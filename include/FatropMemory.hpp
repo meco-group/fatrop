@@ -54,7 +54,12 @@ namespace fatrop
         /// stores which fatrop_memory_el's are contained
         vector<fatrop_memory_el_base *> fatrop_memory_el_vector;
         /// pointer to memory location of allocated data
-        void *storage_mem;
+        void *storage_mem = NULL;
+    public:
+        /// destructor
+        ~fatrop_memory_allocator(){
+            free(storage_mem);
+        }
     };
 
     /** \brief fatrop memory element template */
@@ -90,6 +95,6 @@ namespace fatrop
     private:
         const int size;
         T* data = NULL;
-    };
+   };
 } // namespace fatrop
 #endif //FATROP_MEMORY_INCLUDED

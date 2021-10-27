@@ -8,6 +8,7 @@ class test_container: public fatrop_memory_allocator{
 int main(){
     fatrop_memory_allocator fma;
     fatrop_memory_el<int> test(5, fma);
+    fatrop_memory_matrix(5,5,1, fma);
     fma.allocate();
     std::cout << *((int*) test) << std::endl;
     return 0;
