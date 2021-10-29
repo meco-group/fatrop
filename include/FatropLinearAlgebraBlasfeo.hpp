@@ -1,4 +1,3 @@
-
 #ifndef FATROP_BLASFEO_INCLUDED
 #define FATROP_BLASFEO_INCLUDED
 
@@ -6,6 +5,11 @@
 #define MAT blasfeo_dmat
 #define MEMSIZE_MAT blasfeo_memsize_dmat
 #define MEMSIZE_MAT blasfeo_memsize_dmat
+#define CREATE_MAT blasfeo_create_dmat
+#define ROWPE blasfeo_drowpe
+#define ROWPEI blasfeo_drowpei
+#define COLPE blasfeo_dcolpe
+#define COLPEI blasfeo_dcolpei
 #define CREATE_MAT blasfeo_create_dmat
 #define MATEL BLASFEO_DMATEL
 
@@ -22,11 +26,12 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
+    /** this class is used for blasfeo matrices*/
     class fatrop_matrix_bf : public fatrop_matrix
     {
     public:
         fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
-        fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols){}
+        fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
         inline explicit operator MAT *() const
         {
             return this->mat_;
@@ -59,11 +64,12 @@ namespace fatrop
         const int nrows_;
         const int ncols_;
     };
-    class fatrop_memory_matrix : public fatrop_memory_el_base, public fatrop_matrix_bf
+    /** \brief this class is used for the allocation of a blasfeo matrix */
+    class fatrop_memory_matrix_bf : public fatrop_memory_el_base, public fatrop_matrix_bf
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_matrix(int nrows, int ncols, int N, fatrop_memory_allocator &fma) : fatrop_matrix_bf(nrows, ncols, 0, 0), N_(N), nrows_(nrows), ncols_(ncols)
+        fatrop_memory_matrix_bf(int nrows, int ncols, int N, fatrop_memory_allocator &fma) : fatrop_matrix_bf(nrows, ncols, 0, 0), N_(N), nrows_(nrows), ncols_(ncols)
         {
             fma.add(*this);
         }
@@ -113,6 +119,7 @@ namespace fatrop
         const int nrows_;
         const int ncols_;
     };
+    /** \brief this class represents a permutation matrix */
     class fatrop_permutation_matrix : public fatrop_matrix
     {
     public:
@@ -122,6 +129,9 @@ namespace fatrop
         int ncols() const { return dim_; };
         double get_el(const int ai, const int aj) const
         {
+            #if DEBUG
+               assert(data_!=NULL);
+            #endif
             int aj_one = data_[ai];
             int row_curr = ai - 1;
             while (row_curr >= 0)
@@ -141,9 +151,42 @@ namespace fatrop
                 return 0.0;
             }
         };
+        /** \brief set data pointer*/
         void set_datap(int *data)
         {
             data_ = data;
+        }
+        /** \brief apply row permutation*/
+        void PM(const int kmax, MAT *M) const
+        {
+            #if DEBUG
+               assert(data_!=NULL);
+            #endif
+            ROWPE(kmax, data_,M);
+        }
+        /** \brief apply inverse row permutation*/
+        void PtM(const int kmax, MAT *M) const
+        {
+            #if DEBUG
+               assert(data_!=NULL);
+            #endif
+            ROWPEI(kmax, data_,M);
+        }
+        /** \brief apply col permutation*/
+        void MP(const int kmax, MAT *M) const
+        {
+            #if DEBUG
+               assert(data_!=NULL);
+            #endif
+            COLPE(kmax, data_,M);
+        }
+        /** \brief apply inverse col permutation*/
+        void MPt(const int kmax, MAT *M) const
+        {
+            #if DEBUG
+               assert(data_!=NULL);
+            #endif
+            COLPEI(kmax, data_,M);
         }
 
     private:
@@ -151,7 +194,7 @@ namespace fatrop
         int *data_ = NULL;
     };
 
-    /** \brief this class represents a permutation matrix */
+    /** \brief this class is used for the allocation of a permutation matrix */
     class fatrop_memory_permutation_matrix : public fatrop_memory_el_base, public fatrop_permutation_matrix
     {
     public:

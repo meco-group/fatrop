@@ -10,7 +10,8 @@ int main()
 {
     fatrop_memory_allocator fma;
     fatrop_memory_el<int> test(5, fma);
-    fatrop_memory_matrix test2(4, 4, 1, fma);
+    fatrop_memory_matrix_bf test2(4, 4, 1, fma);
+    fatrop_memory_matrix_bf test69(4, 4, 1, fma);
     fatrop_memory_permutation_matrix P(4, 1, fma);
     fma.allocate();
     int *P_data = P.perm_vector(0);
@@ -23,5 +24,8 @@ int main()
     test2 = P;
     blasfeo_print_dmat(4,4,(blasfeo_dmat*) test2, 0,0);
     std::cout << *((int *)test) << std::endl;
+    test69 = eye(4);
+    P.PM(4, (blasfeo_dmat*) test69);
+    blasfeo_print_dmat(4,4,(blasfeo_dmat*) test69, 0,0);
     return 0;
 }
