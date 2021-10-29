@@ -19,6 +19,7 @@ int main()
     P_data[2] = 3;
     P_data[3] = 3;
     P.print();
+    fatrop_matrix_bf test3(4,4,0,0);
     test2 = P;
     blasfeo_print_dmat(4,4,(blasfeo_dmat*) test2, 0,0);
     std::cout << *((int *)test) << std::endl;

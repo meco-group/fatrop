@@ -12,7 +12,7 @@
 #include <iostream>
 extern "C"
 {
-    #include <blasfeo.h>
+#include <blasfeo.h>
 }
 #include "FatropMemory.hpp"
 #include "FatropLinearAlgebra.hpp"
@@ -22,11 +22,48 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
-    class fatrop_memory_matrix : public fatrop_memory_el_base, public fatrop_matrix
+    class fatrop_matrix_bf : public fatrop_matrix
+    {
+    public:
+        fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols){}
+        inline explicit operator MAT *() const
+        {
+            return this->mat_;
+        }
+        double get_el(const int ai, const int aj) const { return MATEL(mat_, ai, aj); };
+        /** \brief acces to element of matrix */
+        double &at(const int ai, const int aj) const { return MATEL(mat_, ai, aj); };
+        int nrows() const { return nrows_; };
+        int ncols() const { return ncols_; };
+        /** \brief copies all elements from a given fatrop_matrix to this matrix*/
+        void operator=(const fatrop_matrix &fm)
+        {
+            for (int ai = 0; ai < nrows_; ai++)
+            {
+                for (int aj = 0; aj < ncols_; aj++)
+                {
+                    this->at(ai, aj) = fm.get_el(ai, aj);
+                }
+            }
+        }
+        void set_datap(MAT *matbf)
+        {
+            mat_ = matbf;
+        }
+
+    private:
+        MAT *mat_ = NULL;
+        const int row_offset_;
+        const int col_offset_;
+        const int nrows_;
+        const int ncols_;
+    };
+    class fatrop_memory_matrix : public fatrop_memory_el_base, public fatrop_matrix_bf
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_matrix(int nrows, int ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
+        fatrop_memory_matrix(int nrows, int ncols, int N, fatrop_memory_allocator &fma) : fatrop_matrix_bf(nrows, ncols, 0, 0), N_(N), nrows_(nrows), ncols_(ncols)
         {
             fma.add(*this);
         }
@@ -47,6 +84,7 @@ namespace fatrop
         {
             MAT *bf_ptr = (MAT *)data_p;
             this->mat = bf_ptr;
+            fatrop_matrix_bf::set_datap(bf_ptr);
             bf_ptr += N_;
             // align with cache line
             long long l_ptr = (long long)bf_ptr;
@@ -63,25 +101,10 @@ namespace fatrop
             {
                 *d_ptr = 0.0;
             }
-        };
-        inline explicit operator MAT *() const
-        {
-            return this->mat;
         }
-        double get_el(const int ai, const int aj) const { return MATEL(mat, ai, aj); };
-        /** \brief acces to element of matrix */
-        double &at(const int ai, const int aj) const { return MATEL(mat, ai, aj); };
-        int nrows() const { return nrows_; };
-        int ncols() const { return ncols_; };
         void operator=(const fatrop_matrix &fm)
         {
-            for (int ai = 0; ai < nrows_; ai++)
-            {
-                for (int aj = 0; aj < ncols_; aj++)
-                {
-                    this->at(ai, aj) = fm.get_el(ai,aj);
-                }
-            }
+            fatrop_matrix_bf::operator=(fm);
         }
 
     private:
