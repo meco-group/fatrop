@@ -12,10 +12,7 @@
 #include <iostream>
 extern "C"
 {
-#include <blasfeo_memory.h>
-#include <blasfeo_d_blas.h>
-#include <blasfeo_common.h>
-#include <blasfeo_d_aux.h>
+    #include <blasfeo.h>
 }
 #include "FatropMemory.hpp"
 #include "FatropLinearAlgebra.hpp"
@@ -76,6 +73,16 @@ namespace fatrop
         double &at(const int ai, const int aj) const { return MATEL(mat, ai, aj); };
         int nrows() const { return nrows_; };
         int ncols() const { return ncols_; };
+        void operator=(const fatrop_matrix &fm)
+        {
+            for (int ai = 0; ai < nrows_; ai++)
+            {
+                for (int aj = 0; aj < ncols_; aj++)
+                {
+                    this->at(ai, aj) = fm.get_el(ai,aj);
+                }
+            }
+        }
 
     private:
         MAT *mat;
