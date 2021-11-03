@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include "Fatrop.hpp"
+#include "FatropLinearAlgebraEigen.hpp"
 using namespace fatrop;
 using namespace std;
 class test_container : public fatrop_memory_allocator
@@ -27,5 +28,6 @@ int main()
     test69 = eye(4);
     P.PM(4, (blasfeo_dmat*) test69);
     blasfeo_print_dmat(4,4,(blasfeo_dmat*) test69, 0,0);
+    cout << Eig(test69) << std::endl;
     return 0;
 }
