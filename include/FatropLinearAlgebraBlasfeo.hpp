@@ -265,5 +265,37 @@ namespace fatrop
         const int N_;
         int *data_;
     };
+    matrix_ind max_el(int m, int n, blasfeo_dmat *matr, int ai, int aj)
+    {
+        matrix_ind res;
+        res.ai = ai;
+        res.aj = aj;
+        double valmax = 0.0;
+        for (int j = aj; j < n; j++)
+        {
+            for (int i = ai; i < m; i++)
+            {
+                double valij = abs(BLASFEO_DMATEL(matr, i, j));
+                if (valij >= valmax)
+                {
+                    valmax = valij;
+                    res.ai = i;
+                    res.aj = j;
+                }
+            }
+        }
+        return res;
+    };
+ #define MAX(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+ #define MIN(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+    void LU_FACT(const int m, const int n, const int n_max, int& rank, MAT* A, const int* perm_left, const int* perm_right){
+
+    };
 } // namespace fatrop
 #endif //FATROP_BLASFEO_INCLUDED
