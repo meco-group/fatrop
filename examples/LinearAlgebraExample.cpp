@@ -29,5 +29,6 @@ int main()
     P.PM(4, (blasfeo_dmat*) test69);
     blasfeo_print_dmat(4,4,(blasfeo_dmat*) test69, 0,0);
     cout << Eig(test69) << std::endl;
+    cout << Eig(test69.block(0,0,2,2)) << std::endl;
     return 0;
 }

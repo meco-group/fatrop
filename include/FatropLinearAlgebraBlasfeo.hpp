@@ -30,8 +30,11 @@ namespace fatrop
     class fatrop_matrix_bf : public fatrop_matrix
     {
     public:
+        /** \brief constructor memory still has to be allocated*/
         fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        /** \brief constructor memory already allocated*/
         fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        /** \brief type conversion to blasfeo matrix pointer*/
         inline explicit operator MAT *() const
         {
             return this->mat_;
@@ -47,7 +50,9 @@ namespace fatrop
         };
         /** \brief get element of matrix */
         double get_el(const int ai, const int aj) const { return this->at(ai, aj); };
+        /** \brief get number of rows */
         int nrows() const { return nrows_; };
+        /** \brief get number of cols */
         int ncols() const { return ncols_; };
         /** \brief copies all elements from a given fatrop_matrix to this matrix*/
         void operator=(const fatrop_matrix &fm)
@@ -122,6 +127,7 @@ namespace fatrop
                 *d_ptr = 0.0;
             }
         }
+        /** \brief copy operator */
         void operator=(const fatrop_matrix &fm)
         {
             fatrop_matrix_bf::operator=(fm);
@@ -137,10 +143,15 @@ namespace fatrop
     class fatrop_permutation_matrix : public fatrop_matrix
     {
     public:
+        /** \brief constructor memory still has to be allocated */
         fatrop_permutation_matrix(const int dim) : dim_(dim){};
+        /** \brief constructor memory already allocated */
         fatrop_permutation_matrix(const int dim, int *data) : dim_(dim), data_(data){};
+        /** \brief get number of rows */
         int nrows() const { return dim_; };
+        /** \brief get number of columns */
         int ncols() const { return dim_; };
+        /** \brief get element of matrix represented by this permutation matrix - only used for debugging and testing purposes */
         double get_el(const int ai, const int aj) const
         {
 #if DEBUG
@@ -221,22 +232,26 @@ namespace fatrop
     class fatrop_memory_permutation_matrix : public fatrop_memory_el_base, public fatrop_permutation_matrix
     {
     public:
+        /** \brief constructor */
         fatrop_memory_permutation_matrix(const int dim, const int N, fatrop_memory_allocator &fma) : fatrop_permutation_matrix(dim), dim_(dim), N_(N)
         {
             fma.add(*this);
         };
+        /** \brief calculate needed memory size*/
         int memory_size() const
         {
             int size = 0;
             size += N_ * dim_ * sizeof(int);
             return size;
         }
+        /** \brief set up memory*/
         void set_up(char *&char_p)
         {
             data_ = (int *)char_p;
             this->set_datap(data_);
             char_p += memory_size();
         }
+        /** \brief get n-th permutation vector pointer*/
         int *perm_vector(const int n) const
         {
 #if DEBUG
