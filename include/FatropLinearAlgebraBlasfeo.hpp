@@ -36,9 +36,17 @@ namespace fatrop
         {
             return this->mat_;
         }
-        double get_el(const int ai, const int aj) const { return MATEL(mat_, ai, aj); };
         /** \brief acces to element of matrix */
-        double &at(const int ai, const int aj) const { return MATEL(mat_, ai, aj); };
+        double &at(const int ai, const int aj) const
+        {
+#if DEBUG
+            assert(ai < nrows_);
+            assert(aj < ncols_);
+#endif
+            return MATEL(mat_, ai + row_offset_, aj + col_offset_);
+        };
+        /** \brief get element of matrix */
+        double get_el(const int ai, const int aj) const { return this->at(ai, aj); };
         int nrows() const { return nrows_; };
         int ncols() const { return ncols_; };
         /** \brief copies all elements from a given fatrop_matrix to this matrix*/
@@ -52,9 +60,15 @@ namespace fatrop
                 }
             }
         }
+        /** \brief set data pointer*/
         void set_datap(MAT *matbf)
         {
             mat_ = matbf;
+        }
+        /** \brief take a block of size (p,q), starting at (i,j)*/
+        fatrop_matrix_bf block(const int i, const int j, const int p, const int q) const
+        {
+            return fatrop_matrix_bf(p, q, row_offset_ + i, col_offset_ + j, this->mat_);
         }
 
     private:
@@ -129,9 +143,9 @@ namespace fatrop
         int ncols() const { return dim_; };
         double get_el(const int ai, const int aj) const
         {
-            #if DEBUG
-               assert(data_!=NULL);
-            #endif
+#if DEBUG
+            assert(data_ != NULL);
+#endif
             int aj_one = data_[ai];
             int row_curr = ai - 1;
             while (row_curr >= 0)
@@ -156,37 +170,46 @@ namespace fatrop
         {
             data_ = data;
         }
+        /** \brief set data point*/
+        void set_datap(const int i, const int val)
+        {
+#if DEBUG
+            assert(data_ != NULL);
+            assert(i < dim_);
+#endif
+            data_[i] = val;
+        }
         /** \brief apply row permutation*/
         void PM(const int kmax, MAT *M) const
         {
-            #if DEBUG
-               assert(data_!=NULL);
-            #endif
-            ROWPE(kmax, data_,M);
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            ROWPE(kmax, data_, M);
         }
         /** \brief apply inverse row permutation*/
         void PtM(const int kmax, MAT *M) const
         {
-            #if DEBUG
-               assert(data_!=NULL);
-            #endif
-            ROWPEI(kmax, data_,M);
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            ROWPEI(kmax, data_, M);
         }
         /** \brief apply col permutation*/
         void MP(const int kmax, MAT *M) const
         {
-            #if DEBUG
-               assert(data_!=NULL);
-            #endif
-            COLPE(kmax, data_,M);
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            COLPE(kmax, data_, M);
         }
         /** \brief apply inverse col permutation*/
         void MPt(const int kmax, MAT *M) const
         {
-            #if DEBUG
-               assert(data_!=NULL);
-            #endif
-            COLPEI(kmax, data_,M);
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            COLPEI(kmax, data_, M);
         }
 
     private:
