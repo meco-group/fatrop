@@ -9,6 +9,7 @@
 #include "Fatrop.hpp"
 namespace fatrop
 {
+    /** \brief convert fatrop_matrix to Eigen matrix, only used for testing/debugging*/
     Eigen::MatrixXd Eig(const fatrop_matrix &fm)
     {
         const int nrows = fm.nrows();
