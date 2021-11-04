@@ -2,6 +2,7 @@
 #include <memory>
 #include "Fatrop.hpp"
 #include "FatropLinearAlgebraEigen.hpp"
+#include "FatropDebugTools.hpp"
 using namespace fatrop;
 using namespace std;
 class test_container : public fatrop_memory_allocator
@@ -10,25 +11,47 @@ class test_container : public fatrop_memory_allocator
 int main()
 {
     fatrop_memory_allocator fma;
-    fatrop_memory_el<int> test(5, fma);
-    fatrop_memory_matrix_bf test2(4, 4, 1, fma);
-    fatrop_memory_matrix_bf test69(4, 4, 1, fma);
-    fatrop_memory_permutation_matrix P(4, 1, fma);
+    fatrop_memory_matrix_bf A(10, 10, 1, fma);
+    fatrop_memory_matrix_bf A1(10, 10, 1, fma);
+    fatrop_memory_matrix_bf L(10, 10, 1, fma);
+    fatrop_memory_matrix_bf U(10, 10, 1, fma);
+    fatrop_memory_permutation_matrix Pl(10, 1, fma);
+    fatrop_memory_permutation_matrix Pr(10, 1, fma);
     fma.allocate();
-    int *P_data = P.perm_vector(0);
-    P_data[0] = 2;
-    P_data[1] = 2;
-    P_data[2] = 3;
-    P_data[3] = 3;
-    P.print();
-    fatrop_matrix_bf test3(4,4,0,0);
-    test2 = P;
-    blasfeo_print_dmat(4,4,(blasfeo_dmat*) test2, 0,0);
-    std::cout << *((int *)test) << std::endl;
-    test69 = eye(4);
-    P.PM(4, (blasfeo_dmat*) test69);
-    blasfeo_print_dmat(4,4,(blasfeo_dmat*) test69, 0,0);
-    cout << Eig(test69) << std::endl;
-    cout << Eig(test69.block(0,0,2,2)) << std::endl;
+    fill_matrix((MAT *)A);
+    GECP(10,10, (MAT*) A, 0,0, (MAT*) A1, 0,0);
+    A.print();
+    int rank = 0;
+    LU_FACT(10, 10, 10, rank, (MAT *)A, Pl.perm_vector(0), Pr.perm_vector(0));
+    cout << "LU factorization " << endl;
+    A.print();
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            if (i == j)
+            {
+                MATEL((MAT *)L, i, i) = 1.0;
+                MATEL((MAT *)U, i, i) = MATEL((MAT *)A, i, i);
+            }
+            else if (i > j)
+            {
+                // lower
+                MATEL((MAT *)L, i, j) = MATEL((MAT *)A, i, j);
+            }
+            else if (i < j)
+            {
+                // upper
+                MATEL((MAT *)U, i, j) = MATEL((MAT *)A, i, j);
+            }
+        }
+    }
+    cout << "L" << endl;
+    L.print();
+    cout << "U" << endl;
+    U.print();
+    cout << "A - Pl^T @ L @ U @ Pr" << endl;
+    cout << Eig(A1) -  Eig(Pl).transpose() * Eig(L)*Eig(U)* Eig(Pr) << endl;
+
     return 0;
 }

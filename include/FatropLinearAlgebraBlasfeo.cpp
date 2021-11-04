@@ -12,10 +12,6 @@
 #define COLPEI blasfeo_dcolpei
 #define CREATE_MAT blasfeo_create_dmat
 #define MATEL BLASFEO_DMATEL
-#define ROWSW blasfeo_drowsw
-#define COLSW blasfeo_dcolsw
-#define GEAD blasfeo_dgead
-#define GECP blasfeo_dgecp
 
 #include <iostream>
 extern "C"
@@ -305,34 +301,12 @@ namespace fatrop
             __typeof__(b) _b = (b); \
             _a < _b ? _a : _b;      \
         })
-    void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, int *perm_left, int *perm_right, double tol = 1e-12)
-    {
-        int minmn = MIN(m, n_max);
-        int j = 0;
-        for (int i = 0; i < minmn; i++)
-        {
-            matrix_ind max_curr = max_el(m, n_max, A, i, i);
-            if (abs(MATEL(A, max_curr.ai, max_curr.aj)) < tol)
-            {
-                break;
-            }
-            // switch rows
-            ROWSW(n, A, i, 0, A, max_curr.ai, 0);
-            // save in permutation vector
-            perm_left[i] = max_curr.ai;
-            // switch cols
-            COLSW(m, A, 0, i, A, 0, max_curr.aj);
-            // save in permutation vector
-            perm_right[i] = max_curr.aj;
-            for (int j = i + 1; j < m; j++)
-            {
-                double Lji = MATEL(A, j, i) / MATEL(A, i, i);
-                MATEL(A, j, i) = Lji;
-                GEAD(1, n - (i + 1), -Lji, A, i, i + 1, A, j, i + 1);
-            }
-            j = i + 1;
+    void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, const int *perm_left, const int *perm_right){
+        int minmn = MIN(m,n_max);
+        int j =0;
+        for(int i=0; i<minmn; i++){
+            matrix_ind max_curr = max_el(m,n_max, A,i,i);
         }
-        rank = j;
     };
 } // namespace fatrop
 #endif //FATROP_BLASFEO_INCLUDED
