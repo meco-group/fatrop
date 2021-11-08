@@ -12,6 +12,7 @@ int main()
 {
     fatrop_memory_allocator fma;
     fatrop_memory_matrix_bf A(10, 10, 1, fma);
+    fatrop_memory_matrix_bf At(10, 10, 1, fma);
     fatrop_memory_matrix_bf A1(10, 10, 1, fma);
     fatrop_memory_matrix_bf L(10, 10, 1, fma);
     fatrop_memory_matrix_bf U(10, 10, 1, fma);
@@ -19,12 +20,19 @@ int main()
     fatrop_memory_permutation_matrix Pr(10, 1, fma);
     fma.allocate();
     fill_matrix((MAT *)A);
+    At = Eig(Eig(A).transpose());
     GECP(10,10, (MAT*) A, 0,0, (MAT*) A1, 0,0);
+    cout << "A" << endl;
     A.print();
+    cout << "At" << endl;
+    At.print();
     int rank = 0;
     LU_FACT(10, 10, 10, rank, (MAT *)A, Pl.perm_vector(0), Pr.perm_vector(0));
     cout << "LU factorization " << endl;
     A.print();
+    cout << "LUt factorization " << endl;
+    LU_FACT_transposed(10, 10, 10, rank, (MAT *)At, Pl.perm_vector(0), Pr.perm_vector(0));
+    At.print();
     for (int i = 0; i < 10; i++)
     {
         for (int j = 0; j < 10; j++)

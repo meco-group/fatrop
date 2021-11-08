@@ -16,6 +16,7 @@
 #define COLSW blasfeo_dcolsw
 #define GEAD blasfeo_dgead
 #define GECP blasfeo_dgecp
+#define TRSM_LLNN fatrop_dtrsm_llnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation 
 
 #include <iostream>
 extern "C"
@@ -305,6 +306,7 @@ namespace fatrop
             __typeof__(b) _b = (b); \
             _a < _b ? _a : _b;      \
         })
+    /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, int *perm_left, int *perm_right, double tol = 1e-12)
     {
         int minmn = MIN(m, n_max);
@@ -329,6 +331,36 @@ namespace fatrop
                 double Lji = MATEL(A, j, i) / MATEL(A, i, i);
                 MATEL(A, j, i) = Lji;
                 GEAD(1, n - (i + 1), -Lji, A, i, i + 1, A, j, i + 1);
+            }
+            j = i + 1;
+        }
+        rank = j;
+    };
+    /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
+    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, int *perm_left, int *perm_right, double tol = 1e-12)
+    {
+        int minmn = MIN(m, n_max);
+        int j = 0;
+        for (int i = 0; i < minmn; i++)
+        {
+            matrix_ind max_curr = max_el(n_max, m, At, i, i);
+            if (abs(MATEL(At, max_curr.ai, max_curr.aj)) < tol)
+            {
+                break;
+            }
+            // switch rows
+            COLSW(n, At, 0, i, At, 0, max_curr.aj);
+            // save in permutation vector
+            perm_left[i] = max_curr.aj;
+            // switch cols
+            ROWSW(m, At, i, 0, At, max_curr.ai, 0);
+            // save in permutation vector
+            perm_right[i] = max_curr.ai;
+            for (int j = i + 1; j < m; j++)
+            {
+                double Lji = MATEL(At, i, j) / MATEL(At, i, i);
+                MATEL(At, i, j) = Lji;
+                GEAD(n - (i + 1), 1, -Lji, At, i + 1, i, At, i + 1, j);
             }
             j = i + 1;
         }
