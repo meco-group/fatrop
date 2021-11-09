@@ -3,6 +3,20 @@
 # $ cmake --version
 cmake_minimum_required(VERSION 3.14)
 project(FATROP)
+
+set(CMAKE_CXX_STANDARD 11)
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+
+
 # minimum cmake version to find numpy header
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "Debug" CACHE
@@ -24,6 +38,7 @@ option(BUILD_DOCS "Build documentation" OFF)
 find_package(blasfeo)
 add_subdirectory(src)
 add_subdirectory(examples)
+add_subdirectory(test)
 
 if(BUILD_DOCS MATCHES ON)
   add_subdirectory(docs)

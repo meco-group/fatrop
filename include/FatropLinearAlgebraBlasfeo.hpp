@@ -16,7 +16,7 @@
 #define COLSW blasfeo_dcolsw
 #define GEAD blasfeo_dgead
 #define GECP blasfeo_dgecp
-#define TRSM_LLNN fatrop_dtrsm_llnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation 
+#define TRSM_RLNN fatrop_dtrsm_rlnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 
 #include <iostream>
 extern "C"
@@ -31,6 +31,27 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
+    // D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal
+    void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
+    {
+        for (int aj = n - 1; aj >= 0; aj--)
+        {
+            double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
+            double sc = alpha / ajj;
+            for (int k = 0; k < m; k++)
+            {
+                MATEL(sD, k + offs_di, aj + offs_dj) = sc * MATEL(sB, k + offs_bi, aj + offs_bj);
+            }
+            for (int ai = aj + 1; ai < m; ai++)
+            {
+                double sc = -alpha * MATEL(sA, ai + offs_ai, aj + offs_aj) / ajj;
+                for (int k = 0; k < m; k++)
+                {
+                    MATEL(sD, k + offs_di, aj + offs_dj) += sc * MATEL(sD, k + offs_di, ai + offs_dj);
+                }
+            }
+        }
+    }
     /** this class is used for blasfeo matrices*/
     class fatrop_matrix_bf : public fatrop_matrix
     {

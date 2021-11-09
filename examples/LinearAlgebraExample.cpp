@@ -5,9 +5,6 @@
 #include "FatropDebugTools.hpp"
 using namespace fatrop;
 using namespace std;
-class test_container : public fatrop_memory_allocator
-{
-};
 int main()
 {
     fatrop_memory_allocator fma;
@@ -16,12 +13,13 @@ int main()
     fatrop_memory_matrix_bf A1(10, 10, 1, fma);
     fatrop_memory_matrix_bf L(10, 10, 1, fma);
     fatrop_memory_matrix_bf U(10, 10, 1, fma);
+    fatrop_memory_matrix_bf test(10, 10, 1, fma);
     fatrop_memory_permutation_matrix Pl(10, 1, fma);
     fatrop_memory_permutation_matrix Pr(10, 1, fma);
     fma.allocate();
     fill_matrix((MAT *)A);
     At = Eig(Eig(A).transpose());
-    GECP(10,10, (MAT*) A, 0,0, (MAT*) A1, 0,0);
+    GECP(10, 10, (MAT *)A, 0, 0, (MAT *)A1, 0, 0);
     cout << "A" << endl;
     A.print();
     cout << "At" << endl;
@@ -59,7 +57,9 @@ int main()
     cout << "U" << endl;
     U.print();
     cout << "A - Pl^T @ L @ U @ Pr" << endl;
-    cout << Eig(A1) -  Eig(Pl).transpose() * Eig(L)*Eig(U)* Eig(Pr) << endl;
+    cout << Eig(A1) - Eig(Pl).transpose() * Eig(L) * Eig(U) * Eig(Pr) << endl;
+    TRSM_RLNN(10,10,1.0,(MAT*) L,0,0,(MAT*) L,0,0, (MAT*) test, 0,0);
+    test.print();
 
     return 0;
 }
