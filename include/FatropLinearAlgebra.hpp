@@ -62,6 +62,24 @@ namespace fatrop
     private:
         int dim_;
     };
+    /** \brief interface class for matrix representations */
+    class fatrop_vector
+    {
+    public:
+        /** \brief copy of matrix element */
+        virtual double get_el(const int ai) const = 0;
+        /** \brief number of elements */
+        virtual int nels() const = 0;
+        void print()
+        {
+            int n_el = nels();
+            for (int ai = 0; ai < n_el; ai++)
+            {
+                printf("%9.5f ", get_el(ai));
+                printf("\n");
+            }
+        }
+    };
 } // namespace fatrop
 
 #endif // FATROP_LA_INCLUDED

@@ -3,7 +3,7 @@
 
 // macros
 #define MAT blasfeo_dmat
-#define MEMSIZE_MAT blasfeo_memsize_dmat
+#define VEC blasfeo_dvec
 #define MEMSIZE_MAT blasfeo_memsize_dmat
 #define CREATE_MAT blasfeo_create_dmat
 #define ROWPE blasfeo_drowpe
@@ -17,6 +17,9 @@
 #define GEAD blasfeo_dgead
 #define GECP blasfeo_dgecp
 #define TRSM_RLNN fatrop_dtrsm_rlnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation
+#define VECEL BLASFEO_DVECEL
+#define MEMSIZE_VEC blasfeo_memsize_dvec
+#define CREATE_VEC blasfeo_create_dvec
 
 #include <iostream>
 extern "C"
@@ -31,12 +34,12 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
-    // D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal
+    /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it is not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
     {
         for (int aj = n - 1; aj >= 0; aj--)
         {
-            double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
+            double ajj = MATEL(sA, aj + offs_ai, aj + offs_aj);
             double sc = alpha / ajj;
             for (int k = 0; k < m; k++)
             {
@@ -165,6 +168,56 @@ namespace fatrop
         const int nrows_;
         const int ncols_;
     };
+    /** this class is used for blasfeo vectors*/
+    class fatrop_vector_bf : public fatrop_vector
+    {
+    public:
+        /** \brief constructor memory still has to be allocated*/
+        fatrop_vector_bf(const int nels, const int offset) : offset_(offset), nels_(nels) {}
+        /** \brief constructor memory already allocated*/
+        fatrop_vector_bf(const int nels, const int offset, VEC* vecbf) :vec_(vecbf), offset_(offset), nels_(nels) {}
+        /** \brief type conversion to blasfeo vector pointer*/
+        inline explicit operator VEC *() const
+        {
+            return this->vec_;
+        }
+        /** \brief acces to element of matrix */
+        double &at(const int ai) const
+        {
+#if DEBUG
+            assert(ai < nels_);
+#endif
+            return VECEL(vec_, ai + offset_);
+        };
+        /** \brief get element of vector */
+        double get_el(const int ai) const { return this->at(ai); };
+        /** \brief get number of elements */
+        int nels() const { return nels_; };
+        /** \brief copies all elements from a given fatrop_vector to this vector*/
+        void operator=(const fatrop_vector &fm)
+        {
+            for (int ai = 0; ai < nels_; ai++)
+            {
+                    this->at(ai) = fm.get_el(ai);
+            }
+        }
+        /** \brief set data pointer*/
+        void set_datap(VEC *vecbf)
+        {
+            vec_ = vecbf;
+        }
+        /** \brief take a block of size (p), starting at (i)*/
+        fatrop_vector_bf block(const int i, const int p) const
+        {
+            return fatrop_vector_bf(p, offset_ + i, this->vec_);
+        }
+
+    private:
+        VEC *vec_ = NULL;
+        const int offset_;
+        const int nels_;
+    };
+
     /** \brief this class represents a permutation matrix */
     class fatrop_permutation_matrix : public fatrop_matrix
     {
