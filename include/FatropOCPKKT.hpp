@@ -12,6 +12,7 @@
 #define FATROPOCPKKTINDLUCED
 #include "FatropLinearAlgebraBlasfeo.hpp"
 #include "FatropOCP.hpp"
+#include "FatropAux.hpp"
 using namespace std;
 namespace fatrop
 {
@@ -20,15 +21,11 @@ namespace fatrop
     public:
         OCP_KKT(const fatrop_OCP_dims &dims, fatrop_memory_allocator &fma) : dims(dims), RSQrqt(dims.K, fma), BAbt(dims.K, fma), Ggt(dims.K, fma)
         {
-            int K = dims.K;
-            int nu = dims.nu;
-            int nx = dims.nx;
-            RSQrqt.set_dimensions(vector<int>(K, nu+nx+1), vector<int>(K, nu+nx));
-            BAbt.set_dimensions(vector<int>(K, nu+nx+1), vector<int>(K, nu+nx));
-            Ggt.set_dimensions(vector<int>(K, nu+nx+1), vector<int>(dims.ng));
+            RSQrqt.set_dimensions(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nu + dims.nx));
+            BAbt.set_dimensions(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nx));
+            Ggt.set_dimensions(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng));
         };
 
-    private:
         fatrop_OCP_dims dims;
         fatrop_memory_matrix_bf_vec RSQrqt;
         fatrop_memory_matrix_bf_vec BAbt;

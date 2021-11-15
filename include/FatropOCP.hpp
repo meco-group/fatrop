@@ -22,9 +22,9 @@ namespace fatrop
         /// horizon length
         int K;
         /// input vector size
-        int nu;
+        vector<int> nu;
         /// state vector size
-        int nx;
+        vector<int> nx;
         // number of stagewise equality constraints
         vector<int> ng;
     };

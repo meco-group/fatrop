@@ -71,5 +71,7 @@ int main()
     cout << "el time " << el << endl;
     TRSM_RLNN(10, 10, 1.0, (MAT *)L, 0, 0, (MAT *)A, 0, 0, (MAT *)test, 0, 0);
     cout << Eig(Eig(test) - Eig(A) * Eig(Eig(L).inverse())) << endl;
+    vector<int> testvector = vector<int>(5,10) + 5;
+    cout << testvector.at(2) << endl;
     return 0;
 }
