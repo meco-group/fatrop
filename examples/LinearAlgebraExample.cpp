@@ -59,10 +59,10 @@ int main()
     U.print();
     cout << "A - Pl^T @ L @ U @ Pr" << endl;
     cout << Eig(A1) - Eig(Pl).transpose() * Eig(L) * Eig(U) * Eig(Pr) << endl;
-    cout << "A - At^T" << Eig(Eig(A) - Eig(Eig(At).transpose())) <<endl;
+    cout << "A - At^T" << Eig(Eig(A) - Eig(Eig(At).transpose())) << endl;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    for(int i = 0; i < 1000; i++)
+    for (int i = 0; i < 1000; i++)
     {
         TRSM_RLNN(10, 10, 1.0, (MAT *)L, 0, 0, (MAT *)L, 0, 0, (MAT *)test, 0, 0);
     }
@@ -70,7 +70,6 @@ int main()
     test.print();
     cout << "el time " << el << endl;
     TRSM_RLNN(10, 10, 1.0, (MAT *)L, 0, 0, (MAT *)A, 0, 0, (MAT *)test, 0, 0);
-    cout << Eig(Eig(test) - Eig(A)*Eig(Eig(L).inverse())) << endl;
-
+    cout << Eig(Eig(test) - Eig(A) * Eig(Eig(L).inverse())) << endl;
     return 0;
 }

@@ -168,6 +168,68 @@ namespace fatrop
         const int nrows_;
         const int ncols_;
     };
+
+    /** \brief this class is used for the allocation of a blasfeo matrix */
+    class fatrop_memory_matrix_bf_vec : public fatrop_memory_el_base
+    {
+    public:
+        /** \brief constuction for allocation on fatrop_memory_allocator*/
+        fatrop_memory_matrix_bf_vec(const vector<int> &&nrows, const vector<int> &&ncols, int N, fatrop_memory_allocator &fma) :N_(N), nrows_(nrows), ncols_(ncols)
+        {
+            fma.add(*this);
+        }
+        /** \brief constuction for allocation on fatrop_memory_allocator*/
+        fatrop_memory_matrix_bf_vec(int N, fatrop_memory_allocator &fma) : N_(N)
+        {
+            fma.add(*this);
+        }
+        void set_dimensions(vector<int>&& nrows, const vector<int>&& ncols){
+            nrows_ = nrows;
+            ncols_ = ncols;
+        }
+        /** \brief calculate memory size*/
+        int memory_size() const
+        {
+            int result = 0;
+            // size to store structs
+            result += N_ * sizeof(MAT);
+            // sufficient space for cache alignment
+            result = (result + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE + LEVEL1_DCACHE_LINE_SIZE;
+            // size to store date
+            for (int i = 0; i < N_; i++)
+            {
+                result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
+            }
+            return result;
+        };
+        /** \brief set up memory element and advance pointer */
+        void set_up(char *&data_p)
+        {
+            MAT *bf_ptr = (MAT *)data_p;
+            this->mat = bf_ptr;
+            bf_ptr += N_;
+            // align with cache line
+            long long l_ptr = (long long)bf_ptr;
+            l_ptr = (l_ptr + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE;
+            data_p = (char *)l_ptr;
+            double *d_ptr_begin = (double *)data_p;
+            for (int i = 0; i < N_; i++)
+            {
+                CREATE_MAT(nrows_.at(i), ncols_.at(i), mat + i, data_p);
+                data_p += (mat + i)->memsize;
+            }
+            double *d_ptr_end = (double *)data_p;
+            for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)
+            {
+                *d_ptr = 0.0;
+            }
+        }
+    private:
+        MAT *mat;
+        const int N_;
+        vector<int> nrows_;
+        vector<int> ncols_;
+    };
     /** this class is used for blasfeo vectors*/
     class fatrop_vector_bf : public fatrop_vector
     {
@@ -175,7 +237,7 @@ namespace fatrop
         /** \brief constructor memory still has to be allocated*/
         fatrop_vector_bf(const int nels, const int offset) : offset_(offset), nels_(nels) {}
         /** \brief constructor memory already allocated*/
-        fatrop_vector_bf(const int nels, const int offset, VEC* vecbf) :vec_(vecbf), offset_(offset), nels_(nels) {}
+        fatrop_vector_bf(const int nels, const int offset, VEC *vecbf) : vec_(vecbf), offset_(offset), nels_(nels) {}
         /** \brief type conversion to blasfeo vector pointer*/
         inline explicit operator VEC *() const
         {
@@ -198,7 +260,7 @@ namespace fatrop
         {
             for (int ai = 0; ai < nels_; ai++)
             {
-                    this->at(ai) = fm.get_el(ai);
+                this->at(ai) = fm.get_el(ai);
             }
         }
         /** \brief set data pointer*/

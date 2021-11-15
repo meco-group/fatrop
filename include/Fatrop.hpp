@@ -3,4 +3,5 @@
 #include "FatropMemory.hpp"
 #include "FatropLinearAlgebraBlasfeo.hpp"
 #include "FatropIndex.hpp"
+#include "FatropOCPKKT.hpp"
 #endif //FATROP_INCLUDED
