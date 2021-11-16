@@ -19,14 +19,12 @@ namespace fatrop
     class OCP_KKT
     {
     public:
-        OCP_KKT(const fatrop_OCP_dims &dims, fatrop_memory_allocator &fma) : dims(dims), RSQrqt(dims.K, fma), BAbt(dims.K, fma), Ggt(dims.K, fma)
+        OCP_KKT(const fatrop_OCP_dims &dims, fatrop_memory_allocator &fma) : nu(dims.K, vector<int>(dims.nu), fma), nx(dims.K, vector<int>(dims.nx), fma), ng(dims.K,vector<int>(dims.ng), fma), RSQrqt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nu + dims.nx), dims.K, fma), BAbt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nx), dims.K, fma), Ggt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma)
         {
-            RSQrqt.set_dimensions(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nu + dims.nx));
-            BAbt.set_dimensions(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nx));
-            Ggt.set_dimensions(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng));
         };
-
-        fatrop_OCP_dims dims;
+        fatrop_memory_el<int> nu;
+        fatrop_memory_el<int> nx;
+        fatrop_memory_el<int> ng;
         fatrop_memory_matrix_bf_vec RSQrqt;
         fatrop_memory_matrix_bf_vec BAbt;
         fatrop_memory_matrix_bf_vec Ggt;

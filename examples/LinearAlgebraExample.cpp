@@ -17,6 +17,7 @@ int main()
     fatrop_memory_matrix_bf test(10, 10, 1, fma);
     fatrop_memory_permutation_matrix Pl(10, 1, fma);
     fatrop_memory_permutation_matrix Pr(10, 1, fma);
+    fatrop_memory_el<int> testfatropmemel(5, vector<int>(5,420), fma);
     fma.allocate();
     fill_matrix((MAT *)A);
     At = Eig(Eig(A).transpose());
@@ -71,7 +72,6 @@ int main()
     cout << "el time " << el << endl;
     TRSM_RLNN(10, 10, 1.0, (MAT *)L, 0, 0, (MAT *)A, 0, 0, (MAT *)test, 0, 0);
     cout << Eig(Eig(test) - Eig(A) * Eig(Eig(L).inverse())) << endl;
-    vector<int> testvector = vector<int>(5,10) + 5;
-    cout << testvector.at(2) << endl;
+    cout << ((int*) testfatropmemel)[0] << endl;
     return 0;
 }

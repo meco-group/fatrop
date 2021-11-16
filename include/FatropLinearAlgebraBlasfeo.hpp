@@ -169,7 +169,7 @@ namespace fatrop
         const int ncols_;
     };
 
-    /** \brief this class is used for the allocation of a blasfeo matrix */
+    /** \brief this class is used for the allocation of a blasfeo matrix, the dimsensions are set from a vector */
     class fatrop_memory_matrix_bf_vec : public fatrop_memory_el_base
     {
     public:
@@ -177,15 +177,6 @@ namespace fatrop
         fatrop_memory_matrix_bf_vec(const vector<int> &&nrows, const vector<int> &&ncols, int N, fatrop_memory_allocator &fma) :N_(N), nrows_(nrows), ncols_(ncols)
         {
             fma.add(*this);
-        }
-        /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_matrix_bf_vec(int N, fatrop_memory_allocator &fma) : N_(N)
-        {
-            fma.add(*this);
-        }
-        void set_dimensions(vector<int>&& nrows, const vector<int>&& ncols){
-            nrows_ = nrows;
-            ncols_ = ncols;
         }
         /** \brief calculate memory size*/
         int memory_size() const
@@ -227,8 +218,8 @@ namespace fatrop
     private:
         MAT *mat;
         const int N_;
-        vector<int> nrows_;
-        vector<int> ncols_;
+        const vector<int> nrows_;
+        const vector<int> ncols_;
     };
     /** this class is used for blasfeo vectors*/
     class fatrop_vector_bf : public fatrop_vector

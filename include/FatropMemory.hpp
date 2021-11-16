@@ -72,7 +72,7 @@ namespace fatrop
     class fatrop_memory_el : public fatrop_memory_el_base
     {
     public:
-        fatrop_memory_el<T>(int size, fatrop_memory_allocator &fma) : size(size)
+        fatrop_memory_el<T>(int size, vector<T>&& init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
         {
             fma.add(*this);
         }
@@ -86,7 +86,7 @@ namespace fatrop
             for (int i = 0; i < size; i++)
             {
                 T *t_p = (T *)data_p;
-                *t_p = T(); // default constructor
+                *t_p = init_values_.at(i); // default constructor
                 data_p += sizeof(T); // advance pointer
             }
         }
@@ -94,6 +94,7 @@ namespace fatrop
 
     private:
         const int size;
+        vector<T> init_values_;
         T* data = NULL;
    };
 } // namespace fatrop
