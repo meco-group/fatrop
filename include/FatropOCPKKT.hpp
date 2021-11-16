@@ -25,9 +25,9 @@ namespace fatrop
         fatrop_memory_el<int> nu;
         fatrop_memory_el<int> nx;
         fatrop_memory_el<int> ng;
-        fatrop_memory_matrix_bf_vec RSQrqt;
-        fatrop_memory_matrix_bf_vec BAbt;
-        fatrop_memory_matrix_bf_vec Ggt;
+        fatrop_memory_matrix_bf RSQrqt;
+        fatrop_memory_matrix_bf BAbt;
+        fatrop_memory_matrix_bf Ggt;
     };
 } // namespace fatrop
 
