@@ -9,7 +9,7 @@ int main()
 {
     fatrop_memory_allocator fma;
     fatrop_memory_matrix_bf A(10, 10, 1, fma);
-    fatrop_memory_matrix_bf lower(10, 10, 1, fma);
+    fatrop_memory_matrix_bf_vec lower(vector<int>(1,10), vector<int>(1,10), 1, fma);
     fatrop_memory_matrix_bf At(10, 10, 1, fma);
     fatrop_memory_matrix_bf A1(10, 10, 1, fma);
     fatrop_memory_matrix_bf L(10, 10, 1, fma);
