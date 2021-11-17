@@ -19,7 +19,7 @@ int main()
     fatrop_memory_permutation_matrix Pr(10, 1, fma);
     fatrop_memory_el<int> testfatropmemel(5, vector<int>(5,420), fma);
     fma.allocate();
-    fill_matrix((MAT *)A[0]);
+    A[0] = random_matrix(10,10);
     At[0] = Eig(Eig(A[0]).transpose());
     GECP(10, 10, (MAT *)A[0], 0, 0, (MAT *)A1[0], 0, 0);
     cout << "A" << endl;

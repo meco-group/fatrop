@@ -16,7 +16,7 @@ using namespace std;
 namespace fatrop
 {
     /** \brief  this class contains the problem dimensions of a standard ocp*/
-    struct fatrop_OCP_dims
+    struct OCP_dims
     {
     public:
         /// horizon length

@@ -27,6 +27,7 @@ namespace fatrop
             }
         };
         Eig(const Eigen::MatrixXd &Eigenmat) : Eigen::MatrixXd(Eigenmat){};
+        Eig(const int m, const int n) : Eigen::MatrixXd(m,n){};
         /** \brief copy of matrix element */
         double get_el(const int ai, const int aj) const { return Eigen::MatrixXd::operator()(ai, aj); };
         /** \brief number of rows */
