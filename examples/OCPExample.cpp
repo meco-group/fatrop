@@ -7,8 +7,8 @@ using namespace fatrop;
 int main(){
     // problem dimensions
     OCP_dims dims;
-    dims.K = 150;
-    dims.nx = vector<int>(dims.K, 12); 
+    dims.K = 3;
+    dims.nx = vector<int>(dims.K, 3); 
     dims.nu = vector<int>(dims.K, 3); 
     dims.ng = vector<int>(dims.K, 1); 
     // memory allocation
@@ -16,5 +16,6 @@ int main(){
     OCP_KKT KKT(dims, fma);
     fma.allocate();
     random_OCP(KKT, dims, 0);
+    Sparse_OCP(dims, KKT).print("matrix");
     return 0;
 }
