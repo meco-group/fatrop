@@ -273,7 +273,7 @@ namespace fatrop
             return equation_vec.back().offset + equation_vec.back().size + variable_vec.back()->offset + variable_vec.back()->size;
         }
 
-        void print(char *type_id)
+        void print(const char *type_id)
         {
 
             std::vector<Eigen::Triplet<double>> testvec;

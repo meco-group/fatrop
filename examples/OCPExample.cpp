@@ -2,12 +2,13 @@
 #include "FatropDebugTools.hpp"
 #include "FatropSparse.hpp"
 #include "vector"
+#include "string"
 using namespace std;
 using namespace fatrop;
 int main(){
     // problem dimensions
     OCP_dims dims;
-    dims.K = 3;
+    dims.K = 1;
     dims.nx = vector<int>(dims.K, 3); 
     dims.nu = vector<int>(dims.K, 3); 
     dims.ng = vector<int>(dims.K, 1); 
