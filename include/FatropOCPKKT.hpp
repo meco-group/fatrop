@@ -20,7 +20,8 @@ namespace fatrop
     class OCP_KKT
     {
     public:
-        OCP_KKT(const OCP_dims &dims, fatrop_memory_allocator &fma) : nu(dims.K, vector<int>(dims.nu), fma), nx(dims.K, vector<int>(dims.nx), fma), ng(dims.K, vector<int>(dims.ng), fma), RSQrqt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nu + dims.nx), dims.K, fma), BAbt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nx), dims.K, fma), Ggt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma){};
+        OCP_KKT(const OCP_dims &dims, fatrop_memory_allocator &fma) : K(dims.K), nu(dims.K, vector<int>(dims.nu), fma), nx(dims.K, vector<int>(dims.nx), fma), ng(dims.K, vector<int>(dims.ng), fma), RSQrqt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nu + dims.nx), dims.K, fma), BAbt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nx), dims.K, fma), Ggt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma){};
+        int K;
         fatrop_memory_el<int> nu;
         fatrop_memory_el<int> nx;
         fatrop_memory_el<int> ng;
@@ -46,12 +47,55 @@ namespace fatrop
     class OCP_KKT_solver
     {
     public:
-        OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : aux(dims, fma){};
-        /// solve a KKT system
-        // void fact_solve(OCP_KKT *KKT, VEC *ux, VEC *lambda)
-        // {
-        // }
+        OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : aux(dims, fma),
+                                                                             Hht(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma),
+                                                                             Ppt(dims.nx + 1, vector<int>(dims.nx), dims.K, fma),
+                                                                             gamma(dims.K, vector<int>(dims.K, 0), fma),
+                                                                             rho(dims.K, vector<int>(dims.K, 0), fma){};
+        // solve a KKT system
+        void fact_solve(OCP_KKT *OCP, VEC *ux, VEC *lambda)
+        {
+            int K = OCP->K;
+            // recursion
+            {
+                // last stage
+                int nx = ((int *)OCP->nx)[K - 1];
+                // Hh_Km1 <- Gg_Km1
+                // Pp_Km1 <- Qq_Km1
+            }
+            for (int k = K - 2; k >= 0; --k)
+            {
+                goto SUBSDYN;
+            SUBSDYN:
+                // AL <- [BAb]^T_k P_kp1
+                // AL[-1,:] <- AL[-1,:] + p_kp1^T
+                // RSQrqt_stripe <- AL[BA] + RSQrqt
+                // if ng[k]>0
+                // Ggt_stripe  <- Ggt_k
+                // if Hkp1 nonempty
+                // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
+                // Ggt_stripe[-1,:] <- Ggt_stripe[-1,:] + h_kp1^T
+                // gamma_k <- number of eqs represented by Ggt_stripe
+            TRANSFORM_AND_SUBSEQ:
+                // symmetric transformation, done a little different than in paper, in order to fuse LA operations
+                // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
+                // Ggt_tilde <- Ggt_stripe[rho:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
+                // Hh_k <- Ggt_stripe[nu:nu+nx+1, rho:] (transfer to next stage)
+                // GL <- Ggt_tilde @ RSQrqt[:, :rho]^T + RSQrqt[rho:nu+nx+1, rho:]^T (note the transpose of the last term!!) 
+                // RSQrqt_hat = Gt_tilde @ GL[:, :rho]^T + GL[:rho:]^T (note the transpose of the last term!!)
+            SCHUR:
+                cout << "test" << endl;
+            FIRST_STAGE:
+                cout << "test" << endl;
+            FORWARD_SUBSTITUTION:
+                cout << "test" << endl;
+            }
+        }
         OCP_aux aux;
+        fatrop_memory_matrix_bf Hht;
+        fatrop_memory_matrix_bf Ppt;
+        fatrop_memory_el<int> gamma;
+        fatrop_memory_el<int> rho;
     };
 } // namespace fatrop
 #endif // FATROPOCPKKTINDLUCED

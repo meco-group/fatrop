@@ -1,7 +1,7 @@
 /**
  * @file FatropSparse.hpp
  * @author your name (you@domain.com)
- * @brief this file contains functions for representing a block-sparse KKT matrix, only used for DEBUG and TESTING purposes.
+ * @brief this file contains functions for representing a block-sparse KKT matrix, only used for DEBUG and TESTING purposes. This code does NOT aim to be efficient, neither in computational nor memory efficiency.
  * @version 0.1
  * @date 2021-11-17
  * 
