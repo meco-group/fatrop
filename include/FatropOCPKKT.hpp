@@ -79,14 +79,24 @@ namespace fatrop
             TRANSFORM_AND_SUBSEQ:
                 // symmetric transformation, done a little different than in paper, in order to fuse LA operations
                 // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
-                // Ggt_tilde <- Ggt_stripe[rho:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
+                // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
+                // permutations
                 // Hh_k <- Ggt_stripe[nu:nu+nx+1, rho:] (transfer to next stage)
-                // GL <- Ggt_tilde @ RSQrqt[:, :rho]^T + RSQrqt[rho:nu+nx+1, rho:]^T (note the transpose of the last term!!) 
-                // RSQrqt_hat = Gt_tilde @ GL[:, :rho]^T + GL[:rho:]^T (note the transpose of the last term!!)
+                // GL <- Ggt_tilde_k @ RSQrqt[:, :rho]^T + RSQrqt[rho:nu+nx+1, rho:]^T (note the transpose of the last term!!) 
+                // RSQrqt_hat = Gt_tilde_k[:-1,:] @ GL[:, :rho]^T + GL[:rho:]^T (note the transpose of the last term!!)
             SCHUR:
-                cout << "test" << endl;
+                // DLlt_k = [chol(R_hatk)  Llk@chol(R_hatk)^-T]
+                // Pp_k = Qq_hatk - L_k^T @ Ll_k
             FIRST_STAGE:
-                cout << "test" << endl;
+                // if gamma_0 - rho_0 > 0
+                // LU_FACT_TRANSPOSE(Hh0)
+                // permutations
+                // Ggt_tilde_I <- Ggt_stripe[rho_I:nx+1,:rho_I] L^-T 
+                // h_tilde_I <- - U_I ^-1 Ggt_tilde_I[nx+1, :] 
+                // ?? if nx - rho_I > 0 ??
+                // GL_I <- Ggt_tildeI  @ Ppt_I^T + Ppt[rho:nx+1, rho:]^T
+                // Pphat_I <- Ggt_tilde_I[:-1,:] @  GL_I[:,:rho]^T + GL[:rho,:]^T
+                // DlI = [chol(Phat_I) lI@chol(phat_I)^-T]
             FORWARD_SUBSTITUTION:
                 cout << "test" << endl;
             }
