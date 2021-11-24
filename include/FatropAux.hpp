@@ -22,7 +22,7 @@ vector<int> operator+(const vector<int> &a, const int b)
     return res;
 }
 /** \brief function to cumulative sum integer vector, first element is zero */
-vector<int> csum(const vector<int> &a)
+vector<int> offsets(const vector<int> &a)
 {
     vector<int> res(a.size(), 0);
     for (long unsigned int i = 1; i < a.size(); i++)

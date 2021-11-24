@@ -31,11 +31,10 @@ namespace fatrop
         fatrop_memory_matrix_bf BAbt;
         /// small-scale Jacobian stagewise eq constraints
         fatrop_memory_matrix_bf Ggt;
-        /** \brief this subclass contains some data that is cached for efficiency */
         class OCP_aux
         {
         public:
-            OCP_aux(const OCP_dims &dims, fatrop_memory_allocator &fma) : ux_offs(dims.K, csum(dims.nx + dims.nu), fma), g_offs(dims.K, csum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
+            OCP_aux(const OCP_dims &dims, fatrop_memory_allocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
             /// offset arrays are used for efficiency
             fatrop_memory_el<int> ux_offs;
             /// offset arrays are used for efficiency
@@ -50,7 +49,7 @@ namespace fatrop
     {
     public:
         OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : Ppt(dims.nx + 1, vector<int>(dims.nx), dims.K, fma),
-                                                                             Hht(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma),
+                                                                             Hht(vector<int>(1,max(dims.nu + dims.nx + 1)), vector<int>(?????), 1, fma),
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
