@@ -21,6 +21,8 @@
 #define MEMSIZE_VEC blasfeo_memsize_dvec
 #define CREATE_VEC blasfeo_create_dvec
 #define GEMM_NT blasfeo_dgemm_nt
+#define GEAD blasfeo_dgead
+#define SYRK_LN_MN blasfeo_dsyrk_ln_mn
 
 #include <iostream>
 extern "C"

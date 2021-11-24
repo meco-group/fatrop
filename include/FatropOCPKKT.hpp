@@ -49,17 +49,18 @@ namespace fatrop
     {
     public:
         OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
-                                                                             Hht(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma), // the number of eqs can never exceed nx
-                                                                             AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),  // the number of eqs can never exceed nx
+                                                                             Hht(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),                     // the number of eqs can never exceed nx
+                                                                             AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),                      // the number of eqs can never exceed nx
+                                                                             RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma), // the number of eqs can never exceed nx
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
         void fact_solve(OCP_KKT *OCP, VEC *ux, VEC *lambda)
         {
             // define compiler macros for notational convenience
-#define OCPMACRO(type, name, subfix) type name##subfix = ((type)OCP->name)
-#define AUXMACRO(type, name, subfix) type name##subfix = ((type)OCP->aux.name)
-#define SOLVERMACRO(type, name, subfix) type name##subfix = ((type)name)
+#define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
+#define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
+#define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
             int K = OCP->K;
             // make variables local for efficiency
             OCPMACRO(MAT *, RSQrqt, _p);
@@ -68,6 +69,7 @@ namespace fatrop
             SOLVERMACRO(MAT *, Ppt, _p);
             SOLVERMACRO(MAT *, Hht, _p);
             SOLVERMACRO(MAT *, AL, _p);
+            SOLVERMACRO(MAT *, RSQrqt_stripe, _p);
             AUXMACRO(int, max_nu, );
             AUXMACRO(int, max_nx, );
             AUXMACRO(int, max_ng, );
@@ -103,13 +105,18 @@ namespace fatrop
                 // AL <- [BAb]^T_k P_kp1
                 GEMM_NT(nu + nx + 1, nx, nx, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
                 // AL[-1,:] <- AL[-1,:] + p_kp1^T
+                GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
                 // RSQrqt_stripe <- AL[BA] + RSQrqt
+                SYRK_LN_MN(nu + nx + 1, nu + nx, nx, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p + k, 0, 0);
                 // if ng[k]>0
-                // Ggt_stripe  <- Ggt_k
-                // if Hkp1 nonempty
-                // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
-                // Ggt_stripe[-1,:] <- Ggt_stripe[-1,:] + h_kp1^T
-                // gamma_k <- number of eqs represented by Ggt_stripe
+                if (ng > 0)
+                {
+                    // Ggt_stripe  <- Ggt_k
+                    // if Hkp1 nonempty
+                    // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
+                    // Ggt_stripe[-1,:] <- Ggt_stripe[-1,:] + h_kp1^T
+                    // gamma_k <- number of eqs represented by Ggt_stripe
+                }
             TRANSFORM_AND_SUBSEQ:
                 // symmetric transformation, done a little different than in paper, in order to fuse LA operations
                 // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
@@ -138,6 +145,7 @@ namespace fatrop
         fatrop_memory_matrix_bf Ppt;
         fatrop_memory_matrix_bf Hht;
         fatrop_memory_matrix_bf AL;
+        fatrop_memory_matrix_bf RSQrqt_stripe;
         fatrop_memory_el<int> gamma;
         fatrop_memory_el<int> rho;
     };
