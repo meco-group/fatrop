@@ -75,7 +75,7 @@ namespace fatrop
     class fatrop_memory_el : public fatrop_memory_el_base
     {
     public:
-        fatrop_memory_el<T>(int size, vector<T> &&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
+        fatrop_memory_el<T>(int size, const vector<T> &init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
         {
             fma.add(*this);
         }

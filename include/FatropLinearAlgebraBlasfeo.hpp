@@ -20,6 +20,7 @@
 #define VECEL BLASFEO_DVECEL
 #define MEMSIZE_VEC blasfeo_memsize_dvec
 #define CREATE_VEC blasfeo_create_dvec
+#define GEMM_NT blasfeo_dgemm_nt
 
 #include <iostream>
 extern "C"
@@ -118,11 +119,11 @@ namespace fatrop
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_matrix_bf(const vector<int> &&nrows, const vector<int> &&ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
+        fatrop_memory_matrix_bf(const vector<int> &nrows, const vector<int> &ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
+        // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
         {
             fma.add(*this);
         }
-        /** \brief constuction for allocation on fatrop_memory_allocator*/
         fatrop_memory_matrix_bf(const int nrows, const int ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(N, nrows), ncols_(N, ncols)
         {
             fma.add(*this);

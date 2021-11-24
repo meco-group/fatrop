@@ -5,6 +5,7 @@
 #include "string"
 using namespace std;
 using namespace fatrop;
+
 int main()
 {
     // problem dimensions
@@ -31,8 +32,8 @@ int main()
         {
             // blasfeo_dgese(nu + nx + 1, nu + nx, (double) i, RSQrq + i, 0, 0);
             // blasfeo_dgese(nu + nx + 1, nx, (double) i, BAbt +i , 0, 0);
-            blasfeo_dgese(nu + nx + 1, nu + nx, (double) i, RSQrq , 0, 0);
-            blasfeo_dgese(nu + nx + 1, nx, (double) i, BAbt  , 0, 0);
+            blasfeo_dgese(nu + nx + 1, nu + nx, (double)i, RSQrq, 0, 0);
+            blasfeo_dgese(nu + nx + 1, nx, (double)i, BAbt, 0, 0);
         }
     }
     double el = blasfeo_toc(&timer);
