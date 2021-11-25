@@ -53,6 +53,8 @@ namespace fatrop
                                                                              AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
                                                                              Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.ng)), 1, fma),
+                                                                             Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
+                                                                             Pr(max(dims.nu), dims.K, fma),
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
@@ -82,7 +84,7 @@ namespace fatrop
             OCPMACRO(int *, ng, _p);
             SOLVERMACRO(int *, gamma, _p);
             SOLVERMACRO(int *, rho, _p);
-            MAT* RSQrq_hat_curr_p;
+            MAT *RSQrq_hat_curr_p;
             int rank_k;
 
             /////////////// recursion ///////////////
@@ -145,6 +147,7 @@ namespace fatrop
             TRANSFORM_AND_SUBSEQ:
                 // symmetric transformation, done a little different than in paper, in order to fuse LA operations
                 // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
+                // LU_FACT_transposed(gamma_k, nu+nx+1, nu, rank_k, Ggt_stripe_p, )
                 // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
                 // permutations
                 // Hh_k <- Ggt_stripe[nu:nu+nx+1, rho:] (transfer to next stage)
@@ -164,7 +167,7 @@ namespace fatrop
                 // Pphat_I <- Ggt_tilde_I[:-1,:] @  GL_I[:,:rho]^T + GL[:rho,:]^T
                 // DlI = [chol(Phat_I) lI@chol(phat_I)^-T]
             FORWARD_SUBSTITUTION:
-                cout << "test" << endl;
+                // forward substitution
             }
         }
         fatrop_memory_matrix_bf Ppt;
@@ -172,6 +175,8 @@ namespace fatrop
         fatrop_memory_matrix_bf AL;
         fatrop_memory_matrix_bf RSQrqt_stripe;
         fatrop_memory_matrix_bf Ggt_stripe;
+        fatrop_memory_permutation_matrix Pl;
+        fatrop_memory_permutation_matrix Pr;
         fatrop_memory_el<int> gamma;
         fatrop_memory_el<int> rho;
     };
