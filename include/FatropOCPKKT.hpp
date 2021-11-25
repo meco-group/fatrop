@@ -49,9 +49,10 @@ namespace fatrop
     {
     public:
         OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
-                                                                             Hht(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),                     // the number of eqs can never exceed nx
-                                                                             AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),                      // the number of eqs can never exceed nx
-                                                                             RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma), // the number of eqs can never exceed nx
+                                                                             Hht(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma), // the number of eqs can never exceed nx
+                                                                             AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
+                                                                             RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
+                                                                             Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.ng)), 1, fma),
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
@@ -70,6 +71,7 @@ namespace fatrop
             SOLVERMACRO(MAT *, Hht, _p);
             SOLVERMACRO(MAT *, AL, _p);
             SOLVERMACRO(MAT *, RSQrqt_stripe, _p);
+            SOLVERMACRO(MAT *, Ggt_stripe, _p);
             AUXMACRO(int, max_nu, );
             AUXMACRO(int, max_nx, );
             AUXMACRO(int, max_ng, );
@@ -80,6 +82,8 @@ namespace fatrop
             OCPMACRO(int *, ng, _p);
             SOLVERMACRO(int *, gamma, _p);
             SOLVERMACRO(int *, rho, _p);
+            MAT* RSQrq_hat_curr_p;
+            int rank_k;
 
             /////////////// recursion ///////////////
 
@@ -108,14 +112,35 @@ namespace fatrop
                 GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
                 // RSQrqt_stripe <- AL[BA] + RSQrqt
                 SYRK_LN_MN(nu + nx + 1, nu + nx, nx, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p + k, 0, 0);
+                // calculate the size of H_{k+1} matrix
+                int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
+                // gamma_k <- number of eqs represented by Ggt_stripe
+                int gamma_k = Hp1_size + ng;
+                gamma_p[k] = gamma_k;
                 // if ng[k]>0
-                if (ng > 0)
+                if (gamma_k > 0)
                 {
-                    // Ggt_stripe  <- Ggt_k
+                    // if Gk nonempty
+                    if (ng > 0)
+                    {
+                        // Ggt_stripe  <- Ggt_k
+                        GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, 0);
+                    }
                     // if Hkp1 nonempty
-                    // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
-                    // Ggt_stripe[-1,:] <- Ggt_stripe[-1,:] + h_kp1^T
-                    // gamma_k <- number of eqs represented by Ggt_stripe
+                    if (Hp1_size > 0)
+                    {
+                        // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
+                        GEMM_NT(nu + nx + 1, Hp1_size, nx, 1.0, BAbt_p + k, 0, 0, Hht_p, 0, 0, 0.0, Ggt_stripe_p, 0, ng, Ggt_stripe_p, 0, ng);
+                        // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
+                        GEAD(1, Hp1_size, 1.0, Hht_p, nx, 0, Ggt_stripe_p, nu + nx + 1, ng);
+                    }
+                    goto TRANSFORM_AND_SUBSEQ;
+                }
+                else
+                {
+                    rho_p[k] = 0;
+                    rank_k = 0;
+                    RSQrq_hat_curr_p = RSQrqt_stripe_p;
                 }
             TRANSFORM_AND_SUBSEQ:
                 // symmetric transformation, done a little different than in paper, in order to fuse LA operations
@@ -146,6 +171,7 @@ namespace fatrop
         fatrop_memory_matrix_bf Hht;
         fatrop_memory_matrix_bf AL;
         fatrop_memory_matrix_bf RSQrqt_stripe;
+        fatrop_memory_matrix_bf Ggt_stripe;
         fatrop_memory_el<int> gamma;
         fatrop_memory_el<int> rho;
     };
