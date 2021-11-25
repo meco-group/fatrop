@@ -23,6 +23,7 @@
 #define GEMM_NT blasfeo_dgemm_nt
 #define GEAD blasfeo_dgead
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
+#define PMAT fatrop_permutation_matrix
 
 #include <iostream>
 extern "C"
@@ -178,7 +179,8 @@ namespace fatrop
             return res;
         }
         /** \brief get first blasfeo_xmat* struct */
-        explicit operator MAT*() const {
+        explicit operator MAT *() const
+        {
             return mat;
         }
 
@@ -340,29 +342,32 @@ namespace fatrop
         int memory_size() const
         {
             int size = 0;
-            size += N_ * dim_ * sizeof(int);
+            size += N_ * sizeof(fatrop_permutation_matrix) + N_ * dim_ * sizeof(int);
             return size;
         }
         /** \brief set up memory*/
         void set_up(char *&char_p)
         {
-            data_ = (int *)char_p;
-            this->set_datap(data_);
-            char_p += memory_size();
-        }
-        /** \brief get n-th permutation vector pointer*/
-        int *perm_vector(const int n) const
-        {
-#if DEBUG
-            assert(n < N_);
-#endif
-            return data_ + dim_ * n;
-        }
+            perm_p = (fatrop_permutation_matrix *)char_p;
+            for (int i = 0; i < N_; i++)
+            {
+                new (perm_p) fatrop_permutation_matrix(dim_);
+                perm_p++;
+            }
+            int *data_p = (int *)perm_p;
+            for (int i = 0; i < N_; i++)
+            {
+                perm_p[i].set_datap(data_p);
+                data_p += dim_;
+            }
 
+            char_p = (char *)data_p;
+        }
+        explicit operator fatrop_permutation_matrix *() { return perm_p; };
     private:
         const int dim_;
         const int N_;
-        int *data_;
+        fatrop_permutation_matrix *perm_p;
     };
     /** \brief returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
     matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj)
