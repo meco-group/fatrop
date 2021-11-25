@@ -171,6 +171,7 @@ namespace fatrop
                 // Pphat_I <- Ggt_tilde_I[:-1,:] @  GL_I[:,:rho]^T + GL[:rho,:]^T
                 // DlI = [chol(Phat_I) lI@chol(phat_I)^-T]
             FORWARD_SUBSTITUTION:
+                cout<< "test" << endl;
                 // forward substitution
             }
         }

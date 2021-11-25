@@ -323,6 +323,8 @@ namespace fatrop
 #endif
             COLPEI(kmax, data_, M);
         }
+        /** int pointer of permutation vector */
+        explicit operator int *() { return data_; };
 
     private:
         const int dim_;
@@ -355,6 +357,7 @@ namespace fatrop
                 perm_p++;
             }
             int *data_p = (int *)perm_p;
+            this->set_datap(data_p);
             for (int i = 0; i < N_; i++)
             {
                 perm_p[i].set_datap(data_p);
@@ -364,6 +367,7 @@ namespace fatrop
             char_p = (char *)data_p;
         }
         explicit operator fatrop_permutation_matrix *() { return perm_p; };
+
     private:
         const int dim_;
         const int N_;
@@ -406,8 +410,10 @@ namespace fatrop
             _a < _b ? _a : _b;      \
         })
     /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
-    void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, int *perm_left, int *perm_right, double tol = 1e-12)
+    void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12)
     {
+        int *perm_left = (int *)(*Pl_p);
+        int *perm_right = (int *)(*Pr_p);
         int minmn = MIN(m, n_max);
         int j = 0;
         for (int i = 0; i < minmn; i++)
@@ -436,8 +442,10 @@ namespace fatrop
         rank = j;
     };
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
-    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, int *perm_left, int *perm_right, double tol = 1e-12)
+    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12)
     {
+        int *perm_left = (int *)(*Pl_p);
+        int *perm_right = (int *)(*Pr_p);
         int minmn = MIN(m, n_max);
         int j = 0;
         for (int i = 0; i < minmn; i++)

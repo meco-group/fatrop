@@ -27,11 +27,11 @@ int main()
     cout << "At" << endl;
     At[0].print();
     int rank = 0;
-    LU_FACT(10, 10, 10, rank, (MAT *)A[0], Pl.perm_vector(0), Pr.perm_vector(0));
+    LU_FACT(10, 10, 10, rank, (MAT *)A[0],  ((PMAT*) Pl),  ((PMAT*) Pr));
     cout << "LU factorization " << endl;
     A[0].print();
     cout << "LUt factorization " << endl;
-    LU_FACT_transposed(10, 10, 10, rank, (MAT *)At[0], Pl.perm_vector(0), Pr.perm_vector(0));
+    LU_FACT_transposed(10, 10, 10, rank, (MAT *)At[0],  ((PMAT*) Pl), ((PMAT*) Pr));
     At[0].print();
     for (int i = 0; i < 10; i++)
     {
