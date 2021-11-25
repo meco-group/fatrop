@@ -147,11 +147,9 @@ namespace fatrop
                     RSQrq_hat_curr_p = RSQrqt_stripe_p;
                 }
             TRANSFORM_AND_SUBSEQ:
-                PMAT* Plkp = Pl_p +k; 
-                PMAT* Prkp = Pr_p +k; 
                 // symmetric transformation, done a little different than in paper, in order to fuse LA operations
                 // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
-                            // LU_FACT_transposed(gamma_k, nu+nx+1, nu, rank_k, Ggt_stripe_p,)
+                LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
                 // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
                 // permutations
                 // Hh_k <- Ggt_stripe[nu:nu+nx+1, rho:] (transfer to next stage)
@@ -171,7 +169,7 @@ namespace fatrop
                 // Pphat_I <- Ggt_tilde_I[:-1,:] @  GL_I[:,:rho]^T + GL[:rho,:]^T
                 // DlI = [chol(Phat_I) lI@chol(phat_I)^-T]
             FORWARD_SUBSTITUTION:
-                cout<< "test" << endl;
+                cout << "test" << endl;
                 // forward substitution
             }
         }
