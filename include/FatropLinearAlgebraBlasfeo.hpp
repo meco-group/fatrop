@@ -38,7 +38,7 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
-    /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it is not implemented yet in blasfeo*/
+    /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
     {
         for (int aj = n - 1; aj >= 0; aj--)
@@ -307,21 +307,32 @@ namespace fatrop
 #endif
             ROWPEI(kmax, data_, M);
         }
-        /** \brief apply col permutation*/
+        /** \brief apply inverse col permutation*/
         void MP(const int kmax, MAT *M) const
+        {
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            COLPEI(kmax, data_, M);
+        }
+        /** \brief apply col permutation*/
+        void MPt(const int kmax, MAT *M) const
         {
 #if DEBUG
             assert(data_ != NULL);
 #endif
             COLPE(kmax, data_, M);
         }
-        /** \brief apply inverse col permutation*/
-        void MPt(const int kmax, MAT *M) const
+        /** \brief apply col permutation*/
+        void MPt(const int kmax, const int n, MAT *M, const int ai, const int aj) const
         {
 #if DEBUG
             assert(data_ != NULL);
 #endif
-            COLPEI(kmax, data_, M);
+            for (int k = 0; k < kmax; ++k)
+            {
+                COLSW(n, M, ai, aj+k, M, ai, aj+data_[k]);
+            }
         }
         /** int pointer of permutation vector */
         explicit operator int *() { return data_; };
