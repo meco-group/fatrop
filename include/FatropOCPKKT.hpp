@@ -115,7 +115,7 @@ namespace fatrop
                 // AL[-1,:] <- AL[-1,:] + p_kp1^T
                 GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
                 // RSQrqt_stripe <- AL[BA] + RSQrqt
-                SYRK_LN_MN(nu + nx + 1, nu + nx, nx, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p + k, 0, 0);
+                SYRK_LN_MN(nu + nx + 1, nu + nx, nx, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p, 0, 0);
                 // calculate the size of H_{k+1} matrix
                 int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
                 // gamma_k <- number of eqs represented by Ggt_stripe
@@ -152,6 +152,9 @@ namespace fatrop
                 LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
                 // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
                 // permutations
+                (Pl_p+k) -> PM(rho_p[k], RSQrqt_stripe_p);
+                (Pl_p+k) -> MPt(rho_p[k], RSQrqt_stripe_p);
+                // Pr_p->PM(RSQrqt_stripe_p)
                 // Hh_k <- Ggt_stripe[nu:nu+nx+1, rho:] (transfer to next stage)
                 // GL <- Ggt_tilde_k @ RSQrqt[:, :rho]^T + RSQrqt[rho:nu+nx+1, rho:]^T (note the transpose of the last term!!)
                 // RSQrqt_hat = Gt_tilde_k[:-1,:] @ GL[:, :rho]^T + GL[:rho:]^T (note the transpose of the last term!!)
