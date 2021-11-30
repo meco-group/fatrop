@@ -23,6 +23,7 @@
 #define GEMM_NT blasfeo_dgemm_nt
 #define GEAD blasfeo_dgead
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
+#define TRTR_L blasfeo_dtrtr_l
 #define PMAT fatrop_permutation_matrix
 
 #include <iostream>
@@ -312,107 +313,107 @@ namespace fatrop
             for (ii = 0; ii < kmax; ii++)
             {
                 if (data_[ii] != ii)
-                    ROWSW(n, M, ai+ ii, aj, M, ai+data_[ii], aj);
+                    ROWSW(n, M, ai + ii, aj, M, ai + data_[ii], aj);
             }
             return;
         }
-    /** \brief apply inverse row permutation*/
-    void
-    PtM(const int kmax, MAT *M) const
-    {
+        /** \brief apply inverse row permutation*/
+        void
+        PtM(const int kmax, MAT *M) const
+        {
 #if DEBUG
-        assert(data_ != NULL);
+            assert(data_ != NULL);
 #endif
-        ROWPEI(kmax, data_, M);
-    }
-    /** \brief apply inverse col permutation*/
-    void MP(const int kmax, MAT *M) const
-    {
+            ROWPEI(kmax, data_, M);
+        }
+        /** \brief apply inverse col permutation*/
+        void MP(const int kmax, MAT *M) const
+        {
 #if DEBUG
-        assert(data_ != NULL);
+            assert(data_ != NULL);
 #endif
-        COLPEI(kmax, data_, M);
-    }
-    /** \brief apply col permutation*/
-    void MPt(const int kmax, MAT *M) const
-    {
+            COLPEI(kmax, data_, M);
+        }
+        /** \brief apply col permutation*/
+        void MPt(const int kmax, MAT *M) const
+        {
 #if DEBUG
-        assert(data_ != NULL);
+            assert(data_ != NULL);
 #endif
-        COLPE(kmax, data_, M);
-    }
-    /** int pointer of permutation vector */
-    explicit operator int *() { return data_; };
+            COLPE(kmax, data_, M);
+        }
+        /** int pointer of permutation vector */
+        explicit operator int *() { return data_; };
 
-private:
-    const int dim_;
-    int *data_ = NULL;
-};
-
-/** \brief this class is used for the allocation of a permutation matrix */
-class fatrop_memory_permutation_matrix : public fatrop_memory_el_base, public fatrop_permutation_matrix
-{
-public:
-    /** \brief constructor */
-    fatrop_memory_permutation_matrix(const int dim, const int N, fatrop_memory_allocator &fma) : fatrop_permutation_matrix(dim), dim_(dim), N_(N)
-    {
-        fma.add(*this);
+    private:
+        const int dim_;
+        int *data_ = NULL;
     };
-    /** \brief calculate needed memory size*/
-    int memory_size() const
-    {
-        int size = 0;
-        size += N_ * sizeof(fatrop_permutation_matrix) + N_ * dim_ * sizeof(int);
-        return size;
-    }
-    /** \brief set up memory*/
-    void set_up(char *&char_p)
-    {
-        perm_p = (fatrop_permutation_matrix *)char_p;
-        for (int i = 0; i < N_; i++)
-        {
-            new (perm_p) fatrop_permutation_matrix(dim_);
-            perm_p++;
-        }
-        int *data_p = (int *)perm_p;
-        this->set_datap(data_p);
-        for (int i = 0; i < N_; i++)
-        {
-            perm_p[i].set_datap(data_p);
-            data_p += dim_;
-        }
 
-        char_p = (char *)data_p;
-    }
-    explicit operator fatrop_permutation_matrix *() { return perm_p; };
-
-private:
-    const int dim_;
-    const int N_;
-    fatrop_permutation_matrix *perm_p;
-};
-/** \brief returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
-matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj)
-{
-    matrix_ind res;
-    res.ai = ai;
-    res.aj = aj;
-    double valmax = 0.0;
-    for (int j = aj; j < n; j++)
+    /** \brief this class is used for the allocation of a permutation matrix */
+    class fatrop_memory_permutation_matrix : public fatrop_memory_el_base, public fatrop_permutation_matrix
     {
-        for (int i = ai; i < m; i++)
+    public:
+        /** \brief constructor */
+        fatrop_memory_permutation_matrix(const int dim, const int N, fatrop_memory_allocator &fma) : fatrop_permutation_matrix(dim), dim_(dim), N_(N)
         {
-            double valij = abs(MATEL(matr, i, j));
-            if (valij >= valmax)
+            fma.add(*this);
+        };
+        /** \brief calculate needed memory size*/
+        int memory_size() const
+        {
+            int size = 0;
+            size += N_ * sizeof(fatrop_permutation_matrix) + N_ * dim_ * sizeof(int);
+            return size;
+        }
+        /** \brief set up memory*/
+        void set_up(char *&char_p)
+        {
+            perm_p = (fatrop_permutation_matrix *)char_p;
+            for (int i = 0; i < N_; i++)
             {
-                valmax = valij;
-                res.ai = i;
-                res.aj = j;
+                new (perm_p) fatrop_permutation_matrix(dim_);
+                perm_p++;
+            }
+            int *data_p = (int *)perm_p;
+            this->set_datap(data_p);
+            for (int i = 0; i < N_; i++)
+            {
+                perm_p[i].set_datap(data_p);
+                data_p += dim_;
+            }
+
+            char_p = (char *)data_p;
+        }
+        explicit operator fatrop_permutation_matrix *() { return perm_p; };
+
+    private:
+        const int dim_;
+        const int N_;
+        fatrop_permutation_matrix *perm_p;
+    };
+    /** \brief returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
+    matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj)
+    {
+        matrix_ind res;
+        res.ai = ai;
+        res.aj = aj;
+        double valmax = 0.0;
+        for (int j = aj; j < n; j++)
+        {
+            for (int i = ai; i < m; i++)
+            {
+                double valij = abs(MATEL(matr, i, j));
+                if (valij >= valmax)
+                {
+                    valmax = valij;
+                    res.ai = i;
+                    res.aj = j;
+                }
             }
         }
-    }
-    return res;
-};
+        return res;
+    };
 #define MAX(a, b)                   \
     (                               \
         {                           \
@@ -427,69 +428,69 @@ matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj)
             __typeof__(b) _b = (b); \
             _a < _b ? _a : _b;      \
         })
-/** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
-void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12)
-{
-    int *perm_left = (int *)(*Pl_p);
-    int *perm_right = (int *)(*Pr_p);
-    int minmn = MIN(m, n_max);
-    int j = 0;
-    for (int i = 0; i < minmn; i++)
+    /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
+    void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12)
     {
-        matrix_ind max_curr = max_el(m, n_max, A, i, i);
-        if (abs(MATEL(A, max_curr.ai, max_curr.aj)) < tol)
+        int *perm_left = (int *)(*Pl_p);
+        int *perm_right = (int *)(*Pr_p);
+        int minmn = MIN(m, n_max);
+        int j = 0;
+        for (int i = 0; i < minmn; i++)
         {
-            break;
+            matrix_ind max_curr = max_el(m, n_max, A, i, i);
+            if (abs(MATEL(A, max_curr.ai, max_curr.aj)) < tol)
+            {
+                break;
+            }
+            // switch rows
+            ROWSW(n, A, i, 0, A, max_curr.ai, 0);
+            // save in permutation vector
+            perm_left[i] = max_curr.ai;
+            // switch cols
+            COLSW(m, A, 0, i, A, 0, max_curr.aj);
+            // save in permutation vector
+            perm_right[i] = max_curr.aj;
+            for (int j = i + 1; j < m; j++)
+            {
+                double Lji = MATEL(A, j, i) / MATEL(A, i, i);
+                MATEL(A, j, i) = Lji;
+                GEAD(1, n - (i + 1), -Lji, A, i, i + 1, A, j, i + 1);
+            }
+            j = i + 1;
         }
-        // switch rows
-        ROWSW(n, A, i, 0, A, max_curr.ai, 0);
-        // save in permutation vector
-        perm_left[i] = max_curr.ai;
-        // switch cols
-        COLSW(m, A, 0, i, A, 0, max_curr.aj);
-        // save in permutation vector
-        perm_right[i] = max_curr.aj;
-        for (int j = i + 1; j < m; j++)
-        {
-            double Lji = MATEL(A, j, i) / MATEL(A, i, i);
-            MATEL(A, j, i) = Lji;
-            GEAD(1, n - (i + 1), -Lji, A, i, i + 1, A, j, i + 1);
-        }
-        j = i + 1;
-    }
-    rank = j;
-};
-/** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
-void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12)
-{
-    int *perm_left = (int *)(*Pl_p);
-    int *perm_right = (int *)(*Pr_p);
-    int minmn = MIN(m, n_max);
-    int j = 0;
-    for (int i = 0; i < minmn; i++)
+        rank = j;
+    };
+    /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
+    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12)
     {
-        matrix_ind max_curr = max_el(n_max, m, At, i, i);
-        if (abs(MATEL(At, max_curr.ai, max_curr.aj)) < tol)
+        int *perm_left = (int *)(*Pl_p);
+        int *perm_right = (int *)(*Pr_p);
+        int minmn = MIN(m, n_max);
+        int j = 0;
+        for (int i = 0; i < minmn; i++)
         {
-            break;
+            matrix_ind max_curr = max_el(n_max, m, At, i, i);
+            if (abs(MATEL(At, max_curr.ai, max_curr.aj)) < tol)
+            {
+                break;
+            }
+            // switch rows
+            COLSW(n, At, 0, i, At, 0, max_curr.aj);
+            // save in permutation vector
+            perm_left[i] = max_curr.aj;
+            // switch cols
+            ROWSW(m, At, i, 0, At, max_curr.ai, 0);
+            // save in permutation vector
+            perm_right[i] = max_curr.ai;
+            for (int j = i + 1; j < m; j++)
+            {
+                double Lji = MATEL(At, i, j) / MATEL(At, i, i);
+                MATEL(At, i, j) = Lji;
+                GEAD(n - (i + 1), 1, -Lji, At, i + 1, i, At, i + 1, j);
+            }
+            j = i + 1;
         }
-        // switch rows
-        COLSW(n, At, 0, i, At, 0, max_curr.aj);
-        // save in permutation vector
-        perm_left[i] = max_curr.aj;
-        // switch cols
-        ROWSW(m, At, i, 0, At, max_curr.ai, 0);
-        // save in permutation vector
-        perm_right[i] = max_curr.ai;
-        for (int j = i + 1; j < m; j++)
-        {
-            double Lji = MATEL(At, i, j) / MATEL(At, i, i);
-            MATEL(At, i, j) = Lji;
-            GEAD(n - (i + 1), 1, -Lji, At, i + 1, i, At, i + 1, j);
-        }
-        j = i + 1;
-    }
-    rank = j;
-};
+        rank = j;
+    };
 } // namespace fatrop
 #endif //FATROP_BLASFEO_INCLUDED
