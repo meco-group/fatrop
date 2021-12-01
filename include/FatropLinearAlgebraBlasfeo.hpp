@@ -23,6 +23,7 @@
 #define GEMM_NT blasfeo_dgemm_nt
 #define GEAD blasfeo_dgead
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
+#define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
 #define PMAT fatrop_permutation_matrix
 

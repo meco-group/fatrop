@@ -73,5 +73,10 @@ int main()
     TRSM_RLNN(10, 10, 1.0, (MAT *)L[0], 0, 0, (MAT *)A[0], 0, 0, (MAT *)test[0], 0, 0);
     cout << Eig(Eig(test[0]) - Eig(A[0]) * Eig(Eig(L[0]).inverse())) << endl;
     cout << ((int*) testfatropmemel)[0] << endl;
+
+    cout << Eig(test[0]) << std::endl;
+
+
+
     return 0;
 }

@@ -53,6 +53,8 @@ namespace fatrop
                                                                              AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
                                                                              Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.ng)), 1, fma),
+                                                                             Ggt_tilde(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma),
+                                                                             GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
@@ -74,8 +76,10 @@ namespace fatrop
             SOLVERMACRO(MAT *, AL, _p);
             SOLVERMACRO(MAT *, RSQrqt_stripe, _p);
             SOLVERMACRO(MAT *, Ggt_stripe, _p);
+            SOLVERMACRO(MAT *, Ggt_tilde, _p);
             SOLVERMACRO(PMAT *, Pl, _p);
             SOLVERMACRO(PMAT *, Pr, _p);
+            SOLVERMACRO(MAT *, GgLt, _p);
             AUXMACRO(int, max_nu, );
             AUXMACRO(int, max_nx, );
             AUXMACRO(int, max_ng, );
@@ -151,13 +155,14 @@ namespace fatrop
                 // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
                 LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
                 // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
+                TRSM_RLNN(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe_p, rank_k, 0, Ggt_stripe_p, 0, 0, Ggt_tilde_p + k, 0, 0);
                 // permutations
-                TRTR_L(nu, RSQrqt_stripe_p, 0, 0, RSQrqt_stripe_p, 0, 0); // copy lower part of R to upper part
-                (Pr_p + k)->PM(rho_p[k], nu, RSQrqt_stripe_p, 0, 0);
-                (Pr_p + k)->MPt(rho_p[k], RSQrqt_stripe_p);
-                // Hh_k <- Ggt_stripe[nu:nu+nx+1, rho:] (transfer to next stage)
-                // GL <- Ggt_tilde_k @ RSQrqt[:, :rho]^T + RSQrqt[rho:nu+nx+1, rho:]^T (note the transpose of the last term!!)
-                // RSQrqt_hat = Gt_tilde_k[:-1,:] @ GL[:, :rho]^T + GL[:rho:]^T (note the transpose of the last term!!)
+                TRTR_L(nu + nx, RSQrqt_stripe_p, 0, 0, RSQrqt_stripe_p, 0, 0); // copy lower part of RSQ to upper part
+                (Pr_p + k)->PM(rank_k, nu, RSQrqt_stripe_p, 0, 0);             //TODO make use of symmetry
+                (Pr_p + k)->MPt(rank_k, RSQrqt_stripe_p);
+                // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
+                GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_stripe_p, 0, rank_k, 1.0, RSQrqt_stripe_p, rank_k, 0, GgLt_p, 0, 0);
+                // RSQrqt_hat = GL[nu-rank_k + nx +1, :rank_k] * RSQ[:rho, :nu+nx] + RSQrqt[rank_k:, :]  (with RSQ[:rank_k,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
             SCHUR:
                 // DLlt_k = [chol(R_hatk)  Llk@chol(R_hatk)^-T]
                 // Pp_k = Qq_hatk - L_k^T @ Ll_k
@@ -181,6 +186,8 @@ namespace fatrop
         fatrop_memory_matrix_bf AL;
         fatrop_memory_matrix_bf RSQrqt_stripe;
         fatrop_memory_matrix_bf Ggt_stripe;
+        fatrop_memory_matrix_bf Ggt_tilde;
+        fatrop_memory_matrix_bf GgLt;
         fatrop_memory_permutation_matrix Pl;
         fatrop_memory_permutation_matrix Pr;
         fatrop_memory_el<int> gamma;
