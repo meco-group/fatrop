@@ -56,6 +56,7 @@ namespace fatrop
                                                                              Ggt_tilde(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.ng), dims.K, fma),
                                                                              GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
                                                                              RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
+                                                                             Llt(vector<int>(dims.nu + dims.nx + 1), vector<int>(dims.nu + dims.nx), dims.K, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
@@ -82,6 +83,7 @@ namespace fatrop
             SOLVERMACRO(PMAT *, Pr, _p);
             SOLVERMACRO(MAT *, GgLt, _p);
             SOLVERMACRO(MAT *, RSQrqt_hat, _p);
+            SOLVERMACRO(MAT *, Llt, _p);
             AUXMACRO(int, max_nu, );
             AUXMACRO(int, max_nx, );
             AUXMACRO(int, max_ng, );
@@ -114,18 +116,20 @@ namespace fatrop
                 const int nu = nu_p[k];
                 const int nx = nx_p[k];
                 const int ng = ng_p[k];
-                goto SUBSDYN;
-            SUBSDYN:
+                // calculate the size of H_{k+1} matrix
+                const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
+                // gamma_k <- number of eqs represented by Ggt_stripe
+                const int gamma_k = Hp1_size + ng;
+                goto SUBS_DYN;
+                goto SCHUR;
+                goto TRANSFORM_AND_SUBSEQ;
+            SUBS_DYN:
                 // AL <- [BAb]^T_k P_kp1
                 GEMM_NT(nu + nx + 1, nx, nx, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
                 // AL[-1,:] <- AL[-1,:] + p_kp1^T
                 GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
                 // RSQrqt_stripe <- AL[BA] + RSQrqt
                 SYRK_LN_MN(nu + nx + 1, nu + nx, nx, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p, 0, 0);
-                // calculate the size of H_{k+1} matrix
-                int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-                // gamma_k <- number of eqs represented by Ggt_stripe
-                int gamma_k = Hp1_size + ng;
                 gamma_p[k] = gamma_k;
                 // if ng[k]>0
                 if (gamma_k > 0)
@@ -144,7 +148,6 @@ namespace fatrop
                         // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
                         GEAD(1, Hp1_size, 1.0, Hht_p, nx, 0, Ggt_stripe_p, nu + nx + 1, ng);
                     }
-                    goto TRANSFORM_AND_SUBSEQ;
                 }
                 else
                 {
@@ -176,8 +179,17 @@ namespace fatrop
                     RSQrq_hat_curr_p = RSQrqt_stripe_p;
                 }
             SCHUR:
-                // DLlt_k = [chol(R_hatk)  Llk@chol(R_hatk)^-T]
-                // Pp_k = Qq_hatk - L_k^T @ Ll_k
+                if (nu - rank_k > 0)
+                {
+                    // DLlt_k = [chol(R_hatk)  Llk@chol(R_hatk)^-T]
+                    POTRF_L_MN(nu - rank_k + nx + 1, nu - rank_k, RSQrq_hat_curr_p, 0, 0, Llt_p + k, 0, 0);
+                    // Pp_k = Qq_hatk - L_k^T @ Ll_k
+                }
+                else
+                {
+                    // TODO
+                }
+
             FIRST_STAGE:
                 // if gamma_0 - rho_0 > 0
                 // LU_FACT_TRANSPOSE(Hh0)
@@ -201,6 +213,7 @@ namespace fatrop
         fatrop_memory_matrix_bf Ggt_tilde;
         fatrop_memory_matrix_bf GgLt;
         fatrop_memory_matrix_bf RSQrqt_hat;
+        fatrop_memory_matrix_bf Llt;
         fatrop_memory_permutation_matrix Pl;
         fatrop_memory_permutation_matrix Pr;
         fatrop_memory_el<int> gamma;

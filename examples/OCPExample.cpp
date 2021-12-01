@@ -8,6 +8,9 @@ using namespace fatrop;
 
 int main()
 {
+    goto TEST;
+    TEST:
+        cout << "testiout" << endl;
     // problem dimensions
     OCP_dims dims;
     dims.K = 150000;

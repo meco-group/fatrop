@@ -25,6 +25,7 @@
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
 #define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
+#define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define PMAT fatrop_permutation_matrix
 
 #include <iostream>
