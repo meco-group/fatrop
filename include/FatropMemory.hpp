@@ -7,6 +7,7 @@
 #define FATROP_MEMORY_INCLUDED
 #include <iostream>
 #include <vector>
+#include <FatropVector.hpp>
 using namespace std;
 namespace fatrop
 {
@@ -75,6 +76,15 @@ namespace fatrop
     class fatrop_memory_el : public fatrop_memory_el_base
     {
     public:
+        template<typename E>
+        fatrop_memory_el<T>(int size, const VecExpr<E,T> &init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
+        {
+            fma.add(*this);
+        }
+        fatrop_memory_el<T>(int size, const vector<T> &&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(move(init_values))
+        {
+            fma.add(*this);
+        }
         fatrop_memory_el<T>(int size, const vector<T> &init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
         {
             fma.add(*this);
@@ -93,11 +103,11 @@ namespace fatrop
                 data_p += sizeof(T);       // advance pointer
             }
         }
-        explicit operator T *() { return data; };
+        explicit operator T *() const { return data; };
 
     private:
         const int size;
-        vector<T> init_values_;
+        FatropVector<T> init_values_;
         T *data = NULL;
     };
 } // namespace fatrop

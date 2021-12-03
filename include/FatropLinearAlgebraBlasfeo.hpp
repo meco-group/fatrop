@@ -35,6 +35,7 @@ extern "C"
 }
 #include "FatropMemory.hpp"
 #include "FatropLinearAlgebra.hpp"
+#include "FatropVector.hpp"
 #if DEBUG
 #include <assert.h>
 #endif
@@ -125,12 +126,12 @@ namespace fatrop
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_matrix_bf(const vector<int> &nrows, const vector<int> &ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
+        fatrop_memory_matrix_bf(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
         {
             fma.add(*this);
         }
-        fatrop_memory_matrix_bf(const int nrows, const int ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(N, nrows), ncols_(N, ncols)
+        fatrop_memory_matrix_bf(const int nrows, const int ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
         {
             fma.add(*this);
         }
@@ -190,8 +191,8 @@ namespace fatrop
     private:
         MAT *mat;
         const int N_;
-        const vector<int> nrows_;
-        const vector<int> ncols_;
+        const FatropVector<int> nrows_;
+        const FatropVector<int> ncols_;
     };
     /** this class is used for blasfeo vectors*/
     class fatrop_vector_bf : public fatrop_vector

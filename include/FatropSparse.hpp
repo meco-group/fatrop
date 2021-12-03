@@ -18,7 +18,6 @@
 #include <string>
 #include <iomanip> // std::setprecision
 #include <eigen3/Eigen/Sparse>
-#include "FatropSparse.hpp"
 using namespace std;
 namespace fatrop
 {

@@ -11,6 +11,7 @@
 #ifndef FATROPOCPINCLUDED
 #define FATROPOCPINCLUDED
 #include "FatropMemory.hpp"
+#include "FatropVector.hpp"
 #include <vector>
 using namespace std;
 namespace fatrop
@@ -22,11 +23,11 @@ namespace fatrop
         /// horizon length
         int K;
         /// input vector size
-        vector<int> nu;
+        FatropVector<int> nu;
         /// state vector size
-        vector<int> nx;
+        FatropVector<int> nx;
         // number of stagewise equality constraints
-        vector<int> ng;
+        FatropVector<int> ng;
     };
 } // namespace fatrop
 #endif //FATROPOCPINCLUDED
