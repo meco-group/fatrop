@@ -348,7 +348,7 @@ namespace fatrop
         /** int pointer of permutation vector */
         explicit operator int *() { return data_; };
 
-    private:
+    // private:
         const int dim_;
         int *data_ = NULL;
     };
@@ -373,19 +373,19 @@ namespace fatrop
         void set_up(char *&char_p)
         {
             perm_p = (fatrop_permutation_matrix *)char_p;
+            fatrop_permutation_matrix* perm_pp = perm_p;
             for (int i = 0; i < N_; i++)
             {
-                new (perm_p) fatrop_permutation_matrix(dim_);
-                perm_p++;
+                new (perm_pp) fatrop_permutation_matrix(dim_);
+                perm_pp++;
             }
-            int *data_p = (int *)perm_p;
+            int *data_p = (int *)perm_pp;
             this->set_datap(data_p);
             for (int i = 0; i < N_; i++)
             {
                 perm_p[i].set_datap(data_p);
                 data_p += dim_;
             }
-
             char_p = (char *)data_p;
         }
         explicit operator fatrop_permutation_matrix *() { return perm_p; };

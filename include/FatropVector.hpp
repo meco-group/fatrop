@@ -1,8 +1,17 @@
+/**
+ * @file FatropVector.hpp
+ * @author Lander Vanroye
+ * @brief This file containts the FatropVector, which is derived from the std::vector but also allows templated expressions (implemented with CRTP) such as vector-vector sum and vector-scalar sum. https://en.wikipedia.org/wiki/Expression_templates
+ * @version 0.1
+ * @date 2021-12-03
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #ifndef FATROPVECTORINCLUDED
 #define FATROPVECTORINCLUDED
 #include <vector>
 #include <assert.h>
-
 using namespace std;
 namespace fatrop
 {
