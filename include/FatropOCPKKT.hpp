@@ -59,7 +59,9 @@ namespace fatrop
                                                                              RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
                                                                              Llt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma),
                                                                              Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1, fma),
-                                                                             PpIt_stripe(vector<int>(1, max(dims.nx + 1)), vector<int>(max(dims.nx)), 1, fma),
+                                                                             PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                             GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                             GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              PlI(dims.nx.at(0), 1, fma),
@@ -90,7 +92,9 @@ namespace fatrop
             SOLVERMACRO(MAT *, RSQrqt_hat, _p);
             SOLVERMACRO(MAT *, Llt, _p);
             SOLVERMACRO(MAT *, Llt_shift, _p);
-            SOLVERMACRO(MAT *, PpIt_stripe, _p);
+            SOLVERMACRO(MAT *, PpIt_tilde, _p);
+            SOLVERMACRO(MAT *, GgIt_tilde, _p);
+            SOLVERMACRO(MAT *, GgLIt, _p);
             SOLVERMACRO(PMAT *, PlI, _p);
             SOLVERMACRO(PMAT *, PrI, _p);
             // AUXMACRO(int, max_nu, );
@@ -98,9 +102,9 @@ namespace fatrop
             // AUXMACRO(int, max_ng, );
             // AUXMACRO(int *, ux_offs, _p);
             // AUXMACRO(int *, g_offs, _p);
-            OCPMACRO(int*, nu, _p);
-            OCPMACRO(int*, nx, _p);
-            OCPMACRO(int*, ng, _p);
+            OCPMACRO(int *, nu, _p);
+            OCPMACRO(int *, nx, _p);
+            OCPMACRO(int *, ng, _p);
             SOLVERMACRO(int *, gamma, _p);
             SOLVERMACRO(int *, rho, _p);
             MAT *RSQrq_hat_curr_p;
@@ -168,6 +172,11 @@ namespace fatrop
                     // symmetric transformation, done a little different than in paper, in order to fuse LA operations
                     // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
                     LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
+                    if (gamma_k - rank_k > 0)
+                    {
+                        // transfer eq's to next stage
+                        GECP(nx, gamma_k - rank_k, Ggt_stripe_p, 0, rank_k, Hht_p, 0, 0);
+                    }
                     rho_p[k] = rank_k;
                     if (rank_k > 0)
                     {
@@ -208,12 +217,24 @@ namespace fatrop
                 int rankI;
                 //////// FIRST_STAGE
                 {
+                    const int nx = nx_p[0];
+                    const int nu = nu_p[0]; 
+                    const int ng = ng_p[0]; 
                     int gamma_I = gamma_p[0] - rho_p[0];
                     if (gamma_I > 0)
                     {
                         LU_FACT_transposed(gamma_I, nx, nx, rankI, Ggt_p, PlI_p, PrI_p);
+                        // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
+                        TRSM_RLNN(nx - rankI + 1, rankI, -1.0, Ggt_p, rank_k, 0, Ggt_p, 0, 0, GgIt_tilde_p + k, 0, 0);
+                        TRTR_L(nx, Ppt_p, 0, 0, Ppt_p, 0, 0); // copy lower part of RSQ to upper part
+                        // // permutations
+                        (PlI_p)->PM(rankI, Ppt_p); //TODO make use of symmetry
+                        (Pr_p)->MPt(rankI, Ppt_p);
+                        // // GL <- GgIt_tilde @ Pp[:rankI,:nx] + Ppt[rankI:nx+1, rankI:] (with Pp[:rankI,:nx] = Ppt[:nx,:rankI]^T)
+                        GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, rankI, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
+                        // // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
+                        // SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + 1, 0, 0, 1.0, GgLt_p, rank_k, 0, RSQrqt_hat_p, 0, 0);
                     }
-                    // permutations
                     // Ggt_tilde_I <- Ggt_stripe[rho_I:nx+1,:rho_I] L^-T
                     // h_tilde_I <- - U_I ^-1 Ggt_tilde_I[nx+1, :]
                     // ?? if nx - rho_I > 0 ??
@@ -236,7 +257,9 @@ namespace fatrop
         fatrop_memory_matrix_bf RSQrqt_hat;
         fatrop_memory_matrix_bf Llt;
         fatrop_memory_matrix_bf Llt_shift; // needed because feature not implemented yet
-        fatrop_memory_matrix_bf PpIt_stripe;
+        fatrop_memory_matrix_bf PpIt_tilde;
+        fatrop_memory_matrix_bf GgIt_tilde;
+        fatrop_memory_matrix_bf GgLIt;
         fatrop_memory_permutation_matrix Pl;
         fatrop_memory_permutation_matrix Pr;
         fatrop_memory_permutation_matrix PlI;
