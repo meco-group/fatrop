@@ -76,16 +76,9 @@ namespace fatrop
     class fatrop_memory_el : public fatrop_memory_el_base
     {
     public:
+        // E&& is a universal reference
         template<typename E>
-        fatrop_memory_el<T>(int size, const VecExpr<E,T> &init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
-        {
-            fma.add(*this);
-        }
-        fatrop_memory_el<T>(int size, const vector<T> &&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(move(init_values))
-        {
-            fma.add(*this);
-        }
-        fatrop_memory_el<T>(int size, const vector<T> &init_values, fatrop_memory_allocator &fma) : size(size), init_values_(init_values)
+        fatrop_memory_el<T>(int size, E&&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(forward(init_values))
         {
             fma.add(*this);
         }

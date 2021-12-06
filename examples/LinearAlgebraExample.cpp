@@ -9,7 +9,7 @@ int main()
 {
     fatrop_memory_allocator fma;
     fatrop_memory_matrix_bf A(10, 10, 1, fma);
-    fatrop_memory_matrix_bf lower(vector<int>(1,10), vector<int>(1,10), 1, fma);
+    fatrop_memory_matrix_bf lower(vector<int>(1, 10), vector<int>(1, 10), 1, fma);
     fatrop_memory_matrix_bf At(10, 10, 1, fma);
     fatrop_memory_matrix_bf A1(10, 10, 1, fma);
     fatrop_memory_matrix_bf L(10, 10, 1, fma);
@@ -17,9 +17,9 @@ int main()
     fatrop_memory_matrix_bf test(10, 10, 1, fma);
     fatrop_memory_permutation_matrix Pl(10, 1, fma);
     fatrop_memory_permutation_matrix Pr(10, 1, fma);
-    fatrop_memory_el<int> testfatropmemel(5, vector<int>(5,420), fma);
+    fatrop_memory_el<int> testfatropmemel(5, vector<int>(5, 420), fma);
     fma.allocate();
-    A[0] = random_matrix(10,10);
+    A[0] = random_matrix(10, 10);
     At[0] = Eig(Eig(A[0]).transpose());
     GECP(10, 10, (MAT *)A[0], 0, 0, (MAT *)A1[0], 0, 0);
     cout << "A" << endl;
@@ -27,11 +27,11 @@ int main()
     cout << "At" << endl;
     At[0].print();
     int rank = 0;
-    LU_FACT(10, 10, 10, rank, (MAT *)A[0],  ((PMAT*) Pl),  ((PMAT*) Pr));
+    LU_FACT(10, 10, 10, rank, (MAT *)A[0], ((PMAT *)Pl), ((PMAT *)Pr));
     cout << "LU factorization " << endl;
     A[0].print();
     cout << "LUt factorization " << endl;
-    LU_FACT_transposed(10, 10, 10, rank, (MAT *)At[0],  ((PMAT*) Pl), ((PMAT*) Pr));
+    LU_FACT_transposed(10, 10, 10, rank, (MAT *)At[0], ((PMAT *)Pl), ((PMAT *)Pr));
     At[0].print();
     for (int i = 0; i < 10; i++)
     {
@@ -72,7 +72,7 @@ int main()
     cout << "el time " << el << endl;
     TRSM_RLNN(10, 10, 1.0, (MAT *)L[0], 0, 0, (MAT *)A[0], 0, 0, (MAT *)test[0], 0, 0);
     cout << Eig(Eig(test[0]) - Eig(A[0]) * Eig(Eig(L[0]).inverse())) << endl;
-    cout << ((int*) testfatropmemel)[0] << endl;
+    cout << ((int *)testfatropmemel)[0] << endl;
 
     cout << Eig(test[0]) << std::endl;
 
