@@ -1,7 +1,7 @@
 /**
  * @file FatropVector.hpp
  * @author Lander Vanroye
- * @brief This file containts the FatropVector, which is derived from the std::vector but also allows templated expressions (implemented with CRTP) such as vector-vector sum and vector-scalar sum. https://en.wikipedia.org/wiki/Expression_templates
+ * @brief This file containts the FatropVector, which is derived from the std::vector but also allows templated expressions (implemented with CRTP - static polymorphism) such as vector-vector sum and vector-scalar sum. https://en.wikipedia.org/wiki/Expression_templates
  * @version 0.1
  * @date 2021-12-03
  * 
@@ -42,12 +42,13 @@ namespace fatrop
     template <typename T, typename E1>
     class VecScalarSum : public VecExpr<VecScalarSum<T, E1>, T>
     {
-        public:
-        VecScalarSum(const VecExpr<E1,T>& expr, const int scalar):expr_(expr), scalar_(scalar){};
+    public:
+        VecScalarSum(const VecExpr<E1, T> &expr, const int scalar) : expr_(expr), scalar_(scalar){};
         T getEl(const int ai) const { return expr_.getEl(ai) + scalar_; };
         int size() const { return expr_.size(); };
-        public:
-        const VecExpr<E1,T>& expr_;
+
+    public:
+        const VecExpr<E1, T> &expr_;
         T scalar_;
     };
 
@@ -57,8 +58,8 @@ namespace fatrop
     public:
         FatropVector() : vector<T>(){};
         FatropVector(const int size) : vector<T>(size){};
-        FatropVector(const vector<T> &&vec) : vector<T>(move(vec)){};
-        FatropVector(const vector<T> &vec) : vector<T>(vec){};
+        template <typename E>
+        FatropVector(E &&vec) : vector<T>(forward(vec)){};
         T getEl(const int ai) const { return vector<T>::at(ai); };
         int size() const { return vector<T>::size(); };
         template <typename E>
@@ -72,7 +73,7 @@ namespace fatrop
         }
     };
     template <typename T, typename E1, typename E2>
-    VecSum<T, E1, E2> operator+(const VecExpr<E1, T>& expr1, const VecExpr<E2, T>& expr2)
+    VecSum<T, E1, E2> operator+(const VecExpr<E1, T> &expr1, const VecExpr<E2, T> &expr2)
     {
         return VecSum<T, E1, E2>(expr1, expr2);
     }
