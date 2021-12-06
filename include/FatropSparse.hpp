@@ -21,6 +21,11 @@
 using namespace std;
 namespace fatrop
 {
+    struct tiplets{
+        int ai;
+        int aj;
+        double value;
+    };
     class variable
     {
     public:
@@ -44,7 +49,7 @@ namespace fatrop
         }
         vector<double> grad;
     };
-    typedef std::shared_ptr<variable> var_sp;
+    typedef shared_ptr<variable> var_sp;
     class KKT_matrix_base
     {
     };
@@ -63,7 +68,7 @@ namespace fatrop
         virtual void add_to_mv_vec(vector<matrix_vector_base> &mv_vec) = 0;
         virtual int get_size() = 0;
     };
-    typedef std::shared_ptr<fatrop_expression> fe_sp;
+    typedef shared_ptr<fatrop_expression> fe_sp;
     class equation
     {
     public:
@@ -98,15 +103,15 @@ namespace fatrop
                 }
             }
         }
-        void add_rhs(std::vector<double> &rhs_, int offs_H)
+        void add_rhs(vector<double> &rhs_, int offs_H)
         {
             for (int i = 0; i < size; i++)
             {
                 rhs_.at(offs_H + offset + i) = rhs.at(i);
             }
         }
-        std::vector<matrix_vector_base> mv_veceq;
-        std::vector<double> rhs;
+        vector<matrix_vector_base> mv_veceq;
+        vector<double> rhs;
     };
     typename std::shared_ptr<equation> eq_sp;
 
@@ -114,7 +119,7 @@ namespace fatrop
     {
     public:
         fatrop_sum1(const fe_sp &fe1, const fe_sp &fe2) : child1(fe1), child2(fe2){};
-        void add_to_mv_vec(std::vector<matrix_vector_base> &mv_vec)
+        void add_to_mv_vec(vector<matrix_vector_base> &mv_vec)
         {
             child1->add_to_mv_vec(mv_vec);
             child2->add_to_mv_vec(mv_vec);
@@ -128,7 +133,7 @@ namespace fatrop
     };
     fe_sp operator+(const fe_sp &fe1, const fe_sp &fe2)
     {
-        fe_sp res = std::make_shared<fatrop_sum1>(fe1, fe2);
+        fe_sp res = make_shared<fatrop_sum1>(fe1, fe2);
         return res;
     }
     class matrix_vector : public fatrop_expression, public matrix_vector_base
@@ -136,7 +141,7 @@ namespace fatrop
     public:
         matrix_vector(const Eig &mat, var_sp var) : matrix_vector_base(mat, var){};
         bool is_matrix_vector() { return true; };
-        void add_to_mv_vec(std::vector<matrix_vector_base> &mv_vec)
+        void add_to_mv_vec(vector<matrix_vector_base> &mv_vec)
         {
             matrix_vector_base *mvb = static_cast<matrix_vector_base *>(this);
             mv_vec.push_back(*mvb);
@@ -148,7 +153,7 @@ namespace fatrop
     };
     fe_sp operator*(const Eig &mat, var_sp var)
     {
-        fe_sp res = std::make_shared<matrix_vector>(mat, var);
+        fe_sp res = make_shared<matrix_vector>(mat, var);
         return res;
     };
 
@@ -159,7 +164,7 @@ namespace fatrop
         Eig fsm;
         var_sp var1;
         var_sp var2;
-        void add_triplets(std::vector<Eigen::Triplet<double>> &tripl)
+        void add_triplets(vector<Eigen::Triplet<double>> &tripl)
         {
             int offs_var1 = var1->offset;
             int offs_var2 = var2->offset;
@@ -196,7 +201,7 @@ namespace fatrop
     public:
         var_sp get_variable(int size)
         {
-            var_sp var = std::make_shared<variable>(size);
+            var_sp var = make_shared<variable>(size);
             variable_vec.push_back(var);
             return variable_vec.back();
         };
@@ -206,7 +211,7 @@ namespace fatrop
             equation_vec.push_back(eq);
             return equation_vec.back();
         };
-        void set_equation(fe_sp expr, std::vector<double> rhs)
+        void set_equation(fe_sp expr, vector<double> rhs)
         {
             equation &eq = get_equation(expr->get_size());
             eq.add_expression(expr, rhs);
@@ -217,9 +222,9 @@ namespace fatrop
             hess_block_vec.push_back(hb);
         }
 
-        std::vector<var_sp> variable_vec;
-        std::vector<equation> equation_vec;
-        std::vector<hess_block> hess_block_vec;
+        vector<var_sp> variable_vec;
+        vector<equation> equation_vec;
+        vector<hess_block> hess_block_vec;
         void set_offsets()
         {
             int offs_curr = 0;
@@ -235,7 +240,7 @@ namespace fatrop
                 offs_curr += equation_vec.at(i).size;
             }
         }
-        void get_triplets(std::vector<Eigen::Triplet<double>> &tripl_vec)
+        void get_triplets(vector<Eigen::Triplet<double>> &tripl_vec)
         {
             this->set_offsets();
             for (long unsigned int i = 0; i < hess_block_vec.size(); i++)
@@ -249,9 +254,9 @@ namespace fatrop
                 equation_vec.at(i).add_triplets(tripl_vec, offs_vars);
             }
         }
-        std::vector<double> get_rhs()
+        vector<double> get_rhs()
         {
-            std::vector<double> rhs;
+            vector<double> rhs;
             this->set_offsets();
             rhs.assign(get_size(), 0.0);
             for (long unsigned int i = 0; i < variable_vec.size(); i++)
@@ -259,7 +264,7 @@ namespace fatrop
                 variable_vec.at(i)->add_rhs(rhs);
             }
             int offs_vars = variable_vec.back()->offset + variable_vec.back()->size;
-            // std::cout << "offs "<< offs_vars << std::endl;
+            // cout << "offs "<< offs_vars << std::endl;
             for (long unsigned int i = 0; i < equation_vec.size(); i++)
             {
                 equation_vec.at(i).add_rhs(rhs, offs_vars);
@@ -275,14 +280,14 @@ namespace fatrop
         void print(const char *type_id)
         {
 
-            std::vector<Eigen::Triplet<double>> testvec;
+            vector<Eigen::Triplet<double>> testvec;
             get_triplets(testvec);
             //printing (matrix)
-            if (std::string(type_id) == "matrix")
+            if (string(type_id) == "matrix")
             {
-                std::cout << " " << get_size() << " " << get_size() << std::endl
+                cout << " " << get_size() << " " << get_size() << endl
                           << " ";
-                std::cout << std::fixed;
+                cout << fixed;
 
                 Eigen::MatrixXd mat(get_size(), get_size() + 1);
 
@@ -292,53 +297,53 @@ namespace fatrop
                     mat(testvec.at(i).row(), testvec.at(i).col()) = testvec.at(i).value();
                     mat(testvec.at(i).col(), testvec.at(i).row()) = testvec.at(i).value();
                 }
-                std::vector<double> rhs = get_rhs();
+                vector<double> rhs = get_rhs();
                 for (int i = 0; i < get_size(); i++)
                 {
                     mat(i, get_size()) = rhs.at(i);
                 }
-                std::cout << mat << std::endl;
+                cout << mat << endl;
             }
             //printing (ma57)
-            if (std::string(type_id) == "ma57")
+            if (string(type_id) == "ma57")
             {
-                std::cout << " " << get_size() << " " << testvec.size() << std::endl
+                cout << " " << get_size() << " " << testvec.size() << endl
                           << " ";
-                std::cout << std::fixed;
+                cout << fixed;
 
                 for (long unsigned int i = 0; i < testvec.size(); i++)
                 {
-                    std::cout << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << std::setprecision(20) << testvec.at(i).value() << std::endl
+                    cout << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << setprecision(20) << testvec.at(i).value() << endl
                               << " ";
                 }
-                std::vector<double> rhs = get_rhs();
+                vector<double> rhs = get_rhs();
                 for (int i = 0; i < get_size(); i++)
                 {
-                    std::cout << rhs.at(i) << " ";
+                    cout << rhs.at(i) << " ";
                 }
-                std::cout << std::endl;
+                cout << endl;
             }
             //printing (MUMPS)
-            if (std::string(type_id) == "mumps")
+            if (string(type_id) == "mumps")
             {
-                std::cout << get_size() << "     :N \n"
+                cout << get_size() << "     :N \n"
                           << testvec.size() << "     :NZ ";
-                std::cout << std::fixed;
+                cout << fixed;
 
                 for (long unsigned int i = 0; i < testvec.size(); i++)
                 {
-                    std::cout << std::endl
-                              << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << std::setprecision(20) << testvec.at(i).value();
+                    cout << endl
+                              << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << setprecision(20) << testvec.at(i).value();
                 }
-                std::cout << "            :values";
-                std::vector<double> rhs = get_rhs();
+                cout << "            :values";
+                vector<double> rhs = get_rhs();
                 for (int i = 0; i < get_size(); i++)
                 {
-                    std::cout << std::endl
+                    cout << endl
                               << rhs.at(i);
                 }
-                std::cout << "            :RHS";
-                std::cout << std::endl;
+                cout << "            :RHS";
+                cout << endl;
             }
         }
     };

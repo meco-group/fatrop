@@ -218,8 +218,6 @@ namespace fatrop
                 //////// FIRST_STAGE
                 {
                     const int nx = nx_p[0];
-                    const int nu = nu_p[0]; 
-                    const int ng = ng_p[0]; 
                     int gamma_I = gamma_p[0] - rho_p[0];
                     if (gamma_I > 0)
                     {
