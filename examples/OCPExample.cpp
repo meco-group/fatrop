@@ -10,19 +10,14 @@ using namespace fatrop;
 
 int main()
 {
-
-    // FatropVector<int> test(vector<int>(5,5));
-    // FatropVector<int> test2(vector<int>(5,5));
-    // auto testsum = test+test2;
-    // cout << (test+test2).getEl(0) << endl;
-    // problem dimensions
     OCP_dims dims;
-    dims.K = 150000;
-    int nx = 12;
-    int nu = 3;
+    dims.K = 10;
+    int nu = 5;
+    int nx = 9;
+    int ng = 1;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
-    dims.ng = vector<int>(dims.K, 0);
+    dims.ng = vector<int>(dims.K, ng);
     // memory allocation
     fatrop_memory_allocator fma;
     OCP_KKT KKT(dims, fma);

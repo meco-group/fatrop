@@ -12,6 +12,7 @@
 #define FATROPVECTORINCLUDED
 #include <vector>
 #include <assert.h>
+#include <utility>
 using namespace std;
 namespace fatrop
 {
@@ -59,10 +60,6 @@ namespace fatrop
         FatropVector() : vector<T>(){};
         FatropVector(const int size) : vector<T>(size){};
         template <typename E>
-        FatropVector(E &&vec) : vector<T>(forward(vec)){};
-        T getEl(const int ai) const { return vector<T>::at(ai); };
-        int size() const { return vector<T>::size(); };
-        template <typename E>
         FatropVector(const VecExpr<E, T> &vecexpr) : vector<T>(vecexpr.size())
         {
             // todo: vector is first initialized, initialize with iterator
@@ -71,6 +68,10 @@ namespace fatrop
                 vector<T>::at(i) = vecexpr.getEl(i);
             }
         }
+        FatropVector(const vector<T> &vec) : vector<T>(vec){};
+        FatropVector(vector<T> &&vec) : vector<T>(move(vec)){};
+        T getEl(const int ai) const { return vector<T>::at(ai); };
+        int size() const { return vector<T>::size(); };
     };
     template <typename T, typename E1, typename E2>
     VecSum<T, E1, E2> operator+(const VecExpr<E1, T> &expr1, const VecExpr<E2, T> &expr2)

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <FatropVector.hpp>
+#include <utility>
 using namespace std;
 namespace fatrop
 {
@@ -78,7 +79,7 @@ namespace fatrop
     public:
         // E&& is a universal reference
         template<typename E>
-        fatrop_memory_el<T>(int size, E&&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(forward(init_values))
+        fatrop_memory_el<T>(int size, E&&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(forward<E>(init_values))
         {
             fma.add(*this);
         }
