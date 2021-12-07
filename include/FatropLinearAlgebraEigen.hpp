@@ -3,8 +3,8 @@
  *  This file provides an interface for fatrop_matrix/vector to Eigen matrix resp. vecor, this is only used for debugging and testing purposes. 
  *  The code in this file is not optimized for efficiency!
 */
-#ifndef FATROPLINEARALGEBRAEIGENINCLUDED
-#define FATROPLINEARALGEBRAEIGENINCLUDED
+#ifndef FATROP_LINEAR_ALGEBRA_EIGEN_INCLUDED
+#define FATROP_LINEAR_ALGEBRA_EIGEN_INCLUDED
 #include <eigen3/Eigen/Dense>
 #include "Fatrop.hpp"
 namespace fatrop

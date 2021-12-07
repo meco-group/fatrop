@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2021
  * 
  */
-#ifndef FATROPOCPKKTINDLUCED
-#define FATROPOCPKKTINDLUCED
+#ifndef FATROP_OCP_KKT_INCLUDED
+#define FATROP_OCP_KKT_INCLUDED
 #include "FatropLinearAlgebraBlasfeo.hpp"
 #include "FatropOCP.hpp"
 #include "FatropAux.hpp"
@@ -266,4 +266,4 @@ namespace fatrop
         fatrop_memory_el<int> rho;
     };
 } // namespace fatrop
-#endif // FATROPOCPKKTINDLUCED
+#endif // FATROP_OCP_KKT_INCLUDED

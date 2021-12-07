@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2021
  * 
  */
-#ifndef FATROPVECTORINCLUDED
-#define FATROPVECTORINCLUDED
+#ifndef FATROP_VECTOR_INCLUDED
+#define FATROP_VECTOR_INCLUDED
 #include <vector>
 #include <assert.h>
 #include <utility>
@@ -92,4 +92,4 @@ namespace fatrop
     }
 } // namespace fatrop
 
-#endif // FATROPVECTORINCLUDED
+#endif // FATROP_VECTOR_INCLUDED

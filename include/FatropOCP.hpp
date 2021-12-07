@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2021
  * 
  */
-#ifndef FATROPOCPINCLUDED
-#define FATROPOCPINCLUDED
+#ifndef FATROP_OCP_INCLUDED
+#define FATROP_OCP_INCLUDED
 #include "FatropMemory.hpp"
 #include "FatropVector.hpp"
 #include <vector>
@@ -30,4 +30,4 @@ namespace fatrop
         FatropVector<int> ng;
     };
 } // namespace fatrop
-#endif //FATROPOCPINCLUDED
+#endif //FATROP_OCP_INCLUDED
