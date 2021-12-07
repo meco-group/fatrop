@@ -30,4 +30,4 @@ namespace fatrop
         FatropVector<int> ng;
     };
 } // namespace fatrop
-#endif //FATROPOCPINCLUDED
+#endif //FATROP_OCP_INCLUDED

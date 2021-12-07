@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2021
  * 
  */
-#ifndef FATROPSPARSEINCLUDED
-#define FATROPSPARSEINCLUDED
+#ifndef FATROP_SPARSE_INCLUDED
+#define FATROP_SPARSE_INCLUDED
 #include "FatropOCPKKT.hpp"
 #include "FatropLinearAlgebraEigen.hpp"
 #include <vector>
@@ -425,6 +425,6 @@ namespace fatrop
         }
         return KKT;
     };
-} //%namespace fatrop
+} // namespace fatrop
 
-#endif //FATROPSPARSEINCLUDED
+#endif //FATROP_SPARSE_INCLUDED
