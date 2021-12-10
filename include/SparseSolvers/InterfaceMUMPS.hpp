@@ -75,15 +75,6 @@ namespace fatrop
             // mumps takes upper part of matrix!
             MUMPS_INT *irn = aj.data();
             MUMPS_INT *jcn = ai.data();
-            /* Define the problem on the host */
-            if (myid == 0)
-            {
-                id.n = n;
-                id.nnz = nnz;
-                id.irn = irn;
-                id.jcn = jcn;
-            }
-
             vector<double> a;
             assert(((int)A.size()) == nnz);
             for (int i = 0; i < nnz; i++)
@@ -113,7 +104,9 @@ namespace fatrop
                        myid, id.infog[0], id.infog[1]);
                 error = 1;
             }
-
+        }
+        ~InterfaceMUMPS()
+        {
             /* Terminate instance. */
             id.job = JOB_END;
             dmumps_c(&id);
