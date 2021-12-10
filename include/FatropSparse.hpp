@@ -21,10 +21,33 @@
 using namespace std;
 namespace fatrop
 {
-    struct tiplets{
+    /* TODO -> I'm not happy with how expressions are built up here (using shared pointers). We should make use of nodes that are reference counted and "Expression elements"
+    class elem
+    node*
+    upon destruction node->ref_count -- if 0 -> free
+    copy -> node_ref_count ++;
+
+
+    class sum: node
+    members:
+    ref_count 
+    elem1
+    elem2
+
+    elem operator+(elem1, elem2)
+    elem res
+    res.node = new sum(1,2)
+    return res
+    */
+    struct triplet
+    {
+        triplet(const int ai, const int aj, const double value) : ai(ai), aj(aj), val(value){};
+        int row() const { return ai; };
+        int col() const { return aj; };
+        double value() const { return val; };
         int ai;
         int aj;
-        double value;
+        double val;
     };
     class variable
     {
@@ -32,7 +55,7 @@ namespace fatrop
         variable(int size) : size(size){};
         int size;
         int offset;
-        void set_grad(vector<double> &grad_)
+        void set_grad(const vector<double> &grad_)
         {
             grad.assign(size, 0.0);
             for (int i = 0; i < size; i++)
@@ -80,7 +103,7 @@ namespace fatrop
             rhs = rhs_;
             express->add_to_mv_vec(mv_veceq);
         }
-        void add_triplets(vector<Eigen::Triplet<double>> &tripl, int offs_H)
+        void add_triplets(vector<triplet> &tripl, int offs_H)
         {
             for (unsigned long int i = 0; i < mv_veceq.size(); i++)
             {
@@ -94,10 +117,10 @@ namespace fatrop
                     for (int j = 0; j < n; j++)
                     {
                         double val = fsm.get_el(i, j);
-                        if (val != 0.0)
+                        if (!fsm.iszero(i, j))
                         {
 
-                            tripl.push_back(Eigen::Triplet<double>(offs_H + offset + i, offs_var + j, val));
+                            tripl.push_back(triplet(offs_H + offset + i, offs_var + j, val));
                         }
                     }
                 }
@@ -164,7 +187,7 @@ namespace fatrop
         Eig fsm;
         var_sp var1;
         var_sp var2;
-        void add_triplets(vector<Eigen::Triplet<double>> &tripl)
+        void add_triplets(vector<triplet> &tripl)
         {
             int offs_var1 = var1->offset;
             int offs_var2 = var2->offset;
@@ -175,19 +198,19 @@ namespace fatrop
                 for (int j = 0; j < n; j++)
                 {
                     double val = fsm.get_el(i, j);
-                    if (val != 0.0) // only add nonzero's
+                    if (!fsm.iszero(i, j)) // only add nonzero's
                     {
                         int ai = i + offs_var1;
                         int aj = j + offs_var2;
                         if (ai >= aj) // only lower triangular matrix
                         {
-                            tripl.push_back(Eigen::Triplet<double>(ai, aj, val));
+                            tripl.push_back(triplet(ai, aj, val));
                         }
                         else
                         {
                             if (offs_var1 != offs_var2)
                             {
-                                tripl.push_back(Eigen::Triplet<double>(aj, ai, val));
+                                tripl.push_back(triplet(aj, ai, val));
                             }
                         }
                     }
@@ -240,8 +263,10 @@ namespace fatrop
                 offs_curr += equation_vec.at(i).size;
             }
         }
-        void get_triplets(vector<Eigen::Triplet<double>> &tripl_vec)
+        // TODO vector<triple> get_triplets, easier to use
+        void get_triplets(vector<triplet> &tripl_vec)
         {
+            // tripl_vec.resize(0);
             this->set_offsets();
             for (long unsigned int i = 0; i < hess_block_vec.size(); i++)
             {
@@ -280,13 +305,13 @@ namespace fatrop
         void print(const char *type_id)
         {
 
-            vector<Eigen::Triplet<double>> testvec;
+            vector<triplet> testvec;
             get_triplets(testvec);
             //printing (matrix)
             if (string(type_id) == "matrix")
             {
                 cout << " " << get_size() << " " << get_size() << endl
-                          << " ";
+                     << " ";
                 cout << fixed;
 
                 Eigen::MatrixXd mat(get_size(), get_size() + 1);
@@ -308,13 +333,13 @@ namespace fatrop
             if (string(type_id) == "ma57")
             {
                 cout << " " << get_size() << " " << testvec.size() << endl
-                          << " ";
+                     << " ";
                 cout << fixed;
 
                 for (long unsigned int i = 0; i < testvec.size(); i++)
                 {
                     cout << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << setprecision(20) << testvec.at(i).value() << endl
-                              << " ";
+                         << " ";
                 }
                 vector<double> rhs = get_rhs();
                 for (int i = 0; i < get_size(); i++)
@@ -327,20 +352,20 @@ namespace fatrop
             if (string(type_id) == "mumps")
             {
                 cout << get_size() << "     :N \n"
-                          << testvec.size() << "     :NZ ";
+                     << testvec.size() << "     :NZ ";
                 cout << fixed;
 
                 for (long unsigned int i = 0; i < testvec.size(); i++)
                 {
                     cout << endl
-                              << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << setprecision(20) << testvec.at(i).value();
+                         << testvec.at(i).col() + 1 << " " << testvec.at(i).row() + 1 << " " << setprecision(20) << testvec.at(i).value();
                 }
                 cout << "            :values";
                 vector<double> rhs = get_rhs();
                 for (int i = 0; i < get_size(); i++)
                 {
                     cout << endl
-                              << rhs.at(i);
+                         << rhs.at(i);
                 }
                 cout << "            :RHS";
                 cout << endl;
@@ -348,7 +373,7 @@ namespace fatrop
         }
     };
 #define Id Eigen::MatrixXd::Identity
-    KKT_matrix Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP)
+    KKT_matrix Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP, bool Guzero = false)
     {
         int K = dims.K;
         KKT_matrix KKT;
@@ -398,10 +423,19 @@ namespace fatrop
             KKT.set_hess_block(Eig(OCP.RSQrqt[k].block(nu, 0, nx, nu)), x_vec.at(k), u_vec.at(k));
             Eig B(Eig(Eig(OCP.BAbt[k].block(0, 0, nu, nx)).transpose()));
             Eig A(Eig(Eig(OCP.BAbt[k].block(nu, 0, nx, nx)).transpose()));
+            // TODO EYE IS HERE CONSIDERED AS A DENSE MATRIX
             KKT.set_equation(B * u_vec.at(k) + A * (x_vec.at(k)) + Eig(-Id(dims.nx.at(k + 1), dims.nx.at(k + 1))) * (x_vec.at(k + 1)), rhs_dyn);
-            Eig Gu(Eig(OCP.Ggt[k].block(0, 0, nu, ng)).transpose());
-            Eig Gx(Eig(OCP.Ggt[k].block(nu, 0, nx, ng)).transpose());
-            KKT.set_equation(Gu * u_vec.at(k) + Gx * x_vec.at(k), rhs_con);
+            if (Guzero)
+            {
+                Eig Gx(Eig(OCP.Ggt[k].block(nu, 0, nx, ng)).transpose());
+                KKT.set_equation(Gx * x_vec.at(k), rhs_con);
+            }
+            else
+            {
+                Eig Gu(Eig(OCP.Ggt[k].block(0, 0, nu, ng)).transpose());
+                Eig Gx(Eig(OCP.Ggt[k].block(nu, 0, nx, ng)).transpose());
+                KKT.set_equation(Gu * u_vec.at(k) + Gx * x_vec.at(k), rhs_con);
+            }
         }
         // K - 1
         {
@@ -416,10 +450,10 @@ namespace fatrop
             };
             for (int i = 0; i < nx; i++)
             {
-                grad_x.push_back(OCP.RSQrqt[K-1].get_el(nu + nx, nu + i));
+                grad_x.push_back(OCP.RSQrqt[K - 1].get_el(nu + nx, nu + i));
             };
             Eig Gx(Eig(OCP.Ggt[K - 1].block(nu, 0, nx, ng)).transpose());
-            x_vec.at(K-1)->set_grad(grad_x);
+            x_vec.at(K - 1)->set_grad(grad_x);
             KKT.set_hess_block(Eig(OCP.RSQrqt[K - 1].block(nu, nu, nx, nx)), x_vec.at(K - 1), x_vec.at(K - 1));
             KKT.set_equation(Gx * x_vec.at(K - 1), rhs_con);
         }

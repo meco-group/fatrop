@@ -27,7 +27,9 @@ namespace fatrop
             }
         };
         Eig(const Eigen::MatrixXd &Eigenmat) : Eigen::MatrixXd(Eigenmat){};
-        Eig(const int m, const int n) : Eigen::MatrixXd(m,n){};
+        Eig(const int m, const int n) : Eigen::MatrixXd(m, n){};
+        /** \brief a normal Eig reprensents a dense matrix */
+        virtual bool iszero(const int ai, const int aj) const { return false; };
         /** \brief copy of matrix element */
         double get_el(const int ai, const int aj) const { return Eigen::MatrixXd::operator()(ai, aj); };
         /** \brief number of rows */
@@ -35,5 +37,12 @@ namespace fatrop
         /** \brief number of cols */
         int ncols() const { return Eigen::MatrixXd::cols(); };
     };
+    // /** \brief Eig matrix with diagonal sparse structure */
+    // class EigD : public Eig
+    // {
+    //     public:
+    //     EigD(const fatrop_matrix &fm) : Eig(fm){};
+    //     bool iszero(const int ai, const int aj) const { return (ai == aj) ? false : true; cout << "here" << endl;}
+    // };
 }; //namespace fatrop
 #endif

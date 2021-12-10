@@ -2,7 +2,7 @@
 # To find the cmake version run
 # $ cmake --version
 cmake_minimum_required(VERSION 3.14)
-project(FATROP)
+project(FATROP LANGUAGES C CXX Fortran)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -34,7 +34,8 @@ set(CMAKE_C_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SI
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
 option(BUILD_DOCS "Build documentation" OFF)
 
-
+# include(FindMUMPS.cmake)
+# find_package(MUMPS)
 find_package(blasfeo)
 add_subdirectory(src)
 add_subdirectory(examples)
