@@ -10,10 +10,8 @@ namespace fatrop
     {
     public:
     // triplets are from lower part of matrix
-        SparseSolverInterface(const int nnz, const int dim, KKT_matrix &KKT_m) : nnz_(nnz), dim_(dim), ai(nnz), aj(nnz)
+        SparseSolverInterface(const int nnz, const int dim, const vector<triplet> &tripl) : nnz_(nnz), dim_(dim), ai(nnz), aj(nnz)
         {
-            vector<triplet> tripl;
-            KKT_m.get_triplets(tripl);
             for (int i =0; i < nnz; i++)
             {
                 ai.at(i) = tripl.at(i).ai ;

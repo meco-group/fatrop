@@ -15,7 +15,7 @@ namespace fatrop
     class InterfaceMUMPS : public SparseSolverInterface
     {
     public:
-        InterfaceMUMPS(const int nnz, const int dim, KKT_matrix &KKT_m) : SparseSolverInterface(nnz, dim, KKT_m){
+        InterfaceMUMPS(const int nnz, const int dim, const vector<triplet>& tripl) : SparseSolverInterface(nnz, dim, tripl){
             // fortran indexing convention
             ai = ai+1;
             aj = aj+1;
