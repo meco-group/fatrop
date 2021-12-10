@@ -2,29 +2,31 @@
 #define SparseSolverInterfaceIncluded
 #include "../FatropSparse.hpp"
 #include <vector>
+#include "FatropVector.hpp"
 using namespace std;
 namespace fatrop
 {
     class SparseSolverInterface
     {
     public:
-        SparseSolverInterface(const int nnz, const int dim, KKT_matrix &KKT_m) : nnz_(nnz), dim_(dim), ai(dim), aj(dim)
+    // triplets are from lower part of matrix
+        SparseSolverInterface(const int nnz, const int dim, KKT_matrix &KKT_m) : nnz_(nnz), dim_(dim), ai(nnz), aj(nnz)
         {
             vector<triplet> tripl;
             KKT_m.get_triplets(tripl);
-            for (int i; i < dim; i++)
+            for (int i =0; i < nnz; i++)
             {
-                ai.at(i) = tripl.at(i).ai;
-                aj.at(i) = tripl.at(i).aj;
+                ai.at(i) = tripl.at(i).ai ;
+                aj.at(i) = tripl.at(i).aj ;
             }
         };
         virtual void preprocess() = 0;
-        virtual void solve(const vector<triplet> A, const vector<double> rhs) = 0;
-    private:
+        virtual void solve(const vector<triplet>& A, vector<double>& rhs) = 0;
+    protected:
         const int nnz_;
         const int dim_;
-        vector<int> ai;
-        vector<int> aj;
+        FatropVector<int> ai;
+        FatropVector<int> aj;
     };
 } //namespace fatrop
 
