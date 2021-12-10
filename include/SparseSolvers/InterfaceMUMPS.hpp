@@ -15,10 +15,11 @@ namespace fatrop
     class InterfaceMUMPS : public SparseSolverInterface
     {
     public:
-        InterfaceMUMPS(const int nnz, const int dim, const vector<triplet>& tripl) : SparseSolverInterface(nnz, dim, tripl){
+        InterfaceMUMPS(const int nnz, const int dim, const vector<triplet> &tripl) : SparseSolverInterface(nnz, dim, tripl)
+        {
             // fortran indexing convention
-            ai = ai+1;
-            aj = aj+1;
+            ai = ai + 1;
+            aj = aj + 1;
         };
         void preprocess()
         {
@@ -42,15 +43,6 @@ namespace fatrop
 
             id.job = JOB_INIT;
             dmumps_c(&id);
-        };
-        void solve(const vector<triplet> &A, vector<double> &rhsvec)
-        {
-            MUMPS_INT n = dim_;
-            MUMPS_INT8 nnz = nnz_;
-            // mumps takes upper part of matrix!
-            MUMPS_INT *irn = aj.data();
-            MUMPS_INT *jcn = ai.data();
-
             /* Define the problem on the host */
             if (myid == 0)
             {
@@ -67,16 +59,53 @@ namespace fatrop
             id.ICNTL(4) = 0;
             id.ICNTL(7) = 5;
             id.ICNTL(28) = 1;
+            id.job = 1;
+            dmumps_c(&id);
+            if (id.infog[0] < 0)
+            {
+                printf(" (PROC %d) ERROR RETURN: \tINFOG(1)= %d\n\t\t\t\tINFOG(2)= %d\n",
+                       myid, id.infog[0], id.infog[1]);
+                error = 1;
+            }
+        };
+        void solve(const vector<triplet> &A, vector<double> &rhsvec)
+        {
+            MUMPS_INT n = dim_;
+            MUMPS_INT8 nnz = nnz_;
+            // mumps takes upper part of matrix!
+            MUMPS_INT *irn = aj.data();
+            MUMPS_INT *jcn = ai.data();
+            /* Define the problem on the host */
+            if (myid == 0)
+            {
+                id.n = n;
+                id.nnz = nnz;
+                id.irn = irn;
+                id.jcn = jcn;
+            }
+
             vector<double> a;
+            assert(((int)A.size()) == nnz);
             for (int i = 0; i < nnz; i++)
             {
+                // check wether right structure
+                assert(ai.at(i) == A.at(i).row() + 1);
+                assert(aj.at(i) == A.at(i).col() + 1);
                 a.push_back(A.at(i).value());
             }
             id.a = a.data();
             id.rhs = rhsvec.data();
 
             /* Call the MUMPS package (analyse, factorization and solve). */
-            id.job = 6;
+            id.job = 2;
+            dmumps_c(&id);
+            if (id.infog[0] < 0)
+            {
+                printf(" (PROC %d) ERROR RETURN: \tINFOG(1)= %d\n\t\t\t\tINFOG(2)= %d\n",
+                       myid, id.infog[0], id.infog[1]);
+                error = 1;
+            }
+            id.job = 3;
             dmumps_c(&id);
             if (id.infog[0] < 0)
             {
