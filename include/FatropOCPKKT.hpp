@@ -50,10 +50,10 @@ namespace fatrop
     {
     public:
         OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
-                                                                             Hht(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma), // the number of eqs can never exceed nx
+                                                                             Hh(vector<int>(1, max(dims.nx)), vector<int>(1, max(dims.nx+1)), 1, fma), // the number of eqs can never exceed nx
                                                                              AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
-                                                                             Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.ng)), 1, fma),
+                                                                             Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              Ggt_tilde(dims.nu + dims.nx + 1, dims.ng, dims.K, fma),
                                                                              GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
                                                                              RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
@@ -81,7 +81,7 @@ namespace fatrop
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             SOLVERMACRO(MAT *, Ppt, _p);
-            SOLVERMACRO(MAT *, Hht, _p);
+            SOLVERMACRO(MAT *, Hh, _p);
             SOLVERMACRO(MAT *, AL, _p);
             SOLVERMACRO(MAT *, RSQrqt_stripe, _p);
             SOLVERMACRO(MAT *, Ggt_stripe, _p);
@@ -120,7 +120,7 @@ namespace fatrop
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 // Hh_Km1 <- Gg_Km1
-                GECP(nx + 1, ng, Ggt_p + (K - 1), 0, 0, Hht_p, 0, 0);
+                GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hht_p, 0, 0);
                 gamma_p[K - 1] = ng;
                 rho_p[K - 1] = 0;
             }
@@ -128,6 +128,7 @@ namespace fatrop
             {
                 const int nu = nu_p[k];
                 const int nx = nx_p[k];
+                const int nxp1 = nx_p[k+1];
                 const int ng = ng_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
@@ -136,11 +137,11 @@ namespace fatrop
                 //////// SUBSDYN
                 {
                     // AL <- [BAb]^T_k P_kp1
-                    GEMM_NT(nu + nx + 1, nx, nx, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
+                    GEMM_NT(nu + nx + 1, nx, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
                     // AL[-1,:] <- AL[-1,:] + p_kp1^T
                     GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
                     // RSQrqt_stripe <- AL[BA] + RSQrqt
-                    SYRK_LN_MN(nu + nx + 1, nu + nx, nx, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p, 0, 0);
+                    SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p, 0, 0);
                     gamma_p[k] = gamma_k;
                     // if ng[k]>0
                     if (gamma_k > 0)
@@ -149,13 +150,13 @@ namespace fatrop
                         if (ng > 0)
                         {
                             // Ggt_stripe  <- Ggt_k
-                            GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, 0);
+                            GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, ng);
                         }
                         // if Hkp1 nonempty
                         if (Hp1_size > 0)
                         {
                             // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
-                            GEMM_NT(nu + nx + 1, Hp1_size, nx, 1.0, BAbt_p + k, 0, 0, Hht_p, 0, 0, 0.0, Ggt_stripe_p, 0, ng, Ggt_stripe_p, 0, ng);
+                            GEMM_NT(nu + nx + 1, Hp1_size, nxp1, 1.0, BAbt_p + k, 0, 0, Hht_p, 0, 0, 0.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, 0, 0);
                             // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
                             GEAD(1, Hp1_size, 1.0, Hht_p, nx, 0, Ggt_stripe_p, nu + nx + 1, ng);
                         }
@@ -175,7 +176,7 @@ namespace fatrop
                     if (gamma_k - rank_k > 0)
                     {
                         // transfer eq's to next stage
-                        GECP(nx, gamma_k - rank_k, Ggt_stripe_p, 0, rank_k, Hht_p, 0, 0);
+                        GETR(nx, gamma_k - rank_k, Ggt_stripe_p, 0, rank_k, Hht_p, 0, 0);
                     }
                     rho_p[k] = rank_k;
                     if (rank_k > 0)
@@ -221,7 +222,7 @@ namespace fatrop
                     int gamma_I = gamma_p[0] - rho_p[0];
                     if (gamma_I > 0)
                     {
-                        LU_FACT_transposed(gamma_I, nx, nx, rankI, Ggt_p, PlI_p, PrI_p);
+                        LU_FACT_transposed(gamma_I, nx, nx, rankI, Ggt_p, PlI_p, PrI_p); // TODO THIS SHOULD MAKE USE OF Hht!!
                         // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
                         TRSM_RLNN(nx - rankI + 1, rankI, -1.0, Ggt_p, rank_k, 0, Ggt_p, 0, 0, GgIt_tilde_p + k, 0, 0);
                         TRTR_L(nx, Ppt_p, 0, 0, Ppt_p, 0, 0); // copy lower part of RSQ to upper part
@@ -246,7 +247,7 @@ namespace fatrop
             }
         }
         fatrop_memory_matrix_bf Ppt;
-        fatrop_memory_matrix_bf Hht;
+        fatrop_memory_matrix_bf Hh;
         fatrop_memory_matrix_bf AL;
         fatrop_memory_matrix_bf RSQrqt_stripe;
         fatrop_memory_matrix_bf Ggt_stripe;
