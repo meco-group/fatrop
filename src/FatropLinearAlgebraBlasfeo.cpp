@@ -1,25 +1,26 @@
 #include "FatropLinearAlgebraBlasfeo.hpp"
 
-
-namespace fatrop{
+namespace fatrop
+{
 
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
     {
         for (int aj = n - 1; aj >= 0; aj--)
         {
-            double ajj = MATEL(sA, aj + offs_ai, aj + offs_aj);
-            double sc = alpha / ajj;
+            double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
+            double inv_ajj = 1.0/ajj;
+            double scjj = alpha * inv_ajj;
             for (int k = 0; k < m; k++)
             {
-                MATEL(sD, k + offs_di, aj + offs_dj) = sc * MATEL(sB, k + offs_bi, aj + offs_bj);
+                MATEL(sD, offs_di + k, offs_dj + aj) = scjj * MATEL(sB, offs_bi + k, offs_bj + aj);
             }
-            for (int ai = aj + 1; ai < m; ai++)
+            for (int ai = aj + 1; ai < n; ai++)
             {
-                double sc = -alpha * MATEL(sA, ai + offs_ai, aj + offs_aj) / ajj;
+                double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
                 for (int k = 0; k < m; k++)
                 {
-                    MATEL(sD, k + offs_di, aj + offs_dj) += sc * MATEL(sD, k + offs_di, ai + offs_dj);
+                    MATEL(sD, offs_di + k, offs_dj + aj) += sc * MATEL(sD, offs_di + k, offs_dj + ai);
                 }
             }
         }

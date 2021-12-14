@@ -75,6 +75,8 @@ namespace fatrop
             // mumps takes upper part of matrix!
             MUMPS_INT *irn = aj.data();
             MUMPS_INT *jcn = ai.data();
+            id.irn = irn;
+            id.jcn = jcn;
             vector<double> a;
             assert(((int)A.size()) == nnz);
             for (int i = 0; i < nnz; i++)

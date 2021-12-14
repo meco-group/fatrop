@@ -33,8 +33,6 @@ int main()
     OCP_KKT KKTocp(dims, fma);
     fma.allocate();
     random_OCP(KKTocp, dims, 0);
-    KKTocp.RSQrqt[0].print();
-    // Sparse_OCP(dims, KKT).print("matrix");
     KKT_matrix KOCP(Sparse_OCP(dims, KKTocp));
     vector<triplet> ocptripl;
     KOCP.get_triplets(ocptripl);

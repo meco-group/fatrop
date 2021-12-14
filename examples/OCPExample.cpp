@@ -21,14 +21,11 @@ int main()
     // memory allocation
     fatrop_memory_allocator fma;
     OCP_KKT KKT(dims, fma);
+    OCP_KKT_solver OCP_solver(dims, fma);
     fma.allocate();
     random_OCP(KKT, dims, 0);
+    blasfeo_dvec *dummy;
     KKT.RSQrqt[0].print();
-    // Sparse_OCP(dims, KKT).print("matrix");
-    blasfeo_dmat *RSQrq = (blasfeo_dmat *)KKT.RSQrqt[0];
-    blasfeo_dmat *BAbt = (blasfeo_dmat *)KKT.BAbt[0];
-    blasfeo_timer timer;
-    blasfeo_tic(&timer);
-    
+    OCP_solver.fact_solve(&KKT, dummy, dummy);
     return 0;
 }
