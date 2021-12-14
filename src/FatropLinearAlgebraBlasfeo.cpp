@@ -9,7 +9,7 @@ namespace fatrop
         for (int aj = n - 1; aj >= 0; aj--)
         {
             double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
-            double inv_ajj = 1.0/ajj;
+            double inv_ajj = 1.0 / ajj;
             double scjj = alpha * inv_ajj;
             for (int k = 0; k < m; k++)
             {
@@ -25,6 +25,18 @@ namespace fatrop
             }
         }
     }
+    // B <= B + alpha*A^T (B is mxn)
+    void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj)
+    {
+        for (int bj = 0; bj < n; bj++)
+        {
+            for (int bi = 0; bi < m; bi++)
+            {
+                MATEL(sB, offs_bi + bi, offs_bj + bj) += alpha * MATEL(sA, offs_ai + bj, offs_aj + bi);
+            }
+        }
+    }
+
     /** \brief returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
     matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj)
     {

@@ -158,7 +158,7 @@ namespace fatrop
                             // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
                             GEMM_NT(nu + nx + 1, Hp1_size, nxp1, 1.0, BAbt_p + k, 0, 0, Hh_p, 0, 0, 0.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, 0, 0);
                             // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
-                            GEAD(1, Hp1_size, 1.0, Hh_p, nx, 0, Ggt_stripe_p, nu + nx, 0);
+                            GEADTR(1, Hp1_size, 1.0, Hh_p, 0, nx, Ggt_stripe_p, nu + nx, 0);
                         }
                     }
                     else
@@ -188,9 +188,9 @@ namespace fatrop
                         (Pr_p + k)->PM(rank_k, RSQrqt_stripe_p);                       //TODO make use of symmetry
                         (Pr_p + k)->MPt(rank_k, RSQrqt_stripe_p);
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
-                        GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_stripe_p, 0, rank_k, 1.0, RSQrqt_stripe_p, rank_k, 0, GgLt_p, 0, 0);
+                        GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_stripe_p, 0, 0, 1.0, RSQrqt_stripe_p, rank_k, 0, GgLt_p, 0, 0);
                         // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
-                        SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + 1, 0, 0, 1.0, GgLt_p, rank_k, 0, RSQrqt_hat_p, 0, 0);
+                        SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
                         RSQrq_hat_curr_p = RSQrqt_hat_p;
                     }
                     else

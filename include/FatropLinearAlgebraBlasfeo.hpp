@@ -15,6 +15,7 @@
 #define ROWSW blasfeo_drowsw
 #define COLSW blasfeo_dcolsw
 #define GEAD blasfeo_dgead
+#define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
 #define TRSM_RLNN fatrop_dtrsm_rlnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 #define VECEL BLASFEO_DVECEL
@@ -45,6 +46,8 @@ namespace fatrop
     void test();
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
+    // B <= B + alpha*A^T (B is mxn)
+    void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj);
     /** this class is used for blasfeo matrices*/
     class fatrop_matrix_bf : public fatrop_matrix
     {
@@ -330,7 +333,7 @@ namespace fatrop
         /** int pointer of permutation vector */
         explicit operator int *() { return data_; };
 
-    // private:
+        // private:
         const int dim_;
         int *data_ = NULL;
     };
@@ -355,7 +358,7 @@ namespace fatrop
         void set_up(char *&char_p)
         {
             perm_p = (fatrop_permutation_matrix *)char_p;
-            fatrop_permutation_matrix* perm_pp = perm_p;
+            fatrop_permutation_matrix *perm_pp = perm_p;
             for (int i = 0; i < N_; i++)
             {
                 new (perm_pp) fatrop_permutation_matrix(dim_);
