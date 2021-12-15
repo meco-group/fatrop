@@ -173,10 +173,11 @@ namespace fatrop
                     // symmetric transformation, done a little different than in paper, in order to fuse LA operations
                     // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
                     LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
+                    rho_p[k] = rank_k;
                     if (gamma_k - rank_k > 0)
                     {
                         // transfer eq's to next stage
-                        GETR(nx, gamma_k - rank_k, Ggt_stripe_p, 0, rank_k, Hh_p, 0, 0);
+                        GETR(nx, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p, 0, 0);
                     }
                     rho_p[k] = rank_k;
                     if (rank_k > 0)
