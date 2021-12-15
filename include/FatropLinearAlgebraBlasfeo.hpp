@@ -27,6 +27,8 @@
 #define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
+#define ROWEX blasfeo_drowex
+#define TRSV_LTN blasfeo_dtrsv_ltn
 #define PMAT fatrop_permutation_matrix
 
 #include <iostream>
@@ -227,6 +229,78 @@ namespace fatrop
         VEC *vec_ = NULL;
         const int offset_;
         const int nels_;
+    };
+    /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
+    class fatrop_memory_vector_bf : public fatrop_memory_el_base
+    {
+    public:
+        /** \brief constuction for allocation on fatrop_memory_allocator*/
+        fatrop_memory_vector_bf(const FatropVector<int> &nels, int N, fatrop_memory_allocator &fma) : N_(N), nels_(nels)
+        // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
+        {
+            fma.add(*this);
+        }
+        fatrop_memory_vector_bf(const int nels, int N, fatrop_memory_allocator &fma) : N_(N), nels_(vector<int>(N, nels))
+        {
+            fma.add(*this);
+        }
+        /** \brief calculate memory size*/
+        int memory_size() const
+        {
+            int result = 0;
+            // size to store structs
+            result += N_ * sizeof(VEC);
+            // sufficient space for cache alignment
+            result = (result + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE + LEVEL1_DCACHE_LINE_SIZE;
+            // size to store date
+            for (int i = 0; i < N_; i++)
+            {
+                result += MEMSIZE_VEC(nels_.at(i));
+            }
+            return result;
+        };
+        /** \brief set up memory element and advance pointer */
+        void set_up(char *&data_p)
+        {
+            VEC *bf_ptr = (VEC *)data_p;
+            this->vec = bf_ptr;
+            bf_ptr += N_;
+            // align with cache line
+            long long l_ptr = (long long)bf_ptr;
+            l_ptr = (l_ptr + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE;
+            data_p = (char *)l_ptr;
+            double *d_ptr_begin = (double *)data_p;
+            for (int i = 0; i < N_; i++)
+            {
+                CREATE_VEC(nels_.at(i), vec + i, data_p);
+                data_p += (vec + i)->memsize;
+            }
+            double *d_ptr_end = (double *)data_p;
+            for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)
+            {
+                *d_ptr = 0.0;
+            }
+        }
+        /** \brief get fatrop matrix bf */
+        fatrop_vector_bf operator[](const int N) const
+        {
+#if DEBUG
+            assert(N < N_);
+#endif
+            VEC *resvec = vec + N;
+            fatrop_vector_bf res(resvec->m, 0, resvec);
+            return res;
+        }
+        /** \brief get first blasfeo_xmat* struct */
+        explicit operator VEC *() const
+        {
+            return vec;
+        }
+
+    private:
+        VEC *vec;
+        const int N_;
+        const FatropVector<int> nels_;
     };
 
     /** \brief this class represents a permutation matrix */
