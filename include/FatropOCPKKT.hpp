@@ -65,6 +65,7 @@ namespace fatrop
                                                                              HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                             tempvec(vector<int>(1, max(dims.nu+dims.nx+dims.ng)), 1, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              PlI(dims.nx.at(0), 1, fma),
@@ -232,6 +233,9 @@ namespace fatrop
                 {
                     GETR(nx, nx + 1, Hh_p, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
                     LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
+#if DEBUG
+                    assert(gamma_I == rankI);
+#endif
                     // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
                     TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
                     // permutations
@@ -241,18 +245,28 @@ namespace fatrop
                     GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     // // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                     SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
+                    // skipped if nx-rankI = 0
                     POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
                 }
-                // Ggt_tilde_I <- Ggt_stripe[rho_I:nx+1,:rho_I] L^-T
-                // h_tilde_I <- - U_I ^-1 Ggt_tilde_I[nx+1, :]
-                // ?? if nx - rho_I > 0 ??
-                // GL_I <- Ggt_tildeI  @ Ppt_I^T + Ppt[rho:nx+1, rho:]^T
-                // Pphat_I <- Ggt_tilde_I[:-1,:] @  GL_I[:,:rho]^T + GL[:rho,:]^T
-                // DlI = [chol(Phat_I) lI@chol(phat_I)^-T]
+                else
+                {
+                    rankI =0;
+                    POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
+                }
             }
-            // FORWARD_SUBSTITUTION:
-            //     cout << "test" << endl;
-            //     // forward substitution
+            ////// FORWARD_SUBSTITUTION:
+            // first stage
+            {
+                const int nx = nx_p[0];
+                int gamma_I = gamma_p[0] - rho_p[0];
+                // calculate xib
+                ROWEX(nx-rankI,-1.0,LlIt_p, nx-rankI, 0, ux,rankI);
+                // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
+                TRSV_LTN(nx-rankI, LlIt_p, 0,0, ux,rankI,ux,rankI);
+
+
+                // TRSV_LTN()
+            }
         }
         fatrop_memory_matrix_bf Ppt;
         fatrop_memory_matrix_bf Hh;
@@ -270,6 +284,7 @@ namespace fatrop
         fatrop_memory_matrix_bf HhIt;
         fatrop_memory_matrix_bf PpIt_hat;
         fatrop_memory_matrix_bf LlIt;
+        fatrop_memory_vector_bf tempvec;
         fatrop_memory_permutation_matrix Pl;
         fatrop_memory_permutation_matrix Pr;
         fatrop_memory_permutation_matrix PlI;
