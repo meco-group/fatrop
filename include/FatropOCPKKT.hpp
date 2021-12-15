@@ -62,6 +62,9 @@ namespace fatrop
                                                                              PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                             HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                             PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                             LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              PlI(dims.nx.at(0), 1, fma),
@@ -95,6 +98,9 @@ namespace fatrop
             SOLVERMACRO(MAT *, PpIt_tilde, _p);
             SOLVERMACRO(MAT *, GgIt_tilde, _p);
             SOLVERMACRO(MAT *, GgLIt, _p);
+            SOLVERMACRO(MAT *, HhIt, _p);
+            SOLVERMACRO(MAT *, PpIt_hat, _p);
+            SOLVERMACRO(MAT *, LlIt, _p);
             SOLVERMACRO(PMAT *, PlI, _p);
             SOLVERMACRO(PMAT *, PrI, _p);
             // AUXMACRO(int, max_nu, );
@@ -224,17 +230,18 @@ namespace fatrop
                 int gamma_I = gamma_p[0] - rho_p[0];
                 if (gamma_I > 0)
                 {
-                    LU_FACT_transposed(gamma_I, nx, nx, rankI, Ggt_p, PlI_p, PrI_p); // TODO THIS SHOULD MAKE USE OF Hht!!
+                    GETR(nx, nx + 1, Hh_p, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
+                    LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
                     // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
-                    TRSM_RLNN(nx - rankI + 1, rankI, -1.0, Ggt_p, rank_k, 0, Ggt_p, 0, 0, GgIt_tilde_p + 0, 0, 0);
-                    TRTR_L(nx, Ppt_p, 0, 0, Ppt_p, 0, 0); // copy lower part of RSQ to upper part
-                    // // permutations
-                    (PlI_p)->PM(rankI, Ppt_p); //TODO make use of symmetry
-                    (Pr_p)->MPt(rankI, Ppt_p);
+                    TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
+                    // permutations
+                    (PrI_p)->PM(rankI, Ppt_p); //TODO make use of symmetry
+                    (PrI_p)->MPt(rankI, Ppt_p);
                     // // GL <- GgIt_tilde @ Pp[:rankI,:nx] + Ppt[rankI:nx+1, rankI:] (with Pp[:rankI,:nx] = Ppt[:nx,:rankI]^T)
-                    GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, rankI, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
+                    GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     // // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
-                    // SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + 1, 0, 0, 1.0, GgLt_p, rank_k, 0, RSQrqt_hat_p, 0, 0);
+                    SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
+                    POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
                 }
                 // Ggt_tilde_I <- Ggt_stripe[rho_I:nx+1,:rho_I] L^-T
                 // h_tilde_I <- - U_I ^-1 Ggt_tilde_I[nx+1, :]
@@ -260,6 +267,9 @@ namespace fatrop
         fatrop_memory_matrix_bf PpIt_tilde;
         fatrop_memory_matrix_bf GgIt_tilde;
         fatrop_memory_matrix_bf GgLIt;
+        fatrop_memory_matrix_bf HhIt;
+        fatrop_memory_matrix_bf PpIt_hat;
+        fatrop_memory_matrix_bf LlIt;
         fatrop_memory_permutation_matrix Pl;
         fatrop_memory_permutation_matrix Pr;
         fatrop_memory_permutation_matrix PlI;
