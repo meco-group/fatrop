@@ -7,7 +7,7 @@
 #define FATROP_MEMORY_INCLUDED
 #include <iostream>
 #include <vector>
-#include <FatropVector.hpp>
+#include "FatropVector.hpp"
 #include <utility>
 using namespace std;
 namespace fatrop

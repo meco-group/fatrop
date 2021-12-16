@@ -1,6 +1,7 @@
 #ifndef FATROPAUXINCLUDED
 #define FATROPAUXINCLUDED
 #include <vector>
+#include "FatropVector.hpp"
 namespace fatrop
 {
     // /** \brief function to sum two integer vectors */

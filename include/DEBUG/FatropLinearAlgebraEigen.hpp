@@ -6,7 +6,7 @@
 #ifndef FATROP_LINEAR_ALGEBRA_EIGEN_INCLUDED
 #define FATROP_LINEAR_ALGEBRA_EIGEN_INCLUDED
 #include <eigen3/Eigen/Dense>
-#include "Fatrop.hpp"
+#include "../Fatrop.hpp"
 namespace fatrop
 {
 

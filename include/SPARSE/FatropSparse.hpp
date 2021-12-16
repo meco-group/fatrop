@@ -10,8 +10,11 @@
  */
 #ifndef FATROP_SPARSE_INCLUDED
 #define FATROP_SPARSE_INCLUDED
-#include "FatropOCPKKT.hpp"
-#include "FatropLinearAlgebraEigen.hpp"
+/* TODO 
+make a separate file for OCP's
+*/
+#include "../OCP/FatropOCPKKT.hpp"
+#include "../DEBUG/FatropLinearAlgebraEigen.hpp"
 #include <vector>
 #include <memory>
 #include <cstdlib>

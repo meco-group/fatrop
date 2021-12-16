@@ -1,7 +1,7 @@
 #include "Fatrop.hpp"
-#include "FatropSparse.hpp"
-#include "SparseSolvers/InterfaceMUMPS.hpp"
-#include "FatropDebugTools.hpp"
+#include "SPARSE/FatropSparse.hpp"
+#include "SPARSE/InterfaceMUMPS.hpp"
+#include "DEBUG/FatropDebugTools.hpp"
 using namespace fatrop;
 int main()
 {

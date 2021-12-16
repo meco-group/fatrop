@@ -1,4 +1,4 @@
-#include "FatropLinearAlgebraBlasfeo.hpp"
+#include "BLASFEO_WRAPPER/FatropLinearAlgebraBlasfeo.hpp"
 
 namespace fatrop
 {

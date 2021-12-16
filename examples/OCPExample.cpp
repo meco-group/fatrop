@@ -1,10 +1,10 @@
 #include "Fatrop.hpp"
-#include "FatropDebugTools.hpp"
-#include "FatropSparse.hpp"
+#include "DEBUG/FatropDebugTools.hpp"
+#include "SPARSE/FatropSparse.hpp"
 #include "vector"
 #include "string"
 #include <iostream>
-#include "FatropVector.hpp"
+#include "AUX/FatropVector.hpp"
 using namespace std;
 using namespace fatrop;
 
