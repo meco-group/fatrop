@@ -7,6 +7,8 @@
 #define MEMSIZE_MAT blasfeo_memsize_dmat
 #define CREATE_MAT blasfeo_create_dmat
 #define ROWPE blasfeo_drowpe
+#define VECPE blasfeo_dvecpe
+#define VECPEI blasfeo_dvecpei
 #define ROWPEI blasfeo_drowpei
 #define COLPE blasfeo_dcolpe
 #define COLPEI blasfeo_dcolpei
@@ -29,6 +31,7 @@
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define TRSV_LTN blasfeo_dtrsv_ltn
+#define GEMV_T blasfeo_dgemv_t
 #define PMAT fatrop_permutation_matrix
 
 #include <iostream>
@@ -361,6 +364,22 @@ namespace fatrop
             assert(data_ != NULL);
 #endif
             ROWPE(kmax, data_, M);
+        }
+        /** \brief apply vec permutation*/
+        void PV(const int kmax, VEC *V, const int offs) const
+        {
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            VECPE(kmax, data_, V, offs);
+        }
+        /** \brief apply vec permutation*/
+        void PtV(const int kmax, VEC *V, const int offs) const
+        {
+#if DEBUG
+            assert(data_ != NULL);
+#endif
+            VECPEI(kmax, data_, V, offs);
         }
         /** \brief apply row permutation on partial matrix*/
         void PM(const int kmax, const int n, MAT *M, const int ai, const int aj) const

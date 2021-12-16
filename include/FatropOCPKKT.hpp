@@ -73,7 +73,7 @@ namespace fatrop
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
-        void fact_solve(OCP_KKT *OCP, VEC *ux, VEC *lambda)
+        void fact_solve(OCP_KKT *OCP, const fatrop_vector_bf& ux, const fatrop_vector_bf& lam)
         {
             // define compiler macros for notational convenience
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
@@ -104,6 +104,8 @@ namespace fatrop
             SOLVERMACRO(MAT *, LlIt, _p);
             SOLVERMACRO(PMAT *, PlI, _p);
             SOLVERMACRO(PMAT *, PrI, _p);
+            SOLVERMACRO(VEC *, ux, _p);
+            SOLVERMACRO(VEC *, lam, _p);
             // AUXMACRO(int, max_nu, );
             // AUXMACRO(int, max_nx, );
             // AUXMACRO(int, max_ng, );
@@ -224,7 +226,7 @@ namespace fatrop
                     TRTR_L(nx, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
                 }
             }
-            int rankI =0;
+            int rankI = 0;
             //////// FIRST_STAGE
             {
                 const int nx = nx_p[0];
@@ -260,11 +262,13 @@ namespace fatrop
                 const int nx = nx_p[0];
                 int gamma_I = gamma_p[0] - rho_p[0];
                 // calculate xib
-                ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux, rankI);
+                ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux_p, rankI);
                 // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
-                TRSV_LTN(nx - rankI, LlIt_p, 0, 0, ux, rankI, ux, rankI);
-
-                // TRSV_LTN()
+                TRSV_LTN(nx - rankI, LlIt_p, 0, 0, ux_p, rankI, ux_p, rankI);
+                ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, 0);
+                // assume aliasiung is possible for last two eliments
+                GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, ux_p, rankI, 1.0, ux_p, 0, ux_p, 0);
+                (PrI_p)->PtV(rankI, ux_p, 0);
             }
         }
         fatrop_memory_matrix_bf Ppt;

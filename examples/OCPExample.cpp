@@ -30,6 +30,7 @@ int main()
     random_OCP(KKT, dims, 0);
     blasfeo_dvec *dummy;
     KKT.RSQrqt[0].print();
-    OCP_solver.fact_solve(&KKT, (VEC*) ux, (VEC*) lags);
+    ux[0].print();
+    OCP_solver.fact_solve(&KKT, ux[0], lags[0]);
     return 0;
 }
