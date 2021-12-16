@@ -65,7 +65,7 @@ namespace fatrop
                                                                              HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             tempvec(vector<int>(1, max(dims.nu+dims.nx+dims.ng)), 1, fma),
+                                                                             tempvec(vector<int>(1, max(dims.nu + dims.nx + dims.ng)), 1, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              PlI(dims.nx.at(0), 1, fma),
@@ -123,7 +123,7 @@ namespace fatrop
             {
                 const int nx = nx_p[K - 1];
                 const int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
-                const int ng = ng_p[K - 1]; // this should be zero but is included here in case of misuse
+                const int ng = ng_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 // Hh_Km1 <- Gg_Km1
@@ -224,7 +224,7 @@ namespace fatrop
                     TRTR_L(nx, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
                 }
             }
-            int rankI;
+            int rankI =0;
             //////// FIRST_STAGE
             {
                 const int nx = nx_p[0];
@@ -250,7 +250,7 @@ namespace fatrop
                 }
                 else
                 {
-                    rankI =0;
+                    rankI = 0;
                     POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
                 }
             }
@@ -260,10 +260,9 @@ namespace fatrop
                 const int nx = nx_p[0];
                 int gamma_I = gamma_p[0] - rho_p[0];
                 // calculate xib
-                ROWEX(nx-rankI,-1.0,LlIt_p, nx-rankI, 0, ux,rankI);
+                ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux, rankI);
                 // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
-                TRSV_LTN(nx-rankI, LlIt_p, 0,0, ux,rankI,ux,rankI);
-
+                TRSV_LTN(nx - rankI, LlIt_p, 0, 0, ux, rankI, ux, rankI);
 
                 // TRSV_LTN()
             }

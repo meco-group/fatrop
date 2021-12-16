@@ -90,6 +90,14 @@ namespace fatrop
     {
         return VecScalarSum<T, E1>(expr1, scalar);
     }
+    template <typename T, typename E1>
+    T sum(const VecExpr<E1,T>& expr){
+        T res =0;
+        for(int i =0; i<expr.size(); i++){
+            res += expr.getEl(i);
+        }
+        return res;
+    }
 } // namespace fatrop
 
 #endif // FATROP_VECTOR_INCLUDED
