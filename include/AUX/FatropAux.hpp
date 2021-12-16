@@ -30,6 +30,7 @@ namespace fatrop
     FatropVector<T> offsets(const VecExpr<E,T> &a)
     {
         FatropVector<T> res(a.size());
+        res.at(0) = 0;
         for (int i = 1; i < a.size(); i++)
         {
             res.at(i) = a.getEl(i) + res.getEl(i - 1);

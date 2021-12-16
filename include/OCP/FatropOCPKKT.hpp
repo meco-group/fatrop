@@ -65,7 +65,6 @@ namespace fatrop
                                                                              HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             tempvec(vector<int>(1, max(dims.nu + dims.nx + dims.ng)), 1, fma),
                                                                              Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              PlI(dims.nx.at(0), 1, fma),
@@ -73,7 +72,7 @@ namespace fatrop
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
-        void fact_solve(OCP_KKT *OCP, const fatrop_vector_bf& ux, const fatrop_vector_bf& lam)
+        void fact_solve(OCP_KKT *OCP, const fatrop_vector_bf &ux, const fatrop_vector_bf &lam)
         {
             // define compiler macros for notational convenience
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
@@ -247,7 +246,7 @@ namespace fatrop
                     GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     // // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                     SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
-                    // skipped if nx-rankI = 0
+                    // TODO skipped if nx-rankI = 0
                     POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
                 }
                 else
@@ -260,16 +259,52 @@ namespace fatrop
             // first stage
             {
                 const int nx = nx_p[0];
+                const int nu = nu_p[0];
                 int gamma_I = gamma_p[0] - rho_p[0];
-                // calculate xib
-                ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux_p, rankI);
+                // calculate xIb
+                ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux_p, nu + rankI);
                 // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
-                TRSV_LTN(nx - rankI, LlIt_p, 0, 0, ux_p, rankI, ux_p, rankI);
-                ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, 0);
-                // assume aliasiung is possible for last two eliments
-                GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, ux_p, rankI, 1.0, ux_p, 0, ux_p, 0);
-                (PrI_p)->PtV(rankI, ux_p, 0);
+                TRSV_LTN(nx - rankI, LlIt_p, 0, 0, ux_p, nu + rankI, ux_p, nu + rankI);
+                // calculate xIa
+                ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, nu);
+                // assume aliasing is possible for last two eliments
+                GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, ux_p, nu + rankI, 1.0, ux_p, nu, ux_p, nu);
+                (PrI_p)->PtV(rankI, ux_p, nu);
             }
+            int *offs_ux = (int *)OCP->aux.ux_offs;
+            // other stages
+            // for (int k = 0; k < K - 1; k++)
+            for (int k = 0; k < K-1; k++)
+            {
+                const int nx = nx_p[k];
+                const int nu = nu_p[k];
+                const int offs = offs_ux[k];
+                const int rho_k = rho_p[k];
+                const int numrho_k = nu - rho_k;
+                if (numrho_k)
+                {
+                    /// calculate ukb_tilde
+                    // -Lkxk - lk
+                    ROWEX(numrho_k, -1.0, Llt_p + k, numrho_k + nx, 0, ux_p, offs + rho_k);
+                    // assume aliasing of last two eliments is allowed
+                    GEMV_T(nx, numrho_k, -1.0, Llt_p + k, numrho_k, 0, ux_p, offs + nu, 1.0, ux_p, offs + rho_k, ux_p, offs + rho_k);
+                    TRSV_LTN(numrho_k, Llt_p + k, 0, 0, ux_p, offs + rho_k, ux_p, offs + rho_k);
+                }
+                /// calcualate uka_tilde
+                if (rho_k > 0)
+                {
+                    ROWEX(rho_k, 1.0, Ggt_tilde_p + k, numrho_k + nx, 0, ux_p, offs);
+                    GEMV_T(nx + numrho_k, rho_k, 1.0, Ggt_tilde_p + k, 0, 0, ux_p, offs + rho_k, 1.0, ux_p, offs, ux_p, offs);
+                    (Pr_p + k)->PtV(rho_k, ux_p, offs);
+                }
+                // calculate xkp1
+                const int nxp1 = nx_p[k + 1];
+                const int nup1 = nu_p[k + 1];
+                const int offsp1 = offs_ux[k + 1];
+                ROWEX(nx, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+                GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+            }
+            return;
         }
         fatrop_memory_matrix_bf Ppt;
         fatrop_memory_matrix_bf Hh;
@@ -287,7 +322,6 @@ namespace fatrop
         fatrop_memory_matrix_bf HhIt;
         fatrop_memory_matrix_bf PpIt_hat;
         fatrop_memory_matrix_bf LlIt;
-        fatrop_memory_vector_bf tempvec;
         fatrop_memory_permutation_matrix Pl;
         fatrop_memory_permutation_matrix Pr;
         fatrop_memory_permutation_matrix PlI;
