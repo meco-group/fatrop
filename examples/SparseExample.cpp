@@ -1,5 +1,5 @@
 #include "Fatrop.hpp"
-#include "SPARSE/FatropSparse.hpp"
+#include "SPARSE/SparseOCP.hpp"
 #include "SPARSE/InterfaceMUMPS.hpp"
 #include "DEBUG/FatropDebugTools.hpp"
 using namespace fatrop;
@@ -33,12 +33,12 @@ int main()
     OCP_KKT KKTocp(dims, fma);
     fma.allocate();
     random_OCP(KKTocp, dims, 0);
-    KKT_matrix KOCP(Sparse_OCP(dims, KKTocp));
+    Sparse_OCP KOCP(dims, KKTocp);
     vector<triplet> ocptripl;
-    KOCP.get_triplets(ocptripl);
-    InterfaceMUMPS interfo(ocptripl.size(),KOCP.get_size(), ocptripl);
+    KOCP.KKT.get_triplets(ocptripl);
+    InterfaceMUMPS interfo(ocptripl.size(),KOCP.KKT.get_size(), ocptripl);
     interfo.preprocess();
-    vector<double> rhso(KOCP.get_rhs());
+    vector<double> rhso(KOCP.KKT.get_rhs());
     interfo.solve(ocptripl, rhso);
     return 0;
 }

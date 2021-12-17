@@ -28,7 +28,6 @@ int main()
     fatrop_memory_vector_bf lags(N_lags, 1, fma);
     fma.allocate();
     random_OCP(KKT, dims, 0);
-    blasfeo_dvec *dummy;
     KKT.RSQrqt[0].print();
     ux[0].print();
     OCP_solver.fact_solve(&KKT, ux[0], lags[0]);
