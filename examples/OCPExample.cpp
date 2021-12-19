@@ -11,10 +11,10 @@ using namespace fatrop;
 int main()
 {
     OCP_dims dims;
-    dims.K = 10;
-    int nu = 5;
-    int nx = 9;
-    int ng = 2;
+    dims.K = 3;
+    int nu = 2;
+    int nx = 2;
+    int ng = 1;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
@@ -28,8 +28,14 @@ int main()
     fatrop_memory_vector_bf lags(N_lags, 1, fma);
     fma.allocate();
     random_OCP(KKT, dims, 0);
+    cout << "RSQrqt \n" << endl;
     KKT.RSQrqt[0].print();
-    ux[0].print();
+    cout << "BAbt \n" << endl;
+    KKT.BAbt[0].print();
+    cout << "Ggt \n" << endl;
+    KKT.Ggt[0].print();
+    cout << "---------------- \n" << endl;
     OCP_solver.fact_solve(&KKT, ux[0], lags[0]);
+    ux[0].print();
     return 0;
 }

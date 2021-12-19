@@ -2,17 +2,16 @@
 #define SPARSE_OCP_INCLUDED
 using namespace std;
 #include "FatropSparse.hpp"
+#include "InterfaceMUMPS.hpp"
 namespace fatrop
 {
 #define Id Eigen::MatrixXd::Identity
     class Sparse_OCP
     {
     public:
-        Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP, bool Guzero = false)
+        Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP, bool Guzero = false):dims(dims)
         {
             int K = dims.K;
-            vector<var_sp> u_vec;
-            vector<var_sp> x_vec;
             // initialize variables
             for (int k = 0; k < K - 1; k++)
             {
@@ -40,7 +39,7 @@ namespace fatrop
                 };
                 for (int i = 0; i < ng; i++)
                 {
-                    rhs_con.push_back(OCP.Ggt[k].get_el(nx, i));
+                    rhs_con.push_back(OCP.Ggt[k].get_el(nu+nx, i));
                 };
                 for (int i = 0; i < nu; i++)
                 {
@@ -80,7 +79,7 @@ namespace fatrop
                 vector<double> grad_x;
                 for (int i = 0; i < ng; i++)
                 {
-                    rhs_con.push_back(OCP.Ggt[K - 1].get_el(nx, i));
+                    rhs_con.push_back(OCP.Ggt[K - 1].get_el(nu+nx, i));
                 };
                 for (int i = 0; i < nx; i++)
                 {
@@ -92,7 +91,46 @@ namespace fatrop
                 KKT.set_equation(Gx * x_vec.at(K - 1), rhs_con);
             };
         };
+
+        void fact_solve(const fatrop_vector_bf &ux, const fatrop_vector_bf &lam)
+        {
+
+            vector<triplet> ocptripl;
+            KKT.get_triplets(ocptripl);
+            InterfaceMUMPS interfo(ocptripl.size(), KKT.get_size(), ocptripl);
+            interfo.preprocess();
+            vector<double> rhso(KKT.get_rhs());
+            interfo.solve(ocptripl, rhso);
+
+            int offs = 0;
+            VEC* ux_p = (VEC*) ux;
+            // put result in ux vector
+            for(int k =0; k< dims.K-1; k++){
+                int nxk = dims.nx.at(k);
+                int nuk = dims.nu.at(k);
+                int sol_offs_u = u_vec.at(k)->offset;
+                int sol_offs_x = x_vec.at(k)->offset;
+                for(int i=0; i< nuk; i++){
+                    VECEL(ux_p, offs+i) = rhso.at(sol_offs_u +i);
+                }
+                for(int i=0; i< nxk; i++){
+                    VECEL(ux_p, offs+nuk+i) = rhso.at(sol_offs_x +i);
+                }
+                offs += nuk+nxk;
+            }
+            {
+                int sol_offs_x = x_vec.at(dims.K-1)->offset;
+                int nxk = dims.nx.at(dims.K-1);
+                int nuk = dims.nu.at(dims.K-1);
+                for(int i=0; i< nxk; i++){
+                    VECEL(ux_p, offs+nuk+i) = rhso.at(sol_offs_x +i);
+                }
+            }
+        }
         KKT_matrix KKT;
+        OCP_dims dims;
+        vector<var_sp> u_vec;
+        vector<var_sp> x_vec;
     };
 
 } // namespace fatrop

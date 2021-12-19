@@ -304,7 +304,6 @@ namespace fatrop
 
         void print(const char *type_id)
         {
-
             vector<triplet> testvec;
             get_triplets(testvec);
             //printing (matrix)
@@ -328,6 +327,38 @@ namespace fatrop
                     mat(i, get_size()) = rhs.at(i);
                 }
                 cout << mat << endl;
+            }
+            if (string(type_id) == "numpy")
+            {
+                cout << " " << get_size() << " " << get_size() << endl
+                     << " ";
+                cout << fixed;
+
+                Eigen::MatrixXd mat(get_size(), get_size() + 1);
+
+                for (long unsigned int i = 0; i < testvec.size(); i++)
+                {
+                    // std::cout << testvec.at(i).col() + 1 << " " << testvec.at(i).row()  << " " << std::setprecision(20) << testvec.at(i).value() << std::endl
+                    mat(testvec.at(i).row(), testvec.at(i).col()) = testvec.at(i).value();
+                    mat(testvec.at(i).col(), testvec.at(i).row()) = testvec.at(i).value();
+                }
+                vector<double> rhs = get_rhs();
+                for (int i = 0; i < get_size(); i++)
+                {
+                    mat(i, get_size()) = rhs.at(i);
+                }
+                cout << "[";
+                int size = get_size();
+                for(int i = 0; i<size; i++){
+                    cout << "[";
+                for(int j = 0; j< size+1; j++){
+                    cout << mat(i,j);
+                    if(j!= size){cout << ", ";};
+                }
+                 cout << "]" ;
+                 if(i!= size-1){cout << ",";};
+                }
+                cout << "]" << endl;
             }
             //printing (ma57)
             if (string(type_id) == "ma57")
