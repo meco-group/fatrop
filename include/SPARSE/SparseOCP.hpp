@@ -35,19 +35,19 @@ namespace fatrop
                 vector<double> grad_x;
                 for (int i = 0; i < nx; i++)
                 {
-                    rhs_dyn.push_back(OCP.BAbt[k].get_el(nu + nx, i));
+                    rhs_dyn.push_back(-OCP.BAbt[k].get_el(nu + nx, i));
                 };
                 for (int i = 0; i < ng; i++)
                 {
-                    rhs_con.push_back(OCP.Ggt[k].get_el(nu+nx, i));
+                    rhs_con.push_back(-OCP.Ggt[k].get_el(nu+nx, i));
                 };
                 for (int i = 0; i < nu; i++)
                 {
-                    grad_u.push_back(OCP.RSQrqt[k].get_el(nu + nx, i));
+                    grad_u.push_back(-OCP.RSQrqt[k].get_el(nu + nx, i));
                 };
                 for (int i = 0; i < nx; i++)
                 {
-                    grad_x.push_back(OCP.RSQrqt[k].get_el(nu + nx, nu + i));
+                    grad_x.push_back(-OCP.RSQrqt[k].get_el(nu + nx, nu + i));
                 };
                 x_vec.at(k)->set_grad(grad_x);
                 u_vec.at(k)->set_grad(grad_u);
@@ -79,11 +79,11 @@ namespace fatrop
                 vector<double> grad_x;
                 for (int i = 0; i < ng; i++)
                 {
-                    rhs_con.push_back(OCP.Ggt[K - 1].get_el(nu+nx, i));
+                    rhs_con.push_back(-OCP.Ggt[K - 1].get_el(nu+nx, i));
                 };
                 for (int i = 0; i < nx; i++)
                 {
-                    grad_x.push_back(OCP.RSQrqt[K - 1].get_el(nu + nx, nu + i));
+                    grad_x.push_back(-OCP.RSQrqt[K - 1].get_el(nu + nx, nu + i));
                 };
                 Eig Gx(Eig(OCP.Ggt[K - 1].block(nu, 0, nx, ng)).transpose());
                 x_vec.at(K - 1)->set_grad(grad_x);
