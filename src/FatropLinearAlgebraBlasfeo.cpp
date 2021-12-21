@@ -123,4 +123,16 @@ namespace fatrop
         }
         rank = j;
     };
+
+    void fatrop_dtrsv_unu(int m, blasfeo_dmat *sA, int ai, int aj, blasfeo_dvec *sx, int xi, blasfeo_dvec *sz, int zi)
+    {
+        for (int i = m; i >= 0; i--)
+        {
+            VECEL(sz, zi + i) = VECEL(sx, xi, +i);
+            for (int j = i + 1; j < m; j++)
+            {
+                VECEL(sz, zi + i) -= MATEL(sA, ai + i, aj+j)*VECEL(sz, zi + i);
+            }
+        }
+    }
 } // namespace fatrop

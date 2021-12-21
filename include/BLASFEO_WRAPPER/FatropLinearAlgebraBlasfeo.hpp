@@ -31,6 +31,8 @@
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define TRSV_LTN blasfeo_dtrsv_ltn
+#define TRSV_LNN blasfeo_dtrsv_lnn
+#define TRSV_UNU fatrop_dtrsv_unu
 #define GEMV_T blasfeo_dgemv_t
 #define PMAT fatrop_permutation_matrix
 
@@ -492,5 +494,7 @@ namespace fatrop
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12);
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
     void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12);
+    void fatrop_dtrsv_unu(int m, blasfeo_dmat *sA, int ai, int aj, blasfeo_dvec *sx, int xi, blasfeo_dvec *sz, int zi);
+
 } // namespace fatrop
 #endif //FATROP_BLASFEO_INCLUDED

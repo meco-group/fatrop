@@ -8,14 +8,14 @@ int main()
 {
     /// sparse ocp
     OCP_dims dims;
-    dims.K = 50;
-    int nu = 10;
-    int nx = 20;
-    int ng = 5;
+    dims.K = 3;
+    int nu = 2;
+    int nx = 4;
+    int ng = 1;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, 0);
-    dims.ng.at(0) =ng;
+    dims.ng.at(0) = ng;
     // memory allocation
     fatrop_memory_allocator fma;
     OCP_KKT KKTocp(dims, fma);
@@ -31,16 +31,16 @@ int main()
     KKTocp.BAbt[0].print();
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
-    cout << "solving using MUMPS"  << endl;
+    cout << "solving using MUMPS" << endl;
     blasfeo_tic(&timer);
     KOCP.fact_solve(ux[0], lags[0]);
     double el = blasfeo_toc(&timer);
-    cout << "solving using fatrop"  << endl;
+    cout << "solving using fatrop" << endl;
     blasfeo_tic(&timer);
     OCP_solver.fact_solve(&KKTocp, ux2[0], lags[0]);
     double el2 = blasfeo_toc(&timer);
     cout << "el time mumps " << el << endl;
     cout << "el time recursion " << el2 << endl;
-    cout << "inf-norm difference MUMPS - Fatrop "<<(Eig(ux[0]) - Eig(ux2[0])).lpNorm<Eigen::Infinity>()<< endl;
+    cout << "inf-norm difference MUMPS - Fatrop " << (Eig(ux[0]) - Eig(ux2[0])).lpNorm<Eigen::Infinity>() << endl;
     return 0;
 }

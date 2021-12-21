@@ -173,7 +173,7 @@ namespace fatrop
                     {
                         rho_p[k] = 0;
                         rank_k = 0;
-                        RSQrq_hat_curr_p = RSQrqt_tilde_p +k;
+                        RSQrq_hat_curr_p = RSQrqt_tilde_p + k;
                     }
                 }
                 //////// TRANSFORM_AND_SUBSEQ
@@ -185,7 +185,7 @@ namespace fatrop
                     if (gamma_k - rank_k > 0)
                     {
                         // transfer eq's to next stage
-                        GETR(nx+1, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p, 0, 0);
+                        GETR(nx + 1, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p, 0, 0);
                     }
                     rho_p[k] = rank_k;
                     if (rank_k > 0)
@@ -193,18 +193,18 @@ namespace fatrop
                         // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
                         TRSM_RLNN(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);
                         // permutations
-                        TRTR_L(nu + nx, RSQrqt_tilde_p +k, 0, 0, RSQrqt_tilde_p +k, 0, 0); // copy lower part of RSQ to upper part
-                        (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p +k);                       //TODO make use of symmetry
-                        (Pr_p + k)->MPt(rank_k, RSQrqt_tilde_p +k);
+                        TRTR_L(nu + nx, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0); // copy lower part of RSQ to upper part
+                        (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p + k);                          //TODO make use of symmetry
+                        (Pr_p + k)->MPt(rank_k, RSQrqt_tilde_p + k);
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
-                        GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p+k, 0, 0, 1.0, RSQrqt_tilde_p+k, rank_k, 0, GgLt_p, 0, 0);
+                        GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                         SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
                         RSQrq_hat_curr_p = RSQrqt_hat_p;
                     }
                     else
                     {
-                        RSQrq_hat_curr_p = RSQrqt_tilde_p+k;
+                        RSQrq_hat_curr_p = RSQrqt_tilde_p + k;
                     }
                 }
                 //////// SCHUR
@@ -273,8 +273,13 @@ namespace fatrop
                 ROWEX(rankI, -1.0, Ppt_p, nx, 0, lam_p, 0);
                 // assume aliasing is possible for last two elements
                 GEMV_T(rankI, nx, 1.0, Ppt_p, 0, 0, ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
-                (PrI_p)->PtV(rankI, ux_p, nu);
+                // U^-T
+                TRSV_LNN(rankI, GgIt_tilde_p, 0, 0, lam_p, 0, lam_p, 0);
+                // L^-T
+                TRSV_UNU(rankI, GgIt_tilde_p, 0, 0, lam_p, 0, lam_p, 0);
+                /// TODO!
 
+                (PrI_p)->PtV(rankI, ux_p, nu);
             }
             int *offs_ux = (int *)OCP->aux.ux_offs;
             // other stages
