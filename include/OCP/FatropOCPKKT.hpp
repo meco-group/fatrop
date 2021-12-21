@@ -158,7 +158,7 @@ namespace fatrop
                         if (ng > 0)
                         {
                             // Ggt_stripe  <- Ggt_k
-                            GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, ng);
+                            GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, Hp1_size);
                         }
                         // if Hkp1 nonempty
                         if (Hp1_size > 0)
@@ -185,7 +185,7 @@ namespace fatrop
                     if (gamma_k - rank_k > 0)
                     {
                         // transfer eq's to next stage
-                        GETR(nx, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p, 0, 0);
+                        GETR(nx+1, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p, 0, 0);
                     }
                     rho_p[k] = rank_k;
                     if (rank_k > 0)
@@ -269,12 +269,12 @@ namespace fatrop
                 ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, nu);
                 // assume aliasing is possible for last two elements
                 GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, ux_p, nu + rankI, 1.0, ux_p, nu, ux_p, nu);
+                //// lag
+                ROWEX(rankI, -1.0, Ppt_p, nx, 0, lam_p, 0);
+                // assume aliasing is possible for last two elements
+                GEMV_T(rankI, nx, 1.0, Ppt_p, 0, 0, ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
                 (PrI_p)->PtV(rankI, ux_p, nu);
 
-                // // lag
-                // ROWEX(rankI, -1.0, Ppt_p, nx, 0, lam_p, 0);
-                // // assume aliasing is possible for last two elements
-                // GEMV_T(rankI, nx, 1.0, Ppt_p, 0, 0, ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
             }
             int *offs_ux = (int *)OCP->aux.ux_offs;
             // other stages

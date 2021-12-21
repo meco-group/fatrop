@@ -14,7 +14,8 @@ int main()
     int ng = 5;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
-    dims.ng = vector<int>(dims.K, ng);
+    dims.ng = vector<int>(dims.K, 0);
+    dims.ng.at(0) =ng;
     // memory allocation
     fatrop_memory_allocator fma;
     OCP_KKT KKTocp(dims, fma);
@@ -27,6 +28,7 @@ int main()
     fatrop_memory_vector_bf ux2(N_opti_vars, 1, fma);
     fma.allocate();
     random_OCP(KKTocp, dims, 0);
+    KKTocp.BAbt[0].print();
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
     cout << "solving using MUMPS"  << endl;
