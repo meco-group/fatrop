@@ -52,7 +52,7 @@ namespace fatrop
         OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
                                                                              Hh(vector<int>(1, max(dims.nx)), vector<int>(1, max(dims.nx + 1)), 1, fma), // the number of eqs can never exceed nx
                                                                              AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
-                                                                             RSQrqt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
+                                                                             RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma),
                                                                              Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              Ggt_tilde(dims.nu + dims.nx + 1, dims.nx, dims.K, fma),
                                                                              GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
@@ -86,7 +86,7 @@ namespace fatrop
             SOLVERMACRO(MAT *, Ppt, _p);
             SOLVERMACRO(MAT *, Hh, _p);
             SOLVERMACRO(MAT *, AL, _p);
-            SOLVERMACRO(MAT *, RSQrqt_stripe, _p);
+            SOLVERMACRO(MAT *, RSQrqt_tilde, _p);
             SOLVERMACRO(MAT *, Ggt_stripe, _p);
             SOLVERMACRO(MAT *, Ggt_tilde, _p);
             SOLVERMACRO(PMAT *, Pl, _p);
@@ -149,7 +149,7 @@ namespace fatrop
                     // AL[-1,:] <- AL[-1,:] + p_kp1^T
                     GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
                     // RSQrqt_stripe <- AL[BA] + RSQrqt
-                    SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_stripe_p, 0, 0);
+                    SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
                     gamma_p[k] = gamma_k;
                     // if ng[k]>0
                     if (gamma_k > 0)
@@ -173,7 +173,7 @@ namespace fatrop
                     {
                         rho_p[k] = 0;
                         rank_k = 0;
-                        RSQrq_hat_curr_p = RSQrqt_stripe_p;
+                        RSQrq_hat_curr_p = RSQrqt_tilde_p +k;
                     }
                 }
                 //////// TRANSFORM_AND_SUBSEQ
@@ -193,18 +193,18 @@ namespace fatrop
                         // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
                         TRSM_RLNN(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);
                         // permutations
-                        TRTR_L(nu + nx, RSQrqt_stripe_p, 0, 0, RSQrqt_stripe_p, 0, 0); // copy lower part of RSQ to upper part
-                        (Pr_p + k)->PM(rank_k, RSQrqt_stripe_p);                       //TODO make use of symmetry
-                        (Pr_p + k)->MPt(rank_k, RSQrqt_stripe_p);
+                        TRTR_L(nu + nx, RSQrqt_tilde_p +k, 0, 0, RSQrqt_tilde_p +k, 0, 0); // copy lower part of RSQ to upper part
+                        (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p +k);                       //TODO make use of symmetry
+                        (Pr_p + k)->MPt(rank_k, RSQrqt_tilde_p +k);
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
-                        GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_stripe_p, 0, 0, 1.0, RSQrqt_stripe_p, rank_k, 0, GgLt_p, 0, 0);
+                        GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p+k, 0, 0, 1.0, RSQrqt_tilde_p+k, rank_k, 0, GgLt_p, 0, 0);
                         // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                         SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
                         RSQrq_hat_curr_p = RSQrqt_hat_p;
                     }
                     else
                     {
-                        RSQrq_hat_curr_p = RSQrqt_stripe_p;
+                        RSQrq_hat_curr_p = RSQrqt_tilde_p+k;
                     }
                 }
                 //////// SCHUR
@@ -267,14 +267,19 @@ namespace fatrop
                 TRSV_LTN(nx - rankI, LlIt_p, 0, 0, ux_p, nu + rankI, ux_p, nu + rankI);
                 // calculate xIa
                 ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, nu);
-                // assume aliasing is possible for last two eliments
+                // assume aliasing is possible for last two elements
                 GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, ux_p, nu + rankI, 1.0, ux_p, nu, ux_p, nu);
                 (PrI_p)->PtV(rankI, ux_p, nu);
+
+                // // lag
+                // ROWEX(rankI, -1.0, Ppt_p, nx, 0, lam_p, 0);
+                // // assume aliasing is possible for last two elements
+                // GEMV_T(rankI, nx, 1.0, Ppt_p, 0, 0, ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
             }
             int *offs_ux = (int *)OCP->aux.ux_offs;
             // other stages
             // for (int k = 0; k < K - 1; k++)
-            for (int k = 0; k < K-1; k++)
+            for (int k = 0; k < K - 1; k++)
             {
                 const int nx = nx_p[k];
                 const int nu = nu_p[k];
@@ -309,7 +314,7 @@ namespace fatrop
         fatrop_memory_matrix_bf Ppt;
         fatrop_memory_matrix_bf Hh;
         fatrop_memory_matrix_bf AL;
-        fatrop_memory_matrix_bf RSQrqt_stripe;
+        fatrop_memory_matrix_bf RSQrqt_tilde;
         fatrop_memory_matrix_bf Ggt_stripe;
         fatrop_memory_matrix_bf Ggt_tilde;
         fatrop_memory_matrix_bf GgLt;

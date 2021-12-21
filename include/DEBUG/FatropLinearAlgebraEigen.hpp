@@ -26,6 +26,14 @@ namespace fatrop
                 }
             }
         };
+        Eig(const fatrop_vector &fv) : Eigen::MatrixXd(fv.nels(), 1)
+        {
+            const int nels = fv.nels();
+            for (int ai = 0; ai < nels; ai++)
+            {
+                    Eigen::MatrixXd::operator()(ai, 0) = fv.get_el(ai);
+            }
+        };
         Eig(const Eigen::MatrixXd &Eigenmat) : Eigen::MatrixXd(Eigenmat){};
         Eig(const int m, const int n) : Eigen::MatrixXd(m, n){};
         /** \brief a normal Eig reprensents a dense matrix */

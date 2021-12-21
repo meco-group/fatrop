@@ -53,12 +53,13 @@ namespace fatrop
             }
 #define ICNTL(I) icntl[(I)-1] /* macro sdsdfs.t. indices match documentation */
             /* No outputs */
-            id.ICNTL(1) = -1;
-            id.ICNTL(2) = -1;
-            id.ICNTL(3) = -1;
-            id.ICNTL(4) = 0;
+            id.ICNTL(1) = 6; // std output stream printing
+            id.ICNTL(2) = 6;
+            id.ICNTL(3) = 6;
+            id.ICNTL(4) = 0; // printing level
             id.ICNTL(7) = 5;
             id.ICNTL(28) = 1;
+            id.ICNTL(10) = 10; // max no iterative refinement steps
             id.job = 1;
             dmumps_c(&id);
             if (id.infog[0] < 0)

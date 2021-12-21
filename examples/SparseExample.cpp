@@ -8,10 +8,10 @@ int main()
 {
     /// sparse ocp
     OCP_dims dims;
-    dims.K = 3;
-    int nu = 2;
-    int nx = 5;
-    int ng = 1;
+    dims.K = 50;
+    int nu = 10;
+    int nx = 20;
+    int ng = 5;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
@@ -29,30 +29,16 @@ int main()
     random_OCP(KKTocp, dims, 0);
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
-    // for (int i = 0; i < 1000; i++)
-    // {
-    //     KOCP.fact_solve(ux[0], lags[0]);
-    // }
+    cout << "solving using MUMPS"  << endl;
     blasfeo_tic(&timer);
-    for (int i = 0; i < 1; i++)
-    {
-        KOCP.fact_solve(ux[0], lags[0]);
-    }
+    KOCP.fact_solve(ux[0], lags[0]);
     double el = blasfeo_toc(&timer);
-    ux[0].print();
-    // for (int i = 0; i < 1000; i++)
-    // {
-    //     OCP_solver.fact_solve(&KKTocp, ux2[0], lags[0]);
-    // }
+    cout << "solving using fatrop"  << endl;
     blasfeo_tic(&timer);
-    for (int i = 0; i < 1; i++)
-    {
-        OCP_solver.fact_solve(&KKTocp, ux2[0], lags[0]);
-    }
+    OCP_solver.fact_solve(&KKTocp, ux2[0], lags[0]);
     double el2 = blasfeo_toc(&timer);
-    cout << "-----\n";
-    ux2[0].print();
     cout << "el time mumps " << el << endl;
     cout << "el time recursion " << el2 << endl;
+    cout << "inf-norm difference MUMPS - Fatrop "<<(Eig(ux[0]) - Eig(ux2[0])).lpNorm<Eigen::Infinity>()<< endl;
     return 0;
 }
