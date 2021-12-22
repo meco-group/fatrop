@@ -11,11 +11,12 @@ int main()
     dims.K = 3;
     int nu = 2;
     int nx = 4;
-    int ng = 1;
+    int ng = 2;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, 0);
     dims.ng.at(0) = ng;
+    dims.nu.at(dims.K-1) = 0;
     // memory allocation
     fatrop_memory_allocator fma;
     OCP_KKT KKTocp(dims, fma);
@@ -32,12 +33,15 @@ int main()
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
     cout << "solving using MUMPS" << endl;
+    // KOCP.KKT.print("matrix");
     blasfeo_tic(&timer);
     KOCP.fact_solve(ux[0], lags[0]);
+    lags[0].print();
     double el = blasfeo_toc(&timer);
     cout << "solving using fatrop" << endl;
     blasfeo_tic(&timer);
     OCP_solver.fact_solve(&KKTocp, ux2[0], lags[0]);
+    lags[0].print();
     double el2 = blasfeo_toc(&timer);
     cout << "el time mumps " << el << endl;
     cout << "el time recursion " << el2 << endl;

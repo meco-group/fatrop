@@ -296,6 +296,9 @@ namespace fatrop
             {
                 const int nx = nx_p[k];
                 const int nu = nu_p[k];
+                const int nxp1 = nx_p[k + 1];
+                const int nup1 = nu_p[k + 1];
+                const int offsp1 = offs_ux[k + 1];
                 const int offs = offs_ux[k];
                 const int rho_k = rho_p[k];
                 const int numrho_k = nu - rho_k;
@@ -316,9 +319,6 @@ namespace fatrop
                     (Pr_p + k)->PtV(rho_k, ux_p, offs);
                 }
                 // calculate xkp1
-                const int nxp1 = nx_p[k + 1];
-                const int nup1 = nu_p[k + 1];
-                const int offsp1 = offs_ux[k + 1];
                 ROWEX(nx, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
                 GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
             }
