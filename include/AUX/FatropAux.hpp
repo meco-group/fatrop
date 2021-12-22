@@ -33,7 +33,7 @@ namespace fatrop
         res.at(0) = 0;
         for (int i = 1; i < a.size(); i++)
         {
-            res.at(i) = a.getEl(i) + res.getEl(i - 1);
+            res.at(i) = a.getEl(i-1) + res.getEl(i - 1);
         }
         return res;
     }
