@@ -20,8 +20,58 @@ namespace fatrop
                 double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
                 for (int k = 0; k < m; k++)
                 {
+                    // this algorithm is "store bounded"
                     MATEL(sD, offs_di + k, offs_dj + aj) += sc * MATEL(sD, offs_di + k, offs_dj + ai);
                 }
+            }
+        }
+    }
+    /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
+    // this is an experimenta,l, more efficient, version that ONLY WORKS FOR n even!!!
+    void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
+    {
+        for (int aj = n - 1; aj >= 0; aj--)
+        {
+            double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
+            double inv_ajj = 1.0 / ajj;
+            double scjj = alpha * inv_ajj;
+            for (int k = 0; k < m; k++)
+            {
+                // todo, check if possible to incude in main loop
+                MATEL(sD, offs_di + k, offs_dj + aj) = scjj * MATEL(sB, offs_bi + k, offs_bj + aj);
+            }
+            for (int k = 0; k < m; k++)
+            {
+                double res = 0.0;
+                double res1 = 0.0;
+                double res2 = 0.0;
+                double res3 = 0.0;
+                // double res4 = 0.0;
+                // double res5 = 0.0;
+                // double res6 = 0.0;
+                // double res7 = 0.0;
+                for (int ai = aj + 1; ai < n; ai = ai + 4)
+                {
+                    // todo unroll loop -> more independent operations -> filled pipelines
+                    double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
+                    res += sc * MATEL(sD, offs_di + k, offs_dj + ai);
+                    double sc1 = -inv_ajj * MATEL(sA, offs_ai + ai + 1, offs_aj + aj);
+                    res1 += sc1 * MATEL(sD, offs_di + k, offs_dj + ai + 1);
+                    double sc2 = -inv_ajj * MATEL(sA, offs_ai + ai + 2, offs_aj + aj);
+                    res2 += sc2 * MATEL(sD, offs_di + k, offs_dj + ai + 2);
+                    double sc3 = -inv_ajj * MATEL(sA, offs_ai + ai + 3, offs_aj + aj);
+                    res3 += sc3 * MATEL(sD, offs_di + k, offs_dj + ai + 3);
+                    // double sc4 = -inv_ajj * MATEL(sA, offs_ai + ai+4, offs_aj + aj);
+                    // res4 += sc * MATEL(sD, offs_di + k, offs_dj + ai+4);
+                    // double sc5 = -inv_ajj * MATEL(sA, offs_ai + ai+5, offs_aj + aj);
+                    // res5 += sc * MATEL(sD, offs_di + k, offs_dj + ai+5);
+                    // double sc6 = -inv_ajj * MATEL(sA, offs_ai + ai+6, offs_aj + aj);
+                    // res6 += sc * MATEL(sD, offs_di + k, offs_dj + ai+6);
+                    // double sc7 = -inv_ajj * MATEL(sA, offs_ai + ai+7, offs_aj + aj);
+                    // res7 += sc * MATEL(sD, offs_di + k, offs_dj + ai+7);
+                }
+                // MATEL(sD, offs_di + k, offs_dj + aj) += (res+res1+res2+res3+res4+res5+res6+res7);
+                MATEL(sD, offs_di + k, offs_dj + aj) += (res + res1) + (res2 + res3);
             }
         }
     }
@@ -128,10 +178,10 @@ namespace fatrop
     {
         for (int i = m; i >= 0; i--)
         {
-            VECEL(sz, zi + i) = VECEL(sx, xi, +i);
+            VECEL(sz, zi + i) = VECEL(sx, xi + i);
             for (int j = i + 1; j < m; j++)
             {
-                VECEL(sz, zi + i) -= MATEL(sA, ai + i, aj+j)*VECEL(sz, zi + i);
+                VECEL(sz, zi + i) -= MATEL(sA, ai + i, aj + j) * VECEL(sz, zi + j);
             }
         }
     }
