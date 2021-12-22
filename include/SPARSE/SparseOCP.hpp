@@ -9,9 +9,10 @@ namespace fatrop
     class Sparse_OCP
     {
     public:
-        Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP, bool Guzero = false):dims(dims)
+        Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP, bool Guzero = false) : dims(dims)
         {
             int K = dims.K;
+            c_vec = vector<eq_sp>(dims.K, nullptr);
             // initialize variables
             for (int k = 0; k < K - 1; k++)
             {
@@ -39,7 +40,7 @@ namespace fatrop
                 };
                 for (int i = 0; i < ng; i++)
                 {
-                    rhs_con.push_back(-OCP.Ggt[k].get_el(nu+nx, i));
+                    rhs_con.push_back(-OCP.Ggt[k].get_el(nu + nx, i));
                 };
                 for (int i = 0; i < nu; i++)
                 {
@@ -61,13 +62,13 @@ namespace fatrop
                 if (Guzero)
                 {
                     Eig Gx(Eig(OCP.Ggt[k].block(nu, 0, nx, ng)).transpose());
-                    KKT.set_equation(Gx * x_vec.at(k), rhs_con);
+                    c_vec.at(k) = (KKT.set_equation(Gx * x_vec.at(k), rhs_con));
                 }
                 else
                 {
                     Eig Gu(Eig(OCP.Ggt[k].block(0, 0, nu, ng)).transpose());
                     Eig Gx(Eig(OCP.Ggt[k].block(nu, 0, nx, ng)).transpose());
-                    KKT.set_equation(Gu * u_vec.at(k) + Gx * x_vec.at(k), rhs_con);
+                    c_vec.at(k) = (KKT.set_equation(Gu * u_vec.at(k) + Gx * x_vec.at(k), rhs_con));
                 }
             }
             // K - 1
@@ -79,7 +80,7 @@ namespace fatrop
                 vector<double> grad_x;
                 for (int i = 0; i < ng; i++)
                 {
-                    rhs_con.push_back(-OCP.Ggt[K - 1].get_el(nu+nx, i));
+                    rhs_con.push_back(-OCP.Ggt[K - 1].get_el(nu + nx, i));
                 };
                 for (int i = 0; i < nx; i++)
                 {
@@ -103,27 +104,41 @@ namespace fatrop
             interfo.solve(ocptripl, rhso);
 
             int offs = 0;
-            VEC* ux_p = (VEC*) ux;
+            int offs_c = 0;
+            VEC *ux_p = (VEC *)ux;
+            VEC *lam_p = (VEC *)lam;
+            int offs_lam = sum(dims.nu + dims.nx) - dims.nu.at(dims.K-1);
             // put result in ux vector
-            for(int k =0; k< dims.K-1; k++){
+            for (int k = 0; k < dims.K - 1; k++)
+            {
                 int nxk = dims.nx.at(k);
                 int nuk = dims.nu.at(k);
+                int ngk = dims.ng.at(k);
                 int sol_offs_u = u_vec.at(k)->offset;
                 int sol_offs_x = x_vec.at(k)->offset;
-                for(int i=0; i< nuk; i++){
-                    VECEL(ux_p, offs+i) = rhso.at(sol_offs_u +i);
+                int lam_c_offs = c_vec.at(k)->offset;
+                for (int i = 0; i < nuk; i++)
+                {
+                    VECEL(ux_p, offs + i) = rhso.at(sol_offs_u + i);
                 }
-                for(int i=0; i< nxk; i++){
-                    VECEL(ux_p, offs+nuk+i) = rhso.at(sol_offs_x +i);
+                for (int i = 0; i < nxk; i++)
+                {
+                    VECEL(ux_p, offs + nuk + i) = rhso.at(sol_offs_x + i);
                 }
-                offs += nuk+nxk;
+                for (int i = 0; i < ngk; i++)
+                {
+                    VECEL(lam_p, offs_c+i) = rhso.at(offs_lam+lam_c_offs+i);
+                }
+                offs += nuk + nxk;
+                offs_c += ngk; 
             }
             {
-                int sol_offs_x = x_vec.at(dims.K-1)->offset;
-                int nxk = dims.nx.at(dims.K-1);
-                int nuk = dims.nu.at(dims.K-1);
-                for(int i=0; i< nxk; i++){
-                    VECEL(ux_p, offs+nuk+i) = rhso.at(sol_offs_x +i);
+                int sol_offs_x = x_vec.at(dims.K - 1)->offset;
+                int nxk = dims.nx.at(dims.K - 1);
+                int nuk = dims.nu.at(dims.K - 1);
+                for (int i = 0; i < nxk; i++)
+                {
+                    VECEL(ux_p, offs + nuk + i) = rhso.at(sol_offs_x + i);
                 }
             }
         }
@@ -131,6 +146,7 @@ namespace fatrop
         OCP_dims dims;
         vector<var_sp> u_vec;
         vector<var_sp> x_vec;
+        vector<eq_sp>  c_vec;
     };
 
 } // namespace fatrop
