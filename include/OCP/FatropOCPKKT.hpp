@@ -272,11 +272,19 @@ namespace fatrop
                 //// lag
                 ROWEX(rankI, -1.0, Ppt_p, nx, 0, lam_p, 0);
                 // assume aliasing is possible for last two elements
-                GEMV_T(rankI, nx, 1.0, Ppt_p, 0, 0, ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
+                GEMV_T(nx, rankI, -1.0, Ppt_p, 0, 0, ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
                 // U^-T
-                TRSV_LNN(rankI, GgIt_tilde_p, 0, 0, lam_p, 0, lam_p, 0);
+                TRSV_LNN(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
                 // L^-T
-                TRSV_UNU(rankI, GgIt_tilde_p, 0, 0, lam_p, 0, lam_p, 0);
+                TRSV_UNU(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
+                /// TODO!
+                /// TODO!
+                /// TODO!
+                /// TODO!
+                /// TODO!
+                /// TODO!
+                /// TODO!
+                /// TODO!
                 /// TODO!
 
                 (PrI_p)->PtV(rankI, ux_p, nu);

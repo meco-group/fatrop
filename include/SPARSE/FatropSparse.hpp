@@ -136,7 +136,7 @@ namespace fatrop
         vector<matrix_vector_base> mv_veceq;
         vector<double> rhs;
     };
-    typename std::shared_ptr<equation> eq_sp;
+    typedef std::shared_ptr<equation> eq_sp;
 
     class fatrop_sum1 : public fatrop_expression
     {
@@ -228,16 +228,17 @@ namespace fatrop
             variable_vec.push_back(var);
             return variable_vec.back();
         };
-        equation &get_equation(int size)
+        eq_sp get_equation(int size)
         {
-            equation eq(size);
+            eq_sp eq = make_shared<equation>(size);
             equation_vec.push_back(eq);
-            return equation_vec.back();
+            return eq;
         };
-        void set_equation(fe_sp expr, vector<double> rhs)
+        eq_sp set_equation(fe_sp expr, vector<double> rhs)
         {
-            equation &eq = get_equation(expr->get_size());
-            eq.add_expression(expr, rhs);
+            eq_sp eq = get_equation(expr->get_size());
+            eq->add_expression(expr, rhs);
+            return eq;
         }
         void set_hess_block(const Eig &mat, var_sp var1, var_sp var2)
         {
@@ -246,7 +247,7 @@ namespace fatrop
         }
 
         vector<var_sp> variable_vec;
-        vector<equation> equation_vec;
+        vector<eq_sp> equation_vec;
         vector<hess_block> hess_block_vec;
         void set_offsets()
         {
@@ -259,8 +260,8 @@ namespace fatrop
             offs_curr = 0;
             for (long unsigned int i = 0; i < equation_vec.size(); i++)
             {
-                equation_vec.at(i).offset = offs_curr;
-                offs_curr += equation_vec.at(i).size;
+                equation_vec.at(i)->offset = offs_curr;
+                offs_curr += equation_vec.at(i)->size;
             }
         }
         // TODO vector<triple> get_triplets, easier to use
@@ -276,7 +277,7 @@ namespace fatrop
             // std::cout << "offs "<< offs_vars << std::endl;
             for (long unsigned int i = 0; i < equation_vec.size(); i++)
             {
-                equation_vec.at(i).add_triplets(tripl_vec, offs_vars);
+                equation_vec.at(i)->add_triplets(tripl_vec, offs_vars);
             }
         }
         vector<double> get_rhs()
@@ -292,14 +293,14 @@ namespace fatrop
             // cout << "offs "<< offs_vars << std::endl;
             for (long unsigned int i = 0; i < equation_vec.size(); i++)
             {
-                equation_vec.at(i).add_rhs(rhs, offs_vars);
+                equation_vec.at(i)->add_rhs(rhs, offs_vars);
             }
             return rhs;
         }
         int get_size()
         {
             set_offsets();
-            return equation_vec.back().offset + equation_vec.back().size + variable_vec.back()->offset + variable_vec.back()->size;
+            return equation_vec.back()->offset + equation_vec.back()->size + variable_vec.back()->offset + variable_vec.back()->size;
         }
 
         void print(const char *type_id)
