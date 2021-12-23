@@ -11,13 +11,32 @@ using namespace fatrop;
 int main()
 {
     OCP_dims dims;
+    // dims.K = 3;
+    // int nu = 2;
+    // int nx = 5;
+    // int ng = 1;
+    // dims.nx = vector<int>(dims.K, nx);
+    // dims.nu = vector<int>(dims.K, nu);
+    // dims.ng = vector<int>(dims.K, ng);
+    //     dims.K = 3;
+
     dims.K = 3;
-    int nu = 2;
-    int nx = 5;
-    int ng = 1;
+    int nu = 10;
+    int nx = 9;
+    int ng = 5;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
+    dims.ng.at(2) = 0;
+    dims.ng.at(0) = 0;
+    // dims.ng.at(1) = 0;
+    dims.nx.at(2) = 25;
+    // dims.ng.at(2) = 0;
+    // dims.ng.at(0) = 0;
+    // dims.nu.at(2) = 2*nu;
+    // dims.nu.at(20) = 0.5*nu;
+    dims.ng.at(dims.K-1) = 0;
+    dims.nu.at(dims.K-1) = 0;
     // memory allocation
     fatrop_memory_allocator fma;
     OCP_KKT KKT(dims, fma);

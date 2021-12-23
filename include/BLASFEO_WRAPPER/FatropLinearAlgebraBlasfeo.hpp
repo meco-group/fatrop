@@ -29,7 +29,9 @@
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
 #define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
-#define POTRF_L_MN blasfeo_dpotrf_l_mn
+// #define POTRF_L_MN blasfeo_dpotrf_l_mn
+
+#define POTRF_L_MN fatrop_potrf_l_mn
 #define ROWEX blasfeo_drowex
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
@@ -51,6 +53,8 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
+    // for debuggin purposes
+    void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj);
     void test();
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
@@ -89,9 +93,11 @@ namespace fatrop
         /** \brief copies all elements from a given fatrop_matrix to this matrix*/
         void operator=(const fatrop_matrix &fm)
         {
-            for (int ai = 0; ai < nrows_; ai++)
+            for (int ai = 0; ai < fm.nrows(); ai++)
+            // for (int ai = 0; ai < nrows_; ai++)
             {
-                for (int aj = 0; aj < ncols_; aj++)
+                for (int aj = 0; aj < fm.ncols(); aj++)
+                // for (int aj = 0; aj < ncols_; aj++)
                 {
                     this->at(ai, aj) = fm.get_el(ai, aj);
                 }
@@ -352,7 +358,7 @@ namespace fatrop
         {
             for (int k = 0; k < kmax; k++)
             {
-                cout << k << " <-> " <<  data_[k] << endl;
+                cout << k << " <-> " << data_[k] << endl;
             }
         }
         /** \brief set data pointer*/

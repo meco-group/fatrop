@@ -29,13 +29,13 @@ namespace fatrop
         /// add a fatrop_memory_el to allocator
         void add(fatrop_memory_el_base &fme) { fatrop_memory_el_vector.push_back(&fme); };
         /// calculate memory size needed to allocate all fatrop_memroy_el's of this allocator
-        int memory_size()
+        unsigned long int memory_size()
         {
             int size = fatrop_memory_el_vector.size();
-            int res = 0;
+            unsigned long int res = 0;
             for (int i = 0; i < size; i++)
             {
-                res += fatrop_memory_el_vector.at(i)->memory_size();
+                res += (unsigned long int) fatrop_memory_el_vector.at(i)->memory_size();
             }
             return res;
         }
@@ -43,7 +43,7 @@ namespace fatrop
         void allocate()
         {
             int size = fatrop_memory_el_vector.size();
-            int mem_size = this->memory_size();
+            unsigned long int mem_size = this->memory_size();
             cout << "allocating buffer of size " << mem_size / 1024 << " kibytes and " << mem_size % 1024 << " byte" << endl;
             storage_mem = malloc(mem_size);
             char *c_ptr = (char *)storage_mem;
