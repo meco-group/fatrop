@@ -89,7 +89,7 @@ namespace fatrop
                 Eig Gx(Eig(OCP.Ggt[K - 1].block(nu, 0, nx, ng)).transpose());
                 x_vec.at(K - 1)->set_grad(grad_x);
                 KKT.set_hess_block(Eig(OCP.RSQrqt[K - 1].block(nu, nu, nx, nx)), x_vec.at(K - 1), x_vec.at(K - 1));
-                KKT.set_equation(Gx * x_vec.at(K - 1), rhs_con);
+                c_vec.at(K - 1) = KKT.set_equation(Gx * x_vec.at(K - 1), rhs_con);
             };
         };
 
@@ -107,7 +107,7 @@ namespace fatrop
             int offs_c = 0;
             VEC *ux_p = (VEC *)ux;
             VEC *lam_p = (VEC *)lam;
-            int offs_lam = sum(dims.nu + dims.nx) - dims.nu.at(dims.K-1);
+            int offs_lam = sum(dims.nu + dims.nx) - dims.nu.at(dims.K - 1);
             // put result in ux vector
             for (int k = 0; k < dims.K - 1; k++)
             {
@@ -127,18 +127,20 @@ namespace fatrop
                 }
                 for (int i = 0; i < ngk; i++)
                 {
-                    VECEL(lam_p, offs_c+i) = rhso.at(offs_lam+lam_c_offs+i);
+                    VECEL(lam_p, offs_c + i) = rhso.at(offs_lam + lam_c_offs + i);
                 }
                 offs += nuk + nxk;
-                offs_c += ngk; 
+                offs_c += ngk;
             }
             {
                 int sol_offs_x = x_vec.at(dims.K - 1)->offset;
                 int nxk = dims.nx.at(dims.K - 1);
                 int nuk = dims.nu.at(dims.K - 1);
-                for (int i = 0; i < nxk; i++)
+                int lam_c_offs = c_vec.at(dims.K - 1)->offset;
+                int ngk = dims.ng.at(dims.K - 1);
+                for (int i = 0; i < ngk; i++)
                 {
-                    VECEL(ux_p, offs + nuk + i) = rhso.at(sol_offs_x + i);
+                    VECEL(lam_p, offs_c + i) = rhso.at(offs_lam + lam_c_offs + i);
                 }
             }
         }
@@ -146,7 +148,7 @@ namespace fatrop
         OCP_dims dims;
         vector<var_sp> u_vec;
         vector<var_sp> x_vec;
-        vector<eq_sp>  c_vec;
+        vector<eq_sp> c_vec;
     };
 
 } // namespace fatrop

@@ -158,15 +158,15 @@ namespace fatrop
                         if (ng > 0)
                         {
                             // Ggt_stripe  <- Ggt_k
-                            GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, Hp1_size);
+                            GECP(nu + nx + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, 0);
                         }
                         // if Hkp1 nonempty
                         if (Hp1_size > 0)
                         {
                             // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
-                            GEMM_NT(nu + nx + 1, Hp1_size, nxp1, 1.0, BAbt_p + k, 0, 0, Hh_p, 0, 0, 0.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, 0, 0);
+                            GEMM_NT(nu + nx + 1, Hp1_size, nxp1, 1.0, BAbt_p + k, 0, 0, Hh_p, 0, 0, 0.0, Ggt_stripe_p, 0, ng, Ggt_stripe_p, 0, ng);
                             // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
-                            GEADTR(1, Hp1_size, 1.0, Hh_p, 0, nx, Ggt_stripe_p, nu + nx, 0);
+                            GEADTR(1, Hp1_size, 1.0, Hh_p, 0, nx, Ggt_stripe_p, nu + nx, ng);
                         }
                     }
                     else
@@ -192,6 +192,8 @@ namespace fatrop
                     {
                         // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly different from the implementation)
                         TRSM_RLNN(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);
+                        // the following command moves the top block matrix (LU) to the bottom because it it needed later
+                        GECP(rank_k, rank_k, Ggt_stripe_p, 0, 0, Ggt_tilde_p + k, nu - rank_k + nx + 1, 0);
                         // permutations
                         TRTR_L(nu + nx, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0); // copy lower part of RSQ to upper part
                         (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p + k);                          //TODO make use of symmetry
@@ -260,6 +262,7 @@ namespace fatrop
             {
                 const int nx = nx_p[0];
                 const int nu = nu_p[0];
+                const int rho_0 = rho_p[0];
                 int gamma_I = gamma_p[0] - rho_p[0];
                 // calculate xIb
                 ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux_p, nu + rankI);
@@ -277,19 +280,11 @@ namespace fatrop
                 TRSV_LNN(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
                 // L^-T
                 TRSV_UNU(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
-                /// TODO!
-                /// TODO!
-                /// TODO!
-                /// TODO!
-                /// TODO!
-                /// TODO!
-                /// TODO!
-                /// TODO!
-                /// TODO!
-
+                (PlI_p)->PtV(rankI, lam_p, 0);
                 (PrI_p)->PtV(rankI, ux_p, nu);
             }
             int *offs_ux = (int *)OCP->aux.ux_offs;
+            int *offs_g = (int *)OCP->aux.g_offs;
             // other stages
             // for (int k = 0; k < K - 1; k++)
             for (int k = 0; k < K - 1; k++)
@@ -302,6 +297,8 @@ namespace fatrop
                 const int offs = offs_ux[k];
                 const int rho_k = rho_p[k];
                 const int numrho_k = nu - rho_k;
+                const int offs_g_k = offs_g[k];
+                const int gammamrho_k = gamma_p[k] - rho_p[k];
                 if (numrho_k)
                 {
                     /// calculate ukb_tilde
@@ -316,6 +313,20 @@ namespace fatrop
                 {
                     ROWEX(rho_k, 1.0, Ggt_tilde_p + k, numrho_k + nx, 0, ux_p, offs);
                     GEMV_T(nx + numrho_k, rho_k, 1.0, Ggt_tilde_p + k, 0, 0, ux_p, offs + rho_k, 1.0, ux_p, offs, ux_p, offs);
+                    // calculate lamda_tilde_k
+                    // copy vk to right location
+                    VECCP(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k+rho_k);
+                    ROWEX(rho_k, -1.0, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
+                    // assume aliasing of last two eliments is allowed
+                    GEMV_T(nu + nx, rho_k, -1.0, RSQrqt_tilde_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k , lam_p, offs_g_k );
+                    // nu-rank_k+nx,0
+                    // needless copy because feature not implemented yet in trsv_lnn
+                    GECP(rank_k, rank_k, Ggt_tilde_p + k, nu - rank_k + nx + 1, 0, Llt_p, 0, 0);
+                    // U^-T
+                    TRSV_LNN(rank_k, Llt_p, 0, 0, lam_p, offs_g_k , lam_p, offs_g_k);
+                    // L^-T
+                    TRSV_UNU(rank_k, Llt_p, 0, 0, lam_p, offs_g_k , lam_p, offs_g_k);
+                    (Pl_p + k)->PtV(rho_k, lam_p, offs_g_k);
                     (Pr_p + k)->PtV(rho_k, ux_p, offs);
                 }
                 // calculate xkp1

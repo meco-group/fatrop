@@ -19,6 +19,7 @@
 #define GEAD blasfeo_dgead
 #define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
+#define VECCP blasfeo_dveccp
 #define TRSM_RLNN fatrop_dtrsm_rlnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 #define VECEL BLASFEO_DVECEL
 #define MEMSIZE_VEC blasfeo_memsize_dvec
@@ -347,6 +348,13 @@ namespace fatrop
                 return 0.0;
             }
         };
+        void print(const int kmax) const
+        {
+            for (int k = 0; k < kmax; k++)
+            {
+                cout << k << " <-> " <<  data_[k] << endl;
+            }
+        }
         /** \brief set data pointer*/
         void set_datap(int *data)
         {
