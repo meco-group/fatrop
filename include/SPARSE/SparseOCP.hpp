@@ -138,6 +138,10 @@ namespace fatrop
                 int nuk = dims.nu.at(dims.K - 1);
                 int lam_c_offs = c_vec.at(dims.K - 1)->offset;
                 int ngk = dims.ng.at(dims.K - 1);
+                for (int i = 0; i < nxk; i++)
+                {
+                    VECEL(ux_p, offs + nuk + i) = rhso.at(sol_offs_x + i);
+                }
                 for (int i = 0; i < ngk; i++)
                 {
                     VECEL(lam_p, offs_c + i) = rhso.at(offs_lam + lam_c_offs + i);
