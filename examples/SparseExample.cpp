@@ -8,17 +8,17 @@ int main()
 {
     /// sparse ocp
     OCP_dims dims;
-    dims.K = 30;
-    int nu = 2;
-    int nx = 5;
-    int ng = 1;
+    dims.K = 3;
+    int nu = 3;
+    int nx = 20;
+    int ng = 0;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
     // dims.ng.at(2) = 0;
     // dims.nu.at(2) = 2*nu;
-    dims.nu.at(20) = 0.5*nu;
-    dims.nx.at(1) = 3*nx;
+    // dims.nu.at(20) = 0.5*nu;
+    // dims.nx.at(1) = 3*nx;
     dims.ng.at(dims.K-1) = 0;
     dims.nu.at(dims.K-1) = 0;
     // dims.ng.at(dims.K-1) = 0;
@@ -39,7 +39,7 @@ int main()
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
     cout << "solving using MUMPS" << endl;
-    KOCP.KKT.print("matrix");
+    // KOCP.KKT.print("matrix");
     blasfeo_tic(&timer);
     KOCP.fact_solve(ux[0], lags[0]);
     ux[0].print();
