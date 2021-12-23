@@ -8,17 +8,17 @@ int main()
 {
     /// sparse ocp
     OCP_dims dims;
-    dims.K = 3;
-    int nu = 3;
+    dims.K = 30;
+    int nu = 4;
     int nx = 20;
-    int ng = 0;
+    int ng = 1;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
     // dims.ng.at(2) = 0;
     // dims.nu.at(2) = 2*nu;
     // dims.nu.at(20) = 0.5*nu;
-    // dims.nx.at(1) = 3*nx;
+    dims.nx.at(1) = 3*nx;
     dims.ng.at(dims.K-1) = 0;
     dims.nu.at(dims.K-1) = 0;
     // dims.ng.at(dims.K-1) = 0;

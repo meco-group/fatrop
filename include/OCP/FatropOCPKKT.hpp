@@ -65,7 +65,7 @@ namespace fatrop
                                                                              HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             Pl(max(dims.nx), dims.K, fma), // number of equations can never exceed nx
+                                                                             Pl(max(dims.nu), dims.K, fma), // number of equations can never exceed nx
                                                                              Pr(max(dims.nu), dims.K, fma),
                                                                              PlI(dims.nx.at(0), 1, fma),
                                                                              PrI(dims.nx.at(0), 1, fma),
