@@ -13,6 +13,7 @@ namespace fatrop
         {
             int K = dims.K;
             c_vec = vector<eq_sp>(dims.K, nullptr);
+            c_dyn_vec = vector<eq_sp>(dims.K-1, nullptr);
             // initialize variables
             for (int k = 0; k < K - 1; k++)
             {
@@ -58,7 +59,7 @@ namespace fatrop
                 Eig B(Eig(Eig(OCP.BAbt[k].block(0, 0, nu, nx)).transpose()));
                 Eig A(Eig(Eig(OCP.BAbt[k].block(nu, 0, nx, nx)).transpose()));
                 // TODO EYE IS HERE CONSIDERED AS A DENSE MATRIX
-                KKT.set_equation(B * u_vec.at(k) + A * (x_vec.at(k)) + Eig(-Id(dims.nx.at(k + 1), dims.nx.at(k + 1))) * (x_vec.at(k + 1)), rhs_dyn);
+                c_dyn_vec.at(k) = KKT.set_equation(B * u_vec.at(k) + A * (x_vec.at(k)) + Eig(-Id(dims.nx.at(k + 1), dims.nx.at(k + 1))) * (x_vec.at(k + 1)), rhs_dyn);
                 if (Guzero)
                 {
                     Eig Gx(Eig(OCP.Ggt[k].block(nu, 0, nx, ng)).transpose());
@@ -107,7 +108,8 @@ namespace fatrop
             int offs_c = 0;
             VEC *ux_p = (VEC *)ux;
             VEC *lam_p = (VEC *)lam;
-            int offs_lam = sum(dims.nu + dims.nx) - dims.nu.at(dims.K - 1);
+            const int offs_lam = sum(dims.nu + dims.nx) - dims.nu.at(dims.K - 1);
+            int offs_dyn_fatrop = sum(dims.ng);
             // put result in ux vector
             for (int k = 0; k < dims.K - 1; k++)
             {
@@ -129,6 +131,13 @@ namespace fatrop
                 {
                     VECEL(lam_p, offs_c + i) = rhso.at(offs_lam + lam_c_offs + i);
                 }
+                int nxkp1 = dims.nx.at(k+1);
+                int lam_c_dyn_offs = c_dyn_vec.at(k)->offset;
+                for (int i = 0; i < nxkp1; i++)
+                {
+                    VECEL(lam_p, offs_dyn_fatrop + i) = rhso.at(offs_lam + lam_c_dyn_offs + i);
+                }
+                offs_dyn_fatrop += nxkp1;
                 offs += nuk + nxk;
                 offs_c += ngk;
             }
@@ -153,6 +162,7 @@ namespace fatrop
         vector<var_sp> u_vec;
         vector<var_sp> x_vec;
         vector<eq_sp> c_vec;
+        vector<eq_sp> c_dyn_vec;
     };
 
 } // namespace fatrop
