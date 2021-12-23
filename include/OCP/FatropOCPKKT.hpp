@@ -166,7 +166,7 @@ namespace fatrop
                             // Ggt_stripe <- [Ggt_k [BAb_k^T]H_kp1]
                             GEMM_NT(nu + nx + 1, Hp1_size, nxp1, 1.0, BAbt_p + k, 0, 0, Hh_p + (k + 1), 0, 0, 0.0, Ggt_stripe_p, 0, ng, Ggt_stripe_p, 0, ng);
                             // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
-                            GEADTR(1, Hp1_size, 1.0, Hh_p + (k + 1), 0, nx, Ggt_stripe_p, nu + nx, ng);
+                            GEADTR(1, Hp1_size, 1.0, Hh_p + (k + 1), 0, nxp1, Ggt_stripe_p, nu + nx, ng);
                         }
                     }
                     else

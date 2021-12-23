@@ -8,16 +8,17 @@ int main()
 {
     /// sparse ocp
     OCP_dims dims;
-    dims.K = 4;
+    dims.K = 30;
     int nu = 2;
     int nx = 5;
     int ng = 1;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
-    dims.ng.at(2) = 0;
+    // dims.ng.at(2) = 0;
     // dims.nu.at(2) = 2*nu;
-    dims.nx.at(2) = 3*nx;
+    dims.nu.at(20) = 0.5*nu;
+    dims.nx.at(1) = 3*nx;
     dims.ng.at(dims.K-1) = 0;
     dims.nu.at(dims.K-1) = 0;
     // dims.ng.at(dims.K-1) = 0;
@@ -34,7 +35,7 @@ int main()
     fatrop_memory_vector_bf ux2(N_opti_vars, 1, fma);
     fma.allocate();
     random_OCP(KKTocp, dims, 0);
-    KKTocp.BAbt[0].print();
+    // KKTocp.BAbt[0].print();
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
     cout << "solving using MUMPS" << endl;
