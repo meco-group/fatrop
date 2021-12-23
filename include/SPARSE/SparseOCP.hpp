@@ -30,12 +30,13 @@ namespace fatrop
             {
                 int nu = dims.nu.at(k);
                 int nx = dims.nx.at(k);
+                int nxp1 = dims.nx.at(k+1);
                 int ng = dims.ng.at(k);
                 vector<double> rhs_dyn;
                 vector<double> rhs_con;
                 vector<double> grad_u;
                 vector<double> grad_x;
-                for (int i = 0; i < nx; i++)
+                for (int i = 0; i < nxp1; i++)
                 {
                     rhs_dyn.push_back(-OCP.BAbt[k].get_el(nu + nx, i));
                 };
@@ -56,8 +57,8 @@ namespace fatrop
                 KKT.set_hess_block(Eig(OCP.RSQrqt[k].block(0, 0, nu, nu)), u_vec.at(k), u_vec.at(k));
                 KKT.set_hess_block(Eig(OCP.RSQrqt[k].block(nu, nu, nx, nx)), x_vec.at(k), x_vec.at(k));
                 KKT.set_hess_block(Eig(OCP.RSQrqt[k].block(nu, 0, nx, nu)), x_vec.at(k), u_vec.at(k));
-                Eig B(Eig(Eig(OCP.BAbt[k].block(0, 0, nu, nx)).transpose()));
-                Eig A(Eig(Eig(OCP.BAbt[k].block(nu, 0, nx, nx)).transpose()));
+                Eig B(Eig(Eig(OCP.BAbt[k].block(0, 0, nu, nxp1)).transpose()));
+                Eig A(Eig(Eig(OCP.BAbt[k].block(nu, 0, nx, nxp1)).transpose()));
                 // TODO EYE IS HERE CONSIDERED AS A DENSE MATRIX
                 c_dyn_vec.at(k) = KKT.set_equation(B * u_vec.at(k) + A * (x_vec.at(k)) + Eig(-Id(dims.nx.at(k + 1), dims.nx.at(k + 1))) * (x_vec.at(k + 1)), rhs_dyn);
                 if (Guzero)

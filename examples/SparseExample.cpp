@@ -8,16 +8,16 @@ int main()
 {
     /// sparse ocp
     OCP_dims dims;
-    dims.K = 10;
+    dims.K = 4;
     int nu = 2;
-    int nx = 2;
+    int nx = 5;
     int ng = 1;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
     dims.ng.at(2) = 0;
-    dims.nu.at(2) = 2*nu;
-    dims.nx.at(5) = 3*nx;
+    // dims.nu.at(2) = 2*nu;
+    dims.nx.at(2) = 3*nx;
     dims.ng.at(dims.K-1) = 0;
     dims.nu.at(dims.K-1) = 0;
     // dims.ng.at(dims.K-1) = 0;
@@ -38,15 +38,15 @@ int main()
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
     cout << "solving using MUMPS" << endl;
-    // KOCP.KKT.print("matrix");
+    KOCP.KKT.print("matrix");
     blasfeo_tic(&timer);
     KOCP.fact_solve(ux[0], lags[0]);
-    lags[0].print();
+    ux[0].print();
     double el = blasfeo_toc(&timer);
     cout << "solving using fatrop" << endl;
     blasfeo_tic(&timer);
     OCP_solver.fact_solve(&KKTocp, ux2[0], lags2[0]);
-    lags2[0].print();
+    ux2[0].print();
     double el2 = blasfeo_toc(&timer);
     cout << "el time mumps " << el << endl;
     cout << "el time recursion " << el2 << endl;

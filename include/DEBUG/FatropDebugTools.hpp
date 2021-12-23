@@ -26,11 +26,12 @@ OCP_KKT random_OCP(OCP_KKT &KKT, OCP_dims &dims, int seed = 0)
     {
         int nu = dims.nu.at(k);
         int nx = dims.nx.at(k);
+        int nxp1 = dims.nx.at(k+1);
         int ng = dims.ng.at(k);
         KKT.RSQrqt[k] = random_matrix(nu + nx + 1, nu + nx, seed + 0);
         Eig rand1 = Eig(KKT.RSQrqt[k].block(0, 0, nu + nx, nu + nx));
         KKT.RSQrqt[k].block(0, 0, nu + nx, nu + nx) = Eig(rand1.transpose() * rand1);
-        KKT.BAbt[k] = random_matrix(nu + nx + 1, nx, seed + 1);
+        KKT.BAbt[k] = random_matrix(nu + nx + 1, nxp1, seed + 1);
         if (ng > 0)
         {
             KKT.Ggt[k].block(nu, 0, nx + 1, ng) = random_matrix(nx + 1, ng, seed + 2);

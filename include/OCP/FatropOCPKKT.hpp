@@ -21,7 +21,7 @@ namespace fatrop
     class OCP_KKT
     {
     public:
-        OCP_KKT(const OCP_dims &dims, fatrop_memory_allocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, dims.nx, dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
+        OCP_KKT(const OCP_dims &dims, fatrop_memory_allocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
         int K;
         fatrop_memory_el<int> nu;
         fatrop_memory_el<int> nx;
@@ -145,9 +145,9 @@ namespace fatrop
                 //////// SUBSDYN
                 {
                     // AL <- [BAb]^T_k P_kp1
-                    GEMM_NT(nu + nx + 1, nx, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
+                    GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
                     // AL[-1,:] <- AL[-1,:] + p_kp1^T
-                    GEAD(1, nx, 1.0, Ppt_p + (k + 1), nx, 0, AL_p, nx + nu, 0);
+                    GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
                     // RSQrqt_stripe <- AL[BA] + RSQrqt
                     SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
                     gamma_p[k] = gamma_k;
@@ -333,7 +333,7 @@ namespace fatrop
                     (Pr_p + k)->PtV(rho_k, ux_p, offs);
                 }
                 // calculate xkp1
-                ROWEX(nx, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+                ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
                 GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
                 // calculate lam_dyn xp1
                 ROWEX(nxp1, 1.0, Ppt_p+(k+1), nxp1, 0, lam_p, dyn_eqs_ofs);

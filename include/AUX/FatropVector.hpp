@@ -52,6 +52,18 @@ namespace fatrop
         const VecExpr<E1, T> &expr_;
         T scalar_;
     };
+    template <typename T, typename E1>
+    class VecRotate : public VecExpr<VecRotate<T, E1>, T>
+    {
+    public:
+        VecRotate(const VecExpr<E1, T> &expr, const int shift) : expr_(expr), shift_(shift){};
+        T getEl(const int ai) const { return expr_.getEl((ai + shift_ + (((ai + shift_) / size() + 1) * size())) % size()); };
+        int size() const { return expr_.size(); };
+
+    public:
+        const VecExpr<E1, T> &expr_;
+        int shift_;
+    };
 
     template <typename T>
     class FatropVector : public vector<T>, public VecExpr<FatropVector<T>, T>
@@ -91,13 +103,20 @@ namespace fatrop
         return VecScalarSum<T, E1>(expr1, scalar);
     }
     template <typename T, typename E1>
-    T sum(const VecExpr<E1,T>& expr){
-        T res =0;
-        for(int i =0; i<expr.size(); i++){
+    T sum(const VecExpr<E1, T> &expr)
+    {
+        T res = 0;
+        for (int i = 0; i < expr.size(); i++)
+        {
             res += expr.getEl(i);
         }
         return res;
     }
+    template <typename T, typename E1>
+    VecRotate<T, E1> rotate(const VecExpr<E1, T> &expr, const int shift)
+    {
+        return VecRotate<T, E1>(expr, shift);
+    };
 } // namespace fatrop
 
 #endif // FATROP_VECTOR_INCLUDED
