@@ -302,7 +302,7 @@ namespace fatrop
                 const int offs_g_kp1 = offs_g[k+1];
                 const int gammamrho_k = gamma_p[k] - rho_p[k];
                 const int gammamrho_kp1 = gamma_p[k+1] - rho_p[k+1];
-                if (numrho_k)
+                if (numrho_k>0)
                 {
                     /// calculate ukb_tilde
                     // -Lkxk - lk
@@ -318,17 +318,18 @@ namespace fatrop
                     GEMV_T(nx + numrho_k, rho_k, 1.0, Ggt_tilde_p + k, 0, 0, ux_p, offs + rho_k, 1.0, ux_p, offs, ux_p, offs);
                     // calculate lamda_tilde_k
                     // copy vk to right location
-                    VECCP(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
+                    //// TODOOOO THERE IS AN ALIASING PROOBLEM HERE!!
+                    VECCPR(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
                     ROWEX(rho_k, -1.0, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
                     // assume aliasing of last two eliments is allowed
                     GEMV_T(nu + nx, rho_k, -1.0, RSQrqt_tilde_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
                     // nu-rank_k+nx,0
                     // needless copy because feature not implemented yet in trsv_lnn
-                    GECP(rank_k, rank_k, Ggt_tilde_p + k, nu - rank_k + nx + 1, 0, Llt_p, 0, 0);
+                    GECP(rho_k, rho_k, Ggt_tilde_p + k, nu - rho_k + nx + 1, 0, Llt_p, 0, 0);
                     // U^-T
-                    TRSV_LNN(rank_k, Llt_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
+                    TRSV_LNN(rho_k, Llt_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
                     // L^-T
-                    TRSV_UNU(rank_k, Llt_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
+                    TRSV_UNU(rho_k, Llt_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
                     (Pl_p + k)->PtV(rho_k, lam_p, offs_g_k);
                     (Pr_p + k)->PtV(rho_k, ux_p, offs);
                 }

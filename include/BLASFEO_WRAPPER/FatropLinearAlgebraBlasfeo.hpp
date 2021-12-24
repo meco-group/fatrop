@@ -20,6 +20,7 @@
 #define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
 #define VECCP blasfeo_dveccp
+#define VECCPR fatrop_dveccp_reversed
 #define TRSM_RLNN fatrop_dtrsm_rlnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 #define VECEL BLASFEO_DVECEL
 #define MEMSIZE_VEC blasfeo_memsize_dvec
@@ -29,9 +30,7 @@
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
 #define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
-// #define POTRF_L_MN blasfeo_dpotrf_l_mn
-
-#define POTRF_L_MN fatrop_potrf_l_mn
+#define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
@@ -53,8 +52,10 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
+    // cpy elements form sx to sy but in reversed order to avoid aliasing issues in recursion
+    void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi);
     // for debuggin purposes
-    void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj);
+    // void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj);
     void test();
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);

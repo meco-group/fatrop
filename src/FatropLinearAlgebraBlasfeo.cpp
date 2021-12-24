@@ -2,15 +2,23 @@
 
 namespace fatrop
 {
-
-    void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj)
+    // cpy elements form sx to sy but in reversed order to avoid aliasing issues in recursion
+    void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi)
     {
-        blasfeo_dpotrf_l_mn(m, n, sC, ci, cj, sD, di, dj);
-        int minmn = (m < n) ? m : n;
-        for (int i =0; i<minmn; i++){
-            assert(MATEL(sD, di+i,dj+i)>0);
+        for (int i = m - 1; i >= 0; i--)
+        {
+            VECEL(sy, yi + i) = VECEL(sx, xi + i);
         }
     }
+
+    // void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj)
+    // {
+    //     blasfeo_dpotrf_l_mn(m, n, sC, ci, cj, sD, di, dj);
+    //     int minmn = (m < n) ? m : n;
+    //     for (int i =0; i<minmn; i++){
+    //         assert(MATEL(sD, di+i,dj+i)>0);
+    //     }
+    // }
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
     {
@@ -116,7 +124,6 @@ namespace fatrop
                 }
             }
         }
-        cout << valmax << endl;
         return res;
     };
     /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
