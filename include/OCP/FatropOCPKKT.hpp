@@ -53,8 +53,8 @@ namespace fatrop
                                                                              Hh(dims.nx, dims.nx + 1, dims.K, fma), // the number of eqs can never exceed nx
                                                                              AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
-                                                                             Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
-                                                                             Ggt_tilde(dims.nu + dims.nx + 1, dims.nx, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
+                                                                             Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx+dims.nu)), 1, fma),
+                                                                             Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
                                                                              GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
                                                                              RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
                                                                              Llt(dims.nu + dims.nx + 1, dims.nu, dims.K, fma),

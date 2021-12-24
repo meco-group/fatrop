@@ -20,7 +20,7 @@ int main()
     // dims.ng = vector<int>(dims.K, ng);
     //     dims.K = 3;
 
-    dims.K = 3;
+    dims.K = 5;
     int nu = 10;
     int nx = 9;
     int ng = 5;
@@ -30,6 +30,7 @@ int main()
     dims.ng.at(2) = 0;
     dims.ng.at(0) = 0;
     // dims.ng.at(1) = 0;
+    dims.nx.at(2) = 25;
     dims.nx.at(2) = 25;
     // dims.ng.at(2) = 0;
     // dims.ng.at(0) = 0;
