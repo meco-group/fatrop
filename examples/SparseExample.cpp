@@ -14,21 +14,15 @@ int main()
     // int nx = 9;
     // int ng = 4;
     // dims.nx.at(2) = 3*nx;
-    dims.K = 5;
-    int nu = 50;
-    int nx = 30;
-    int ng = 4;
+    dims.K = 3;
+    int nu = 1;
+    int nx = 2;
+    int ng = 0;
     dims.nx = vector<int>(dims.K, nx);
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
     dims.nu.at(dims.K-1) = 0;
-    dims.ng.at(0)= 0;
-    dims.ng.at(1)= 2*ng;
-    dims.nx.at(4)= 50;
-    dims.nu.at(3)= 50;
-    dims.ng.at(3) = 0;
-    dims.ng.at(4)= 50;
-    // dims.ng.at(2)= 0;
+    dims.ng.at(dims.K-1) = nx;
     // dims.ng.at(dims.K-1) = 0;
     // memory allocation
     fatrop_memory_allocator fma;
@@ -46,8 +40,8 @@ int main()
     KKTocp.BAbt[0].print();
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
+    KOCP.KKT.print("matrix");
     cout << "solving using MUMPS" << endl;
-    // KOCP.KKT.print("numpy");
     blasfeo_tic(&timer);
     KOCP.fact_solve(ux[0], lags[0]);
     double el = blasfeo_toc(&timer);
