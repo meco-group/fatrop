@@ -22,10 +22,10 @@ namespace fatrop
         /// buffer to safe evaluation result, in a buffer we always save a matrix in CCS format with lda==out_m
         vector<double> buffer;
         void init_offsets();
-        /// evaluate function and save res in "ccs format"
+        /// evaluate function and save res in "ccs format with lda==out_m"
         virtual int eval(const double **arg, double *res) = 0;
         /// evaluate function and save res in "blasfeo format"
-        int eval_bf(const double **arg, MAT *bf_mat)
+        int eval_bf(const double **arg, MAT *bf_mat) 
         {
             double *buffer_p = buffer.data();
             // todo make this static polymorphism using CRTP
