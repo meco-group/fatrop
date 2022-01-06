@@ -23,8 +23,6 @@ namespace fatrop
         void codegen_init(void *handle, const std::string &function_name);
         /// pointer to result_buffer
         double *output_buffer_p;
-        /// pointer to casadi codegen evalutation function
-        eval_t eval; // !! multhithreading of this function not yet supported
         /// casadi int work vector
         casadi_int *iw;
         /// casadi double work vector

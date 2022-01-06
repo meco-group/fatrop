@@ -286,9 +286,10 @@ namespace fatrop
             }
             int *offs_ux = (int *)OCP->aux.ux_offs;
             int *offs_g = (int *)OCP->aux.g_offs;
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
             // other stages
             // for (int k = 0; k < K - 1; k++)
-            int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
+            // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
             for (int k = 0; k < K - 1; k++)
             {
                 const int nx = nx_p[k];
@@ -300,6 +301,7 @@ namespace fatrop
                 const int rho_k = rho_p[k];
                 const int numrho_k = nu - rho_k;
                 const int offs_g_k = offs_g[k];
+                const int offs_dyn_eq_k = offs_dyn_eq[k];
                 const int offs_g_kp1 = offs_g[k + 1];
                 const int gammamrho_k = gamma_p[k] - rho_p[k];
                 const int gamma_k = gamma_p[k];
@@ -339,11 +341,9 @@ namespace fatrop
                 ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
                 GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
                 // calculate lam_dyn xp1
-                ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, dyn_eqs_ofs);
-                GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, dyn_eqs_ofs, lam_p, dyn_eqs_ofs);
-                GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, dyn_eqs_ofs, lam_p, dyn_eqs_ofs);
-
-                dyn_eqs_ofs += nxp1;
+                ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+                GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+                GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
             }
             return;
         }
