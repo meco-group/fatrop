@@ -10,6 +10,7 @@ add_executable(SparseExample SparseExample.cpp)
 find_package(MUMPS)
 target_link_libraries(SparseExample MUMPS::MPISEQ)
 target_link_libraries(SparseExample MUMPS::DMUMPS)
+# target_link_libraries(SparseExample profiler)
 
 
 foreach(example IN LISTS Examples) 

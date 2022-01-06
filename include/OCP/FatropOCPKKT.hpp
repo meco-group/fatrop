@@ -35,11 +35,12 @@ namespace fatrop
         class OCP_aux
         {
         public:
-            OCP_aux(const OCP_dims &dims, fatrop_memory_allocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
+            OCP_aux(const OCP_dims &dims, fatrop_memory_allocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K-1, offsets(rotate(dims.nx, 1))+ sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
             /// offset arrays are used for efficiency
             const fatrop_memory_el<int> ux_offs;
             /// offset arrays are used for efficiency
             const fatrop_memory_el<int> g_offs;
+            const fatrop_memory_el<int> dyn_eq_offs;
             int max_nu;
             int max_nx;
             int max_ng;

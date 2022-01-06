@@ -37,6 +37,7 @@
 #define TRSV_UNU fatrop_dtrsv_unu
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
+#define PACKMAT blasfeo_pack_dmat
 #define PMAT fatrop_permutation_matrix
 
 #include <iostream>
@@ -61,10 +62,75 @@ namespace fatrop
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
     // /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
-    // void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
+    void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
     // B <= B + alpha*A^T (B is mxn)
     void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj);
-    /** this class is used for blasfeo matrices*/
+
+    // // permute the rows of a matrix struct
+    // void fatrop_drowpe(int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
+    // {
+
+    //     // invalidate stored inverse diagonal
+    //     sA->use_dA = 0;
+
+    //     int ii;
+    //     for (ii = 0; ii < kmax; ii++)
+    //     {
+    //         if (ipiv[ii] != ii)
+    //             blasfeo_drowsw(size, sA, ai + ii, aj, sA, ai + ipiv[ii], aj);
+    //     }
+    //     return;
+    // }
+
+    // // inverse permute the rows of a matrix struct
+    // void fatrop_drowpei(const int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
+    // {
+
+    //     // invalidate stored inverse diagonal
+    //     sA->use_dA = 0;
+
+    //     int ii;
+    //     for (ii = kmax - 1; ii >= 0; ii--)
+    //     {
+    //         if (ipiv[ii] != ii)
+    //             blasfeo_drowsw(size, sA, ai + ii, aj, sA, ai + ipiv[ii], aj);
+    //     }
+    //     return;
+    // }
+
+    // // permute the cols of a matrix struct
+    // void fatrop_dcolpe(const int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
+    // {
+
+    //     // invalidate stored inverse diagonal
+    //     sA->use_dA = 0;
+
+    //     int ii;
+    //     for (ii = 0; ii < kmax; ii++)
+    //     {
+    //         if (ipiv[ii] != ii)
+    //             blasfeo_dcolsw(size, sA, ai, aj + ii, sA, ai, aj + ipiv[ii]);
+    //     }
+    //     return;
+    // }
+
+    // // inverse permute the cols of a matrix struct
+    // void fatrop_dcolpei(const int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
+    // {
+
+    //     // invalidate stored inverse diagonal
+    //     sA->use_dA = 0;
+
+    //     int ii;
+    //     for (ii = kmax - 1; ii >= 0; ii--)
+    //     {
+    //         if (ipiv[ii] != ii)
+    //             blasfeo_dcolsw(size, sA, ai, aj + ii, sA, ai, aj + ipiv[ii]);
+    //     }
+    //     return;
+    // }
+
+    /** \brief this class is used for blasfeo matrices*/
     class fatrop_matrix_bf : public fatrop_matrix
     {
     public:

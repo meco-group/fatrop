@@ -37,6 +37,7 @@ namespace fatrop
         }
     };
     // special matrices
+    /** \brief identity matrix */
     class eye : public fatrop_matrix
     {
     public:

@@ -2,8 +2,8 @@
 #define FATROP_INCLUDEgetD
 #include "AUX/FatropMemory.hpp"
 #include "BLASFEO_WRAPPER/FatropLinearAlgebraBlasfeo.hpp"
-#include "AUX/FatropIndex.hpp"
 #include "OCP/FatropOCPKKT.hpp"
 #include "AUX/FatropVector.hpp"
+#include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
 // #include "SparseSolvers/InterfaceMUMPS.hpp"
 #endif //FATROP_INCLUDED

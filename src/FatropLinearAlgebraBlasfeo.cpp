@@ -37,7 +37,7 @@ namespace fatrop
                 double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
                 for (int k = 0; k < m; k++)
                 {
-                    // this algorithm is "store bounded"
+                    // this algorithm is "store bounded", the loops can be switched like in the alt version to make this more efficient
                     MATEL(sD, offs_di + k, offs_dj + aj) += sc * MATEL(sD, offs_di + k, offs_dj + ai);
                 }
             }
@@ -195,6 +195,10 @@ namespace fatrop
 
     void fatrop_dtrsv_unu(const int m, const int n, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi)
     {
+        for (int i = m; i <n; i++)
+        {
+            VECEL(sz, zi + i) = VECEL(sx, xi+i);
+        }
         for (int i = m - 1; i >= 0; i--)
         {
             double res = VECEL(sx, xi + i);
