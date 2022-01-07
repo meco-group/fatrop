@@ -320,7 +320,7 @@ namespace fatrop
                     GEMV_T(nx + numrho_k, rho_k, 1.0, Ggt_tilde_p + k, 0, 0, ux_p, offs + rho_k, 1.0, ux_p, offs, ux_p, offs);
                     // calculate lamda_tilde_k
                     // copy vk to right location
-                    //// TODOOOO THERE IS AN ALIASING PROOBLEM HERE!!
+                    // we implemented a version of vector copy that starts with copy of last element, to avoid aliasing error
                     VECCPR(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
                     ROWEX(rho_k, -1.0, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
                     // assume aliasing of last two eliments is allowed
