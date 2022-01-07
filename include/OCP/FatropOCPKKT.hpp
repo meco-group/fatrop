@@ -60,7 +60,7 @@ namespace fatrop
                                                                              RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
                                                                              Llt(dims.nu + dims.nx + 1, dims.nu, dims.K, fma),
                                                                              Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1, fma),
-                                                                             PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                            //  PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                              HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
@@ -96,7 +96,7 @@ namespace fatrop
             SOLVERMACRO(MAT *, RSQrqt_hat, _p);
             SOLVERMACRO(MAT *, Llt, _p);
             SOLVERMACRO(MAT *, Llt_shift, _p);
-            SOLVERMACRO(MAT *, PpIt_tilde, _p);
+            // SOLVERMACRO(MAT *, PpIt_tilde, _p);
             SOLVERMACRO(MAT *, GgIt_tilde, _p);
             SOLVERMACRO(MAT *, GgLIt, _p);
             SOLVERMACRO(MAT *, HhIt, _p);
@@ -263,8 +263,6 @@ namespace fatrop
             {
                 const int nx = nx_p[0];
                 const int nu = nu_p[0];
-                const int rho_0 = rho_p[0];
-                int gamma_I = gamma_p[0] - rho_p[0];
                 // calculate xIb
                 ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux_p, nu + rankI);
                 // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
@@ -357,7 +355,7 @@ namespace fatrop
         fatrop_memory_matrix_bf RSQrqt_hat;
         fatrop_memory_matrix_bf Llt;
         fatrop_memory_matrix_bf Llt_shift; // needed because feature not implemented yet
-        fatrop_memory_matrix_bf PpIt_tilde;
+        // fatrop_memory_matrix_bf PpIt_tilde;
         fatrop_memory_matrix_bf GgIt_tilde;
         fatrop_memory_matrix_bf GgLIt;
         fatrop_memory_matrix_bf HhIt;
@@ -370,5 +368,6 @@ namespace fatrop
         fatrop_memory_el<int> gamma;
         fatrop_memory_el<int> rho;
     };
+
 } // namespace fatrop
 #endif // FATROP_OCP_KKT_INCLUDED

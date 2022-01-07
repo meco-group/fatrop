@@ -30,9 +30,10 @@ namespace fatrop
             MUMPS_INT *jcn = ai.data();
 
             int argc = 1;
-            char *name = "c_example";
+            char name[] = "InterfaceMUMPS";
+            char* name_p = (char*) name;
             char **argv;
-            argv = &name;
+            argv = &name_p;
             ierr = MPI_Init(&argc, &argv);
             ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
@@ -71,7 +72,7 @@ namespace fatrop
         };
         void solve(const vector<triplet> &A, vector<double> &rhsvec)
         {
-            MUMPS_INT n = dim_;
+            // MUMPS_INT n = dim_;
             MUMPS_INT8 nnz = nnz_;
             // mumps takes upper part of matrix!
             MUMPS_INT *irn = aj.data();

@@ -33,9 +33,7 @@ fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader> &handle_, con
     getint_t n_out_fcn = (getint_t)dlsym(handle_p, (function_name + (std::string) "_n_out").c_str());
     // if (dlerror()) return 1;
     casadi_int n_out = n_out_fcn();
-#if DEBUG
     assert(n_out == 1);
-#endif
 
     // Checkout thread-local memory (not thread-safe)
     // Note MAX_NUM_THREADS
