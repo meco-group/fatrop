@@ -2,8 +2,9 @@
 using namespace fatrop;
 using namespace std;
 
-fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader>& handle_, const std::string &function_name):handle(handle_){
-    void * handle_p = handle_->handle;
+fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader> &handle_, const std::string &function_name) : handle(handle_)
+{
+    void *handle_p = handle_->handle;
     /* Memory management -- increase reference counter */
     incref = (signal_t)dlsym(handle_p, (function_name + (std::string) "_incref").c_str());
     if (dlerror())
@@ -25,12 +26,12 @@ fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader>& handle_, con
 
     /* Number of inputs */
     getint_t n_in_fcn = (getint_t)dlsym(handle_p, (function_name + (std::string) "_n_in").c_str());
-    //if (dlerror()) return 1;
+    // if (dlerror()) return 1;
     n_in = n_in_fcn();
 
     /* Number of outputs */
     getint_t n_out_fcn = (getint_t)dlsym(handle_p, (function_name + (std::string) "_n_out").c_str());
-    //if (dlerror()) return 1;
+    // if (dlerror()) return 1;
     casadi_int n_out = n_out_fcn();
 #if DEBUG
     assert(n_out == 1);
@@ -44,7 +45,6 @@ fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader>& handle_, con
     casadi_int sz_arg = n_in, sz_res = n_out, sz_iw = 0, sz_w = 0;
     work_t work = (work_t)dlsym(handle_p, (function_name + (std::string) "_work").c_str());
 
-
     if (dlerror())
         dlerror(); // No such function, reset error flags
     assert((work && work(&sz_arg, &sz_res, &sz_iw, &sz_w)) == 0);
@@ -53,8 +53,8 @@ fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader>& handle_, con
     w = work_vector_d.data();
     iw = work_vector_i.data();
     /* Input sparsities */
-    //sparsity_t sp_in = (sparsity_t)dlsym(handle, (function_name + (std::string) "_sparsity_in").c_str());
-    //assert(dlerror() == 0);
+    // sparsity_t sp_in = (sparsity_t)dlsym(handle, (function_name + (std::string) "_sparsity_in").c_str());
+    // assert(dlerror() == 0);
 
     /* Output sparsities */
     sparsity_t sp_out = (sparsity_t)dlsym(handle_p, (function_name + (std::string) "_sparsity_out").c_str());
@@ -74,4 +74,19 @@ fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader>& handle_, con
     // allocate output buffer
     buffer.resize(out_nnz, 0.0);
     output_buffer_p = buffer.data();
+}
+
+int fatrop_eval_CasGen::eval_buffer(const double **arg)
+{
+    double *buffer_p = buffer.data();
+    if (eval(arg, &output_buffer_p, iw, w, mem))
+        return 1;
+}
+
+fatrop_eval_CasGen::~fatrop_eval_CasGen()
+{
+    // Release thread-local (not thread-safe)
+    release(mem);
+    /* Free memory (thread-safe) */
+    decref();
 }

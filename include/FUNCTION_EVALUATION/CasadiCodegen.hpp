@@ -44,7 +44,7 @@ namespace fatrop
         /// int work vector
         vector<casadi_int> work_vector_i;
         /// evaluate function and save res in "ccs format with lda==out_m"
-        int eval_buffer(const double **arg, double *res);
+        int eval_buffer(const double **arg);
         /// for reference counting of handle pointer
         shared_ptr<DL_loader> handle;
         ~fatrop_eval_CasGen();
