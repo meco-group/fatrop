@@ -21,16 +21,16 @@ namespace fatrop
         vector<int> sparsity_out;
         /// buffer to safe evaluation result, in a buffer we always save a matrix in CCS format with lda==out_m
         vector<double> buffer;
-        void init_offsets();
         /// evaluate function and save res in "ccs format with lda==out_m"
-        virtual int eval(const double **arg, double *res) = 0;
+        virtual int eval_buffer(const double **arg, double *res) = 0;
         /// evaluate function and save res in "blasfeo format"
         int eval_bf(const double **arg, MAT *bf_mat) 
         {
             double *buffer_p = buffer.data();
             // todo make this static polymorphism using CRTP
-            int res = eval(arg, buffer_p);
+            int res = eval_buffer(arg, buffer_p);
             PACKMAT(out_m, out_n, buffer_p, out_m, bf_mat, 0, 0);
+            return res;
         }
         ~fatrop_eval_base(){};
     };

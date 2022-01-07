@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "FunctionEvaluation.hpp"
+#include "AUX/DynamicLib.hpp"
 /* Typedefs */
 typedef long long int casadi_int;
 typedef void (*signal_t)(void);
@@ -15,14 +16,15 @@ typedef int (*casadi_checkout_t)(void);
 typedef void (*casadi_release_t)(int);
 namespace fatrop
 {
-    class fatrop_eval : public fatrop_eval_base
+    class fatrop_eval_CasGen : public fatrop_eval_base
     {
     public:
         /// constructor from file
-        fatrop_eval(shared_ptr<void> handle, const std::string &function_name);
-        void codegen_init(void *handle, const std::string &function_name);
+        fatrop_eval_CasGen(const shared_ptr<DL_loader> &handle, const std::string &function_name);
         /// pointer to result_buffer
         double *output_buffer_p;
+        /// pointer to casadi codegen evalutation function
+        eval_t eval; // !! multhithreading of this function not yet supported
         /// casadi int work vector
         casadi_int *iw;
         /// casadi double work vector
@@ -42,10 +44,10 @@ namespace fatrop
         /// int work vector
         vector<casadi_int> work_vector_i;
         /// evaluate function and save res in "ccs format with lda==out_m"
-        int eval(const double **arg, double *res);
+        int eval_buffer(const double **arg, double *res);
         /// for reference counting of handle pointer
-        shared_ptr<void> handle;
-        ~fatrop_eval();
+        shared_ptr<DL_loader> handle;
+        ~fatrop_eval_CasGen();
     };
 } // fatrop
 
