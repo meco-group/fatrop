@@ -24,8 +24,12 @@ namespace fatrop
         /// evaluate function and save res in "ccs format with lda==out_m"
         virtual int eval_buffer(const double **arg) = 0;
         /// evaluate function and save res in "blasfeo format"
-        int eval_bf(const double **arg, MAT *bf_mat) 
+        int eval_bf(const double **arg, MAT *bf_mat)
         {
+#if DEBUG
+            assert(bf_mat->m == out_m);
+            assert(bf_mat->n == out_n);
+#endif
             double *buffer_p = buffer.data();
             // todo make this static polymorphism using CRTP
             int res = eval_buffer(arg);

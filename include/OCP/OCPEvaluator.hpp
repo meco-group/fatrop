@@ -91,7 +91,7 @@ namespace fatrop
                 }
                 if (ng_k > 0)
                 {
-                    const double *arg[6];
+                    const double *arg[5];
                     arg[0] = primal_data + offs_ux_k + nu_k;        // states_k
                     arg[1] = scales_primal_data + offs_ux_k + nu_k; // scales states_k
                     arg[2] = primal_data + offs_ux_k;               // inputs_k

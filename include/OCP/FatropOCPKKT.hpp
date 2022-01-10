@@ -11,7 +11,7 @@
 #ifndef FATROP_OCP_KKT_INCLUDED
 #define FATROP_OCP_KKT_INCLUDED
 #include "../BLASFEO_WRAPPER/FatropLinearAlgebraBlasfeo.hpp"
-#include "FatropOCP.hpp"
+#include "FatropOCPDims.hpp"
 #include "../AUX/FatropAux.hpp"
 #include "../AUX/FatropVector.hpp"
 using namespace std;
