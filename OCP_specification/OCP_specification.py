@@ -1,6 +1,7 @@
 from casadi import *
 
 
+# This class can be used to specify OCP's with intial and final constraints and generate necessary code for it.
 class OptimalControlProblem:
     def __init__(self):
         self.ngI = 0
@@ -10,13 +11,13 @@ class OptimalControlProblem:
     def get_states(self, nx):
         self.nx = nx
         self.x_sym = SX.sym('states', nx)
-        self.scales_x_sym = self.scales_x_sym*SX.sym('sclaes_states', nx)
+        self.scales_x_sym = self.scales_x_sym*SX.sym('scales_states', nx)
         return self.x_sym
 
     def get_inputs(self, nu):
         self.nu = nu
-        self.scales_u_sym = SX.sym('scales_states', nu)
-        self.u_sym = self.scales_u_sym * SX.sym('states', nu)
+        self.scales_u_sym = SX.sym('scales_inputs', nu)
+        self.u_sym = self.scales_u_sym * SX.sym('inputs', nu)
         return self.u_sym
 
     def set_dynamics(self, xkp1):
@@ -42,6 +43,47 @@ class OptimalControlProblem:
         self.dual_eqF = SX.sym("dual_eqF", self.ngF)
         self.eqF = self.scales_eqF*eq
 
+    def set_up_Opti(self, K):
+        nu = self.nu
+        nx = self.nx
+        self.opti = Opti()
+        N_vars = K*nx + (K-1)*nu
+        self.opti_vars = self.opti.variable(N_vars)
+        self.x_vars = MX.zeros(nx, K)
+        self.u_vars = MX.zeros(nu, K)
+        for k in range(K-1):
+            offs = k*(nu+nx)
+            self.u_vars[:, k] = self.opti_vars[offs:offs+nu]
+            self.x_vars[:, k] = self.opti_vars[offs+nu:offs+nu+nx]
+        offs = (K-1)*(nu+nx)
+        self.x_vars[:, K-1] = self.opti_vars[offs:offs+nx]
+        Lkf = Function("Lk", [self.obj_scale, self.x_sym,
+                       self.scales_x_sym, self.u_sym, self.scales_u_sym], [self.Lk])
+        LkFf = Function("Lk", [self.obj_scale, self.x_sym,
+                        self.scales_x_sym], [self.Lk])
+        stateskp1 = SX.sym(nx)
+        Dynamcisf = Function("F", [stateskp1, self.scales_x_sym, self.x_sym, self.u_sym,
+                             self.scales_u_sym, self.scales_dyn], [-stateskp1 + self.dynamics])
+        if self.ngI > 0:
+            EqIf = Function("eqI", [self.x_sym, self.scales_x_sym,
+                            self.u_sym, self.scales_u_sym, self.scales_eqI], [self.eqI])
+            self.opti.subject_to(EqIf(self.x_vars[:, 0], DM.ones(
+                nx), self.u_vars[:, 0], DM.ones(nu), DM.ones(self.ngI)) == 0.0)
+        if self.ngF > 0:
+            EqFf = Function(
+                "eqI", [self.x_sym, self.scales_x_sym, self.scales_eqF], [self.eqF])
+            self.opti.subject_to(
+                EqFf(self.x_vars[:, K-1], DM.ones(nx), DM.ones(self.ngI)) == 0.0)
+        J = 0
+        for k in range(K-1):
+            J += self.Lkf(1.0, self.x_vars[:, k],
+                          DM.ones(nx), self.u_vars[:, k], DM.ones(nx))
+            self.opti.subject_to(Dynamcisf(self.x_vars[:, k+1], DM.ones(
+                nx), self.x_vars[:, k], self.u_vars[:, k], DM.ones(nu), DM.ones(nx)))
+        J += self.LkFf(1.0, self.x_vars[:, K-1], DM.ones(nx))
+        self.opti.minimize(J)
+        return self.opti
+
     def generate_code(self, filename):
         C = CodeGenerator(filename)
         # BAbt
@@ -57,45 +99,51 @@ class OptimalControlProblem:
         # RSQrqtI
         RSQrqtI = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
         [RSQI, rqI] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
-        if self.ngI>0:
+        if self.ngI > 0:
             RSQI += hessian(self.dual_eqI.T@self.eqI,
                             vertcat(self.u_sym, self.x_sym))
         RSQI += hessian(self.dual_dyn.T@self.dynamics,
                         vertcat(self.u_sym, self.x_sym))
-        RSQrqtI[:self.nu+self.nx, :] = RSQI 
-        RSQrqtI[self.nu+self.nx, :] = rqI[:] 
-        C.add(Function("RSQrqtI", [self.obj_scale, self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym, self.dual_dyn, self.scales_dyn, self.dual_eqI, self.scales_eqI], [densify(RSQrqtI)]))
+        RSQrqtI[:self.nu+self.nx, :] = RSQI
+        RSQrqtI[self.nu+self.nx, :] = rqI[:]
+        C.add(Function("RSQrqtI", [self.obj_scale, self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym,
+              self.dual_dyn, self.scales_dyn, self.dual_eqI, self.scales_eqI], [densify(RSQrqtI)]))
         # rqI
         # RSQrqt
         RSQrqt = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
         [RSQ, rq] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
         RSQ += hessian(self.dual_dyn.T@self.dynamics,
-                        vertcat(self.u_sym, self.x_sym))
-        RSQrqt[:self.nu+self.nx, :] = RSQ 
-        RSQrqt[self.nu+self.nx, :] = rq[:] 
-        C.add(Function("RSQrqt", [self.obj_scale, self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym, self.dual_dyn, self.scales_dyn, self.dual_eqI, self.scales_eqI], [densify(RSQrqt)]))
+                       vertcat(self.u_sym, self.x_sym))
+        RSQrqt[:self.nu+self.nx, :] = RSQ
+        RSQrqt[self.nu+self.nx, :] = rq[:]
+        C.add(Function("RSQrqt", [self.obj_scale, self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym,
+              self.dual_dyn, self.scales_dyn, self.dual_eqI, self.scales_eqI], [densify(RSQrqt)]))
         # rq
         # RSQrqtF
         RSQrqtF = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
         [RSQF, rqF] = hessian(self.Lk, vertcat(self.x_sym))
-        if self.ngF>0:
+        if self.ngF > 0:
             RSQF += hessian(self.dual_eqF.T@self.eqF,
                             vertcat(self.x_sym))
-        RSQrqtF[self.nx:, :] = RSQF 
-        RSQrqtF[self.nx, :] = rqF[:] 
-        C.add(Function("RSQrqtF", [self.obj_scale, self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym, self.dual_dyn, self.scales_dyn, self.dual_eqF, self.scales_eqF], [densify(RSQrqtF)]))
+        RSQrqtF[self.nx:, :] = RSQF
+        RSQrqtF[self.nx, :] = rqF[:]
+        C.add(Function("RSQrqtF", [self.obj_scale, self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym,
+              self.dual_dyn, self.scales_dyn, self.dual_eqF, self.scales_eqF], [densify(RSQrqtF)]))
         # rqF
         # GgtI
         GgtI = SX.zeros(self.nu+self.nx+1, self.ngI)
-        GgtI[:self.nu+self.nx,:] = jacobian(self.eqI, vertcat(self.u_sym, self.x_sym)).T
-        GgtI[self.nu+self.nx,:] = self.eqI[:]
-        C.add(Function("GgtI", [self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym, self.scales_eqI], [densify(GgtI)]))
+        GgtI[:self.nu+self.nx,
+             :] = jacobian(self.eqI, vertcat(self.u_sym, self.x_sym)).T
+        GgtI[self.nu+self.nx, :] = self.eqI[:]
+        C.add(Function("GgtI", [self.x_sym, self.scales_x_sym, self.u_sym,
+              self.scales_u_sym, self.scales_eqI], [densify(GgtI)]))
         # g_I
         # GgtF
         GgtF = SX.zeros(self.nx+1, self.ngI)
-        GgtF[:self.nx,:] = jacobian(self.eqF, vertcat(self.x_sym)).T
-        GgtF[self.nx,:] = self.eqF[:]
-        C.add(Function("GgtI", [self.x_sym, self.scales_x_sym, self.u_sym, self.scales_u_sym, self.scales_eqI],[densify(GgtF)]))
+        GgtF[:self.nx, :] = jacobian(self.eqF, vertcat(self.x_sym)).T
+        GgtF[self.nx, :] = self.eqF[:]
+        C.add(Function("GgtI", [self.x_sym, self.scales_x_sym, self.u_sym,
+              self.scales_u_sym, self.scales_eqI], [densify(GgtF)]))
         # g_F
         C.generate()
-        pass
+        return
