@@ -60,7 +60,7 @@ namespace fatrop
             id.ICNTL(4) = 0; // printing level
             id.ICNTL(7) = 5;
             id.ICNTL(28) = 1;
-            id.ICNTL(10) = 10; // max no iterative refinement steps
+            id.ICNTL(10) = 0; // max no iterative refinement steps
             id.job = 1;
             dmumps_c(&id);
             if (id.infog[0] < 0)
@@ -92,6 +92,8 @@ namespace fatrop
             id.rhs = rhsvec.data();
 
             /* Call the MUMPS package (analyse, factorization and solve). */
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
             id.job = 2;
             dmumps_c(&id);
             if (id.infog[0] < 0)
@@ -108,6 +110,7 @@ namespace fatrop
                        myid, id.infog[0], id.infog[1]);
                 error = 1;
             }
+            cout << "el time mumps " << blasfeo_toc(&timer) << endl;
         }
         ~InterfaceMUMPS()
         {

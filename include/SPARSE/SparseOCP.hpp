@@ -95,7 +95,7 @@ namespace fatrop
             };
         };
 
-        void fact_solve(const fatrop_vector_bf &ux, const fatrop_vector_bf &lam)
+        void fact_solve(const fatrop_vector_bf &ux, const fatrop_vector_bf &lam, double& el_time)
         {
 
             vector<triplet> ocptripl;
@@ -103,7 +103,11 @@ namespace fatrop
             InterfaceMUMPS interfo(ocptripl.size(), KKT.get_size(), ocptripl);
             interfo.preprocess();
             vector<double> rhso(KKT.get_rhs());
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
             interfo.solve(ocptripl, rhso);
+            el_time = blasfeo_toc(&timer);
+            
 
             int offs = 0;
             int offs_c = 0;

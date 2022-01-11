@@ -117,7 +117,8 @@ namespace fatrop
                     for (int j = 0; j < n; j++)
                     {
                         double val = fsm.get_el(i, j);
-                        if (!fsm.iszero(i, j))
+                        // if (!fsm.iszero(i, j))
+                        if (val!=0.0)
                         {
 
                             tripl.push_back(triplet(offs_H + offset + i, offs_var + j, val));
@@ -198,7 +199,8 @@ namespace fatrop
                 for (int j = 0; j < n; j++)
                 {
                     double val = fsm.get_el(i, j);
-                    if (!fsm.iszero(i, j)) // only add nonzero's
+                    // if (!fsm.iszero(i, j)) // only add nonzero's
+                    if (val!=0.0) // only add nonzero's
                     {
                         int ai = i + offs_var1;
                         int aj = j + offs_var2;
@@ -206,13 +208,10 @@ namespace fatrop
                         {
                             tripl.push_back(triplet(ai, aj, val));
                         }
-                        else
-                        {
-                            if (offs_var1 != offs_var2)
-                            {
-                                tripl.push_back(triplet(aj, ai, val));
-                            }
-                        }
+                    }
+                    else
+                    {
+                        cout << "zero" << endl;
                     }
                 }
             }
