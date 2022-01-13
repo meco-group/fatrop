@@ -42,7 +42,7 @@ int main()
     // memory allocation
     MemoryAllocator fma;
     OCPKKT KKT(dims, fma);
-    OCP_KKT_solver OCP_solver(dims, fma);
+    OCPKKTSolver OCP_solver(dims, fma);
     int N_opti_vars = sum(dims.nu + dims.nx);
     int N_lags = (dims.K - 1) * nx + sum(dims.ng);
     FatropMemoryVecBF ux(N_opti_vars, 1, fma);
