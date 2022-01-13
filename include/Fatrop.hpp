@@ -4,6 +4,7 @@
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include "OCP/OCPKKT.hpp"
 #include "OCP/OCPEvaluator.hpp"
+#include "OCP/OCPTemplate.hpp"
 #include "AUX/FatropVector.hpp"
 #include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
 // #include "SparseSolvers/InterfaceMUMPS.hpp"

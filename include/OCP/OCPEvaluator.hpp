@@ -3,12 +3,13 @@
 #include "OCPKKT.hpp"
 #include "FUNCTION_EVALUATION/FunctionEvaluation.hpp"
 #include "SOLVER/FatropData.hpp"
+#include "OCPTemplate.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class OCPEvaluator
+    class CasGenFE
     {
         int eval_hess(OCPKKTMemory *OCP, double obj_scale, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &lam, const FatropVecBF &scales_lam)
         {
