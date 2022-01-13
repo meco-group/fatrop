@@ -32,10 +32,10 @@ namespace fatrop
         FatropMemoryMatBF BAbt;
         /// small-scale Jacobian stagewise eq constraints
         FatropMemoryMatBF Ggt;
-        class OCP_aux
+        class OCPAux
         {
         public:
-            OCP_aux(const OCPDims &dims, MemoryAllocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K - 1, offsets(rotate(dims.nx, 1)) + sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
+            OCPAux(const OCPDims &dims, MemoryAllocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K - 1, offsets(rotate(dims.nx, 1)) + sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
             /// offset arrays are used for efficiency
             const FatropMemoryEl<int> ux_offs;
             /// offset arrays are used for efficiency
@@ -45,12 +45,12 @@ namespace fatrop
             int max_nx;
             int max_ng;
         };
-        OCP_aux aux;
+        OCPAux aux;
     };
-    class OCP_KKT_solver
+    class OCPKKTSolver
     {
     public:
-        OCP_KKT_solver(const OCPDims &dims, MemoryAllocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
+        OCPKKTSolver(const OCPDims &dims, MemoryAllocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
                                                                     Hh(dims.nx, dims.nx + 1, dims.K, fma), // the number of eqs can never exceed nx
                                                                     AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                     RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
