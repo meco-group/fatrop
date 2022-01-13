@@ -1,7 +1,7 @@
 from casadi import *
-import OCP_specification
+import OCPSpecification
 
-OCP = OCP_specification.OptimalControlProblem()
+OCP = OCPSpecification.OptimalControlProblem()
 uk = OCP.get_inputs(2)
 xk = OCP.get_states(2)
 OCP.set_dynamics(xk+uk) #xkp1 = xk + uk
