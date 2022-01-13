@@ -21,7 +21,7 @@
 using namespace std;
 namespace fatrop
 {
-    /* TODO -> I'm not happy with how expressions are built up here (using shared pointers). We should make use of nodes that are reference counted and "Expression elements"
+    /* TODO -> I'm not happy with how expressions are built up here (using shared pointers). We should make use of nodes that are reference counted, I also want scalarnode-expressions, which allow matrix operations like in casADi 
     class elem
     node*
     upon destruction node->ref_count -- if 0 -> free
@@ -118,6 +118,7 @@ namespace fatrop
                     {
                         double val = fsm.get_el(i, j);
                         // if (!fsm.iszero(i, j))
+                        ///// TODO THIS IS A DANGEROUS AND BAD WAY OF REPRESENTING SPARSITY WITHIN MATRICES
                         if (val!=0.0)
                         {
 
@@ -200,6 +201,7 @@ namespace fatrop
                 {
                     double val = fsm.get_el(i, j);
                     // if (!fsm.iszero(i, j)) // only add nonzero's
+                    ///// TODO THIS IS A DANGEROUS AND BAD WAY OF REPRESENTING SPARSITY WITHIN MATRICES
                     if (val!=0.0) // only add nonzero's
                     {
                         int ai = i + offs_var1;
