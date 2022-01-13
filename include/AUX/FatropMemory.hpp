@@ -74,12 +74,12 @@ namespace fatrop
     ///
     /// default constructor should be available
     template <typename T>
-    class fatrop_memory_el : public MemoryElBase
+    class FatropMemoryEl : public MemoryElBase
     {
     public:
         // E&& is a universal reference
         template<typename E>
-        fatrop_memory_el<T>(int size, E&&init_values, MemoryAllocator &fma) : size(size), init_values_(forward<E>(init_values))
+        FatropMemoryEl<T>(int size, E&&init_values, MemoryAllocator &fma) : size(size), init_values_(forward<E>(init_values))
         {
             fma.add(*this);
         }

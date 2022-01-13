@@ -1,12 +1,12 @@
 /**
  * @file OCPKKT.hpp
  * @author your name (you@domain.com)
- * @brief this file contains classes to represent a KKT matrix by blasfeo submatrices 
+ * @brief this file contains classes to represent a KKT matrix by blasfeo submatrices
  * @version 0.1
  * @date 2021-11-10
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 #ifndef FATROP_OCP_KKT_INCLUDED
 #define FATROP_OCP_KKT_INCLUDED
@@ -23,9 +23,9 @@ namespace fatrop
     public:
         OCPKKT(const OCPDims &dims, MemoryAllocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
         int K;
-        fatrop_memory_el<int> nu;
-        fatrop_memory_el<int> nx;
-        fatrop_memory_el<int> ng;
+        FatropMemoryEl<int> nu;
+        FatropMemoryEl<int> nx;
+        FatropMemoryEl<int> ng;
         /// small-scale Hessian
         FatropMemoryMatBF RSQrqt;
         /// small-scale Jacobian dynamics
@@ -35,12 +35,12 @@ namespace fatrop
         class OCP_aux
         {
         public:
-            OCP_aux(const OCPDims &dims, MemoryAllocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K-1, offsets(rotate(dims.nx, 1))+ sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
+            OCP_aux(const OCPDims &dims, MemoryAllocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K - 1, offsets(rotate(dims.nx, 1)) + sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
             /// offset arrays are used for efficiency
-            const fatrop_memory_el<int> ux_offs;
+            const FatropMemoryEl<int> ux_offs;
             /// offset arrays are used for efficiency
-            const fatrop_memory_el<int> g_offs;
-            const fatrop_memory_el<int> dyn_eq_offs;
+            const FatropMemoryEl<int> g_offs;
+            const FatropMemoryEl<int> dyn_eq_offs;
             int max_nu;
             int max_nx;
             int max_ng;
@@ -51,27 +51,27 @@ namespace fatrop
     {
     public:
         OCP_KKT_solver(const OCPDims &dims, MemoryAllocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
-                                                                             Hh(dims.nx, dims.nx + 1, dims.K, fma), // the number of eqs can never exceed nx
-                                                                             AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
-                                                                             RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
-                                                                             Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
-                                                                             Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
-                                                                             GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
-                                                                             RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
-                                                                             Llt(dims.nu + dims.nx + 1, dims.nu, dims.K, fma),
-                                                                             Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1, fma),
-                                                                            //  PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
-                                                                             Pl(max(dims.nu), dims.K, fma), // number of equations can never exceed nx
-                                                                             Pr(max(dims.nu), dims.K, fma),
-                                                                             PlI(dims.nx.at(0), 1, fma),
-                                                                             PrI(dims.nx.at(0), 1, fma),
-                                                                             gamma(dims.K, vector<int>(dims.K, 0), fma),
-                                                                             rho(dims.K, vector<int>(dims.K, 0), fma){};
+                                                                    Hh(dims.nx, dims.nx + 1, dims.K, fma), // the number of eqs can never exceed nx
+                                                                    AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
+                                                                    RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
+                                                                    Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
+                                                                    Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
+                                                                    GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1, fma),
+                                                                    RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
+                                                                    Llt(dims.nu + dims.nx + 1, dims.nu, dims.K, fma),
+                                                                    Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1, fma),
+                                                                    //  PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                    GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                    GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                    HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                    PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                    LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
+                                                                    Pl(max(dims.nu), dims.K, fma), // number of equations can never exceed nx
+                                                                    Pr(max(dims.nu), dims.K, fma),
+                                                                    PlI(dims.nx.at(0), 1, fma),
+                                                                    PrI(dims.nx.at(0), 1, fma),
+                                                                    gamma(dims.K, vector<int>(dims.K, 0), fma),
+                                                                    rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
         void fact_solve(OCPKKT *OCP, const FatropVecBF &ux, const FatropVecBF &lam)
         {
@@ -196,7 +196,7 @@ namespace fatrop
                         GECP(rank_k, gamma_k, Ggt_stripe_p, 0, 0, Ggt_tilde_p + k, nu - rank_k + nx + 1, 0);
                         // permutations
                         TRTR_L(nu + nx, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0); // copy lower part of RSQ to upper part
-                        (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p + k);                          //TODO make use of symmetry
+                        (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p + k);                          // TODO make use of symmetry
                         (Pr_p + k)->MPt(rank_k, RSQrqt_tilde_p + k);
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
                         GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
@@ -243,7 +243,7 @@ namespace fatrop
                     // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
                     TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
                     // permutations
-                    (PrI_p)->PM(rankI, Ppt_p); //TODO make use of symmetry
+                    (PrI_p)->PM(rankI, Ppt_p); // TODO make use of symmetry
                     (PrI_p)->MPt(rankI, Ppt_p);
                     // // GL <- GgIt_tilde @ Pp[:rankI,:nx] + Ppt[rankI:nx+1, rankI:] (with Pp[:rankI,:nx] = Ppt[:nx,:rankI]^T)
                     GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
@@ -365,8 +365,8 @@ namespace fatrop
         MemoryPermMat Pr;
         MemoryPermMat PlI;
         MemoryPermMat PrI;
-        fatrop_memory_el<int> gamma;
-        fatrop_memory_el<int> rho;
+        FatropMemoryEl<int> gamma;
+        FatropMemoryEl<int> rho;
     };
 
 } // namespace fatrop

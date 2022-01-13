@@ -5,6 +5,7 @@
 #include "string"
 #include <iostream>
 #include "AUX/FatropVector.hpp"
+#include <memory>
 using namespace std;
 using namespace fatrop;
 

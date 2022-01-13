@@ -17,7 +17,7 @@ int main()
     FatropMemoryMatBF test(100, 100, 1, fma);
     MemoryPermMat Pl(100, 1, fma);
     MemoryPermMat Pr(100, 1, fma);
-    fatrop_memory_el<int> testfatropmemel(5, vector<int>(5, 420), fma);
+    FatropMemoryEl<int> testfatropmemel(5, vector<int>(5, 420), fma);
     fma.allocate();
     A[0] = random_matrix(100, 100);
     At[0] = Eig(Eig(A[0]).transpose());
