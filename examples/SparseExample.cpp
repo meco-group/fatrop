@@ -30,7 +30,7 @@ int main()
     // dims.ng.at(dims.K-1) = 0;
     // memory allocation
     MemoryAllocator fma;
-    OCPKKT KKTocp(dims, fma);
+    OCPKKTMemory KKTocp(dims, fma);
     OCPKKTSolver OCP_solver(dims, fma);
 
     int N_opti_vars = sum(dims.nu + dims.nx);

@@ -10,7 +10,7 @@ namespace fatrop
 {
     class OCPEvaluator
     {
-        int eval_hess(OCPKKT *OCP, double obj_scale, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &lam, const FatropVecBF &scales_lam)
+        int eval_hess(OCPKKTMemory *OCP, double obj_scale, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &lam, const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -52,7 +52,7 @@ namespace fatrop
             }
             return 0;
         }
-        int eval_jac(OCPKKT *OCP, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &scales_lam)
+        int eval_jac(OCPKKTMemory *OCP, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;

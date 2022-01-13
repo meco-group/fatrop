@@ -9,7 +9,7 @@ namespace fatrop
     class Sparse_OCP
     {
     public:
-        Sparse_OCP(OCPDims &dims, OCPKKT &OCP, bool Guzero = false) : dims(dims)
+        Sparse_OCP(OCPDims &dims, OCPKKTMemory &OCP, bool Guzero = false) : dims(dims)
         {
             int K = dims.K;
             c_vec = vector<eq_sp>(dims.K, nullptr);

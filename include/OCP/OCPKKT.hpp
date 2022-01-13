@@ -18,10 +18,10 @@ using namespace std;
 namespace fatrop
 {
     /** \brief this class contains all information to represent the KKT system of an equality constrained OCP*/
-    class OCPKKT
+    class OCPKKTMemory
     {
     public:
-        OCPKKT(const OCPDims &dims, MemoryAllocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
+        OCPKKTMemory(const OCPDims &dims, MemoryAllocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
         int K;
         FatropMemoryEl<int> nu;
         FatropMemoryEl<int> nx;
@@ -73,7 +73,7 @@ namespace fatrop
                                                                     gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                     rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
-        void fact_solve(OCPKKT *OCP, const FatropVecBF &ux, const FatropVecBF &lam)
+        void fact_solve(OCPKKTMemory *OCP, const FatropVecBF &ux, const FatropVecBF &lam)
         {
             // define compiler macros for notational convenience
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)

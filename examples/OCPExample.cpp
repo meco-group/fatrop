@@ -41,7 +41,7 @@ int main()
     dims.nu.at(dims.K-1) = 0;
     // memory allocation
     MemoryAllocator fma;
-    OCPKKT KKT(dims, fma);
+    OCPKKTMemory KKT(dims, fma);
     OCPKKTSolver OCP_solver(dims, fma);
     int N_opti_vars = sum(dims.nu + dims.nx);
     int N_lags = (dims.K - 1) * nx + sum(dims.ng);
