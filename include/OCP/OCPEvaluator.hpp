@@ -8,9 +8,9 @@
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class OCP_evaluator
+    class OCPEvaluator
     {
-        int eval_hess(OCP_KKT *OCP, double obj_scale, const fatrop_vector_bf &primal_vars, const fatrop_vector_bf &scales_primal_vars, const fatrop_vector_bf &lam, const fatrop_vector_bf &scales_lam)
+        int eval_hess(OCPKKT *OCP, double obj_scale, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &lam, const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -52,7 +52,7 @@ namespace fatrop
             }
             return 0;
         }
-        int eval_jac(OCP_KKT *OCP, const fatrop_vector_bf &primal_vars, const fatrop_vector_bf &scales_primal_vars, const fatrop_vector_bf &scales_lam)
+        int eval_jac(OCPKKT *OCP, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -108,9 +108,9 @@ namespace fatrop
         }
 
     public:
-        vector<fatrop_eval_base *> BAbtf;
-        vector<fatrop_eval_base *> RSQrqtf;
-        vector<fatrop_eval_base *> Ggtf;
+        vector<EvalBase *> BAbtf;
+        vector<EvalBase *> RSQrqtf;
+        vector<EvalBase *> Ggtf;
     };
 } // namespace fatrop
 

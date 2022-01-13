@@ -7,13 +7,13 @@
 #define FATROP_LA_INCLUDED
 namespace fatrop
 {
-    struct matrix_ind
+    struct MatrixInd
     {
         int ai;
         int aj;
     };
     /** \brief interface class for matrix representations */
-    class fatrop_matrix
+    class FatropMat
     {
     public:
         /** \brief copy of matrix element */
@@ -38,7 +38,7 @@ namespace fatrop
     };
     // special matrices
     /** \brief identity matrix */
-    class eye : public fatrop_matrix
+    class eye : public FatropMat
     {
     public:
         /** \brief constructor */
@@ -64,7 +64,7 @@ namespace fatrop
         int dim_;
     };
     /** \brief interface class for matrix representations */
-    class fatrop_vector
+    class  FatropVec
     {
     public:
         /** \brief copy of matrix element */

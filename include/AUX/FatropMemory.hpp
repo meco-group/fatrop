@@ -13,7 +13,7 @@ using namespace std;
 namespace fatrop
 {
     /** \brief fatrop memory element, used for allocation of memory*/
-    class fatrop_memory_el_base
+    class MemoryElBase
     {
     public:
         /** \brief calculate memory size*/
@@ -23,11 +23,11 @@ namespace fatrop
     };
 
     /** \brief allocates and initializes fatrop_memory_el's in one big chunk of memory */
-    class fatrop_memory_allocator
+    class MemoryAllocator
     {
     public:
         /// add a fatrop_memory_el to allocator
-        void add(fatrop_memory_el_base &fme) { fatrop_memory_el_vector.push_back(&fme); };
+        void add(MemoryElBase &fme) { fatrop_memory_el_vector.push_back(&fme); };
         /// calculate memory size needed to allocate all fatrop_memroy_el's of this allocator
         unsigned long int memory_size()
         {
@@ -55,13 +55,13 @@ namespace fatrop
 
     private:
         /// stores which fatrop_memory_el's are contained
-        vector<fatrop_memory_el_base *> fatrop_memory_el_vector;
+        vector<MemoryElBase *> fatrop_memory_el_vector;
         /// pointer to memory location of allocated data
         void *storage_mem = NULL;
 
     public:
         /// destructor
-        ~fatrop_memory_allocator()
+        ~MemoryAllocator()
         {
             free(storage_mem);
         }
@@ -74,12 +74,12 @@ namespace fatrop
     ///
     /// default constructor should be available
     template <typename T>
-    class fatrop_memory_el : public fatrop_memory_el_base
+    class fatrop_memory_el : public MemoryElBase
     {
     public:
         // E&& is a universal reference
         template<typename E>
-        fatrop_memory_el<T>(int size, E&&init_values, fatrop_memory_allocator &fma) : size(size), init_values_(forward<E>(init_values))
+        fatrop_memory_el<T>(int size, E&&init_values, MemoryAllocator &fma) : size(size), init_values_(forward<E>(init_values))
         {
             fma.add(*this);
         }

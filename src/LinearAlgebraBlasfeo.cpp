@@ -1,4 +1,6 @@
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "AUX/LinearAlgebra.hpp"
+
 
 namespace fatrop
 {
@@ -105,9 +107,9 @@ namespace fatrop
     }
 
     /** \brief returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
-    matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj)
+    MatrixInd max_el(int m, int n, MAT *matr, int ai, int aj)
     {
-        matrix_ind res;
+        MatrixInd res;
         res.ai = ai;
         res.aj = aj;
         double valmax = 0.0;
@@ -136,7 +138,7 @@ namespace fatrop
         int j = 0;
         for (int i = 0; i < minmn; i++)
         {
-            matrix_ind max_curr = max_el(m, n_max, A, i, i);
+            MatrixInd max_curr = max_el(m, n_max, A, i, i);
             if (abs(MATEL(A, max_curr.ai, max_curr.aj)) < tol)
             {
                 break;
@@ -169,7 +171,7 @@ namespace fatrop
         int j = 0;
         for (int i = 0; i < minmn; i++)
         {
-            matrix_ind max_curr = max_el(n_max, m, At, i, i);
+            MatrixInd max_curr = max_el(n_max, m, At, i, i);
             if (abs(MATEL(At, max_curr.ai, max_curr.aj)) < tol)
             {
                 break;

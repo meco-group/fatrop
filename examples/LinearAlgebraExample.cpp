@@ -7,16 +7,16 @@ using namespace fatrop;
 using namespace std;
 int main()
 {
-    fatrop_memory_allocator fma;
-    fatrop_memory_matrix_bf A(100, 100, 1, fma);
-    fatrop_memory_matrix_bf lower(vector<int>(1, 100), vector<int>(1, 100), 1, fma);
-    fatrop_memory_matrix_bf At(100, 100, 1, fma);
-    fatrop_memory_matrix_bf A1(100, 100, 1, fma);
-    fatrop_memory_matrix_bf L(100, 100, 1, fma);
-    fatrop_memory_matrix_bf U(100, 100, 1, fma);
-    fatrop_memory_matrix_bf test(100, 100, 1, fma);
-    fatrop_memory_permutation_matrix Pl(100, 1, fma);
-    fatrop_memory_permutation_matrix Pr(100, 1, fma);
+    MemoryAllocator fma;
+    FatropMemoryMatBF A(100, 100, 1, fma);
+    FatropMemoryMatBF lower(vector<int>(1, 100), vector<int>(1, 100), 1, fma);
+    FatropMemoryMatBF At(100, 100, 1, fma);
+    FatropMemoryMatBF A1(100, 100, 1, fma);
+    FatropMemoryMatBF L(100, 100, 1, fma);
+    FatropMemoryMatBF U(100, 100, 1, fma);
+    FatropMemoryMatBF test(100, 100, 1, fma);
+    MemoryPermMat Pl(100, 1, fma);
+    MemoryPermMat Pr(100, 1, fma);
     fatrop_memory_el<int> testfatropmemel(5, vector<int>(5, 420), fma);
     fma.allocate();
     A[0] = random_matrix(100, 100);

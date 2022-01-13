@@ -11,10 +11,10 @@ namespace fatrop
 {
 
     /** \brief convert fatrop_matrix to Eigen matrix, only used for testing/debugging*/
-    class Eig : public Eigen::MatrixXd, public fatrop_matrix
+    class Eig : public Eigen::MatrixXd, public FatropMat
     {
     public:
-        Eig(const fatrop_matrix &fm) : Eigen::MatrixXd(fm.nrows(), fm.ncols())
+        Eig(const FatropMat &fm) : Eigen::MatrixXd(fm.nrows(), fm.ncols())
         {
             const int nrows = fm.nrows();
             const int ncols = fm.ncols();
@@ -26,7 +26,7 @@ namespace fatrop
                 }
             }
         };
-        Eig(const fatrop_vector &fv) : Eigen::MatrixXd(fv.nels(), 1)
+        Eig(const FatropVec &fv) : Eigen::MatrixXd(fv.nels(), 1)
         {
             const int nels = fv.nels();
             for (int ai = 0; ai < nels; ai++)

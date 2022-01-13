@@ -6,7 +6,7 @@ using namespace std;
 namespace fatrop
 {
     /// Class used to evaluate a numerical functions. Functions can be implemented by hand or casadi codegen API or by plain casadi.
-    class fatrop_eval_base
+    class EvalBase
     {
     public:
         /// number of input vectors of the function
@@ -36,7 +36,7 @@ namespace fatrop
             PACKMAT(out_m, out_n, buffer_p, out_m, bf_mat, 0, 0);
             return res;
         }
-        ~fatrop_eval_base(){};
+        ~EvalBase(){};
     };
 };     // namespace fatrop
 #endif // FUNCTIONEVALUATIONINCLUDED

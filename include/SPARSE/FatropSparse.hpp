@@ -39,9 +39,9 @@ namespace fatrop
     res.node = new sum(1,2)
     return res
     */
-    struct triplet
+    struct Triplet
     {
-        triplet(const int ai, const int aj, const double value) : ai(ai), aj(aj), val(value){};
+        Triplet(const int ai, const int aj, const double value) : ai(ai), aj(aj), val(value){};
         int row() const { return ai; };
         int col() const { return aj; };
         double value() const { return val; };
@@ -49,10 +49,10 @@ namespace fatrop
         int aj;
         double val;
     };
-    class variable
+    class Variable
     {
     public:
-        variable(int size) : size(size){};
+        Variable(int size) : size(size){};
         int size;
         int offset;
         void set_grad(const vector<double> &grad_)
@@ -72,30 +72,30 @@ namespace fatrop
         }
         vector<double> grad;
     };
-    typedef shared_ptr<variable> var_sp;
-    class KKT_matrix_base
+    typedef shared_ptr<Variable> var_sp;
+    class SparseKKTMatrixBase
     {
     };
-    class matrix_vector_base
+    class MatrixVectorBase
     {
     public:
-        matrix_vector_base(const Eig &mat, var_sp var) : fsm(mat), var(var){};
+        MatrixVectorBase(const Eig &mat, var_sp var) : fsm(mat), var(var){};
         Eig fsm;
         var_sp var;
     };
 
-    class fatrop_expression
+    class SparseExpression
     {
     public:
         virtual bool is_matrix_vector() { return false; };
-        virtual void add_to_mv_vec(vector<matrix_vector_base> &mv_vec) = 0;
+        virtual void add_to_mv_vec(vector<MatrixVectorBase> &mv_vec) = 0;
         virtual int get_size() = 0;
     };
-    typedef shared_ptr<fatrop_expression> fe_sp;
-    class equation
+    typedef shared_ptr<SparseExpression> fe_sp;
+    class Equation
     {
     public:
-        equation(int size) : size(size){};
+        Equation(int size) : size(size){};
         int size;
         int offset;
         void add_expression(const fe_sp &express, vector<double> &rhs_)
@@ -103,11 +103,11 @@ namespace fatrop
             rhs = rhs_;
             express->add_to_mv_vec(mv_veceq);
         }
-        void add_triplets(vector<triplet> &tripl, int offs_H)
+        void add_triplets(vector<Triplet> &tripl, int offs_H)
         {
             for (unsigned long int i = 0; i < mv_veceq.size(); i++)
             {
-                matrix_vector_base mvi = mv_veceq.at(i);
+                MatrixVectorBase mvi = mv_veceq.at(i);
                 int offs_var = mvi.var->offset;
                 Eig &fsm = mvi.fsm;
                 int m = fsm.nrows();
@@ -121,7 +121,7 @@ namespace fatrop
                         if (val!=0.0)
                         {
 
-                            tripl.push_back(triplet(offs_H + offset + i, offs_var + j, val));
+                            tripl.push_back(Triplet(offs_H + offset + i, offs_var + j, val));
                         }
                     }
                 }
@@ -134,16 +134,16 @@ namespace fatrop
                 rhs_.at(offs_H + offset + i) = rhs.at(i);
             }
         }
-        vector<matrix_vector_base> mv_veceq;
+        vector<MatrixVectorBase> mv_veceq;
         vector<double> rhs;
     };
-    typedef std::shared_ptr<equation> eq_sp;
+    typedef std::shared_ptr<Equation> eq_sp;
 
-    class fatrop_sum1 : public fatrop_expression
+    class FatropSum1 : public SparseExpression
     {
     public:
-        fatrop_sum1(const fe_sp &fe1, const fe_sp &fe2) : child1(fe1), child2(fe2){};
-        void add_to_mv_vec(vector<matrix_vector_base> &mv_vec)
+        FatropSum1(const fe_sp &fe1, const fe_sp &fe2) : child1(fe1), child2(fe2){};
+        void add_to_mv_vec(vector<MatrixVectorBase> &mv_vec)
         {
             child1->add_to_mv_vec(mv_vec);
             child2->add_to_mv_vec(mv_vec);
@@ -157,17 +157,17 @@ namespace fatrop
     };
     fe_sp operator+(const fe_sp &fe1, const fe_sp &fe2)
     {
-        fe_sp res = make_shared<fatrop_sum1>(fe1, fe2);
+        fe_sp res = make_shared<FatropSum1>(fe1, fe2);
         return res;
     }
-    class matrix_vector : public fatrop_expression, public matrix_vector_base
+    class MatrixVector : public SparseExpression, public MatrixVectorBase
     {
     public:
-        matrix_vector(const Eig &mat, var_sp var) : matrix_vector_base(mat, var){};
+        MatrixVector(const Eig &mat, var_sp var) : MatrixVectorBase(mat, var){};
         bool is_matrix_vector() { return true; };
-        void add_to_mv_vec(vector<matrix_vector_base> &mv_vec)
+        void add_to_mv_vec(vector<MatrixVectorBase> &mv_vec)
         {
-            matrix_vector_base *mvb = static_cast<matrix_vector_base *>(this);
+            MatrixVectorBase *mvb = static_cast<MatrixVectorBase *>(this);
             mv_vec.push_back(*mvb);
         }
         int get_size()
@@ -177,18 +177,18 @@ namespace fatrop
     };
     fe_sp operator*(const Eig &mat, var_sp var)
     {
-        fe_sp res = make_shared<matrix_vector>(mat, var);
+        fe_sp res = make_shared<MatrixVector>(mat, var);
         return res;
     };
 
-    class hess_block
+    class HessBlock
     {
     public:
-        hess_block(const Eig &mat, var_sp var1, var_sp var2) : fsm(mat), var1(var1), var2(var2){};
+        HessBlock(const Eig &mat, var_sp var1, var_sp var2) : fsm(mat), var1(var1), var2(var2){};
         Eig fsm;
         var_sp var1;
         var_sp var2;
-        void add_triplets(vector<triplet> &tripl)
+        void add_triplets(vector<Triplet> &tripl)
         {
             int offs_var1 = var1->offset;
             int offs_var2 = var2->offset;
@@ -206,7 +206,7 @@ namespace fatrop
                         int aj = j + offs_var2;
                         if (ai >= aj) // only lower triangular matrix
                         {
-                            tripl.push_back(triplet(ai, aj, val));
+                            tripl.push_back(Triplet(ai, aj, val));
                         }
                     }
                     else
@@ -218,18 +218,18 @@ namespace fatrop
         }
     };
 
-    class KKT_matrix : public KKT_matrix_base
+    class SparseKKTMatrix : public SparseKKTMatrixBase
     {
     public:
         var_sp get_variable(int size)
         {
-            var_sp var = make_shared<variable>(size);
+            var_sp var = make_shared<Variable>(size);
             variable_vec.push_back(var);
             return variable_vec.back();
         };
         eq_sp get_equation(int size)
         {
-            eq_sp eq = make_shared<equation>(size);
+            eq_sp eq = make_shared<Equation>(size);
             equation_vec.push_back(eq);
             return eq;
         };
@@ -241,13 +241,13 @@ namespace fatrop
         }
         void set_hess_block(const Eig &mat, var_sp var1, var_sp var2)
         {
-            hess_block hb(mat, var1, var2);
+            HessBlock hb(mat, var1, var2);
             hess_block_vec.push_back(hb);
         }
 
         vector<var_sp> variable_vec;
         vector<eq_sp> equation_vec;
-        vector<hess_block> hess_block_vec;
+        vector<HessBlock> hess_block_vec;
         void set_offsets()
         {
             int offs_curr = 0;
@@ -264,7 +264,7 @@ namespace fatrop
             }
         }
         // TODO vector<triple> get_triplets, easier to use
-        void get_triplets(vector<triplet> &tripl_vec)
+        void get_triplets(vector<Triplet> &tripl_vec)
         {
             // tripl_vec.resize(0);
             this->set_offsets();
@@ -304,7 +304,7 @@ namespace fatrop
 
         void print(const char *type_id)
         {
-            vector<triplet> testvec;
+            vector<Triplet> testvec;
             get_triplets(testvec);
             //printing (matrix)
             if (string(type_id) == "matrix")

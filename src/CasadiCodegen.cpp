@@ -2,7 +2,7 @@
 using namespace fatrop;
 using namespace std;
 
-fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader> &handle_, const std::string &function_name) : handle(handle_)
+EvalCasGen::EvalCasGen(const shared_ptr<DLLoader> &handle_, const std::string &function_name) : handle(handle_)
 {
     void *handle_p = handle_->handle;
     /* Memory management -- increase reference counter */
@@ -74,14 +74,14 @@ fatrop_eval_CasGen::fatrop_eval_CasGen(const shared_ptr<DL_loader> &handle_, con
     output_buffer_p = buffer.data();
 }
 
-int fatrop_eval_CasGen::eval_buffer(const double **arg)
+int EvalCasGen::eval_buffer(const double **arg)
 {
     double *buffer_p = buffer.data();
     if (eval(arg, &output_buffer_p, iw, w, mem))
         return 1;
 }
 
-fatrop_eval_CasGen::~fatrop_eval_CasGen()
+EvalCasGen::~EvalCasGen()
 {
     // Release thread-local (not thread-safe)
     release(mem);

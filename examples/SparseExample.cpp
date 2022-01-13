@@ -10,7 +10,7 @@ int main()
     // ProfilerStart("output_inside.prof"); //Start profiling section and save to file
 
     /// sparse ocp
-    OCP_dims dims;
+    OCPDims dims;
     // next parameters give problem
     // dims.K = 3;
     // int nu = 10;
@@ -29,16 +29,16 @@ int main()
     dims.ng.at(0) = nx;
     // dims.ng.at(dims.K-1) = 0;
     // memory allocation
-    fatrop_memory_allocator fma;
-    OCP_KKT KKTocp(dims, fma);
+    MemoryAllocator fma;
+    OCPKKT KKTocp(dims, fma);
     OCP_KKT_solver OCP_solver(dims, fma);
 
     int N_opti_vars = sum(dims.nu + dims.nx);
     int N_lags = sum(dims.nx) - dims.nx.at(0) + sum(dims.ng);
-    fatrop_memory_vector_bf ux(N_opti_vars, 1, fma);
-    fatrop_memory_vector_bf lags(N_lags, 1, fma);
-    fatrop_memory_vector_bf lags2(N_lags, 1, fma);
-    fatrop_memory_vector_bf ux2(N_opti_vars, 1, fma);
+    FatropMemoryVecBF ux(N_opti_vars, 1, fma);
+    FatropMemoryVecBF lags(N_lags, 1, fma);
+    FatropMemoryVecBF lags2(N_lags, 1, fma);
+    FatropMemoryVecBF ux2(N_opti_vars, 1, fma);
     fma.allocate();
     random_OCP(KKTocp, dims, 3);
     // KKTocp.BAbt[0].print();

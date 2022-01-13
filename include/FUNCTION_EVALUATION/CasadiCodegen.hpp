@@ -16,11 +16,11 @@ typedef int (*casadi_checkout_t)(void);
 typedef void (*casadi_release_t)(int);
 namespace fatrop
 {
-    class fatrop_eval_CasGen : public fatrop_eval_base
+    class EvalCasGen : public EvalBase
     {
     public:
         /// constructor from file
-        fatrop_eval_CasGen(const shared_ptr<DL_loader> &handle, const std::string &function_name);
+        EvalCasGen(const shared_ptr<DLLoader> &handle, const std::string &function_name);
         /// pointer to result_buffer
         double *output_buffer_p;
         /// pointer to casadi codegen evalutation function
@@ -46,8 +46,8 @@ namespace fatrop
         /// evaluate function and save res in "ccs format with lda==out_m"
         int eval_buffer(const double **arg);
         /// for reference counting of handle pointer
-        shared_ptr<DL_loader> handle;
-        ~fatrop_eval_CasGen();
+        shared_ptr<DLLoader> handle;
+        ~EvalCasGen();
     };
 } // fatrop
 

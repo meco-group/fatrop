@@ -38,7 +38,7 @@
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
 #define PACKMAT blasfeo_pack_dmat
-#define PMAT fatrop_permutation_matrix
+#define PMAT PermMat
 
 #include <iostream>
 extern "C"
@@ -131,13 +131,13 @@ namespace fatrop
     // }
 
     /** \brief this class is used for blasfeo matrices*/
-    class fatrop_matrix_bf : public fatrop_matrix
+    class FatropMatBF : public FatropMat
     {
     public:
         /** \brief constructor memory still has to be allocated*/
-        fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
         /** \brief constructor memory already allocated*/
-        fatrop_matrix_bf(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
         /** \brief type conversion to blasfeo matrix pointer*/
         inline explicit operator MAT *() const
         {
@@ -159,7 +159,7 @@ namespace fatrop
         /** \brief get number of cols */
         int ncols() const { return ncols_; };
         /** \brief copies all elements from a given fatrop_matrix to this matrix*/
-        void operator=(const fatrop_matrix &fm)
+        void operator=(const FatropMat &fm)
         {
             for (int ai = 0; ai < fm.nrows(); ai++)
             // for (int ai = 0; ai < nrows_; ai++)
@@ -177,9 +177,9 @@ namespace fatrop
             mat_ = matbf;
         }
         /** \brief take a block of size (p,q), starting at (i,j)*/
-        fatrop_matrix_bf block(const int i, const int j, const int p, const int q) const
+        FatropMatBF block(const int i, const int j, const int p, const int q) const
         {
-            return fatrop_matrix_bf(p, q, row_offset_ + i, col_offset_ + j, this->mat_);
+            return FatropMatBF(p, q, row_offset_ + i, col_offset_ + j, this->mat_);
         }
 
     private:
@@ -191,16 +191,16 @@ namespace fatrop
     };
 
     /** \brief this class is used for the allocation of a blasfeo matrix, the dimsensions are set from a vector */
-    class fatrop_memory_matrix_bf : public fatrop_memory_el_base
+    class FatropMemoryMatBF : public MemoryElBase
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_matrix_bf(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
+        FatropMemoryMatBF(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N, MemoryAllocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
         {
             fma.add(*this);
         }
-        fatrop_memory_matrix_bf(const int nrows, const int ncols, int N, fatrop_memory_allocator &fma) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
+        FatropMemoryMatBF(const int nrows, const int ncols, int N, MemoryAllocator &fma) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
         {
             fma.add(*this);
         }
@@ -242,13 +242,13 @@ namespace fatrop
             }
         }
         /** \brief get fatrop matrix bf */
-        fatrop_matrix_bf operator[](const int N) const
+        FatropMatBF operator[](const int N) const
         {
 #if DEBUG
             assert(N < N_);
 #endif
             MAT *resmat = mat + N;
-            fatrop_matrix_bf res(resmat->m, resmat->n, 0, 0, resmat);
+            FatropMatBF res(resmat->m, resmat->n, 0, 0, resmat);
             return res;
         }
         /** \brief get first blasfeo_xmat* struct */
@@ -264,13 +264,13 @@ namespace fatrop
         const FatropVector<int> ncols_;
     };
     /** this class is used for blasfeo vectors*/
-    class fatrop_vector_bf : public fatrop_vector
+    class FatropVecBF : public FatropVec
     {
     public:
         /** \brief constructor memory still has to be allocated*/
-        fatrop_vector_bf(const int nels, const int offset) : offset_(offset), nels_(nels) {}
+        FatropVecBF(const int nels, const int offset) : offset_(offset), nels_(nels) {}
         /** \brief constructor memory already allocated*/
-        fatrop_vector_bf(const int nels, const int offset, VEC *vecbf) : vec_(vecbf), offset_(offset), nels_(nels) {}
+        FatropVecBF(const int nels, const int offset, VEC *vecbf) : vec_(vecbf), offset_(offset), nels_(nels) {}
         /** \brief type conversion to blasfeo vector pointer*/
         inline explicit operator VEC *() const
         {
@@ -289,7 +289,7 @@ namespace fatrop
         /** \brief get number of elements */
         int nels() const { return nels_; };
         /** \brief copies all elements from a given fatrop_vector to this vector*/
-        void operator=(const fatrop_vector &fm)
+        void operator=(const FatropVec &fm)
         {
             for (int ai = 0; ai < nels_; ai++)
             {
@@ -302,9 +302,9 @@ namespace fatrop
             vec_ = vecbf;
         }
         /** \brief take a block of size (p), starting at (i)*/
-        fatrop_vector_bf block(const int i, const int p) const
+        FatropVecBF block(const int i, const int p) const
         {
-            return fatrop_vector_bf(p, offset_ + i, this->vec_);
+            return FatropVecBF(p, offset_ + i, this->vec_);
         }
 
     private:
@@ -313,16 +313,16 @@ namespace fatrop
         const int nels_;
     };
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
-    class fatrop_memory_vector_bf : public fatrop_memory_el_base
+    class FatropMemoryVecBF : public MemoryElBase
     {
     public:
-        /** \brief constuction for allocation on fatrop_memory_allocator*/
-        fatrop_memory_vector_bf(const FatropVector<int> &nels, int N, fatrop_memory_allocator &fma) : N_(N), nels_(nels)
+        /** \brief constuction for allocation on MemoryAllocator*/
+        FatropMemoryVecBF(const FatropVector<int> &nels, int N, MemoryAllocator &fma) : N_(N), nels_(nels)
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
         {
             fma.add(*this);
         }
-        fatrop_memory_vector_bf(const int nels, int N, fatrop_memory_allocator &fma) : N_(N), nels_(vector<int>(N, nels))
+        FatropMemoryVecBF(const int nels, int N, MemoryAllocator &fma) : N_(N), nels_(vector<int>(N, nels))
         {
             fma.add(*this);
         }
@@ -364,13 +364,13 @@ namespace fatrop
             }
         }
         /** \brief get fatrop matrix bf */
-        fatrop_vector_bf operator[](const int N) const
+        FatropVecBF operator[](const int N) const
         {
 #if DEBUG
             assert(N < N_);
 #endif
             VEC *resvec = vec + N;
-            fatrop_vector_bf res(resvec->m, 0, resvec);
+            FatropVecBF res(resvec->m, 0, resvec);
             return res;
         }
         /** \brief get first blasfeo_xmat* struct */
@@ -386,13 +386,13 @@ namespace fatrop
     };
 
     /** \brief this class represents a permutation matrix */
-    class fatrop_permutation_matrix : public fatrop_matrix
+    class PermMat : public FatropMat
     {
     public:
         /** \brief constructor memory still has to be allocated */
-        fatrop_permutation_matrix(const int dim) : dim_(dim){};
+        PermMat(const int dim) : dim_(dim){};
         /** \brief constructor memory already allocated */
-        fatrop_permutation_matrix(const int dim, int *data) : dim_(dim), data_(data){};
+        PermMat(const int dim, int *data) : dim_(dim), data_(data){};
         /** \brief get number of rows */
         int nrows() const { return dim_; };
         /** \brief get number of columns */
@@ -518,11 +518,11 @@ namespace fatrop
     };
 
     /** \brief this class is used for the allocation of a permutation matrix */
-    class fatrop_memory_permutation_matrix : public fatrop_memory_el_base, public fatrop_permutation_matrix
+    class MemoryPermMat : public MemoryElBase, public PermMat
     {
     public:
         /** \brief constructor */
-        fatrop_memory_permutation_matrix(const int dim, const int N, fatrop_memory_allocator &fma) : fatrop_permutation_matrix(dim), dim_(dim), N_(N)
+        MemoryPermMat(const int dim, const int N, MemoryAllocator &fma) : PermMat(dim), dim_(dim), N_(N)
         {
             fma.add(*this);
         };
@@ -530,17 +530,17 @@ namespace fatrop
         int memory_size() const
         {
             int size = 0;
-            size += N_ * sizeof(fatrop_permutation_matrix) + N_ * dim_ * sizeof(int);
+            size += N_ * sizeof(PermMat) + N_ * dim_ * sizeof(int);
             return size;
         }
         /** \brief set up memory*/
         void set_up(char *&char_p)
         {
-            perm_p = (fatrop_permutation_matrix *)char_p;
-            fatrop_permutation_matrix *perm_pp = perm_p;
+            perm_p = (PermMat *)char_p;
+            PermMat *perm_pp = perm_p;
             for (int i = 0; i < N_; i++)
             {
-                new (perm_pp) fatrop_permutation_matrix(dim_);
+                new (perm_pp) PermMat(dim_);
                 perm_pp++;
             }
             int *data_p = (int *)perm_pp;
@@ -552,14 +552,14 @@ namespace fatrop
             }
             char_p = (char *)data_p;
         }
-        explicit operator fatrop_permutation_matrix *() { return perm_p; };
+        explicit operator PermMat *() { return perm_p; };
 
     private:
         const int dim_;
         const int N_;
-        fatrop_permutation_matrix *perm_p;
+        PermMat *perm_p;
     };
-    matrix_ind max_el(int m, int n, MAT *matr, int ai, int aj);
+    MatrixInd max_el(int m, int n, MAT *matr, int ai, int aj);
 #define MAX(a, b)                   \
     (                               \
         {                           \

@@ -10,7 +10,7 @@ namespace fatrop
     {
     public:
     // triplets are from lower part of matrix
-        SparseSolverInterface(const int nnz, const int dim, const vector<triplet> &tripl) : nnz_(nnz), dim_(dim), ai(nnz), aj(nnz)
+        SparseSolverInterface(const int nnz, const int dim, const vector<Triplet> &tripl) : nnz_(nnz), dim_(dim), ai(nnz), aj(nnz)
         {
             for (int i =0; i < nnz; i++)
             {
@@ -19,7 +19,7 @@ namespace fatrop
             }
         };
         virtual void preprocess() = 0;
-        virtual void solve(const vector<triplet>& A, vector<double>& rhs) = 0;
+        virtual void solve(const vector<Triplet>& A, vector<double>& rhs) = 0;
     protected:
         const int nnz_;
         const int dim_;

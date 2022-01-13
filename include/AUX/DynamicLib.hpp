@@ -5,10 +5,10 @@
 using namespace std;
 namespace fatrop
 {
-    class DL_loader
+    class DLLoader
     {
     public:
-        DL_loader(const string &filename)
+        DLLoader(const string &filename)
         {
             handle = dlopen(&filename[0], RTLD_LAZY);
             if (handle == 0)
@@ -16,7 +16,7 @@ namespace fatrop
                 printf("Cannot open f.so, error %s\n", dlerror());
             }
         }
-        ~DL_loader()
+        ~DLLoader()
         {
             free(handle);
         }

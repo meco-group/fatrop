@@ -13,7 +13,7 @@ TEST(HelloTest, BasicAssertions)
     // Expect equality.
     EXPECT_EQ(7 * 6, 42);
 }
-class test_container : public fatrop_memory_allocator
+class test_container : public MemoryAllocator
 {
 };
 int main(int argc, char** argv){

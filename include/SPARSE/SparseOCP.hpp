@@ -9,7 +9,7 @@ namespace fatrop
     class Sparse_OCP
     {
     public:
-        Sparse_OCP(OCP_dims &dims, OCP_KKT &OCP, bool Guzero = false) : dims(dims)
+        Sparse_OCP(OCPDims &dims, OCPKKT &OCP, bool Guzero = false) : dims(dims)
         {
             int K = dims.K;
             c_vec = vector<eq_sp>(dims.K, nullptr);
@@ -95,10 +95,10 @@ namespace fatrop
             };
         };
 
-        void fact_solve(const fatrop_vector_bf &ux, const fatrop_vector_bf &lam, double& el_time)
+        void fact_solve(const FatropVecBF &ux, const FatropVecBF &lam, double& el_time)
         {
 
-            vector<triplet> ocptripl;
+            vector<Triplet> ocptripl;
             KKT.get_triplets(ocptripl);
             InterfaceMUMPS interfo(ocptripl.size(), KKT.get_size(), ocptripl);
             interfo.preprocess();
@@ -162,8 +162,8 @@ namespace fatrop
                 }
             }
         }
-        KKT_matrix KKT;
-        OCP_dims dims;
+        SparseKKTMatrix KKT;
+        OCPDims dims;
         vector<var_sp> u_vec;
         vector<var_sp> x_vec;
         vector<eq_sp> c_vec;

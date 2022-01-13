@@ -18,24 +18,24 @@ using namespace std;
 namespace fatrop
 {
     /** \brief this class contains all information to represent the KKT system of an equality constrained OCP*/
-    class OCP_KKT
+    class OCPKKT
     {
     public:
-        OCP_KKT(const OCP_dims &dims, fatrop_memory_allocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
+        OCPKKT(const OCPDims &dims, MemoryAllocator &fma) : K(dims.K), nu(dims.K, dims.nu, fma), nx(dims.K, dims.nx, fma), ng(dims.K, dims.ng, fma), RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K, fma), BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K, fma), Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K, fma), aux(dims, fma){};
         int K;
         fatrop_memory_el<int> nu;
         fatrop_memory_el<int> nx;
         fatrop_memory_el<int> ng;
         /// small-scale Hessian
-        fatrop_memory_matrix_bf RSQrqt;
+        FatropMemoryMatBF RSQrqt;
         /// small-scale Jacobian dynamics
-        fatrop_memory_matrix_bf BAbt;
+        FatropMemoryMatBF BAbt;
         /// small-scale Jacobian stagewise eq constraints
-        fatrop_memory_matrix_bf Ggt;
+        FatropMemoryMatBF Ggt;
         class OCP_aux
         {
         public:
-            OCP_aux(const OCP_dims &dims, fatrop_memory_allocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K-1, offsets(rotate(dims.nx, 1))+ sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
+            OCP_aux(const OCPDims &dims, MemoryAllocator &fma) : ux_offs(dims.K, offsets(dims.nx + dims.nu), fma), g_offs(dims.K, offsets(dims.ng), fma), dyn_eq_offs(dims.K-1, offsets(rotate(dims.nx, 1))+ sum(dims.ng), fma), max_nu(max(dims.nu)), max_nx(max(dims.nx)), max_ng(max(dims.ng)){};
             /// offset arrays are used for efficiency
             const fatrop_memory_el<int> ux_offs;
             /// offset arrays are used for efficiency
@@ -50,7 +50,7 @@ namespace fatrop
     class OCP_KKT_solver
     {
     public:
-        OCP_KKT_solver(const OCP_dims &dims, fatrop_memory_allocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
+        OCP_KKT_solver(const OCPDims &dims, MemoryAllocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K, fma),
                                                                              Hh(dims.nx, dims.nx + 1, dims.K, fma), // the number of eqs can never exceed nx
                                                                              AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1, fma),
                                                                              RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K, fma), // TODO, only save first rho rows (can never exceed nu)
@@ -73,7 +73,7 @@ namespace fatrop
                                                                              gamma(dims.K, vector<int>(dims.K, 0), fma),
                                                                              rho(dims.K, vector<int>(dims.K, 0), fma){};
         // solve a KKT system
-        void fact_solve(OCP_KKT *OCP, const fatrop_vector_bf &ux, const fatrop_vector_bf &lam)
+        void fact_solve(OCPKKT *OCP, const FatropVecBF &ux, const FatropVecBF &lam)
         {
             // define compiler macros for notational convenience
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
@@ -345,26 +345,26 @@ namespace fatrop
             }
             return;
         }
-        fatrop_memory_matrix_bf Ppt;
-        fatrop_memory_matrix_bf Hh;
-        fatrop_memory_matrix_bf AL;
-        fatrop_memory_matrix_bf RSQrqt_tilde;
-        fatrop_memory_matrix_bf Ggt_stripe;
-        fatrop_memory_matrix_bf Ggt_tilde;
-        fatrop_memory_matrix_bf GgLt;
-        fatrop_memory_matrix_bf RSQrqt_hat;
-        fatrop_memory_matrix_bf Llt;
-        fatrop_memory_matrix_bf Llt_shift; // needed because feature not implemented yet
+        FatropMemoryMatBF Ppt;
+        FatropMemoryMatBF Hh;
+        FatropMemoryMatBF AL;
+        FatropMemoryMatBF RSQrqt_tilde;
+        FatropMemoryMatBF Ggt_stripe;
+        FatropMemoryMatBF Ggt_tilde;
+        FatropMemoryMatBF GgLt;
+        FatropMemoryMatBF RSQrqt_hat;
+        FatropMemoryMatBF Llt;
+        FatropMemoryMatBF Llt_shift; // needed because feature not implemented yet
         // fatrop_memory_matrix_bf PpIt_tilde;
-        fatrop_memory_matrix_bf GgIt_tilde;
-        fatrop_memory_matrix_bf GgLIt;
-        fatrop_memory_matrix_bf HhIt;
-        fatrop_memory_matrix_bf PpIt_hat;
-        fatrop_memory_matrix_bf LlIt;
-        fatrop_memory_permutation_matrix Pl;
-        fatrop_memory_permutation_matrix Pr;
-        fatrop_memory_permutation_matrix PlI;
-        fatrop_memory_permutation_matrix PrI;
+        FatropMemoryMatBF GgIt_tilde;
+        FatropMemoryMatBF GgLIt;
+        FatropMemoryMatBF HhIt;
+        FatropMemoryMatBF PpIt_hat;
+        FatropMemoryMatBF LlIt;
+        MemoryPermMat Pl;
+        MemoryPermMat Pr;
+        MemoryPermMat PlI;
+        MemoryPermMat PrI;
         fatrop_memory_el<int> gamma;
         fatrop_memory_el<int> rho;
     };

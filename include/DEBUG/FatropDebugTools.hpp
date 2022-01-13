@@ -19,7 +19,7 @@ Eig random_matrix(const int m, const int n, const int seed = 0)
         }
     return res;
 }
-OCP_KKT random_OCP(OCP_KKT &KKT, OCP_dims &dims, int seed = 0)
+OCPKKT random_OCP(OCPKKT &KKT, OCPDims &dims, int seed = 0)
 {
     int K = dims.K;
     for (int k = 0; k < K - 1; k++)

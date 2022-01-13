@@ -10,7 +10,7 @@ using namespace fatrop;
 
 int main()
 {
-    OCP_dims dims;
+    OCPDims dims;
     // dims.K = 3;
     // int nu = 2;
     // int nx = 5;
@@ -39,13 +39,13 @@ int main()
     dims.ng.at(dims.K-1) = 0;
     dims.nu.at(dims.K-1) = 0;
     // memory allocation
-    fatrop_memory_allocator fma;
-    OCP_KKT KKT(dims, fma);
+    MemoryAllocator fma;
+    OCPKKT KKT(dims, fma);
     OCP_KKT_solver OCP_solver(dims, fma);
     int N_opti_vars = sum(dims.nu + dims.nx);
     int N_lags = (dims.K - 1) * nx + sum(dims.ng);
-    fatrop_memory_vector_bf ux(N_opti_vars, 1, fma);
-    fatrop_memory_vector_bf lags(N_lags, 1, fma);
+    FatropMemoryVecBF ux(N_opti_vars, 1, fma);
+    FatropMemoryVecBF lags(N_lags, 1, fma);
     fma.allocate();
     random_OCP(KKT, dims, 0);
     blasfeo_timer timer;
