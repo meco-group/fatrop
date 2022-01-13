@@ -20,8 +20,6 @@ namespace fatrop
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(int *, nu, _p);
-            OCPMACRO(int *, nx, _p);
-            OCPMACRO(int *, ng, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
             SOLVERMACRO(VEC *, scales_primal_vars, _p);
             SOLVERMACRO(VEC *, lam, _p);

@@ -76,9 +76,9 @@ EvalCasGen::EvalCasGen(const shared_ptr<DLLoader> &handle_, const std::string &f
 
 int EvalCasGen::eval_buffer(const double **arg)
 {
-    double *buffer_p = buffer.data();
     if (eval(arg, &output_buffer_p, iw, w, mem))
         return 1;
+    return 0;
 }
 
 EvalCasGen::~EvalCasGen()

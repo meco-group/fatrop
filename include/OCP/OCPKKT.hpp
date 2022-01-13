@@ -60,7 +60,6 @@ namespace fatrop
                                                                     RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1, fma),
                                                                     Llt(dims.nu + dims.nx + 1, dims.nu, dims.K, fma),
                                                                     Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1, fma),
-                                                                    //  PpIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                     GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                     GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
                                                                     HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1, fma),
@@ -96,7 +95,6 @@ namespace fatrop
             SOLVERMACRO(MAT *, RSQrqt_hat, _p);
             SOLVERMACRO(MAT *, Llt, _p);
             SOLVERMACRO(MAT *, Llt_shift, _p);
-            // SOLVERMACRO(MAT *, PpIt_tilde, _p);
             SOLVERMACRO(MAT *, GgIt_tilde, _p);
             SOLVERMACRO(MAT *, GgLIt, _p);
             SOLVERMACRO(MAT *, HhIt, _p);
@@ -106,11 +104,6 @@ namespace fatrop
             SOLVERMACRO(PMAT *, PrI, _p);
             SOLVERMACRO(VEC *, ux, _p);
             SOLVERMACRO(VEC *, lam, _p);
-            // AUXMACRO(int, max_nu, );
-            // AUXMACRO(int, max_nx, );
-            // AUXMACRO(int, max_ng, );
-            // AUXMACRO(int *, ux_offs, _p);
-            // AUXMACRO(int *, g_offs, _p);
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, nx, _p);
             OCPMACRO(int *, ng, _p);
@@ -355,7 +348,6 @@ namespace fatrop
         FatropMemoryMatBF RSQrqt_hat;
         FatropMemoryMatBF Llt;
         FatropMemoryMatBF Llt_shift; // needed because feature not implemented yet
-        // fatrop_memory_matrix_bf PpIt_tilde;
         FatropMemoryMatBF GgIt_tilde;
         FatropMemoryMatBF GgLIt;
         FatropMemoryMatBF HhIt;
