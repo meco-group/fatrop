@@ -6,7 +6,7 @@ class OptimalControlProblem:
     def __init__(self):
         self.ngI = 0
         self.ngF = 0
-        self.eqI = SX.sym("d_EqI", 0)
+        self.eqI = SX.sym("EqI", 0)
         self.dual_eqI = SX.sym("d_EqI", 0)
         self.scales_eqI = SX.sym("d_EqI", 0)
         self.eqF = SX.sym("d_EqI", 0)
@@ -52,6 +52,7 @@ class OptimalControlProblem:
         self.eqF = self.scales_eqF*eq
 
     def set_up_Opti(self, K):
+        # all scales are set to 1.0
         nu = self.nu
         nx = self.nx
         self.opti = Opti()

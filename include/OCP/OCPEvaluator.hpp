@@ -1,7 +1,8 @@
 #ifndef OCPEVALUATORINCLUDED
 #define OCPEVALUATORINCLUDED
-#include "FatropOCPKKT.hpp"
+#include "OCPKKT.hpp"
 #include "FUNCTION_EVALUATION/FunctionEvaluation.hpp"
+#include "SOLVER/FatropData.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)

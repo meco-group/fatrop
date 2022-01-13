@@ -46,7 +46,7 @@ extern "C"
 #include <blasfeo.h>
 }
 #include "../AUX/FatropMemory.hpp"
-#include "../AUX/FatropLinearAlgebra.hpp"
+#include "../AUX/LinearAlgebra.hpp"
 #include "../AUX/FatropVector.hpp"
 #if DEBUG
 #include <assert.h>

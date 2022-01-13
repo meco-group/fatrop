@@ -1,9 +1,9 @@
 #ifndef FATROPDEBUGTOOLSINCLUDED
 #define FATROPDEBUGTOOLSINCLUDED
-#include "../BLASFEO_WRAPPER/FatropLinearAlgebraBlasfeo.hpp"
+#include "../BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include <random>
 #include <vector>
-#include "FatropLinearAlgebraEigen.hpp"
+#include "LinearAlgebraEigen.hpp"
 using namespace fatrop;
 Eig random_matrix(const int m, const int n, const int seed = 0)
 {

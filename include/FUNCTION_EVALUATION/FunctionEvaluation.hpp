@@ -1,7 +1,7 @@
 #ifndef FUNCTIONEVALUATIONINCLUDED
 #define FUNCTIONEVALUATIONINCLUDED
 #include <vector>
-#include "BLASFEO_WRAPPER/FatropLinearAlgebraBlasfeo.hpp"
+#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 using namespace std;
 namespace fatrop
 {

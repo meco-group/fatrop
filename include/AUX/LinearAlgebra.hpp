@@ -1,5 +1,5 @@
 /**
- *  @file FatropLinearAlgebra.hpp
+ *  @file LinearAlgebra.hpp
  *  This file contains some interface classes for use in linear algebra. 
  *
 */

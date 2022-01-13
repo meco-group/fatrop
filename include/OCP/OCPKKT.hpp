@@ -1,5 +1,5 @@
 /**
- * @file FatropOCPKKT.hpp
+ * @file OCPKKT.hpp
  * @author your name (you@domain.com)
  * @brief this file contains classes to represent a KKT matrix by blasfeo submatrices 
  * @version 0.1
@@ -10,9 +10,9 @@
  */
 #ifndef FATROP_OCP_KKT_INCLUDED
 #define FATROP_OCP_KKT_INCLUDED
-#include "../BLASFEO_WRAPPER/FatropLinearAlgebraBlasfeo.hpp"
-#include "FatropOCPDims.hpp"
-#include "../AUX/FatropAux.hpp"
+#include "../BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "OCPDims.hpp"
+#include "../AUX/Aux.hpp"
 #include "../AUX/FatropVector.hpp"
 using namespace std;
 namespace fatrop

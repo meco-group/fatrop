@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 #include "Fatrop.hpp"
-#include "DEBUG/FatropLinearAlgebraEigen.hpp"
+#include "DEBUG/LinearAlgebraEigen.hpp"
 #include "DEBUG/FatropDebugTools.hpp"
 #include <gtest/gtest.h>
 using namespace fatrop;

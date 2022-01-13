@@ -1,5 +1,5 @@
 /**
- *  @file FatropLinearAlgebraEigen.hpp
+ *  @file LinearAlgebraEigen.hpp
  *  This file provides an interface for fatrop_matrix/vector to Eigen matrix resp. vecor, this is only used for debugging and testing purposes. 
  *  The code in this file is not optimized for efficiency!
 */
