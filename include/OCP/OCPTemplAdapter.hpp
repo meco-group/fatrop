@@ -11,7 +11,12 @@ namespace fatrop
 {
     class CasGenFE
     {
-        int eval_hess(OCPKKTMemory *OCP, double obj_scale, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &lam, const FatropVecBF &scales_lam)
+        int eval_hess(OCPKKTMemory *OCP,
+                      double obj_scale,
+                      const FatropVecBF &primal_vars,
+                      const FatropVecBF &scales_primal_vars,
+                      const FatropVecBF &lam,
+                      const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -42,7 +47,7 @@ namespace fatrop
                     arg[2] = scales_primal_data + offs_ux_k;        // scales states k
                     arg[3] = primal_data + offs_ux_k + nu_k;        // inputs k
                     arg[4] = scales_primal_data + offs_ux_k + nu_k; // scales inputs k
-                    arg[5] = lam_data + offs_dyn_eq_k;              // lam_dyn k 
+                    arg[5] = lam_data + offs_dyn_eq_k;              // lam_dyn k
                     arg[6] = scales_lam_data + offs_dyn_eq_k;       // scales lam_dyn k
                     arg[7] = lam_data + offs_g_k;                   // lam_eq k
                     arg[8] = scales_lam_data + offs_g_k;            // scales lam_eq k
@@ -51,7 +56,10 @@ namespace fatrop
             }
             return 0;
         }
-        int eval_jac(OCPKKTMemory *OCP, const FatropVecBF &primal_vars, const FatropVecBF &scales_primal_vars, const FatropVecBF &scales_lam)
+        int eval_jac(OCPKKTMemory *OCP,
+                     const FatropVecBF &primal_vars,
+                     const FatropVecBF &scales_primal_vars,
+                     const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -102,7 +110,8 @@ namespace fatrop
             }
             return 0;
         }
-        int eval_g(){
+        int eval_g()
+        {
             return 0;
         }
 

@@ -24,7 +24,7 @@ namespace fatrop
         /// evaluate function and save res in "ccs format with lda==out_m"
         virtual int eval_buffer(const double **arg) = 0;
         /// evaluate function and save res in "blasfeo format"
-        int eval_bf(const double **arg, MAT *bf_mat)
+        inline int eval_bf(const double **arg, MAT *bf_mat)
         {
 #if DEBUG
             assert(bf_mat->m == out_m);

@@ -19,6 +19,7 @@ namespace fatrop
     class EvalCasGen : public EvalBase
     {
     public:
+        EvalCasGen();
         /// constructor from file
         EvalCasGen(const shared_ptr<DLLoader> &handle, const std::string &function_name);
         /// pointer to result_buffer

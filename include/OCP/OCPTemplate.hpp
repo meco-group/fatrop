@@ -4,17 +4,40 @@
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 namespace fatrop
 {
-    template<typename Derived>
     class OCPTemplate
     {
     public:
-        virtual int get_nxk(const int k);
-        virtual int get_nuk(const int k);
-        virtual int get_ngk(const int k);
-        virtual int get_horizon_lenght();
-        virtual int eval_BAbtk(const double ** args, MAT *res, const int k) const = 0;
-        virtual int eval_RSQrqtk(const double **args, MAT *res, const int k) const = 0;
-        virtual int eval_Ggtk(const double **args, MAT *res, const int k) const = 0;
+        virtual int get_nxk(const int k) const;
+        virtual int get_nuk(const int k) const;
+        virtual int get_ngk(const int k) const;
+        virtual int get_horizon_length() const;
+        virtual int eval_BAbtk(const double *states_kp1,
+                               const double *scales_states_kp1,
+                               const double *states_k,
+                               const double *scales_states_k,
+                               const double *inputs_k,
+                               const double *scales_inputs_k,
+                               const double *scales_lam,
+                               MAT *res,
+                               const int k) = 0;
+        virtual int eval_RSQrqtk(const double *objective_scale,
+                                 const double *states_k,
+                                 const double *scales_states_k,
+                                 const double *inputs_k,
+                                 const double *scales_inputs_k,
+                                 const double *lam_dyn_k,
+                                 const double *scales_lam_dyn_k,
+                                 const double *lam_eq_k,
+                                 const double *scales_lam_eq_k,
+                                 MAT *res,
+                                 const int k) = 0;
+        virtual int eval_Ggtk(const double *states_k,
+                              const double *scales_states_k,
+                              const double *inputs_k,
+                              const double *scales_inputs_k,
+                              const double *scales,
+                              MAT *res,
+                              const int k) = 0;
     };
 };     // namespace fatrop
 #endif // OCPTEMPLATEINCLUDED
