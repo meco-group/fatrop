@@ -2,9 +2,10 @@
 #define OCPTEMPLATEINCLUDED
 #include "OCP/OCPKKT.hpp"
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "AUX/SmartPtr.hpp"
 namespace fatrop
 {
-    class OCPTemplate
+    class OCPTemplate: public RefCountedObj
     {
     public:
         virtual int get_nxk(const int k) const = 0;

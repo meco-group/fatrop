@@ -36,15 +36,15 @@ namespace fatrop
         {
             ptr_->IncrRef();
         }
-        T *operator->() const
+        inline T *operator->() const
         {
             return ptr_;
         }
-        operator T *() const
+        inline operator T *() const
         {
             return ptr_;
         }
-        T &operator*() const
+        inline T &operator*() const
         {
             return *ptr_;
         }
