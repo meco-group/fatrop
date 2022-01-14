@@ -34,7 +34,7 @@ namespace fatrop
                                                     GgtFf(GgtFf){};
         static OCPTemplateBasic from_shared_lib(const string &filename, const int K)
         {
-            RefCountPtr<DLLoader> handle = new DLLoader(filename);
+            RefCountPtr<DLHandler> handle = new DLHandler(filename);
             EvalCasGen BAbtf(handle, "BAbt");
             EvalCasGen RSQrqtf(handle, "RSQrqt");
             EvalCasGen RSQrqtFf(handle, "RSQrqtF");

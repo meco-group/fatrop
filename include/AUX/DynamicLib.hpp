@@ -6,10 +6,10 @@
 using namespace std;
 namespace fatrop
 {
-    class DLLoader: public RefCountedObj
+    class DLHandler: public RefCountedObj
     {
     public:
-        DLLoader(const string &filename)
+        DLHandler(const string &filename)
         {
             handle = dlopen(&filename[0], RTLD_LAZY);
             if (handle == 0)
@@ -17,7 +17,7 @@ namespace fatrop
                 printf("Cannot open f.so, error %s\n", dlerror());
             }
         }
-        ~DLLoader()
+        ~DLHandler()
         {
             dlclose(handle);
         }
