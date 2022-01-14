@@ -6,7 +6,7 @@
 using namespace std;
 namespace fatrop
 {
-    class OCPTemplateBasic: public OCPTemplate
+    class OCPTemplateBasic : public OCPTemplate
     {
     public:
         OCPTemplateBasic(const int nu,
@@ -80,7 +80,19 @@ namespace fatrop
                          MAT *res,
                          const int k)
         {
-            return 0;
+            const double *args[9];
+            args[0] = objective_scale;
+            args[1] = states_k;
+            args[2] = scales_states_k;
+            args[3] = inputs_k;
+            args[4] = scales_inputs_k;
+            args[5] = lam_dyn_k;
+            args[6] = scales_lam_dyn_k;
+            args[7] = lam_eq_k;
+            args[8] = scales_lam_eq_k;
+            if (k == K_ - 1)
+                return RSQrqtFf.eval_bf(args, res);
+            return RSQrqtf.eval_bf(args, res);
         };
         int eval_Ggtk(const double *states_k,
                       const double *scales_states_k,
@@ -90,7 +102,19 @@ namespace fatrop
                       MAT *res,
                       const int k)
         {
-            return 0;
+            if (k != 0 && k != K_ - 1)
+                return 0;
+            const double *args[5];
+            args[0] = states_k;
+            args[1] = scales_states_k;
+            args[2] = inputs_k;
+            args[3] = scales_inputs_k;
+            args[4] = scales;
+            if (k == K_ - 1)
+                return GgtFf.eval_bf(args, res);
+            if (k ==0)
+                return GgtIf.eval_bf(args, res);
+            return 1;
         };
 
     private:

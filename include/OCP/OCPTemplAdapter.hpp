@@ -9,7 +9,7 @@
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class CasGenFE
+    class OCPTemplateAdapter // public OCP -> also include KKTmemory, OCPDims, ...
     {
         int eval_hess(OCPKKTMemory *OCP,
                       double obj_scale,
