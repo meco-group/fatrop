@@ -3,6 +3,8 @@
 #define OCPTEMPLATEBASICINCLUDED
 #include "OCPTemplate.hpp"
 #include <string>
+#include <AUX/DynamicLib.hpp>
+#include <AUX/SmartPtr.hpp>
 using namespace std;
 namespace fatrop
 {
@@ -30,6 +32,17 @@ namespace fatrop
                                                     GgtFf(GgtFf){};
         static OCPTemplateBasic from_shared_lib(const string &filename, const int K)
         {
+            RefCountPtr<DLLoader> handle = new DLLoader(filename);
+            EvalCasGen BAbtf(handle, "BAbt");
+            EvalCasGen RSQrqtf(handle, "RSQrqt");
+            EvalCasGen RSQrqtFf(handle, "RSQrqtF");
+            EvalCasGen GgtIf(handle, "GgtI");
+            EvalCasGen GgtFf(handle, "GgtF");
+            const int nx = BAbtf.out_n;
+            const int nu = BAbtf.out_m - nx - 1;
+            const int ngI = GgtIf.out_n;
+            const int ngF = GgtFf.out_n;
+            return OCPTemplateBasic(nu, nx, ngI, ngF, K, BAbtf, RSQrqtf, RSQrqtFf, GgtIf, GgtFf);
         }
         int get_nxk(const int k) const
         {
@@ -112,7 +125,7 @@ namespace fatrop
             args[4] = scales;
             if (k == K_ - 1)
                 return GgtFf.eval_bf(args, res);
-            if (k ==0)
+            if (k == 0)
                 return GgtIf.eval_bf(args, res);
             return 1;
         };

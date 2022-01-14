@@ -2,10 +2,11 @@
 #define DYNAMICLIBINCLUDED
 #include <dlfcn.h>
 #include <string>
+#include <AUX/SmartPtr.hpp>
 using namespace std;
 namespace fatrop
 {
-    class DLLoader
+    class DLLoader: public RefCountedObj
     {
     public:
         DLLoader(const string &filename)

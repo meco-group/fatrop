@@ -2,7 +2,7 @@
 using namespace fatrop;
 using namespace std;
 
-EvalCasGen::EvalCasGen(const shared_ptr<DLLoader> &handle_, const std::string &function_name) : handle(handle_)
+EvalCasGen::EvalCasGen(const RefCountPtr<DLLoader> &handle_, const std::string &function_name) : handle(handle_)
 {
     void *handle_p = handle_->handle;
     /* Memory management -- increase reference counter */
