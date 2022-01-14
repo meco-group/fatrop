@@ -7,10 +7,10 @@ namespace fatrop
     class OCPTemplate
     {
     public:
-        virtual int get_nxk(const int k) const;
-        virtual int get_nuk(const int k) const;
-        virtual int get_ngk(const int k) const;
-        virtual int get_horizon_length() const;
+        virtual int get_nxk(const int k) const = 0;
+        virtual int get_nuk(const int k) const = 0;
+        virtual int get_ngk(const int k) const = 0;
+        virtual int get_horizon_length() const = 0;
         virtual int eval_BAbtk(const double *states_kp1,
                                const double *scales_states_kp1,
                                const double *states_k,

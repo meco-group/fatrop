@@ -151,7 +151,7 @@ class OptimalControlProblem:
         GgtF = SX.zeros(self.nx+1, self.ngI)
         GgtF[:self.nx, :] = jacobian(self.eqF, vertcat(self.x_sym_scaled)).T
         GgtF[self.nx, :] = self.eqF[:].T
-        C.add(Function("GgtI", [self.x_sym_scaled, self.scales_x_sym, self.u_sym_scaled,
+        C.add(Function("GgtF", [self.x_sym_scaled, self.scales_x_sym, self.u_sym_scaled,
               self.scales_u_sym, self.scales_eqI], [densify(GgtF)]))
         # g_F
         C.generate()

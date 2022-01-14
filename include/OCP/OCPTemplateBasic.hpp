@@ -3,8 +3,10 @@
 #define OCPTEMPLATEBASICINCLUDED
 #include "OCPTemplate.hpp"
 #include <string>
+#include <iostream>
 #include <AUX/DynamicLib.hpp>
 #include <AUX/SmartPtr.hpp>
+#include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
 using namespace std;
 namespace fatrop
 {
@@ -44,15 +46,15 @@ namespace fatrop
             const int ngF = GgtFf.out_n;
             return OCPTemplateBasic(nu, nx, ngI, ngF, K, BAbtf, RSQrqtf, RSQrqtFf, GgtIf, GgtFf);
         }
-        int get_nxk(const int k) const
+        int get_nxk(const int k) const override
         {
             return nx_;
         }
-        int get_nuk(const int k) const
+        int get_nuk(const int k) const override
         {
             return nu_;
         }
-        int get_ngk(const int k) const
+        int get_ngk(const int k) const override
         {
             if (k == 0)
                 return ngI_;
@@ -60,7 +62,7 @@ namespace fatrop
                 return ngF_;
             return 0;
         }
-        int get_horizon_length() const { return K_; };
+        int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
                        const double *scales_states_kp1,
                        const double *states_k,
@@ -69,7 +71,7 @@ namespace fatrop
                        const double *scales_inputs_k,
                        const double *scales_lam,
                        MAT *res,
-                       const int k)
+                       const int k) override
         {
             const double *args[7];
             args[0] = states_kp1;
@@ -91,7 +93,7 @@ namespace fatrop
                          const double *lam_eq_k,
                          const double *scales_lam_eq_k,
                          MAT *res,
-                         const int k)
+                         const int k) override
         {
             const double *args[9];
             args[0] = objective_scale;
@@ -113,7 +115,7 @@ namespace fatrop
                       const double *scales_inputs_k,
                       const double *scales,
                       MAT *res,
-                      const int k)
+                      const int k) override
         {
             if (k != 0 && k != K_ - 1)
                 return 0;

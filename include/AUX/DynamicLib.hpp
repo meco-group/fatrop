@@ -19,7 +19,7 @@ namespace fatrop
         }
         ~DLLoader()
         {
-            free(handle);
+            dlclose(handle);
         }
         void *handle;
     };
