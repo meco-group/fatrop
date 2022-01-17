@@ -3,37 +3,38 @@
 #include "OCPKKT.hpp"
 #include "OCPTemplate.hpp"
 #include "AUX/SmartPtr.hpp"
-#include "TEMPLATES/NLP.hpp"
-#define OCPMACRO1(type, name, suffix) type name##suffix = ((type)ocpkktmemory.name)
-#define AUXMACRO1(type, name, suffix) type name##suffix = ((type)ocpkktmemory.aux.name)
-#define SOLVERMACRO1(type, name, suffix) type name##suffix = ((type)name)
+#include "OCP.hpp"
+#define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
+#define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
+#define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class OCPTemplateAdapter : public NLP, public RefCountedObj // public OCP -> also include KKTmemory, OCPDims, ...
+    class OCPTemplateAdapter : public OCP, public RefCountedObj // public OCP -> also include KKTmemory, OCPDims, ...
     {
-        public:
-        OCPTemplateAdapter(const RefCountPtr<OCPTemplate> &ocptempl_, MemoryAllocator &fma) : nuexpr(RefCountPtr<OCPTemplate>(ocptempl_)),nxexpr(RefCountPtr<OCPTemplate>(ocptempl_)),  ngexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ocptempl(ocptempl_), ocpkktmemory(OCPDims(ocptempl_->get_horizon_length(),nuexpr, nxexpr, ngexpr), fma)
+    public:
+        OCPTemplateAdapter(const RefCountPtr<OCPTemplate> &ocptempl_, MemoryAllocator &fma) : nuexpr(RefCountPtr<OCPTemplate>(ocptempl_)), nxexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ngexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ocptempl(ocptempl_)
         {
         }
-        int EvalHess(
+        int evalHess(
+            OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &lam,
-            const FatropVecBF &scales_lam)
+            const FatropVecBF &scales_lam) override
         {
             // horizon length
-            int K = ocpkktmemory.K;
+            int K = OCP->K;
             // offsets
-            int *offs_ux = (int *)ocpkktmemory.aux.ux_offs;
-            int *offs_g = (int *)ocpkktmemory.aux.g_offs;
-            int *offs_dyn_eq = (int *)ocpkktmemory.aux.dyn_eq_offs;
-            OCPMACRO1(MAT *, RSQrqt, _p);
-            OCPMACRO1(int *, nu, _p);
-            SOLVERMACRO1(VEC *, primal_vars, _p);
-            SOLVERMACRO1(VEC *, scales_primal_vars, _p);
-            SOLVERMACRO1(VEC *, lam, _p);
-            SOLVERMACRO1(VEC *, scales_lam, _p);
+            int *offs_ux = (int *)OCP->aux.ux_offs;
+            int *offs_g = (int *)OCP->aux.g_offs;
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
+            OCPMACRO(MAT *, RSQrqt, _p);
+            OCPMACRO(int *, nu, _p);
+            SOLVERMACRO(VEC *, primal_vars, _p);
+            SOLVERMACRO(VEC *, scales_primal_vars, _p);
+            SOLVERMACRO(VEC *, lam, _p);
+            SOLVERMACRO(VEC *, scales_lam, _p);
             double *primal_data = primal_vars_p->pa;
             double *scales_primal_data = scales_primal_vars_p->pa;
             double *lam_data = lam_p->pa;
@@ -59,24 +60,25 @@ namespace fatrop
             }
             return 0;
         }
-        int EvalJac(
+        int evalJac(
+            OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam)
+            const FatropVecBF &scales_lam) override
         {
             // horizon length
-            int K = ocpkktmemory.K;
+            int K = OCP->K;
             // offsets
-            int *offs_ux = (int *)ocpkktmemory.aux.ux_offs;
-            int *offs_g = (int *)ocpkktmemory.aux.g_offs;
-            int *offs_dyn_eq = (int *)ocpkktmemory.aux.dyn_eq_offs;
-            OCPMACRO1(MAT *, BAbt, _p);
-            OCPMACRO1(MAT *, Ggt, _p);
-            OCPMACRO1(int *, nu, _p);
-            OCPMACRO1(int *, ng, _p);
-            SOLVERMACRO1(VEC *, primal_vars, _p);
-            SOLVERMACRO1(VEC *, scales_primal_vars, _p);
-            SOLVERMACRO1(VEC *, scales_lam, _p);
+            int *offs_ux = (int *)OCP->aux.ux_offs;
+            int *offs_g = (int *)OCP->aux.g_offs;
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
+            OCPMACRO(MAT *, BAbt, _p);
+            OCPMACRO(MAT *, Ggt, _p);
+            OCPMACRO(int *, nu, _p);
+            OCPMACRO(int *, ng, _p);
+            SOLVERMACRO(VEC *, primal_vars, _p);
+            SOLVERMACRO(VEC *, scales_primal_vars, _p);
+            SOLVERMACRO(VEC *, scales_lam, _p);
             double *primal_data = primal_vars_p->pa;
             double *scales_primal_data = scales_primal_vars_p->pa;
             double *scales_lam_data = scales_lam_p->pa;
@@ -118,6 +120,11 @@ namespace fatrop
         {
             return 0;
         }
+        OCPDims GetOCPDims() const override
+        {
+            return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr);
+        }
+
     private:
         class nxExpr : public VecExpr<nxExpr, int>
         {
@@ -154,9 +161,9 @@ namespace fatrop
         nxExpr nuexpr;
         nxExpr nxexpr;
         nxExpr ngexpr;
+
     private:
         RefCountPtr<OCPTemplate> ocptempl;
-        OCPKKTMemory ocpkktmemory;
     };
 } // namespace fatrop
 

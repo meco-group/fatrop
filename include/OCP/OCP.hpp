@@ -1,21 +1,25 @@
-#ifndef NLPINCLUDED
-#define NLPINCLUDED
+#ifndef OCPINCLUDED
+#define OCPINCLUDED
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "OCPDims.hpp"
 namespace fatrop
 {
-    class NLP
+    class OCP
     {
         public:
-        virtual int EvalHess(
+        virtual int evalHess(
+            OCPKKTMemory* OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &lam,
             const FatropVecBF &scales_lam) = 0;
-        virtual int EvalJac(
+        virtual int evalJac(
+            OCPKKTMemory* OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &scales_lam) = 0;
+        virtual OCPDims GetOCPDims() const  = 0;
     };
 } // namespace fatrop
-#endif // NLPINCLUDED
+#endif // OCPINCLUDED
