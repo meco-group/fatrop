@@ -3,6 +3,7 @@
 #include "SPARSE/InterfaceMUMPS.hpp"
 #include "DEBUG/FatropDebugTools.hpp"
 #include "AUX/FatropVector.hpp"
+#include "OCP/OCPLSRiccati.hpp"
 // #include <gperftools/profiler.h>
 using namespace fatrop;
 int main()
@@ -31,7 +32,7 @@ int main()
     // memory allocation
     MemoryAllocator fma;
     OCPKKTMemory KKTocp(dims, fma);
-    OCPKKTSolver OCP_solver(dims, fma);
+    OCPLSRiccati OCP_solver(dims, fma);
 
     int N_opti_vars = sum(dims.nu + dims.nx);
     int N_lags = sum(dims.nx) - dims.nx.at(0) + sum(dims.ng);
@@ -56,7 +57,7 @@ int main()
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {
-        OCP_solver.fact_solve(&KKTocp, ux2[0], lags2[0]);
+        OCP_solver.computeSD(&KKTocp, 0.0, ux2[0], lags2[0]);
     }
     double el2 = blasfeo_toc(&timer) / N;
     // lags2[0].print();

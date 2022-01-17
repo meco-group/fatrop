@@ -9,7 +9,7 @@
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class OCPTemplateAdapter : public OCP, public RefCountedObj // public OCP -> also include KKTmemory, OCPDims, ...
+    class OCPTemplateAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
         OCPTemplateAdapter(const RefCountPtr<OCPTemplate> &ocptempl_, MemoryAllocator &fma) : nuexpr(RefCountPtr<OCPTemplate>(ocptempl_)), nxexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ngexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ocptempl(ocptempl_)

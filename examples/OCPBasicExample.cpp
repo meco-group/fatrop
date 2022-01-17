@@ -4,6 +4,8 @@
 #include "AUX/SmartPtr.hpp"
 #include "AUX/FatropMemory.hpp"
 #include "OCP/OCPAlg.hpp"
+#include "OCP/OCPLinearSolver.hpp"
+#include "OCP/OCPLSRiccati.hpp"
 using namespace fatrop;
 int main()
 {
@@ -11,4 +13,5 @@ int main()
     RefCountPtr<OCPTemplate> ocptemplatebasic =
         new OCPTemplateBasic(OCPTemplateBasic::from_shared_lib("./f.so", 10));
     OCPTemplateAdapter ocptempladapter(ocptemplatebasic, fma);
+    OCPLSRiccati(ocptempladapter.GetOCPDims(), fma);
 }

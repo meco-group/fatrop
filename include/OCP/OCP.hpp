@@ -2,9 +2,10 @@
 #define OCPINCLUDED
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
+#include "AUX/SmartPtr.hpp"
 namespace fatrop
 {
-    class OCP
+    class OCP: public RefCountedObj
     {
         public:
         virtual int evalHess(
