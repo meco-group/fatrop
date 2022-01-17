@@ -154,16 +154,6 @@ namespace fatrop
         nxExpr nuexpr;
         nxExpr nxexpr;
         nxExpr ngexpr;
-        OCPDims GetDims()
-        {
-            OCPDims res;
-            res.K = ocptempl -> get_horizon_length();
-            res.nu = nuexpr;
-            res.nx = nxexpr;
-            res.ng = ngexpr;
-            return res;
-        }
-
     private:
         RefCountPtr<OCPTemplate> ocptempl;
         OCPKKTMemory ocpkktmemory;
