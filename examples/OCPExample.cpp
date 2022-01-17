@@ -7,6 +7,7 @@
 #include "AUX/FatropVector.hpp"
 #include <memory>
 #include <OCP/OCPTemplateBasic.hpp>
+#include <OCP/OCPTemplAdapter.hpp>
 using namespace std;
 using namespace fatrop;
 

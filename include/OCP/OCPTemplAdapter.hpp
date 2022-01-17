@@ -3,22 +3,27 @@
 #include "OCPKKT.hpp"
 #include "OCPTemplate.hpp"
 #include "AUX/SmartPtr.hpp"
+#include "TEMPLATES/NLP.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class OCPTemplateAdapter // public OCP -> also include KKTmemory, OCPDims, ...
+    class OCPTemplateAdapter : public NLP, public RefCountedObj // public OCP -> also include KKTmemory, OCPDims, ...
     {
-        OCPTemplateAdapter(const RefCountPtr<OCPTemplate>& ocptempl):ocptempl(ocptempl)
+        OCPTemplateAdapter(const RefCountPtr<OCPTemplate> &ocptempl, MemoryAllocator &fma) : ocptempl(ocptempl), ocpkktmemory(ocptempl->GetDims(), fma)
         {
         }
-        int eval_hess(OCPKKTMemory *OCP,
-                      double obj_scale,
-                      const FatropVecBF &primal_vars,
-                      const FatropVecBF &scales_primal_vars,
-                      const FatropVecBF &lam,
-                      const FatropVecBF &scales_lam)
+        int EvalHess()
+        {
+            return 0;
+        }
+        int evalHess(OCPKKTMemory *OCP,
+                     double obj_scale,
+                     const FatropVecBF &primal_vars,
+                     const FatropVecBF &scales_primal_vars,
+                     const FatropVecBF &lam,
+                     const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -57,10 +62,10 @@ namespace fatrop
             }
             return 0;
         }
-        int eval_jac(OCPKKTMemory *OCP,
-                     const FatropVecBF &primal_vars,
-                     const FatropVecBF &scales_primal_vars,
-                     const FatropVecBF &scales_lam)
+        int evalJac(OCPKKTMemory *OCP,
+                    const FatropVecBF &primal_vars,
+                    const FatropVecBF &scales_primal_vars,
+                    const FatropVecBF &scales_lam)
         {
             // horizon length
             int K = OCP->K;
@@ -119,6 +124,7 @@ namespace fatrop
 
     private:
         RefCountPtr<OCPTemplate> ocptempl;
+        OCPKKTMemory ocpkktmemory;
     };
 } // namespace fatrop
 
