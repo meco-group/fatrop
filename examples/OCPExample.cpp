@@ -13,6 +13,7 @@ using namespace fatrop;
 
 int main()
 {
+    // RefCountPtr<OCPTemplate> ocptempl = new OCPTemplateBasic(OCPTemplateBasic::from_shared_lib("f.so", )));
     // OCPDims dims;
     // // dims.K = 3;
     // // int nu = 2;

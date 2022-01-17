@@ -1,8 +1,21 @@
 #ifndef NLPINCLUDED
 #define NLPINCLUDED
-class NLP
+#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+namespace fatrop
 {
-    virtual int EvalHess() = 0;
-    virtual int EvalJac() = 0;
-};
+    class NLP
+    {
+        public:
+        virtual int EvalHess(
+            double obj_scale,
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            const FatropVecBF &lam,
+            const FatropVecBF &scales_lam) = 0;
+        virtual int EvalJac(
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            const FatropVecBF &scales_lam) = 0;
+    };
+} // namespace fatrop
 #endif // NLPINCLUDED

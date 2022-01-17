@@ -1,12 +1,12 @@
 /**
  * @file FatropOCP.hpp
  * @author your name (you@domain.com)
- * @brief this file contains necessary the OCP specific code 
+ * @brief this file contains necessary the OCP specific code
  * @version 0.1
  * @date 2021-11-10
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 #ifndef FATROP_OCPDIMS_INCLUDED
 #define FATROP_OCPDIMS_INCLUDED
@@ -20,6 +20,8 @@ namespace fatrop
     struct OCPDims
     {
     public:
+        OCPDims(){};
+        OCPDims(const int K, const FatropVector<int>&nu,const FatropVector<int>& nx, const FatropVector<int>& ng):K(K), nu(nu), ng(ng){};
         /// horizon length
         int K;
         /// input vector size
@@ -30,4 +32,4 @@ namespace fatrop
         FatropVector<int> ng;
     };
 } // namespace fatrop
-#endif //FATROP_OCPDIMS_INCLUDED
+#endif // FATROP_OCPDIMS_INCLUDED
