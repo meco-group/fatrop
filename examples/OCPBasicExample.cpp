@@ -12,6 +12,8 @@ int main()
     MemoryAllocator fma;
     RefCountPtr<OCPTemplate> ocptemplatebasic =
         new OCPTemplateBasic(OCPTemplateBasic::from_shared_lib("./f.so", 10));
-    OCPTemplateAdapter ocptempladapter(ocptemplatebasic, fma);
-    OCPLSRiccati(ocptempladapter.GetOCPDims(), fma);
+    RefCountPtr<OCP> ocptempladapter = new OCPTemplateAdapter(ocptemplatebasic, fma);
+    RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims(), fma);
+    OCPAlg ocpalg(ocptempladapter, ocplsriccati, fma);
+    fma.allocate();
 }
