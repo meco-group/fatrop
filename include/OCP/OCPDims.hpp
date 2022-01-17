@@ -21,7 +21,7 @@ namespace fatrop
     {
     public:
         OCPDims(){};
-        OCPDims(const int K, const FatropVector<int>&nu,const FatropVector<int>& nx, const FatropVector<int>& ng):K(K), nu(nu), ng(ng){};
+        OCPDims(const int K, const FatropVector<int>&nu,const FatropVector<int>& nx, const FatropVector<int>& ng):K(K), nu(nu), nx(nx), ng(ng){};
         /// horizon length
         int K;
         /// input vector size
