@@ -46,11 +46,11 @@ int main()
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
     // KOCP.KKT.print("matrix");
-    double el;
-    KOCP.fact_solve(ux[0], lags[0], el);
+    // double el;
+    KOCP.computeSD(&KKTocp,1.0, ux[0], lags[0]);
     cout << "solving using MUMPS" << endl;
     blasfeo_tic(&timer);
-    KOCP.fact_solve(ux[0], lags[0], el);
+    KOCP.computeSD(&KKTocp,1.0, ux[0], lags[0]);
     // lags[0].print();
     cout << "solving using fatrop" << endl;
     int N = 1000;
@@ -61,9 +61,9 @@ int main()
     }
     double el2 = blasfeo_toc(&timer) / N;
     // lags2[0].print();
-    cout << "el time mumps " << el << endl;
+    // cout << "el time mumps " << el << endl;
     cout << "el time recursion " << el2 << endl;
-    cout << "speedup " << el / el2 << endl;
+    // cout << "speedup " << el / el2 << endl;
     cout << "inf-norm difference MUMPS - Fatrop  primal " << (Eig(ux[0]) - Eig(ux2[0])).lpNorm<Eigen::Infinity>() << endl;
     cout << "inf-norm difference MUMPS - Fatrop  dual " << (Eig(lags[0]) - Eig(lags2[0])).lpNorm<Eigen::Infinity>() << endl;
     cout << "inf-norm   primal " << Eig(ux[0]).lpNorm<Eigen::Infinity>() << endl;

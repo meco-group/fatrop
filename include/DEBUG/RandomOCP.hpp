@@ -70,10 +70,17 @@ namespace fatrop
                       MAT *res,
                       const int k) override
         {
+            int nu = get_nuk(k);
             int nx = get_nxk(k);
             int ng = get_ngk(k);
             FatropMatBF fmres(res);
-            fmres = random_matrix(nx + 1, ng, seed + 4);
+            if (k < K_ - 1)
+            {
+                fmres = random_matrix(nx + 1, ng, seed + 4);
+            }
+            else{
+            fmres.block(nu, 0, nx + 1, ng) = random_matrix(nx + 1, ng, seed + 4);
+            }
             return 0;
         };
 

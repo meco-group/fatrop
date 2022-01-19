@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "SPARSE/SparseOCP.hpp"
 using namespace std;
 using namespace fatrop;
 int main()
@@ -35,6 +36,8 @@ int main()
     ocpalg.EvalHess(1.0, ux[0], ux[0], lags[0], lags[0]);
     ocpalg.EvalJac(ux[0], ux[0], lags[0]);
     ocplsriccati->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
+    RefCountPtr<OCPLinearSolver> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(),ocpalg.ocpkktmemory_);
+    ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
     ocpalg.ocpkktmemory_.BAbt[0].print();
     cout << Eig(ux[0]) << endl;
 }

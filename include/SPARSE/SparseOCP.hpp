@@ -3,13 +3,14 @@
 using namespace std;
 #include "FatropSparse.hpp"
 #include "InterfaceMUMPS.hpp"
+#include "OCP/OCPLinearSolver.hpp"
 namespace fatrop
 {
 #define Id Eigen::MatrixXd::Identity
-    class Sparse_OCP
+    class Sparse_OCP: public OCPLinearSolver
     {
     public:
-        Sparse_OCP(OCPDims &dims, OCPKKTMemory &OCP, bool Guzero = false) : dims(dims)
+        Sparse_OCP(const OCPDims &dims, OCPKKTMemory &OCP, bool Guzero = false) : dims(dims)
         {
             int K = dims.K;
             c_vec = vector<eq_sp>(dims.K, nullptr);
@@ -95,7 +96,12 @@ namespace fatrop
             };
         };
 
-        void fact_solve(const FatropVecBF &ux, const FatropVecBF &lam, double& el_time)
+        // solve a KKT system
+        int computeSD(
+            OCPKKTMemory *OCP,
+            const double inertia_correction,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam) override
         {
 
             vector<Triplet> ocptripl;
@@ -106,7 +112,6 @@ namespace fatrop
             blasfeo_timer timer;
             blasfeo_tic(&timer);
             interfo.solve(ocptripl, rhso);
-            el_time = blasfeo_toc(&timer);
             
 
             int offs = 0;
@@ -161,6 +166,7 @@ namespace fatrop
                     VECEL(lam_p, offs_c + i) = rhso.at(offs_lam + lam_c_offs + i);
                 }
             }
+            return 0;
         }
         SparseKKTMatrix KKT;
         OCPDims dims;
