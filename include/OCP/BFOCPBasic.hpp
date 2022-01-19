@@ -1,7 +1,7 @@
 // Basic OCP template: initial and terminal constraints eq constraints, Function evaluation provided by Casadi CodeGen
 #ifndef OCPTEMPLATEBASICINCLUDED
 #define OCPTEMPLATEBASICINCLUDED
-#include "OCPTemplate.hpp"
+#include "BFOCP.hpp"
 #include <string>
 #include <iostream>
 #include <AUX/DynamicLib.hpp>
@@ -10,10 +10,10 @@
 using namespace std;
 namespace fatrop
 {
-    class OCPTemplateBasic : public OCPTemplate
+    class BFOCPBasic : public BFOCP
     {
     public:
-        OCPTemplateBasic(const int nu,
+        BFOCPBasic(const int nu,
                          const int nx,
                          const int ngI,
                          const int ngF,
@@ -32,7 +32,8 @@ namespace fatrop
                                                     RSQrqtFf(RSQrqtFf),
                                                     GgtIf(GgtIf),
                                                     GgtFf(GgtFf){};
-        static OCPTemplateBasic from_shared_lib(const string &filename, const int K)
+        // TODO Create Builder class
+        static BFOCPBasic from_shared_lib(const string &filename, const int K)
         {
             RefCountPtr<DLHandler> handle = new DLHandler(filename);
             EvalCasGen BAbtf(handle, "BAbt");
@@ -44,7 +45,7 @@ namespace fatrop
             const int nu = BAbtf.out_m - nx - 1;
             const int ngI = GgtIf.out_n;
             const int ngF = GgtFf.out_n;
-            return OCPTemplateBasic(nu, nx, ngI, ngF, K, BAbtf, RSQrqtf, RSQrqtFf, GgtIf, GgtFf);
+            return BFOCPBasic(nu, nx, ngI, ngF, K, BAbtf, RSQrqtf, RSQrqtFf, GgtIf, GgtFf);
         }
         int get_nxk(const int k) const override
         {

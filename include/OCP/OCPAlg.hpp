@@ -8,10 +8,10 @@
 #include "AUX/FatropMemory.hpp"
 namespace fatrop
 {
-    class OCPAlg : public NLPAlg
+    class FatropOCP : public FatropNLP
     {
     public:
-        OCPAlg(const RefCountPtr<OCP> &ocp, const RefCountPtr<OCPLinearSolver> &ls, MemoryAllocator &fma) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims(), fma){};
+        FatropOCP(const RefCountPtr<OCP> &ocp, const RefCountPtr<OCPLinearSolver> &ls, MemoryAllocator &fma) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims(), fma){};
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -45,9 +45,9 @@ namespace fatrop
         {
             return ls_->computeSD(
                 &ocpkktmemory_,
-            inertia_correction,
-            dprimal_vars,
-            dlam);
+                inertia_correction,
+                dprimal_vars,
+                dlam);
         };
 
     private:

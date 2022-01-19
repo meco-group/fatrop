@@ -1,7 +1,7 @@
 #ifndef OCPEVALUATORINCLUDED
 #define OCPEVALUATORINCLUDED
 #include "OCPKKT.hpp"
-#include "OCPTemplate.hpp"
+#include "BFOCP.hpp"
 #include "AUX/SmartPtr.hpp"
 #include "OCP.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
@@ -9,10 +9,10 @@
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
-    class OCPTemplateAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
+    class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        OCPTemplateAdapter(const RefCountPtr<OCPTemplate> &ocptempl_, MemoryAllocator &fma) : nuexpr(RefCountPtr<OCPTemplate>(ocptempl_)), nxexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ngexpr(RefCountPtr<OCPTemplate>(ocptempl_)), ocptempl(ocptempl_)
+        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_, MemoryAllocator &fma) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ocptempl(ocptempl_)
         {
         }
         int evalHess(
@@ -129,32 +129,32 @@ namespace fatrop
         class nxExpr : public VecExpr<nxExpr, int>
         {
         public:
-            nxExpr(const RefCountPtr<OCPTemplate> &parent) : parent(parent){};
+            nxExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_nxk(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<OCPTemplate> parent;
+            const RefCountPtr<BFOCP> parent;
         };
         class nuExpr : public VecExpr<nxExpr, int>
         {
         public:
-            nuExpr(const RefCountPtr<OCPTemplate> &parent) : parent(parent){};
+            nuExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_nuk(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<OCPTemplate> parent;
+            const RefCountPtr<BFOCP> parent;
         };
         class ngExpr : public VecExpr<nxExpr, int>
         {
         public:
-            ngExpr(const RefCountPtr<OCPTemplate> &parent) : parent(parent){};
+            ngExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_ngk(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<OCPTemplate> parent;
+            const RefCountPtr<BFOCP> parent;
         };
 
     public:
@@ -163,7 +163,7 @@ namespace fatrop
         nxExpr ngexpr;
 
     private:
-        RefCountPtr<OCPTemplate> ocptempl;
+        RefCountPtr<BFOCP> ocptempl;
     };
 } // namespace fatrop
 

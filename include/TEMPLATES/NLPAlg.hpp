@@ -8,7 +8,7 @@ namespace fatrop
         int nvars;
         int neqs;
     };
-    class NLPAlg
+    class FatropNLP
     {
     public:
         virtual int EvalHess(

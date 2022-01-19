@@ -7,7 +7,7 @@
 #include "OCPDims.hpp"
 namespace fatrop
 {
-    class OCPTemplate : public RefCountedObj
+    class BFOCP : public RefCountedObj
     {
     public:
         virtual int get_nxk(const int k) const = 0;
