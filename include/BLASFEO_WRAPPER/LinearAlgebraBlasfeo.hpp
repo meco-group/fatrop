@@ -138,6 +138,8 @@ namespace fatrop
         FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
         /** \brief constructor memory already allocated*/
         FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        /** \brief constructor memory already allocated*/
+        FatropMatBF(MAT *matbf) : mat_(matbf), row_offset_(0), col_offset_(0), nrows_(matbf->m), ncols_(matbf->n) {}
         /** \brief type conversion to blasfeo matrix pointer*/
         inline explicit operator MAT *() const
         {

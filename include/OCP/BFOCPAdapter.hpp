@@ -136,7 +136,7 @@ namespace fatrop
         private:
             const RefCountPtr<BFOCP> parent;
         };
-        class nuExpr : public VecExpr<nxExpr, int>
+        class nuExpr : public VecExpr<nuExpr, int>
         {
         public:
             nuExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
@@ -146,7 +146,7 @@ namespace fatrop
         private:
             const RefCountPtr<BFOCP> parent;
         };
-        class ngExpr : public VecExpr<nxExpr, int>
+        class ngExpr : public VecExpr<ngExpr, int>
         {
         public:
             ngExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
@@ -158,9 +158,9 @@ namespace fatrop
         };
 
     public:
-        nxExpr nuexpr;
+        nuExpr nuexpr;
         nxExpr nxexpr;
-        nxExpr ngexpr;
+        ngExpr ngexpr;
 
     private:
         RefCountPtr<BFOCP> ocptempl;

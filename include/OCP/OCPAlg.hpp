@@ -50,7 +50,7 @@ namespace fatrop
                 dlam);
         };
 
-    private:
+    public:
         RefCountPtr<OCP> ocp_;
         RefCountPtr<OCPLinearSolver> ls_;
         OCPKKTMemory ocpkktmemory_;

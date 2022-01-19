@@ -18,7 +18,7 @@ int main()
     // int nx = 9;
     // int ng = 4;
     // dims.nx.at(2) = 3*nx;
-    dims.K = 100;
+    dims.K = 10;
     int nu = 5;
     int nx = 10;
     int ng = 0;
@@ -26,8 +26,8 @@ int main()
     dims.nu = vector<int>(dims.K, nu);
     dims.ng = vector<int>(dims.K, ng);
     // dims.nu.at(dims.K - 1) = 0;
-    dims.ng.at(dims.K - 1) = nx;
-    dims.ng.at(0) = nx;
+    // dims.ng.at(dims.K - 1) = nx;
+    // dims.ng.at(0) = nx;
     // dims.ng.at(dims.K-1) = 0;
     // memory allocation
     MemoryAllocator fma;
@@ -41,7 +41,7 @@ int main()
     FatropMemoryVecBF lags2(N_lags, 1, fma);
     FatropMemoryVecBF ux2(N_opti_vars, 1, fma);
     fma.allocate();
-    random_OCP(KKTocp, dims, 3);
+    random_OCP(KKTocp, dims, 0);
     // KKTocp.BAbt[0].print();
     Sparse_OCP KOCP(dims, KKTocp);
     blasfeo_timer timer;
@@ -68,6 +68,7 @@ int main()
     cout << "inf-norm difference MUMPS - Fatrop  dual " << (Eig(lags[0]) - Eig(lags2[0])).lpNorm<Eigen::Infinity>() << endl;
     cout << "inf-norm   primal " << Eig(ux[0]).lpNorm<Eigen::Infinity>() << endl;
     cout << "inf-norm   dual " << Eig(lags[0]).lpNorm<Eigen::Infinity>() << endl;
+    cout << Eig(ux[0]) << endl;
     // ProfilerStop();
     return 0;
 }
