@@ -1,6 +1,7 @@
 #ifndef NLPINCLUDED
 #define NLPINCLUDED
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "AUX/SmartPtr.hpp"
 namespace fatrop
 {
     struct NLPDims
@@ -8,7 +9,7 @@ namespace fatrop
         int nvars;
         int neqs;
     };
-    class FatropNLP
+    class FatropNLP: public RefCountedObj
     {
     public:
         virtual int EvalHess(

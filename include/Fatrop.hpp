@@ -6,6 +6,9 @@
 #include "OCP/BFOCPAdapter.hpp"
 #include "OCP/BFOCP.hpp"
 #include "AUX/FatropVector.hpp"
+#include "SOLVER/FatropAlg.hpp"
+#include "SOLVER/FatropData.hpp"
 #include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
+
 // #include "SparseSolvers/InterfaceMUMPS.hpp"
 #endif //FATROP_INCLUDED
