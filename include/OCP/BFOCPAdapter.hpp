@@ -118,7 +118,6 @@ namespace fatrop
                 int nu_k = nu_p[K-1];
                 int ng_k = ng_p[K-1];
                 int offs_ux_k = offs_ux[K-1];
-                int offs_dyn_eq_k = offs_dyn_eq[K-1];
                 int offs_g_k = offs_g[K-1];
                 if (ng_k > 0)
                 {
