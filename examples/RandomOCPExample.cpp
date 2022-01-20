@@ -13,7 +13,7 @@ int main()
     int K = 150;
     int nu = 3;
     int nx = 12;
-    int ng = 0;
+    int ng = 1;
     FatropVector<int> nu_ = vector<int>(K, nu);
     FatropVector<int> nx_ = vector<int>(K, nx);
     FatropVector<int> ng_ = vector<int>(K, ng);
@@ -34,12 +34,13 @@ int main()
     blasfeo_timer timer;
     int N = 10000;
     blasfeo_tic(&timer);
-    for(int i=0; i<N; i++){
-    ocplsriccati->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
+    for (int i = 0; i < N; i++)
+    {
+        ocplsriccati->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
     }
     double el = blasfeo_toc(&timer);
-    cout << "el time riccati " << el/N << endl;
-    RefCountPtr<OCPLinearSolver> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(),ocpalg.ocpkktmemory_);
+    cout << "el time riccati " << el / N << endl;
+    RefCountPtr<OCPLinearSolver> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
     ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[1], lags[1]);
     // ocpalg.ocpkktmemory_.BAbt[0].print();
     // cout << Eig(ux[0]) -Eig(ux[1]) << endl;

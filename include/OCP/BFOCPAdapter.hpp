@@ -114,6 +114,24 @@ namespace fatrop
                         k);
                 }
             }
+            {
+                int nu_k = nu_p[K-1];
+                int ng_k = ng_p[K-1];
+                int offs_ux_k = offs_ux[K-1];
+                int offs_dyn_eq_k = offs_dyn_eq[K-1];
+                int offs_g_k = offs_g[K-1];
+                if (ng_k > 0)
+                {
+                    ocptempl->eval_Ggtk(
+                        primal_data + offs_ux_k + nu_k,
+                        scales_primal_data + offs_ux_k + nu_k,
+                        primal_data + offs_ux_k,
+                        scales_primal_data + offs_ux_k,
+                        scales_lam_data + offs_g_k,
+                        Ggt_p + K-1,
+                        K-1);
+                }
+            }
             return 0;
         }
         int eval_g()
