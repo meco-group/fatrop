@@ -76,6 +76,9 @@ EvalCasGen::EvalCasGen(const RefCountPtr<DLHandler> &handle_, const std::string 
 
 int EvalCasGen::eval_buffer(const double **arg)
 {
+    w = work_vector_d.data();
+    iw = work_vector_i.data();
+    output_buffer_p = buffer.data();
     if (eval(arg, &output_buffer_p, iw, w, mem))
         return 1;
     return 0;

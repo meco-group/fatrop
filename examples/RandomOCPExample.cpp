@@ -27,18 +27,21 @@ int main()
     FatropOCP ocpalg(ocptempladapter, ocplsriccati);
     int N_opti_vars = sum(nu_ + nx_);
     int N_lags = sum(nx_) - nx_.at(0) + sum(ng_);
+    blasfeo_timer timer;
     FatropMemoryVecBF ux(N_opti_vars, 2);
     FatropMemoryVecBF lags(N_lags, 2);
+    blasfeo_tic(&timer);
     ocpalg.EvalHess(1.0, ux[0], ux[0], lags[0], lags[0]);
     ocpalg.EvalJac(ux[0], ux[0], lags[0]);
-    blasfeo_timer timer;
-    int N = 10000;
+    double el = blasfeo_toc(&timer);
+    cout << "el time FE " << el << endl;
+    int N = 100;
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {
         ocplsriccati->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
     }
-    double el = blasfeo_toc(&timer);
+    el = blasfeo_toc(&timer);
     cout << "el time riccati " << el / N << endl;
     RefCountPtr<OCPLinearSolver> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
     ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[1], lags[1]);

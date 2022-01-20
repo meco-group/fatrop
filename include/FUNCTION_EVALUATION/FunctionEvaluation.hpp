@@ -34,7 +34,8 @@ namespace fatrop
             // todo make this static polymorphism using CRTP
             int res = eval_buffer(arg);
             PACKMAT(out_m, out_n, buffer_p, out_m, bf_mat, 0, 0);
-            return res;
+            return 0;
+            // return res;
         }
         ~EvalBase(){};
     };

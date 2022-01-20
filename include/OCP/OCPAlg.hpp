@@ -11,7 +11,9 @@ namespace fatrop
     class FatropOCP : public FatropNLP
     {
     public:
-        FatropOCP(const RefCountPtr<OCP> &ocp, const RefCountPtr<OCPLinearSolver> &ls) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims()){};
+        FatropOCP(
+            const RefCountPtr<OCP> &ocp,
+            const RefCountPtr<OCPLinearSolver> &ls) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims()){};
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -49,12 +51,13 @@ namespace fatrop
                 dprimal_vars,
                 dlam);
         };
-        NLPDims GetNLPDims() const override {
+        NLPDims GetNLPDims() const override
+        {
             NLPDims res;
             // states + inputs
             res.nvars = sum(ocpkktmemory_.nu) + sum(ocpkktmemory_.nx);
             // stagewise equality contraints + dynamics constraints
-            res.neqs= sum(ocpkktmemory_.ng) + sum(ocpkktmemory_.nx) - ocpkktmemory_.nx.at(0);
+            res.neqs = sum(ocpkktmemory_.ng) + sum(ocpkktmemory_.nx) - ocpkktmemory_.nx.at(0);
             return res;
         };
 

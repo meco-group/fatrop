@@ -53,6 +53,8 @@ namespace fatrop
         }
         int get_nuk(const int k) const override
         {
+            if (k == K_ - 1)
+                return 0;
             return nu_;
         }
         int get_ngk(const int k) const override
