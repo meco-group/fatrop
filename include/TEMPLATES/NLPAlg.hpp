@@ -25,6 +25,7 @@ namespace fatrop
             const double intertia_correction,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam) = 0;
+            virtual NLPDims GetNLPDims() const =0;
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

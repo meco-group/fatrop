@@ -49,6 +49,14 @@ namespace fatrop
                 dprimal_vars,
                 dlam);
         };
+        NLPDims GetNLPDims() const override {
+            NLPDims res;
+            // states + inputs
+            res.nvars = sum(ocpkktmemory_.nu) + sum(ocpkktmemory_.nx);
+            // stagewise equality contraints + dynamics constraints
+            res.neqs= sum(ocpkktmemory_.ng) + sum(ocpkktmemory_.nx) - ocpkktmemory_.nx.at(0);
+            return res;
+        };
 
     public:
         RefCountPtr<OCP> ocp_;
