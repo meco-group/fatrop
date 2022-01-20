@@ -8,16 +8,16 @@ using namespace std;
 int main()
 {
     MemoryAllocator fma;
-    FatropMemoryMatBF A(100, 100, 1, fma);
-    FatropMemoryMatBF lower(vector<int>(1, 100), vector<int>(1, 100), 1, fma);
-    FatropMemoryMatBF At(100, 100, 1, fma);
-    FatropMemoryMatBF A1(100, 100, 1, fma);
-    FatropMemoryMatBF L(100, 100, 1, fma);
-    FatropMemoryMatBF U(100, 100, 1, fma);
-    FatropMemoryMatBF test(100, 100, 1, fma);
+    FatropMemoryMatBF A(100, 100, 1);
+    FatropMemoryMatBF lower(vector<int>(1, 100), vector<int>(1, 100), 1);
+    FatropMemoryMatBF At(100, 100, 1);
+    FatropMemoryMatBF A1(100, 100, 1);
+    FatropMemoryMatBF L(100, 100, 1);
+    FatropMemoryMatBF U(100, 100, 1);
+    FatropMemoryMatBF test(100, 100, 1);
     MemoryPermMat Pl(100, 1, fma);
     MemoryPermMat Pr(100, 1, fma);
-    FatropMemoryEl<int> testfatropmemel(5, vector<int>(5, 420), fma);
+    vector<int> testfatropmemel(5, 420);
     fma.allocate();
     A[0] = random_matrix(100, 100);
     At[0] = Eig(Eig(A[0]).transpose());

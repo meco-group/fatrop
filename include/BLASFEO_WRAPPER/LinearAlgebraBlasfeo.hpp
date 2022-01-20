@@ -21,7 +21,7 @@
 #define GECP blasfeo_dgecp
 #define VECCP blasfeo_dveccp
 #define VECCPR fatrop_dveccp_reversed
-#define TRSM_RLNN fatrop_dtrsm_rlnn //TODO this is not implemented by blasfeo so we defined our own (naive) implementation
+#define TRSM_RLNN fatrop_dtrsm_rlnn // TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 #define VECEL BLASFEO_DVECEL
 #define MEMSIZE_VEC blasfeo_memsize_dvec
 #define CREATE_VEC blasfeo_create_dvec
@@ -193,18 +193,18 @@ namespace fatrop
     };
 
     /** \brief this class is used for the allocation of a blasfeo matrix, the dimsensions are set from a vector */
-    class FatropMemoryMatBF : public MemoryElBase
+    class FatropMemoryMatBF
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        FatropMemoryMatBF(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N, MemoryAllocator &fma) : N_(N), nrows_(nrows), ncols_(ncols)
+        FatropMemoryMatBF(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N) : N_(N), nrows_(nrows), ncols_(ncols)
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
         {
-            fma.add(*this);
+            set_up();
         }
-        FatropMemoryMatBF(const int nrows, const int ncols, int N, MemoryAllocator &fma) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
+        FatropMemoryMatBF(const int nrows, const int ncols, int N) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
         {
-            fma.add(*this);
+            set_up();
         }
         /** \brief calculate memory size*/
         int memory_size() const
@@ -222,8 +222,11 @@ namespace fatrop
             return result;
         };
         /** \brief set up memory element and advance pointer */
-        void set_up(char *&data_p)
+        void set_up()
         {
+            free(mem);
+            mem = malloc(this->memory_size());
+            char *data_p = (char *)mem;
             MAT *bf_ptr = (MAT *)data_p;
             this->mat = bf_ptr;
             bf_ptr += N_;
@@ -258,8 +261,15 @@ namespace fatrop
         {
             return mat;
         }
+        FatropMemoryMatBF(const FatropMemoryMatBF &cpy) = delete;
+        FatropMemoryMatBF &operator=(const FatropMemoryMatBF &) = delete;
+        ~FatropMemoryMatBF()
+        {
+            free(mem);
+        }
 
     private:
+        void *mem = NULL;
         MAT *mat;
         const int N_;
         const FatropVector<int> nrows_;
@@ -315,18 +325,18 @@ namespace fatrop
         const int nels_;
     };
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
-    class FatropMemoryVecBF : public MemoryElBase
+    class FatropMemoryVecBF 
     {
     public:
         /** \brief constuction for allocation on MemoryAllocator*/
-        FatropMemoryVecBF(const FatropVector<int> &nels, int N, MemoryAllocator &fma) : N_(N), nels_(nels)
+        FatropMemoryVecBF(const FatropVector<int> &nels, int N) : N_(N), nels_(nels)
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
         {
-            fma.add(*this);
+            set_up();
         }
-        FatropMemoryVecBF(const int nels, int N, MemoryAllocator &fma) : N_(N), nels_(vector<int>(N, nels))
+        FatropMemoryVecBF(const int nels, int N) : N_(N), nels_(vector<int>(N, nels))
         {
-            fma.add(*this);
+            set_up();
         }
         /** \brief calculate memory size*/
         int memory_size() const
@@ -344,8 +354,11 @@ namespace fatrop
             return result;
         };
         /** \brief set up memory element and advance pointer */
-        void set_up(char *&data_p)
+        void set_up()
         {
+            free(mem);
+            mem = malloc(this->memory_size());
+            char *data_p = (char *)mem;
             VEC *bf_ptr = (VEC *)data_p;
             this->vec = bf_ptr;
             bf_ptr += N_;
@@ -380,8 +393,15 @@ namespace fatrop
         {
             return vec;
         }
+        FatropMemoryVecBF(const FatropMemoryVecBF &cpy) = delete;
+        FatropMemoryVecBF &operator=(const FatropMemoryVecBF &) = delete;
+        ~FatropMemoryVecBF()
+        {
+            free(mem);
+        }
 
     private:
+        void *mem = NULL; 
         VEC *vec;
         const int N_;
         const FatropVector<int> nels_;
@@ -583,4 +603,4 @@ namespace fatrop
     void fatrop_dtrsv_unu(const int m, const int n, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi);
 
 } // namespace fatrop
-#endif //FATROP_BLASFEO_INCLUDED
+#endif // FATROP_BLASFEO_INCLUDED

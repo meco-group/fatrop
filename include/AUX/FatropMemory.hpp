@@ -45,10 +45,12 @@ namespace fatrop
             int size = fatrop_memory_el_vector.size();
             unsigned long int mem_size = this->memory_size();
             cout << "allocating buffer of size " << mem_size / 1024 << " kibytes and " << mem_size % 1024 << " byte" << endl;
-            storage_mem = malloc(mem_size);
-            char *c_ptr = (char *)storage_mem;
+            // storage_mem = malloc(mem_size);
+            // char *c_ptr = (char *)storage_mem;
             for (int i = 0; i < size; i++)
             {
+                storage_mem = malloc(fatrop_memory_el_vector.at(i) ->memory_size());
+                char *c_ptr = (char *)storage_mem;
                 fatrop_memory_el_vector.at(i)->set_up(c_ptr);
             }
         };
@@ -67,42 +69,42 @@ namespace fatrop
         }
     };
 
-    /** \brief fatrop memory element template */
-    /// example usage:
-    /// fatrop_memory_el<int> test(5);
-    /// represents five integers in memory
-    ///
-    /// default constructor should be available
-    template <typename T>
-    class FatropMemoryEl : public MemoryElBase
-    {
-    public:
-        // E&& is a universal reference
-        template<typename E>
-        FatropMemoryEl<T>(int size, E&&init_values, MemoryAllocator &fma) : size(size), init_values_(forward<E>(init_values))
-        {
-            fma.add(*this);
-        }
-        int memory_size() const
-        {
-            return size * sizeof(T);
-        }
-        void set_up(char *&data_p)
-        {
-            data = (T *)data_p;
-            for (int i = 0; i < size; i++)
-            {
-                T *t_p = (T *)data_p;
-                *t_p = init_values_.at(i); // default constructor
-                data_p += sizeof(T);       // advance pointer
-            }
-        }
-        explicit operator T *() const { return data; };
+    // /** \brief fatrop memory element template */
+    // /// example usage:
+    // /// fatrop_memory_el<int> test(5);
+    // /// represents five integers in memory
+    // ///
+    // /// default constructor should be available
+    // template <typename T>
+    // class FatropMemoryEl : public MemoryElBase
+    // {
+    // public:
+    //     // E&& is a universal reference
+    //     template<typename E>
+    //     FatropMemoryEl<T>(int size, E&&init_values, MemoryAllocator &fma) : size(size), init_values_(forward<E>(init_values))
+    //     {
+    //         fma.add(*this);
+    //     }
+    //     int memory_size() const
+    //     {
+    //         return size * sizeof(T);
+    //     }
+    //     void set_up(char *&data_p)
+    //     {
+    //         data = (T *)data_p;
+    //         for (int i = 0; i < size; i++)
+    //         {
+    //             T *t_p = (T *)data_p;
+    //             *t_p = init_values_.at(i); // default constructor
+    //             data_p += sizeof(T);       // advance pointer
+    //         }
+    //     }
+    //     explicit operator T *() const { return data; };
 
-    private:
-        const int size;
-        FatropVector<T> init_values_;
-        T *data = NULL;
-    };
+    // private:
+    //     const int size;
+    //     FatropVector<T> init_values_;
+    //     T *data = NULL;
+    // };
 } // namespace fatrop
 #endif //FATROP_MEMORY_INCLUDED

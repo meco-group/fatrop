@@ -10,9 +10,9 @@ using namespace std;
 using namespace fatrop;
 int main()
 {
-    int K = 10;
-    int nu = 5;
-    int nx = 10;
+    int K = 150;
+    int nu = 3;
+    int nx = 12;
     int ng = 0;
     FatropVector<int> nu_ = vector<int>(K, nu);
     FatropVector<int> nx_ = vector<int>(K, nx);
@@ -28,16 +28,25 @@ int main()
     FatropOCP ocpalg(ocptempladapter, ocplsriccati, fma);
     int N_opti_vars = sum(nu_ + nx_);
     int N_lags = sum(nx_) - nx_.at(0) + sum(ng_);
-    FatropMemoryVecBF ux(N_opti_vars, 1, fma);
-    FatropMemoryVecBF lags(N_lags, 1, fma);
-    FatropMemoryVecBF lags2(N_lags, 1, fma);
-    FatropMemoryVecBF ux2(N_opti_vars, 1, fma);
+    FatropMemoryVecBF ux(N_opti_vars, 2);
+    FatropMemoryVecBF lags(N_lags, 2);
     fma.allocate();
     ocpalg.EvalHess(1.0, ux[0], ux[0], lags[0], lags[0]);
     ocpalg.EvalJac(ux[0], ux[0], lags[0]);
+    blasfeo_timer timer;
+    int N = 10000;
+    blasfeo_tic(&timer);
+    for(int i=0; i<N; i++){
     ocplsriccati->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
+    }
+    double el = blasfeo_toc(&timer);
+    cout << "el time riccati " << el/N << endl;
     RefCountPtr<OCPLinearSolver> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(),ocpalg.ocpkktmemory_);
-    ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[0], lags[0]);
-    ocpalg.ocpkktmemory_.BAbt[0].print();
-    cout << Eig(ux[0]) << endl;
+    ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, ux[1], lags[1]);
+    // ocpalg.ocpkktmemory_.BAbt[0].print();
+    // cout << Eig(ux[0]) -Eig(ux[1]) << endl;
+    cout << "inf-norm difference MUMPS - Fatrop  primal " << (Eig(ux[0]) - Eig(ux[1])).lpNorm<Eigen::Infinity>() << endl;
+    cout << "inf-norm difference MUMPS - Fatrop  dual " << (Eig(lags[0]) - Eig(lags[1])).lpNorm<Eigen::Infinity>() << endl;
+    cout << "inf-norm   primal " << Eig(ux[0]).lpNorm<Eigen::Infinity>() << endl;
+    cout << "inf-norm   dual " << Eig(lags[0]).lpNorm<Eigen::Infinity>() << endl;
 }
