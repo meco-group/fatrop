@@ -11,7 +11,7 @@ namespace fatrop
     class FatropOCP : public FatropNLP
     {
     public:
-        FatropOCP(const RefCountPtr<OCP> &ocp, const RefCountPtr<OCPLinearSolver> &ls, MemoryAllocator &fma) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims(), fma){};
+        FatropOCP(const RefCountPtr<OCP> &ocp, const RefCountPtr<OCPLinearSolver> &ls) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims()){};
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,

@@ -12,7 +12,7 @@ namespace fatrop
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_, MemoryAllocator &fma) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ocptempl(ocptempl_)
+        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ocptempl(ocptempl_)
         {
         }
         int evalHess(
@@ -26,9 +26,9 @@ namespace fatrop
             // horizon length
             int K = OCP->K;
             // offsets
-            int *offs_ux = (int *)OCP->aux.ux_offs;
-            int *offs_g = (int *)OCP->aux.g_offs;
-            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
+            const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
+            int *offs_g = (int *)OCP->aux.g_offs.data();
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
@@ -69,9 +69,9 @@ namespace fatrop
             // horizon length
             int K = OCP->K;
             // offsets
-            int *offs_ux = (int *)OCP->aux.ux_offs;
-            int *offs_g = (int *)OCP->aux.g_offs;
-            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
+            int *offs_ux = (int *)OCP->aux.ux_offs.data();
+            int *offs_g = (int *)OCP->aux.g_offs.data();
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             OCPMACRO(int *, nu, _p);

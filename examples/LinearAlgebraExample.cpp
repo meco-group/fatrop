@@ -7,7 +7,6 @@ using namespace fatrop;
 using namespace std;
 int main()
 {
-    MemoryAllocator fma;
     FatropMemoryMatBF A(100, 100, 1);
     FatropMemoryMatBF lower(vector<int>(1, 100), vector<int>(1, 100), 1);
     FatropMemoryMatBF At(100, 100, 1);
@@ -15,10 +14,9 @@ int main()
     FatropMemoryMatBF L(100, 100, 1);
     FatropMemoryMatBF U(100, 100, 1);
     FatropMemoryMatBF test(100, 100, 1);
-    MemoryPermMat Pl(100, 1, fma);
-    MemoryPermMat Pr(100, 1, fma);
+    MemoryPermMat Pl(100, 1);
+    MemoryPermMat Pr(100, 1);
     vector<int> testfatropmemel(5, 420);
-    fma.allocate();
     A[0] = random_matrix(100, 100);
     At[0] = Eig(Eig(A[0]).transpose());
     GECP(100, 100, (MAT *)A[0], 0, 0, (MAT *)A1[0], 0, 0);

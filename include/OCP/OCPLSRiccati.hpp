@@ -7,7 +7,7 @@ namespace fatrop
     class OCPLSRiccati: public OCPLinearSolver
     {
     public:
-        OCPLSRiccati(const OCPDims &dims, MemoryAllocator &fma) : Ppt(dims.nx + 1, dims.nx, dims.K),
+        OCPLSRiccati(const OCPDims &dims) : Ppt(dims.nx + 1, dims.nx, dims.K),
                                                                   Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
                                                                   AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1),
                                                                   RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
@@ -22,12 +22,12 @@ namespace fatrop
                                                                   HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
                                                                   PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
                                                                   LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
-                                                                  Pl(max(dims.nu), dims.K, fma), // number of equations can never exceed nx
-                                                                  Pr(max(dims.nu), dims.K, fma),
-                                                                  PlI(dims.nx.at(0), 1, fma),
-                                                                  PrI(dims.nx.at(0), 1, fma),
-                                                                  gamma(dims.K, vector<int>(dims.K, 0), fma),
-                                                                  rho(dims.K, vector<int>(dims.K, 0), fma){};
+                                                                  Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
+                                                                  Pr(max(dims.nu), dims.K),
+                                                                  PlI(dims.nx.at(0), 1),
+                                                                  PrI(dims.nx.at(0), 1),
+                                                                  gamma(vector<int>(dims.K, 0)),
+                                                                  rho(vector<int>(dims.K, 0)){};
         // solve a KKT system
         int computeSD(
             OCPKKTMemory *OCP,
@@ -236,9 +236,9 @@ namespace fatrop
                 (PlI_p)->PtV(rankI, lam_p, 0);
                 (PrI_p)->PtV(rankI, ux_p, nu);
             }
-            int *offs_ux = (int *)OCP->aux.ux_offs;
-            int *offs_g = (int *)OCP->aux.g_offs;
-            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs;
+            int *offs_ux = (int *)OCP->aux.ux_offs.data();
+            int *offs_g = (int *)OCP->aux.g_offs.data();
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
             // other stages
             // for (int k = 0; k < K - 1; k++)
             // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
@@ -318,8 +318,8 @@ namespace fatrop
         MemoryPermMat Pr;
         MemoryPermMat PlI;
         MemoryPermMat PrI;
-        FatropMemoryEl<int> gamma;
-        FatropMemoryEl<int> rho;
+        FatropVector<int> gamma;
+        FatropVector<int> rho;
     };
 };     // namespace
 #endif // OCPLSRICCATIINCLUDED

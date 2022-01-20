@@ -20,17 +20,15 @@ int main()
     // ng_.at(K - 1) = nx;
     // ng_.at(0) = nx;
 
-    MemoryAllocator fma;
     RefCountPtr<BFOCP> ocptemplatebasic =
         new RandomOCP(nu_, nx_, ng_, K);
-    RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic, fma);
-    RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims(), fma);
-    FatropOCP ocpalg(ocptempladapter, ocplsriccati, fma);
+    RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
+    RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
+    FatropOCP ocpalg(ocptempladapter, ocplsriccati);
     int N_opti_vars = sum(nu_ + nx_);
     int N_lags = sum(nx_) - nx_.at(0) + sum(ng_);
     FatropMemoryVecBF ux(N_opti_vars, 2);
     FatropMemoryVecBF lags(N_lags, 2);
-    fma.allocate();
     ocpalg.EvalHess(1.0, ux[0], ux[0], lags[0], lags[0]);
     ocpalg.EvalJac(ux[0], ux[0], lags[0]);
     blasfeo_timer timer;

@@ -84,6 +84,7 @@ namespace fatrop
         FatropVector(vector<T> &&vec) : vector<T>(move(vec)){};
         T getEl(const int ai) const { return vector<T>::at(ai); };
         int size() const { return vector<T>::size(); };
+        operator T*(){return this->data();};
     };
     template <typename T, typename E1, typename E2>
     VecSum<T, E1, E2> operator+(const VecExpr<E1, T> &expr1, const VecExpr<E2, T> &expr2)

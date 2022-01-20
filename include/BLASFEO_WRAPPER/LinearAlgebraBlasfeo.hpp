@@ -540,13 +540,13 @@ namespace fatrop
     };
 
     /** \brief this class is used for the allocation of a permutation matrix */
-    class MemoryPermMat : public MemoryElBase, public PermMat
+    class MemoryPermMat : public PermMat
     {
     public:
         /** \brief constructor */
-        MemoryPermMat(const int dim, const int N, MemoryAllocator &fma) : PermMat(dim), dim_(dim), N_(N)
+        MemoryPermMat(const int dim, const int N) : PermMat(dim), dim_(dim), N_(N)
         {
-            fma.add(*this);
+            set_up();
         };
         /** \brief calculate needed memory size*/
         int memory_size() const
@@ -556,8 +556,11 @@ namespace fatrop
             return size;
         }
         /** \brief set up memory*/
-        void set_up(char *&char_p)
+        void set_up()
         {
+            free(mem);
+            mem = malloc(this->memory_size());
+            char *char_p = (char *)mem;
             perm_p = (PermMat *)char_p;
             PermMat *perm_pp = perm_p;
             for (int i = 0; i < N_; i++)
@@ -575,8 +578,15 @@ namespace fatrop
             char_p = (char *)data_p;
         }
         explicit operator PermMat *() { return perm_p; };
+        MemoryPermMat(const MemoryPermMat &cpy) = delete;
+        MemoryPermMat &operator=(const MemoryPermMat &) = delete;
+        ~MemoryPermMat()
+        {
+            free(mem);
+        }
 
     private:
+        void *mem = NULL; 
         const int dim_;
         const int N_;
         PermMat *perm_p;

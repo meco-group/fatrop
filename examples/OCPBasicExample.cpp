@@ -9,11 +9,9 @@
 using namespace fatrop;
 int main()
 {
-    MemoryAllocator fma;
     RefCountPtr<BFOCP> ocptemplatebasic =
         new BFOCPBasic(BFOCPBasic::from_shared_lib("./f.so", 10));
-    RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic, fma);
-    RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims(), fma);
-    FatropOCP ocpalg(ocptempladapter, ocplsriccati, fma);
-    fma.allocate();
+    RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
+    RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
+    FatropOCP ocpalg(ocptempladapter, ocplsriccati);
 }
