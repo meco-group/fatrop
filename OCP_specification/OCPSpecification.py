@@ -86,7 +86,7 @@ class OptimalControlProblem:
         J = 0
         for k in range(K-1):
             J += Lkf(1.0, self.x_vars[:, k],
-                          DM.ones(nx), self.u_vars[:, k], DM.ones(nx))
+                          DM.ones(nx), self.u_vars[:, k], DM.ones(nu))
             self.opti.subject_to(Dynamcisf(self.x_vars[:, k+1], DM.ones(
                 nx), self.x_vars[:, k], self.u_vars[:, k], DM.ones(nu), DM.ones(nx))==0.0)
         J += LkFf(1.0, self.x_vars[:, K-1], DM.ones(nx))
