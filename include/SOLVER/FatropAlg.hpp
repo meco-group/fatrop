@@ -7,17 +7,33 @@ namespace fatrop
 {
     class FatropAlg
     {
+    public:
         FatropAlg(
             const RefCountPtr<FatropNLP> &fatropnlp,
-            const RefCountPtr<FatropData> &fatropdata) : 
-            fatropnlp_(fatropnlp),
-            fatropdata_(fatropdata) 
-            {}
+            const RefCountPtr<FatropData> &fatropdata) : fatropnlp_(fatropnlp),
+                                                         fatropdata_(fatropdata)
+        {
+        }
         int Optimize()
         {
             // fatropnlp_->EvalHess();
             // fatropnlp_->EvalJac();
             // fatropnlp_->ComputeSD();
+            return 0;
+        }
+        int EvalHess()
+        {
+            // return fatropnlp_->EvalHess
+            // (
+            // ) 
+            return 0;
+        }
+        int EvalJac()
+        {
+            return 0;
+        }
+        int ComputeSD()
+        {
             return 0;
         }
         RefCountPtr<FatropNLP> fatropnlp_;

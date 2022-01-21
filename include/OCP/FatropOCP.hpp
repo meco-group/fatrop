@@ -19,7 +19,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &lam,
-            const FatropVecBF &scales_lam)
+            const FatropVecBF &scales_lam) override
         {
             return ocp_->evalHess(
                 &ocpkktmemory_,
@@ -32,7 +32,7 @@ namespace fatrop
         int EvalJac(
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam)
+            const FatropVecBF &scales_lam) override
         {
             return ocp_->evalJac(
                 &ocpkktmemory_,
@@ -43,7 +43,7 @@ namespace fatrop
         int ComputeSD(
             const double inertia_correction,
             const FatropVecBF &dprimal_vars,
-            const FatropVecBF &dlam)
+            const FatropVecBF &dlam) override
         {
             return ls_->computeSD(
                 &ocpkktmemory_,

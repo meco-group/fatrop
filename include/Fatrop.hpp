@@ -8,6 +8,8 @@
 #include "AUX/FatropVector.hpp"
 #include "SOLVER/FatropAlg.hpp"
 #include "SOLVER/FatropData.hpp"
+#include "SOLVER/ScalingMethod.hpp"
+#include "SOLVER/AlgStrategy.hpp"
 #include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
 
 // #include "SparseSolvers/InterfaceMUMPS.hpp"

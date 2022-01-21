@@ -1,6 +1,6 @@
 #include "DEBUG/RandomOCP.hpp"
 #include "OCP/OCPLSRiccati.hpp"
-#include "OCP/OCPAlg.hpp"
+#include "OCP/FatropOCP.hpp"
 #include "AUX/FatropVector.hpp"
 #include <vector>
 #include <iostream>

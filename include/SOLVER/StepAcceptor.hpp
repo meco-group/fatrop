@@ -1,0 +1,3 @@
+#ifndef STEPACCEPTORINCLUDED
+
+#endif // !

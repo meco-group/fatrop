@@ -3,7 +3,7 @@
 #include "OCP/BFOCPAdapter.hpp"
 #include "AUX/SmartPtr.hpp"
 #include "AUX/FatropMemory.hpp"
-#include "OCP/OCPAlg.hpp"
+#include "OCP/FatropOCP.hpp"
 #include "OCP/OCPLinearSolver.hpp"
 #include "OCP/OCPLSRiccati.hpp"
 #include "AUX/FatropVector.hpp"
