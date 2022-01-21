@@ -1,9 +1,9 @@
 #ifndef SCALINGMETHODINCLUDED
 #define SCALINGMETHODINCLUDED
-#include "FatropData.hpp"
+#include "SOLVER/FatropData.hpp"
 #include "TEMPLATES/NLPAlg.hpp"
 #include "AUX/SmartPtr.hpp"
-#include "AlgStrategy.hpp"
+#include "SOLVER/AlgStrategy.hpp"
 namespace fatrop
 {
     class ScalingMethod : public AlgStrategy
