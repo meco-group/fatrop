@@ -6,6 +6,7 @@
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
 #include "AUX/FatropMemory.hpp"
+#include "OCPScalingMethod.hpp"
 namespace fatrop
 {
     class FatropOCP : public FatropNLP
@@ -13,7 +14,8 @@ namespace fatrop
     public:
         FatropOCP(
             const RefCountPtr<OCP> &ocp,
-            const RefCountPtr<OCPLinearSolver> &ls) : ocp_(ocp), ls_(ls), ocpkktmemory_(ocp_->GetOCPDims()){};
+            const RefCountPtr<OCPLinearSolver> &ls,
+            const RefCountPtr<OCPScalingMethod> &scaler) : ocp_(ocp), ls_(ls), scaler_(scaler), ocpkktmemory_(ocp_->GetOCPDims()){};
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -51,6 +53,19 @@ namespace fatrop
                 dprimal_vars,
                 dlam);
         };
+        int ComputeScalings(
+            double &obj_scale,
+            FatropVecBF &x_scales,
+            FatropVecBF &lam_scales,
+            const FatropVecBF &grad_curr) 
+        {
+            return scaler_->ComputeScalings(
+                &ocpkktmemory_,
+                obj_scale,
+                x_scales,
+                lam_scales,
+                grad_curr);
+        };
         NLPDims GetNLPDims() const override
         {
             NLPDims res;
@@ -64,6 +79,7 @@ namespace fatrop
     public:
         RefCountPtr<OCP> ocp_;
         RefCountPtr<OCPLinearSolver> ls_;
+        RefCountPtr<OCPScalingMethod> scaler_;
         OCPKKTMemory ocpkktmemory_;
     };
 } // namespace fatrop

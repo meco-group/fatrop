@@ -8,6 +8,7 @@
 #include "OCP/OCPLSRiccati.hpp"
 #include "AUX/FatropVector.hpp"
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "OCP/OCPNoScaling.hpp"
 using namespace fatrop;
 int main()
 {
@@ -15,7 +16,8 @@ int main()
         new BFOCPBasic(BFOCPBasic::from_shared_lib("./f.so", 150));
     RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
     RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
-    FatropOCP ocpalg(ocptempladapter, ocplsriccati);
+    RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling();
+    FatropOCP ocpalg(ocptempladapter, ocplsriccati, ocpscaler);
     NLPDims nlpdims = ocpalg.GetNLPDims();
     blasfeo_timer timer;
     FatropMemoryVecBF ux(nlpdims.nvars, 2);

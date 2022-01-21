@@ -27,6 +27,11 @@ namespace fatrop
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam) = 0;
             virtual NLPDims GetNLPDims() const =0;
+        virtual int ComputeScalings(
+            double &obj_scale,
+            FatropVecBF &x_scales,
+            FatropVecBF &lam_scales,
+            const FatropVecBF &grad_curr) = 0;
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

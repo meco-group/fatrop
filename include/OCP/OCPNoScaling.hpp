@@ -16,7 +16,7 @@ namespace fatrop
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr){
+            const FatropVecBF &grad_curr) override{
                 VECSE(x_scales.nels(), 1.0, (VEC*) x_scales, 0);
                 VECSE(lam_scales.nels(), 1.0, (VEC*) lam_scales, 0);
                 return 0;
