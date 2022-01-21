@@ -11,6 +11,7 @@
 #include "OCP/OCPScalingMethod.hpp"
 #include "OCP/OCPNoScaling.hpp"
 #include "SOLVER/AlgStrategy.hpp"
+#include "SOLVER/FatropParams.hpp"
 #include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
 
 // #include "SparseSolvers/InterfaceMUMPS.hpp"

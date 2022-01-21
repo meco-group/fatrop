@@ -1,0 +1,4 @@
+#ifndef FILTERINCLUDED
+#define FILTERINCLUDED
+
+#endif // FILTERINCLUDED

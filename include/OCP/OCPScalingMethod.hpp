@@ -6,9 +6,10 @@
 #include "SOLVER/AlgStrategy.hpp"
 namespace fatrop
 {
-    class OCPScalingMethod : public RefCountedObj //this is an OCP strategy
+    class OCPScalingMethod : public AlgStrategy//this is an OCP strategy
     {
     public:
+        OCPScalingMethod(const RefCountPtr<FatropParams>& fatrop_params):AlgStrategy(fatrop_params){};
         virtual int ComputeScalings(
             OCPKKTMemory *OCP,
             double& obj_scale,

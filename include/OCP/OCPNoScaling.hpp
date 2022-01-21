@@ -11,6 +11,7 @@ namespace fatrop
     class OCPNoScaling : public OCPScalingMethod
     {
     public:
+        OCPNoScaling(const RefCountPtr<FatropParams>& fatrop_params):OCPScalingMethod(fatrop_params){};
         virtual int ComputeScalings(
             OCPKKTMemory *OCP,
             double &obj_scale,

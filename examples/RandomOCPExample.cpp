@@ -24,7 +24,8 @@ int main()
         new RandomOCP(nu_, nx_, ng_, K);
     RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
     RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
-    RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling();
+    RefCountPtr<FatropParams> params = new FatropParams();
+    RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
     FatropOCP ocpalg(ocptempladapter, ocplsriccati, ocpscaler);
     int N_opti_vars = sum(nu_ + nx_);
     int N_lags = sum(nx_) - nx_.at(0) + sum(ng_);
