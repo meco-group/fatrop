@@ -23,10 +23,19 @@ int main()
     FatropMemoryVecBF ux(nlpdims.nvars, 2);
     FatropMemoryVecBF lags(nlpdims.neqs, 2);
     int N = 1000;
-    VEC *prim_sc = (VEC *)ux[1];
-    VEC *du_sc = (VEC *)lags[1];
-    VECSE(nlpdims.nvars, 1.0, prim_sc, 0);
-    VECSE(nlpdims.neqs, 1.0, du_sc, 0);
+    // VEC *prim_sc = (VEC *)ux[1];
+    // VEC *du_sc = (VEC *)lags[1];
+
+    // VECSE(nlpdims.nvars, 1.0, prim_sc, 0);
+    // VECSE(nlpdims.neqs, 1.0, du_sc, 0);
+    FatropVecBF scalesx = ux[1];
+    FatropVecBF scaleslam = lags[1];
+    double obj_sc = 1.0;
+    ocpalg.ComputeScalings(
+        obj_sc,
+        scalesx,
+        scaleslam,
+        scaleslam);
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {
