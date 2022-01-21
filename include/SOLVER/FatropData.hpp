@@ -21,6 +21,7 @@ namespace fatrop
                                              grad_curr(nlpdims.nvars, 1),
                                              grad_next(nlpdims.nvars, 1){};
         const NLPDims nlpdims;
+        double obj_scaling_factor = 1.0;
         FatropMemoryVecBF x_curr;
         FatropMemoryVecBF x_next;
         FatropMemoryVecBF delta_x;

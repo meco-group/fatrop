@@ -37,6 +37,7 @@
 #define TRSV_UNU fatrop_dtrsv_unu
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
+#define VECSE blasfeo_dvecse
 #define PACKMAT blasfeo_pack_dmat
 #define PMAT PermMat
 

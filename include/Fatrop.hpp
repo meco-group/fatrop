@@ -1,5 +1,5 @@
 #ifndef FATROP_INCLUDED
-#define FATROP_INCLUDEgetD
+#define FATROP_INCLUDED
 #include "AUX/FatropMemory.hpp"
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include "OCP/OCPKKT.hpp"
@@ -9,6 +9,7 @@
 #include "SOLVER/FatropAlg.hpp"
 #include "SOLVER/FatropData.hpp"
 #include "OCP/OCPScalingMethod.hpp"
+#include "OCP/OCPNoScaling.hpp"
 #include "SOLVER/AlgStrategy.hpp"
 #include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
 

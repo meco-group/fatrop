@@ -6,10 +6,16 @@
 #include "SOLVER/AlgStrategy.hpp"
 namespace fatrop
 {
-    class ScalingMethod : public AlgStrategy
+    class OCPScalingMethod  //this is an OCP strategy
     {
-        ScalingMethod(const RefCountPtr<FatropData> &fatropdata) : fatropdata_(fatropdata){};
-        RefCountPtr<FatropData> fatropdata_;
+    public:
+        virtual int ComputeScalings(
+            OCPKKTMemory *OCP,
+            double& obj_scale,
+            FatropVecBF &x_scales,
+            FatropVecBF &lam_scales,
+            const FatropVecBF &grad_curr) = 0;
     };
+
 } // namespace fatrop
 #endif // !SCALINGMETHODINCLUDED

@@ -7,6 +7,7 @@
 #include "OCP/OCPLinearSolver.hpp"
 #include "OCP/OCPLSRiccati.hpp"
 #include "AUX/FatropVector.hpp"
+#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 using namespace fatrop;
 int main()
 {
@@ -20,12 +21,16 @@ int main()
     FatropMemoryVecBF ux(nlpdims.nvars, 2);
     FatropMemoryVecBF lags(nlpdims.neqs, 2);
     int N = 1000;
+    VEC *prim_sc = (VEC *)ux[1];
+    VEC *du_sc = (VEC *)lags[1];
+    VECSE(nlpdims.nvars, 1.0, prim_sc, 0);
+    VECSE(nlpdims.neqs, 1.0, du_sc, 0);
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {
-        ocpalg.EvalHess(1.0, ux[0], ux[0], lags[0], lags[0]);
-        ocpalg.EvalJac(ux[0], ux[0], lags[0]);
+        ocpalg.EvalHess(1.0, ux[0], ux[1], lags[0], lags[1]);
+        ocpalg.EvalJac(ux[0], ux[1], lags[1]);
     }
     double el = blasfeo_toc(&timer);
-    cout << "time elapsed " << el/N << endl;
+    cout << "time elapsed " << el / N << endl;
 }
