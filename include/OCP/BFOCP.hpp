@@ -34,7 +34,8 @@ namespace fatrop
                                  const double *scales_lam_eq_k,
                                  MAT *res,
                                  const int k) = 0;
-        virtual int eval_Ggtk(const double *states_k,
+        virtual int eval_Ggtk(
+            const double *states_k,
                               const double *scales_states_k,
                               const double *inputs_k,
                               const double *scales_inputs_k,
@@ -42,6 +43,14 @@ namespace fatrop
                               MAT *res,
                               const int k) = 0;
 
+        virtual int EvalConstraintViolation(
+            const double *states_k,
+                              const double *scales_states_k,
+                              const double *inputs_k,
+                              const double *scales_inputs_k,
+                              const double *scales,
+                              double * constraint_violation_k,
+                              const int k) = 0;
     };
 };     // namespace fatrop
 #endif // OCPTEMPLATEINCLUDED

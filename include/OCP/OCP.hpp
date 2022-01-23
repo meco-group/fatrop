@@ -20,6 +20,11 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &scales_lam) = 0;
+        virtual int EvalConstraintViolation(
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            const FatropVecBF &scales_lam,
+            const FatropVecBF &constraint_violation) = 0;
         virtual OCPDims GetOCPDims() const  = 0;
     };
 } // namespace fatrop

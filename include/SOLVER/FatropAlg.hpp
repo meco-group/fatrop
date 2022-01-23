@@ -3,6 +3,7 @@
 #include "AUX/SmartPtr.hpp"
 #include "TEMPLATES/NLPAlg.hpp"
 #include "FatropData.hpp"
+#include "Filter.hpp"
 namespace fatrop
 {
     class FatropAlg

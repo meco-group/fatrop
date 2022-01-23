@@ -77,6 +77,17 @@ namespace fatrop
             fmres.block(nu, 0, nx + 1, ng) = random_matrix(nx + 1, ng, seed + 4);
             return 0;
         };
+        int EvalConstraintViolation(
+            const double *states_k,
+            const double *scales_states_k,
+            const double *inputs_k,
+            const double *scales_inputs_k,
+            const double *scales,
+            double *constraint_violation_k,
+            const int k) override{
+                assert(false); // feature not implemented yet
+                return 0;
+        };
 
     private:
         const vector<int> nu_;

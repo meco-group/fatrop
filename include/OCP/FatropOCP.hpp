@@ -57,7 +57,7 @@ namespace fatrop
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr) 
+            const FatropVecBF &grad_curr)
         {
             return scaler_->ComputeScalings(
                 &ocpkktmemory_,
@@ -65,6 +65,18 @@ namespace fatrop
                 x_scales,
                 lam_scales,
                 grad_curr);
+        };
+        int EvalConstraintViolation(
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            const FatropVecBF &scales_lam,
+            const FatropVecBF &constraint_violation) override
+        {
+            return ocp_->EvalConstraintViolation(
+                primal_vars,
+                scales_primal_vars,
+                scales_lam,
+                constraint_violation);
         };
         NLPDims GetNLPDims() const override
         {

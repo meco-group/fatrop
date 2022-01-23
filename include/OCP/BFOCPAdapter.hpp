@@ -133,6 +133,15 @@ namespace fatrop
             }
             return 0;
         }
+        int EvalConstraintViolation(
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            const FatropVecBF &scales_lam,
+            const FatropVecBF &constraint_violation) override
+        {
+                assert(false); // feature not implemented yet
+                return 0;
+        }
         int eval_g()
         {
             return 0;

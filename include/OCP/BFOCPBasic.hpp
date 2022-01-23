@@ -14,24 +14,27 @@ namespace fatrop
     {
     public:
         BFOCPBasic(const int nu,
-                         const int nx,
-                         const int ngI,
-                         const int ngF,
-                         const int K,
-                         const EvalCasGen &BAbtf,
-                         const EvalCasGen &RSQrqtf,
-                         const EvalCasGen &RSQrqtFf,
-                         const EvalCasGen &GgtIf,
-                         const EvalCasGen &GgtFf) : nu_(nu),
-                                                    nx_(nx),
-                                                    ngI_(ngI),
-                                                    ngF_(ngF),
-                                                    K_(K),
-                                                    BAbtf(BAbtf),
-                                                    RSQrqtf(RSQrqtf),
-                                                    RSQrqtFf(RSQrqtFf),
-                                                    GgtIf(GgtIf),
-                                                    GgtFf(GgtFf){};
+                   const int nx,
+                   const int ngI,
+                   const int ngF,
+                   const int K,
+                   const EvalCasGen &BAbtf,
+                   const EvalCasGen &RSQrqtf,
+                   const EvalCasGen &RSQrqtFf,
+                   const EvalCasGen &GgtIf,
+                   const EvalCasGen &GgtFf,
+                   const EvalCasGen &bkf
+                   ) : nu_(nu),
+                                              nx_(nx),
+                                              ngI_(ngI),
+                                              ngF_(ngF),
+                                              K_(K),
+                                              BAbtf(BAbtf),
+                                              RSQrqtf(RSQrqtf),
+                                              RSQrqtFf(RSQrqtFf),
+                                              GgtIf(GgtIf),
+                                              GgtFf(GgtFf), 
+                                              bkf(bkf){};
         // TODO Create Builder class
         static BFOCPBasic from_shared_lib(const string &filename, const int K)
         {
@@ -41,11 +44,12 @@ namespace fatrop
             EvalCasGen RSQrqtFf(handle, "RSQrqtF");
             EvalCasGen GgtIf(handle, "GgtI");
             EvalCasGen GgtFf(handle, "GgtF");
+            EvalCasGen bkf(handle, "bfk");
             const int nx = BAbtf.out_n;
             const int nu = BAbtf.out_m - nx - 1;
             const int ngI = GgtIf.out_n;
             const int ngF = GgtFf.out_n;
-            return BFOCPBasic(nu, nx, ngI, ngF, K, BAbtf, RSQrqtf, RSQrqtFf, GgtIf, GgtFf);
+            return BFOCPBasic(nu, nx, ngI, ngF, K, BAbtf, RSQrqtf, RSQrqtFf, GgtIf, GgtFf, bkf);
         }
         int get_nxk(const int k) const override
         {
@@ -134,6 +138,18 @@ namespace fatrop
                 return GgtIf.eval_bf(args, res);
             return 1;
         };
+        int EvalConstraintViolation(
+            const double *states_k,
+            const double *scales_states_k,
+            const double *inputs_k,
+            const double *scales_inputs_k,
+            const double *scales,
+            double *constraint_violation_k,
+            const int k) override{
+                assert(false); // feature not implemented yet
+                return 0;
+
+        };
 
     private:
         const int nu_;
@@ -146,6 +162,7 @@ namespace fatrop
         EvalCasGen RSQrqtFf;
         EvalCasGen GgtIf;
         EvalCasGen GgtFf;
+        EvalCasGen bkf;
     };
 }
 #endif // OCPTEMPLATEBASICINCLUDED
