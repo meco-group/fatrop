@@ -22,10 +22,11 @@ namespace fatrop
         {
             filterdata_.push_back(filterdata);
         }
-        inline bool CheckDominated(const FilterData &fdin, const int k) const
+        /** \brief check if fdin0 is dominated by fdin1 */
+        inline bool IsDominated(const FilterData &fdin0, const FilterData &fdin1) const
         {
-            FilterData fdk = filterdata_.at(k);
-            if (fdin.phi > fdk.phi && fdin.theta > fdk.theta)
+            // worse barrier filter and constraint violation -> dominated
+            if (fdin0.phi > fdin1.phi && fdin0.theta > fdin1.theta)
             {
                 return true;
             }
@@ -36,7 +37,7 @@ namespace fatrop
             // run over filterdata_ elements
             for (vector<double>::size_type k = 0; k < filterdata_.size(); k++)
             {
-                if (CheckDominated(fdin, k))
+                if (IsDominated(fdin, filterdata_.at(k)))
                 {
                     return false;
                 };
