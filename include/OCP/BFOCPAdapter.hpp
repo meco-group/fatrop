@@ -238,6 +238,43 @@ namespace fatrop
             }
             return 0;
         };
+        int EvalObj(
+            OCPKKTMemory *OCP,
+            double obj_scale,
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            double &res)
+        {
+            // horizon length
+            int K = OCP->K;
+            // offsets
+            const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
+            OCPMACRO(int *, nu, _p);
+            SOLVERMACRO(VEC *, primal_vars, _p);
+            SOLVERMACRO(VEC *, scales_primal_vars, _p);
+            double *primal_data = primal_vars_p->pa;
+            double *scales_primal_data = scales_primal_vars_p->pa;
+            double restot= 0.0;
+            for (int k = 0; k < K; k++)
+            {
+                int nu_k = nu_p[k];
+                int offs_ux_k = offs_ux[k];
+                double resk = 0.0;
+                ocptempl->eval_rqk(
+                    &obj_scale,
+                    primal_data + offs_ux_k,
+                    scales_primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
+                    scales_primal_data + offs_ux_k + nu_k,
+                    &resk,
+                    k);
+                    restot += resk;
+            }
+            res = restot;
+            return 0;
+        }
+
+        ;
         OCPDims GetOCPDims() const override
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr);

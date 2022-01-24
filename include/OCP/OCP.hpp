@@ -32,6 +32,12 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &gradient) = 0;
+        virtual int EvalObj(
+            OCPKKTMemory *OCP,
+            double obj_scale,
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            double &res) = 0; 
         virtual OCPDims GetOCPDims() const  = 0;
     };
 } // namespace fatrop
