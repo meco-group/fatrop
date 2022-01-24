@@ -24,7 +24,7 @@ class OptimalControlProblem:
     def get_inputs(self, nu):
         self.nu = nu
         self.scales_u_sym = SX.sym('scales_inputs', nu)
-        self.u_sym_scaled =  SX.sym('inputs', nu)
+        self.u_sym_scaled = SX.sym('inputs', nu)
         self.u_sym = self.scales_u_sym * self.u_sym_scaled
         return self.u_sym
 
@@ -36,8 +36,8 @@ class OptimalControlProblem:
     def set_stagecost(self, Lk):
         self.Lk = self.obj_scale*Lk
 
-    def set_stagecostFinal(self, Lk):
-        self.Lk = self.obj_scale*Lk
+    def set_stagecostFinal(self, LF):
+        self.LF = self.obj_scale*LF
 
     def set_eq_initial(self, eq):
         self.ngI = eq.shape[0]
@@ -86,9 +86,9 @@ class OptimalControlProblem:
         J = 0
         for k in range(K-1):
             J += Lkf(1.0, self.x_vars[:, k],
-                          DM.ones(nx), self.u_vars[:, k], DM.ones(nu))
+                     DM.ones(nx), self.u_vars[:, k], DM.ones(nu))
             self.opti.subject_to(Dynamcisf(self.x_vars[:, k+1], DM.ones(
-                nx), self.x_vars[:, k], self.u_vars[:, k], DM.ones(nu), DM.ones(nx))==0.0)
+                nx), self.x_vars[:, k], self.u_vars[:, k], DM.ones(nu), DM.ones(nx)) == 0.0)
         J += LkFf(1.0, self.x_vars[:, K-1], DM.ones(nx))
         self.opti.minimize(J)
         return self.opti
@@ -102,7 +102,7 @@ class OptimalControlProblem:
         BAbt[:self.nu+self.nx,
              :] = jacobian(self.dynamics, vertcat(self.u_sym_scaled, self.x_sym_scaled)).T
         b = (stateskp1 - self.dynamics)[:]
-        BAbt[self.nu+self.nx, :] = b 
+        BAbt[self.nu+self.nx, :] = b
         C.add(Function("BAbt", [stateskp1, scales_stateskp1, self.x_sym_scaled,
               self.scales_x_sym, self.u_sym_scaled, self.scales_u_sym, self.scales_dyn], [densify(BAbt)]))
         # b
@@ -110,7 +110,8 @@ class OptimalControlProblem:
               self.scales_x_sym, self.u_sym_scaled, self.scales_u_sym, self.scales_dyn], [densify(b)]))
         # RSQrqtI
         RSQrqtI = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
-        [RSQI, rqI] = hessian(self.Lk, vertcat(self.u_sym_scaled, self.x_sym_scaled))
+        [RSQI, rqI] = hessian(self.Lk, vertcat(
+            self.u_sym_scaled, self.x_sym_scaled))
         if self.ngI > 0:
             RSQI += hessian(self.dual_eqI.T@self.eqI,
                             vertcat(self.u_sym_scaled, self.x_sym_scaled))
@@ -125,7 +126,8 @@ class OptimalControlProblem:
               self.scales_dyn, self.scales_eqI], [densify(rqI)]))
         # RSQrqt
         RSQrqt = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
-        [RSQ, rq] = hessian(self.Lk, vertcat(self.u_sym_scaled, self.x_sym_scaled))
+        [RSQ, rq] = hessian(self.Lk, vertcat(
+            self.u_sym_scaled, self.x_sym_scaled))
         RSQ += hessian(self.dual_dyn.T@self.dynamics,
                        vertcat(self.u_sym_scaled, self.x_sym_scaled))[0]
         RSQrqt[:self.nu+self.nx, :] = RSQ
@@ -135,9 +137,12 @@ class OptimalControlProblem:
         # rqF
         C.add(Function("rqk", [self.obj_scale, self.x_sym_scaled, self.scales_x_sym, self.u_sym_scaled, self.scales_u_sym,
               self.scales_dyn, self.scales_eqI], [densify(rq)]))
+        # Lk
+        C.add(Function("Lk", [self.obj_scale, self.x_sym_scaled, self.scales_x_sym,
+              self.u_sym_scaled, self.scales_u_sym], [densify(self.Lk)]))
         # RSQrqtF
         RSQrqtF = SX.zeros(self.nx+1, self.nx)
-        [RSQF, rqF] = hessian(self.Lk, vertcat(self.x_sym_scaled))
+        [RSQF, rqF] = hessian(self.LkF, vertcat(self.x_sym_scaled))
         if self.ngF > 0:
             RSQF += hessian(self.dual_eqF.T@self.eqF,
                             vertcat(self.x_sym_scaled))
@@ -148,6 +153,9 @@ class OptimalControlProblem:
         # rqF
         C.add(Function("rqF", [self.obj_scale, self.x_sym_scaled, self.scales_x_sym, self.u_sym_scaled, self.scales_u_sym,
               self.scales_dyn, self.scales_eqI], [densify(rqF)]))
+        # LF
+        C.add(Function("LF", [self.obj_scale, self.x_sym_scaled, self.scales_x_sym,
+              self.u_sym_scaled, self.scales_u_sym], [densify(self.LF)]))
         # GgtI
         GgtI = SX.zeros(self.nu+self.nx+1, self.ngI)
         GgtI[:self.nu+self.nx,

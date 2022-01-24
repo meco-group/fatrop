@@ -71,6 +71,14 @@ namespace fatrop
             const double *scales_inputs_k,
             double *res,
             const int k) = 0;
+        virtual int eval_Lk(
+            const double *objective_scale,
+            const double *states_k,
+            const double *scales_states_k,
+            const double *inputs_k,
+            const double *scales_inputs_k,
+            double * res,
+            const int k) = 0;
     };
 };     // namespace fatrop
 #endif // OCPTEMPLATEINCLUDED

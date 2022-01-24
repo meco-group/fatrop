@@ -115,6 +115,18 @@ namespace fatrop
                 assert(false); // feature not implemented yet
                 return 0;
         };
+        int eval_Lk(
+            const double *objective_scale,
+            const double *states_k,
+            const double *scales_states_k,
+            const double *inputs_k,
+            const double *scales_inputs_k,
+            double * res,
+            const int k) override 
+        {
+                assert(false); // feature not implemented yet
+                return 0;
+        };
 
     private:
         const vector<int> nu_;
