@@ -1,6 +1,7 @@
 #ifndef FUNCTIONEVALUATIONINCLUDED
 #define FUNCTIONEVALUATIONINCLUDED
 #include <vector>
+#include <cstring>
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 using namespace std;
 namespace fatrop
@@ -34,6 +35,14 @@ namespace fatrop
             // todo make this static polymorphism using CRTP
             int res = eval_buffer(arg);
             PACKMAT(out_m, out_n, buffer_p, out_m, bf_mat, 0, 0);
+            return res;
+        }
+        inline int eval_array(const double **arg, double *array)
+        {
+            double *buffer_p = buffer.data();
+            // todo make this static polymorphism using CRTP
+            int res = eval_buffer(arg);
+            memcpy(buffer_p, array, out_nnz*sizeof(double));
             return res;
         }
         ~EvalBase(){};

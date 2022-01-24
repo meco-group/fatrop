@@ -77,14 +77,43 @@ namespace fatrop
             fmres.block(nu, 0, nx + 1, ng) = random_matrix(nx + 1, ng, seed + 4);
             return 0;
         };
-        int EvalConstraintViolation(
+        int eval_bk(
+            const double *states_kp1,
+            const double *scales_states_kp1,
+            const double *states_k,
+            const double *scales_states_k,
+            const double *inputs_k,
+            const double *scales_inputs_k,
+            const double *scales_lam,
+            double *res,
+            const int k) 
+        {
+                assert(false); // feature not implemented yet
+                return 0;
+        };
+        int eval_gk(
             const double *states_k,
             const double *scales_states_k,
             const double *inputs_k,
             const double *scales_inputs_k,
             const double *scales,
-            double *constraint_violation_k,
-            const int k) override{
+            double *res,
+            const int k) 
+        {
+                assert(false); // feature not implemented yet
+                return 0;
+        };
+        int eval_rqk(
+            const double *objective_scale,
+            const double *states_k,
+            const double *scales_states_k,
+            const double *inputs_k,
+            const double *scales_inputs_k,
+            const double *scales_lam_dyn_k,
+            const double *scales_lam_eq_k,
+            double *res,
+            const int k) 
+        {
                 assert(false); // feature not implemented yet
                 return 0;
         };
