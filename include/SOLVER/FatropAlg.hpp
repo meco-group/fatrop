@@ -33,6 +33,30 @@ namespace fatrop
         {
             return 0;
         }
+        int EvalCVNext()
+        {
+            return 0;
+        }
+        int EvalCVCurr()
+        {
+            return 0;
+        }
+        int EvalGradCurr()
+        {
+            return 0;
+        }
+        int EvalGradNext()
+        {
+            return 0;
+        }
+        double EvalObjCurr()
+        {
+            return 0.0;
+        }
+        double EvalObjNext()
+        {
+            return 0.0;
+        }
         int ComputeSD()
         {
             return 0;
