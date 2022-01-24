@@ -73,6 +73,7 @@ namespace fatrop
             const FatropVecBF &constraint_violation) override
         {
             return ocp_->EvalConstraintViolation(
+                &ocpkktmemory_,
                 primal_vars,
                 scales_primal_vars,
                 scales_lam,

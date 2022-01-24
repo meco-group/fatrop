@@ -21,6 +21,7 @@ namespace fatrop
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &scales_lam) = 0;
         virtual int EvalConstraintViolation(
+            OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &scales_lam,
