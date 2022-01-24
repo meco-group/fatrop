@@ -86,7 +86,7 @@ namespace fatrop
             const double *scales_inputs_k,
             const double *scales_lam,
             double *res,
-            const int k) 
+            const int k)  override
         {
                 assert(false); // feature not implemented yet
                 return 0;
@@ -98,7 +98,7 @@ namespace fatrop
             const double *scales_inputs_k,
             const double *scales,
             double *res,
-            const int k) 
+            const int k)  override
         {
                 assert(false); // feature not implemented yet
                 return 0;
@@ -109,10 +109,8 @@ namespace fatrop
             const double *scales_states_k,
             const double *inputs_k,
             const double *scales_inputs_k,
-            const double *scales_lam_dyn_k,
-            const double *scales_lam_eq_k,
             double *res,
-            const int k) 
+            const int k)  override
         {
                 assert(false); // feature not implemented yet
                 return 0;

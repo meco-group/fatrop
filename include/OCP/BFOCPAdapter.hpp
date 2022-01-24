@@ -115,10 +115,10 @@ namespace fatrop
                 }
             }
             {
-                int nu_k = nu_p[K-1];
-                int ng_k = ng_p[K-1];
-                int offs_ux_k = offs_ux[K-1];
-                int offs_g_k = offs_g[K-1];
+                int nu_k = nu_p[K - 1];
+                int ng_k = ng_p[K - 1];
+                int offs_ux_k = offs_ux[K - 1];
+                int offs_g_k = offs_g[K - 1];
                 if (ng_k > 0)
                 {
                     ocptempl->eval_Ggtk(
@@ -127,8 +127,8 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         scales_primal_data + offs_ux_k,
                         scales_lam_data + offs_g_k,
-                        Ggt_p + K-1,
-                        K-1);
+                        Ggt_p + K - 1,
+                        K - 1);
                 }
             }
             return 0;
@@ -146,7 +146,7 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-            double * cv_p =((VEC*) constraint_violation )-> pa;
+            double *cv_p = ((VEC *)constraint_violation)->pa;
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
@@ -173,7 +173,7 @@ namespace fatrop
                     primal_data + offs_ux_k,
                     scales_primal_data + offs_ux_k,
                     scales_lam_data + offs_dyn_eq_k,
-                    cv_p+offs_dyn_eq_k,
+                    cv_p + offs_dyn_eq_k,
                     k);
                 if (ng_k > 0)
                 {
@@ -188,10 +188,10 @@ namespace fatrop
                 }
             }
             {
-                int nu_k = nu_p[K-1];
-                int ng_k = ng_p[K-1];
-                int offs_ux_k = offs_ux[K-1];
-                int offs_g_k = offs_g[K-1];
+                int nu_k = nu_p[K - 1];
+                int ng_k = ng_p[K - 1];
+                int offs_ux_k = offs_ux[K - 1];
+                int offs_g_k = offs_g[K - 1];
                 if (ng_k > 0)
                 {
                     ocptempl->eval_gk(
@@ -200,14 +200,45 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         scales_primal_data + offs_ux_k,
                         scales_lam_data + offs_g_k,
-                        cv_p+ offs_g_k,
-                        K-1);
+                        cv_p + offs_g_k,
+                        K - 1);
                 }
             }
             return 0;
-                assert(false); // feature not implemented yet
-                return 0;
         }
+        int EvalGrad(
+            OCPKKTMemory *OCP,
+            double obj_scale,
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &scales_primal_vars,
+            const FatropVecBF &scales_lam,
+            const FatropVecBF &gradient) override
+        {
+            // horizon length
+            int K = OCP->K;
+            // offsets
+            const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
+            double *grad_p = ((VEC *)gradient)->pa;
+            OCPMACRO(int *, nu, _p);
+            SOLVERMACRO(VEC *, primal_vars, _p);
+            SOLVERMACRO(VEC *, scales_primal_vars, _p);
+            double *primal_data = primal_vars_p->pa;
+            double *scales_primal_data = scales_primal_vars_p->pa;
+            for (int k = 0; k < K; k++)
+            {
+                int nu_k = nu_p[k];
+                int offs_ux_k = offs_ux[k];
+                ocptempl->eval_rqk(
+                    &obj_scale,
+                    primal_data + offs_ux_k,
+                    scales_primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
+                    scales_primal_data + offs_ux_k + nu_k,
+                    grad_p + offs_ux_k,
+                    k);
+            }
+            return 0;
+        };
         OCPDims GetOCPDims() const override
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr);

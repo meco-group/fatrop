@@ -196,7 +196,7 @@ namespace fatrop
             const double *scales_inputs_k,
             const double *scales,
             double *res,
-            const int k)
+            const int k) override
         {
             const double *args[5];
             args[0] = states_k;
@@ -216,8 +216,6 @@ namespace fatrop
             const double *scales_states_k,
             const double *inputs_k,
             const double *scales_inputs_k,
-            const double *scales_lam_dyn_k,
-            const double *scales_lam_eq_k,
             double *res,
             const int k) override
         {
@@ -227,8 +225,6 @@ namespace fatrop
             args[2] = scales_states_k;
             args[3] = inputs_k;
             args[4] = scales_inputs_k;
-            args[5] = scales_lam_dyn_k;
-            args[6] = scales_lam_eq_k;
             if (k == K_ - 1)
                 return rqFf.eval_array(args, res);
             if (k == 0)
