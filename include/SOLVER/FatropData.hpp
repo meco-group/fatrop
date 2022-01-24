@@ -9,30 +9,37 @@ namespace fatrop
     struct FatropData : public RefCountedObj
     {
         FatropData(const NLPDims &nlpdims) : nlpdims(nlpdims),
-                                             x_curr(nlpdims.nvars, 1),
-                                             x_next(nlpdims.nvars, 1),
-                                             delta_x(nlpdims.nvars, 1),
-                                             x_scales(nlpdims.nvars, 1),
-                                             lam_curr(nlpdims.neqs, 1),
-                                             lam_next(nlpdims.neqs, 1),
-                                             lam_scales(nlpdims.neqs, 1),
-                                             g_curr(nlpdims.neqs, 1),
-                                             g_next(nlpdims.neqs, 1),
-                                             grad_curr(nlpdims.nvars, 1),
-                                             grad_next(nlpdims.nvars, 1){};
+                                             memvars(nlpdims.nvars, 6),
+                                             memeqs(nlpdims.neqs, 4),
+                                             x_curr(memvars[0]),
+                                             x_next(memvars[1]),
+                                             delta_x(memvars[2]),
+                                             x_scales(memvars[3]),
+                                             lam_curr(memeqs[0]),
+                                             lam_next(memeqs[1]),
+                                             lam_scales(memeqs[2]),
+                                             g_curr(memeqs[3]),
+                                             g_next(memeqs[4]),
+                                             grad_curr(memvars[4]),
+                                             grad_next(memvars[5])
+
+        {
+        }
         const NLPDims nlpdims;
         double obj_scaling_factor = 1.0;
-        FatropMemoryVecBF x_curr;
-        FatropMemoryVecBF x_next;
-        FatropMemoryVecBF delta_x;
-        FatropMemoryVecBF x_scales;
-        FatropMemoryVecBF lam_curr;
-        FatropMemoryVecBF lam_next;
-        FatropMemoryVecBF lam_scales;
-        FatropMemoryVecBF g_curr;
-        FatropMemoryVecBF g_next;
-        FatropMemoryVecBF grad_curr;
-        FatropMemoryVecBF grad_next;
+        FatropMemoryVecBF memvars;
+        FatropMemoryVecBF memeqs;
+        FatropVecBF x_curr;
+        FatropVecBF x_next;
+        FatropVecBF delta_x;
+        FatropVecBF x_scales;
+        FatropVecBF lam_curr;
+        FatropVecBF lam_next;
+        FatropVecBF lam_scales;
+        FatropVecBF g_curr;
+        FatropVecBF g_next;
+        FatropVecBF grad_curr;
+        FatropVecBF grad_next;
     };
 }
 #endif // FATROPDATAINCLUDED
