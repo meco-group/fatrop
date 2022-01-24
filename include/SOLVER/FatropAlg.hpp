@@ -17,37 +17,55 @@ namespace fatrop
         }
         int Optimize()
         {
-            // fatropnlp_->EvalHess();
-            // fatropnlp_->EvalJac();
-            // fatropnlp_->ComputeSD();
             return 0;
         }
-        int EvalHess()
+        inline int EvalHess()
         {
-            // return fatropnlp_->EvalHess
-            // (
-            // ) 
-            return 0;
+            return fatropnlp_->EvalHess(
+                fatropdata_->obj_scale,
+                fatropdata_->x_curr,
+                fatropdata_->x_scales,
+                fatropdata_->lam_curr,
+                fatropdata_->lam_scales);
         }
-        int EvalJac()
+        inline int EvalJac()
         {
-            return 0;
+            return fatropnlp_->EvalJac(
+                fatropdata_->x_curr,
+                fatropdata_->x_scales,
+                fatropdata_->lam_scales);
         }
-        int EvalCVNext()
+        inline int EvalCVCurr()
         {
-            return 0;
+            return fatropnlp_->EvalConstraintViolation(
+                fatropdata_->x_curr,
+                fatropdata_->x_scales,
+                fatropdata_->lam_scales,
+                fatropdata_->g_curr);
         }
-        int EvalCVCurr()
+        inline int EvalCVNext()
         {
-            return 0;
+            return fatropnlp_->EvalConstraintViolation(
+                fatropdata_->x_next,
+                fatropdata_->x_scales,
+                fatropdata_->lam_scales,
+                fatropdata_->g_next);
         }
-        int EvalGradCurr()
+        inline int EvalGradCurr()
         {
-            return 0;
+            return fatropnlp_->EvalGrad(
+                fatropdata_->obj_scale,
+                fatropdata_->x_curr,
+                fatropdata_->x_scales,
+                fatropdata_->grad_curr);
         }
         int EvalGradNext()
         {
-            return 0;
+            return fatropnlp_->EvalGrad(
+                fatropdata_->obj_scale,
+                fatropdata_->x_next,
+                fatropdata_->x_scales,
+                fatropdata_->grad_next);
         }
         double EvalObjCurr()
         {

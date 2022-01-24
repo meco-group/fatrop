@@ -31,7 +31,6 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam,
             const FatropVecBF &gradient) = 0;
         virtual OCPDims GetOCPDims() const  = 0;
     };

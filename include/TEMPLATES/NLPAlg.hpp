@@ -26,13 +26,12 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
             const FatropVecBF &scales_lam,
-            const FatropVecBF &constraint_violation) = 0;
+            FatropVecBF &constraint_violation) = 0;
         virtual int EvalGrad(
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam,
-            const FatropVecBF &gradient) = 0;
+            FatropVecBF &gradient) = 0;
         virtual int ComputeSD(
             const double intertia_correction,
             const FatropVecBF &dprimal_vars,

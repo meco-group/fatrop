@@ -26,7 +26,7 @@ namespace fatrop
         {
         }
         const NLPDims nlpdims;
-        double obj_scaling_factor = 1.0;
+        double obj_scale = 1.0;
         FatropMemoryVecBF memvars;
         FatropMemoryVecBF memeqs;
         FatropVecBF x_curr;
