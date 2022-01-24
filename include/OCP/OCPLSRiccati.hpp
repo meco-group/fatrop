@@ -35,6 +35,8 @@ namespace fatrop
             const FatropVecBF &ux,
             const FatropVecBF &lam) override
         {
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
             // define compiler macros for notational convenience
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
@@ -297,6 +299,8 @@ namespace fatrop
                 GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
                 GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
             }
+            double el = blasfeo_toc(&timer);
+            // cout << "el time " << el << endl;
             return 0;
         }
         FatropMemoryMatBF Ppt;

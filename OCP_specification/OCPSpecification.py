@@ -68,8 +68,8 @@ class OptimalControlProblem:
         self.x_vars[:, K-1] = self.opti_vars[offs:offs+nx]
         Lkf = Function("Lk", [self.obj_scale, self.x_sym_scaled,
                        self.scales_x_sym, self.u_sym_scaled, self.scales_u_sym], [self.Lk])
-        LkFf = Function("Lk", [self.obj_scale, self.x_sym_scaled,
-                        self.scales_x_sym], [self.Lk])
+        LkFf = Function("LF", [self.obj_scale, self.x_sym_scaled,
+                        self.scales_x_sym], [self.LF])
         stateskp1 = SX.sym("stateskp1", nx)
         Dynamcisf = Function("F", [stateskp1, self.scales_x_sym, self.x_sym_scaled, self.u_sym_scaled,
                              self.scales_u_sym, self.scales_dyn], [-stateskp1 + self.dynamics])
@@ -142,7 +142,7 @@ class OptimalControlProblem:
               self.u_sym_scaled, self.scales_u_sym], [densify(self.Lk)]))
         # RSQrqtF
         RSQrqtF = SX.zeros(self.nx+1, self.nx)
-        [RSQF, rqF] = hessian(self.LkF, vertcat(self.x_sym_scaled))
+        [RSQF, rqF] = hessian(self.LF, vertcat(self.x_sym_scaled))
         if self.ngF > 0:
             RSQF += hessian(self.dual_eqF.T@self.eqF,
                             vertcat(self.x_sym_scaled))
