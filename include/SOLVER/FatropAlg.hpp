@@ -7,7 +7,7 @@
 #include "LineSearch.hpp"
 namespace fatrop
 {
-    class FatropAlg
+    class FatropAlg: public RefCountedObj
     {
     public:
         FatropAlg(

@@ -6,10 +6,11 @@ namespace fatrop
 {
     struct FilterData
     {
+        const int iteration = 0;
         /** \brief barrier function value */
-        double phi = 0.0;
+        const double phi = 0.0;
         /** \brief constraint violation value */
-        double theta = 0.0;
+        const double theta = 0.0;
     };
     class Filter
     {
