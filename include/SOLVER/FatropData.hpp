@@ -4,13 +4,14 @@
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include "TEMPLATES/NLPAlg.hpp"
 #include "AUX/Common.hpp"
+#include "FatropParams.hpp"
 using namespace std;
 namespace fatrop
 {
     #define CACHEMACRO(instance, val) instance.evaluated ?  instance.value : instance.SetValue(val)
     struct FatropData : public RefCountedObj
     {
-        FatropData(const NLPDims &nlpdims) : nlpdims(nlpdims),
+        FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams>& params ) : nlpdims(nlpdims),
                                              memvars(nlpdims.nvars, 6),
                                              memeqs(nlpdims.neqs, 6),
                                              x_curr(memvars[0]),
@@ -24,9 +25,14 @@ namespace fatrop
                                              g_curr(memeqs[4]),
                                              g_next(memeqs[5]),
                                              grad_curr(memvars[4]),
-                                             grad_next(memvars[5])
-
+                                             grad_next(memvars[5]),
+                                             params(params)
         {
+            Initialize();
+        }
+        void Initialize(){
+            smax = params -> smax;
+
         }
         int TryStep(double alpha_primal, double alpha_dual)
         {
@@ -59,9 +65,17 @@ namespace fatrop
         {
             return CACHEMACRO(cache_next.cv_l1, L1(g_next));
         }
+        double LamL1Curr()
+        {
+            return L1(lam_curr);
+        }
         double LamLinfCurr()
         {
             return Linf(lam_curr);
+        }
+        double LamMeanCurr()
+        {
+            return LamL1Curr()/nlpdims.nvars;
         }
 
         const NLPDims nlpdims;
@@ -99,6 +113,8 @@ namespace fatrop
         };
         EvalCache cache_curr;
         EvalCache cache_next;
+        const RefCountPtr<FatropParams> params;
+        double smax;
     };
 }
 #endif // FATROPDATAINCLUDED
