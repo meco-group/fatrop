@@ -4,6 +4,7 @@
 #include "TEMPLATES/NLPAlg.hpp"
 #include "FatropData.hpp"
 #include "Filter.hpp"
+#include "LineSearch.hpp"
 namespace fatrop
 {
     class FatropAlg

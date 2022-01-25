@@ -1,3 +1,3 @@
 #ifndef STEPACCEPTORINCLUDED
 
-#endif // !
+#endif // STEPACCEPTORINCLUDED
