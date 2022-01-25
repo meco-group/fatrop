@@ -40,15 +40,18 @@
 #define VECSE blasfeo_dvecse
 #define PACKMAT blasfeo_pack_dmat
 #define PMAT PermMat
+#define AXPY blasfeo_daxpy
+#define AXPBY blasfeo_daxpby
 
 #include <iostream>
 extern "C"
 {
 #include <blasfeo.h>
 }
-#include "../AUX/FatropMemory.hpp"
-#include "../AUX/LinearAlgebra.hpp"
-#include "../AUX/FatropVector.hpp"
+#include "AUX/FatropMemory.hpp"
+#include "AUX/LinearAlgebra.hpp"
+#include "AUX/FatropVector.hpp"
+#include "AUX/Common.hpp"
 #if DEBUG
 #include <assert.h>
 #endif
@@ -301,6 +304,8 @@ namespace fatrop
         double get_el(const int ai) const { return this->at(ai); };
         /** \brief get number of elements */
         int nels() const { return nels_; };
+        /** \brief get offset */
+        int offset() const { return offset_; };
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm)
         {
@@ -325,6 +330,24 @@ namespace fatrop
         const int offset_;
         const int nels_;
     };
+    inline void axpy(const double alpha, const FatropVecBF& va, FatropVecBF& vb)
+    {
+        DBGASSERT(va.nels() == vb.nels());
+        VEC* va_p = (VEC*) va;
+        VEC* vb_p = (VEC*) vb;
+        AXPY(va.nels(),alpha, va_p, va.offset(), vb_p, vb.offset(), vb_p, vb.offset());
+
+    };
+    inline void axpby(const double alpha, const FatropVecBF& va, const double beta, FatropVecBF& vb)
+    {
+        DBGASSERT(va.nels() == vb.nels());
+        VEC* va_p = (VEC*) va;
+        VEC* vb_p = (VEC*) vb;
+        AXPBY(va.nels(),alpha, va_p, va.offset(), beta, vb_p, vb.offset(), vb_p, vb.offset());
+
+    };
+
+
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
     class FatropMemoryVecBF 
     {

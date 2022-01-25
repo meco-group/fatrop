@@ -3,6 +3,7 @@
 #define FATROPDATAINCLUDED
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include "TEMPLATES/NLPAlg.hpp"
+#include "AUX/Common.hpp"
 using namespace std;
 namespace fatrop
 {
@@ -24,6 +25,10 @@ namespace fatrop
                                              grad_next(memvars[5])
 
         {
+        }
+        int TryStep(double alpha_primal, double alpha_dual)
+        {
+            return 0;
         }
         const NLPDims nlpdims;
         double obj_scale = 1.0;
