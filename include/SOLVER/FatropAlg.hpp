@@ -7,6 +7,10 @@
 #include "LineSearch.hpp"
 namespace fatrop
 {
+    struct IterationData
+    {
+        
+    };
     class FatropAlg: public RefCountedObj
     {
     public:

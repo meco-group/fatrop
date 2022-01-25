@@ -7,6 +7,7 @@
 using namespace std;
 namespace fatrop
 {
+    #define CACHEMACRO(instance, val) instance.evaluated ?  instance.value : instance.SetValue(val)
     struct FatropData : public RefCountedObj
     {
         FatropData(const NLPDims &nlpdims) : nlpdims(nlpdims),
@@ -32,40 +33,37 @@ namespace fatrop
             axpy(alpha_primal, delta_x, x_curr, x_next);
             axpby(alpha_primal, lam_calc, 1 - alpha_primal, lam_curr, lam_next);
             // reset evaluation flags
-            evalcachenext = EvalCache();
+            cache_next = EvalCache();
             return 0;
         }
         int TakeStep()
         {
             x_curr.SwapWith(x_next);
             lam_curr.SwapWith(lam_next);
-            evalcachecurr = evalcachenext;
+            cache_curr = cache_next;
             return 0;
         }
         double CVLinfCurr()
         {
-            if(evalcachecurr.CVLinfEvaluated) return evalcachecurr.CVLinf;
-            evalcachecurr.CVLinfEvaluated = true;
-            return Linf(g_curr);
+            return CACHEMACRO(cache_curr.cv_linf, Linf(g_curr));
         }
         double CVLinfNext()
         {
-            if(evalcachenext.CVLinfEvaluated) return evalcachenext.CVLinf;
-            evalcachenext.CVLinfEvaluated = true;
-            return Linf(g_next);
+            return CACHEMACRO(cache_next.cv_linf, Linf(g_next));
         }
         double CVL1Curr()
         {
-            if(evalcachecurr.CVL1Evaluated) return evalcachecurr.CVL1;
-            evalcachecurr.CVL1Evaluated = true;
-            return L1(g_curr);
+            return CACHEMACRO(cache_curr.cv_l1, L1(g_curr));
         }
         double CVL1Next()
         {
-            if(evalcachenext.CVL1Evaluated) return evalcachenext.CVL1;
-            evalcachenext.CVL1Evaluated = true;
-            return L1(g_next);
+            return CACHEMACRO(cache_next.cv_l1, L1(g_next));
         }
+        double LamLinfCurr()
+        {
+            return Linf(lam_curr);
+        }
+
         const NLPDims nlpdims;
         double obj_scale = 1.0;
         FatropMemoryVecBF memvars;
@@ -84,13 +82,23 @@ namespace fatrop
         FatropVecBF grad_next;
         struct EvalCache
         {
-            bool CVLinfEvaluated = false;
-            double CVLinf = 0.0;
-            bool CVL1Evaluated = false;
-            double CVL1 = 0.0;
+            struct Instance{
+                bool evaluated = false;
+                double value = 0.0;
+                double SetValue(const double value_)
+                {
+                    value = value;
+                    evaluated = true;
+                    return value;
+                }
+            };
+            Instance cv_linf;
+            Instance cv_l1;
+            Instance lam_linf;
+            Instance lam_l1;
         };
-        EvalCache evalcachecurr; 
-        EvalCache evalcachenext; 
+        EvalCache cache_curr;
+        EvalCache cache_next;
     };
 }
 #endif // FATROPDATAINCLUDED
