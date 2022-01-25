@@ -42,7 +42,21 @@
 #define PMAT PermMat
 #define AXPY blasfeo_daxpy
 #define AXPBY blasfeo_daxpby
-
+#define DOT blasfeo_ddot
+#define MAX(a, b)                   \
+    (                               \
+        {                           \
+            __typeof__(a) _a = (a); \
+            __typeof__(b) _b = (b); \
+            _a > _b ? _a : _b;      \
+        })
+#define MIN(a, b)                   \
+    (                               \
+        {                           \
+            __typeof__(a) _a = (a); \
+            __typeof__(b) _b = (b); \
+            _a < _b ? _a : _b;      \
+        })
 #include <iostream>
 extern "C"
 {
@@ -324,28 +338,71 @@ namespace fatrop
         {
             return FatropVecBF(p, offset_ + i, this->vec_);
         }
-
-    private:
+        inline void SwapWith(FatropVecBF& vb)
+        {
+            DBGASSERT(vb.offset_ == offset_);
+            DBGASSERT(vb.nels_ == nels_);
+            VEC* tmp = vec_;
+            vec_ = vb.vec_;
+            vb.vec_ = tmp;
+        }
+    protected:
         VEC *vec_ = NULL;
         const int offset_;
         const int nels_;
     };
-    inline void axpy(const double alpha, const FatropVecBF& va, FatropVecBF& vb)
+    inline void axpy(const double alpha, const FatropVecBF& va, const FatropVecBF& vb, FatropVecBF& vc)
+    {
+        DBGASSERT(va.nels() == vb.nels());
+        DBGASSERT(va.nels() == vc.nels());
+        VEC* va_p = (VEC*) va;
+        VEC* vb_p = (VEC*) vb;
+        VEC* vc_p = (VEC*) vc;
+        AXPY(va.nels(),alpha, va_p, va.offset(), vb_p, vb.offset(), vc_p, vc.offset());
+
+    };
+    inline void axpby(const double alpha, const FatropVecBF& va, const double beta, const FatropVecBF& vb, FatropVecBF& vc)
+    {
+        DBGASSERT(va.nels() == vb.nels());
+        DBGASSERT(va.nels() == vc.nels());
+        VEC* va_p = (VEC*) va;
+        VEC* vb_p = (VEC*) vb;
+        VEC* vc_p = (VEC*) vc;
+        AXPBY(va.nels(),alpha, va_p, va.offset(), beta, vb_p, vb.offset(), vc_p, vc.offset());
+
+    };
+    inline double dot(const FatropVecBF& va, FatropVecBF& vb)
     {
         DBGASSERT(va.nels() == vb.nels());
         VEC* va_p = (VEC*) va;
         VEC* vb_p = (VEC*) vb;
-        AXPY(va.nels(),alpha, va_p, va.offset(), vb_p, vb.offset(), vb_p, vb.offset());
-
+        return DOT(va.nels(),va_p, va.offset(), vb_p, vb.offset());
     };
-    inline void axpby(const double alpha, const FatropVecBF& va, const double beta, FatropVecBF& vb)
+    inline double Linf(const FatropVecBF& va)
     {
-        DBGASSERT(va.nels() == vb.nels());
         VEC* va_p = (VEC*) va;
-        VEC* vb_p = (VEC*) vb;
-        AXPBY(va.nels(),alpha, va_p, va.offset(), beta, vb_p, vb.offset(), vb_p, vb.offset());
-
+        int nels = va.nels();
+        int offset = va.offset();
+        double res = 0.0;
+        for(int i =offset; i < nels + offset; i++)
+        {
+            res += abs(VECEL(va_p, i));
+        }
+        return res;
     };
+    inline double L1(const FatropVecBF& va)
+    {
+        VEC* va_p = (VEC*) va;
+        int nels = va.nels();
+        int offset = va.offset();
+        double res = 0.0;
+        for(int i =offset; i < nels + offset; i++)
+        {
+            res = MAX(res, abs(VECEL(va_p, i)));
+        }
+        return res;
+    };
+
 
 
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
@@ -616,20 +673,7 @@ namespace fatrop
         PermMat *perm_p;
     };
     MatrixInd max_el(int m, int n, MAT *matr, int ai, int aj);
-#define MAX(a, b)                   \
-    (                               \
-        {                           \
-            __typeof__(a) _a = (a); \
-            __typeof__(b) _b = (b); \
-            _a > _b ? _a : _b;      \
-        })
-#define MIN(a, b)                   \
-    (                               \
-        {                           \
-            __typeof__(a) _a = (a); \
-            __typeof__(b) _b = (b); \
-            _a < _b ? _a : _b;      \
-        })
+
     /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12);
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
