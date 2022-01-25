@@ -43,10 +43,10 @@ int main()
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {
-        ocpalg.EvalConstraintViolation(ux[0], ux[1], scaleslam, cv);
-        ocpalg.EvalGrad(1.0, ux[0], ux[1], grad);
-        ocpalg.EvalHess(1.0, ux[0], ux[1], lags[0], lags[1]);
-        ocpalg.EvalJac(ux[0], ux[1], lags[1]);
+        ocpalg.EvalConstraintViolation(ux[0], cv);
+        ocpalg.EvalGrad(1.0, ux[0],  grad);
+        ocpalg.EvalHess(1.0, ux[0],  lags[0]);
+        ocpalg.EvalJac(ux[0]);
         ocpalg.ComputeSD(0.0, dux, dlam);
     }
     double el = blasfeo_toc(&timer);

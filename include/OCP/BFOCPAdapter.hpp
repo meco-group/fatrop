@@ -19,9 +19,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &lam,
-            const FatropVecBF &scales_lam) override
+            const FatropVecBF &lam) override
         {
             // horizon length
             int K = OCP->K;
@@ -32,13 +30,9 @@ namespace fatrop
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_primal_vars, _p);
             SOLVERMACRO(VEC *, lam, _p);
-            SOLVERMACRO(VEC *, scales_lam, _p);
             double *primal_data = primal_vars_p->pa;
-            double *scales_primal_data = scales_primal_vars_p->pa;
             double *lam_data = lam_p->pa;
-            double *scales_lam_data = scales_lam_p->pa;
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
@@ -48,13 +42,9 @@ namespace fatrop
                 ocptempl->eval_RSQrqtk(
                     &obj_scale,
                     primal_data + offs_ux_k,
-                    scales_primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
-                    scales_primal_data + offs_ux_k + nu_k,
                     lam_data + offs_dyn_eq_k,
-                    scales_lam_data + offs_dyn_eq_k,
                     lam_data + offs_g_k,
-                    scales_lam_data + offs_g_k,
                     RSQrqt_p + k,
                     k);
             }
@@ -62,26 +52,18 @@ namespace fatrop
         }
         int evalJac(
             OCPKKTMemory *OCP,
-            const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam) override
+            const FatropVecBF &primal_vars ) override
         {
             // horizon length
             int K = OCP->K;
             // offsets
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
-            int *offs_g = (int *)OCP->aux.g_offs.data();
-            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_lam, _p);
             double *primal_data = primal_vars_p->pa;
-            double *scales_primal_data = scales_primal_vars_p->pa;
-            double *scales_lam_data = scales_lam_p->pa;
 
             for (int k = 0; k < K - 1; k++)
             {
@@ -90,26 +72,17 @@ namespace fatrop
                 int nu_kp1 = nu_p[k + 1];
                 int offs_ux_k = offs_ux[k];
                 int offs_ux_kp1 = offs_ux[k + 1];
-                int offs_dyn_eq_k = offs_dyn_eq[k];
-                int offs_g_k = offs_g[k];
                 ocptempl->eval_BAbtk(
                     primal_data + offs_ux_kp1 + nu_kp1,
-                    scales_primal_data + offs_ux_kp1 + nu_kp1,
                     primal_data + offs_ux_k + nu_k,
-                    scales_primal_data + offs_ux_k + nu_k,
                     primal_data + offs_ux_k,
-                    scales_primal_data + offs_ux_k,
-                    scales_lam_data + offs_dyn_eq_k,
                     BAbt_p + k,
                     k);
                 if (ng_k > 0)
                 {
                     ocptempl->eval_Ggtk(
                         primal_data + offs_ux_k + nu_k,
-                        scales_primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
-                        scales_primal_data + offs_ux_k,
-                        scales_lam_data + offs_g_k,
                         Ggt_p + k,
                         k);
                 }
@@ -118,15 +91,11 @@ namespace fatrop
                 int nu_k = nu_p[K - 1];
                 int ng_k = ng_p[K - 1];
                 int offs_ux_k = offs_ux[K - 1];
-                int offs_g_k = offs_g[K - 1];
                 if (ng_k > 0)
                 {
                     ocptempl->eval_Ggtk(
                         primal_data + offs_ux_k + nu_k,
-                        scales_primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
-                        scales_primal_data + offs_ux_k,
-                        scales_lam_data + offs_g_k,
                         Ggt_p + K - 1,
                         K - 1);
                 }
@@ -136,8 +105,6 @@ namespace fatrop
         int EvalConstraintViolation(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam,
             const FatropVecBF &constraint_violation) override
         {
             // horizon length
@@ -150,11 +117,7 @@ namespace fatrop
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_lam, _p);
             double *primal_data = primal_vars_p->pa;
-            double *scales_primal_data = scales_primal_vars_p->pa;
-            double *scales_lam_data = scales_lam_p->pa;
 
             for (int k = 0; k < K - 1; k++)
             {
@@ -167,22 +130,15 @@ namespace fatrop
                 int offs_g_k = offs_g[k];
                 ocptempl->eval_bk(
                     primal_data + offs_ux_kp1 + nu_kp1,
-                    scales_primal_data + offs_ux_kp1 + nu_kp1,
                     primal_data + offs_ux_k + nu_k,
-                    scales_primal_data + offs_ux_k + nu_k,
                     primal_data + offs_ux_k,
-                    scales_primal_data + offs_ux_k,
-                    scales_lam_data + offs_dyn_eq_k,
                     cv_p + offs_dyn_eq_k,
                     k);
                 if (ng_k > 0)
                 {
                     ocptempl->eval_gk(
                         primal_data + offs_ux_k + nu_k,
-                        scales_primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
-                        scales_primal_data + offs_ux_k,
-                        scales_lam_data + offs_g_k,
                         cv_p + offs_g_k,
                         k);
                 }
@@ -196,10 +152,7 @@ namespace fatrop
                 {
                     ocptempl->eval_gk(
                         primal_data + offs_ux_k + nu_k,
-                        scales_primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
-                        scales_primal_data + offs_ux_k,
-                        scales_lam_data + offs_g_k,
                         cv_p + offs_g_k,
                         K - 1);
                 }
@@ -210,7 +163,6 @@ namespace fatrop
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
             const FatropVecBF &gradient) override
         {
             // horizon length
@@ -220,9 +172,7 @@ namespace fatrop
             double *grad_p = ((VEC *)gradient)->pa;
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_primal_vars, _p);
             double *primal_data = primal_vars_p->pa;
-            double *scales_primal_data = scales_primal_vars_p->pa;
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
@@ -230,9 +180,7 @@ namespace fatrop
                 ocptempl->eval_rqk(
                     &obj_scale,
                     primal_data + offs_ux_k,
-                    scales_primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
-                    scales_primal_data + offs_ux_k + nu_k,
                     grad_p + offs_ux_k,
                     k);
             }
@@ -242,7 +190,6 @@ namespace fatrop
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
             double &res)
         {
             // horizon length
@@ -251,10 +198,8 @@ namespace fatrop
             const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
-            SOLVERMACRO(VEC *, scales_primal_vars, _p);
             double *primal_data = primal_vars_p->pa;
-            double *scales_primal_data = scales_primal_vars_p->pa;
-            double restot= 0.0;
+            double restot = 0.0;
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
@@ -263,12 +208,10 @@ namespace fatrop
                 ocptempl->eval_rqk(
                     &obj_scale,
                     primal_data + offs_ux_k,
-                    scales_primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
-                    scales_primal_data + offs_ux_k + nu_k,
                     &resk,
                     k);
-                    restot += resk;
+                restot += resk;
             }
             res = restot;
             return 0;

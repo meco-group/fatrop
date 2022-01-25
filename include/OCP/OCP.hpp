@@ -5,40 +5,32 @@
 #include "AUX/SmartPtr.hpp"
 namespace fatrop
 {
-    class OCP: public RefCountedObj
+    class OCP : public RefCountedObj
     {
-        public:
+    public:
         virtual int evalHess(
-            OCPKKTMemory* OCP,
+            OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &lam,
-            const FatropVecBF &scales_lam) = 0;
+            const FatropVecBF &lam) = 0;
         virtual int evalJac(
-            OCPKKTMemory* OCP,
-            const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam) = 0;
+            OCPKKTMemory *OCP,
+            const FatropVecBF &primal_vars) = 0;
         virtual int EvalConstraintViolation(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam,
             const FatropVecBF &constraint_violation) = 0;
         virtual int EvalGrad(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
             const FatropVecBF &gradient) = 0;
         virtual int EvalObj(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            double &res) = 0; 
-        virtual OCPDims GetOCPDims() const  = 0;
+            double &res) = 0;
+        virtual OCPDims GetOCPDims() const = 0;
     };
 } // namespace fatrop
 #endif // OCPINCLUDED

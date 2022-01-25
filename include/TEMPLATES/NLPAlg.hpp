@@ -15,22 +15,15 @@ namespace fatrop
         virtual int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &lam,
-            const FatropVecBF &scales_lam) = 0;
+            const FatropVecBF &lam) = 0;
         virtual int EvalJac(
-            const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam) = 0;
+            const FatropVecBF &primal_vars ) = 0;
         virtual int EvalConstraintViolation(
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam,
             FatropVecBF &constraint_violation) = 0;
         virtual int EvalGrad(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
             FatropVecBF &gradient) = 0;
         virtual int ComputeSD(
             const double intertia_correction,

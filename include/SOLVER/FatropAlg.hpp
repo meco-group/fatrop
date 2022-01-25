@@ -29,31 +29,23 @@ namespace fatrop
             return fatropnlp_->EvalHess(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
-                fatropdata_->x_scales,
-                fatropdata_->lam_curr,
-                fatropdata_->lam_scales);
+                fatropdata_->lam_curr);
         }
         inline int EvalJac()
         {
             return fatropnlp_->EvalJac(
-                fatropdata_->x_curr,
-                fatropdata_->x_scales,
-                fatropdata_->lam_scales);
+                fatropdata_->x_curr);
         }
         inline int EvalCVCurr()
         {
             return fatropnlp_->EvalConstraintViolation(
                 fatropdata_->x_curr,
-                fatropdata_->x_scales,
-                fatropdata_->lam_scales,
                 fatropdata_->g_curr);
         }
         inline int EvalCVNext()
         {
             return fatropnlp_->EvalConstraintViolation(
                 fatropdata_->x_next,
-                fatropdata_->x_scales,
-                fatropdata_->lam_scales,
                 fatropdata_->g_next);
         }
         inline int EvalGradCurr()
@@ -61,7 +53,6 @@ namespace fatrop
             return fatropnlp_->EvalGrad(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
-                fatropdata_->x_scales,
                 fatropdata_->grad_curr);
         }
         int EvalGradNext()
@@ -69,7 +60,6 @@ namespace fatrop
             return fatropnlp_->EvalGrad(
                 fatropdata_->obj_scale,
                 fatropdata_->x_next,
-                fatropdata_->x_scales,
                 fatropdata_->grad_next);
         }
         double EvalObjCurr()

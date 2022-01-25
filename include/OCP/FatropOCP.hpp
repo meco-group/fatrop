@@ -19,28 +19,20 @@ namespace fatrop
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &lam,
-            const FatropVecBF &scales_lam) override
+            const FatropVecBF &lam) override
         {
             return ocp_->evalHess(
                 &ocpkktmemory_,
                 obj_scale,
                 primal_vars,
-                scales_primal_vars,
-                lam,
-                scales_lam);
+                lam);
         };
         int EvalJac(
-            const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam) override
+            const FatropVecBF &primal_vars) override
         {
             return ocp_->evalJac(
                 &ocpkktmemory_,
-                primal_vars,
-                scales_primal_vars,
-                scales_lam);
+                primal_vars);
         };
         int ComputeSD(
             const double inertia_correction,
@@ -68,21 +60,16 @@ namespace fatrop
         };
         int EvalConstraintViolation(
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
-            const FatropVecBF &scales_lam,
             FatropVecBF &constraint_violation) override
         {
             return ocp_->EvalConstraintViolation(
                 &ocpkktmemory_,
                 primal_vars,
-                scales_primal_vars,
-                scales_lam,
                 constraint_violation);
         };
         int EvalGrad(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &scales_primal_vars,
             FatropVecBF &gradient) override
         {
 
@@ -90,7 +77,6 @@ namespace fatrop
                 &ocpkktmemory_,
                 obj_scale,
                 primal_vars,
-                scales_primal_vars,
                 gradient);
         };
         NLPDims GetNLPDims() const override
