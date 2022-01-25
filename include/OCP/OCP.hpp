@@ -19,12 +19,12 @@ namespace fatrop
         virtual int EvalConstraintViolation(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &constraint_violation) = 0;
+            FatropVecBF &constraint_violation) = 0;
         virtual int EvalGrad(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &gradient) = 0;
+            FatropVecBF &gradient) = 0;
         virtual int EvalObj(
             OCPKKTMemory *OCP,
             double obj_scale,

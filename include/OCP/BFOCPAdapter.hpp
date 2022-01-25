@@ -105,7 +105,7 @@ namespace fatrop
         int EvalConstraintViolation(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &constraint_violation) override
+            FatropVecBF &constraint_violation) override
         {
             // horizon length
             int K = OCP->K;
@@ -163,7 +163,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            const FatropVecBF &gradient) override
+            FatropVecBF &gradient) override
         {
             // horizon length
             int K = OCP->K;
