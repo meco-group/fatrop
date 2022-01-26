@@ -7,6 +7,7 @@
 #include "OCPLinearSolver.hpp"
 #include "AUX/FatropMemory.hpp"
 #include "OCPScalingMethod.hpp"
+#include "DuInfEvaluator.hpp"
 namespace fatrop
 {
     class FatropOCP : public FatropNLP
@@ -91,6 +92,7 @@ namespace fatrop
                 primal_vars,
                 res);
         };
+
         NLPDims GetNLPDims() const override
         {
             NLPDims res;
@@ -105,7 +107,8 @@ namespace fatrop
         RefCountPtr<OCP> ocp_;
         RefCountPtr<OCPLinearSolver> ls_;
         RefCountPtr<OCPScalingMethod> scaler_;
+        DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
-    };
-} // namespace fatrop
+        };
+    }  // namespace fatrop
 #endif //  OCPALGINCLUDED
