@@ -338,75 +338,106 @@ namespace fatrop
         {
             return FatropVecBF(p, offset_ + i, this->vec_);
         }
-        inline void SwapWith(FatropVecBF& vb)
+        inline void SwapWith(FatropVecBF &vb)
         {
             DBGASSERT(vb.offset_ == offset_);
             DBGASSERT(vb.nels_ == nels_);
-            VEC* tmp = vec_;
+            VEC *tmp = vec_;
             vec_ = vb.vec_;
             vb.vec_ = tmp;
         }
+
     protected:
         VEC *vec_ = NULL;
         const int offset_;
         const int nels_;
     };
-    inline void axpy(const double alpha, const FatropVecBF& va, const FatropVecBF& vb, FatropVecBF& vc)
+
+    // class CachedQuantity
+    // {
+    // public:
+    //     virtual double eval();
+    //     inline double get()
+    //     {
+    //         return evaluated ? value : SetValue(eval());
+    //     }
+    // private:
+    //     double SetValue(const double value_)
+    //     {
+    //         value = value;
+    //         evaluated = true;
+    //         return value;
+    //     }
+    //     bool evaluated = false;
+    //     double value = 0.0;
+    // };
+    // class L1Quantity: public CachedQuantity
+    // {
+    //     // double eval() override{
+    //     //     return 
+    //     // }
+    // };
+    // /** \brief decorator for FatropVecBF that allows computation of certain quantities*/
+    // class FatropVecBFCached : public FatropVecBF
+    // {
+    // public:
+    //     FatropVecBFCached(const FatropVecBF &fatropvecbf) : FatropVecBF(fatropvecbf){};
+
+    // private:
+    // };
+
+    inline void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, FatropVecBF &vc)
     {
         DBGASSERT(va.nels() == vb.nels());
         DBGASSERT(va.nels() == vc.nels());
-        VEC* va_p = (VEC*) va;
-        VEC* vb_p = (VEC*) vb;
-        VEC* vc_p = (VEC*) vc;
-        AXPY(va.nels(),alpha, va_p, va.offset(), vb_p, vb.offset(), vc_p, vc.offset());
-
+        VEC *va_p = (VEC *)va;
+        VEC *vb_p = (VEC *)vb;
+        VEC *vc_p = (VEC *)vc;
+        AXPY(va.nels(), alpha, va_p, va.offset(), vb_p, vb.offset(), vc_p, vc.offset());
     };
-    inline void axpby(const double alpha, const FatropVecBF& va, const double beta, const FatropVecBF& vb, FatropVecBF& vc)
+    inline void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc)
     {
         DBGASSERT(va.nels() == vb.nels());
         DBGASSERT(va.nels() == vc.nels());
-        VEC* va_p = (VEC*) va;
-        VEC* vb_p = (VEC*) vb;
-        VEC* vc_p = (VEC*) vc;
-        AXPBY(va.nels(),alpha, va_p, va.offset(), beta, vb_p, vb.offset(), vc_p, vc.offset());
-
+        VEC *va_p = (VEC *)va;
+        VEC *vb_p = (VEC *)vb;
+        VEC *vc_p = (VEC *)vc;
+        AXPBY(va.nels(), alpha, va_p, va.offset(), beta, vb_p, vb.offset(), vc_p, vc.offset());
     };
-    inline double dot(const FatropVecBF& va, FatropVecBF& vb)
+    inline double dot(const FatropVecBF &va, FatropVecBF &vb)
     {
         DBGASSERT(va.nels() == vb.nels());
-        VEC* va_p = (VEC*) va;
-        VEC* vb_p = (VEC*) vb;
-        return DOT(va.nels(),va_p, va.offset(), vb_p, vb.offset());
+        VEC *va_p = (VEC *)va;
+        VEC *vb_p = (VEC *)vb;
+        return DOT(va.nels(), va_p, va.offset(), vb_p, vb.offset());
     };
-    inline double Linf(const FatropVecBF& va)
+    inline double Linf(const FatropVecBF &va)
     {
-        VEC* va_p = (VEC*) va;
+        VEC *va_p = (VEC *)va;
         int nels = va.nels();
         int offset = va.offset();
         double res = 0.0;
-        for(int i =offset; i < nels + offset; i++)
+        for (int i = offset; i < nels + offset; i++)
         {
             res += abs(VECEL(va_p, i));
         }
         return res;
     };
-    inline double L1(const FatropVecBF& va)
+    inline double L1(const FatropVecBF &va)
     {
-        VEC* va_p = (VEC*) va;
+        VEC *va_p = (VEC *)va;
         int nels = va.nels();
         int offset = va.offset();
         double res = 0.0;
-        for(int i =offset; i < nels + offset; i++)
+        for (int i = offset; i < nels + offset; i++)
         {
             res = MAX(res, abs(VECEL(va_p, i)));
         }
         return res;
     };
 
-
-
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
-    class FatropMemoryVecBF 
+    class FatropMemoryVecBF
     {
     public:
         /** \brief constuction for allocation on MemoryAllocator*/
@@ -482,7 +513,7 @@ namespace fatrop
         }
 
     private:
-        void *mem = NULL; 
+        void *mem = NULL;
         VEC *vec;
         const int N_;
         const FatropVector<int> nels_;
@@ -667,7 +698,7 @@ namespace fatrop
         }
 
     private:
-        void *mem = NULL; 
+        void *mem = NULL;
         const int dim_;
         const int N_;
         PermMat *perm_p;

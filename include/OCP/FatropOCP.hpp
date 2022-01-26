@@ -79,6 +79,18 @@ namespace fatrop
                 primal_vars,
                 gradient);
         };
+        int EvalObj(
+            double obj_scale,
+            const FatropVecBF &primal_vars,
+            double &res) override
+        {
+
+            return ocp_->EvalObj(
+                &ocpkktmemory_,
+                obj_scale,
+                primal_vars,
+                res);
+        };
         NLPDims GetNLPDims() const override
         {
             NLPDims res;

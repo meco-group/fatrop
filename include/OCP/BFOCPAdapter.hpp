@@ -215,9 +215,8 @@ namespace fatrop
             }
             res = restot;
             return 0;
-        }
+        };
 
-        ;
         OCPDims GetOCPDims() const override
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr);

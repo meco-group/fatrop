@@ -9,7 +9,7 @@ namespace fatrop
         int nvars;
         int neqs;
     };
-    class FatropNLP: public RefCountedObj
+    class FatropNLP : public RefCountedObj
     {
     public:
         virtual int EvalHess(
@@ -17,7 +17,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) = 0;
         virtual int EvalJac(
-            const FatropVecBF &primal_vars ) = 0;
+            const FatropVecBF &primal_vars) = 0;
         virtual int EvalConstraintViolation(
             const FatropVecBF &primal_vars,
             FatropVecBF &constraint_violation) = 0;
@@ -25,11 +25,15 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) = 0;
+        virtual int EvalObj(
+            double obj_scale,
+            const FatropVecBF &primal_vars,
+            double &res) = 0;
         virtual int ComputeSD(
             const double intertia_correction,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam) = 0;
-            virtual NLPDims GetNLPDims() const =0;
+        virtual NLPDims GetNLPDims() const = 0;
         virtual int ComputeScalings(
             double &obj_scale,
             FatropVecBF &x_scales,

@@ -44,8 +44,10 @@ namespace fatrop
         }
         int TakeStep()
         {
+            // TODO make a struct which containts vectors associated with curr <-> next
             x_curr.SwapWith(x_next);
             lam_curr.SwapWith(lam_next);
+            grad_curr.SwapWith(grad_next);
             cache_curr = cache_next;
             return 0;
         }
@@ -110,6 +112,7 @@ namespace fatrop
             Instance cv_l1;
             Instance lam_linf;
             Instance lam_l1;
+            Instance du_inf_linf;
         };
         EvalCache cache_curr;
         EvalCache cache_next;

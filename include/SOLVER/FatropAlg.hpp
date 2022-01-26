@@ -9,9 +9,8 @@ namespace fatrop
 {
     struct IterationData
     {
-        
     };
-    class FatropAlg: public RefCountedObj
+    class FatropAlg : public RefCountedObj
     {
     public:
         FatropAlg(
@@ -64,11 +63,21 @@ namespace fatrop
         }
         double EvalObjCurr()
         {
-            return 0.0;
+            double res = 0.0;
+            fatropnlp_->EvalObj(
+                fatropdata_->obj_scale,
+                fatropdata_ -> x_curr,
+                res);
+            return res;
         }
         double EvalObjNext()
         {
-            return 0.0;
+            double res = 0.0;
+            fatropnlp_->EvalObj(
+                fatropdata_->obj_scale,
+                fatropdata_ -> x_next,
+                res);
+            return res;
         }
         int ComputeSD()
         {

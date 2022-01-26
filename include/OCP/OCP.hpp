@@ -4,7 +4,8 @@
 #include "OCPDims.hpp"
 #include "AUX/SmartPtr.hpp"
 namespace fatrop
-{
+{ 
+    /** \brief interface class for OCP operations*/
     class OCP : public RefCountedObj
     {
     public:
