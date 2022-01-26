@@ -43,6 +43,8 @@
 #define AXPY blasfeo_daxpy
 #define AXPBY blasfeo_daxpby
 #define DOT blasfeo_ddot
+#define GESE blasfeo_dgese
+#define DIARE blasfeo_ddiare
 #define MAX(a, b)                   \
     (                               \
         {                           \
@@ -83,6 +85,7 @@ namespace fatrop
     void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
     // B <= B + alpha*A^T (B is mxn)
     void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj);
+    void fatrop_identity(const int m, MAT* sA, const int ai, const int aj);
 
     // // permute the rows of a matrix struct
     // void fatrop_drowpe(int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)

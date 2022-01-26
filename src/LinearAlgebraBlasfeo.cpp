@@ -211,4 +211,9 @@ namespace fatrop
             VECEL(sz, zi + i) = res;
         }
     }
+    void fatrop_identity(const int m, MAT* sA, const int ai, const int aj)
+    {
+        GESE(m,m, 0.0, sA, ai, aj);
+        DIARE(m, 1.0, sA, ai,aj);
+    }
 } // namespace fatrop
