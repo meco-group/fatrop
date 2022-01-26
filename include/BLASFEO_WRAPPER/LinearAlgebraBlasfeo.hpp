@@ -32,6 +32,7 @@
 #define TRTR_L blasfeo_dtrtr_l
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
+#define ROWIN blasfeo_drowin
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
 #define TRSV_UNU fatrop_dtrsv_unu
