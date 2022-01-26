@@ -208,10 +208,9 @@ namespace fatrop
             res = restot;
             return 0;
         };
-        int EvalInitial(
+        /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !!*/
+        int AdaptKKTInitial(
             OCPKKTMemory *OCP,
-            double obj_scale,
-            const FatropVecBF &primal_vars,
             const FatropVecBF &grad)
         {
             // horizon length
@@ -224,15 +223,12 @@ namespace fatrop
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, nx, _p);
             OCPMACRO(int *, ng, _p);
-            SOLVERMACRO(VEC *, primal_vars, _p);
             SOLVERMACRO(VEC *, grad, _p);
-            double *primal_data = primal_vars_p->pa;
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
                 int nx_k = nx_p[k];
                 int offs_ux_k = offs_ux[k];
-                // RSQrq's
                 fatrop_identity(nu_k + nx_k, RSQrqt_p + k, 0,0);
                 ROWIN(nu_k+nx_k, 1.0, grad_p, offs_ux_k, RSQrqt_p+k, nu_k+ nx_k, 0);
             }
@@ -242,15 +238,6 @@ namespace fatrop
                 int nu_k = nu_p[k];
                 int nx_k = nx_p[k];
                 int nx_kp1 = nx_p[k + 1];
-                int nu_kp1 = nu_p[k + 1];
-                int offs_ux_k = offs_ux[k];
-                int offs_ux_kp1 = offs_ux[k + 1];
-                ocptempl->eval_BAbtk(
-                    primal_data + offs_ux_kp1 + nu_kp1,
-                    primal_data + offs_ux_k + nu_k,
-                    primal_data + offs_ux_k,
-                    BAbt_p + k,
-                    k);
                 GESE(1, nx_kp1, 0.0, BAbt_p + k, nu_k + nx_k, 0);
             }
             for (int k = 0; k < K; k++)
@@ -258,14 +245,8 @@ namespace fatrop
                 int nu_k = nu_p[k];
                 int nx_k = nx_p[k];
                 int ng_k = ng_p[k];
-                int offs_ux_k = offs_ux[k];
                 if (ng_k > 0)
                 {
-                    ocptempl->eval_Ggtk(
-                        primal_data + offs_ux_k + nu_k,
-                        primal_data + offs_ux_k,
-                        Ggt_p + k,
-                        k);
                     GESE(1, ng_k, 0.0, Ggt_p + k, nu_k + nx_k, 0);
                 }
             }
