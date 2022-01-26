@@ -80,9 +80,12 @@ namespace fatrop
                 res);
             return res;
         }
-        int ComputeSD()
+        int ComputeSD(double inertia_correction)
         {
-            return 0;
+            return fatropnlp_->ComputeSD(
+                inertia_correction,
+                fatropdata_->delta_x,
+                fatropdata_->lam_calc);
         }
         RefCountPtr<FatropNLP> fatropnlp_;
         RefCountPtr<FatropData> fatropdata_;

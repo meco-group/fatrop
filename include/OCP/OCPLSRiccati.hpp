@@ -4,30 +4,39 @@
 #include "OCPLinearSolver.hpp"
 namespace fatrop
 {
-    class OCPLSRiccati: public OCPLinearSolver
+    bool check_reg(const int m, MAT *sA, const int ai, const int aj)
+    {
+        for (int i = 0; i < m; i++)
+        {
+            if (MATEL(sA, ai + m, aj + m) == 0.0)
+                return false;
+        }
+        return true;
+    }
+    class OCPLSRiccati : public OCPLinearSolver
     {
     public:
         OCPLSRiccati(const OCPDims &dims) : Ppt(dims.nx + 1, dims.nx, dims.K),
-                                                                  Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
-                                                                  AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1),
-                                                                  RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
-                                                                  Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
-                                                                  Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
-                                                                  GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1),
-                                                                  RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
-                                                                  Llt(dims.nu + dims.nx + 1, dims.nu, dims.K),
-                                                                  Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1),
-                                                                  GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
-                                                                  GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
-                                                                  HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
-                                                                  PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
-                                                                  LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
-                                                                  Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
-                                                                  Pr(max(dims.nu), dims.K),
-                                                                  PlI(dims.nx.at(0), 1),
-                                                                  PrI(dims.nx.at(0), 1),
-                                                                  gamma(vector<int>(dims.K, 0)),
-                                                                  rho(vector<int>(dims.K, 0)){};
+                                            Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
+                                            AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1),
+                                            RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
+                                            Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                            Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
+                                            GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1),
+                                            RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                            Llt(dims.nu + dims.nx + 1, dims.nu, dims.K),
+                                            Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1),
+                                            GgIt_tilde(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
+                                            GgLIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
+                                            HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
+                                            PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
+                                            LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
+                                            Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
+                                            Pr(max(dims.nu), dims.K),
+                                            PlI(dims.nx.at(0), 1),
+                                            PrI(dims.nx.at(0), 1),
+                                            gamma(vector<int>(dims.K, 0)),
+                                            rho(vector<int>(dims.K, 0)){};
         // solve a KKT system
         int computeSD(
             OCPKKTMemory *OCP,
@@ -107,6 +116,7 @@ namespace fatrop
                     GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
                     // RSQrqt_stripe <- AL[BA] + RSQrqt
                     SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+                    DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
                     gamma_p[k] = gamma_k;
                     // if ng[k]>0
                     if (gamma_k > 0)
@@ -172,6 +182,8 @@ namespace fatrop
                     {
                         // DLlt_k = [chol(R_hatk); Llk@chol(R_hatk)^-T]
                         POTRF_L_MN(nu - rank_k + nx + 1, nu - rank_k, RSQrq_hat_curr_p, 0, 0, Llt_p + k, 0, 0);
+                        if (!check_reg(nu - rank_k, Llt_p + k, 0, 0))
+                            return 1;
                         // Pp_k = Qq_hatk - L_k^T @ Ll_k
                         // SYRK_LN_MN(nx+1, nx, nu-rank_k, -1.0,Llt_p+k, nu-rank_k,0, Llt_p+k, nu-rank_k,0, 1.0, RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
                         GECP(nx + 1, nu - rank_k, Llt_p + k, nu - rank_k, 0, Llt_shift_p, 0, 0); // needless operation because feature not implemented yet
@@ -207,6 +219,8 @@ namespace fatrop
                     SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
                     // TODO skipped if nx-rankI = 0
                     POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
+                    if (!check_reg(nx - rankI, LlIt_p, 0, 0))
+                        return 2;
                 }
                 else
                 {

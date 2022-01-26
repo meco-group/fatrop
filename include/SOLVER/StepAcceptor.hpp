@@ -13,7 +13,9 @@ namespace fatrop
         const RefCountPtr<Filter>& filter,
         const RefCountPtr<FatropParams>& fatropparams
     ): fatropdata_(fatropdata), filter_(filter), fatropparams_(fatropparams)
-    {};
+    {
+        Initialize();
+    };
         public:
         void Initialize()
         {
