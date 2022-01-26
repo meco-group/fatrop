@@ -8,6 +8,7 @@
 #include "AUX/FatropMemory.hpp"
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
+#include "OCPInitializer.hpp"
 namespace fatrop
 {
     class FatropOCP : public FatropNLP

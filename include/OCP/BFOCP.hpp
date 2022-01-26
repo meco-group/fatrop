@@ -33,7 +33,6 @@ namespace fatrop
             const double *inputs_k,
             MAT *res,
             const int k) = 0;
-
         virtual int eval_bk(
             const double *states_kp1,
             const double *states_k,
