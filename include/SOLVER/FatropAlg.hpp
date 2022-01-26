@@ -5,6 +5,7 @@
 #include "FatropData.hpp"
 #include "Filter.hpp"
 #include "LineSearch.hpp"
+#include "StepAcceptor.hpp"
 namespace fatrop
 {
     struct IterationData

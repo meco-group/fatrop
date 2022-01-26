@@ -1,6 +1,7 @@
 #ifndef FILTERINCLUDED
 #define FILTERINCLUDED
 #include "vector"
+#include "AUX/SmartPtr.hpp"
 using namespace std;
 namespace fatrop
 {
@@ -12,7 +13,7 @@ namespace fatrop
         /** \brief constraint violation value */
         const double theta = 0.0;
     };
-    class Filter
+    class Filter: public RefCountedObj
     {
     public:
         Filter(const int size)
