@@ -5,7 +5,7 @@
     #include "AUX/SmartPtr.hpp"
     #include <vector>
     using namespace fatrop;
-    RefCountPtr<RandomOCP> GenerateRandom(int nu, int nx, int ng, int K)
+    RefCountPtr<BFOCP> GenerateRandom(int nu, int nx, int ng, int K)
     {
     FatropVector<int> nu_ = vector<int>(K, nu);
     FatropVector<int> nx_ = vector<int>(K, nx);
@@ -21,10 +21,10 @@
 
 
 
-    %rename(RandomOCPp) RefCountPtr<RandomOCP>;
+    %rename(BFOCPp) RefCountPtr<BFOCP>;
 
     %apply(int DIM1,int DIM2, double* IN_ARRAY2) {(int dim1, int dim2, double* mat)};
-    class RefCountPtr<RandomOCP> 
+    class RefCountPtr<BFOCP> 
     {
         public:
     %extend {
@@ -53,7 +53,7 @@
         }
     }
     };
-    RefCountPtr<RandomOCP> GenerateRandom(int nu, int nx, int ng, int K);
+    RefCountPtr<BFOCP> GenerateRandom(int nu, int nx, int ng, int K);
 
     %init %{
         import_array();
