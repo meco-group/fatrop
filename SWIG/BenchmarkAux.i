@@ -4,6 +4,7 @@
     #include "DEBUG/RandomOCP.hpp"
     #include "AUX/SmartPtr.hpp"
     #include <vector>
+    using namespace fatrop;
     RefCountPtr<RandomOCP> GenerateRandom(int nu, int nx, int ng, int K)
     {
     FatropVector<int> nu_ = vector<int>(K, nu);
@@ -13,4 +14,21 @@
     }
     %}
 
+
+    %rename(RandomOCPp) RefCountPtr<RandomOCP>;
+
+    class RefCountPtr<RandomOCP> 
+    {
+        public:
+    %extend {
+        int get420()
+        {
+            return 421;
+        };
+    }
+    };
     RefCountPtr<RandomOCP> GenerateRandom(int nu, int nx, int ng, int K);
+
+    %init %{
+
+    %}

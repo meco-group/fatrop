@@ -61,6 +61,7 @@ namespace fatrop
             if(this->ptr_!=NULL) this->ptr_->DecrRef();
             this->ptr_ = other.GetRawPtr();
             this->ptr_->IncrRef();
+            return *this;
         }
 
         ~RefCountPtr()
