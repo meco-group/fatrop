@@ -95,6 +95,11 @@ namespace fatrop
                 c_vec.at(K - 1) = KKT.set_equation(Gx * x_vec.at(K - 1), rhs_con);
             };
         };
+        void print()
+        {
+            KKT.print("matrix");
+        }
+
 
         // solve a KKT system
         int computeSD(

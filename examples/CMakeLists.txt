@@ -14,6 +14,8 @@ target_link_libraries(SparseExample MUMPS::MPISEQ)
 target_link_libraries(SparseExample MUMPS::DMUMPS)
 target_link_libraries(RandomOCPExample MUMPS::MPISEQ)
 target_link_libraries(RandomOCPExample MUMPS::DMUMPS)
+target_link_libraries(OCPBasicExample MUMPS::MPISEQ)
+target_link_libraries(OCPBasicExample MUMPS::DMUMPS)
 # target_link_libraries(SparseExample profiler)
 
 

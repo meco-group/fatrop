@@ -5,7 +5,7 @@ namespace fatrop
 {
     class OCPInitializer
     {
-        // TODO seperate class for this
+        public:
         /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !!*/
         int AdaptKKTInitial(
             OCPKKTMemory *OCP,

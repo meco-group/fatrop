@@ -42,7 +42,7 @@ namespace fatrop
             double *buffer_p = buffer.data();
             // todo make this static polymorphism using CRTP
             int res = eval_buffer(arg);
-            memcpy(buffer_p, array, out_nnz*sizeof(double));
+            memcpy(array, buffer_p, out_nnz*sizeof(double));
             return res;
         }
         ~EvalBase(){};

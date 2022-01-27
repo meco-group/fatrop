@@ -105,7 +105,7 @@ class OptimalControlProblem:
         RSQrqtI[self.nu+self.nx, :] = rqI[:]
         C.add(Function("RSQrqtI", [self.obj_scale, self.x_sym,
               self.u_sym, self.dual_dyn, self.dual_eqI], [densify(RSQrqtI)]))
-        # rqI
+        rqI
         C.add(Function("rqI", [self.obj_scale,
               self.x_sym, self.u_sym], [densify(rqI)]))
         # RSQrqt

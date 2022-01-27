@@ -11,12 +11,13 @@
 #include "OCP/OCPNoScaling.hpp"
 #include "SOLVER/FatropParams.hpp"
 #include "SOLVER/FatropAlg.hpp"
+#include "SPARSE/SparseOCP.hpp"
 
 using namespace fatrop;
 int main()
 {
     RefCountPtr<BFOCP> ocptemplatebasic =
-        new BFOCPBasic(BFOCPBasic::from_shared_lib("./f.so", 150));
+        new BFOCPBasic(BFOCPBasic::from_shared_lib("./../../OCP_specification/f.so", 3));
     RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
     RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
     RefCountPtr<FatropParams> params = new FatropParams();
@@ -24,8 +25,8 @@ int main()
     FatropOCP ocpalg(ocptempladapter, ocplsriccati, ocpscaler);
     NLPDims nlpdims = ocpalg.GetNLPDims();
     blasfeo_timer timer;
-    FatropMemoryVecBF ux(nlpdims.nvars, 4);
-    FatropMemoryVecBF lags(nlpdims.neqs, 4);
+    FatropMemoryVecBF ux(nlpdims.nvars, 5);
+    FatropMemoryVecBF lags(nlpdims.neqs, 5);
     int N = 1000;
     FatropVecBF scalesx = ux[1];
     FatropVecBF dux = ux[3];
@@ -33,6 +34,8 @@ int main()
     FatropVecBF cv = lags[2];
     FatropVecBF scaleslam = lags[1];
     FatropVecBF dlam = lags[3];
+    FatropVecBF duinf = ux[4];
+
     // FatropAlg fatropalg(ocpalg)
     double obj_sc = 1.0;
     ocpalg.ComputeScalings(
@@ -40,15 +43,20 @@ int main()
         scalesx,
         scaleslam,
         scaleslam);
-    blasfeo_tic(&timer);
-    for (int i = 0; i < N; i++)
-    {
-        ocpalg.EvalConstraintViolation(ux[0], cv);
-        ocpalg.EvalGrad(1.0, ux[0],  grad);
-        ocpalg.EvalHess(1.0, ux[0],  lags[0]);
-        ocpalg.EvalJac(ux[0]);
-        ocpalg.ComputeSD(0.0, dux, dlam);
-    }
+    ocpalg.EvalConstraintViolation(ux[0], cv);
+    ocpalg.EvalGrad(1.0, ux[0], grad);
+    ocpalg.EvalHess(1.0, ux[0], lags[0]);
+    ocpalg.EvalJac(ux[0]);
+    // grad.print();
+    ocpalg.OCPInitializer_.AdaptKKTInitial(&ocpalg.ocpkktmemory_,grad);
+    ocpalg.ComputeSD(0.0, dux, dlam);
+    grad.print();
+    ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, ux[0], dlam, grad, duinf);
+    cout << Linf(duinf) << endl;
+
+    // }
     double el = blasfeo_toc(&timer);
-    cout << "time elapsed " << el / N << endl;
+    // cout << "time elapsed " << el / N << endl;
+    RefCountPtr<Sparse_OCP> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
+    ocplssparse->print();
 }

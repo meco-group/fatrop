@@ -41,7 +41,7 @@ option(BUILD_DOCS "Build documentation" OFF)
 find_package(blasfeo)
 add_subdirectory(src)
 add_subdirectory(examples)
-add_subdirectory(SWIG)
+# add_subdirectory(SWIG)
 # add_subdirectory(test)
 
 if(BUILD_DOCS MATCHES ON)

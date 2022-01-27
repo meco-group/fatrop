@@ -110,6 +110,7 @@ namespace fatrop
         RefCountPtr<OCPScalingMethod> scaler_;
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
+        OCPInitializer OCPInitializer_;
         };
     }  // namespace fatrop
 #endif //  OCPALGINCLUDED
