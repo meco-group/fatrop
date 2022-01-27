@@ -26,6 +26,11 @@ namespace fatrop
     class RefCountPtr
     {
     public:
+        RefCountPtr()
+        {
+            ptr_ = NULL;
+            // ptr_->IncrRef();
+        }
         RefCountPtr(T* raw_ptr)
         {
             ptr_ = raw_ptr;
@@ -48,6 +53,16 @@ namespace fatrop
         {
             return *ptr_;
         }
+        T* GetRawPtr() const {
+            return ptr_;
+        }
+        RefCountPtr<T>& operator=(const RefCountPtr<T>& other)
+        {
+            if(this->ptr_!=NULL) this->ptr_->DecrRef();
+            this->ptr_ = other.GetRawPtr();
+            this->ptr_->IncrRef();
+        }
+
         ~RefCountPtr()
         {
             ptr_->DecrRef();
