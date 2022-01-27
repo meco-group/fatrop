@@ -31,13 +31,12 @@ namespace fatrop
             ptr_ = NULL;
             // ptr_->IncrRef();
         }
-        RefCountPtr(T* raw_ptr)
+        RefCountPtr(T *raw_ptr)
         {
             ptr_ = raw_ptr;
             ptr_->IncrRef();
         }
-        RefCountPtr(const RefCountPtr<T> &copy):
-        ptr_(copy)
+        RefCountPtr(const RefCountPtr<T> &copy) : ptr_(copy)
         {
             ptr_->IncrRef();
         }
@@ -53,12 +52,20 @@ namespace fatrop
         {
             return *ptr_;
         }
-        T* GetRawPtr() const {
+        T *GetRawPtr() const
+        {
             return ptr_;
         }
-        RefCountPtr<T>& operator=(const RefCountPtr<T>& other)
+        RefCountPtr<T> &operator=(const RefCountPtr<T> &other)
         {
-            if(this->ptr_!=NULL) this->ptr_->DecrRef();
+            if (this->ptr_ != NULL)
+            {
+                this->ptr_->DecrRef();
+                if (ptr_->RefCount() == 0)
+                {
+                    delete ptr_;
+                }
+            }
             this->ptr_ = other.GetRawPtr();
             this->ptr_->IncrRef();
             return *this;
@@ -72,8 +79,9 @@ namespace fatrop
                 delete ptr_;
             }
         }
+
     private:
-       T *ptr_ = nullptr;
+        T *ptr_ = nullptr;
     };
 } // namespace fatrop
 #endif // SMARTPOINTERINCLUDED
