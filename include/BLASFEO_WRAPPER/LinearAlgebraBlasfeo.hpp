@@ -423,7 +423,7 @@ namespace fatrop
         double res = 0.0;
         for (int i = offset; i < nels + offset; i++)
         {
-            res += abs(VECEL(va_p, i));
+            res = MAX(res, abs(VECEL(va_p, i)));
         }
         return res;
     };
@@ -435,7 +435,7 @@ namespace fatrop
         double res = 0.0;
         for (int i = offset; i < nels + offset; i++)
         {
-            res = MAX(res, abs(VECEL(va_p, i)));
+            res += abs(VECEL(va_p, i));
         }
         return res;
     };

@@ -12,7 +12,6 @@ namespace fatrop
         int DuInfEval(
             OCPKKTMemory *OCP,
             double obj_scale,
-            const FatropVecBF &primal_vars,
             const FatropVecBF &lam,
             const FatropVecBF &grad,
             FatropVecBF &du_inf)

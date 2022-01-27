@@ -213,7 +213,6 @@ namespace fatrop
                     }
                     else
                     {
-                        cout << "zero" << endl;
                     }
                 }
             }
