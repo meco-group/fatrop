@@ -14,6 +14,7 @@ namespace fatrop
             const RefCountPtr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
                                                          fatropnlp_(nlp),
                                                          fatropdata_(fatropdata){};
+        virtual int FindAcceptableTrialPoint()=0;
         inline int EvalCVNext()
         {
             return fatropnlp_->EvalConstraintViolation(
@@ -41,7 +42,9 @@ namespace fatrop
             const RefCountPtr<FatropNLP> &nlp,
             const RefCountPtr<FatropData> &fatropdata,
             const RefCountPtr<Filter> &filter)
-            : LineSearch(fatropparams, nlp, fatropdata), filter_(filter){};
+            : LineSearch(fatropparams, nlp, fatropdata), filter_(filter){
+                Initialize();
+            };
         void Initialize()
         {
             // todo avoid reallocation when maxiter doesn't change
@@ -72,12 +75,16 @@ namespace fatrop
                     if (switch_cond && (cv_curr <= fatropdata_->theta_min))
                     {
                         // f-step
-                        fatropdata_->TakeStep();
-                        return ll;
+                        if (obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr)
+                        {
+                            fatropdata_->TakeStep();
+                            return ll;
+                        }
                     }
                     else
                     {
                         // h-step
+                        // check sufficient decrease wrt current iterate
                         if ((cv_next < (1.0 - gamma_theta) * cv_curr) || (obj_next < obj_curr - gamma_phi * cv_curr))
                         {
                             if (!switch_cond || !(obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr))
@@ -91,6 +98,7 @@ namespace fatrop
                 }
                 alpha_primal /= 2.0;
             }
+            assert(false);
             return 0;
         };
         RefCountPtr<Filter> filter_;

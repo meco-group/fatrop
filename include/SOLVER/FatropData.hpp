@@ -105,7 +105,7 @@ namespace fatrop
         }
         double LinDecrCurr()
         {
-            return dot(grad_curr, x_curr);
+            return dot(grad_curr, delta_x);
         }
 
         const NLPDims nlpdims;

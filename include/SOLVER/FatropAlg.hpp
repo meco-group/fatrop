@@ -69,6 +69,7 @@ namespace fatrop
             {
                 fatropdata_-> obj_curr =  EvalObjCurr();
                 cout << "iteration, objective: " << i << ", " << EvalObjCurr() << endl;
+                cout << "iteration, cv: " << i << ", " << fatropdata_->CVLinfCurr() << endl;
                 // prepare iteration
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
@@ -107,9 +108,8 @@ namespace fatrop
                     delta_w_last = deltaw;
                 }
                 cout << "regularization  " << deltaw << endl;
-                cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-                fatropdata_->TryStep(1.0, 1.0);
-                fatropdata_->TakeStep();
+                // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
+                linesearch_-> FindAcceptableTrialPoint();
             }
             return 0;
         }

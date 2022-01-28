@@ -39,6 +39,7 @@ class OptimalControlProblem:
 
     def set_eq_final(self, eq):
         self.ngF = eq.shape[0]
+        print(self.ngF)
         self.dual_eqF = SX.sym("dual_eqF", self.ngF)
         self.eqF = eq
 
@@ -125,7 +126,7 @@ class OptimalControlProblem:
         [RSQF, rqF] = hessian(self.LF, vertcat(self.x_sym))
         if self.ngF > 0:
             RSQF += hessian(self.dual_eqF.T@self.eqF,
-                            vertcat(self.x_sym))
+                            vertcat(self.x_sym))[0]
         RSQrqtF[:self.nx, :] = RSQF
         RSQrqtF[self.nx, :] = rqF[:]
         C.add(Function("RSQrqtF", [self.obj_scale, self.u_sym, self.x_sym,
@@ -143,8 +144,8 @@ class OptimalControlProblem:
         # g_I
         C.add(Function("gI", [self.u_sym, self.x_sym], [densify(self.eqI[:])]))
         # GgtF
-        GgtF = SX.zeros(self.nx+1, self.ngI)
-        GgtF[:self.nx, :] = jacobian(self.eqF, vertcat(self.x_sym)).T
+        GgtF = SX.zeros(self.nx+1, self.ngF)
+        GgtF[:self.nx, :] = jacobian(self.eqF, self.x_sym).T
         GgtF[self.nx, :] = self.eqF[:].T
         C.add(Function("GgtF", [self.u_sym, self.x_sym], [densify(GgtF)]))
         # g_F
