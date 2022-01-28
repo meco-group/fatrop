@@ -73,8 +73,8 @@ namespace fatrop
                 int offs_ux_kp1 = offs_ux[k + 1];
                 ocptempl->eval_BAbtk(
                     primal_data + offs_ux_kp1 + nu_kp1,
-                    primal_data + offs_ux_k + nu_k,
                     primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
                     BAbt_p + k,
                     k);
             }
@@ -86,8 +86,8 @@ namespace fatrop
                 if (ng_k > 0)
                 {
                     ocptempl->eval_Ggtk(
-                        primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
+                        primal_data + offs_ux_k + nu_k,
                         Ggt_p + k,
                         k);
                 }
@@ -122,15 +122,15 @@ namespace fatrop
                 int offs_g_k = offs_g[k];
                 ocptempl->eval_bk(
                     primal_data + offs_ux_kp1 + nu_kp1,
-                    primal_data + offs_ux_k + nu_k,
                     primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
                     cv_p + offs_dyn_eq_k,
                     k);
                 if (ng_k > 0)
                 {
                     ocptempl->eval_gk(
-                        primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
+                        primal_data + offs_ux_k + nu_k,
                         cv_p + offs_g_k,
                         k);
                 }
@@ -143,8 +143,8 @@ namespace fatrop
                 if (ng_k > 0)
                 {
                     ocptempl->eval_gk(
-                        primal_data + offs_ux_k + nu_k,
                         primal_data + offs_ux_k,
+                        primal_data + offs_ux_k + nu_k,
                         cv_p + offs_g_k,
                         K - 1);
                 }

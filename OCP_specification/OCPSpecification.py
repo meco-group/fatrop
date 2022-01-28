@@ -89,10 +89,10 @@ class OptimalControlProblem:
         b = (stateskp1 - self.dynamics)[:]
         BAbt[self.nu+self.nx, :] = b
         C.add(
-            Function("BAbt", [stateskp1, self.x_sym, self.u_sym], [densify(BAbt)]))
+            Function("BAbt", [stateskp1, self.u_sym, self.x_sym], [densify(BAbt)]))
         # b
-        C.add(Function("bk", [stateskp1, self.x_sym,
-                              self.u_sym], [densify(b)]))
+        C.add(Function("bk", [stateskp1, self.u_sym,
+                              self.x_sym], [densify(b)]))
         # RSQrqtI
         RSQrqtI = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
         [RSQI, rqI] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
@@ -103,11 +103,11 @@ class OptimalControlProblem:
                         vertcat(self.u_sym, self.x_sym))[0]
         RSQrqtI[:self.nu+self.nx, :] = RSQI
         RSQrqtI[self.nu+self.nx, :] = rqI[:]
-        C.add(Function("RSQrqtI", [self.obj_scale, self.x_sym,
-              self.u_sym, self.dual_dyn, self.dual_eqI], [densify(RSQrqtI)]))
+        C.add(Function("RSQrqtI", [self.obj_scale, self.u_sym,
+              self.x_sym, self.dual_dyn, self.dual_eqI], [densify(RSQrqtI)]))
         rqI
         C.add(Function("rqI", [self.obj_scale,
-              self.x_sym, self.u_sym], [densify(rqI)]))
+              self.u_sym, self.x_sym], [densify(rqI)]))
         # RSQrqt
         RSQrqt = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
         [RSQ, rq] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
@@ -115,11 +115,11 @@ class OptimalControlProblem:
                        vertcat(self.u_sym, self.x_sym))[0]
         RSQrqt[:self.nu+self.nx, :] = RSQ
         RSQrqt[self.nu+self.nx, :] = rq[:]
-        C.add(Function("RSQrqt", [self.obj_scale, self.x_sym, self.u_sym,self.dual_dyn, self.dual_eqI], [densify(RSQrqt)]))
+        C.add(Function("RSQrqt", [self.obj_scale, self.u_sym, self.x_sym,self.dual_dyn, self.dual_eqI], [densify(RSQrqt)]))
         # rqF
-        C.add(Function("rqk", [self.obj_scale, self.x_sym, self.u_sym], [densify(rq)]))
+        C.add(Function("rqk", [self.obj_scale, self.u_sym, self.x_sym], [densify(rq)]))
         # Lk
-        C.add(Function("Lk", [self.obj_scale, self.x_sym, self.u_sym], [densify(self.Lk)]))
+        C.add(Function("Lk", [self.obj_scale, self.u_sym, self.x_sym], [densify(self.Lk)]))
         # RSQrqtF
         RSQrqtF = SX.zeros(self.nx+1, self.nx)
         [RSQF, rqF] = hessian(self.LF, vertcat(self.x_sym))
@@ -128,26 +128,26 @@ class OptimalControlProblem:
                             vertcat(self.x_sym))
         RSQrqtF[:self.nx, :] = RSQF
         RSQrqtF[self.nx, :] = rqF[:]
-        C.add(Function("RSQrqtF", [self.obj_scale, self.x_sym, self.u_sym,
+        C.add(Function("RSQrqtF", [self.obj_scale, self.u_sym, self.x_sym,
               self.dual_dyn, self.dual_eqF], [densify(RSQrqtF)]))
         # rqF
-        C.add(Function("rqF", [self.obj_scale, self.x_sym, self.u_sym], [densify(rqF)]))
+        C.add(Function("rqF", [self.obj_scale, self.u_sym, self.x_sym], [densify(rqF)]))
         # LF
-        C.add(Function("LF", [self.obj_scale, self.x_sym, self.u_sym], [densify(self.LF)]))
+        C.add(Function("LF", [self.obj_scale, self.u_sym, self.x_sym], [densify(self.LF)]))
         # GgtI
         GgtI = SX.zeros(self.nu+self.nx+1, self.ngI)
         GgtI[:self.nu+self.nx,
              :] = jacobian(self.eqI, vertcat(self.u_sym, self.x_sym)).T
         GgtI[self.nu+self.nx, :] = self.eqI[:].T
-        C.add(Function("GgtI", [self.x_sym, self.u_sym], [densify(GgtI)]))
+        C.add(Function("GgtI", [self.u_sym, self.x_sym], [densify(GgtI)]))
         # g_I
-        C.add(Function("gI", [self.x_sym, self.u_sym], [densify(self.eqI[:])]))
+        C.add(Function("gI", [self.u_sym, self.x_sym], [densify(self.eqI[:])]))
         # GgtF
         GgtF = SX.zeros(self.nx+1, self.ngI)
         GgtF[:self.nx, :] = jacobian(self.eqF, vertcat(self.x_sym)).T
         GgtF[self.nx, :] = self.eqF[:].T
-        C.add(Function("GgtF", [self.x_sym, self.u_sym], [densify(GgtF)]))
+        C.add(Function("GgtF", [self.u_sym, self.x_sym], [densify(GgtF)]))
         # g_F
-        C.add(Function("gF", [self.x_sym, self.u_sym], [densify(self.eqF[:])]))
+        C.add(Function("gF", [self.u_sym, self.x_sym], [densify(self.eqF[:])]))
         C.generate()
         return

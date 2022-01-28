@@ -56,11 +56,13 @@ namespace fatrop
             Initialization();
             if (fatropdata_->LamLinfCalc() < lammax)
             {
+                cout << "accepted lam " << endl;
                 fatropdata_->AcceptInitialization();
             }
+            EvalCVCurr();
             for (int i = 0; i < maxiter; i++)
             {
-                cout << "iteration , objective: " << i << ", "<< EvalObjCurr() << endl;
+                cout << "iteration, objective: " << i << ", "<< EvalObjCurr() << endl;
                 // prepare iteration
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
@@ -86,6 +88,7 @@ namespace fatrop
                 int increase_counter = 0;
                 if (regularity != 0) // regularization is necessary
                 {
+                    cout << "regularization" << endl;
                     deltaw = (delta_w_last == 0.0)? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
                     regularity = ComputeSD(deltaw);
                     while (regularity != 0)
@@ -96,6 +99,7 @@ namespace fatrop
                     }
                     delta_w_last = deltaw;
                 }
+                cout << "step size " << Linf(fatropdata_->delta_x) << endl;
                 fatropdata_->TryStep(1.0, 1.0);
                 fatropdata_->TakeStep();
             }

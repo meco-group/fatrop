@@ -128,7 +128,7 @@ namespace fatrop
                 double value = 0.0;
                 double SetValue(const double value_)
                 {
-                    value = value;
+                    value = value_;
                     evaluated = true;
                     return value;
                 }

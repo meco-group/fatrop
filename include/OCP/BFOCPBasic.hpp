@@ -31,8 +31,7 @@ namespace fatrop
                    const EvalCasGen &GgtFf,
                    const EvalCasGen &gFf,
                    const EvalCasGen &Lkf,
-                   const EvalCasGen &LFf
-                   ) : nu_(nu),
+                   const EvalCasGen &LFf) : nu_(nu),
                                             nx_(nx),
                                             ngI_(ngI),
                                             ngF_(ngF),
@@ -51,7 +50,8 @@ namespace fatrop
                                             gFf(gFf),
                                             Lkf(Lkf),
                                             LFf(LFf)
-                                             {}
+        {
+        }
         // TODO Create Builder class
         static BFOCPBasic from_shared_lib(const string &filename, const int K)
         {
@@ -118,13 +118,13 @@ namespace fatrop
         {
             const double *args[3];
             args[0] = states_kp1;
-            args[1] = states_k;
-            args[2] = inputs_k;
+            args[1] = inputs_k;
+            args[2] = states_k;
             return BAbtf.eval_bf(args, res);
         }
         int eval_RSQrqtk(const double *objective_scale,
-                         const double *states_k,
                          const double *inputs_k,
+                         const double *states_k,
                          const double *lam_dyn_k,
                          const double *lam_eq_k,
                          MAT *res,
@@ -132,8 +132,8 @@ namespace fatrop
         {
             const double *args[5];
             args[0] = objective_scale;
-            args[1] = states_k;
-            args[2] = inputs_k;
+            args[1] = inputs_k;
+            args[2] = states_k;
             args[3] = lam_dyn_k;
             args[4] = lam_eq_k;
             if (k == 0)
@@ -142,14 +142,15 @@ namespace fatrop
                 return RSQrqtFf.eval_bf(args, res);
             return RSQrqtf.eval_bf(args, res);
         };
-        int eval_Ggtk(const double *states_k,
-                      const double *inputs_k,
-                      MAT *res,
-                      const int k) override
+        int eval_Ggtk(
+            const double *inputs_k,
+            const double *states_k,
+            MAT *res,
+            const int k) override
         {
             const double *args[2];
-            args[0] = states_k;
-            args[1] = inputs_k;
+            args[0] = inputs_k;
+            args[1] = states_k;
             if (k == K_ - 1)
                 return GgtFf.eval_bf(args, res);
             if (k == 0)
@@ -158,26 +159,26 @@ namespace fatrop
         };
         int eval_bk(
             const double *states_kp1,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             double *constraint_violation_k,
             const int k) override
         {
             const double *args[3];
             args[0] = states_kp1;
-            args[1] = states_k;
-            args[2] = inputs_k;
+            args[1] = inputs_k;
+            args[2] = states_k;
             return bkf.eval_array(args, constraint_violation_k);
         };
         virtual int eval_gk(
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             double *res,
             const int k) override
         {
             const double *args[2];
+            args[1] = inputs_k;
             args[0] = states_k;
-            args[2] = inputs_k;
             if (k == K_ - 1)
                 return gFf.eval_array(args, res);
             if (k == 0)
@@ -186,15 +187,15 @@ namespace fatrop
         }
         int eval_rqk(
             const double *objective_scale,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             double *res,
             const int k) override
         {
             const double *args[3];
             args[0] = objective_scale;
-            args[1] = states_k;
-            args[2] = inputs_k;
+            args[1] = inputs_k;
+            args[2] = states_k;
             if (k == K_ - 1)
                 return rqFf.eval_array(args, res);
             if (k == 0)
@@ -204,14 +205,15 @@ namespace fatrop
 
         int eval_Lk(
             const double *objective_scale,
-            const double *states_k,
             const double *inputs_k,
-            double * res,
-            const int k) override{
+            const double *states_k,
+            double *res,
+            const int k) override
+        {
             const double *args[3];
             args[0] = objective_scale;
-            args[1] = states_k;
-            args[2] = inputs_k;
+            args[1] = inputs_k;
+            args[2] = states_k;
             if (k == K_ - 1)
                 return LFf.eval_array(args, res);
             return Lkf.eval_array(args, res);
