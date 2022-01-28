@@ -16,27 +16,27 @@ namespace fatrop
         virtual int get_horizon_length() const = 0;
         virtual int eval_BAbtk(
             const double *states_kp1,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             MAT *res,
             const int k) = 0;
         virtual int eval_RSQrqtk(
             const double *objective_scale,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             const double *lam_dyn_k,
             const double *lam_eq_k,
             MAT *res,
             const int k) = 0;
         virtual int eval_Ggtk(
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             MAT *res,
             const int k) = 0;
         virtual int eval_bk(
             const double *states_kp1,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             double *res,
             const int k) = 0;
         virtual int eval_gk(
@@ -46,14 +46,14 @@ namespace fatrop
             const int k) = 0;
         virtual int eval_rqk(
             const double *objective_scale,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             double *res,
             const int k) = 0;
         virtual int eval_Lk(
             const double *objective_scale,
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             double * res,
             const int k) = 0;
     };

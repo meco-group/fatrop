@@ -93,6 +93,7 @@ namespace fatrop
                 const int ng = ng_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
+                DIARE(nx, inertia_correction, Ppt_p + K-1, 0, 0);
                 // Hh_Km1 <- Gg_Km1
                 GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
                 gamma_p[K - 1] = ng;
@@ -226,6 +227,8 @@ namespace fatrop
                 {
                     rankI = 0;
                     POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
+                    if (!check_reg(nx, LlIt_p, 0, 0))
+                        return 2;
                 }
             }
             ////// FORWARD_SUBSTITUTION:

@@ -67,6 +67,7 @@ namespace fatrop
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
                 EvalDuInf();
+                cout << "iteration, du_inf: " << i << ", "<< fatropdata_->DuInfLinfCurr() << endl;
                 // convergence check
                 // todo make a seperate class
                 double emu = fatropdata_->EMuCurr(0.0);
@@ -88,7 +89,6 @@ namespace fatrop
                 int increase_counter = 0;
                 if (regularity != 0) // regularization is necessary
                 {
-                    cout << "regularization" << endl;
                     deltaw = (delta_w_last == 0.0)? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
                     regularity = ComputeSD(deltaw);
                     while (regularity != 0)
@@ -99,6 +99,7 @@ namespace fatrop
                     }
                     delta_w_last = deltaw;
                 }
+                cout << "regularization  " << deltaw<< endl;
                 cout << "step size " << Linf(fatropdata_->delta_x) << endl;
                 fatropdata_->TryStep(1.0, 1.0);
                 fatropdata_->TakeStep();

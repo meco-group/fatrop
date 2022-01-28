@@ -111,8 +111,8 @@ namespace fatrop
         }
         int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
-                       const double *states_k,
                        const double *inputs_k,
+                       const double *states_k,
                        MAT *res,
                        const int k) override
         {
@@ -177,8 +177,8 @@ namespace fatrop
             const int k) override
         {
             const double *args[2];
-            args[1] = inputs_k;
-            args[0] = states_k;
+            args[0] = inputs_k;
+            args[1] = states_k;
             if (k == K_ - 1)
                 return gFf.eval_array(args, res);
             if (k == 0)
