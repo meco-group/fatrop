@@ -12,7 +12,7 @@ namespace fatrop
     struct FatropData : public RefCountedObj
     {
         FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams>& params ) : nlpdims(nlpdims),
-                                             memvars(nlpdims.nvars, 6),
+                                             memvars(nlpdims.nvars, 7),
                                              memeqs(nlpdims.neqs, 6),
                                              x_curr(memvars[0]),
                                              x_next(memvars[1]),
@@ -26,13 +26,29 @@ namespace fatrop
                                              g_next(memeqs[5]),
                                              grad_curr(memvars[4]),
                                              grad_next(memvars[5]),
+                                             du_inf_curr(memvars[6]),
                                              params(params)
         {
             Initialize();
         }
         void Initialize(){
             smax = params -> smax;
-
+        }
+        double EMuCurr(double mu){
+            double res = 0.0;
+            double lammean = LamMeanCurr();
+            double cv = CVLinfCurr();
+            double du = DuInfLinfCurr();
+            double sd = 0.0;
+            if(lammean > smax){
+                sd = lammean/smax;
+                du /= sd;
+            }
+            res = MAX(cv,du);
+            return res;
+        };
+        int AcceptInitialization(){
+            lam_calc.SwapWith(lam_curr);
         }
         int TryStep(double alpha_primal, double alpha_dual)
         {
@@ -69,7 +85,7 @@ namespace fatrop
         }
         double LamL1Curr()
         {
-            return L1(lam_curr);
+            return CACHEMACRO(cache_curr.cv_linf, Linf(lam_curr));
         }
         double LamLinfCurr()
         {
@@ -78,6 +94,13 @@ namespace fatrop
         double LamMeanCurr()
         {
             return LamL1Curr()/nlpdims.nvars;
+        }
+        double LamLinfCalc(){
+            return Linf(lam_calc);
+        }
+        double DuInfLinfCurr()
+        {
+            return CACHEMACRO(cache_curr.du_inf_linf, Linf(du_inf_curr));
         }
 
         const NLPDims nlpdims;
@@ -96,6 +119,7 @@ namespace fatrop
         FatropVecBF g_next;
         FatropVecBF grad_curr;
         FatropVecBF grad_next;
+        FatropVecBF du_inf_curr;
         struct EvalCache
         {
             struct Instance{

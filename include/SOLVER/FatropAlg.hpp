@@ -6,6 +6,7 @@
 #include "Filter.hpp"
 #include "LineSearch.hpp"
 #include "StepAcceptor.hpp"
+// #include "AlgorithmQuantities.hpp"
 namespace fatrop
 {
     struct IterationData
@@ -16,12 +17,40 @@ namespace fatrop
     public:
         FatropAlg(
             const RefCountPtr<FatropNLP> &fatropnlp,
-            const RefCountPtr<FatropData> &fatropdata) : fatropnlp_(fatropnlp),
-                                                         fatropdata_(fatropdata)
+            const RefCountPtr<FatropData> &fatropdata,
+            const RefCountPtr<FatropParams> &fatropparams) : fatropnlp_(fatropnlp),
+                                                             fatropdata_(fatropdata),
+                                                             fatropparams_(fatropparams)
         {
+            Initialize();
+        }
+        void Initialize()
+        {
+            lammax = fatropparams_->lammax;
+            maxiter = fatropparams_->maxiter;
+            tol = fatropparams_->tol;
         }
         int Optimize()
         {
+            // initialization
+            EvalJac(); // todo twice evaluation
+            EvalGradCurr();
+            Initialization();
+            if (fatropdata_->LamLinfCalc() < lammax)
+            {
+                fatropdata_->AcceptInitialization();
+            }
+            for (int i = 0; i < maxiter; i++)
+            {
+                // prepare iteration
+                EvalJac(); // needed for dual inf
+                EvalGradCurr(); // needed for dual inf
+                EvalDuInf();
+                fatropdata_->EMuCurr(0.0);
+
+
+                EvalHess();
+            }
             return 0;
         }
         inline int EvalHess()
@@ -67,7 +96,7 @@ namespace fatrop
             double res = 0.0;
             fatropnlp_->EvalObj(
                 fatropdata_->obj_scale,
-                fatropdata_ -> x_curr,
+                fatropdata_->x_curr,
                 res);
             return res;
         }
@@ -76,9 +105,25 @@ namespace fatrop
             double res = 0.0;
             fatropnlp_->EvalObj(
                 fatropdata_->obj_scale,
-                fatropdata_ -> x_next,
+                fatropdata_->x_next,
                 res);
             return res;
+        }
+        int EvalDuInf()
+        {
+            return fatropnlp_->EvalDuInf(
+                fatropdata_->obj_scale,
+                fatropdata_->lam_curr,
+                fatropdata_->grad_curr,
+                fatropdata_->du_inf_curr
+            );
+        }
+        inline int Initialization()
+        {
+            return fatropnlp_->Initializiaton(
+                fatropdata_->grad_curr,
+                fatropdata_->lam_calc,
+                fatropdata_->delta_x);
         }
         int ComputeSD(double inertia_correction)
         {
@@ -89,6 +134,12 @@ namespace fatrop
         }
         RefCountPtr<FatropNLP> fatropnlp_;
         RefCountPtr<FatropData> fatropdata_;
+        RefCountPtr<FatropParams> fatropparams_;
+
+    private:
+        double lammax;
+        double tol;
+        int maxiter;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

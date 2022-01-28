@@ -399,6 +399,13 @@ namespace fatrop
         VEC *vc_p = (VEC *)vc;
         AXPY(va.nels(), alpha, va_p, va.offset(), vb_p, vb.offset(), vc_p, vc.offset());
     };
+    inline void copy(const FatropVecBF &va, const FatropVecBF &vb)
+    {
+        DBGASSERT(va.nels() == vb.nels());
+        VEC *va_p = (VEC *)va;
+        VEC *vb_p = (VEC *)vb;
+        VECCP(va.nels(), va_p, va.offset(), vb_p, vb.offset());
+    };
     inline void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc)
     {
         DBGASSERT(va.nels() == vb.nels());

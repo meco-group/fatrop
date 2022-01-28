@@ -93,6 +93,29 @@ namespace fatrop
                 primal_vars,
                 res);
         };
+        int EvalDuInf(
+            double obj_scale,
+            const FatropVecBF &lam,
+            const FatropVecBF &grad,
+            FatropVecBF &du_inf) override
+        {
+            return duinfevaluator_.DuInfEval(
+                &ocpkktmemory_,
+                obj_scale,
+                lam,
+                grad,
+                du_inf);
+        }
+        int Initializiaton(
+            const FatropVecBF& grad,
+            FatropVecBF& dlam,
+            FatropVecBF& optimvarsdummy
+        ) override
+        {
+            // assume constraint jacobian evaluated
+            OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
+            return ls_->computeSD(&ocpkktmemory_, 0.0, optimvarsdummy, dlam);
+        }
 
         NLPDims GetNLPDims() const override
         {

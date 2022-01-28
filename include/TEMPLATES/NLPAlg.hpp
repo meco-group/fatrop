@@ -29,6 +29,11 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             double &res) = 0;
+        virtual int EvalDuInf(
+            double obj_scale,
+            const FatropVecBF &lam,
+            const FatropVecBF &grad,
+            FatropVecBF &du_inf) = 0;
         virtual int ComputeSD(
             const double intertia_correction,
             const FatropVecBF &dprimal_vars,
@@ -39,6 +44,10 @@ namespace fatrop
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr) = 0;
+        virtual int Initializiaton(
+            const FatropVecBF& grad,
+            FatropVecBF& lam,
+            FatropVecBF& optimvarsdummy) = 0 ;
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

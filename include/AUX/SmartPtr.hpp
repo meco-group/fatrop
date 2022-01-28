@@ -58,16 +58,20 @@ namespace fatrop
         }
         RefCountPtr<T> &operator=(const RefCountPtr<T> &other)
         {
-            if (this->ptr_ != NULL) RemoveRef();
+            RemoveRef();
             this->ptr_ = other.GetRawPtr();
             this->ptr_->IncrRef();
             return *this;
         }
-        void RemoveRef(){
-            ptr_->DecrRef();
-            if (ptr_->RefCount() == 0)
+        void RemoveRef()
+        {
+            if (this->ptr_ != NULL)
             {
-                delete ptr_;
+                ptr_->DecrRef();
+                if (ptr_->RefCount() == 0)
+                {
+                    delete ptr_;
+                }
             }
         }
 

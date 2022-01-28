@@ -7,7 +7,9 @@ namespace fatrop
     {
         public:
         int maxiter = 100;
-        double smax = 0.0;
+        double smax = 100.0; 
+        double lammax = 1e3;
+        double tol = 1e-8;
     };
 
 } // namespace fatrop
