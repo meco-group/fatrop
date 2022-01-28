@@ -197,7 +197,7 @@ namespace fatrop
                 int nu_k = nu_p[k];
                 int offs_ux_k = offs_ux[k];
                 double resk = 0.0;
-                ocptempl->eval_rqk(
+                ocptempl->eval_Lk(
                     &obj_scale,
                     primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,

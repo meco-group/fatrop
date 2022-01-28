@@ -24,10 +24,10 @@ int main()
     RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
     FatropOCP ocpalg(ocptempladapter, ocplsriccati, ocpscaler);
     NLPDims nlpdims = ocpalg.GetNLPDims();
-    blasfeo_timer timer;
+    // blasfeo_timer timer;
     FatropMemoryVecBF ux(nlpdims.nvars, 5);
     FatropMemoryVecBF lags(nlpdims.neqs, 5);
-    int N = 1000;
+    // int N = 1000;
     FatropVecBF scalesx = ux[1];
     FatropVecBF dux = ux[3];
     FatropVecBF grad = ux[2];

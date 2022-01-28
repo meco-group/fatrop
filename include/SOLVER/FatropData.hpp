@@ -49,6 +49,7 @@ namespace fatrop
         };
         int AcceptInitialization(){
             lam_calc.SwapWith(lam_curr);
+            return 0;
         }
         int TryStep(double alpha_primal, double alpha_dual)
         {

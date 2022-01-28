@@ -26,5 +26,5 @@ int main()
     RefCountPtr<FatropNLP> fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
     RefCountPtr<FatropData> fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
     RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params);
-
+    fatropalg->Optimize();
 }

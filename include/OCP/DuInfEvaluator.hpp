@@ -52,7 +52,7 @@ namespace fatrop
                 const int ng = ng_p[k];
                 const int offs = offs_ux[k];
                 const int offs_g_k = offs_g[k];
-                GEMV_N(nu+nx, ng, 1.0, Ggt_p+k, 0,0,lam_p, offs_g_k, 1.0, du_inf_p, offs, du_inf_p, offs);
+                GEMV_N(nu + nx, ng, 1.0, Ggt_p + k, 0, 0, lam_p, offs_g_k, 1.0, du_inf_p, offs, du_inf_p, offs);
             }
 
             return 0;
