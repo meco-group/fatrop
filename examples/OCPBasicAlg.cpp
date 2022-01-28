@@ -11,7 +11,8 @@
 #include "OCP/OCPNoScaling.hpp"
 #include "SOLVER/FatropParams.hpp"
 // #include "SOLVER/FatropAlg.hpp"
-// #include "SPARSE/SparseOCP.hpp"
+// #ioclude "SPARSE/SparseOCP.hpp"
+#include "SOLVER/Filter.hpp"
 #include "OCP/FatropOCP.hpp"
 #include "SOLVER/FatropAlg.hpp"
 using namespace fatrop;
@@ -25,6 +26,8 @@ int main()
     RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
     RefCountPtr<FatropNLP> fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
     RefCountPtr<FatropData> fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
-    RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params);
+    RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
+    RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter);
+    RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter,linesearch);
     fatropalg->Optimize();
 }

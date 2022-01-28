@@ -103,6 +103,10 @@ namespace fatrop
         {
             return CACHEMACRO(cache_curr.du_inf_linf, Linf(du_inf_curr));
         }
+        double LinDecrCurr()
+        {
+            return dot(grad_curr, x_curr);
+        }
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
@@ -141,7 +145,10 @@ namespace fatrop
         };
         EvalCache cache_curr;
         EvalCache cache_next;
+        double obj_curr;
+        double theta_min = 1e-4;
         const RefCountPtr<FatropParams> params;
+        // algorithm parameters
         double smax;
     };
 }

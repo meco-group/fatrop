@@ -19,10 +19,14 @@ namespace fatrop
         FatropAlg(
             const RefCountPtr<FatropNLP> &fatropnlp,
             const RefCountPtr<FatropData> &fatropdata,
-            const RefCountPtr<FatropParams> &fatropparams)
+            const RefCountPtr<FatropParams> &fatropparams,
+            const RefCountPtr<Filter> &filter,
+            const RefCountPtr<LineSearch> &linesearch)
             : fatropnlp_(fatropnlp),
               fatropdata_(fatropdata),
-              fatropparams_(fatropparams)
+              fatropparams_(fatropparams),
+              filter_(filter),
+              linesearch_(linesearch)
         {
             Initialize();
         }
@@ -41,7 +45,7 @@ namespace fatrop
             kappa_wplus = fatropparams_->kappa_wplus;
             kappa_wplusem = fatropparams_->kappa_wplusem;
             // todo avoid reallocation when maxiter doesn't change
-            filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
+            // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
         }
         int Optimize()
         {
@@ -60,14 +64,16 @@ namespace fatrop
                 fatropdata_->AcceptInitialization();
             }
             EvalCVCurr();
+            fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
             for (int i = 0; i < maxiter; i++)
             {
-                cout << "iteration, objective: " << i << ", "<< EvalObjCurr() << endl;
+                fatropdata_-> obj_curr =  EvalObjCurr();
+                cout << "iteration, objective: " << i << ", " << EvalObjCurr() << endl;
                 // prepare iteration
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
                 EvalDuInf();
-                cout << "iteration, du_inf: " << i << ", "<< fatropdata_->DuInfLinfCurr() << endl;
+                cout << "iteration, du_inf: " << i << ", " << fatropdata_->DuInfLinfCurr() << endl;
                 // convergence check
                 // todo make a seperate class
                 double emu = fatropdata_->EMuCurr(0.0);
@@ -81,6 +87,7 @@ namespace fatrop
                 while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu))
                 {
                     mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
+                    filter_->Reset();
                 }
                 // Hessian is necessary for calculating search direction
                 EvalHess();
@@ -89,17 +96,17 @@ namespace fatrop
                 int increase_counter = 0;
                 if (regularity != 0) // regularization is necessary
                 {
-                    deltaw = (delta_w_last == 0.0)? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
+                    deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
                     regularity = ComputeSD(deltaw);
                     while (regularity != 0)
                     {
                         increase_counter++;
-                        deltaw = (delta_w_last == 0.0) ? kappa_wplusem*deltaw: kappa_wplus*deltaw;
+                        deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
                         regularity = ComputeSD(deltaw);
                     }
                     delta_w_last = deltaw;
                 }
-                cout << "regularization  " << deltaw<< endl;
+                cout << "regularization  " << deltaw << endl;
                 cout << "step size " << Linf(fatropdata_->delta_x) << endl;
                 fatropdata_->TryStep(1.0, 1.0);
                 fatropdata_->TakeStep();
@@ -124,12 +131,6 @@ namespace fatrop
                 fatropdata_->x_curr,
                 fatropdata_->g_curr);
         }
-        inline int EvalCVNext()
-        {
-            return fatropnlp_->EvalConstraintViolation(
-                fatropdata_->x_next,
-                fatropdata_->g_next);
-        }
         inline int EvalGradCurr()
         {
             return fatropnlp_->EvalGrad(
@@ -137,28 +138,19 @@ namespace fatrop
                 fatropdata_->x_curr,
                 fatropdata_->grad_curr);
         }
-        int EvalGradNext()
-        {
-            return fatropnlp_->EvalGrad(
-                fatropdata_->obj_scale,
-                fatropdata_->x_next,
-                fatropdata_->grad_next);
-        }
+        // int EvalGradNext()
+        // {
+        //     return fatropnlp_->EvalGrad(
+        //         fatropdata_->obj_scale,
+        //         fatropdata_->x_next,
+        //         fatropdata_->grad_next);
+        // }
         double EvalObjCurr()
         {
             double res = 0.0;
             fatropnlp_->EvalObj(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
-                res);
-            return res;
-        }
-        double EvalObjNext()
-        {
-            double res = 0.0;
-            fatropnlp_->EvalObj(
-                fatropdata_->obj_scale,
-                fatropdata_->x_next,
                 res);
             return res;
         }
@@ -188,7 +180,7 @@ namespace fatrop
         RefCountPtr<FatropData> fatropdata_;
         RefCountPtr<FatropParams> fatropparams_;
         RefCountPtr<Filter> filter_;
-
+        RefCountPtr<LineSearch> linesearch_;
     private:
         double lammax;
         double tol;

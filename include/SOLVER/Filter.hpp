@@ -7,6 +7,8 @@ namespace fatrop
 {
     struct FilterData
     {
+        FilterData(){};
+        FilterData(const int iteration, const double phi, const double theta):iteration(iteration),phi(phi),theta(theta){};
         const int iteration = 0;
         /** \brief barrier function value */
         const double phi = 0.0;

@@ -19,6 +19,15 @@ namespace fatrop
         double kappa_wmin = 1.0/3.0;
         double kappa_wplus = 8;
         double kappa_wplusem = 100;
+        double s_phi = 2.3;
+        double delta = 1.0;
+        double s_theta = 1.1;
+        double theta_min = 1e-4;
+        // double gamma_theta = 1e-8;
+        double gamma_theta = 1e-5; // todo check!!
+        double gamma_phi = 1e-8;
+        double eta_phi = 1e-4;
+
     };
 
 } // namespace fatrop
