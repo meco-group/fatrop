@@ -10,5 +10,5 @@ target_include_directories(fatrop
 # target_link_libraries(fatrop esmumps) 
 # target_include_directories(fatrop
 #     PRIVATE
-#         /home/lander/installations/MUMPS_5.4.1/include
+#         $ENV{HOME}/installations/MUMPS_5.4.1/include
 # )
