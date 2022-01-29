@@ -54,7 +54,7 @@ namespace fatrop
         int TryStep(double alpha_primal, double alpha_dual)
         {
             axpy(alpha_primal, delta_x, x_curr, x_next);
-            axpby(alpha_primal, lam_calc, 1 - alpha_primal, lam_curr, lam_next);
+            axpby(alpha_primal, lam_calc, 1.0 - alpha_primal, lam_curr, lam_next);
             // reset evaluation flags
             cache_next = EvalCache();
             return 0;
@@ -65,6 +65,7 @@ namespace fatrop
             x_curr.SwapWith(x_next);
             lam_curr.SwapWith(lam_next);
             grad_curr.SwapWith(grad_next);
+            g_curr.SwapWith(g_next);
             cache_curr = cache_next;
             return 0;
         }
@@ -86,7 +87,7 @@ namespace fatrop
         }
         double LamL1Curr()
         {
-            return CACHEMACRO(cache_curr.cv_linf, Linf(lam_curr));
+            return CACHEMACRO(cache_curr.lam_l1, Linf(lam_curr));
         }
         double LamLinfCurr()
         {

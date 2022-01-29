@@ -93,6 +93,8 @@ namespace fatrop
                 // Hessian is necessary for calculating search direction
                 EvalHess();
                 double deltaw = 0;
+
+
                 int regularity = ComputeSD(0.0);
                 int increase_counter = 0;
                 if (regularity != 0) // regularization is necessary
@@ -107,9 +109,10 @@ namespace fatrop
                     }
                     delta_w_last = deltaw;
                 }
-                cout << "regularization  " << deltaw << endl;
-                // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-                linesearch_-> FindAcceptableTrialPoint();
+                cout << "regularization  " << (deltaw) << endl;
+                cout << "step size " << Linf(fatropdata_->delta_x) << endl;
+                int ls = linesearch_-> FindAcceptableTrialPoint();
+                cout << "ls "<< ls<< endl;
             }
             return 0;
         }

@@ -29,5 +29,10 @@ int main()
     RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
     RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter);
     RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter,linesearch);
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
+
     fatropalg->Optimize();
-}
+    double el = blasfeo_toc(&timer);
+    cout << "el time " << el << endl;
+    }

@@ -9,6 +9,7 @@
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"
+#include "SPARSE/SparseOCP.hpp"
 namespace fatrop
 {
     class FatropOCP : public FatropNLP
@@ -41,6 +42,7 @@ namespace fatrop
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam) override
         {
+            // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
             return ls_->computeSD(
                 &ocpkktmemory_,
                 inertia_correction,
@@ -107,10 +109,9 @@ namespace fatrop
                 du_inf);
         }
         int Initializiaton(
-            const FatropVecBF& grad,
-            FatropVecBF& dlam,
-            FatropVecBF& optimvarsdummy
-        ) override
+            const FatropVecBF &grad,
+            FatropVecBF &dlam,
+            FatropVecBF &optimvarsdummy) override
         {
             // assume constraint jacobian evaluated
             OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
@@ -134,6 +135,6 @@ namespace fatrop
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;
-        };
-    }  // namespace fatrop
+    };
+} // namespace fatrop
 #endif //  OCPALGINCLUDED

@@ -62,12 +62,12 @@ namespace fatrop
             double cv_curr = fatropdata_->CVL1Curr();
             double obj_curr = fatropdata_->obj_curr;
             double lin_decr_curr = fatropdata_->LinDecrCurr();
-            for (int ll = 0; ll < 50; ll++)
+            for (int ll = 1; ll < 50; ll++)
             {
                 fatropdata_->TryStep(alpha_primal, alpha_dual);
-                double obj_next = EvalObjNext();
                 EvalCVNext();
                 double cv_next = fatropdata_->CVL1Next();
+                double obj_next = EvalObjNext();
                 // todo change iteration number from zero to real iteration number
                 if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
                 {

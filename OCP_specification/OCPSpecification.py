@@ -87,7 +87,7 @@ class OptimalControlProblem:
         BAbt = SX.zeros(self.nu+self.nx+1, self.nx)
         BAbt[:self.nu+self.nx,
              :] = jacobian(self.dynamics, vertcat(self.u_sym, self.x_sym)).T
-        b = (stateskp1 - self.dynamics)[:]
+        b = (-stateskp1 +  self.dynamics)[:]
         BAbt[self.nu+self.nx, :] = b
         C.add(
             Function("BAbt", [stateskp1, self.u_sym, self.x_sym], [densify(BAbt)]))
