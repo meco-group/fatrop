@@ -128,7 +128,7 @@ namespace fatrop
         }
         return res;
     };
-    /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
+    /** \brief Function to calculate LU factorization result is saved in A, L is lower unitriangular */
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol)
     {
         A->use_dA = 0;
