@@ -69,7 +69,7 @@ int main()
     }
     double el = blasfeo_toc(&timer);
     // test[0].print();
-    cout << "el time " << el << endl;
+    cout << "el time " << el << " s" << endl;
     TRSM_RLNN(100, 100, 1.0, (MAT *)L[0], 0, 0, (MAT *)A[0], 0, 0, (MAT *)test[0], 0, 0);
     // cout << Eig(Eig(test[0]) - Eig(A[0]) * Eig(Eig(L[0]).inverse())) << endl;
     // cout << ((int *)testfatropmemel)[0] << endl;

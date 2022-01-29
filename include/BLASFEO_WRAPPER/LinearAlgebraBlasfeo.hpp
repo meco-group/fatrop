@@ -310,7 +310,7 @@ namespace fatrop
         {
             return this->vec_;
         }
-        /** \brief acces to element of matrix */
+        /** \brief access to element of matrix */
         double &at(const int ai) const
         {
 #if DEBUG
@@ -716,7 +716,7 @@ namespace fatrop
     };
     MatrixInd max_el(int m, int n, MAT *matr, int ai, int aj);
 
-    /** \brief Function to calculate LU factorization result is saved in A, L is unit diagonal */
+    /** \brief Function to calculate LU factorization result is saved in A, L is lower unitriangular */
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12);
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
     void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-12);
