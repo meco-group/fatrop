@@ -44,6 +44,8 @@ namespace fatrop
             kappa_wmin = fatropparams_->kappa_wmin;
             kappa_wplus = fatropparams_->kappa_wplus;
             kappa_wplusem = fatropparams_->kappa_wplusem;
+            delta_c = fatropparams_->delta_c;
+            kappa_c = fatropparams_->kappa_c;
             // todo avoid reallocation when maxiter doesn't change
             // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
         }
