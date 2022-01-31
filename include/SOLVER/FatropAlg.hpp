@@ -93,19 +93,18 @@ namespace fatrop
                 // Hessian is necessary for calculating search direction
                 EvalHess();
                 double deltaw = 0;
-
-
-                int regularity = ComputeSD(0.0);
+                double deltac = 0.0;
+                int regularity = ComputeSD(0.0, deltac);
                 int increase_counter = 0;
                 if (regularity != 0) // regularization is necessary
                 {
                     deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
-                    regularity = ComputeSD(deltaw);
+                    regularity = ComputeSD(deltaw, deltac);
                     while (regularity != 0)
                     {
                         increase_counter++;
                         deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
-                        regularity = ComputeSD(deltaw);
+                        regularity = ComputeSD(deltaw,deltac);
                     }
                     delta_w_last = deltaw;
                 }
@@ -172,10 +171,11 @@ namespace fatrop
                 fatropdata_->lam_calc,
                 fatropdata_->delta_x);
         }
-        int ComputeSD(double inertia_correction)
+        int ComputeSD(double inertia_correction_w, double inertia_correction_c)
         {
             return fatropnlp_->ComputeSD(
-                inertia_correction,
+                inertia_correction_w,
+                inertia_correction_c,
                 fatropdata_->delta_x,
                 fatropdata_->lam_calc);
         }

@@ -104,7 +104,8 @@ namespace fatrop
         // solve a KKT system
         int computeSD(
             OCPKKTMemory *OCP,
-            const double inertia_correction,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam) override
         {

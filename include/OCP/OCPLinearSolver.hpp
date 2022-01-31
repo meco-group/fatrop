@@ -10,7 +10,8 @@ namespace fatrop
     public:
         virtual int computeSD(
             OCPKKTMemory *OCP,
-            const double intertia_correction,
+            const double intertia_correction_w,
+            const double intertia_correction_c,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam) = 0;
     };

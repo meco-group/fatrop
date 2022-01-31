@@ -48,8 +48,8 @@ class OptimalControlProblem:
         nu = self.nu
         nx = self.nx
         self.opti = Opti()
-        N_vars = K*nx + (K-1)*nu
-        self.opti_vars = self.opti.variable(N_vars)
+        self.N_vars = K*nx + (K-1)*nu
+        self.opti_vars = self.opti.variable(self.N_vars)
         self.x_vars = MX.zeros(nx, K)
         self.u_vars = MX.zeros(nu, K)
         for k in range(K-1):
@@ -99,7 +99,7 @@ class OptimalControlProblem:
         [RSQI, rqI] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
         if self.ngI > 0:
             RSQI += hessian(self.dual_eqI.T@self.eqI,
-                            vertcat(self.u_sym, self.x_sym))
+                            vertcat(self.u_sym, self.x_sym))[0]
         RSQI += hessian(self.dual_dyn.T@self.dynamics,
                         vertcat(self.u_sym, self.x_sym))[0]
         RSQrqtI[:self.nu+self.nx, :] = RSQI

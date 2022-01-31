@@ -35,7 +35,8 @@ namespace fatrop
             const FatropVecBF &grad,
             FatropVecBF &du_inf) = 0;
         virtual int ComputeSD(
-            const double intertia_correction,
+            const double intertia_correction_w,
+            const double intertia_correction_c,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam) = 0;
         virtual NLPDims GetNLPDims() const = 0;

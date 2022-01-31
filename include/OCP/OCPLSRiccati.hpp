@@ -8,7 +8,7 @@ namespace fatrop
     {
         for (int i = 0; i < m; i++)
         {
-            if (MATEL(sA, ai + i, aj + i) <1e-12)
+            if (MATEL(sA, ai + i, aj + i) < 1e-12)
                 return false;
         }
         return true;
@@ -40,9 +40,189 @@ namespace fatrop
         // solve a KKT system
         int computeSD(
             OCPKKTMemory *OCP,
-            const double inertia_correction,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam) override
+            {
+                if(inertia_correction_c==0.0){
+                    return computeSDnor(OCP, inertia_correction_w, ux,lam);
+                }
+                else
+                {
+                    return computeSDDeg(OCP, inertia_correction_w,inertia_correction_c, ux,lam);
+                }
+            }
+        // solve a KKT system
+        int computeSDDeg(
+            OCPKKTMemory *OCP,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam)
+        {
+            // blasfeo_timer timer;
+            // blasfeo_tic(&timer);
+            // define compiler macros for notational convenience
+#define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
+#define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
+#define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
+            int K = OCP->K;
+            // make variables local for efficiency
+            OCPMACRO(MAT *, RSQrqt, _p);
+            OCPMACRO(MAT *, BAbt, _p);
+            OCPMACRO(MAT *, Ggt, _p);
+            SOLVERMACRO(MAT *, Ppt, _p);
+            SOLVERMACRO(MAT *, Hh, _p);
+            SOLVERMACRO(MAT *, AL, _p);
+            SOLVERMACRO(MAT *, RSQrqt_tilde, _p);
+            SOLVERMACRO(MAT *, Ggt_stripe, _p);
+            SOLVERMACRO(MAT *, Ggt_tilde, _p);
+            SOLVERMACRO(PMAT *, Pl, _p);
+            SOLVERMACRO(PMAT *, Pr, _p);
+            SOLVERMACRO(MAT *, GgLt, _p);
+            SOLVERMACRO(MAT *, RSQrqt_hat, _p);
+            SOLVERMACRO(MAT *, Llt, _p);
+            SOLVERMACRO(MAT *, Llt_shift, _p);
+            SOLVERMACRO(MAT *, GgIt_tilde, _p);
+            SOLVERMACRO(MAT *, GgLIt, _p);
+            SOLVERMACRO(MAT *, HhIt, _p);
+            SOLVERMACRO(MAT *, PpIt_hat, _p);
+            SOLVERMACRO(MAT *, LlIt, _p);
+            SOLVERMACRO(PMAT *, PlI, _p);
+            SOLVERMACRO(PMAT *, PrI, _p);
+            SOLVERMACRO(VEC *, ux, _p);
+            SOLVERMACRO(VEC *, lam, _p);
+            OCPMACRO(int *, nu, _p);
+            OCPMACRO(int *, nx, _p);
+            OCPMACRO(int *, ng, _p);
+            MAT *RSQrq_hat_curr_p;
+            double delta_cmin1 = 1 / inertia_correction_c;
+
+            /////////////// recursion ///////////////
+
+            // last stage
+            {
+                const int nx = nx_p[K - 1];
+                const int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
+                const int ng = ng_p[K - 1];
+                // Pp_Km1 <- Qq_Km1
+                GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
+                DIARE(nx, inertia_correction_w, Ppt_p + K - 1, 0, 0);
+                GECP(nx + 1, nx, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
+                SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+                TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+            }
+            for (int k = K - 2; k >= 0; --k)
+            {
+                const int nu = nu_p[k];
+                const int nx = nx_p[k];
+                const int nxp1 = nx_p[k + 1];
+                const int ng = ng_p[k];
+                //////// SUBSDYN
+                {
+                    // AL <- [BAb]^T_k P_kp1
+                    GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
+                    // AL[-1,:] <- AL[-1,:] + p_kp1^T
+                    GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
+                    // RSQrqt_stripe <- AL[BA] + RSQrqt
+                    SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+                    // RSQrqt + 1/d_c At@A
+                    DIARE(nu + nx, inertia_correction_w, RSQrqt_tilde_p + k, 0, 0);
+                    SYRK_LN_MN(nu + nx + 1, nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, Ggt_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+                }
+                //////// TRANSFORM_AND_SUBSEQ
+                {
+                    RSQrq_hat_curr_p = RSQrqt_tilde_p + k;
+                }
+                //////// SCHUR
+                {
+                    // DLlt_k = [chol(R_hatk); Llk@chol(R_hatk)^-T]
+                    POTRF_L_MN(nu + nx + 1, nu, RSQrq_hat_curr_p, 0, 0, Llt_p + k, 0, 0);
+                    if (!check_reg(nu, Llt_p + k, 0, 0))
+                        return 1;
+                    // Pp_k = Qq_hatk - L_k^T @ Ll_k
+                    // SYRK_LN_MN(nx+1, nx, nu-rank_k, -1.0,Llt_p+k, nu-rank_k,0, Llt_p+k, nu-rank_k,0, 1.0, RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
+                    GECP(nx + 1, nu, Llt_p + k, nu, 0, Llt_shift_p, 0, 0); // needless operation because feature not implemented yet
+                    SYRK_LN_MN(nx + 1, nx, nu, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, RSQrq_hat_curr_p, nu, nu, Ppt_p + k, 0, 0);
+                }
+                TRTR_L(nx, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
+            }
+            //////// FIRST_STAGE
+            {
+                const int nx = nx_p[0];
+                {
+                    POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
+                    if (!check_reg(nx, LlIt_p, 0, 0))
+                        return 2;
+                }
+            }
+            ////// FORWARD_SUBSTITUTION:
+            // first stage
+            {
+                const int nx = nx_p[0];
+                const int nu = nu_p[0];
+                // calculate xIb
+                ROWEX(nx, -1.0, LlIt_p, nx, 0, ux_p, nu);
+                // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
+                TRSV_LTN(nx, LlIt_p, 0, 0, ux_p, nu, ux_p, nu);
+            }
+            int *offs_ux = (int *)OCP->aux.ux_offs.data();
+            int *offs_g = (int *)OCP->aux.g_offs.data();
+            int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
+            // other stages
+            // for (int k = 0; k < K - 1; k++)
+            // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
+            for (int k = 0; k < K - 1; k++)
+            {
+                const int nx = nx_p[k];
+                const int nu = nu_p[k];
+                const int ng = ng_p[k];
+                const int nxp1 = nx_p[k + 1];
+                const int nup1 = nu_p[k + 1];
+                const int offsp1 = offs_ux[k + 1];
+                const int offs = offs_ux[k];
+                const int offs_g_k = offs_g[k];
+                const int offs_dyn_eq_k = offs_dyn_eq[k];
+                const int offs_g_kp1 = offs_g[k + 1];
+                /// calculate ukb_tilde
+                // -Lkxk - lk
+                ROWEX(nu, -1.0, Llt_p + k, nu + nx, 0, ux_p, offs);
+                // assume aliasing of last two eliments is allowed
+                GEMV_T(nx, nu, -1.0, Llt_p + k, nu, 0, ux_p, offs + nu, 1.0, ux_p, offs, ux_p, offs);
+                TRSV_LTN(nu, Llt_p + k, 0, 0, ux_p, offs, ux_p, offs);
+                // calculate xkp1
+                ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+                GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+                // calculate lam_dyn xp1
+                ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+                GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+                // // calculate lam_eq xk
+                // ROWEX(ng, -1.0, Ggt_p + k, 0, 0, lam_p, offs_g_k);
+                // GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+            }
+            // calculate lam_eq xk
+            for (int k = 0; k < K; k++)
+            {
+                const int nx = nx_p[k];
+                const int nu = nu_p[k];
+                const int ng = ng_p[k];
+                const int offs = offs_ux[k];
+                const int offs_g_k = offs_g[k];
+                ROWEX(ng, delta_cmin1, Ggt_p + k , nu+nx, 0, lam_p, offs_g_k);
+                GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+            }
+            // double el = blasfeo_toc(&timer);
+            // cout << "el time " << el << endl;
+            return 0;
+        }
+        // solve a KKT system
+        int
+        computeSDnor(
+            OCPKKTMemory *OCP,
+            const double inertia_correction,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam)
         {
             // blasfeo_timer timer;
             // blasfeo_tic(&timer);
@@ -93,7 +273,7 @@ namespace fatrop
                 const int ng = ng_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
-                DIARE(nx, inertia_correction, Ppt_p + K-1, 0, 0);
+                DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
                 // Hh_Km1 <- Gg_Km1
                 GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
                 gamma_p[K - 1] = ng;
@@ -205,6 +385,7 @@ namespace fatrop
                 if (gamma_I > 0)
                 {
                     GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
+                    // HhIt[0].print();
                     LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
 #if DEBUG
                     assert(gamma_I == rankI);

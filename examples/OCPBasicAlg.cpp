@@ -19,13 +19,14 @@ using namespace fatrop;
 int main()
 {
     RefCountPtr<BFOCP> ocptemplatebasic =
-        new BFOCPBasic(BFOCPBasic::from_shared_lib("./../../OCP_specification/f.so", 10));
+        new BFOCPBasic(BFOCPBasic::from_shared_lib("./../../OCP_specification/f.so", 100));
     RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
     RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
     RefCountPtr<FatropParams> params = new FatropParams();
     RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
     RefCountPtr<FatropNLP> fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
     RefCountPtr<FatropData> fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
+    VECSE(fatropdata->x_curr.nels(), 1.0, (VEC*)fatropdata->x_curr,0);
     RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
     RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter);
     RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter,linesearch);
