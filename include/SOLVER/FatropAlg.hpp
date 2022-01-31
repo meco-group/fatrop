@@ -44,7 +44,7 @@ namespace fatrop
             kappa_wmin = fatropparams_->kappa_wmin;
             kappa_wplus = fatropparams_->kappa_wplus;
             kappa_wplusem = fatropparams_->kappa_wplusem;
-            delta_c = fatropparams_->delta_c;
+            delta_c_stripe = fatropparams_->delta_c;
             kappa_c = fatropparams_->kappa_c;
             // todo avoid reallocation when maxiter doesn't change
             // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
@@ -96,7 +96,7 @@ namespace fatrop
                 EvalHess();
                 // todo make an update class for regularization
                 double deltaw = 0;
-                double deltac_candidate = 1e-8 * pow(mu, 0.25);
+                double deltac_candidate = delta_c_stripe * pow(mu, kappa_c);
                 double deltac = 0.0;
                 int regularity = ComputeSD(deltaw, deltac);
                 if (regularity < 0)
@@ -220,7 +220,7 @@ namespace fatrop
         double kappa_wmin;
         double kappa_wplus;
         double kappa_wplusem;
-        double delta_c;
+        double delta_c_stripe;
         double kappa_c;
     };
 } // namespace fatrop
