@@ -34,6 +34,11 @@ namespace fatrop
         void Initialize(){
             smax = params -> smax;
         }
+        int Reset(){
+            cache_curr = EvalCache();
+            cache_next = EvalCache();
+            return 0;
+        }
         double EMuCurr(double mu){
             double res = 0.0;
             double lammean = LamMeanCurr();

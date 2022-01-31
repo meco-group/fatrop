@@ -1,6 +1,7 @@
 #ifndef LINESEARCHINCLUDED
 #define LINESEARCHINCLUDED
 #include "AlgStrategy.hpp"
+#include "IterationData.hpp"
 #include "FatropAlg.hpp"
 #include <cmath>
 namespace fatrop
@@ -41,8 +42,9 @@ namespace fatrop
             const RefCountPtr<FatropParams> &fatropparams,
             const RefCountPtr<FatropNLP> &nlp,
             const RefCountPtr<FatropData> &fatropdata,
-            const RefCountPtr<Filter> &filter)
-            : LineSearch(fatropparams, nlp, fatropdata), filter_(filter){
+            const RefCountPtr<Filter> &filter,
+            const RefCountPtr<Journaller> &journaller)
+            : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller){
                 Initialize();
             };
         void Initialize()
@@ -102,6 +104,7 @@ namespace fatrop
             return 0;
         };
         RefCountPtr<Filter> filter_;
+        RefCountPtr<Journaller> journaller_;
         double s_phi;
         double delta;
         double s_theta;

@@ -26,14 +26,18 @@ int main()
     RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
     RefCountPtr<FatropNLP> fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
     RefCountPtr<FatropData> fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
-    // VECSE(fatropdata->x_curr.nels(), 1.0, (VEC*)fatropdata->x_curr,0);
     RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
-    RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter);
-    RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter,linesearch);
+    RefCountPtr<Journaller> journaller(new Journaller(params->maxiter + 1));
+    RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
+    RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
     blasfeo_timer timer;
-    blasfeo_tic(&timer);
+    fatropalg->Optimize();
+    VECSE(fatropdata->x_curr.nels(), 1.0, (VEC *)fatropdata->x_curr, 0);
+    VECSE(fatropdata->lam_curr.nels(), 0.0, (VEC *)fatropdata->lam_curr, 0);
 
+    blasfeo_tic(&timer);
     fatropalg->Optimize();
     double el = blasfeo_toc(&timer);
     cout << "el time " << el << endl;
-    }
+    journaller->PrintIterations();
+}

@@ -7,12 +7,10 @@
 #include "LineSearch.hpp"
 #include "StepAcceptor.hpp"
 #include <cmath>
+#include "IterationData.hpp"
 // #include "AlgorithmQuantities.hpp"
 namespace fatrop
 {
-    struct IterationData
-    {
-    };
     class FatropAlg : public RefCountedObj
     {
     public:
@@ -21,12 +19,14 @@ namespace fatrop
             const RefCountPtr<FatropData> &fatropdata,
             const RefCountPtr<FatropParams> &fatropparams,
             const RefCountPtr<Filter> &filter,
-            const RefCountPtr<LineSearch> &linesearch)
+            const RefCountPtr<LineSearch> &linesearch,
+            const RefCountPtr<Journaller> &journaller)
             : fatropnlp_(fatropnlp),
               fatropdata_(fatropdata),
               fatropparams_(fatropparams),
               filter_(filter),
-              linesearch_(linesearch)
+              linesearch_(linesearch),
+              journaller_(journaller)
         {
             Initialize();
         }
@@ -44,13 +44,20 @@ namespace fatrop
             kappa_wmin = fatropparams_->kappa_wmin;
             kappa_wplus = fatropparams_->kappa_wplus;
             kappa_wplusem = fatropparams_->kappa_wplusem;
-            delta_c_stripe = fatropparams_->delta_c;
+            delta_c_stripe = fatropparams_->delta_c_stripe;
             kappa_c = fatropparams_->kappa_c;
             // todo avoid reallocation when maxiter doesn't change
             // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
         }
+        void Reset()
+        {
+            filter_->Reset();
+            fatropdata_->Reset();
+            journaller_->Reset();
+        }
         int Optimize()
         {
+            Reset();
             // optimization algorithm parameters
             const double mu_min = tol / 10;
             // optimization variables
@@ -62,23 +69,29 @@ namespace fatrop
             Initialization();
             if (fatropdata_->LamLinfCalc() < lammax)
             {
-                cout << "accepted lam " << endl;
+                // cout << "accepted lam " << endl;
                 fatropdata_->AcceptInitialization();
             }
             EvalCVCurr();
             fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
+            int ls = 0;
+            double deltaw = 0;
+            double deltac = 0.0;
             for (int i = 0; i < maxiter; i++)
             {
                 fatropdata_->obj_curr = EvalObjCurr();
-                cout << "iteration, objective: " << i << ", " << EvalObjCurr() << endl;
-                cout << "iteration, cv: " << i << ", " << fatropdata_->CVLinfCurr() << endl;
-                // prepare iteration
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
                 EvalDuInf();
-                cout << "iteration, du_inf: " << i << ", " << fatropdata_->DuInfLinfCurr() << endl;
-                // convergence check
-                // todo make a seperate class
+                IterationData &it_curr = journaller_->it_curr;
+                it_curr.iter = i;
+                it_curr.mu = mu;
+                it_curr.objective = EvalObjCurr();
+                it_curr.constraint_violation = fatropdata_->CVLinfCurr();
+                it_curr.du_inf = fatropdata_->DuInfLinfCurr();
+                it_curr.ls = ls;
+                it_curr.reg = deltaw;
+                journaller_->Push();
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
@@ -95,9 +108,9 @@ namespace fatrop
                 // Hessian is necessary for calculating search direction
                 EvalHess();
                 // todo make an update class for regularization
-                double deltaw = 0;
                 double deltac_candidate = delta_c_stripe * pow(mu, kappa_c);
-                double deltac = 0.0;
+                deltaw = 0.0;
+                deltac = 0.0;
                 int regularity = ComputeSD(deltaw, deltac);
                 if (regularity < 0)
                 {
@@ -130,10 +143,9 @@ namespace fatrop
                     }
                     delta_w_last = deltaw;
                 }
-                cout << "regularization  " << (deltaw) << endl;
-                cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-                int ls = linesearch_->FindAcceptableTrialPoint();
-                cout << "ls " << ls << endl;
+                // cout << "regularization  " << (deltaw) << endl;
+                // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
+                ls = linesearch_->FindAcceptableTrialPoint();
             }
             return 0;
         }
@@ -206,6 +218,7 @@ namespace fatrop
         RefCountPtr<FatropParams> fatropparams_;
         RefCountPtr<Filter> filter_;
         RefCountPtr<LineSearch> linesearch_;
+        RefCountPtr<Journaller> journaller_;
 
     private:
         double lammax;
