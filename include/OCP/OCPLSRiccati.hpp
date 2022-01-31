@@ -44,15 +44,16 @@ namespace fatrop
             const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam) override
+        {
+            if (inertia_correction_c == 0.0)
             {
-                if(inertia_correction_c==0.0){
-                    return computeSDnor(OCP, inertia_correction_w, ux,lam);
-                }
-                else
-                {
-                    return computeSDDeg(OCP, inertia_correction_w,inertia_correction_c, ux,lam);
-                }
+                return computeSDnor(OCP, inertia_correction_w, ux, lam);
             }
+            else
+            {
+                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam);
+            }
+        }
         // solve a KKT system
         int computeSDDeg(
             OCPKKTMemory *OCP,
@@ -194,7 +195,7 @@ namespace fatrop
                 const int ng = ng_p[k];
                 const int offs = offs_ux[k];
                 const int offs_g_k = offs_g[k];
-                ROWEX(ng, delta_cmin1, Ggt_p + k , nu+nx, 0, lam_p, offs_g_k);
+                ROWEX(ng, delta_cmin1, Ggt_p + k, nu + nx, 0, lam_p, offs_g_k);
                 GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
             }
             // double el = blasfeo_toc(&timer);
@@ -272,7 +273,8 @@ namespace fatrop
                 const int ng = ng_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-                if(Hp1_size> nu+nx) return -1;
+                if (Hp1_size > nu + nx)
+                    return -1;
                 // gamma_k <- number of eqs represented by Ggt_stripe
                 const int gamma_k = Hp1_size + ng;
                 //////// SUBSDYN
@@ -373,7 +375,8 @@ namespace fatrop
                     GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
                     // HhIt[0].print();
                     LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
-                    if(rankI < gamma_I) return -2;
+                    if (rankI < gamma_I)
+                        return -2;
                     // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
                     TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
                     // permutations
