@@ -73,24 +73,12 @@ namespace fatrop
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             SOLVERMACRO(MAT *, Ppt, _p);
-            SOLVERMACRO(MAT *, Hh, _p);
             SOLVERMACRO(MAT *, AL, _p);
             SOLVERMACRO(MAT *, RSQrqt_tilde, _p);
-            SOLVERMACRO(MAT *, Ggt_stripe, _p);
             SOLVERMACRO(MAT *, Ggt_tilde, _p);
-            SOLVERMACRO(PMAT *, Pl, _p);
-            SOLVERMACRO(PMAT *, Pr, _p);
-            SOLVERMACRO(MAT *, GgLt, _p);
-            SOLVERMACRO(MAT *, RSQrqt_hat, _p);
             SOLVERMACRO(MAT *, Llt, _p);
             SOLVERMACRO(MAT *, Llt_shift, _p);
-            SOLVERMACRO(MAT *, GgIt_tilde, _p);
-            SOLVERMACRO(MAT *, GgLIt, _p);
-            SOLVERMACRO(MAT *, HhIt, _p);
-            SOLVERMACRO(MAT *, PpIt_hat, _p);
             SOLVERMACRO(MAT *, LlIt, _p);
-            SOLVERMACRO(PMAT *, PlI, _p);
-            SOLVERMACRO(PMAT *, PrI, _p);
             SOLVERMACRO(VEC *, ux, _p);
             SOLVERMACRO(VEC *, lam, _p);
             OCPMACRO(int *, nu, _p);
@@ -177,14 +165,11 @@ namespace fatrop
             {
                 const int nx = nx_p[k];
                 const int nu = nu_p[k];
-                const int ng = ng_p[k];
                 const int nxp1 = nx_p[k + 1];
                 const int nup1 = nu_p[k + 1];
                 const int offsp1 = offs_ux[k + 1];
                 const int offs = offs_ux[k];
-                const int offs_g_k = offs_g[k];
                 const int offs_dyn_eq_k = offs_dyn_eq[k];
-                const int offs_g_kp1 = offs_g[k + 1];
                 /// calculate ukb_tilde
                 // -Lkxk - lk
                 ROWEX(nu, -1.0, Llt_p + k, nu + nx, 0, ux_p, offs);
@@ -287,6 +272,7 @@ namespace fatrop
                 const int ng = ng_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
+                if(Hp1_size> nu+nx) return -1;
                 // gamma_k <- number of eqs represented by Ggt_stripe
                 const int gamma_k = Hp1_size + ng;
                 //////// SUBSDYN
@@ -387,9 +373,7 @@ namespace fatrop
                     GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
                     // HhIt[0].print();
                     LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
-#if DEBUG
-                    assert(gamma_I == rankI);
-#endif
+                    if(rankI < gamma_I) return -2;
                     // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
                     TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
                     // permutations

@@ -67,7 +67,7 @@ namespace fatrop
             fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
             for (int i = 0; i < maxiter; i++)
             {
-                fatropdata_-> obj_curr =  EvalObjCurr();
+                fatropdata_->obj_curr = EvalObjCurr();
                 cout << "iteration, objective: " << i << ", " << EvalObjCurr() << endl;
                 cout << "iteration, cv: " << i << ", " << fatropdata_->CVLinfCurr() << endl;
                 // prepare iteration
@@ -92,26 +92,46 @@ namespace fatrop
                 }
                 // Hessian is necessary for calculating search direction
                 EvalHess();
+                // todo make an update class for regularization
                 double deltaw = 0;
+                double deltac_candidate = 1e-8 * pow(mu, 0.25);
                 double deltac = 0.0;
-                int regularity = ComputeSD(0.0, deltac);
+                int regularity = ComputeSD(deltaw, deltac);
+                if (regularity < 0)
+                {
+                    deltac = deltac_candidate;
+                    regularity = ComputeSD(deltaw, deltac);
+                    cout << "Jac degenerate" << endl;
+                }
                 int increase_counter = 0;
-                if (regularity != 0) // regularization is necessary
+                if (regularity > 0) // regularization is necessary
                 {
                     deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
                     regularity = ComputeSD(deltaw, deltac);
-                    while (regularity != 0)
+                    if ((deltac == 0.0) && (regularity < 0))
+                    {
+                        deltac = deltac_candidate;
+                        regularity = ComputeSD(deltaw, deltac);
+                        cout << "Jac degenerate" << endl;
+                    }
+                    while (regularity > 0)
                     {
                         increase_counter++;
                         deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
-                        regularity = ComputeSD(deltaw,deltac);
+                        regularity = ComputeSD(deltaw, deltac);
+                        if ((deltac == 0.0) && (regularity < 0))
+                        {
+                            deltac = deltac_candidate;
+                            regularity = ComputeSD(deltaw, deltac);
+                            cout << "Jac degenerate" << endl;
+                        }
                     }
                     delta_w_last = deltaw;
                 }
                 cout << "regularization  " << (deltaw) << endl;
                 cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-                int ls = linesearch_-> FindAcceptableTrialPoint();
-                cout << "ls "<< ls<< endl;
+                int ls = linesearch_->FindAcceptableTrialPoint();
+                cout << "ls " << ls << endl;
             }
             return 0;
         }
@@ -184,6 +204,7 @@ namespace fatrop
         RefCountPtr<FatropParams> fatropparams_;
         RefCountPtr<Filter> filter_;
         RefCountPtr<LineSearch> linesearch_;
+
     private:
         double lammax;
         double tol;
@@ -197,6 +218,8 @@ namespace fatrop
         double kappa_wmin;
         double kappa_wplus;
         double kappa_wplusem;
+        double delta_c;
+        double kappa_c;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED
