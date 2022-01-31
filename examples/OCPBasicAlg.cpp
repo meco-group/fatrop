@@ -31,13 +31,11 @@ int main()
     RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
     RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
     blasfeo_timer timer;
-    fatropalg->Optimize();
     VECSE(fatropdata->x_curr.nels(), 1.0, (VEC *)fatropdata->x_curr, 0);
     VECSE(fatropdata->lam_curr.nels(), 0.0, (VEC *)fatropdata->lam_curr, 0);
-
     blasfeo_tic(&timer);
     fatropalg->Optimize();
     double el = blasfeo_toc(&timer);
     cout << "el time " << el << endl;
-    journaller->PrintIterations();
+    // journaller->PrintIterations();
 }

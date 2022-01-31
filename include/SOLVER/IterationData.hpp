@@ -15,7 +15,7 @@ namespace fatrop
         double reg = 0.0;
         double alpha_pr = 0.0;
         double alpha_du = 0.0;
-        char type[2] = " ";
+        char type; 
     };
     class Journaller : public RefCountedObj
     {
@@ -31,11 +31,11 @@ namespace fatrop
                 IterationData iterationdata_i = iterationdata[i];
                 if (iterationdata_i.reg == 0.0)
                 {
-                    printf("step %3d: obj %.15e, cv : %.15e, du %.15e, lg(mu), %4.1f, lg(reg)  -.-, a_d %.2e, a_p %.2e, ls %d \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls);
+                    printf("step %3d: obj %.15e, cv : %.15e, du %.15e, lg(mu), %4.1f, lg(reg)  -.-, a_d %.2e, a_p %.2e, ls %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
                 }
                 else
                 {
-                    printf("step %3d: obj %.15e, cv : %.15e, du %.15e, lg(mu), %4.1f, lg(reg) %4.1f, a_d %.2e, a_p %.2e, ls %d \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), log10(iterationdata_i.reg), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls);
+                    printf("step %3d: obj %.15e, cv : %.15e, du %.15e, lg(mu), %4.1f, lg(reg) %4.1f, a_d %.2e, a_p %.2e, ls %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), log10(iterationdata_i.reg), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
                 }
             }
             print_count = iterationdata.size();

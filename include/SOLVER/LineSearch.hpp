@@ -15,7 +15,7 @@ namespace fatrop
             const RefCountPtr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
                                                          fatropnlp_(nlp),
                                                          fatropdata_(fatropdata){};
-        virtual int FindAcceptableTrialPoint()=0;
+        virtual int FindAcceptableTrialPoint() = 0;
         inline int EvalCVNext()
         {
             return fatropnlp_->EvalConstraintViolation(
@@ -44,9 +44,10 @@ namespace fatrop
             const RefCountPtr<FatropData> &fatropdata,
             const RefCountPtr<Filter> &filter,
             const RefCountPtr<Journaller> &journaller)
-            : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller){
-                Initialize();
-            };
+            : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller)
+        {
+            Initialize();
+        };
         void Initialize()
         {
             // todo avoid reallocation when maxiter doesn't change
@@ -71,13 +72,15 @@ namespace fatrop
                 double cv_next = fatropdata_->CVL1Next();
                 double obj_next = EvalObjNext();
                 // todo change iteration number from zero to real iteration number
+                (journaller_->it_curr).type = 'f';
                 if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
                 {
                     bool switch_cond = (lin_decr_curr < 0) && (alpha_primal * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
+                    bool armijo = obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr;
                     if (switch_cond && (cv_curr <= fatropdata_->theta_min))
                     {
                         // f-step
-                        if (obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr)
+                        if (armijo)
                         {
                             fatropdata_->TakeStep();
                             return ll;
@@ -89,9 +92,10 @@ namespace fatrop
                         // check sufficient decrease wrt current iterate
                         if ((cv_next < (1.0 - gamma_theta) * cv_curr) || (obj_next < obj_curr - gamma_phi * cv_curr))
                         {
-                            if (!switch_cond || !(obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr))
+                            if (!switch_cond || !(armijo))
                             {
                                 filter_->Augment(FilterData(0, obj_curr - gamma_phi * cv_curr, cv_curr * (1 - gamma_theta)));
+                                (journaller_->it_curr).type = 'h';
                             }
                             fatropdata_->TakeStep();
                             return ll;
