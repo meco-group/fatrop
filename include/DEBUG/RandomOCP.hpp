@@ -9,8 +9,9 @@ namespace fatrop
     class RandomOCP : public BFOCP
     {
     public:
-        RandomOCP(const vector<int> &nu, const vector<int> &nx, const vector<int> &ng, const int K) : nu_(nu), nx_(nx), ng_(ng), K_(K){
-
+        RandomOCP(const vector<int> &nu, const vector<int> &nx, const vector<int> &ng, const int K) : nu_(nu), nx_(nx), ng_(ng), K_(K)
+        {
+        }
         int get_nxk(const int k) const override { return nx_.at(k); };
         int get_nuk(const int k) const override { return nu_.at(k); };
         int get_ngk(const int k) const override { return ng_.at(k); };
@@ -71,39 +72,39 @@ namespace fatrop
             const double *states_k,
             const double *inputs_k,
             double *res,
-            const int k)  override
+            const int k) override
         {
-                assert(false); // feature not implemented yet
-                return 0;
+            assert(false); // feature not implemented yet
+            return 0;
         };
         int eval_gk(
             const double *states_k,
             const double *inputs_k,
             double *res,
-            const int k)  override
+            const int k) override
         {
-                assert(false); // feature not implemented yet
-                return 0;
+            assert(false); // feature not implemented yet
+            return 0;
         };
         int eval_rqk(
             const double *objective_scale,
             const double *states_k,
             const double *inputs_k,
             double *res,
-            const int k)  override
+            const int k) override
         {
-                assert(false); // feature not implemented yet
-                return 0;
+            assert(false); // feature not implemented yet
+            return 0;
         };
         int eval_Lk(
             const double *objective_scale,
             const double *states_k,
             const double *inputs_k,
-            double * res,
-            const int k) override 
+            double *res,
+            const int k) override
         {
-                assert(false); // feature not implemented yet
-                return 0;
+            assert(false); // feature not implemented yet
+            return 0;
         };
 
     private:
@@ -113,5 +114,5 @@ namespace fatrop
         const int K_;
         int seed = 0;
     };
-}
+};
 #endif //  RANDOMOCPINCLUDED
