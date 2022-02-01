@@ -12,7 +12,7 @@ namespace fatrop
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ocptempl(ocptempl_)
+        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ngineqexpr(RefCountPtr<BFOCP>(ocptempl_)), ocptempl(ocptempl_)
         {
         }
         int evalHess(
@@ -210,7 +210,7 @@ namespace fatrop
         };
         OCPDims GetOCPDims() const override
         {
-            return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr);
+            return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr);
         }
 
     private:
@@ -244,21 +244,22 @@ namespace fatrop
         private:
             const RefCountPtr<BFOCP> parent;
         };
-        // class ngIneqExpr : public VecExpr<ngExpr, int>
-        // {
-        // public:
-        //     ngIneqExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
-        //     int getEl(const int ai) const { return parent->get_ng_ineq_k(ai); };
-        //     int size() const { return parent->get_horizon_length(); };
+        class ngIneqExpr : public VecExpr<ngExpr, int>
+        {
+        public:
+            ngIneqExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            int getEl(const int ai) const { return parent->get_ng_ineq_k(ai); };
+            int size() const { return parent->get_horizon_length(); };
 
-        // private:
-        //     const RefCountPtr<BFOCP> parent;
-        // };
+        private:
+            const RefCountPtr<BFOCP> parent;
+        };
 
     public:
         nuExpr nuexpr;
         nxExpr nxexpr;
         ngExpr ngexpr;
+        ngIneqExpr ngineqexpr;
 
     private:
         RefCountPtr<BFOCP> ocptempl;

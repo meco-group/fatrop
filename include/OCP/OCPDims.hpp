@@ -21,7 +21,7 @@ namespace fatrop
     {
     public:
         OCPDims(){};
-        OCPDims(const int K, const FatropVector<int>&nu,const FatropVector<int>& nx, const FatropVector<int>& ng):K(K), nu(nu), nx(nx), ng(ng){};
+        OCPDims(const int K, const FatropVector<int>&nu,const FatropVector<int>& nx, const FatropVector<int>& ng, const FatropVector<int>& ng_ineq):K(K), nu(nu), nx(nx), ng(ng), ng_ineq(ng_ineq){};
         /// horizon length
         int K;
         /// input vector size
@@ -30,6 +30,8 @@ namespace fatrop
         FatropVector<int> nx;
         // number of stagewise equality constraints
         FatropVector<int> ng;
+        // number of stagewise inequality constraints
+        FatropVector<int> ng_ineq;
     };
 } // namespace fatrop
 #endif // FATROP_OCPDIMS_INCLUDED
