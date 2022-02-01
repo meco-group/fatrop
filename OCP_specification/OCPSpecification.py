@@ -6,11 +6,13 @@ class OptimalControlProblem:
     def __init__(self):
         self.ngI = 0
         self.ngF = 0
+        self.ngIneq = 0
         self.eqI = SX.sym("EqI", 0)
         self.dual_eqI = SX.sym("d_EqI", 0)
         self.eqF = SX.sym("d_EqI", 0)
         self.dual_eqF = SX.sym("d_EqF", 0)
         self.obj_scale = SX.sym("obj_scale")
+        self.ineq = SX.sym("d_EqI", 0)
 
     def get_states(self, nx):
         self.nx = nx
@@ -39,9 +41,15 @@ class OptimalControlProblem:
 
     def set_eq_final(self, eq):
         self.ngF = eq.shape[0]
-        print(self.ngF)
         self.dual_eqF = SX.sym("dual_eqF", self.ngF)
         self.eqF = eq
+    def set_ineq(self, ineq, lower, upper):
+        # todo no ineq on final stage x
+        self.ngIneq = ineq.shape[0]
+        self.dualIneq = SX.sym("dual_Ineq", self.ngIneq)
+        self.ineq = ineq
+        self.lower = lower
+        self.upper = upper
 
     def set_up_Opti(self, K):
         # all scales are set to 1.0
@@ -76,6 +84,16 @@ class OptimalControlProblem:
             J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k])
             self.opti.subject_to(
                 Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k]) == 0.0)
+        if self.ngIneq>0:
+            Ineqf = Function("ineqf", [self.u_sym, self.x_sym], [self.ineq])
+            for k in range(K-1):
+                for i in range(self.ngIneq):
+                    if self.lower == -inf:
+                        self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                    elif self.upper == inf:
+                        self.opti.subject_to(self.lower[i] <Ineqf(self.u_sym, self.x_sym)[i])
+                    else:
+                        self.opti.subject_to(self.lower[i] <Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
         J += LkFf(1.0, self.x_vars[:, K-1])
         self.opti.minimize(J)
         return self.opti
@@ -102,10 +120,12 @@ class OptimalControlProblem:
                             vertcat(self.u_sym, self.x_sym))[0]
         RSQI += hessian(self.dual_dyn.T@self.dynamics,
                         vertcat(self.u_sym, self.x_sym))[0]
+        if self.ngIneq>0:
+            RSQI += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[0]
         RSQrqtI[:self.nu+self.nx, :] = RSQI
         RSQrqtI[self.nu+self.nx, :] = rqI[:]
         C.add(Function("RSQrqtI", [self.obj_scale, self.u_sym,
-              self.x_sym, self.dual_dyn, self.dual_eqI], [densify(RSQrqtI)]))
+              self.x_sym, self.dual_dyn, self.dual_eqI, self.dualIneq], [densify(RSQrqtI)]))
         rqI
         C.add(Function("rqI", [self.obj_scale,
               self.u_sym, self.x_sym], [densify(rqI)]))
@@ -114,9 +134,11 @@ class OptimalControlProblem:
         [RSQ, rq] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
         RSQ += hessian(self.dual_dyn.T@self.dynamics,
                        vertcat(self.u_sym, self.x_sym))[0]
+        if self.ngIneq>0:
+            RSQ += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[0]
         RSQrqt[:self.nu+self.nx, :] = RSQ
         RSQrqt[self.nu+self.nx, :] = rq[:]
-        C.add(Function("RSQrqt", [self.obj_scale, self.u_sym, self.x_sym,self.dual_dyn, self.dual_eqI], [densify(RSQrqt)]))
+        C.add(Function("RSQrqt", [self.obj_scale, self.u_sym, self.x_sym,self.dual_dyn, self.dual_eqI, self.dualIneq], [densify(RSQrqt)]))
         # rqF
         C.add(Function("rqk", [self.obj_scale, self.u_sym, self.x_sym], [densify(rq)]))
         # Lk
@@ -127,10 +149,12 @@ class OptimalControlProblem:
         if self.ngF > 0:
             RSQF += hessian(self.dual_eqF.T@self.eqF,
                             vertcat(self.x_sym))[0]
+        if self.ngIneq>0:
+            RSQF += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[0]
         RSQrqtF[:self.nx, :] = RSQF
         RSQrqtF[self.nx, :] = rqF[:]
         C.add(Function("RSQrqtF", [self.obj_scale, self.u_sym, self.x_sym,
-              self.dual_dyn, self.dual_eqF], [densify(RSQrqtF)]))
+              self.dual_dyn, self.dual_eqF, self.dualIneq], [densify(RSQrqtF)]))
         # rqF
         C.add(Function("rqF", [self.obj_scale, self.u_sym, self.x_sym], [densify(rqF)]))
         # LF
@@ -150,5 +174,11 @@ class OptimalControlProblem:
         C.add(Function("GgtF", [self.u_sym, self.x_sym], [densify(GgtF)]))
         # g_F
         C.add(Function("gF", [self.u_sym, self.x_sym], [densify(self.eqF[:])]))
+        # Ggineqt
+        Ggineqt = SX.zeros(self.nu+self.nx+1, self.ngIneq)
+        Ggineqt[:self.nu+self.nx, :] = jacobian(self.ineq, vertcat(self.nu, self.nx)).T
+        Ggineqt[self.nu+self.nx, :] =  self.ineq[:]
+        C.add(Function("Ggineqt", [self.u_sym, self.x_sym], [densify(Ggineqt)]))
+        C.add(Function("gineq", [self.u_sym, self.x_sym], [densify(self.ineq[:])]))
         C.generate()
         return

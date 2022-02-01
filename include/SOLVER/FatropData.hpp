@@ -8,51 +8,56 @@
 using namespace std;
 namespace fatrop
 {
-    #define CACHEMACRO(instance, val) instance.evaluated ?  instance.value : instance.SetValue(val)
+#define CACHEMACRO(instance, val) instance.evaluated ? instance.value : instance.SetValue(val)
     struct FatropData : public RefCountedObj
     {
-        FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams>& params ) : nlpdims(nlpdims),
-                                             memvars(nlpdims.nvars, 7),
-                                             memeqs(nlpdims.neqs, 6),
-                                             x_curr(memvars[0]),
-                                             x_next(memvars[1]),
-                                             delta_x(memvars[2]),
-                                             x_scales(memvars[3]),
-                                             lam_curr(memeqs[0]),
-                                             lam_next(memeqs[1]),
-                                             lam_calc(memeqs[2]),
-                                             lam_scales(memeqs[3]),
-                                             g_curr(memeqs[4]),
-                                             g_next(memeqs[5]),
-                                             grad_curr(memvars[4]),
-                                             grad_next(memvars[5]),
-                                             du_inf_curr(memvars[6]),
-                                             params(params)
+        FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
+                                                                                      memvars(nlpdims.nvars, 7),
+                                                                                      memeqs(nlpdims.neqs, 6),
+                                                                                      x_curr(memvars[0]),
+                                                                                      x_next(memvars[1]),
+                                                                                      delta_x(memvars[2]),
+                                                                                      x_scales(memvars[3]),
+                                                                                      lam_curr(memeqs[0]),
+                                                                                      lam_next(memeqs[1]),
+                                                                                      lam_calc(memeqs[2]),
+                                                                                      lam_scales(memeqs[3]),
+                                                                                      g_curr(memeqs[4]),
+                                                                                      g_next(memeqs[5]),
+                                                                                      grad_curr(memvars[4]),
+                                                                                      grad_next(memvars[5]),
+                                                                                      du_inf_curr(memvars[6]),
+                                                                                      params(params)
         {
             Initialize();
         }
-        void Initialize(){
-            smax = params -> smax;
+        void Initialize()
+        {
+            smax = params->smax;
         }
-        int Reset(){
+        int Reset()
+        {
             cache_curr = EvalCache();
             cache_next = EvalCache();
             return 0;
         }
-        double EMuCurr(double mu){
+        double EMuCurr(double mu)
+        {
             double res = 0.0;
             double lammean = LamMeanCurr();
             double cv = CVLinfCurr();
             double du = DuInfLinfCurr();
             double sd = 0.0;
-            if(lammean > smax){
-                sd = lammean/smax;
+            if (lammean > smax)
+            {
+                sd = lammean / smax;
                 du /= sd;
             }
-            res = MAX(cv,du);
+            res = MAX(cv, du);
             return res;
         };
-        int AcceptInitialization(){
+        int AcceptInitialization()
+        {
             lam_calc.SwapWith(lam_curr);
             return 0;
         }
@@ -100,9 +105,10 @@ namespace fatrop
         }
         double LamMeanCurr()
         {
-            return LamL1Curr()/nlpdims.nvars;
+            return LamL1Curr() / nlpdims.nvars;
         }
-        double LamLinfCalc(){
+        double LamLinfCalc()
+        {
             return Linf(lam_calc);
         }
         double DuInfLinfCurr()
@@ -133,7 +139,8 @@ namespace fatrop
         FatropVecBF du_inf_curr;
         struct EvalCache
         {
-            struct Instance{
+            struct Instance
+            {
                 bool evaluated = false;
                 double value = 0.0;
                 double SetValue(const double value_)

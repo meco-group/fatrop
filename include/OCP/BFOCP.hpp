@@ -13,6 +13,7 @@ namespace fatrop
         virtual int get_nxk(const int k) const = 0;
         virtual int get_nuk(const int k) const = 0;
         virtual int get_ngk(const int k) const = 0;
+        virtual int get_ng_ineq_k(const int k) const = 0;
         virtual int get_horizon_length() const = 0;
         virtual int eval_BAbtk(
             const double *states_kp1,

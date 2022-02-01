@@ -11,10 +11,10 @@ namespace fatrop
     public:
         RandomOCP(const vector<int> &nu, const vector<int> &nx, const vector<int> &ng, const int K) : nu_(nu), nx_(nx), ng_(ng), K_(K){
 
-                                                                                                                                 };
         int get_nxk(const int k) const override { return nx_.at(k); };
         int get_nuk(const int k) const override { return nu_.at(k); };
         int get_ngk(const int k) const override { return ng_.at(k); };
+        int get_ng_ineq_k(const int k) const override { return 0; };
         int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
                        const double *states_k,

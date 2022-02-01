@@ -244,6 +244,16 @@ namespace fatrop
         private:
             const RefCountPtr<BFOCP> parent;
         };
+        class ngIneqExpr : public VecExpr<ngExpr, int>
+        {
+        public:
+            ngIneqExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            int getEl(const int ai) const { return parent->get_ng_ineq_k(ai); };
+            int size() const { return parent->get_horizon_length(); };
+
+        private:
+            const RefCountPtr<BFOCP> parent;
+        };
 
     public:
         nuExpr nuexpr;

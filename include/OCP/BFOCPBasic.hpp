@@ -17,6 +17,7 @@ namespace fatrop
                    const int nx,
                    const int ngI,
                    const int ngF,
+                   const int ng_ineq,
                    const int K,
                    const EvalCasGen &BAbtf,
                    const EvalCasGen &bkf,
@@ -35,6 +36,7 @@ namespace fatrop
                                             nx_(nx),
                                             ngI_(ngI),
                                             ngF_(ngF),
+                                            ng_ineq_(ng_ineq),
                                             K_(K),
                                             BAbtf(BAbtf),
                                             bkf(bkf),
@@ -70,12 +72,14 @@ namespace fatrop
             EvalCasGen gFf(handle, "gF");
             EvalCasGen Lkf(handle, "Lk");
             EvalCasGen LFf(handle, "LF");
+            EvalCasGen Ggineqtf(handle, "Ggineqt");
 
             const int nx = BAbtf.out_n;
             const int nu = BAbtf.out_m - nx - 1;
             const int ngI = GgtIf.out_n;
             const int ngF = GgtFf.out_n;
-            return BFOCPBasic(nu, nx, ngI, ngF, K,
+            const int ng_ineq = Ggineqtf.out_n;
+            return BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, K,
                               BAbtf,
                               bkf,
                               RSQrqtIf,
@@ -108,6 +112,14 @@ namespace fatrop
             if (k == K_ - 1)
                 return ngF_;
             return 0;
+        }
+        int get_ng_ineq_k(const int k) const override
+        {
+            if (k == K_ - 1)
+            {
+                return 0;
+            }
+            return ng_ineq_;
         }
         int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
@@ -224,6 +236,7 @@ namespace fatrop
         const int nx_;
         const int ngI_;
         const int ngF_;
+        const int ng_ineq_;
         const int K_;
         EvalCasGen BAbtf;
         EvalCasGen bkf;

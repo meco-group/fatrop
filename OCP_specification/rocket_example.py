@@ -17,6 +17,5 @@ opti = OCP.set_up_Opti(100)
 opti.solver("ipopt",{}, {"print_level":7, "max_iter":5, "max_soc":1})
 opti.set_initial(OCP.opti_vars, DM.ones(1,OCP.N_vars))
 opti.solve()
-opti.solve()
 OCP.generate_code("f.c")
 #gcc -fPIC -march=native -shared -O3 f.c -o f.so
