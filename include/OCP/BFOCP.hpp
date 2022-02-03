@@ -34,6 +34,11 @@ namespace fatrop
             const double *states_k,
             MAT *res,
             const int k) = 0;
+        virtual int eval_Ggt_ineqk(
+            const double *inputs_k,
+            const double *states_k,
+            MAT *res,
+            const int k) = 0;
         virtual int eval_bk(
             const double *states_kp1,
             const double *inputs_k,
@@ -41,6 +46,11 @@ namespace fatrop
             double *res,
             const int k) = 0;
         virtual int eval_gk(
+            const double *states_k,
+            const double *inputs_k,
+            double *res,
+            const int k) = 0;
+        virtual int eval_gineqk(
             const double *states_k,
             const double *inputs_k,
             double *res,

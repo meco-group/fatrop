@@ -31,6 +31,8 @@ namespace fatrop
                    const EvalCasGen &gIf,
                    const EvalCasGen &GgtFf,
                    const EvalCasGen &gFf,
+                   const EvalCasGen &Ggt_ineqf,
+                   const EvalCasGen &gineqf,
                    const EvalCasGen &Lkf,
                    const EvalCasGen &LFf) : nu_(nu),
                                             nx_(nx),
@@ -50,6 +52,8 @@ namespace fatrop
                                             gIf(gIf),
                                             GgtFf(GgtFf),
                                             gFf(gFf),
+                                            Ggt_ineqf(Ggt_ineqf),
+                                            g_ineqf(gineqf),
                                             Lkf(Lkf),
                                             LFf(LFf)
         {
@@ -73,6 +77,7 @@ namespace fatrop
             EvalCasGen Lkf(handle, "Lk");
             EvalCasGen LFf(handle, "LF");
             EvalCasGen Ggineqtf(handle, "Ggineqt");
+            EvalCasGen gineqf(handle, "gineq");
 
             const int nx = BAbtf.out_n;
             const int nu = BAbtf.out_m - nx - 1;
@@ -92,6 +97,8 @@ namespace fatrop
                               gIf,
                               GgtFf,
                               gFf,
+                              Ggineqtf,
+                              gineqf,
                               Lkf,
                               LFf);
         }
@@ -169,6 +176,19 @@ namespace fatrop
                 return GgtIf.eval_bf(args, res);
             return 1;
         };
+        int eval_Ggt_ineqk(
+            const double *inputs_k,
+            const double *states_k,
+            MAT *res,
+            const int k) override
+        {
+            if (k == K_ - 1)
+                return 0;
+            const double *args[2];
+            args[0] = inputs_k;
+            args[1] = states_k;
+            return Ggt_ineqf.eval_bf(args, res);
+        };
         int eval_bk(
             const double *states_kp1,
             const double *inputs_k,
@@ -182,7 +202,7 @@ namespace fatrop
             args[2] = states_k;
             return bkf.eval_array(args, constraint_violation_k);
         };
-        virtual int eval_gk(
+        int eval_gk(
             const double *inputs_k,
             const double *states_k,
             double *res,
@@ -196,6 +216,19 @@ namespace fatrop
             if (k == 0)
                 return gIf.eval_array(args, res);
             return 1;
+        }
+        int eval_gineqk(
+            const double *inputs_k,
+            const double *states_k,
+            double *res,
+            const int k) override
+        {
+            if (k == K_ - 1)
+                return 0;
+            const double *args[2];
+            args[0] = inputs_k;
+            args[1] = states_k;
+            return g_ineqf.eval_array(args, res);
         }
         int eval_rqk(
             const double *objective_scale,
@@ -250,6 +283,8 @@ namespace fatrop
         EvalCasGen gIf;
         EvalCasGen GgtFf;
         EvalCasGen gFf;
+        EvalCasGen Ggt_ineqf;
+        EvalCasGen g_ineqf;
         EvalCasGen Lkf;
         EvalCasGen LFf;
     };
