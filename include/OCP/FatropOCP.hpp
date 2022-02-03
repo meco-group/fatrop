@@ -125,8 +125,9 @@ namespace fatrop
             NLPDims res;
             // states + inputs
             res.nvars = sum(ocpkktmemory_.nu) + sum(ocpkktmemory_.nx);
-            // stagewise equality contraints + dynamics constraints
-            res.neqs = sum(ocpkktmemory_.ng) + sum(ocpkktmemory_.nx) - ocpkktmemory_.nx.at(0);
+            // stagewise equality contraints + dynamics constraints + slack constraints
+            res.neqs = sum(ocpkktmemory_.ng) + sum(ocpkktmemory_.nx) - ocpkktmemory_.nx.at(0) + sum(ocpkktmemory_.ng_ineq);
+            res.nineqs = sum(ocpkktmemory_.ng_ineq);
             return res;
         };
 

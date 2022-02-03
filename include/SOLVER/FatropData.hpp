@@ -14,6 +14,7 @@ namespace fatrop
         FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                       memvars(nlpdims.nvars, 7),
                                                                                       memeqs(nlpdims.neqs, 6),
+                                                                                      memineqs(nlpdims.nineqs, 6),
                                                                                       x_curr(memvars[0]),
                                                                                       x_next(memvars[1]),
                                                                                       delta_x(memvars[2]),
@@ -27,6 +28,12 @@ namespace fatrop
                                                                                       grad_curr(memvars[4]),
                                                                                       grad_next(memvars[5]),
                                                                                       du_inf_curr(memvars[6]),
+                                                                                      s_curr(memineqs[0]),
+                                                                                      s_next(memineqs[1]),
+                                                                                      delta_s(memineqs[2]),
+                                                                                      z_curr(memineqs[3]),
+                                                                                      z_next(memineqs[4]),
+                                                                                      delta_z(memineqs[5]),
                                                                                       params(params)
         {
             Initialize();
@@ -124,6 +131,7 @@ namespace fatrop
         double obj_scale = 1.0;
         FatropMemoryVecBF memvars;
         FatropMemoryVecBF memeqs;
+        FatropMemoryVecBF memineqs;
         FatropVecBF x_curr;
         FatropVecBF x_next;
         FatropVecBF delta_x;
@@ -137,6 +145,13 @@ namespace fatrop
         FatropVecBF grad_curr;
         FatropVecBF grad_next;
         FatropVecBF du_inf_curr;
+        // vectors neccessary for inequality constraints
+        FatropVecBF s_curr;
+        FatropVecBF s_next;
+        FatropVecBF delta_s;
+        FatropVecBF z_curr;
+        FatropVecBF z_next;
+        FatropVecBF delta_z;
         struct EvalCache
         {
             struct Instance

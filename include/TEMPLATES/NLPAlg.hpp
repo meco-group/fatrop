@@ -8,6 +8,7 @@ namespace fatrop
     {
         int nvars;
         int neqs;
+        int nineqs;
     };
     class FatropNLP : public RefCountedObj
     {
