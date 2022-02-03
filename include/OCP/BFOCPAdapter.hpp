@@ -63,8 +63,10 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
+            OCPMACRO(MAT *, Ggt_ineq, _p);
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
+            OCPMACRO(int *, ng_ineq, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
             double *primal_data = primal_vars_p->pa;
 
@@ -92,6 +94,20 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
                         Ggt_p + k,
+                        k);
+                }
+            }
+            for (int k = 0; k < K; k++)
+            {
+                int nu_k = nu_p[k];
+                int ng_ineq_k = ng_ineq_p[k];
+                int offs_ux_k = offs_ux[k];
+                if (ng_ineq_k > 0)
+                {
+                    ocptempl->eval_Ggt_ineqk(
+                        primal_data + offs_ux_k,
+                        primal_data + offs_ux_k + nu_k,
+                        Ggt_ineq_p + k,
                         k);
                 }
             }

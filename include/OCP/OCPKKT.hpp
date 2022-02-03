@@ -25,6 +25,7 @@ namespace fatrop
                                             nu(dims.nu),
                                             nx(dims.nx),
                                             ng(dims.ng),
+                                            ng_ineq(dims.ng_ineq),
                                             RSQrqt(dims.nu + dims.nx + 1, dims.nu + dims.nx, dims.K),
                                             BAbt(dims.nu + dims.nx + 1, rotate(dims.nx, 1), dims.K),
                                             Ggt(dims.nu + dims.nx + 1, dims.ng, dims.K),
@@ -36,6 +37,7 @@ namespace fatrop
         FatropVector<int> nu;
         FatropVector<int> nx;
         FatropVector<int> ng;
+        FatropVector<int> ng_ineq,
         /// small-scale Hessian
         FatropMemoryMatBF RSQrqt;
         /// small-scale Jacobian dynamics
