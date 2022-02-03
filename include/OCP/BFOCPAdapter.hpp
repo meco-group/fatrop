@@ -27,6 +27,7 @@ namespace fatrop
             const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
+            int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
@@ -39,12 +40,14 @@ namespace fatrop
                 int offs_ux_k = offs_ux[k];
                 int offs_dyn_eq_k = offs_dyn_eq[k];
                 int offs_g_k = offs_g[k];
+                int offs_ineq_k = offs_ineq[k];
                 ocptempl->eval_RSQrqtk(
                     &obj_scale,
                     primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
                     lam_data + offs_dyn_eq_k,
                     lam_data + offs_g_k,
+                    lam_data + offs_ineq_k,
                     RSQrqt_p + k,
                     k);
             }

@@ -146,15 +146,17 @@ namespace fatrop
                          const double *states_k,
                          const double *lam_dyn_k,
                          const double *lam_eq_k,
+                         const double *lam_ineq_k,
                          MAT *res,
                          const int k) override
         {
-            const double *args[5];
+            const double *args[6];
             args[0] = objective_scale;
             args[1] = inputs_k;
             args[2] = states_k;
             args[3] = lam_dyn_k;
             args[4] = lam_eq_k;
+            args[5] = lam_ineq_k;
             if (k == 0)
                 return RSQrqtIf.eval_bf(args, res);
             if (k == K_ - 1)

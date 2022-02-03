@@ -27,6 +27,7 @@ namespace fatrop
             const double *states_k,
             const double *lam_dyn_k,
             const double *lam_eq_k,
+            const double *lam_eq_ineq_k,
             MAT *res,
             const int k) = 0;
         virtual int eval_Ggtk(

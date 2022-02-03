@@ -35,6 +35,7 @@ namespace fatrop
                          const double *inputs_k,
                          const double *lam_dyn_k,
                          const double *lam_eq_k,
+                         const double *lam_ineq_eq_k,
                          MAT *res,
                          const int k) override
         {
