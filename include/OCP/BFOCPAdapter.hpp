@@ -124,9 +124,11 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
+            int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
             double *cv_p = ((VEC *)constraint_violation)->pa;
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
+            OCPMACRO(int *, ng_ineq, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
             double *primal_data = primal_vars_p->pa;
 
@@ -145,8 +147,15 @@ namespace fatrop
                     primal_data + offs_ux_k + nu_k,
                     cv_p + offs_dyn_eq_k,
                     k);
+            }
+            for (int k = 0; k < K; k++)
+            {
+                int ng_k = ng_p[k];
                 if (ng_k > 0)
                 {
+                    int nu_k = nu_p[k];
+                    int offs_ux_k = offs_ux[k];
+                    int offs_g_k = offs_g[k];
                     ocptempl->eval_gk(
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
@@ -154,18 +163,19 @@ namespace fatrop
                         k);
                 }
             }
+            for (int k = 0; k < K; k++)
             {
-                int nu_k = nu_p[K - 1];
-                int ng_k = ng_p[K - 1];
-                int offs_ux_k = offs_ux[K - 1];
-                int offs_g_k = offs_g[K - 1];
-                if (ng_k > 0)
+                int ng_ineq_k = ng_ineq_p[k];
+                if (ng_ineq_k > 0)
                 {
-                    ocptempl->eval_gk(
+                    int nu_k = nu_p[k];
+                    int offs_ux_k = offs_ux[k];
+                    int offs_gineq_k = offs_ineq[k];
+                    ocptempl->eval_gineqk(
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
-                        cv_p + offs_g_k,
-                        K - 1);
+                        cv_p + offs_gineq_k,
+                        k);
                 }
             }
             return 0;

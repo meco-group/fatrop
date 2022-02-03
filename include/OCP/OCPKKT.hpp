@@ -37,7 +37,7 @@ namespace fatrop
         FatropVector<int> nu;
         FatropVector<int> nx;
         FatropVector<int> ng;
-        FatropVector<int> ng_ineq,
+        FatropVector<int> ng_ineq;
         /// small-scale Hessian
         FatropMemoryMatBF RSQrqt;
         /// small-scale Jacobian dynamics
