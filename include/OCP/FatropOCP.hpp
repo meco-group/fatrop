@@ -140,7 +140,7 @@ namespace fatrop
         {
             // assume constraint jacobian evaluated
             OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
-            return ls_->SolveInitialization(&ocpkktmemory_, dlam, s_dummy,ux_dummy,zL,zU, lower, upper);
+            return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy,s_dummy,zL,zU, lower, upper);
         }
 
         NLPDims GetNLPDims() const override
