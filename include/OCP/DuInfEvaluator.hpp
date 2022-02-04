@@ -41,7 +41,7 @@ namespace fatrop
                 const int offsp1 = offs_ux[k + 1];
                 const int offs = offs_ux[k];
                 const int offs_dyn_eq_k = offs_dyn_eq[k];
-                GEMV_N(nu + nx + 1, nxp1, 1.0, BAbt_p + k, 0, 0, lam_p, offs_dyn_eq_k, 1.0, du_inf_p, offs, du_inf_p, offs);
+                GEMV_N(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, lam_p, offs_dyn_eq_k, 1.0, du_inf_p, offs, du_inf_p, offs);
                 AXPY(nxp1, -1.0, lam_p, offs_dyn_eq_k, du_inf_p, offsp1 + nup1, du_inf_p, offsp1 + nup1);
             }
             // contribution of equality constraints
