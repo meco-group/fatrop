@@ -269,6 +269,9 @@ namespace fatrop
             {
                 *d_ptr = 0.0;
             }
+            // cout << "allocated memory size " << this->memory_size()<< endl;
+            // cout << "used memory size " << (unsigned long long) d_ptr_end - (unsigned long long) mem << endl;
+            // cout << "difference " << this->memory_size()-((unsigned long long) d_ptr_end - (unsigned long long) mem)<< endl;
         }
         /** \brief get fatrop matrix bf */
         FatropMatBF operator[](const int N) const
