@@ -196,10 +196,15 @@ namespace fatrop
         }
         inline int Initialization()
         {
-            return fatropnlp_->Initializiaton(
+            return fatropnlp_->Initialization(
                 fatropdata_->grad_curr,
                 fatropdata_->lam_calc,
-                fatropdata_->delta_x);
+                fatropdata_->delta_x,
+                fatropdata_->delta_s,
+                fatropdata_->zL_curr,
+                fatropdata_->zU_curr,
+                fatropdata_->s_lower,
+                fatropdata_->s_upper);
         }
         int ComputeSD(double inertia_correction_w, double inertia_correction_c)
         {

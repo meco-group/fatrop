@@ -63,7 +63,7 @@ int main()
     // double el = blasfeo_toc(&timer);
     // cout << "time elapsed " << el / N << endl;
     RefCountPtr<Sparse_OCP> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
-    ocplssparse-> computeSD(&ocpalg.ocpkktmemory_, 0.0,0.0, dux, dlam);
+    ocplssparse-> computeSD(&ocpalg.ocpkktmemory_, 0.0,0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam ,dlam);
     cout << "dlam" << endl;
     dlam.print();
     ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);

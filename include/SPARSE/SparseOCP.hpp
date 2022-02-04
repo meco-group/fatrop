@@ -7,14 +7,14 @@ using namespace std;
 namespace fatrop
 {
 #define Id Eigen::MatrixXd::Identity
-    class Sparse_OCP: public OCPLinearSolver
+    class Sparse_OCP : public OCPLinearSolver
     {
     public:
         Sparse_OCP(const OCPDims &dims, OCPKKTMemory &OCP, bool Guzero = false) : dims(dims)
         {
             int K = dims.K;
             c_vec = vector<eq_sp>(dims.K, nullptr);
-            c_dyn_vec = vector<eq_sp>(dims.K-1, nullptr);
+            c_dyn_vec = vector<eq_sp>(dims.K - 1, nullptr);
             // initialize variables
             for (int k = 0; k < K - 1; k++)
             {
@@ -31,7 +31,7 @@ namespace fatrop
             {
                 int nu = dims.nu.at(k);
                 int nx = dims.nx.at(k);
-                int nxp1 = dims.nx.at(k+1);
+                int nxp1 = dims.nx.at(k + 1);
                 int ng = dims.ng.at(k);
                 vector<double> rhs_dyn;
                 vector<double> rhs_con;
@@ -100,14 +100,19 @@ namespace fatrop
             KKT.print("matrix");
         }
 
-
         // solve a KKT system
         int computeSD(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
             const FatropVecBF &ux,
-            const FatropVecBF &lam) override
+            const FatropVecBF &lam,
+            const FatropVecBF &s,
+            const FatropVecBF &zL,
+            const FatropVecBF &zU,
+            const FatropVecBF &lower,
+            const FatropVecBF &upper,
+            const FatropVecBF &delta_s) override
         {
 
             vector<Triplet> ocptripl;
@@ -118,7 +123,6 @@ namespace fatrop
             blasfeo_timer timer;
             blasfeo_tic(&timer);
             interfo.solve(ocptripl, rhso);
-            
 
             int offs = 0;
             int offs_c = 0;
@@ -147,7 +151,7 @@ namespace fatrop
                 {
                     VECEL(lam_p, offs_c + i) = rhso.at(offs_lam + lam_c_offs + i);
                 }
-                int nxkp1 = dims.nx.at(k+1);
+                int nxkp1 = dims.nx.at(k + 1);
                 int lam_c_dyn_offs = c_dyn_vec.at(k)->offset;
                 for (int i = 0; i < nxkp1; i++)
                 {
@@ -174,6 +178,20 @@ namespace fatrop
             }
             return 0;
         }
+        int
+        SolveInitialization(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &lam,
+            const FatropVecBF &ux_dummy,
+            const FatropVecBF &s_dummy,
+            const FatropVecBF &zL,
+            const FatropVecBF &zU,
+            const FatropVecBF &lower,
+            const FatropVecBF &upper) override
+        {
+            // feature not implemented
+            assert(false);
+        };
         SparseKKTMatrix KKT;
         OCPDims dims;
         vector<var_sp> u_vec;

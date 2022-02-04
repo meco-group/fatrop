@@ -57,7 +57,14 @@ namespace fatrop
                 inertia_correction_w,
                 inertia_correction_c,
                 dprimal_vars,
-                dlam);
+                dlam,
+                s,
+                zL_curr,
+                zU_curr, 
+                lower_bound,
+                upper_bound,
+                delta_s
+                );
         };
         int ComputeScalings(
             double &obj_scale,
@@ -120,14 +127,20 @@ namespace fatrop
                 grad,
                 du_inf);
         }
-        int Initializiaton(
+        int Initialization(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
-            FatropVecBF &optimvarsdummy) override
+            const FatropVecBF &ux_dummy,
+            const FatropVecBF &s_dummy,
+            const FatropVecBF &zL,
+            const FatropVecBF &zU,
+            const FatropVecBF &lower,
+            const FatropVecBF &upper
+            ) override
         {
             // assume constraint jacobian evaluated
             OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
-            return ls_->computeSD(&ocpkktmemory_, 0.0, 0.0, optimvarsdummy, dlam);
+            return ls_->SolveInitialization(&ocpkktmemory_, dlam, s_dummy,ux_dummy,zL,zU, lower, upper);
         }
 
         NLPDims GetNLPDims() const override

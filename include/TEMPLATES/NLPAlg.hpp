@@ -54,10 +54,16 @@ namespace fatrop
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr) = 0;
-        virtual int Initializiaton(
-            const FatropVecBF& grad,
-            FatropVecBF& lam,
-            FatropVecBF& optimvarsdummy) = 0 ;
+        virtual int Initialization(
+            const FatropVecBF &grad,
+            FatropVecBF &dlam,
+            const FatropVecBF &ux_dummy,
+            const FatropVecBF &s_dummy,
+            const FatropVecBF &zL,
+            const FatropVecBF &zU,
+            const FatropVecBF &lower,
+            const FatropVecBF &upper
+            )  =0;
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

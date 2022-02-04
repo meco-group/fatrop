@@ -13,7 +13,24 @@ namespace fatrop
             const double intertia_correction_w,
             const double intertia_correction_c,
             const FatropVecBF &dprimal_vars,
-            const FatropVecBF &dlam) = 0;
+            const FatropVecBF &dlam,
+            const FatropVecBF &s,
+            const FatropVecBF &zL,
+            const FatropVecBF &zU,
+            const FatropVecBF &lower,
+            const FatropVecBF &upper,
+            const FatropVecBF &delta_s) = 0;
+
+        virtual int
+        SolveInitialization(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &lam,
+            const FatropVecBF &ux_dummy,
+            const FatropVecBF &s_dummy,
+            const FatropVecBF &zL,
+            const FatropVecBF &zU,
+            const FatropVecBF &lower,
+            const FatropVecBF &upper) = 0;
     };
 
 } // namespace fatrop
