@@ -43,7 +43,13 @@ namespace fatrop
             const double inertia_correction_w,
             const double inertia_correction_c,
             const FatropVecBF &dprimal_vars,
-            const FatropVecBF &dlam) override
+            const FatropVecBF &dlam,
+            const FatropVecBF &s,
+            const FatropVecBF &zL_curr,
+            const FatropVecBF &zU_curr,
+            const FatropVecBF &lower_bound,
+            const FatropVecBF &upper_bound,
+            const FatropVecBF &delta_s) override
         {
             // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
             return ls_->computeSD(
@@ -121,7 +127,7 @@ namespace fatrop
         {
             // assume constraint jacobian evaluated
             OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
-            return ls_->computeSD(&ocpkktmemory_,0.0, 0.0, optimvarsdummy, dlam);
+            return ls_->computeSD(&ocpkktmemory_, 0.0, 0.0, optimvarsdummy, dlam);
         }
 
         NLPDims GetNLPDims() const override

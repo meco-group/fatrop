@@ -34,7 +34,7 @@ int main()
     FatropMemoryVecBF lags(N_lags, 2);
     blasfeo_tic(&timer);
     ocpalg.EvalHess(1.0, ux[0], lags[0]);
-    ocpalg.EvalJac(ux[0]);
+    ocpalg.EvalJac(ux[0], ux[0]);
     double el = blasfeo_toc(&timer);
     cout << "el time FE " << el << endl;
     int N = 1000;

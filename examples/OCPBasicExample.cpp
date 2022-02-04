@@ -46,10 +46,10 @@ int main()
     ocpalg.EvalConstraintViolation(ux[0], ux[0],cv);
     ocpalg.EvalGrad(1.0, ux[0], grad);
     ocpalg.EvalHess(1.0, ux[0], lags[0]);
-    ocpalg.EvalJac(ux[0]);
+    ocpalg.EvalJac(ux[0], ux[0]);
     // grad.print();
     ocpalg.OCPInitializer_.AdaptKKTInitial(&ocpalg.ocpkktmemory_,grad);
-    ocpalg.ComputeSD(0.0,0.0, dux, dlam);
+    ocpalg.ComputeSD(0.0,0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam, dlam);
     cout << "dlam" << endl;
     dlam.print();
     // grad.print();

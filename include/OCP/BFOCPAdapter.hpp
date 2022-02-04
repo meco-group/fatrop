@@ -62,10 +62,12 @@ namespace fatrop
             int K = OCP->K;
             // offsets
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
+            int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             OCPMACRO(MAT *, Ggt_ineq, _p);
             OCPMACRO(int *, nu, _p);
+            OCPMACRO(int *, nx, _p);
             OCPMACRO(int *, ng, _p);
             OCPMACRO(int *, ng_ineq, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
@@ -98,11 +100,14 @@ namespace fatrop
                         k);
                 }
             }
+            VEC *slack_vars_bf = (VEC *)slack_vars;
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
+                int nx_k = nx_p[k];
                 int ng_ineq_k = ng_ineq_p[k];
                 int offs_ux_k = offs_ux[k];
+                int offs_gineq_k = offs_ineq[k];
                 if (ng_ineq_k > 0)
                 {
                     ocptempl->eval_Ggt_ineqk(
@@ -111,7 +116,7 @@ namespace fatrop
                         Ggt_ineq_p + k,
                         k);
                     // rewrite problem
-                    // ROW
+                    ROWAD(ng_ineq_k, -1.0, slack_vars_bf, offs_gineq_k, Ggt_ineq_p+k, nu_k+ nx_k, 0);
                 }
             }
             return 0;

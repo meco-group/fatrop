@@ -207,7 +207,13 @@ namespace fatrop
                 inertia_correction_w,
                 inertia_correction_c,
                 fatropdata_->delta_x,
-                fatropdata_->lam_calc);
+                fatropdata_->lam_calc,
+                fatropdata_->s_curr,
+                fatropdata_->zL_curr,
+                fatropdata_->zU_curr,
+                fatropdata_->s_lower,
+                fatropdata_->s_upper,
+                fatropdata_->delta_s);
         }
         RefCountPtr<FatropNLP> fatropnlp_;
         RefCountPtr<FatropData> fatropdata_;
