@@ -31,11 +31,13 @@ namespace fatrop
                 lam);
         };
         int EvalJac(
-            const FatropVecBF &primal_vars) override
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars) override
         {
             return ocp_->evalJac(
                 &ocpkktmemory_,
-                primal_vars);
+                primal_vars,
+                slack_vars);
         };
         int ComputeSD(
             const double inertia_correction_w,
@@ -66,11 +68,13 @@ namespace fatrop
         };
         int EvalConstraintViolation(
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override
         {
             return ocp_->EvalConstraintViolation(
                 &ocpkktmemory_,
                 primal_vars,
+                slack_vars,
                 constraint_violation);
         };
         int EvalGrad(

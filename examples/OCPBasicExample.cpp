@@ -43,7 +43,7 @@ int main()
         scalesx,
         scaleslam,
         scaleslam);
-    ocpalg.EvalConstraintViolation(ux[0], cv);
+    ocpalg.EvalConstraintViolation(ux[0], ux[0],cv);
     ocpalg.EvalGrad(1.0, ux[0], grad);
     ocpalg.EvalHess(1.0, ux[0], lags[0]);
     ocpalg.EvalJac(ux[0]);

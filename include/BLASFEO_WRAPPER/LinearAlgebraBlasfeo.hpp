@@ -33,6 +33,7 @@
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define ROWIN blasfeo_drowin
+#define ROWAD fatrop_drowad
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
 #define TRSV_UNU fatrop_dtrsv_unu
@@ -87,6 +88,7 @@ namespace fatrop
     // B <= B + alpha*A^T (B is mxn)
     void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj);
     void fatrop_identity(const int m, MAT* sA, const int ai, const int aj);
+    void fatrop_drowad(int kmax, double alpha, struct blasfeo_dvec *sx, int xi, struct blasfeo_dmat *sA, int ai, int aj);
 
     // // permute the rows of a matrix struct
     // void fatrop_drowpe(int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)

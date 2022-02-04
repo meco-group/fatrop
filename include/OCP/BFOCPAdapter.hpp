@@ -55,7 +55,8 @@ namespace fatrop
         }
         int evalJac(
             OCPKKTMemory *OCP,
-            const FatropVecBF &primal_vars) override
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars) override
         {
             // horizon length
             int K = OCP->K;
@@ -109,6 +110,8 @@ namespace fatrop
                         primal_data + offs_ux_k + nu_k,
                         Ggt_ineq_p + k,
                         k);
+                    // rewrite problem
+                    // ROW
                 }
             }
             return 0;
@@ -116,6 +119,7 @@ namespace fatrop
         int EvalConstraintViolation(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override
         {
             // horizon length
@@ -135,12 +139,10 @@ namespace fatrop
             for (int k = 0; k < K - 1; k++)
             {
                 int nu_k = nu_p[k];
-                int ng_k = ng_p[k];
                 int nu_kp1 = nu_p[k + 1];
                 int offs_ux_k = offs_ux[k];
                 int offs_ux_kp1 = offs_ux[k + 1];
                 int offs_dyn_eq_k = offs_dyn_eq[k];
-                int offs_g_k = offs_g[k];
                 ocptempl->eval_bk(
                     primal_data + offs_ux_kp1 + nu_kp1,
                     primal_data + offs_ux_k,
@@ -163,12 +165,15 @@ namespace fatrop
                         k);
                 }
             }
+            VEC *cv_bf = (VEC *)constraint_violation;
+            VEC *slack_vars_bf = (VEC *)slack_vars;
             for (int k = 0; k < K; k++)
             {
                 int ng_ineq_k = ng_ineq_p[k];
                 if (ng_ineq_k > 0)
                 {
                     int nu_k = nu_p[k];
+                    int ng_ineq_k = ng_ineq_p[k];
                     int offs_ux_k = offs_ux[k];
                     int offs_gineq_k = offs_ineq[k];
                     ocptempl->eval_gineqk(
@@ -176,6 +181,8 @@ namespace fatrop
                         primal_data + offs_ux_k + nu_k,
                         cv_p + offs_gineq_k,
                         k);
+                    // rewrite problem
+                    AXPY(ng_ineq_k, -1.0, slack_vars_bf, offs_gineq_k, cv_bf, offs_gineq_k, cv_bf, offs_gineq_k);
                 }
             }
             return 0;

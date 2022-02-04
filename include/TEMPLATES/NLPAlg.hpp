@@ -18,9 +18,11 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) = 0;
         virtual int EvalJac(
-            const FatropVecBF &primal_vars) = 0;
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars) = 0;
         virtual int EvalConstraintViolation(
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) = 0;
         virtual int EvalGrad(
             double obj_scale,

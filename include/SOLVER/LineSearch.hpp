@@ -20,6 +20,7 @@ namespace fatrop
         {
             return fatropnlp_->EvalConstraintViolation(
                 fatropdata_->x_next,
+                fatropdata_->s_next,
                 fatropdata_->g_next);
         }
         double EvalObjNext()
