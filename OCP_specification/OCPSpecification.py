@@ -9,6 +9,7 @@ class OptimalControlProblem:
         self.ngIneq = 0
         self.eqI = SX.sym("EqI", 0)
         self.dual_eqI = SX.sym("d_EqI", 0)
+        self.dualIneq = SX.sym("dualineq", 0)
         self.eqF = SX.sym("d_EqI", 0)
         self.dual_eqF = SX.sym("d_EqF", 0)
         self.obj_scale = SX.sym("obj_scale")
@@ -176,8 +177,8 @@ class OptimalControlProblem:
         C.add(Function("gF", [self.u_sym, self.x_sym], [densify(self.eqF[:])]))
         # Ggineqt
         Ggineqt = SX.zeros(self.nu+self.nx+1, self.ngIneq)
-        Ggineqt[:self.nu+self.nx, :] = jacobian(self.ineq, vertcat(self.nu, self.nx)).T
-        Ggineqt[self.nu+self.nx, :] =  self.ineq[:]
+        Ggineqt[:self.nu+self.nx, :] = jacobian(self.ineq, vertcat(self.u_sym, self.x_sym)).T
+        Ggineqt[self.nu+self.nx, :] =  self.ineq[:].T
         C.add(Function("Ggineqt", [self.u_sym, self.x_sym], [densify(Ggineqt)]))
         C.add(Function("gineq", [self.u_sym, self.x_sym], [densify(self.ineq[:])]))
         C.generate()

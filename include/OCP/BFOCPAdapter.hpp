@@ -301,7 +301,6 @@ namespace fatrop
         nxExpr nxexpr;
         ngExpr ngexpr;
         ngIneqExpr ngineqexpr;
-
     private:
         RefCountPtr<BFOCP> ocptempl;
     };

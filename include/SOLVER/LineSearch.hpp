@@ -66,6 +66,7 @@ namespace fatrop
             double cv_curr = fatropdata_->CVL1Curr();
             double obj_curr = fatropdata_->obj_curr;
             double lin_decr_curr = fatropdata_->LinDecrCurr();
+            // cout << "lindecr " << lin_decr_curr << endl;
             for (int ll = 1; ll < 50; ll++)
             {
                 fatropdata_->TryStep(alpha_primal, alpha_dual);

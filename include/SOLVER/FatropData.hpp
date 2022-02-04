@@ -70,6 +70,7 @@ namespace fatrop
         int AcceptInitialization()
         {
             lam_calc.SwapWith(lam_curr);
+            cache_curr = EvalCache();
             return 0;
         }
         int TryStep(double alpha_primal, double alpha_dual)

@@ -69,7 +69,7 @@ namespace fatrop
             Initialization();
             if (fatropdata_->LamLinfCalc() < lammax)
             {
-                // cout << "accepted lam " << endl;
+                cout << "accepted lam " << endl;
                 fatropdata_->AcceptInitialization();
             }
             EvalCVCurr();

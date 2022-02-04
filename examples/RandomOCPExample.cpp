@@ -10,14 +10,14 @@ using namespace std;
 using namespace fatrop;
 int main()
 {
-    int K = 150;
-    int nu = 3;
-    int nx = 12;
-    int ng = 1;
+    int K = 100;
+    int nu = 2;
+    int nx = 9;
+    int ng = 0;
     FatropVector<int> nu_ = vector<int>(K, nu);
     FatropVector<int> nx_ = vector<int>(K, nx);
     FatropVector<int> ng_ = vector<int>(K, ng);
-    // ng_.at(K - 1) = nx;
+    ng_.at(K - 1) = 6;
     // ng_.at(0) = nx;
 
     RefCountPtr<BFOCP> ocptemplatebasic =
