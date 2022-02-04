@@ -219,7 +219,7 @@ namespace fatrop
     {
         for (int i = 0; i < kmax; i++)
         {
-            MATEL(sA, ai, aj + i) = VECEL(sx, xi + i);
+            MATEL(sA, ai, aj + i) += alpha* VECEL(sx, xi + i);
         }
     }
 } // namespace fatrop
