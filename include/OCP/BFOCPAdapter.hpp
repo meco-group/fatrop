@@ -285,7 +285,7 @@ namespace fatrop
         private:
             const RefCountPtr<BFOCP> parent;
         };
-        class ngIneqExpr : public VecExpr<ngExpr, int>
+        class ngIneqExpr : public VecExpr<ngIneqExpr, int>
         {
         public:
             ngIneqExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
