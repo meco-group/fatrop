@@ -111,6 +111,8 @@ namespace fatrop
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
+            const FatropVecBF &delta_zL,
+            const FatropVecBF &delta_zU,
             const FatropVecBF &lower,
             const FatropVecBF &upper,
             const FatropVecBF &delta_s) override

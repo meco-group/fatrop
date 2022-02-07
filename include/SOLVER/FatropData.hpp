@@ -14,7 +14,7 @@ namespace fatrop
         FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                       memvars(nlpdims.nvars, 7),
                                                                                       memeqs(nlpdims.neqs, 6),
-                                                                                      memineqs(nlpdims.nineqs, 10),
+                                                                                      memineqs(nlpdims.nineqs, 11),
                                                                                       x_curr(memvars[0]),
                                                                                       x_next(memvars[1]),
                                                                                       delta_x(memvars[2]),
@@ -35,9 +35,10 @@ namespace fatrop
                                                                                       zL_next(memineqs[4]),
                                                                                       zU_curr(memineqs[5]),
                                                                                       zU_next(memineqs[6]),
-                                                                                      delta_z(memineqs[7]),
-                                                                                      s_lower(memineqs[8]),
-                                                                                      s_upper(memineqs[9]),
+                                                                                      delta_zL(memineqs[7]),
+                                                                                      delta_zU(memineqs[8]),
+                                                                                      s_lower(memineqs[9]),
+                                                                                      s_upper(memineqs[10]),
                                                                                       params(params)
         {
             Initialize();
@@ -158,7 +159,8 @@ namespace fatrop
         FatropVecBF zL_next;
         FatropVecBF zU_curr;
         FatropVecBF zU_next;
-        FatropVecBF delta_z;
+        FatropVecBF delta_zL;
+        FatropVecBF delta_zU;
         FatropVecBF s_lower;
         FatropVecBF s_upper;
         struct EvalCache

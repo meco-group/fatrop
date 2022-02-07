@@ -43,18 +43,17 @@ int main()
         scalesx,
         scaleslam,
         scaleslam);
-    ocpalg.EvalConstraintViolation(ux[0], ux[0],cv);
+    ocpalg.EvalConstraintViolation(ux[0], ux[0], cv);
     ocpalg.EvalGrad(1.0, ux[0], grad);
     ocpalg.EvalHess(1.0, ux[0], lags[0]);
     ocpalg.EvalJac(ux[0], ux[0]);
     // grad.print();
-    ocpalg.OCPInitializer_.AdaptKKTInitial(&ocpalg.ocpkktmemory_,grad);
-    ocpalg.ComputeSD(0.0,0.0,0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam, dlam);
+    ocpalg.OCPInitializer_.AdaptKKTInitial(&ocpalg.ocpkktmemory_, grad);
+    ocpalg.ComputeSD(0.0, 0.0, 0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam);
     cout << "dlam" << endl;
     dlam.print();
     // grad.print();
     ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);
-
 
     cout << "du inf Linf" << endl;
     cout << Linf(duinf) << endl;
@@ -63,7 +62,7 @@ int main()
     // double el = blasfeo_toc(&timer);
     // cout << "time elapsed " << el / N << endl;
     RefCountPtr<Sparse_OCP> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
-    ocplssparse-> computeSD(&ocpalg.ocpkktmemory_, 0.0,0.0,0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam ,dlam);
+    ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, 0.0, 0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam);
     cout << "dlam" << endl;
     dlam.print();
     ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);

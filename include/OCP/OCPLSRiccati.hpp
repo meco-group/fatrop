@@ -2,6 +2,7 @@
 #define OCPLSRICCATIINCLUDED
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
+#include <cmath>
 namespace fatrop
 {
     bool check_reg(const int m, MAT *sA, const int ai, const int aj)
@@ -31,6 +32,7 @@ namespace fatrop
                                             HhIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
                                             PpIt_hat(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
                                             LlIt(vector<int>(1, dims.nx.at(0) + 1), vector<int>(1, dims.nx.at(0)), 1),
+                                            Ggt_ineq_temp(vector<int>(1, max(dims.nu + dims.nx) + 1), vector<int>(1, max(dims.ng_ineq)), 1),
                                             Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
                                             Pr(max(dims.nu), dims.K),
                                             PlI(dims.nx.at(0), 1),
@@ -48,18 +50,19 @@ namespace fatrop
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
+            const FatropVecBF &delta_zL,
+            const FatropVecBF &delta_zU,
             const FatropVecBF &lower,
             const FatropVecBF &upper,
-            const FatropVecBF &delta_s
-            ) override
+            const FatropVecBF &delta_s) override
         {
             if (inertia_correction_c == 0.0)
             {
-                return computeSDnor(OCP, inertia_correction_w,mu, ux, lam, s,zL, zU, lower,upper, delta_s);
+                return computeSDnor(OCP, inertia_correction_w, mu, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
             else
             {
-                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam, s,zL, zU, lower,upper, delta_s);
+                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam, s, zL, zU, lower, upper, delta_s);
             }
         }
         // solve a KKT system
@@ -226,8 +229,7 @@ namespace fatrop
             const FatropVecBF &zL,
             const FatropVecBF &zU,
             const FatropVecBF &lower,
-            const FatropVecBF &upper
-       ) override
+            const FatropVecBF &upper) override
         {
             // blasfeo_timer timer;
             // blasfeo_tic(&timer);
@@ -355,7 +357,7 @@ namespace fatrop
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
                         // GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         // split up because valgrind was giving invalid read errors when C matrix has nonzero row offset
-                        GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0,0);
+                        GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
                         // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                         SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
@@ -409,7 +411,7 @@ namespace fatrop
                     // // GL <- GgIt_tilde @ Pp[:rankI,:nx] + Ppt[rankI:nx+1, rankI:] (with Pp[:rankI,:nx] = Ppt[:nx,:rankI]^T)
                     // GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     // split up because valgrind was giving invalid read errors when C matrix has nonzero row offset
-                    GECP(nx - rankI + 1, nx, Ppt_p, rankI, 0, GgLIt_p,0,0);
+                    GECP(nx - rankI + 1, nx, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, GgLIt_p, 0, 0, GgLIt_p, 0, 0);
                     // // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                     SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
@@ -526,6 +528,8 @@ namespace fatrop
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
+            const FatropVecBF &delta_zL,
+            const FatropVecBF &delta_zU,
             const FatropVecBF &lower,
             const FatropVecBF &upper,
             const FatropVecBF &delta_s)
@@ -541,6 +545,7 @@ namespace fatrop
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
+            OCPMACRO(MAT *, Ggt_ineq, _p);
             SOLVERMACRO(MAT *, Ppt, _p);
             SOLVERMACRO(MAT *, Hh, _p);
             SOLVERMACRO(MAT *, AL, _p);
@@ -558,10 +563,19 @@ namespace fatrop
             SOLVERMACRO(MAT *, HhIt, _p);
             SOLVERMACRO(MAT *, PpIt_hat, _p);
             SOLVERMACRO(MAT *, LlIt, _p);
+            SOLVERMACRO(MAT *, Ggt_ineq_temp, _p);
             SOLVERMACRO(PMAT *, PlI, _p);
             SOLVERMACRO(PMAT *, PrI, _p);
             SOLVERMACRO(VEC *, ux, _p);
             SOLVERMACRO(VEC *, lam, _p);
+            SOLVERMACRO(VEC *, s, _p);
+            SOLVERMACRO(VEC *, zL, _p);
+            SOLVERMACRO(VEC *, zU, _p);
+            SOLVERMACRO(VEC *, delta_zL, _p);
+            SOLVERMACRO(VEC *, delta_zU, _p);
+            SOLVERMACRO(VEC *, lower, _p);
+            SOLVERMACRO(VEC *, upper, _p);
+            SOLVERMACRO(VEC *, delta_s, _p);
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, nx, _p);
             OCPMACRO(int *, ng, _p);
@@ -570,6 +584,7 @@ namespace fatrop
             SOLVERMACRO(int *, rho, _p);
             MAT *RSQrq_hat_curr_p;
             int rank_k;
+            int *offs_ineq_p = (int *)OCP->aux.ineq_offs.data();
 
             /////////////// recursion ///////////////
 
@@ -593,6 +608,8 @@ namespace fatrop
                 const int nxp1 = nx_p[k + 1];
                 const int ng = ng_p[k];
                 const int ng_ineq = ng_ineq_p[k];
+                // const int offs_g_k = offs_g_p[k];
+                const int offs_ineq_k = offs_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
                 if (Hp1_size > nu + nx)
@@ -608,6 +625,38 @@ namespace fatrop
                     // RSQrqt_stripe <- AL[BA] + RSQrqt
                     SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
                     //// inequalities
+                    if (ng_ineq > 0)
+                    {
+                        GECP(nu + nx, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                        for (int i = 0; i < ng_ineq; i++)
+                        {
+                            double scaling_factor = inertia_correction;
+                            double zLi = VECEL(zL_p, offs_ineq_k + i);
+                            double zUi = VECEL(zU_p, offs_ineq_k + i);
+                            double si = VECEL(s_p, offs_ineq_k + i);
+                            double loweri = VECEL(lower_p, offs_ineq_k + i);
+                            double upperi = VECEL(upper_p, offs_ineq_k + i);
+                            double grad_barrier = 0.0;
+                            if (!isinf(loweri))
+                            {
+                                double dist = si - loweri;
+                                double dist_m1 = 1.0 / dist;
+                                scaling_factor += zLi * dist_m1;
+                                grad_barrier += mu * dist_m1;
+                            }
+                            if (!isinf(upperi))
+                            {
+                                double dist = upperi - si;
+                                double dist_m1 = 1.0 / dist;
+                                scaling_factor += zUi * dist_m1;
+                                grad_barrier -= mu * dist_m1;
+                            }
+                            COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                            MATEL(Ggt_ineq_temp_p, nu + nx, i) += grad_barrier;
+                        }
+                        // add the penalty
+                        SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+                    }
                     DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
                     gamma_p[k] = gamma_k;
                     // if ng[k]>0
@@ -659,7 +708,7 @@ namespace fatrop
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
                         // GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         // split up because valgrind was giving invalid read errors when C matrix has nonzero row offset
-                        GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0,0);
+                        GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
                         // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                         SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
@@ -713,7 +762,7 @@ namespace fatrop
                     // // GL <- GgIt_tilde @ Pp[:rankI,:nx] + Ppt[rankI:nx+1, rankI:] (with Pp[:rankI,:nx] = Ppt[:nx,:rankI]^T)
                     // GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     // split up because valgrind was giving invalid read errors when C matrix has nonzero row offset
-                    GECP(nx - rankI + 1, nx, Ppt_p, rankI, 0, GgLIt_p,0,0);
+                    GECP(nx - rankI + 1, nx, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
                     GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, GgLIt_p, 0, 0, GgLIt_p, 0, 0);
                     // // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
                     SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
@@ -757,6 +806,7 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
+            int *offs_g_ineq_p = (int *)OCP->aux.g_ineq_offs.data();
             // other stages
             // for (int k = 0; k < K - 1; k++)
             // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
@@ -766,8 +816,11 @@ namespace fatrop
                 const int nu = nu_p[k];
                 const int nxp1 = nx_p[k + 1];
                 const int nup1 = nu_p[k + 1];
+                const int ng_ineq = ng_ineq_p[k];
                 const int offsp1 = offs_ux[k + 1];
                 const int offs = offs_ux[k];
+                const int offs_g_ineq_k = offs_g_ineq_p[k];
+                const int offs_ineq_k = offs_ineq_p[k];
                 const int rho_k = rho_p[k];
                 const int numrho_k = nu - rho_k;
                 const int offs_g_k = offs_g[k];
@@ -814,6 +867,41 @@ namespace fatrop
                 ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
                 GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
                 GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+                if (ng_ineq > 0)
+                {
+                    // calculate delta_s
+                    ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
+                    GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    // calculate lamineq
+                    for (int i = 0; i < ng_ineq; i++)
+                    {
+                        double scaling_factor = inertia_correction;
+                        double zLi = VECEL(zL_p, offs_ineq_k + i);
+                        double zUi = VECEL(zU_p, offs_ineq_k + i);
+                        double si = VECEL(s_p, offs_ineq_k + i);
+                        double loweri = VECEL(lower_p, offs_ineq_k + i);
+                        double upperi = VECEL(upper_p, offs_ineq_k + i);
+                        double grad_barrier_L = 0.0;
+                        double grad_barrier_U = 0.0;
+                        if (!isinf(loweri))
+                        {
+                            double dist = si - loweri;
+                            double dist_m1 = 1.0 / dist;
+                            scaling_factor += zLi * dist_m1;
+                            grad_barrier_L = mu * dist_m1;
+                            VECEL(delta_zL_p, offs_ineq_k + i) = grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor * VECEL(delta_s_p, offs_ineq_k + i);
+                        }
+                        if (!isinf(upperi))
+                        {
+                            double dist = upperi - si;
+                            double dist_m1 = 1.0 / dist;
+                            scaling_factor += zUi * dist_m1;
+                            grad_barrier_U = - mu * dist_m1;
+                            VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor * VECEL(delta_s_p, offs_ineq_k + i);
+                        }
+                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + scaling_factor * VECEL(delta_s_p, offs_ineq_k + i);
+                    }
+                }
             }
             // double el = blasfeo_toc(&timer);
             // cout << "el time " << el << endl;
@@ -834,6 +922,7 @@ namespace fatrop
         FatropMemoryMatBF HhIt;
         FatropMemoryMatBF PpIt_hat;
         FatropMemoryMatBF LlIt;
+        FatropMemoryMatBF Ggt_ineq_temp;
         MemoryPermMat Pl;
         MemoryPermMat Pr;
         MemoryPermMat PlI;

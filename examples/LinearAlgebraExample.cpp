@@ -8,6 +8,7 @@ using namespace fatrop;
 using namespace std;
 int main()
 {
+    if(isinf(-INFINITY)) cout << "infinity " << endl;
     blasfeo_dmat sA;
     blasfeo_dmat sB;
     blasfeo_dmat sC;

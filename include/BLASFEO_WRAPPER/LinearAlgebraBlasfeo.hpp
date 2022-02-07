@@ -47,6 +47,7 @@
 #define DOT blasfeo_ddot
 #define GESE blasfeo_dgese
 #define DIARE blasfeo_ddiare
+#define COLSC blasfeo_dcolsc
 #define MAX(a, b)                   \
     (                               \
         {                           \

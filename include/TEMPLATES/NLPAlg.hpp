@@ -46,6 +46,8 @@ namespace fatrop
             const FatropVecBF &s,
             const FatropVecBF &zL_curr,
             const FatropVecBF &zU_curr,
+            const FatropVecBF &delta_zL,
+            const FatropVecBF &delta_ZU,
             const FatropVecBF &lower_bound,
             const FatropVecBF &upper_bound,
             const FatropVecBF &delta_s) = 0; 

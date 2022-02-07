@@ -217,6 +217,8 @@ namespace fatrop
                 fatropdata_->s_curr,
                 fatropdata_->zL_curr,
                 fatropdata_->zU_curr,
+                fatropdata_->delta_zL,
+                fatropdata_->delta_zU,
                 fatropdata_->s_lower,
                 fatropdata_->s_upper,
                 fatropdata_->delta_s);
