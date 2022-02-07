@@ -28,7 +28,7 @@ namespace fatrop
         {
             for (std::vector<double>::size_type i = print_count; i < iterationdata.size(); i++)
             {
-                IterationData iterationdata_i(iterationdata.at(i));
+                IterationData iterationdata_i = iterationdata.at(i);
                 if (iterationdata_i.reg == 0.0)
                 {
                     printf("step %3d: obj %.15e, cv : %.15e, du %.15e, lg(mu), %4.1f, lg(reg)  -.-, a_d %.2e, a_p %.2e, ls %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
@@ -47,7 +47,7 @@ namespace fatrop
         void Reset()
         {
             iterationdata.resize(0);
-            print_count = 0;
+            // print_count = 0;
         }
         int print_count = 0;
         vector<IterationData> iterationdata;
