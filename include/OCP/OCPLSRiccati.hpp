@@ -875,7 +875,8 @@ namespace fatrop
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
-                        double scaling_factor = inertia_correction;
+                        double scaling_factor_L = inertia_correction;
+                        double scaling_factor_U = inertia_correction;
                         double zLi = VECEL(zL_p, offs_ineq_k + i);
                         double zUi = VECEL(zU_p, offs_ineq_k + i);
                         double si = VECEL(s_p, offs_ineq_k + i);
@@ -887,19 +888,19 @@ namespace fatrop
                         {
                             double dist = si - loweri;
                             double dist_m1 = 1.0 / dist;
-                            scaling_factor += zLi * dist_m1;
+                            scaling_factor_L = zLi * dist_m1;
                             grad_barrier_L = mu * dist_m1;
-                            VECEL(delta_zL_p, offs_ineq_k + i) = grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor * VECEL(delta_s_p, offs_ineq_k + i);
+                            VECEL(delta_zL_p, offs_ineq_k + i) = grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         if (!isinf(upperi))
                         {
                             double dist = upperi - si;
                             double dist_m1 = 1.0 / dist;
-                            scaling_factor += zUi * dist_m1;
-                            grad_barrier_U = - mu * dist_m1;
-                            VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor * VECEL(delta_s_p, offs_ineq_k + i);
+                            scaling_factor_U += zUi * dist_m1;
+                            grad_barrier_U = -mu * dist_m1;
+                            VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + scaling_factor * VECEL(delta_s_p, offs_ineq_k + i);
+                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }
             }
