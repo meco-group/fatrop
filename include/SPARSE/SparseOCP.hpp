@@ -105,6 +105,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
+            const double mu,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,

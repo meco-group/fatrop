@@ -12,6 +12,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             const double intertia_correction_w,
             const double intertia_correction_c,
+            const double mu,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam,
             const FatropVecBF &s,

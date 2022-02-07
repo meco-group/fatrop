@@ -42,6 +42,7 @@ namespace fatrop
         int ComputeSD(
             const double inertia_correction_w,
             const double inertia_correction_c,
+            const double mu,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam,
             const FatropVecBF &s,
@@ -56,6 +57,7 @@ namespace fatrop
                 &ocpkktmemory_,
                 inertia_correction_w,
                 inertia_correction_c,
+                mu,
                 dprimal_vars,
                 dlam,
                 s,

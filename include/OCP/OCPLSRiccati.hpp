@@ -42,6 +42,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
+            const double mu,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,
@@ -54,7 +55,7 @@ namespace fatrop
         {
             if (inertia_correction_c == 0.0)
             {
-                return computeSDnor(OCP, inertia_correction_w, ux, lam, s,zL, zU, lower,upper, delta_s);
+                return computeSDnor(OCP, inertia_correction_w,mu, ux, lam, s,zL, zU, lower,upper, delta_s);
             }
             else
             {
@@ -519,6 +520,7 @@ namespace fatrop
         computeSDnor(
             OCPKKTMemory *OCP,
             const double inertia_correction,
+            const double mu,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,
@@ -563,6 +565,7 @@ namespace fatrop
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, nx, _p);
             OCPMACRO(int *, ng, _p);
+            OCPMACRO(int *, ng_ineq, _p);
             SOLVERMACRO(int *, gamma, _p);
             SOLVERMACRO(int *, rho, _p);
             MAT *RSQrq_hat_curr_p;
@@ -589,6 +592,7 @@ namespace fatrop
                 const int nx = nx_p[k];
                 const int nxp1 = nx_p[k + 1];
                 const int ng = ng_p[k];
+                const int ng_ineq = ng_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
                 if (Hp1_size > nu + nx)
@@ -603,6 +607,7 @@ namespace fatrop
                     GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
                     // RSQrqt_stripe <- AL[BA] + RSQrqt
                     SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+                    //// inequalities
                     DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
                     gamma_p[k] = gamma_k;
                     // if ng[k]>0

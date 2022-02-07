@@ -112,33 +112,33 @@ namespace fatrop
                 double deltac_candidate = delta_c_stripe * pow(mu, kappa_c);
                 deltaw = 0.0;
                 deltac = 0.0;
-                int regularity = ComputeSD(deltaw, deltac);
+                int regularity = ComputeSD(deltaw, deltac, mu);
                 if (regularity < 0)
                 {
                     deltac = deltac_candidate;
-                    regularity = ComputeSD(deltaw, deltac);
+                    regularity = ComputeSD(deltaw, deltac, mu);
                     cout << "Jac degenerate" << endl;
                 }
                 int increase_counter = 0;
                 if (regularity > 0) // regularization is necessary
                 {
                     deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
-                    regularity = ComputeSD(deltaw, deltac);
+                    regularity = ComputeSD(deltaw, deltac, mu);
                     if ((deltac == 0.0) && (regularity < 0))
                     {
                         deltac = deltac_candidate;
-                        regularity = ComputeSD(deltaw, deltac);
+                        regularity = ComputeSD(deltaw, deltac,mu);
                         cout << "Jac degenerate" << endl;
                     }
                     while (regularity > 0)
                     {
                         increase_counter++;
                         deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
-                        regularity = ComputeSD(deltaw, deltac);
+                        regularity = ComputeSD(deltaw, deltac, mu);
                         if ((deltac == 0.0) && (regularity < 0))
                         {
                             deltac = deltac_candidate;
-                            regularity = ComputeSD(deltaw, deltac);
+                            regularity = ComputeSD(deltaw, deltac, mu);
                             cout << "Jac degenerate" << endl;
                         }
                     }
@@ -206,11 +206,12 @@ namespace fatrop
                 fatropdata_->s_lower,
                 fatropdata_->s_upper);
         }
-        int ComputeSD(double inertia_correction_w, double inertia_correction_c)
+        int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu)
         {
             return fatropnlp_->ComputeSD(
                 inertia_correction_w,
                 inertia_correction_c,
+                mu,
                 fatropdata_->delta_x,
                 fatropdata_->lam_calc,
                 fatropdata_->s_curr,
