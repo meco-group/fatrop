@@ -52,7 +52,8 @@ namespace fatrop
             OCPAux(const OCPDims &dims) : ux_offs(offsets(dims.nx + dims.nu)),
                                           g_offs(offsets(dims.ng)),
                                           dyn_eq_offs(offsets(rotate(dims.nx, 1)) + sum(dims.ng)),
-                                          g_ineq_offs(offsets(rotate(dims.ng_ineq, 1)) + (sum(dims.nx) - dims.nx.at(0) + sum(dims.ng))),
+                                          g_ineq_offs(offsets(dims.ng_ineq) + (sum(dims.nx) - dims.nx.at(0) + sum(dims.ng))),
+                                          ineq_offs(offsets(dims.ng_ineq)),
                                           max_nu(max(dims.nu)), max_nx(max(dims.nx)),
                                           max_ng(max(dims.ng)),
                                           max_ngineq(max(dims.ng_ineq)){};
@@ -62,6 +63,7 @@ namespace fatrop
             const FatropVector<int> g_offs;
             const FatropVector<int> dyn_eq_offs;
             const FatropVector<int> g_ineq_offs;
+            const FatropVector<int> ineq_offs;
             int max_nu;
             int max_nx;
             int max_ng;
