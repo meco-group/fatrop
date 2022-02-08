@@ -10,10 +10,10 @@
  */
 #ifndef FATROP_OCP_KKT_INCLUDED
 #define FATROP_OCP_KKT_INCLUDED
-#include "../blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
-#include "../aux/Aux.hpp"
-#include "../aux/FatropVector.hpp"
+#include "aux/Aux.hpp"
+#include "aux/FatropVector.hpp"
 using namespace std;
 namespace fatrop
 {

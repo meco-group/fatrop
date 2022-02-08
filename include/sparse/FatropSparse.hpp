@@ -10,8 +10,8 @@
  */
 #ifndef FATROP_SPARSE_INCLUDED
 #define FATROP_SPARSE_INCLUDED
-#include "../ocp/OCPKKT.hpp"
-#include "../debug/LinearAlgebraEigen.hpp"
+#include "ocp/OCPKKT.hpp"
+#include "debug/LinearAlgebraEigen.hpp"
 #include <vector>
 #include <memory>
 #include <cstdlib>
