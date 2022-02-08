@@ -5,6 +5,7 @@
 #include "TEMPLATES/NLPAlg.hpp"
 #include "AUX/Common.hpp"
 #include "FatropParams.hpp"
+#include <cmath>
 using namespace std;
 namespace fatrop
 {
@@ -12,6 +13,7 @@ namespace fatrop
     struct FatropData : public RefCountedObj
     {
         FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
+                                                                                      n_ineqs(nlpdims.nineqs),
                                                                                       memvars(nlpdims.nvars, 7),
                                                                                       memeqs(nlpdims.neqs, 6),
                                                                                       memineqs(nlpdims.nineqs, 11),
@@ -77,6 +79,9 @@ namespace fatrop
         int TryStep(double alpha_primal, double alpha_dual)
         {
             axpy(alpha_primal, delta_x, x_curr, x_next);
+            axpy(alpha_primal, delta_s, s_curr, s_next);
+            axpy(alpha_dual, delta_zL, zL_curr, zL_next);
+            axpy(alpha_dual, delta_zU, zU_curr, zU_next);
             axpby(alpha_primal, lam_calc, 1.0 - alpha_primal, lam_curr, lam_next);
             // reset evaluation flags
             cache_next = EvalCache();
@@ -86,7 +91,10 @@ namespace fatrop
         {
             // TODO make a struct which containts vectors associated with curr <-> next
             x_curr.SwapWith(x_next);
+            s_curr.SwapWith(s_next);
             lam_curr.SwapWith(lam_next);
+            zL_curr.SwapWith(zL_next);
+            zU_curr.SwapWith(zU_next);
             grad_curr.SwapWith(grad_next);
             g_curr.SwapWith(g_next);
             cache_curr = cache_next;
@@ -132,9 +140,45 @@ namespace fatrop
         {
             return dot(grad_curr, delta_x);
         }
+        void AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau)
+        {
+            alpha_max_pr = 1.0;
+            alpha_max_du = 1.0;
+            VEC *s_lower_p = (VEC *)s_lower;
+            VEC *s_upper_p = (VEC *)s_upper;
+            VEC *delta_s_p = (VEC *)delta_s;
+            VEC *s_curr_p = (VEC *)s_curr;
+            VEC *zL_curr_p = (VEC *)zL_curr;
+            VEC *zU_curr_p = (VEC *)zU_curr;
+            VEC *delta_zL_p = (VEC *)delta_zL;
+            VEC *delta_zU_p = (VEC *)delta_zU;
+            for (int i = 0; i < n_ineqs; i++)
+            {
+                if (!isinf(VECEL(s_lower_p, i)))
+                {
+                    double delta_s_i = VECEL(delta_s_p, i);
+                    double delta_Z_i = VECEL(delta_zL_p, i);
+                    // primal
+                    alpha_max_pr = delta_s_i < 0 ? MIN(alpha_max_pr, -tau * (VECEL(s_curr_p, i)-VECEL(s_lower_p, i)) / delta_s_i) : alpha_max_pr;
+                    // dual
+                    alpha_max_du = delta_Z_i < 0 ? MIN(alpha_max_du, -tau * (VECEL(zL_curr_p, i)) / delta_Z_i) : alpha_max_du;
+                }
+                if (!isinf(VECEL(s_upper_p, i)))
+                {
+                    double delta_s_i = VECEL(delta_s_p, i);
+                    double delta_Z_i = VECEL(delta_zU_p, i);
+                    // primal
+                    alpha_max_pr = delta_s_i < 0 ? MIN(alpha_max_pr, -tau * (VECEL(s_upper_p, i) - VECEL(s_curr_p, i)) / delta_s_i) : alpha_max_pr;
+                    // dual
+                    alpha_max_du = delta_Z_i < 0 ? MIN(alpha_max_du, -tau * (VECEL(zU_curr_p, i)) / delta_Z_i) : alpha_max_du;
+                }
+            }
+            return;
+        }
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
+        int n_ineqs;
         FatropMemoryVecBF memvars;
         FatropMemoryVecBF memeqs;
         FatropMemoryVecBF memineqs;
