@@ -16,7 +16,7 @@ namespace fatrop
                                                                                       n_ineqs(nlpdims.nineqs),
                                                                                       memvars(nlpdims.nvars, 7),
                                                                                       memeqs(nlpdims.neqs, 6),
-                                                                                      memineqs(nlpdims.nineqs, 11),
+                                                                                      memineqs(nlpdims.nineqs, 12),
                                                                                       x_curr(memvars[0]),
                                                                                       x_next(memvars[1]),
                                                                                       delta_x(memvars[2]),
@@ -30,17 +30,18 @@ namespace fatrop
                                                                                       grad_curr(memvars[4]),
                                                                                       grad_next(memvars[5]),
                                                                                       du_inf_curr(memvars[6]),
-                                                                                      s_curr(memineqs[0]),
-                                                                                      s_next(memineqs[1]),
-                                                                                      delta_s(memineqs[2]),
-                                                                                      zL_curr(memineqs[3]),
-                                                                                      zL_next(memineqs[4]),
-                                                                                      zU_curr(memineqs[5]),
-                                                                                      zU_next(memineqs[6]),
-                                                                                      delta_zL(memineqs[7]),
-                                                                                      delta_zU(memineqs[8]),
-                                                                                      s_lower(memineqs[9]),
-                                                                                      s_upper(memineqs[10]),
+                                                                                      du_inf_curr_s(memineqs[0]),
+                                                                                      s_curr(memineqs[1]),
+                                                                                      s_next(memineqs[2]),
+                                                                                      delta_s(memineqs[3]),
+                                                                                      zL_curr(memineqs[4]),
+                                                                                      zL_next(memineqs[5]),
+                                                                                      zU_curr(memineqs[6]),
+                                                                                      zU_next(memineqs[7]),
+                                                                                      delta_zL(memineqs[8]),
+                                                                                      delta_zU(memineqs[9]),
+                                                                                      s_lower(memineqs[10]),
+                                                                                      s_upper(memineqs[11]),
                                                                                       params(params)
         {
             Initialize();
@@ -195,6 +196,7 @@ namespace fatrop
         FatropVecBF grad_curr;
         FatropVecBF grad_next;
         FatropVecBF du_inf_curr;
+        FatropVecBF du_inf_curr_s;
         // vectors neccessary for inequality constraints
         FatropVecBF s_curr;
         FatropVecBF s_next;

@@ -127,7 +127,7 @@ namespace fatrop
                     if ((deltac == 0.0) && (regularity < 0))
                     {
                         deltac = deltac_candidate;
-                        regularity = ComputeSD(deltaw, deltac,mu);
+                        regularity = ComputeSD(deltaw, deltac, mu);
                         cout << "Jac degenerate" << endl;
                     }
                     while (regularity > 0)
@@ -192,7 +192,8 @@ namespace fatrop
                 fatropdata_->obj_scale,
                 fatropdata_->lam_curr,
                 fatropdata_->grad_curr,
-                fatropdata_->du_inf_curr);
+                fatropdata_->du_inf_curr
+              );
         }
         inline int Initialization()
         {

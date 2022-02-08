@@ -64,13 +64,12 @@ namespace fatrop
                 dlam,
                 s,
                 zL_curr,
-                zU_curr, 
+                zU_curr,
                 delta_zL,
-                delta_zU, 
+                delta_zU,
                 lower_bound,
                 upper_bound,
-                delta_s
-                );
+                delta_s);
         };
         int ComputeScalings(
             double &obj_scale,
@@ -124,14 +123,16 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &lam,
             const FatropVecBF &grad,
-            FatropVecBF &du_inf) override
+            FatropVecBF &du_inf
+          ) override
         {
             return duinfevaluator_.DuInfEval(
                 &ocpkktmemory_,
                 obj_scale,
                 lam,
                 grad,
-                du_inf);
+                du_inf
+               );
         }
         int Initialization(
             const FatropVecBF &grad,
@@ -141,12 +142,11 @@ namespace fatrop
             const FatropVecBF &zL,
             const FatropVecBF &zU,
             const FatropVecBF &lower,
-            const FatropVecBF &upper
-            ) override
+            const FatropVecBF &upper) override
         {
             // assume constraint jacobian evaluated
             OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
-            return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy,s_dummy,zL,zU, lower, upper);
+            return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy, s_dummy, zL, zU, lower, upper);
         }
 
         NLPDims GetNLPDims() const override

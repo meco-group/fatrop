@@ -867,6 +867,15 @@ namespace fatrop
                 ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
                 GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
                 GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+            }
+            for (int k = 0; k < K; k++)
+            {
+                const int nx = nx_p[k];
+                const int nu = nu_p[k];
+                const int ng_ineq = ng_ineq_p[k];
+                const int offs = offs_ux[k];
+                const int offs_g_ineq_k = offs_g_ineq_p[k];
+                const int offs_ineq_k = offs_ineq_p[k];
                 if (ng_ineq > 0)
                 {
                     // calculate delta_s

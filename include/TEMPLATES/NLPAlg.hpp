@@ -50,7 +50,7 @@ namespace fatrop
             const FatropVecBF &delta_ZU,
             const FatropVecBF &lower_bound,
             const FatropVecBF &upper_bound,
-            const FatropVecBF &delta_s) = 0; 
+            const FatropVecBF &delta_s) = 0;
         virtual NLPDims GetNLPDims() const = 0;
         virtual int ComputeScalings(
             double &obj_scale,
@@ -65,8 +65,7 @@ namespace fatrop
             const FatropVecBF &zL,
             const FatropVecBF &zU,
             const FatropVecBF &lower,
-            const FatropVecBF &upper
-            )  =0;
+            const FatropVecBF &upper) = 0;
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

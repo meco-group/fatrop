@@ -53,10 +53,10 @@ int main()
     cout << "dlam" << endl;
     dlam.print();
     // grad.print();
-    ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);
+    // ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);
 
-    cout << "du inf Linf" << endl;
-    cout << Linf(duinf) << endl;
+    // cout << "du inf Linf" << endl;
+    // cout << Linf(duinf) << endl;
 
     // }
     // double el = blasfeo_toc(&timer);
@@ -65,8 +65,8 @@ int main()
     ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, 0.0, 0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam);
     cout << "dlam" << endl;
     dlam.print();
-    ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);
-    cout << "du inf Linf" << endl;
+    // ocpalg.duinfevaluator_.DuInfEval(&ocpalg.ocpkktmemory_, 1.0, dlam, grad, duinf);
+    // cout << "du inf Linf" << endl;
     cout << Linf(duinf) << endl;
     // ocplssparse->print();
 }
