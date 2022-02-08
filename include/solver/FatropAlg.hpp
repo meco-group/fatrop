@@ -1,7 +1,7 @@
 #ifndef FATROPALGINCLUDED
 #define FATROPALGINCLUDED
-#include "AUX/SmartPtr.hpp"
-#include "TEMPLATES/NLPAlg.hpp"
+#include "aux/SmartPtr.hpp"
+#include "templates/NLPAlg.hpp"
 #include "FatropData.hpp"
 #include "Filter.hpp"
 #include "LineSearch.hpp"

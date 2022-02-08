@@ -1,6 +1,6 @@
 #ifndef FATROPDEBUGTOOLSINCLUDED
 #define FATROPDEBUGTOOLSINCLUDED
-#include "../BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "../blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include <random>
 #include <vector>
 #include "LinearAlgebraEigen.hpp"

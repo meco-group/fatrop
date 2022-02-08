@@ -1,6 +1,6 @@
 #ifndef STEPACCEPTORINCLUDED
 #define STEPACCEPTORINCLUDED
-#include "AUX/SmartPtr.hpp"
+#include "aux/SmartPtr.hpp"
 #include "FatropData.hpp"
 #include "FatropParams.hpp"
 #include "Filter.hpp"

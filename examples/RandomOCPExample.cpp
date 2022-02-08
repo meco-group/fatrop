@@ -1,11 +1,11 @@
-#include "DEBUG/RandomOCP.hpp"
-#include "OCP/OCPLSRiccati.hpp"
-#include "OCP/FatropOCP.hpp"
-#include "AUX/FatropVector.hpp"
+#include "debug/RandomOCP.hpp"
+#include "ocp/OCPLSRiccati.hpp"
+#include "ocp/FatropOCP.hpp"
+#include "aux/FatropVector.hpp"
 #include <vector>
 #include <iostream>
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
-#include "SPARSE/SparseOCP.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "sparse/SparseOCP.hpp"
 using namespace std;
 using namespace fatrop;
 int main()

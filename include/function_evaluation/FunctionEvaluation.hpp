@@ -2,7 +2,7 @@
 #define FUNCTIONEVALUATIONINCLUDED
 #include <vector>
 #include <cstring>
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 using namespace std;
 namespace fatrop
 {

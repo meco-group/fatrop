@@ -2,7 +2,7 @@
 #define SparseSolverInterfaceIncluded
 #include "FatropSparse.hpp"
 #include <vector>
-#include "../AUX/FatropVector.hpp"
+#include "../aux/FatropVector.hpp"
 using namespace std;
 namespace fatrop
 {

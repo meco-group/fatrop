@@ -1,9 +1,9 @@
 #ifndef OCPTEMPLATEINCLUDED
 #define OCPTEMPLATEINCLUDED
-#include "OCP/OCPKKT.hpp"
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
-#include "AUX/SmartPtr.hpp"
-#include "AUX/FatropVector.hpp"
+#include "ocp/OCPKKT.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "aux/SmartPtr.hpp"
+#include "aux/FatropVector.hpp"
 #include "OCPDims.hpp"
 namespace fatrop
 {

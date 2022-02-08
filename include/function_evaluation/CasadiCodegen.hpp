@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include "FunctionEvaluation.hpp"
-#include "AUX/DynamicLib.hpp"
+#include "aux/DynamicLib.hpp"
 /* Typedefs */
 typedef long long int casadi_int;
 typedef void (*signal_t)(void);

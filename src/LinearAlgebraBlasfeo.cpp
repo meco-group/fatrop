@@ -1,5 +1,5 @@
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
-#include "AUX/LinearAlgebra.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "aux/LinearAlgebra.hpp"
 
 
 namespace fatrop

@@ -65,10 +65,10 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include "AUX/FatropMemory.hpp"
-#include "AUX/LinearAlgebra.hpp"
-#include "AUX/FatropVector.hpp"
-#include "AUX/Common.hpp"
+#include "aux/FatropMemory.hpp"
+#include "aux/LinearAlgebra.hpp"
+#include "aux/FatropVector.hpp"
+#include "aux/Common.hpp"
 #if DEBUG
 #include <assert.h>
 #endif

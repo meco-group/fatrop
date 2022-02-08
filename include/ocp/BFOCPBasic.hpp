@@ -4,9 +4,9 @@
 #include "BFOCP.hpp"
 #include <string>
 #include <iostream>
-#include <AUX/DynamicLib.hpp>
-#include <AUX/SmartPtr.hpp>
-#include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
+#include <aux/DynamicLib.hpp>
+#include <aux/SmartPtr.hpp>
+#include "function_evaluation/CasadiCodegen.hpp"
 using namespace std;
 namespace fatrop
 {

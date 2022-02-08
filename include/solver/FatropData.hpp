@@ -1,9 +1,9 @@
 // solver data
 #ifndef FATROPDATAINCLUDED
 #define FATROPDATAINCLUDED
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
-#include "TEMPLATES/NLPAlg.hpp"
-#include "AUX/Common.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "templates/NLPAlg.hpp"
+#include "aux/Common.hpp"
 #include "FatropParams.hpp"
 using namespace std;
 namespace fatrop

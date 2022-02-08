@@ -10,8 +10,8 @@
  */
 #ifndef FATROP_OCPDIMS_INCLUDED
 #define FATROP_OCPDIMS_INCLUDED
-#include "../AUX/FatropMemory.hpp"
-#include "../AUX/FatropVector.hpp"
+#include "../aux/FatropMemory.hpp"
+#include "../aux/FatropVector.hpp"
 #include <vector>
 using namespace std;
 namespace fatrop

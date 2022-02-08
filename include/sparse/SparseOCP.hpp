@@ -3,7 +3,7 @@
 using namespace std;
 #include "FatropSparse.hpp"
 #include "InterfaceMUMPS.hpp"
-#include "OCP/OCPLinearSolver.hpp"
+#include "ocp/OCPLinearSolver.hpp"
 namespace fatrop
 {
 #define Id Eigen::MatrixXd::Identity

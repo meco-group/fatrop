@@ -1,8 +1,8 @@
 #ifndef RANDOMOCPINCLUDED
 #define RANDOMOCPINCLUDED
-#include "OCP/BFOCP.hpp"
-#include "DEBUG/FatropDebugTools.hpp"
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "ocp/BFOCP.hpp"
+#include "debug/FatropDebugTools.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include <vector>
 namespace fatrop
 {

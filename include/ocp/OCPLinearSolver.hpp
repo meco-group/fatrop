@@ -1,7 +1,7 @@
 #ifndef NLPLSINCLUDED
 #define NLPLSINCLUDED
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
-#include "AUX/SmartPtr.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "aux/SmartPtr.hpp"
 #include "OCPKKT.hpp"
 namespace fatrop
 {

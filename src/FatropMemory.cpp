@@ -1,1 +1,1 @@
-#include "AUX/FatropMemory.hpp"
+#include "aux/FatropMemory.hpp"

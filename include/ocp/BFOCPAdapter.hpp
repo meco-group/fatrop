@@ -2,7 +2,7 @@
 #define OCPEVALUATORINCLUDED
 #include "OCPKKT.hpp"
 #include "BFOCP.hpp"
-#include "AUX/SmartPtr.hpp"
+#include "aux/SmartPtr.hpp"
 #include "OCP.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)

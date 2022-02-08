@@ -1,15 +1,15 @@
 #ifndef OCPALGINCLUDED
 #define OCPALGINCLUDED
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
-#include "TEMPLATES/NLPAlg.hpp"
-#include "AUX/SmartPtr.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "templates/NLPAlg.hpp"
+#include "aux/SmartPtr.hpp"
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
-#include "AUX/FatropMemory.hpp"
+#include "aux/FatropMemory.hpp"
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"
-#include "SPARSE/SparseOCP.hpp"
+#include "sparse/SparseOCP.hpp"
 namespace fatrop
 {
     class FatropOCP : public FatropNLP

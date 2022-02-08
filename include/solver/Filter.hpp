@@ -1,7 +1,7 @@
 #ifndef FILTERINCLUDED
 #define FILTERINCLUDED
 #include "vector"
-#include "AUX/SmartPtr.hpp"
+#include "aux/SmartPtr.hpp"
 using namespace std;
 namespace fatrop
 {

@@ -1,8 +1,8 @@
 #ifndef OCPINCLUDED
 #define OCPINCLUDED
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
-#include "AUX/SmartPtr.hpp"
+#include "aux/SmartPtr.hpp"
 namespace fatrop
 { 
     /** \brief interface class for OCP operations*/

@@ -1,11 +1,11 @@
 #ifndef NOSCALINGMETHODINCLUDED
 #define NOSCALINGMETHODINCLUDED
-#include "SOLVER/FatropData.hpp"
-#include "TEMPLATES/NLPAlg.hpp"
-#include "AUX/SmartPtr.hpp"
-#include "SOLVER/AlgStrategy.hpp"
+#include "solver/FatropData.hpp"
+#include "templates/NLPAlg.hpp"
+#include "aux/SmartPtr.hpp"
+#include "solver/AlgStrategy.hpp"
 #include "OCPScalingMethod.hpp"
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 namespace fatrop
 {
     class OCPNoScaling : public OCPScalingMethod

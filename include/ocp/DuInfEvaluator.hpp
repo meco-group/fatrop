@@ -1,8 +1,8 @@
 #ifndef DUINFEVALINCLUDED
 #define DUINFEVALINCLUDED
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
-#include "AUX/Common.hpp"
+#include "aux/Common.hpp"
 namespace fatrop
 {
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)

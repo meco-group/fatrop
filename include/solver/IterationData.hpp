@@ -1,6 +1,6 @@
 #ifndef FATROPITERATIONDATAINCLUDED
 #define FATROPITERATIONDATAINCLUDED
-#include "AUX/SmartPtr.hpp"
+#include "aux/SmartPtr.hpp"
 #include <cmath>
 namespace fatrop
 {

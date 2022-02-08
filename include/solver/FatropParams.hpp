@@ -1,6 +1,6 @@
 #ifndef FATROPPARAMSINCLUDED
 #define FATROPPARAMSINCLUDED
-#include "AUX/SmartPtr.hpp"
+#include "aux/SmartPtr.hpp"
 namespace fatrop
 {
     class FatropParams: public RefCountedObj
