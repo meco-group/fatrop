@@ -1,7 +1,6 @@
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "aux/LinearAlgebra.hpp"
 
-
 namespace fatrop
 {
     // cpy elements form sx to sy but in reversed order to avoid aliasing issues in recursion
@@ -197,9 +196,9 @@ namespace fatrop
 
     void fatrop_dtrsv_unu(const int m, const int n, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi)
     {
-        for (int i = m; i <n; i++)
+        for (int i = m; i < n; i++)
         {
-            VECEL(sz, zi + i) = VECEL(sx, xi+i);
+            VECEL(sz, zi + i) = VECEL(sx, xi + i);
         }
         for (int i = m - 1; i >= 0; i--)
         {
@@ -211,9 +210,9 @@ namespace fatrop
             VECEL(sz, zi + i) = res;
         }
     }
-    void fatrop_identity(const int m, MAT* sA, const int ai, const int aj)
+    void fatrop_identity(const int m, MAT *sA, const int ai, const int aj)
     {
-        GESE(m,m, 0.0, sA, ai, aj);
-        DIARE(m, 1.0, sA, ai,aj);
+        GESE(m, m, 0.0, sA, ai, aj);
+        DIARE(m, 1.0, sA, ai, aj);
     }
 } // namespace fatrop

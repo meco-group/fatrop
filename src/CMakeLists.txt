@@ -6,7 +6,6 @@ target_include_directories(fatrop
         ${PROJECT_SOURCE_DIR}/include
 )
 
-
 # target_link_libraries(fatrop esmumps) 
 # target_include_directories(fatrop
 #     PRIVATE
