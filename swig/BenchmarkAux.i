@@ -1,8 +1,8 @@
 %module BenchmarkAux
     %{
     #define SWIG_FILE_WITH_INIT
-    #include "DEBUG/RandomOCP.hpp"
-    #include "AUX/SmartPtr.hpp"
+    #include "debug/RandomOCP.hpp"
+    #include "aux/SmartPtr.hpp"
     #include <vector>
     using namespace fatrop;
     RefCountPtr<BFOCP> GenerateRandom(int nu, int nx, int ng, int K)
