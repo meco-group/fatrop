@@ -1,6 +1,10 @@
+# MUMPS
+
 For MUMPS general sparse linear solver, install:
 * `sudo apt-get install intel-mkl-full libmetis-dev libscotch-dev openmpi-bin libopenmpi-dev`
 * use `-lmkt_rt` for blas and lapack
+
+# Reserving CPU cores
 
 When benchmarking (or when you want best Fatrop-app performance), you can reserve CPU cores and assign them to the Fatrop-app. This can be done with isolcpu as explained below. An alternative is to use [cset-shield](http://manpages.ubuntu.com/manpages/trusty/man1/cset-shield.1.html). This latter allows for dynamically changing which CPUs are shielded, and also permits the scheduler to (automatically) balance loads in the shielded CPUs, which is often more convenient in multithreaded applications.
 
