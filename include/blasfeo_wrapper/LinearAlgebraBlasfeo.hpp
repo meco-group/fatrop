@@ -75,9 +75,9 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
-    // cpy elements form sx to sy but in reversed order to avoid aliasing issues in recursion
+    // copy elements from sx to sy but in reversed order to avoid aliasing issues in recursion
     void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi);
-    // for debuggin purposes
+    // for debugging purposes
     // void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj);
     void test();
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/

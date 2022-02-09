@@ -29,7 +29,6 @@ namespace fatrop
         RefCountPtr()
         {
             ptr_ = NULL;
-            // ptr_->IncrRef();
         }
         RefCountPtr(T *raw_ptr)
         {
@@ -74,7 +73,6 @@ namespace fatrop
                 }
             }
         }
-
         ~RefCountPtr()
         {
             RemoveRef();
