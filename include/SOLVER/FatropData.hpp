@@ -84,8 +84,8 @@ namespace fatrop
         };
         int EvalDuInfSlacksEqs()
         {
-            VEC *lower_bound_p = (VEC *)s_upper;
-            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lower_bound_p = (VEC *)s_lower;
+            VEC *upper_bound_p = (VEC *)s_upper;
             VEC *lam_curr_p = (VEC *)lam_curr;
             VEC *du_inf_curr_s_p = (VEC *)du_inf_curr_s;
             VECCPSC(n_ineqs, -1.0, lam_curr_p, n_eqs, du_inf_curr_s_p, 0);
@@ -108,8 +108,8 @@ namespace fatrop
         }
         double EvalCompSlackInf(double mu)
         {
-            VEC *lower_bound_p = (VEC *)s_upper;
-            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lower_bound_p = (VEC *)s_lower;
+            VEC *upper_bound_p = (VEC *)s_upper;
             VEC *s_curr_p = (VEC *)s_curr;
             VEC *zL_p = (VEC *)zL_curr;
             VEC *zU_p = (VEC *)zU_curr;
@@ -134,8 +134,8 @@ namespace fatrop
         }
         double EvalBarrier(double mu, VEC *s_p)
         {
-            VEC *lower_bound_p = (VEC *)s_upper;
-            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lower_bound_p = (VEC *)s_lower;
+            VEC *upper_bound_p = (VEC *)s_upper;
             // VEC *s_p = (VEC *)s_curr;
             double res = 0.0;
             for (int i = 0; i < s_curr.nels(); i++)
@@ -166,8 +166,8 @@ namespace fatrop
         }
         double EvalBarrierLinDecr(double mu)
         {
-            VEC *lower_bound_p = (VEC *)s_upper;
-            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lower_bound_p = (VEC *)s_lower;
+            VEC *upper_bound_p = (VEC *)s_upper;
             VEC *s_p = (VEC *)s_curr;
             VEC *delta_s_p = (VEC *)delta_s;
             double res = 0.0;
@@ -250,8 +250,8 @@ namespace fatrop
         }
         double ZL1Curr()
         {
-            VEC *lower_bound_p = (VEC *)s_upper;
-            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lower_bound_p = (VEC *)s_lower;
+            VEC *upper_bound_p = (VEC *)s_upper;
             VEC *zL_p = (VEC *)zL_curr;
             VEC *zU_p = (VEC *)zU_curr;
             double res = 0.0;
@@ -272,8 +272,8 @@ namespace fatrop
         }
         int nIneqsR()
         {
-            VEC *lower_bound_p = (VEC *)s_upper;
-            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lower_bound_p = (VEC *)s_lower;
+            VEC *upper_bound_p = (VEC *)s_upper;
             int res = 0;
             for (int i = 0; i < n_ineqs; i++)
             {
