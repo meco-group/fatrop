@@ -89,10 +89,10 @@ class OptimalControlProblem:
             Ineqf = Function("ineqf", [self.u_sym, self.x_sym], [self.ineq])
             for k in range(K-1):
                 for i in range(self.ngIneq):
-                    if self.lower == -inf:
+                    if self.lower[i] == -inf:
                         self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
-                    elif self.upper == inf:
-                        self.opti.subject_to(self.lower[i] <Ineqf(self.u_sym, self.x_sym)[i])
+                    elif self.upper[i] == inf:
+                        self.opti.subject_to(self.lower[i] <Ineqf(self.u_vars[:,k], self.x_vars[:,k])[i])
                     else:
                         self.opti.subject_to(self.lower[i] <Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
         J += LkFf(1.0, self.x_vars[:, K-1])
@@ -150,8 +150,8 @@ class OptimalControlProblem:
         if self.ngF > 0:
             RSQF += hessian(self.dual_eqF.T@self.eqF,
                             vertcat(self.x_sym))[0]
-        if self.ngIneq>0:
-            RSQF += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[0]
+        # if self.ngIneq>-1:
+        #     RSQF += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[-1]
         RSQrqtF[:self.nx, :] = RSQF
         RSQrqtF[self.nx, :] = rqF[:]
         C.add(Function("RSQrqtF", [self.obj_scale, self.u_sym, self.x_sym,

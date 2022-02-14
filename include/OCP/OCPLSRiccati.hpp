@@ -816,11 +816,8 @@ namespace fatrop
                 const int nu = nu_p[k];
                 const int nxp1 = nx_p[k + 1];
                 const int nup1 = nu_p[k + 1];
-                const int ng_ineq = ng_ineq_p[k];
                 const int offsp1 = offs_ux[k + 1];
                 const int offs = offs_ux[k];
-                const int offs_g_ineq_k = offs_g_ineq_p[k];
-                const int offs_ineq_k = offs_ineq_p[k];
                 const int rho_k = rho_p[k];
                 const int numrho_k = nu - rho_k;
                 const int offs_g_k = offs_g[k];
@@ -884,8 +881,8 @@ namespace fatrop
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
-                        double scaling_factor_L = inertia_correction;
-                        double scaling_factor_U = inertia_correction;
+                        double scaling_factor_L = 0.0;
+                        double scaling_factor_U = 0.0;
                         double zLi = VECEL(zL_p, offs_ineq_k + i);
                         double zUi = VECEL(zU_p, offs_ineq_k + i);
                         double si = VECEL(s_p, offs_ineq_k + i);
@@ -905,11 +902,11 @@ namespace fatrop
                         {
                             double dist = upperi - si;
                             double dist_m1 = 1.0 / dist;
-                            scaling_factor_U += zUi * dist_m1;
+                            scaling_factor_U = zUi * dist_m1;
                             grad_barrier_U = -mu * dist_m1;
                             VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
+                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }
             }

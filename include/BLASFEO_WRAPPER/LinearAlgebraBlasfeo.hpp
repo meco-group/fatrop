@@ -20,6 +20,7 @@
 #define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
 #define VECCP blasfeo_dveccp
+#define VECCPSC blasfeo_dveccpsc
 #define VECCPR fatrop_dveccp_reversed
 #define TRSM_RLNN fatrop_dtrsm_rlnn // TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 #define VECEL BLASFEO_DVECEL

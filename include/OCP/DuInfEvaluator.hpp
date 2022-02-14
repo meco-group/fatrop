@@ -34,7 +34,6 @@ namespace fatrop
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
             int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
-            int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
             // contribution of dynamics constraints
             for (int k = 0; k < K - 1; k++)
             {

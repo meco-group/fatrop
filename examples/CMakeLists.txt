@@ -1,5 +1,5 @@
 # list(APPEND Examples blasfeo_wrapper_example casadi_codegen_wrapper_example test)
-list(APPEND Examples LinearAlgebraExample OCPExample SparseExample OCPBasicExample RandomOCPExample OCPBasicAlg)
+list(APPEND Examples LinearAlgebraExample OCPExample SparseExample OCPBasicExample RandomOCPExample OCPBasicAlg OCPBasicAlgQP)
 # list(APPEND Examples LinearAlgebraExample OCPExample)
 
 enable_testing()
@@ -9,6 +9,7 @@ add_executable(SparseExample SparseExample.cpp)
 add_executable(OCPBasicExample OCPBasicExample.cpp)
 add_executable(RandomOCPExample RandomOCPExample.cpp)
 add_executable(OCPBasicAlg OCPBasicAlg.cpp)
+add_executable(OCPBasicAlgQP OCPBasicAlgQP.cpp)
 # find_package(MUMPS COMPONENTS MUMPS::MPISEQ MUMPS::DMUMPS)
 find_package(MUMPS)
 target_link_libraries(SparseExample MUMPS::MPISEQ)
@@ -19,6 +20,8 @@ target_link_libraries(OCPBasicExample MUMPS::MPISEQ)
 target_link_libraries(OCPBasicExample MUMPS::DMUMPS)
 target_link_libraries(OCPBasicAlg MUMPS::MPISEQ)
 target_link_libraries(OCPBasicAlg MUMPS::DMUMPS)
+target_link_libraries(OCPBasicAlgQP MUMPS::MPISEQ)
+target_link_libraries(OCPBasicAlgQP MUMPS::DMUMPS)
 # target_link_libraries(SparseExample profiler)
 
 

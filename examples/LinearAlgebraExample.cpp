@@ -21,8 +21,8 @@ int main()
     GESE(12, 12, 0.0, &sC, 0, 0); // 12x12
     GESE(12, 12, 0.0, &sD, 0, 0);
     // D <- A@B^T + C
-    // GEMM_NT(11, 11, 11, 1.0, &sA, 0, 0, &sB, 1, 0, 1.0, &sC, 0, 0, &sD, 0, 0);
-    GEAD(11, 11, 1.0, &sA, 1, 0, &sB, 1, 0);
+    GEMM_NT(11, 11, 11, 1.0, &sA, 0, 0, &sB, 1, 0, 1.0, &sC, 0, 0, &sD, 0, 0);
+    // GEAD(11, 11, 1.0, &sA, 1, 0, &sB, 1, 0);
     blasfeo_free_dmat(&sA);
     blasfeo_free_dmat(&sB);
     blasfeo_free_dmat(&sC);

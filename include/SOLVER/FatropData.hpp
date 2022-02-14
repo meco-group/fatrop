@@ -13,6 +13,7 @@ namespace fatrop
     struct FatropData : public RefCountedObj
     {
         FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
+                                                                                      n_eqs(nlpdims.neqs),
                                                                                       n_ineqs(nlpdims.nineqs),
                                                                                       memvars(nlpdims.nvars, 7),
                                                                                       memeqs(nlpdims.neqs, 6),
@@ -49,6 +50,7 @@ namespace fatrop
         void Initialize()
         {
             smax = params->smax;
+            n_ineqs_r = nIneqsR();
         }
         int Reset()
         {
@@ -59,18 +61,135 @@ namespace fatrop
         double EMuCurr(double mu)
         {
             double res = 0.0;
-            double lammean = LamMeanCurr();
+            double z_L1 = +ZL1Curr();
+            double lammean = (LamL1Curr() + z_L1) / (n_eqs + n_ineqs_r);
+            double z_mean = z_L1 / n_ineqs_r;
             double cv = CVLinfCurr();
             double du = DuInfLinfCurr();
+            double compl_slack = EvalCompSlackInf(mu);
             double sd = 0.0;
+            double sc = 0.0;
             if (lammean > smax)
             {
                 sd = lammean / smax;
                 du /= sd;
             }
-            res = MAX(cv, du);
+            if (z_mean > smax)
+            {
+                sc = z_mean / smax;
+                compl_slack /= sc;
+            }
+            res = MAX(cv, MAX(du, compl_slack));
             return res;
         };
+        int EvalDuInfSlacksEqs()
+        {
+            VEC *lower_bound_p = (VEC *)s_upper;
+            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *lam_curr_p = (VEC *)lam_curr;
+            VEC *du_inf_curr_s_p = (VEC *)du_inf_curr_s;
+            VECCPSC(n_ineqs, -1.0, lam_curr_p, n_eqs, du_inf_curr_s_p, 0);
+            VEC *zL_p = (VEC *)zL_curr;
+            VEC *zU_p = (VEC *)zU_curr;
+            for (int i = 0; i < n_ineqs; i++)
+            {
+                double loweri = VECEL(lower_bound_p, i);
+                double upperi = VECEL(upper_bound_p, i);
+                if (!isinf(loweri))
+                {
+                    VECEL(du_inf_curr_s_p, i) -= VECEL(zL_p, i);
+                }
+                if (!isinf(upperi))
+                {
+                    VECEL(du_inf_curr_s_p, i) -= VECEL(zU_p, i);
+                }
+            }
+            return 0;
+        }
+        double EvalCompSlackInf(double mu)
+        {
+            VEC *lower_bound_p = (VEC *)s_upper;
+            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *s_curr_p = (VEC *)s_curr;
+            VEC *zL_p = (VEC *)zL_curr;
+            VEC *zU_p = (VEC *)zU_curr;
+            double res = 0.0;
+            for (int i = 0; i < s_curr.nels(); i++)
+            {
+                double loweri = VECEL(lower_bound_p, i);
+                double upperi = VECEL(upper_bound_p, i);
+                double si = VECEL(s_curr_p, i);
+                if (!isinf(loweri))
+                {
+                    double dist = si - loweri;
+                    res = MAX(res, dist * VECEL(zL_p, i) - mu);
+                }
+                if (!isinf(upperi))
+                {
+                    double dist = upperi - si;
+                    res = MAX(res, dist * VECEL(zU_p, i) - mu);
+                }
+            }
+            return res;
+        }
+        double EvalBarrier(double mu, VEC *s_p)
+        {
+            VEC *lower_bound_p = (VEC *)s_upper;
+            VEC *upper_bound_p = (VEC *)s_lower;
+            // VEC *s_p = (VEC *)s_curr;
+            double res = 0.0;
+            for (int i = 0; i < s_curr.nels(); i++)
+            {
+                double loweri = VECEL(lower_bound_p, i);
+                double upperi = VECEL(upper_bound_p, i);
+                double si = VECEL(s_p, i);
+                if (!isinf(loweri))
+                {
+                    double dist = si - loweri;
+                    res += -mu * log(dist);
+                }
+                if (!isinf(upperi))
+                {
+                    double dist = upperi - si;
+                    res += -mu * log(dist);
+                }
+            }
+            return res;
+        }
+        double EvalBarrierCurr(double mu)
+        {
+            return EvalBarrier(mu, (VEC *)s_curr);
+        }
+        double EvalBarrierNext(double mu)
+        {
+            return EvalBarrier(mu, (VEC *)s_next);
+        }
+        double EvalBarrierLinDecr(double mu)
+        {
+            VEC *lower_bound_p = (VEC *)s_upper;
+            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *s_p = (VEC *)s_curr;
+            VEC *delta_s_p = (VEC *)delta_s;
+            double res = 0.0;
+            for (int i = 0; i < s_curr.nels(); i++)
+            {
+                double loweri = VECEL(lower_bound_p, i);
+                double upperi = VECEL(upper_bound_p, i);
+                double si = VECEL(s_p, i);
+                double delta_si = VECEL(delta_s_p, i);
+                if (!isinf(loweri))
+                {
+                    double dist = si - loweri;
+                    res += -mu * delta_si / dist;
+                }
+                if (!isinf(upperi))
+                {
+                    double dist = upperi - si;
+                    res += -mu * delta_si / dist;
+                }
+            }
+            return res;
+        }
         int AcceptInitialization()
         {
             lam_calc.SwapWith(lam_curr);
@@ -129,6 +248,48 @@ namespace fatrop
         {
             return LamL1Curr() / nlpdims.nvars;
         }
+        double ZL1Curr()
+        {
+            VEC *lower_bound_p = (VEC *)s_upper;
+            VEC *upper_bound_p = (VEC *)s_lower;
+            VEC *zL_p = (VEC *)zL_curr;
+            VEC *zU_p = (VEC *)zU_curr;
+            double res = 0.0;
+            for (int i = 0; i < n_ineqs; i++)
+            {
+                double loweri = VECEL(lower_bound_p, i);
+                double upperi = VECEL(upper_bound_p, i);
+                if (!isinf(loweri))
+                {
+                    res += abs(VECEL(zL_p, i));
+                }
+                if (!isinf(upperi))
+                {
+                    res += abs(VECEL(zU_p, i));
+                }
+            }
+            return res;
+        }
+        int nIneqsR()
+        {
+            VEC *lower_bound_p = (VEC *)s_upper;
+            VEC *upper_bound_p = (VEC *)s_lower;
+            int res = 0;
+            for (int i = 0; i < n_ineqs; i++)
+            {
+                double loweri = VECEL(lower_bound_p, i);
+                double upperi = VECEL(upper_bound_p, i);
+                if (!isinf(loweri))
+                {
+                    res++;
+                }
+                if (!isinf(upperi))
+                {
+                    res++;
+                }
+            }
+            return res;
+        }
         double LamLinfCalc()
         {
             return Linf(lam_calc);
@@ -160,7 +321,7 @@ namespace fatrop
                     double delta_s_i = VECEL(delta_s_p, i);
                     double delta_Z_i = VECEL(delta_zL_p, i);
                     // primal
-                    alpha_max_pr = delta_s_i < 0 ? MIN(alpha_max_pr, -tau * (VECEL(s_curr_p, i)-VECEL(s_lower_p, i)) / delta_s_i) : alpha_max_pr;
+                    alpha_max_pr = delta_s_i < 0 ? MIN(alpha_max_pr, -tau * (VECEL(s_curr_p, i) - VECEL(s_lower_p, i)) / delta_s_i) : alpha_max_pr;
                     // dual
                     alpha_max_du = delta_Z_i < 0 ? MIN(alpha_max_du, -tau * (VECEL(zL_curr_p, i)) / delta_Z_i) : alpha_max_du;
                 }
@@ -179,7 +340,9 @@ namespace fatrop
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
+        int n_eqs;
         int n_ineqs;
+        int n_ineqs_r = 0;
         FatropMemoryVecBF memvars;
         FatropMemoryVecBF memeqs;
         FatropMemoryVecBF memineqs;
