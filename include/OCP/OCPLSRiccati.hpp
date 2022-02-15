@@ -642,14 +642,14 @@ namespace fatrop
                                 double dist = si - loweri;
                                 double dist_m1 = 1.0 / dist;
                                 scaling_factor += zLi * dist_m1;
-                                grad_barrier += mu * dist_m1;
+                                grad_barrier -= mu * dist_m1;
                             }
                             if (!isinf(upperi))
                             {
                                 double dist = upperi - si;
                                 double dist_m1 = 1.0 / dist;
                                 scaling_factor += zUi * dist_m1;
-                                grad_barrier -= mu * dist_m1;
+                                grad_barrier += mu * dist_m1;
                             }
                             COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                             MATEL(Ggt_ineq_temp_p, nu + nx, i) += grad_barrier;
@@ -895,7 +895,7 @@ namespace fatrop
                             double dist = si - loweri;
                             double dist_m1 = 1.0 / dist;
                             scaling_factor_L = zLi * dist_m1;
-                            grad_barrier_L = mu * dist_m1;
+                            grad_barrier_L =- mu * dist_m1;
                             VECEL(delta_zL_p, offs_ineq_k + i) = grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         if (!isinf(upperi))
@@ -903,7 +903,7 @@ namespace fatrop
                             double dist = upperi - si;
                             double dist_m1 = 1.0 / dist;
                             scaling_factor_U = zUi * dist_m1;
-                            grad_barrier_U = -mu * dist_m1;
+                            grad_barrier_U = mu * dist_m1;
                             VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
