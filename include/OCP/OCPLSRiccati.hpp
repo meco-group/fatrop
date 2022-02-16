@@ -676,7 +676,7 @@ namespace fatrop
                     //// inequalities
                     if (ng_ineq > 0)
                     {
-                        GECP(nu + nx, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                        GECP(nu + nx+1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
                         for (int i = 0; i < ng_ineq; i++)
                         {
                             double scaling_factor = inertia_correction;
@@ -701,7 +701,7 @@ namespace fatrop
                                 grad_barrier += mu * dist_m1;
                             }
                             COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                            MATEL(Ggt_ineq_temp_p, nu + nx, i) += grad_barrier;
+                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor+inertia_correction)*MATEL(Ggt_ineq_p+k, nu + nx, i);
                         }
                         // add the penalty
                         SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
@@ -926,7 +926,8 @@ namespace fatrop
                 {
                     // calculate delta_s
                     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
-                    GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    GEMV_T(ng_ineq, nu+nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
@@ -945,7 +946,7 @@ namespace fatrop
                             double dist_m1 = 1.0 / dist;
                             scaling_factor_L = zLi * dist_m1;
                             grad_barrier_L = -mu * dist_m1;
-                            VECEL(delta_zL_p, offs_ineq_k + i) = grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
+                            VECEL(delta_zL_p, offs_ineq_k + i) = -grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         if (!isinf(upperi))
                         {
@@ -953,7 +954,7 @@ namespace fatrop
                             double dist_m1 = 1.0 / dist;
                             scaling_factor_U = zUi * dist_m1;
                             grad_barrier_U = mu * dist_m1;
-                            VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
+                            VECEL(delta_zU_p, offs_ineq_k + i) = -grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }

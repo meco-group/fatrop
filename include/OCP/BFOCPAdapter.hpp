@@ -62,7 +62,7 @@ namespace fatrop
             int K = OCP->K;
             // offsets
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
-            int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
+            int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             OCPMACRO(MAT *, Ggt_ineq, _p);
@@ -107,7 +107,7 @@ namespace fatrop
                 int nx_k = nx_p[k];
                 int ng_ineq_k = ng_ineq_p[k];
                 int offs_ux_k = offs_ux[k];
-                int offs_gineq_k = offs_ineq[k];
+                int offs_ineq_k = offs_ineq[k];
                 if (ng_ineq_k > 0)
                 {
                     ocptempl->eval_Ggt_ineqk(
@@ -116,7 +116,7 @@ namespace fatrop
                         Ggt_ineq_p + k,
                         k);
                     // rewrite problem
-                    ROWAD(ng_ineq_k, -1.0, slack_vars_bf, offs_gineq_k, Ggt_ineq_p+k, nu_k+ nx_k, 0);
+                    ROWAD(ng_ineq_k, -1.0, slack_vars_bf, offs_ineq_k, Ggt_ineq_p+k, nu_k+ nx_k, 0);
                 }
             }
             return 0;
@@ -133,7 +133,7 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-            int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
+            int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
             double *cv_p = ((VEC *)constraint_violation)->pa;
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
@@ -180,14 +180,14 @@ namespace fatrop
                     int nu_k = nu_p[k];
                     int ng_ineq_k = ng_ineq_p[k];
                     int offs_ux_k = offs_ux[k];
-                    int offs_gineq_k = offs_ineq[k];
+                    int offs_ineq_k = offs_ineq[k];
                     ocptempl->eval_gineqk(
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
-                        cv_p + offs_gineq_k,
+                        cv_p + offs_ineq_k,
                         k);
                     // rewrite problem
-                    AXPY(ng_ineq_k, -1.0, slack_vars_bf, offs_gineq_k, cv_bf, offs_gineq_k, cv_bf, offs_gineq_k);
+                    AXPY(ng_ineq_k, -1.0, slack_vars_bf, offs_ineq_k, cv_bf, offs_ineq_k, cv_bf, offs_ineq_k);
                 }
             }
             return 0;

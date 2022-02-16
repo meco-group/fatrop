@@ -18,6 +18,9 @@
 using namespace fatrop;
 int main()
 {
+    FatropMemoryMatBF test(2,2,1);
+    test[0].print();
+
     RefCountPtr<BFOCP> ocptemplatebasic =
         new BFOCPBasic(BFOCPBasic::from_shared_lib("./../../OCP_specification/f.so", 100));
     RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
