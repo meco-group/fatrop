@@ -146,7 +146,7 @@ namespace fatrop
                 }
                 // cout << "regularization  " << (deltaw) << endl;
                 // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-                ls = linesearch_->FindAcceptableTrialPoint();
+                ls = linesearch_->FindAcceptableTrialPoint(mu);
             }
             return 0;
         }

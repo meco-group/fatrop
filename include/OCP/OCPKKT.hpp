@@ -56,7 +56,8 @@ namespace fatrop
                                           ineq_offs(offsets(dims.ng_ineq)),
                                           max_nu(max(dims.nu)), max_nx(max(dims.nx)),
                                           max_ng(max(dims.ng)),
-                                          max_ngineq(max(dims.ng_ineq)){};
+                                          max_ngineq(max(dims.ng_ineq)),
+                                          n_ineqs(sum(dims.ng_ineq)){};
             /// offset arrays are used for efficiency
             const FatropVector<int> ux_offs;
             /// offset arrays are used for efficiency
@@ -68,6 +69,7 @@ namespace fatrop
             int max_nx;
             int max_ng;
             int max_ngineq;
+            int n_ineqs;
         };
         OCPAux aux;
     };

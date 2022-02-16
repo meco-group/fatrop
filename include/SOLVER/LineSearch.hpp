@@ -15,7 +15,7 @@ namespace fatrop
             const RefCountPtr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
                                                          fatropnlp_(nlp),
                                                          fatropdata_(fatropdata){};
-        virtual int FindAcceptableTrialPoint() = 0;
+        virtual int FindAcceptableTrialPoint(double mu) = 0;
         inline int EvalCVNext()
         {
             return fatropnlp_->EvalConstraintViolation(
@@ -59,12 +59,14 @@ namespace fatrop
             gamma_phi = fatrop_params_->gamma_phi;
             eta_phi = fatrop_params_->eta_phi;
         }
-        int FindAcceptableTrialPoint()
+        int FindAcceptableTrialPoint(double mu)
         {
             double alpha_primal = 1.0;
             double alpha_dual = 1.0;
             double cv_curr = fatropdata_->CVL1Curr();
             double obj_curr = fatropdata_->obj_curr;
+            double barrier_curr = fatropdata_->EvalBarrierCurr(mu);
+            obj_curr += barrier_curr;
             double lin_decr_curr = fatropdata_->LinDecrCurr();
             // cout << "lindecr " << lin_decr_curr << endl;
             for (int ll = 1; ll < 50; ll++)
@@ -73,6 +75,8 @@ namespace fatrop
                 EvalCVNext();
                 double cv_next = fatropdata_->CVL1Next();
                 double obj_next = EvalObjNext();
+                double barrier_next = fatropdata_->EvalBarrierNext(mu);
+                obj_next += barrier_next;
                 // todo change iteration number from zero to real iteration number
                 (journaller_->it_curr).type = 'f';
                 if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
