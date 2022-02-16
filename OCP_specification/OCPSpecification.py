@@ -90,7 +90,8 @@ class OptimalControlProblem:
             for k in range(K-1):
                 for i in range(self.ngIneq):
                     if self.lower[i] == -inf:
-                        self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                        # self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                        self.opti.subject_to(self.upper[i] >Ineqf(self.u_vars[:,k], self.x_vars[:,k])[i])
                     elif self.upper[i] == inf:
                         self.opti.subject_to(self.lower[i] <Ineqf(self.u_vars[:,k], self.x_vars[:,k])[i])
                     else:

@@ -330,7 +330,7 @@ namespace fatrop
                     double delta_s_i = VECEL(delta_s_p, i);
                     double delta_Z_i = VECEL(delta_zU_p, i);
                     // primal
-                    alpha_max_pr = delta_s_i < 0 ? MIN(alpha_max_pr, -tau * (VECEL(s_upper_p, i) - VECEL(s_curr_p, i)) / delta_s_i) : alpha_max_pr;
+                    alpha_max_pr = delta_s_i > 0 ? MIN(alpha_max_pr, tau * (VECEL(s_upper_p, i) - VECEL(s_curr_p, i)) / delta_s_i) : alpha_max_pr;
                     // dual
                     alpha_max_du = delta_Z_i < 0 ? MIN(alpha_max_du, -tau * (VECEL(zU_curr_p, i)) / delta_Z_i) : alpha_max_du;
                 }

@@ -954,7 +954,7 @@ namespace fatrop
                             double dist_m1 = 1.0 / dist;
                             scaling_factor_U = zUi * dist_m1;
                             grad_barrier_U = mu * dist_m1;
-                            VECEL(delta_zU_p, offs_ineq_k + i) = -grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) - scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
+                            VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
