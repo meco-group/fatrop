@@ -92,6 +92,8 @@ namespace fatrop
                         if (armijo)
                         {
                             fatropdata_->TakeStep();
+                            journaller_->it_curr.alpha_pr = alpha_primal;
+                            journaller_->it_curr.alpha_du = alpha_dual;
                             return ll;
                         }
                     }
@@ -107,6 +109,8 @@ namespace fatrop
                                 (journaller_->it_curr).type = 'h';
                             }
                             fatropdata_->TakeStep();
+                            journaller_->it_curr.alpha_pr = alpha_primal;
+                            journaller_->it_curr.alpha_du = alpha_dual;
                             return ll;
                         }
                     }

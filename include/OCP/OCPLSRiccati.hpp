@@ -701,7 +701,7 @@ namespace fatrop
                                 grad_barrier += mu * dist_m1;
                             }
                             COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor+inertia_correction)*MATEL(Ggt_ineq_p+k, nu + nx, i);
+                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p+k, nu + nx, i);
                         }
                         // add the penalty
                         SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);

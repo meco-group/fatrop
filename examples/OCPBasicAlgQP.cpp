@@ -18,7 +18,7 @@
 using namespace fatrop;
 int main()
 {
-    FatropMemoryMatBF test(2,2,1);
+    FatropMemoryMatBF test(2, 2, 1);
     test[0].print();
 
     RefCountPtr<BFOCP> ocptemplatebasic =
@@ -36,14 +36,17 @@ int main()
     blasfeo_timer timer;
     VECSE(fatropdata->x_curr.nels(), 0.0, (VEC *)fatropdata->x_curr, 0);
     VECSE(fatropdata->lam_curr.nels(), 0.0, (VEC *)fatropdata->lam_curr, 0);
-    VECSE(fatropdata->s_curr.nels(), -0.01, (VEC *) fatropdata->s_curr, 0);
-    VECSE(fatropdata->zL_curr.nels(), 1.0, (VEC *) fatropdata->zL_curr, 0);
-    VECSE(fatropdata->zU_curr.nels(), 1.0, (VEC *) fatropdata->zU_curr, 0);
-    VECSE(fatropdata->s_lower.nels(), INFINITY, (VEC *) fatropdata->s_lower, 0);
-    VECSE(fatropdata->s_upper.nels(), 0.0, (VEC *) fatropdata->s_upper, 0);
+    VECSE(fatropdata->s_curr.nels(), 0.01, (VEC *)fatropdata->s_curr, 0);
+    VECSE(fatropdata->zL_curr.nels(), 1.0, (VEC *)fatropdata->zL_curr, 0);
+    VECSE(fatropdata->zU_curr.nels(), 1.0, (VEC *)fatropdata->zU_curr, 0);
+    VECSE(fatropdata->s_lower.nels(), 0.0, (VEC *)fatropdata->s_lower, 0);
+    VECSE(fatropdata->s_upper.nels(), INFINITY, (VEC *)fatropdata->s_upper, 0);
     fatropdata->Initialize();
     blasfeo_tic(&timer);
-    fatropalg->Optimize();
+    for (int i = 0; i < 1; i++)
+    {
+        fatropalg->Optimize();
+    }
     double el = blasfeo_toc(&timer);
     cout << "el time " << el << endl;
     // journaller->PrintIterations();
