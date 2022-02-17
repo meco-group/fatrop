@@ -52,6 +52,7 @@ namespace fatrop
             smax = params->smax;
             kappa1 = params->kappa1;
             kappa2 = params->kappa2;
+            kappa_d = params->kappa_d;
             n_ineqs_r = nIneqsR();
         }
         int Reset()

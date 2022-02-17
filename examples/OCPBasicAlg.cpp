@@ -34,6 +34,8 @@ int main()
     VECSE(fatropdata->x_curr.nels(), 1.0, (VEC *)fatropdata->x_curr, 0);
     VECSE(fatropdata->s_lower.nels(), 0.0, (VEC *) fatropdata->s_lower, 0);
     VECSE(fatropdata->s_upper.nels(), INFINITY, (VEC *) fatropdata->s_upper, 0);
+    // VECSE(fatropdata->s_lower.nels(), -INFINITY, (VEC *) fatropdata->s_lower, 0);
+    // VECSE(fatropdata->s_upper.nels(), 0.0, (VEC *) fatropdata->s_upper, 0);
     fatropdata->Initialize();
     blasfeo_tic(&timer);
     fatropalg->Optimize();
