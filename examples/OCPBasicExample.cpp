@@ -48,7 +48,7 @@ int main()
     ocpalg.EvalHess(1.0, ux[0], lags[0]);
     ocpalg.EvalJac(ux[0], ux[0]);
     // grad.print();
-    ocpalg.OCPInitializer_.AdaptKKTInitial(&ocpalg.ocpkktmemory_, grad);
+    ocpalg.OCPInitializer_.AdaptKKTInitial(&ocpalg.ocpkktmemory_, grad, grad);
     ocpalg.ComputeSD(0.0, 0.0, 0.0, dux, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam, dlam);
     cout << "dlam" << endl;
     dlam.print();

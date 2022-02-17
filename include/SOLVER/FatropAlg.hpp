@@ -67,6 +67,7 @@ namespace fatrop
             EvalJac(); // todo twice evaluation
             EvalGradCurr();
             Initialization();
+            fatropdata_->BoundSlacks();
             if (fatropdata_->LamLinfCalc() < lammax)
             {
                 cout << "accepted lam " << endl;
@@ -202,6 +203,7 @@ namespace fatrop
                 fatropdata_->lam_calc,
                 fatropdata_->delta_x,
                 fatropdata_->delta_s,
+                fatropdata_->s_curr,
                 fatropdata_->zL_curr,
                 fatropdata_->zU_curr,
                 fatropdata_->s_lower,

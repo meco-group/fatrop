@@ -50,10 +50,16 @@ namespace fatrop
         void Initialize()
         {
             smax = params->smax;
+            kappa1 = params->kappa1;
+            kappa2 = params->kappa2;
             n_ineqs_r = nIneqsR();
         }
         int Reset()
         {
+            VECSE(zL_curr.nels(), 1.0, (VEC *)zL_curr, 0);
+            VECSE(zU_curr.nels(), 1.0, (VEC *)zU_curr, 0);
+            VECSE(lam_curr.nels(), 0.0, (VEC *)lam_curr, 0);
+            VECSE(s_curr.nels(), 0.0, (VEC *)s_curr, 0);
             cache_curr = EvalCache();
             cache_next = EvalCache();
             return 0;
@@ -189,6 +195,36 @@ namespace fatrop
                 }
             }
             return res;
+        }
+        int BoundSlacks()
+        {
+            VEC *s_lower_p = (VEC *)s_lower;
+            VEC *s_upper_p = (VEC *)s_upper;
+            VEC *s_curr_p = (VEC *)s_curr;
+            for (int i = 0; i < n_ineqs; i++)
+            {
+                double loweri = VECEL(s_lower_p, i);
+                double upperi = VECEL(s_lower_p, i);
+                bool lower_bounded = !isinf(loweri);
+                bool upper_bounded = !isinf(upperi);
+                bool two_sided = lower_bounded && upper_bounded;
+                if (two_sided)
+                {
+                    double pL = MIN(kappa1 * MAX(1.0, abs(loweri)), kappa2 * (upperi - loweri));
+                    double pR = MIN(kappa1 * MAX(1.0, abs(upperi)), kappa2 * (upperi - loweri));
+                    // project
+                    VECEL(s_curr_p, i) = MIN(MAX(VECEL(s_curr_p, i), loweri + pL), upperi - pR);
+                }
+                else if (lower_bounded)
+                {
+                    VECEL(s_curr_p, i) = MAX(VECEL(s_curr_p, i), loweri+ kappa1*MAX(1.0, abs(loweri)));
+                }
+                else if (upper_bounded)
+                {
+                    VECEL(s_curr_p, i) = MIN(VECEL(s_curr_p, i), upperi- kappa1*MAX(1.0, abs(upperi)));
+                }
+            }
+            return 0;
         }
         int AcceptInitialization()
         {
@@ -398,6 +434,8 @@ namespace fatrop
         const RefCountPtr<FatropParams> params;
         // algorithm parameters
         double smax;
+        double kappa1;
+        double kappa2;
     };
 }
 #endif // FATROPDATAINCLUDED

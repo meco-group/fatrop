@@ -123,29 +123,28 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &lam,
             const FatropVecBF &grad,
-            FatropVecBF &du_inf
-          ) override
+            FatropVecBF &du_inf) override
         {
             return duinfevaluator_.DuInfEval(
                 &ocpkktmemory_,
                 obj_scale,
                 lam,
                 grad,
-                du_inf
-               );
+                du_inf);
         }
         int Initialization(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
             const FatropVecBF &ux_dummy,
             const FatropVecBF &s_dummy,
+            FatropVecBF &s_curr,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
             const FatropVecBF &lower,
             const FatropVecBF &upper) override
         {
             // assume constraint jacobian evaluated
-            OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
+            OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad, s_curr);
             return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy, s_dummy, zL, zU, lower, upper);
         }
 
