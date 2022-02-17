@@ -134,6 +134,7 @@ namespace fatrop
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
             int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
+            int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
             double *cv_p = ((VEC *)constraint_violation)->pa;
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
@@ -181,13 +182,14 @@ namespace fatrop
                     int ng_ineq_k = ng_ineq_p[k];
                     int offs_ux_k = offs_ux[k];
                     int offs_ineq_k = offs_ineq[k];
+                    int offs_g_ineq_k = offs_g_ineq[k];
                     ocptempl->eval_gineqk(
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
-                        cv_p + offs_ineq_k,
+                        cv_p + offs_g_ineq_k,
                         k);
                     // rewrite problem
-                    AXPY(ng_ineq_k, -1.0, slack_vars_bf, offs_ineq_k, cv_bf, offs_ineq_k, cv_bf, offs_ineq_k);
+                    AXPY(ng_ineq_k, -1.0, slack_vars_bf, offs_ineq_k, cv_bf, offs_g_ineq_k, cv_bf, offs_g_ineq_k);
                 }
             }
             return 0;
