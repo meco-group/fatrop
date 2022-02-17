@@ -41,6 +41,7 @@ namespace fatrop
             const double intertia_correction_w,
             const double intertia_correction_c,
             const double mu,
+            const double kappa_d,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam,
             const FatropVecBF &s,

@@ -106,6 +106,7 @@ namespace fatrop
             const double inertia_correction_w,
             const double inertia_correction_c,
             const double mu,
+            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,

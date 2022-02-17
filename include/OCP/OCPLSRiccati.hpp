@@ -45,6 +45,7 @@ namespace fatrop
             const double inertia_correction_w,
             const double inertia_correction_c,
             const double mu,
+            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,
@@ -58,11 +59,11 @@ namespace fatrop
         {
             if (inertia_correction_c == 0.0)
             {
-                return computeSDnor(OCP, inertia_correction_w, mu, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
+                return computeSDnor(OCP, inertia_correction_w, mu,kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
             else
             {
-                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c,mu, ux, lam, s, zL, zU,delta_zL, delta_zU, lower, upper, delta_s);
+                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, mu,kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
         }
         // solve a KKT system
@@ -71,6 +72,7 @@ namespace fatrop
             const double inertia_correction_w,
             const double inertia_correction_c,
             double mu,
+            double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,
@@ -156,7 +158,7 @@ namespace fatrop
                     //// inequalities
                     if (ng_ineq > 0)
                     {
-                        GECP(nu + nx+1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                        GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
                         for (int i = 0; i < ng_ineq; i++)
                         {
                             double scaling_factor = inertia_correction_w;
@@ -181,7 +183,7 @@ namespace fatrop
                                 grad_barrier += mu * dist_m1;
                             }
                             COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p+k, nu + nx, i);
+                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                         }
                         // add the penalty
                         SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
@@ -279,7 +281,7 @@ namespace fatrop
                     // calculate delta_s
                     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
                     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-                    GEMV_T(ng_ineq, nu+nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    GEMV_T(ng_ineq, nu + nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
@@ -669,6 +671,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             const double inertia_correction,
             const double mu,
+            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &s,
@@ -773,7 +776,7 @@ namespace fatrop
                     //// inequalities
                     if (ng_ineq > 0)
                     {
-                        GECP(nu + nx+1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                        GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
                         for (int i = 0; i < ng_ineq; i++)
                         {
                             double scaling_factor = inertia_correction;
@@ -783,22 +786,28 @@ namespace fatrop
                             double loweri = VECEL(lower_p, offs_ineq_k + i);
                             double upperi = VECEL(upper_p, offs_ineq_k + i);
                             double grad_barrier = 0.0;
-                            if (!isinf(loweri))
+                            bool lower_bounded = !isinf(loweri);
+                            bool upper_bounded = !isinf(upperi);
+                            if (lower_bounded)
                             {
                                 double dist = si - loweri;
                                 double dist_m1 = 1.0 / dist;
                                 scaling_factor += zLi * dist_m1;
                                 grad_barrier -= mu * dist_m1;
                             }
-                            if (!isinf(upperi))
+                            if (upper_bounded)
                             {
                                 double dist = upperi - si;
                                 double dist_m1 = 1.0 / dist;
                                 scaling_factor += zUi * dist_m1;
                                 grad_barrier += mu * dist_m1;
                             }
+                            if (!(lower_bounded && upper_bounded))
+                            {
+                                grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
+                            }
                             COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p+k, nu + nx, i);
+                            MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                         }
                         // add the penalty
                         SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
@@ -1024,7 +1033,7 @@ namespace fatrop
                     // calculate delta_s
                     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
                     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-                    GEMV_T(ng_ineq, nu+nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    GEMV_T(ng_ineq, nu + nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
@@ -1037,7 +1046,9 @@ namespace fatrop
                         double upperi = VECEL(upper_p, offs_ineq_k + i);
                         double grad_barrier_L = 0.0;
                         double grad_barrier_U = 0.0;
-                        if (!isinf(loweri))
+                        bool lower_bounded = !isinf(loweri);
+                        bool upper_bounded = !isinf(upperi);
+                        if (lower_bounded)
                         {
                             double dist = si - loweri;
                             double dist_m1 = 1.0 / dist;
@@ -1045,7 +1056,7 @@ namespace fatrop
                             grad_barrier_L = -mu * dist_m1;
                             VECEL(delta_zL_p, offs_ineq_k + i) = -grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
                         }
-                        if (!isinf(upperi))
+                        if (upper_bounded)
                         {
                             double dist = upperi - si;
                             double dist_m1 = 1.0 / dist;
@@ -1053,7 +1064,12 @@ namespace fatrop
                             grad_barrier_U = mu * dist_m1;
                             VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
+                        double grad_barrier = grad_barrier_L + grad_barrier_U;
+                        if (!(lower_bounded && upper_bounded))
+                        {
+                            grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
+                        }
+                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }
             }

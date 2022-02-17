@@ -46,6 +46,7 @@ namespace fatrop
             kappa_wplusem = fatropparams_->kappa_wplusem;
             delta_c_stripe = fatropparams_->delta_c_stripe;
             kappa_c = fatropparams_->kappa_c;
+            kappa_d = fatropparams_->kappa_d;
             // todo avoid reallocation when maxiter doesn't change
             // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
         }
@@ -215,6 +216,7 @@ namespace fatrop
                 inertia_correction_w,
                 inertia_correction_c,
                 mu,
+                kappa_d,
                 fatropdata_->delta_x,
                 fatropdata_->lam_calc,
                 fatropdata_->s_curr,
@@ -248,6 +250,7 @@ namespace fatrop
         double kappa_wplusem;
         double delta_c_stripe;
         double kappa_c;
+        double kappa_d;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

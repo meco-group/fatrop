@@ -149,15 +149,22 @@ namespace fatrop
                 double loweri = VECEL(lower_bound_p, i);
                 double upperi = VECEL(upper_bound_p, i);
                 double si = VECEL(s_p, i);
-                if (!isinf(loweri))
+                bool lower_bounded = !isinf(loweri);
+                bool upper_bounded = !isinf(upperi);
+                bool one_sided = !(lower_bounded && upper_bounded);
+                if (lower_bounded)
                 {
                     double dist = si - loweri;
                     res += -mu * log(dist);
+                    if (one_sided)
+                        res += kappa_d * mu * dist;
                 }
-                if (!isinf(upperi))
+                if (upper_bounded)
                 {
                     double dist = upperi - si;
                     res += -mu * log(dist);
+                    if (one_sided)
+                        res += kappa_d * mu * dist;
                 }
             }
             return res;
@@ -183,15 +190,22 @@ namespace fatrop
                 double upperi = VECEL(upper_bound_p, i);
                 double si = VECEL(s_p, i);
                 double delta_si = VECEL(delta_s_p, i);
-                if (!isinf(loweri))
+                bool lower_bounded = !isinf(loweri);
+                bool upper_bounded = !isinf(upperi);
+                bool one_sided = !(lower_bounded && upper_bounded);
+                if (lower_bounded)
                 {
                     double dist = si - loweri;
                     res += -mu * delta_si / dist;
+                    if (one_sided)
+                        res += kappa_d * mu*delta_si;
                 }
-                if (!isinf(upperi))
+                if (upper_bounded)
                 {
                     double dist = upperi - si;
-                    res += -mu * delta_si / dist;
+                    res += mu * delta_si / dist;
+                    if (one_sided)
+                        res -= kappa_d * mu*delta_si;
                 }
             }
             return res;
@@ -217,11 +231,11 @@ namespace fatrop
                 }
                 else if (lower_bounded)
                 {
-                    VECEL(s_curr_p, i) = MAX(VECEL(s_curr_p, i), loweri+ kappa1*MAX(1.0, abs(loweri)));
+                    VECEL(s_curr_p, i) = MAX(VECEL(s_curr_p, i), loweri + kappa1 * MAX(1.0, abs(loweri)));
                 }
                 else if (upper_bounded)
                 {
-                    VECEL(s_curr_p, i) = MIN(VECEL(s_curr_p, i), upperi- kappa1*MAX(1.0, abs(upperi)));
+                    VECEL(s_curr_p, i) = MIN(VECEL(s_curr_p, i), upperi - kappa1 * MAX(1.0, abs(upperi)));
                 }
             }
             return 0;
@@ -436,6 +450,7 @@ namespace fatrop
         double smax;
         double kappa1;
         double kappa2;
+        double kappa_d;
     };
 }
 #endif // FATROPDATAINCLUDED

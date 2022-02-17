@@ -31,6 +31,7 @@ namespace fatrop
         double kappa_c = 0.25;
         double kappa1 = 1e-2;
         double kappa2 = 1e-2;
+        double kappa_d = 1e-4;
     };
 
 } // namespace fatrop
