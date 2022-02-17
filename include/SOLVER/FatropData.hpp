@@ -204,7 +204,7 @@ namespace fatrop
             for (int i = 0; i < n_ineqs; i++)
             {
                 double loweri = VECEL(s_lower_p, i);
-                double upperi = VECEL(s_lower_p, i);
+                double upperi = VECEL(s_upper_p, i);
                 bool lower_bounded = !isinf(loweri);
                 bool upper_bounded = !isinf(upperi);
                 bool two_sided = lower_bounded && upper_bounded;

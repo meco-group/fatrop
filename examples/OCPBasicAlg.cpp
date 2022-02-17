@@ -31,7 +31,7 @@ int main()
     RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
     RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
     blasfeo_timer timer;
-    VECSE(fatropdata->x_curr.nels(), 0.0, (VEC *)fatropdata->x_curr, 0);
+    VECSE(fatropdata->x_curr.nels(), 1.0, (VEC *)fatropdata->x_curr, 0);
     VECSE(fatropdata->s_lower.nels(), 0.0, (VEC *) fatropdata->s_lower, 0);
     VECSE(fatropdata->s_upper.nels(), INFINITY, (VEC *) fatropdata->s_upper, 0);
     fatropdata->Initialize();
