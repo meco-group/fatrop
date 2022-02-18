@@ -5,6 +5,7 @@
 */
 #ifndef FATROP_LA_INCLUDED
 #define FATROP_LA_INCLUDED
+#include <iostream>
 namespace fatrop
 {
     struct MatrixInd

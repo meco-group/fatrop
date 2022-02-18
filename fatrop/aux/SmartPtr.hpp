@@ -1,5 +1,6 @@
 #ifndef SMARTPOINTERINCLUDED
 #define SMARTPOINTERINCLUDED
+#include <cstddef>
 namespace fatrop
 {
     class RefCountedObj

@@ -2,7 +2,10 @@
 #define LINESEARCHINCLUDED
 #include "AlgStrategy.hpp"
 #include "IterationData.hpp"
-#include "FatropAlg.hpp"
+// #include "FatropAlg.hpp"
+#include "templates/NLPAlg.hpp"
+#include "solver/FatropData.hpp"
+#include "solver/Filter.hpp"
 #include <cmath>
 namespace fatrop
 {

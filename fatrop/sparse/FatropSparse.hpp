@@ -156,11 +156,7 @@ namespace fatrop
         const fe_sp child1;
         const fe_sp child2;
     };
-    fe_sp operator+(const fe_sp &fe1, const fe_sp &fe2)
-    {
-        fe_sp res = make_shared<FatropSum1>(fe1, fe2);
-        return res;
-    }
+    fe_sp operator+(const fe_sp &fe1, const fe_sp &fe2);
     class MatrixVector : public SparseExpression, public MatrixVectorBase
     {
     public:
@@ -176,11 +172,7 @@ namespace fatrop
             return fsm.nrows();
         }
     };
-    fe_sp operator*(const Eig &mat, var_sp var)
-    {
-        fe_sp res = make_shared<MatrixVector>(mat, var);
-        return res;
-    };
+    fe_sp operator*(const Eig &mat, var_sp var);
 
     class HessBlock
     {

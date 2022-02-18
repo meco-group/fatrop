@@ -1,6 +1,10 @@
 #ifndef OCPINITIALIZERINCLUDED
 #define OCPINITIALIZERINCLUDED
 #include "OCPKKT.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
+#define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
+#define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
     class OCPInitializer

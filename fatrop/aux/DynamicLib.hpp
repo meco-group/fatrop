@@ -2,7 +2,7 @@
 #define DYNAMICLIBINCLUDED
 #include <dlfcn.h>
 #include <string>
-#include <aux/SmartPtr.hpp>
+#include "SmartPtr.hpp"
 using namespace std;
 namespace fatrop
 {

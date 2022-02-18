@@ -2,6 +2,9 @@
 #define FATROPITERATIONDATAINCLUDED
 #include "aux/SmartPtr.hpp"
 #include <cmath>
+#include <vector>
+#include <iostream>
+using namespace std;
 namespace fatrop
 {
     struct IterationData

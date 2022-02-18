@@ -3,6 +3,7 @@
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
 #include "aux/SmartPtr.hpp"
+#include "ocp/OCPKKT.hpp"
 namespace fatrop
 { 
     /** \brief interface class for OCP operations*/

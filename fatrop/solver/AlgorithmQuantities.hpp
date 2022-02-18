@@ -12,8 +12,8 @@
 
 #ifndef ALGORITHMQUANTITIESINCLUDED
 #define ALGORITHMQUANTITIESINCLUDED
-#include "AUX/SmartPtr.hpp"
-#include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
+#include "aux/SmartPtr.hpp"
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "FatropData.hpp"
 namespace fatrop
 {
