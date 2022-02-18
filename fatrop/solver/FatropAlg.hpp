@@ -99,6 +99,8 @@ namespace fatrop
                 if (emu < tol)
                 {
                     cout << "found solution :) " << endl;
+                    cout << "riccati time " << sd_time << endl;
+                    cout << "hess time " << hess_time << endl;
                     return 0;
                 }
                 // update mu
@@ -154,10 +156,15 @@ namespace fatrop
         }
         inline int EvalHess()
         {
-            return fatropnlp_->EvalHess(
-                fatropdata_->obj_scale,
-                fatropdata_->x_curr,
-                fatropdata_->lam_curr);
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res =
+                fatropnlp_->EvalHess(
+                    fatropdata_->obj_scale,
+                    fatropdata_->x_curr,
+                    fatropdata_->lam_curr);
+            hess_time += blasfeo_toc(&timer);
+            return res;
         }
         inline int EvalJac()
         {
@@ -194,8 +201,7 @@ namespace fatrop
                 fatropdata_->obj_scale,
                 fatropdata_->lam_curr,
                 fatropdata_->grad_curr,
-                fatropdata_->du_inf_curr
-              );
+                fatropdata_->du_inf_curr);
         }
         inline int Initialization()
         {
@@ -212,7 +218,9 @@ namespace fatrop
         }
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu)
         {
-            return fatropnlp_->ComputeSD(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = fatropnlp_->ComputeSD(
                 inertia_correction_w,
                 inertia_correction_c,
                 mu,
@@ -227,6 +235,8 @@ namespace fatrop
                 fatropdata_->s_lower,
                 fatropdata_->s_upper,
                 fatropdata_->delta_s);
+            sd_time += blasfeo_toc(&timer);
+            return res;
         }
         RefCountPtr<FatropNLP> fatropnlp_;
         RefCountPtr<FatropData> fatropdata_;
@@ -251,6 +261,9 @@ namespace fatrop
         double delta_c_stripe;
         double kappa_c;
         double kappa_d;
+        double sd_time = 0.0;
+        double hess_time = 0.0;
+        double jac_time = 0.0;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

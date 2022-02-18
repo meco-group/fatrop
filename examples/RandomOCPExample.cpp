@@ -11,15 +11,15 @@ using namespace fatrop;
 int main()
 {
     int K = 150;
-    int nu = 3;
+    int nu = 12;
     int nx = 12;
-    int ng = 1;
+    int ng = 4;
     FatropVector<int> nu_ = vector<int>(K, nu);
     FatropVector<int> nx_ = vector<int>(K, nx);
     FatropVector<int> ng_ = vector<int>(K, ng);
     // nx_.at(40) = 25;
     // nu_.at(20) = 20;
-    // ng_.at(K - 1) = 6;
+    // ng_.at(K - 1) = nx;
     // ng_.at(0) = nx;
 
     RefCountPtr<BFOCP> ocptemplatebasic =
@@ -39,7 +39,7 @@ int main()
     ocpalg.EvalJac(ux[0], ux[0]);
     double el = blasfeo_toc(&timer);
     cout << "el time FE " << el << endl;
-    int N = 1000;
+    int N = 1;
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {
