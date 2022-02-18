@@ -1,8 +1,8 @@
 #include <iostream>
 #include <memory>
 #include "Fatrop.hpp"
-#include "DEBUG/LinearAlgebraEigen.hpp"
-#include "DEBUG/FatropDebugTools.hpp"
+#include "debug/LinearAlgebraEigen.hpp"
+#include "debug/FatropDebugTools.hpp"
 #include <limits>
 using namespace fatrop;
 using namespace std;

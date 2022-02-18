@@ -1,9 +1,9 @@
 #include "Fatrop.hpp"
-#include "SPARSE/SparseOCP.hpp"
-#include "SPARSE/InterfaceMUMPS.hpp"
-#include "DEBUG/FatropDebugTools.hpp"
-#include "AUX/FatropVector.hpp"
-#include "OCP/OCPLSRiccati.hpp"
+#include "sparse/SparseOCP.hpp"
+#include "sparse/InterfaceMUMPS.hpp"
+#include "debug/FatropDebugTools.hpp"
+#include "aux/FatropVector.hpp"
+#include "ocp/OCPLSRiccati.hpp"
 // #include <gperftools/profiler.h>
 using namespace fatrop;
 int main()

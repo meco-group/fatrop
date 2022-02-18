@@ -1,1 +1,1 @@
-#include "SPARSE/InterfaceMUMPS.hpp"
+#include "sparse/InterfaceMUMPS.hpp"

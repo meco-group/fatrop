@@ -1,4 +1,4 @@
-#include "FUNCTION_EVALUATION/CasadiCodegen.hpp"
+#include "function_evaluation/CasadiCodegen.hpp"
 using namespace fatrop;
 using namespace std;
 

@@ -1,13 +1,13 @@
 #include "Fatrop.hpp"
-#include "DEBUG/FatropDebugTools.hpp"
-#include "SPARSE/FatropSparse.hpp"
+#include "debug/FatropDebugTools.hpp"
+#include "sparse/FatropSparse.hpp"
 #include "vector"
 #include "string"
 #include <iostream>
-#include "AUX/FatropVector.hpp"
+#include "aux/FatropVector.hpp"
 #include <memory>
-#include <OCP/BFOCPBasic.hpp>
-#include <OCP/BFOCPAdapter.hpp>
+#include <ocp/BFOCPBasic.hpp>
+#include <ocp/BFOCPAdapter.hpp>
 using namespace std;
 using namespace fatrop;
 

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 #include "BLASFEO_WRAPPER/LinearAlgebraBlasfeo.hpp"
 #include "AUX/LinearAlgebra.hpp"
+=======
+#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "aux/LinearAlgebra.hpp"
+>>>>>>> 458c1a71a05f65d5cfca9a4fa1e32cac12807350
 
 namespace fatrop
 {
@@ -211,6 +216,7 @@ namespace fatrop
         }
     }
     void fatrop_identity(const int m, MAT *sA, const int ai, const int aj)
+<<<<<<< HEAD
     {
         GESE(m, m, 0.0, sA, ai, aj);
         DIARE(m, 1.0, sA, ai, aj);
@@ -221,5 +227,10 @@ namespace fatrop
         {
             MATEL(sA, ai, aj + i) += alpha* VECEL(sx, xi + i);
         }
+=======
+    {
+        GESE(m, m, 0.0, sA, ai, aj);
+        DIARE(m, 1.0, sA, ai, aj);
+>>>>>>> 458c1a71a05f65d5cfca9a4fa1e32cac12807350
     }
 } // namespace fatrop
