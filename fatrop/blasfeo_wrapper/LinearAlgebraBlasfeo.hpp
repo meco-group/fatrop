@@ -171,7 +171,7 @@ namespace fatrop
             return this->mat_;
         }
         /** \brief acces to element of matrix */
-        double &at(const int ai, const int aj) const
+        inline double &at(const int ai, const int aj) const
         {
 #if DEBUG
             assert(ai < nrows_);
@@ -180,11 +180,11 @@ namespace fatrop
             return MATEL(mat_, ai + row_offset_, aj + col_offset_);
         };
         /** \brief get element of matrix */
-        double get_el(const int ai, const int aj) const { return this->at(ai, aj); };
+        inline double get_el(const int ai, const int aj) const { return this->at(ai, aj); };
         /** \brief get number of rows */
-        int nrows() const { return nrows_; };
+        inline int nrows() const { return nrows_; };
         /** \brief get number of cols */
-        int ncols() const { return ncols_; };
+        inline int ncols() const { return ncols_; };
         /** \brief copies all elements from a given fatrop_matrix to this matrix*/
         void operator=(const FatropMat &fm)
         {

@@ -1,8 +1,8 @@
 /**
  *  @file LinearAlgebra.hpp
- *  This file contains some interface classes for use in linear algebra. 
+ *  This file contains some interface classes for use in linear algebra.
  *
-*/
+ */
 #ifndef FATROP_LA_INCLUDED
 #define FATROP_LA_INCLUDED
 #include <iostream>
@@ -23,19 +23,7 @@ namespace fatrop
         virtual int nrows() const = 0;
         /** \brief number of cols */
         virtual int ncols() const = 0;
-        void print()
-        {
-            int n_rows = nrows();
-            int n_cols = ncols();
-            for (int ai = 0; ai < n_rows; ai++)
-            {
-                for (int aj = 0; aj < n_cols; aj++)
-                {
-                    printf("%9.5f ", get_el(ai, aj));
-                }
-                printf("\n");
-            }
-        }
+        void print();
     };
     // special matrices
     /** \brief identity matrix */
@@ -45,7 +33,7 @@ namespace fatrop
         /** \brief constructor */
         eye(int dim) : dim_(dim){};
         /** \brief copy of matrix element */
-        double get_el(const int ai, const int aj) const
+        inline double get_el(const int ai, const int aj) const
         {
             if (ai == aj)
             {
@@ -65,22 +53,14 @@ namespace fatrop
         int dim_;
     };
     /** \brief interface class for matrix representations */
-    class  FatropVec
+    class FatropVec
     {
     public:
         /** \brief copy of matrix element */
         virtual double get_el(const int ai) const = 0;
         /** \brief number of elements */
         virtual int nels() const = 0;
-        void print()
-        {
-            int n_el = nels();
-            for (int ai = 0; ai < n_el; ai++)
-            {
-                printf("%9.5f ", get_el(ai));
-                printf("\n");
-            }
-        }
+        void print();
     };
 } // namespace fatrop
 
