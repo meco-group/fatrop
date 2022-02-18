@@ -29,6 +29,6 @@ foreach(example IN LISTS Examples)
     target_link_libraries(${example} fatrop)
     target_include_directories(${example}
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/fatrop
 )
 endforeach()
