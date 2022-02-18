@@ -6,7 +6,7 @@ namespace fatrop
     class FatropParams: public RefCountedObj
     {
         public:
-        int maxiter = 100;
+        int maxiter = 500;
         double smax = 100.0; 
         double lammax = 1e3;
         double tol = 1e-6;
