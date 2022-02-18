@@ -3,6 +3,13 @@
 
 namespace fatrop
 {
+    void fatrop_dcolsc(int kmax, double alpha, struct blasfeo_dmat *sA, int ai, int aj)
+    {
+        for (int k = 0; k < kmax; k++)
+        {
+            MATEL(sA, ai + k, aj) *= alpha;
+        }
+    }
     // cpy elements form sx to sy but in reversed order to avoid aliasing issues in recursion
     void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi)
     {

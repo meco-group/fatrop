@@ -49,6 +49,7 @@
 #define GESE blasfeo_dgese
 #define DIARE blasfeo_ddiare
 #define COLSC blasfeo_dcolsc
+
 #define MAX(a, b)                   \
     (                               \
         {                           \
@@ -77,6 +78,7 @@ extern "C"
 using namespace std;
 namespace fatrop
 {
+    void fatrop_dcolsc(int kmax, double alpha, struct blasfeo_dmat *sA, int ai, int aj);
     // copy elements from sx to sy but in reversed order to avoid aliasing issues in recursion
     void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi);
     // for debugging purposes
@@ -88,7 +90,7 @@ namespace fatrop
     void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj);
     // B <= B + alpha*A^T (B is mxn)
     void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj);
-    void fatrop_identity(const int m, MAT* sA, const int ai, const int aj);
+    void fatrop_identity(const int m, MAT *sA, const int ai, const int aj);
     void fatrop_drowad(int kmax, double alpha, struct blasfeo_dvec *sx, int xi, struct blasfeo_dmat *sA, int ai, int aj);
 
     // // permute the rows of a matrix struct
@@ -263,7 +265,8 @@ namespace fatrop
             for (int i = 0; i < N_; i++)
             {
                 CREATE_MAT(nrows_.at(i), ncols_.at(i), mat + i, data_p);
-                data_p += (mat + i)->memsize;
+                data_p += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
+                // data_p += (mat + i)->memsize;
             }
             double *d_ptr_end = (double *)data_p;
             for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)
@@ -384,7 +387,7 @@ namespace fatrop
     // class L1Quantity: public CachedQuantity
     // {
     //     // double eval() override{
-    //     //     return 
+    //     //     return
     //     // }
     // };
     // /** \brief decorator for FatropVecBF that allows computation of certain quantities*/

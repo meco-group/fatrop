@@ -182,7 +182,7 @@ namespace fatrop
                                 scaling_factor += zUi * dist_m1;
                                 grad_barrier += mu * dist_m1;
                             }
-                            COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                            COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                             MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                         }
                         // add the penalty
@@ -281,7 +281,7 @@ namespace fatrop
                     // calculate delta_s
                     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
                     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-                    GEMV_T(ng_ineq, nu + nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    GEMV_T(nu + nx,ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
@@ -806,7 +806,7 @@ namespace fatrop
                             {
                                 grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                             }
-                            COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                            COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                             MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                         }
                         // add the penalty
@@ -1033,7 +1033,7 @@ namespace fatrop
                     // calculate delta_s
                     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
                     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-                    GEMV_T(ng_ineq, nu + nx, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {

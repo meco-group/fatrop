@@ -19,7 +19,7 @@ using namespace fatrop;
 int main()
 {
     RefCountPtr<BFOCP> ocptemplatebasic =
-        new BFOCPBasic(BFOCPBasic::from_shared_lib("./../../OCP_specification/f.so", 100));
+        new BFOCPBasic(BFOCPBasic::from_shared_lib("./../../ocp_specification/f.so", 100));
     RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
     RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
     RefCountPtr<FatropParams> params = new FatropParams();
