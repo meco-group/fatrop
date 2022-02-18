@@ -2,7 +2,6 @@
 #include "ocp/BFOCP.hpp"
 #include "ocp/BFOCPAdapter.hpp"
 #include "aux/SmartPtr.hpp"
-#include "aux/FatropMemory.hpp"
 #include "ocp/FatropOCP.hpp"
 #include "ocp/OCPLinearSolver.hpp"
 #include "ocp/OCPLSRiccati.hpp"

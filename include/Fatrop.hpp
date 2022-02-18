@@ -1,6 +1,5 @@
 #ifndef FATROP_INCLUDED
 #define FATROP_INCLUDED
-#include "aux/FatropMemory.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "ocp/OCPKKT.hpp"
 #include "ocp/BFOCPAdapter.hpp"

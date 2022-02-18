@@ -5,7 +5,6 @@
 #include "aux/SmartPtr.hpp"
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
-#include "aux/FatropMemory.hpp"
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"

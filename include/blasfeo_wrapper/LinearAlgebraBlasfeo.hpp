@@ -68,7 +68,6 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include "aux/FatropMemory.hpp"
 #include "aux/LinearAlgebra.hpp"
 #include "aux/FatropVector.hpp"
 #include "aux/Common.hpp"
