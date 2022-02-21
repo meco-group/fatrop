@@ -17,7 +17,7 @@
 using namespace std;
 namespace fatrop
 {
-    /** \brief this class contains all information to represent the KKT system of an equality constrained OCP*/
+    /** \brief this class contains all information to represent the KKT system of an equality constrained OCP */
     class OCPKKTMemory
     {
     public:

@@ -13,26 +13,26 @@ namespace fatrop
         int ai;
         int aj;
     };
-    /** \brief interface class for matrix representations */
+    /** \brief Interface class for matrix representations */
     class FatropMat
     {
     public:
-        /** \brief copy of matrix element */
+        /** \brief Copy of matrix element */
         virtual double get_el(const int ai, const int aj) const = 0;
-        /** \brief number of rows */
+        /** \brief Number of rows */
         virtual int nrows() const = 0;
-        /** \brief number of cols */
+        /** \brief Number of cols */
         virtual int ncols() const = 0;
         void print();
     };
     // special matrices
-    /** \brief identity matrix */
+    /** \brief Identity matrix */
     class eye : public FatropMat
     {
     public:
-        /** \brief constructor */
+        /** \brief Constructor */
         eye(int dim) : dim_(dim){};
-        /** \brief copy of matrix element */
+        /** \brief Copy of matrix element */
         inline double get_el(const int ai, const int aj) const
         {
             if (ai == aj)
@@ -44,21 +44,21 @@ namespace fatrop
                 return 0.0;
             }
         };
-        /** \brief number of rows */
+        /** \brief Number of rows */
         int nrows() const { return dim_; };
-        /** \brief number of cols */
+        /** \brief Number of cols */
         int ncols() const { return dim_; };
 
     private:
         int dim_;
     };
-    /** \brief interface class for matrix representations */
+    /** \brief Interface class for matrix representations */
     class FatropVec
     {
     public:
-        /** \brief copy of matrix element */
+        /** \brief Copy of matrix element */
         virtual double get_el(const int ai) const = 0;
-        /** \brief number of elements */
+        /** \brief Number of elements */
         virtual int nels() const = 0;
         void print();
     };

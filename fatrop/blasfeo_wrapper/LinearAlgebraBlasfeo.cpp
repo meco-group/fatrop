@@ -10,7 +10,7 @@ namespace fatrop
             MATEL(sA, ai + k, aj) *= alpha;
         }
     }
-    // cpy elements form sx to sy but in reversed order to avoid aliasing issues in recursion
+    /** \brief copy elements from sx to sy but in reversed order to avoid aliasing issues in recursion */
     void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi)
     {
         for (int i = m - 1; i >= 0; i--)
@@ -112,7 +112,7 @@ namespace fatrop
         }
     }
 
-    /** \brief returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
+    /** \brief Returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
     MatrixInd max_el(int m, int n, MAT *matr, int ai, int aj)
     {
         MatrixInd res;
