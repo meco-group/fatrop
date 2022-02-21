@@ -14,8 +14,8 @@ namespace fatrop
         {
             for (int i =0; i < nnz; i++)
             {
-                ai.at(i) = tripl.at(i).ai ;
-                aj.at(i) = tripl.at(i).aj ;
+                ai.at(i) = tripl.at(i).ai;
+                aj.at(i) = tripl.at(i).aj;
             }
         };
         virtual void preprocess() = 0;

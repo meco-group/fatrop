@@ -101,7 +101,6 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) override
         {
-
             return ocp_->EvalGrad(
                 &ocpkktmemory_,
                 obj_scale,
