@@ -164,6 +164,9 @@ class FatropOCPCodeGenerator:
               x_sym, stage_params_sym], [densify(Ggineqt)]))
         C.add(Function("gineq", [u_sym, x_sym, stage_params_sym], [
               densify(ineq[:])]))
+        C.add(Function("default_stage_params", [], [
+              densify(self.ocpspec.DefaultStageParams())]))
+        
         C.generate()
         return
 class OptiBuilder:

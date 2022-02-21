@@ -18,6 +18,7 @@ namespace fatrop
                    const int ngI,
                    const int ngF,
                    const int ng_ineq,
+                   const int n_stage_params,
                    const int K,
                    const EvalCasGen &BAbtf,
                    const EvalCasGen &bkf,
@@ -39,6 +40,7 @@ namespace fatrop
                                             ngI_(ngI),
                                             ngF_(ngF),
                                             ng_ineq_(ng_ineq),
+                                            n_stage_params_(n_stage_params),
                                             K_(K),
                                             BAbtf(BAbtf),
                                             bkf(bkf),
@@ -78,13 +80,15 @@ namespace fatrop
             EvalCasGen LFf(handle, "LF");
             EvalCasGen Ggineqtf(handle, "Ggineqt");
             EvalCasGen gineqf(handle, "gineq");
+            EvalCasGen defaultstageparamsf(handle, "gineq");
 
             const int nx = BAbtf.out_n;
             const int nu = BAbtf.out_m - nx - 1;
             const int ngI = GgtIf.out_n;
             const int ngF = GgtFf.out_n;
             const int ng_ineq = Ggineqtf.out_n;
-            return BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, K,
+            const int n_stage_params = defaultstageparamsf.out_m;
+            return BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, n_stage_params, K,
                               BAbtf,
                               bkf,
                               RSQrqtIf,
@@ -130,7 +134,7 @@ namespace fatrop
         }
         int get_n_stage_params_k(const int k) const override
         {
-            return 0;
+            return n_stage_params_;
         };
         int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
@@ -153,7 +157,7 @@ namespace fatrop
                          const double *lam_dyn_k,
                          const double *lam_eq_k,
                          const double *lam_ineq_k,
-            const double *stage_params_k,
+                         const double *stage_params_k,
                          MAT *res,
                          const int k) override
         {
@@ -294,6 +298,7 @@ namespace fatrop
         const int ngI_;
         const int ngF_;
         const int ng_ineq_;
+        const int n_stage_params_;
         const int K_;
         EvalCasGen BAbtf;
         EvalCasGen bkf;
