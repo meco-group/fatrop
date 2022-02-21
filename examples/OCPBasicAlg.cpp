@@ -32,14 +32,21 @@ int main()
     RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
     blasfeo_timer timer;
     VECSE(fatropdata->x_curr.nels(), 1.0, (VEC *)fatropdata->x_curr, 0);
-    VECSE(fatropdata->s_lower.nels(), 0.0, (VEC *) fatropdata->s_lower, 0);
-    VECSE(fatropdata->s_upper.nels(), INFINITY, (VEC *) fatropdata->s_upper, 0);
+    VECSE(fatropdata->s_lower.nels(), 0.0, (VEC *)fatropdata->s_lower, 0);
+    VECSE(fatropdata->s_upper.nels(), INFINITY, (VEC *)fatropdata->s_upper, 0);
     // VECSE(fatropdata->s_lower.nels(), -INFINITY, (VEC *) fatropdata->s_lower, 0);
     // VECSE(fatropdata->s_upper.nels(), 0.0, (VEC *) fatropdata->s_upper, 0);
-    fatropdata->Initialize();
-    blasfeo_tic(&timer);
-    fatropalg->Optimize();
-    double el = blasfeo_toc(&timer);
-    cout << "el time " << el << endl;
+    double el = 0.0;
+    const int N = 100;
+    for (int i = 0; i < N; i++)
+    {
+        VECSE(fatropdata->x_curr.nels(), 1.0, (VEC *)fatropdata->x_curr, 0);
+        fatropdata->Initialize();
+        blasfeo_tic(&timer);
+        fatropalg->Optimize();
+        el += blasfeo_toc(&timer);
+    }
+    fatropalg->journaller_->PrintIterations();
+    cout << "el time " << el/N << endl;
     // journaller->PrintIterations();
 }

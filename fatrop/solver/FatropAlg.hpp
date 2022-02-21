@@ -71,7 +71,7 @@ namespace fatrop
             fatropdata_->BoundSlacks();
             if (fatropdata_->LamLinfCalc() < lammax)
             {
-                cout << "accepted lam " << endl;
+                // cout << "accepted lam " << endl;
                 fatropdata_->AcceptInitialization();
             }
             EvalCVCurr();
@@ -94,13 +94,13 @@ namespace fatrop
                 it_curr.ls = ls;
                 it_curr.reg = deltaw;
                 journaller_->Push();
-                journaller_->PrintIterations();
+                // journaller_->PrintIterations();
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
-                    cout << "found solution :) " << endl;
-                    cout << "riccati time " << sd_time << endl;
-                    cout << "hess time " << hess_time << endl;
+                    // cout << "found solution :) " << endl;
+                    // cout << "riccati time " << sd_time << endl;
+                    // cout << "hess time " << hess_time << endl;
                     return 0;
                 }
                 // update mu
