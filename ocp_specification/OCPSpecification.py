@@ -10,6 +10,7 @@ class OCPSpecificationInterface:
         self.ngI = 0
         self.ngF = 0
         self.ngIneq = 0
+        self.n_stage_params = 0
         self.SetProblemDimensions()
 
     @abstractmethod
@@ -17,28 +18,30 @@ class OCPSpecificationInterface:
         pass
 
     @abstractmethod
-    def Dynamics(self, uk, xk):
+    def Dynamics(self, uk, xk, stage_params):
         pass
 
     @abstractmethod
-    def StageCost(self, uk, xk):
+    def StageCost(self, uk, xk, stage_params):
         pass
 
     @abstractmethod
-    def StageCostFinal(self, xK):
+    def StageCostFinal(self, xK, stage_params):
         pass
 
     @abstractmethod
-    def EqConstrInitial(self, uk, xk):
+    def EqConstrInitial(self, uk, xk, stage_params):
         return SX.zeros(0)
 
     @abstractmethod
-    def EqConstrFinal(self, xK):
+    def EqConstrFinal(self, xK, stage_params):
         return SX.zeros(0)
-
     @abstractmethod
-    def StageWiseInequality(self, uk, xk):
+    def StageWiseInequality(self, uk, xk, stage_params):
         return SX.zeros(0)
+    @abstractmethod
+    def DefaultStageParams(self):
+        return SX.zeros(self.n_stage_params)
 
 
 class FatropOCPCodeGenerator:
@@ -50,16 +53,18 @@ class FatropOCPCodeGenerator:
         # get problem dimensions
         nu = self.ocpspec.nu
         nx = self.ocpspec.nx
+        n_stage_params = self.ocpspec.n_stage_params
         # make symbols for variables
         u_sym = SX.sym("inputs", nu)
         x_sym = SX.sym("states", nx)
+        stage_params_sym = SX.sym("states", n_stage_params)
         # make expressions for functions
-        dynamics = self.ocpspec.Dynamics(u_sym, x_sym)
-        Lk = self.ocpspec.StageCost(u_sym, x_sym)
-        LF = self.ocpspec.StageCostFinal(x_sym)
-        eqI = self.ocpspec.EqConstrInitial(u_sym, x_sym)
-        eqF = self.ocpspec.EqConstrFinal(x_sym)
-        ineq = self.ocpspec.StageWiseInequality(u_sym, x_sym)[1]
+        dynamics = self.ocpspec.Dynamics(u_sym, x_sym, stage_params_sym)
+        Lk = self.ocpspec.StageCost(u_sym, x_sym, stage_params_sym)
+        LF = self.ocpspec.StageCostFinal(x_sym, stage_params_sym)
+        eqI = self.ocpspec.EqConstrInitial(u_sym, x_sym, stage_params_sym)
+        eqF = self.ocpspec.EqConstrFinal(x_sym, stage_params_sym)
+        ineq = self.ocpspec.StageWiseInequality(u_sym, x_sym, stage_params_sym)[1]
         ngI = eqI.shape[0]
         ngF = eqF.shape[0]
         ngIneq = ineq.shape[0]
@@ -77,10 +82,10 @@ class FatropOCPCodeGenerator:
         b = (-stateskp1 + dynamics)[:]
         BAbt[nu+nx, :] = b
         C.add(
-            Function("BAbt", [stateskp1, u_sym, x_sym], [densify(BAbt)]))
+            Function("BAbt", [stateskp1, u_sym, x_sym, stage_params_sym], [densify(BAbt)]))
         # b
         C.add(Function("bk", [stateskp1, u_sym,
-                              x_sym], [densify(b)]))
+                              x_sym, stage_params_sym], [densify(b)]))
         # RSQrqtI
         RSQrqtI = SX.zeros(nu+nx+1, nu + nx)
         [RSQI, rqI] = hessian(Lk, vertcat(u_sym, x_sym))
@@ -95,10 +100,10 @@ class FatropOCPCodeGenerator:
         RSQrqtI[:nu+nx, :] = RSQI
         RSQrqtI[nu+nx, :] = rqI[:]
         C.add(Function("RSQrqtI", [obj_scale, u_sym,
-              x_sym, dual_dyn, dual_eqI, dualIneq], [densify(RSQrqtI)]))
+              x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym], [densify(RSQrqtI)]))
         rqI
         C.add(Function("rqI", [obj_scale,
-              u_sym, x_sym], [densify(rqI)]))
+              u_sym, x_sym, stage_params_sym], [densify(rqI)]))
         # RSQrqt
         RSQrqt = SX.zeros(nu+nx+1, nu + nx)
         [RSQ, rq] = hessian(Lk, vertcat(u_sym, x_sym))
@@ -110,13 +115,13 @@ class FatropOCPCodeGenerator:
         RSQrqt[:nu+nx, :] = RSQ
         RSQrqt[nu+nx, :] = rq[:]
         C.add(Function("RSQrqt", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqI, dualIneq], [densify(RSQrqt)]))
+              dual_dyn, dual_eqI, dualIneq, stage_params_sym], [densify(RSQrqt)]))
         # rqF
         C.add(Function("rqk", [obj_scale,
-              u_sym, x_sym], [densify(rq)]))
+              u_sym, x_sym, stage_params_sym], [densify(rq)]))
         # Lk
         C.add(Function("Lk", [obj_scale, u_sym,
-              x_sym], [densify(Lk)]))
+              x_sym, stage_params_sym], [densify(Lk)]))
         # RSQrqtF
         RSQrqtF = SX.zeros(nx+1, nx)
         [RSQF, rqF] = hessian(LF, vertcat(x_sym))
@@ -128,36 +133,36 @@ class FatropOCPCodeGenerator:
         RSQrqtF[:nx, :] = RSQF
         RSQrqtF[nx, :] = rqF[:]
         C.add(Function("RSQrqtF", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqF, dualIneq], [densify(RSQrqtF)]))
+              dual_dyn, dual_eqF, dualIneq, stage_params_sym], [densify(RSQrqtF)]))
         # rqF
         C.add(Function("rqF", [obj_scale,
-              u_sym, x_sym], [densify(rqF)]))
+              u_sym, x_sym, stage_params_sym], [densify(rqF)]))
         # LF
         C.add(Function("LF", [obj_scale, u_sym,
-              x_sym], [densify(LF)]))
+              x_sym, stage_params_sym], [densify(LF)]))
         # GgtI
         GgtI = SX.zeros(nu+nx+1, ngI)
         GgtI[:nu+nx,
              :] = jacobian(eqI, vertcat(u_sym, x_sym)).T
         GgtI[nu+nx, :] = eqI[:].T
-        C.add(Function("GgtI", [u_sym, x_sym], [densify(GgtI)]))
+        C.add(Function("GgtI", [u_sym, x_sym, stage_params_sym], [densify(GgtI)]))
         # g_I
-        C.add(Function("gI", [u_sym, x_sym], [densify(eqI[:])]))
+        C.add(Function("gI", [u_sym, x_sym, stage_params_sym], [densify(eqI[:])]))
         # GgtF
         GgtF = SX.zeros(nx+1, ngF)
         GgtF[:nx, :] = jacobian(eqF, x_sym).T
         GgtF[nx, :] = eqF[:].T
-        C.add(Function("GgtF", [u_sym, x_sym], [densify(GgtF)]))
+        C.add(Function("GgtF", [u_sym, x_sym, stage_params_sym], [densify(GgtF)]))
         # g_F
-        C.add(Function("gF", [u_sym, x_sym], [densify(eqF[:])]))
+        C.add(Function("gF", [u_sym, x_sym, stage_params_sym], [densify(eqF[:])]))
         # Ggineqt
         Ggineqt = SX.zeros(nu+nx+1, ngIneq)
         Ggineqt[:nu+nx,
                 :] = jacobian(ineq, vertcat(u_sym, x_sym)).T
         Ggineqt[nu+nx, :] = ineq[:].T
         C.add(Function("Ggineqt", [u_sym,
-              x_sym], [densify(Ggineqt)]))
-        C.add(Function("gineq", [u_sym, x_sym], [
+              x_sym, stage_params_sym], [densify(Ggineqt)]))
+        C.add(Function("gineq", [u_sym, x_sym, stage_params_sym], [
               densify(ineq[:])]))
         C.generate()
         return
