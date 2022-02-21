@@ -1,12 +1,13 @@
 from casadi import *
 class RockDyns:
-   def dynamics(self, uk, xk, dt = 0.1):
-       # split up state into its components position, invariants and orientation (cf. above)
-       nx = 9
+   def __init__(self):
        self.ind_pos = list(range(0,2))
        self.ind_rot = list(range(2,6))
        self.ind_vel = list(range(6,8))
        self.ind_omega = [8]
+   def dynamics(self, uk, xk, dt = 0.1):
+       # split up state into its components position, invariants and orientation (cf. above)
+       nx = 9
        self.xk_pos = xk[self.ind_pos]
        self.xk_rot = reshape(xk[self.ind_rot], 2,2)
        self.xk_vel = xk[self.ind_vel]

@@ -1,4 +1,235 @@
+from abc import abstractmethod
 from casadi import *
+
+
+class OCPSpecificationInterface:
+    def __init__(self):
+        # problem dimensions
+        self.nx = 0
+        self.nu = 0
+        self.ngI = 0
+        self.ngF = 0
+        self.ngIneq = 0
+        self.SetProblemDimensions()
+
+    @abstractmethod
+    def SetProblemDimensions(self):
+        pass
+
+    @abstractmethod
+    def Dynamics(self, uk, xk):
+        pass
+
+    @abstractmethod
+    def StageCost(self, uk, xk):
+        pass
+
+    @abstractmethod
+    def StageCostFinal(self, xK):
+        pass
+
+    @abstractmethod
+    def EqConstrInitial(self, uk, xk):
+        return SX.zeros(0)
+
+    @abstractmethod
+    def EqConstrFinal(self, xK):
+        return SX.zeros(0)
+
+    @abstractmethod
+    def StageWiseInequality(self, uk, xk):
+        return SX.zeros(0)
+
+
+class FatropOCPCodeGenerator:
+    def __init__(self, ocpspec):
+        self.ocpspec = ocpspec
+
+    def generate_code(self, filename):
+        C = CodeGenerator(filename)
+        # get problem dimensions
+        nu = self.ocpspec.nu
+        nx = self.ocpspec.nx
+        # make symbols for variables
+        u_sym = SX.sym("inputs", nu)
+        x_sym = SX.sym("states", nx)
+        # make expressions for functions
+        dynamics = self.ocpspec.Dynamics(u_sym, x_sym)
+        Lk = self.ocpspec.StageCost(u_sym, x_sym)
+        LF = self.ocpspec.StageCostFinal(x_sym)
+        eqI = self.ocpspec.EqConstrInitial(u_sym, x_sym)
+        eqF = self.ocpspec.EqConstrFinal(x_sym)
+        ineq = self.ocpspec.StageWiseInequality(u_sym, x_sym)[1]
+        ngI = eqI.shape[0]
+        ngF = eqF.shape[0]
+        ngIneq = ineq.shape[0]
+        # make symbols for dual variables
+        dual_dyn = SX.sym("d_dyn", nx)
+        dual_eqI = SX.sym("d_EqI", ngI)
+        dualIneq = SX.sym("dualineq", ngIneq)
+        dual_eqF = SX.sym("d_EqF", ngF)
+        obj_scale = SX.sym("obj_scale")
+        # BAbt
+        stateskp1 = SX.sym("states_kp1", nx)
+        BAbt = SX.zeros(nu+nx+1, nx)
+        BAbt[:nu+nx,
+             :] = jacobian(dynamics, vertcat(u_sym, x_sym)).T
+        b = (-stateskp1 + dynamics)[:]
+        BAbt[nu+nx, :] = b
+        C.add(
+            Function("BAbt", [stateskp1, u_sym, x_sym], [densify(BAbt)]))
+        # b
+        C.add(Function("bk", [stateskp1, u_sym,
+                              x_sym], [densify(b)]))
+        # RSQrqtI
+        RSQrqtI = SX.zeros(nu+nx+1, nu + nx)
+        [RSQI, rqI] = hessian(Lk, vertcat(u_sym, x_sym))
+        if ngI > 0:
+            RSQI += hessian(dual_eqI.T@eqI,
+                            vertcat(u_sym, x_sym))[0]
+        RSQI += hessian(dual_dyn.T@dynamics,
+                        vertcat(u_sym, x_sym))[0]
+        if ngIneq > 0:
+            RSQI += hessian(dualIneq.T@ineq,
+                            vertcat(u_sym, x_sym))[0]
+        RSQrqtI[:nu+nx, :] = RSQI
+        RSQrqtI[nu+nx, :] = rqI[:]
+        C.add(Function("RSQrqtI", [obj_scale, u_sym,
+              x_sym, dual_dyn, dual_eqI, dualIneq], [densify(RSQrqtI)]))
+        rqI
+        C.add(Function("rqI", [obj_scale,
+              u_sym, x_sym], [densify(rqI)]))
+        # RSQrqt
+        RSQrqt = SX.zeros(nu+nx+1, nu + nx)
+        [RSQ, rq] = hessian(Lk, vertcat(u_sym, x_sym))
+        RSQ += hessian(dual_dyn.T@dynamics,
+                       vertcat(u_sym, x_sym))[0]
+        if ngIneq > 0:
+            RSQ += hessian(dualIneq.T@ineq,
+                           vertcat(u_sym, x_sym))[0]
+        RSQrqt[:nu+nx, :] = RSQ
+        RSQrqt[nu+nx, :] = rq[:]
+        C.add(Function("RSQrqt", [obj_scale, u_sym, x_sym,
+              dual_dyn, dual_eqI, dualIneq], [densify(RSQrqt)]))
+        # rqF
+        C.add(Function("rqk", [obj_scale,
+              u_sym, x_sym], [densify(rq)]))
+        # Lk
+        C.add(Function("Lk", [obj_scale, u_sym,
+              x_sym], [densify(Lk)]))
+        # RSQrqtF
+        RSQrqtF = SX.zeros(nx+1, nx)
+        [RSQF, rqF] = hessian(LF, vertcat(x_sym))
+        if ngF > 0:
+            RSQF += hessian(dual_eqF.T@eqF,
+                            vertcat(x_sym))[0]
+        # if ngIneq>-1:
+        #     RSQF += hessian(dualIneq.T@ineq, vertcat(u_sym, x_sym))[-1]
+        RSQrqtF[:nx, :] = RSQF
+        RSQrqtF[nx, :] = rqF[:]
+        C.add(Function("RSQrqtF", [obj_scale, u_sym, x_sym,
+              dual_dyn, dual_eqF, dualIneq], [densify(RSQrqtF)]))
+        # rqF
+        C.add(Function("rqF", [obj_scale,
+              u_sym, x_sym], [densify(rqF)]))
+        # LF
+        C.add(Function("LF", [obj_scale, u_sym,
+              x_sym], [densify(LF)]))
+        # GgtI
+        GgtI = SX.zeros(nu+nx+1, ngI)
+        GgtI[:nu+nx,
+             :] = jacobian(eqI, vertcat(u_sym, x_sym)).T
+        GgtI[nu+nx, :] = eqI[:].T
+        C.add(Function("GgtI", [u_sym, x_sym], [densify(GgtI)]))
+        # g_I
+        C.add(Function("gI", [u_sym, x_sym], [densify(eqI[:])]))
+        # GgtF
+        GgtF = SX.zeros(nx+1, ngF)
+        GgtF[:nx, :] = jacobian(eqF, x_sym).T
+        GgtF[nx, :] = eqF[:].T
+        C.add(Function("GgtF", [u_sym, x_sym], [densify(GgtF)]))
+        # g_F
+        C.add(Function("gF", [u_sym, x_sym], [densify(eqF[:])]))
+        # Ggineqt
+        Ggineqt = SX.zeros(nu+nx+1, ngIneq)
+        Ggineqt[:nu+nx,
+                :] = jacobian(ineq, vertcat(u_sym, x_sym)).T
+        Ggineqt[nu+nx, :] = ineq[:].T
+        C.add(Function("Ggineqt", [u_sym,
+              x_sym], [densify(Ggineqt)]))
+        C.add(Function("gineq", [u_sym, x_sym], [
+              densify(ineq[:])]))
+        C.generate()
+        return
+class OptiBuilder:
+    def __init__(self, ocpspec):
+        self.ocpspec = ocpspec
+    def set_up_Opti(self, K):
+        # all scales are set to 1.0
+        # get problem dimensions
+        nu = self.ocpspec.nu
+        nx = self.ocpspec.nx
+        self.opti = Opti()
+        self.N_vars = K*nx + (K-1)*nu
+        self.opti_vars = self.opti.variable(self.N_vars)
+        self.x_vars = MX.zeros(nx, K)
+        self.u_vars = MX.zeros(nu, K)
+        # make symbols for variables
+        u_sym = SX.sym("inputs", nu)
+        x_sym = SX.sym("states", nx)
+        obj_scale = SX.sym("obj_scale", 1)
+        # make expressions for functions
+        dynamics = self.ocpspec.Dynamics(u_sym, x_sym)
+        Lk = self.ocpspec.StageCost(u_sym, x_sym)
+        LF = self.ocpspec.StageCostFinal(x_sym)
+        eqI = self.ocpspec.EqConstrInitial(u_sym, x_sym)
+        eqF = self.ocpspec.EqConstrFinal(x_sym)
+        lower, ineq, upper = self.ocpspec.StageWiseInequality(u_sym, x_sym)
+        ngI = eqI.shape[0]
+        ngF = eqF.shape[0]
+        ngIneq = ineq.shape[0]
+        for k in range(K-1):
+            offs = k*(nu+nx)
+            self.u_vars[:, k] = self.opti_vars[offs:offs+nu]
+            self.x_vars[:, k] = self.opti_vars[offs+nu:offs+nu+nx]
+        offs = (K-1)*(nu+nx)
+        self.x_vars[:, K-1] = self.opti_vars[offs:offs+nx]
+        Lkf = Function(
+            "Lk", [obj_scale, x_sym, u_sym], [Lk])
+        LkFf = Function("LF", [obj_scale, x_sym], [LF])
+        stateskp1 = SX.sym("stateskp1", nx)
+        Dynamcisf = Function(
+            "F", [stateskp1, x_sym, u_sym], [-stateskp1 + dynamics])
+        if ngI > 0:
+            EqIf = Function("eqI", [x_sym, u_sym], [eqI])
+            self.opti.subject_to(
+                EqIf(self.x_vars[:, 0], self.u_vars[:, 0]) == 0.0)
+        if ngF > 0:
+            EqFf = Function("eqF", [x_sym], [eqF])
+            self.opti.subject_to(EqFf(self.x_vars[:, K-1]) == 0.0)
+        J = 0
+        for k in range(K-1):
+            J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k])
+            self.opti.subject_to(
+                Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k]) == 0.0)
+        if ngIneq > 0:
+            Ineqf = Function("ineqf", [u_sym, x_sym], [ineq])
+            for k in range(K-1):
+                for i in range(ngIneq):
+                    if lower[i] == -inf:
+                        # self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                        self.opti.subject_to(upper[i] > Ineqf(
+                            self.u_vars[:, k], self.x_vars[:, k])[i])
+                    elif upper[i] == inf:
+                        self.opti.subject_to(lower[i] < Ineqf(
+                            self.u_vars[:, k], self.x_vars[:, k])[i])
+                    else:
+                        self.opti.subject_to(lower[i] < Ineqf(
+                            self.u_vars, self.x_vars)[i] < upper[i])
+        J += LkFf(1.0, self.x_vars[:, K-1])
+        self.opti.minimize(J)
+        return self.opti
+    pass
 
 
 # This class can be used to specify OCP's with intial and final constraints and generate necessary code for it.
@@ -44,6 +275,7 @@ class OptimalControlProblem:
         self.ngF = eq.shape[0]
         self.dual_eqF = SX.sym("dual_eqF", self.ngF)
         self.eqF = eq
+
     def set_ineq(self, ineq, lower, upper):
         # todo no ineq on final stage x
         self.ngIneq = ineq.shape[0]
@@ -85,17 +317,20 @@ class OptimalControlProblem:
             J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k])
             self.opti.subject_to(
                 Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k]) == 0.0)
-        if self.ngIneq>0:
+        if self.ngIneq > 0:
             Ineqf = Function("ineqf", [self.u_sym, self.x_sym], [self.ineq])
             for k in range(K-1):
                 for i in range(self.ngIneq):
                     if self.lower[i] == -inf:
                         # self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
-                        self.opti.subject_to(self.upper[i] >Ineqf(self.u_vars[:,k], self.x_vars[:,k])[i])
+                        self.opti.subject_to(self.upper[i] > Ineqf(
+                            self.u_vars[:, k], self.x_vars[:, k])[i])
                     elif self.upper[i] == inf:
-                        self.opti.subject_to(self.lower[i] <Ineqf(self.u_vars[:,k], self.x_vars[:,k])[i])
+                        self.opti.subject_to(self.lower[i] < Ineqf(
+                            self.u_vars[:, k], self.x_vars[:, k])[i])
                     else:
-                        self.opti.subject_to(self.lower[i] <Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                        self.opti.subject_to(self.lower[i] < Ineqf(
+                            self.u_sym, self.x_sym)[i] < self.upper[i])
         J += LkFf(1.0, self.x_vars[:, K-1])
         self.opti.minimize(J)
         return self.opti
@@ -107,7 +342,7 @@ class OptimalControlProblem:
         BAbt = SX.zeros(self.nu+self.nx+1, self.nx)
         BAbt[:self.nu+self.nx,
              :] = jacobian(self.dynamics, vertcat(self.u_sym, self.x_sym)).T
-        b = (-stateskp1 +  self.dynamics)[:]
+        b = (-stateskp1 + self.dynamics)[:]
         BAbt[self.nu+self.nx, :] = b
         C.add(
             Function("BAbt", [stateskp1, self.u_sym, self.x_sym], [densify(BAbt)]))
@@ -122,8 +357,9 @@ class OptimalControlProblem:
                             vertcat(self.u_sym, self.x_sym))[0]
         RSQI += hessian(self.dual_dyn.T@self.dynamics,
                         vertcat(self.u_sym, self.x_sym))[0]
-        if self.ngIneq>0:
-            RSQI += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[0]
+        if self.ngIneq > 0:
+            RSQI += hessian(self.dualIneq.T@self.ineq,
+                            vertcat(self.u_sym, self.x_sym))[0]
         RSQrqtI[:self.nu+self.nx, :] = RSQI
         RSQrqtI[self.nu+self.nx, :] = rqI[:]
         C.add(Function("RSQrqtI", [self.obj_scale, self.u_sym,
@@ -136,15 +372,19 @@ class OptimalControlProblem:
         [RSQ, rq] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
         RSQ += hessian(self.dual_dyn.T@self.dynamics,
                        vertcat(self.u_sym, self.x_sym))[0]
-        if self.ngIneq>0:
-            RSQ += hessian(self.dualIneq.T@self.ineq, vertcat(self.u_sym, self.x_sym))[0]
+        if self.ngIneq > 0:
+            RSQ += hessian(self.dualIneq.T@self.ineq,
+                           vertcat(self.u_sym, self.x_sym))[0]
         RSQrqt[:self.nu+self.nx, :] = RSQ
         RSQrqt[self.nu+self.nx, :] = rq[:]
-        C.add(Function("RSQrqt", [self.obj_scale, self.u_sym, self.x_sym,self.dual_dyn, self.dual_eqI, self.dualIneq], [densify(RSQrqt)]))
+        C.add(Function("RSQrqt", [self.obj_scale, self.u_sym, self.x_sym,
+              self.dual_dyn, self.dual_eqI, self.dualIneq], [densify(RSQrqt)]))
         # rqF
-        C.add(Function("rqk", [self.obj_scale, self.u_sym, self.x_sym], [densify(rq)]))
+        C.add(Function("rqk", [self.obj_scale,
+              self.u_sym, self.x_sym], [densify(rq)]))
         # Lk
-        C.add(Function("Lk", [self.obj_scale, self.u_sym, self.x_sym], [densify(self.Lk)]))
+        C.add(Function("Lk", [self.obj_scale, self.u_sym,
+              self.x_sym], [densify(self.Lk)]))
         # RSQrqtF
         RSQrqtF = SX.zeros(self.nx+1, self.nx)
         [RSQF, rqF] = hessian(self.LF, vertcat(self.x_sym))
@@ -158,9 +398,11 @@ class OptimalControlProblem:
         C.add(Function("RSQrqtF", [self.obj_scale, self.u_sym, self.x_sym,
               self.dual_dyn, self.dual_eqF, self.dualIneq], [densify(RSQrqtF)]))
         # rqF
-        C.add(Function("rqF", [self.obj_scale, self.u_sym, self.x_sym], [densify(rqF)]))
+        C.add(Function("rqF", [self.obj_scale,
+              self.u_sym, self.x_sym], [densify(rqF)]))
         # LF
-        C.add(Function("LF", [self.obj_scale, self.u_sym, self.x_sym], [densify(self.LF)]))
+        C.add(Function("LF", [self.obj_scale, self.u_sym,
+              self.x_sym], [densify(self.LF)]))
         # GgtI
         GgtI = SX.zeros(self.nu+self.nx+1, self.ngI)
         GgtI[:self.nu+self.nx,
@@ -178,9 +420,12 @@ class OptimalControlProblem:
         C.add(Function("gF", [self.u_sym, self.x_sym], [densify(self.eqF[:])]))
         # Ggineqt
         Ggineqt = SX.zeros(self.nu+self.nx+1, self.ngIneq)
-        Ggineqt[:self.nu+self.nx, :] = jacobian(self.ineq, vertcat(self.u_sym, self.x_sym)).T
-        Ggineqt[self.nu+self.nx, :] =  self.ineq[:].T
-        C.add(Function("Ggineqt", [self.u_sym, self.x_sym], [densify(Ggineqt)]))
-        C.add(Function("gineq", [self.u_sym, self.x_sym], [densify(self.ineq[:])]))
+        Ggineqt[:self.nu+self.nx,
+                :] = jacobian(self.ineq, vertcat(self.u_sym, self.x_sym)).T
+        Ggineqt[self.nu+self.nx, :] = self.ineq[:].T
+        C.add(Function("Ggineqt", [self.u_sym,
+              self.x_sym], [densify(Ggineqt)]))
+        C.add(Function("gineq", [self.u_sym, self.x_sym], [
+              densify(self.ineq[:])]))
         C.generate()
         return
