@@ -44,6 +44,7 @@ sparse/InterfaceMUMPS.hpp                   sparse/InterfaceMUMPS.cpp
 sparse/InterfacePardiso.hpp                 sparse/InterfacePardiso.cpp
 sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
+json/json.h json/json.cpp
 )
 set(FATROPHEADERS
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp

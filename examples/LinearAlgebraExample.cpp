@@ -4,10 +4,40 @@
 #include "debug/LinearAlgebraEigen.hpp"
 #include "debug/FatropDebugTools.hpp"
 #include <limits>
+#include "json/json.h"
 using namespace fatrop;
 using namespace std;
 int main()
 {
+    // Create the input
+    std::string input = "{ \"hello\": \"world\" }";
+
+    // Parse the input
+    json::jobject result = json::jobject::parse(input);
+
+    // Get a value
+    std::string value = (std::string)result.get("hello");
+
+    // Add entries
+    json::jobject example;
+    example["int"] = 123;
+    example["float"] = 12.3f;
+    example["string"] = "test string";
+    int test_array[3] = {1, 2, 3};
+    example["array"] = std::vector<int>(test_array, test_array + 3);
+    std::string test_string_array[2] = {"hello", "world"};
+    example["strarray"] = std::vector<std::string>(test_string_array, test_string_array + 2);
+    example["emptyarray"] = std::vector<std::string>();
+    example["boolean"].set_boolean(true);
+    example["null"].set_null();
+    // Serialize the new object
+    std::string serial = (std::string)example;
+    cout << serial << endl;
+    // get new object
+    json::jobject res = json::jobject::parse(serial);
+    // json::jobject::const_value res2 = json::jobject::parse(res.get("array"));
+    // cout << (int)res2.array(0) << endl;
+    // vector<int> testarray = res2.get_number_array<int>();
     blasfeo_dmat sA;
     blasfeo_dmat sB;
     blasfeo_dmat sC;

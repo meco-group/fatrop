@@ -94,7 +94,7 @@ namespace fatrop
                 it_curr.ls = ls;
                 it_curr.reg = deltaw;
                 journaller_->Push();
-                // journaller_->PrintIterations();
+                journaller_->PrintIterations();
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
