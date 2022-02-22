@@ -19,8 +19,7 @@ namespace fatrop
         int n_el = nels();
         for (int ai = 0; ai < n_el; ai++)
         {
-            printf("%9.5f ", get_el(ai));
-            printf("\n");
+            printf("%9.5f\n", get_el(ai));
         }
     }
 }
