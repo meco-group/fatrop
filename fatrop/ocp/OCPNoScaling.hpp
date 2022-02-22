@@ -26,4 +26,4 @@ namespace fatrop
     };
 
 } // namespace fatrop
-#endif // !SCALINGMETHODINCLUDEDLUDED
+#endif // !SCALINGMETHODINCLUDED

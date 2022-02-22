@@ -36,7 +36,7 @@ namespace fatrop
             }
             return false;
         }
-        bool IsAcceptable(const FilterData &fdin)
+        bool IsAcceptable(const FilterData &fdin) const
         {
             // run over filterdata_ elements
             for (vector<double>::size_type k = 0; k < filterdata_.size(); k++)

@@ -10,7 +10,7 @@
 namespace fatrop
 {
 
-    /** \brief convert fatrop_matrix to Eigen matrix, only used for testing/debugging*/
+    /** \brief convert fatrop_matrix to Eigen matrix, only used for testing/debugging */
     class Eig : public Eigen::MatrixXd, public FatropMat
     {
     public:

@@ -10,7 +10,7 @@ namespace fatrop
     class OCPInitializer
     {
     public:
-        /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !!*/
+        /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !! */
         int AdaptKKTInitial(
             OCPKKTMemory *OCP,
             const FatropVecBF &grad,

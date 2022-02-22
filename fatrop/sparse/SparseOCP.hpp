@@ -13,8 +13,8 @@ namespace fatrop
         Sparse_OCP(const OCPDims &dims, OCPKKTMemory &OCP, bool Guzero = false) : dims(dims)
         {
             int K = dims.K;
-            c_vec = vector<eq_sp>(dims.K, nullptr);
-            c_dyn_vec = vector<eq_sp>(dims.K - 1, nullptr);
+            c_vec = vector<eq_sp>(K, nullptr);
+            c_dyn_vec = vector<eq_sp>(K - 1, nullptr);
             // initialize variables
             for (int k = 0; k < K - 1; k++)
             {
