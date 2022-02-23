@@ -17,7 +17,7 @@ namespace fatrop
         int get_ngk(const int k) const override { return ng_.at(k); };
         int get_ng_ineq_k(const int k) const override { return 0; };
         int get_n_stage_params_k(const int k) const override { return 0; };
-        int get_n_global_parms() const override{return 0;};
+        int get_n_global_parmas() const override{return 0;};
         int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
                        const double *states_k,

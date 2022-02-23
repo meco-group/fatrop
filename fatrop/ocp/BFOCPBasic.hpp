@@ -132,7 +132,7 @@ namespace fatrop
             }
             return ng_ineq_;
         }
-        int get_n_global_parms() const override { return 0; };
+        int get_n_global_parmas() const override { return 0; };
         int get_n_stage_params_k(const int k) const override
         {
             return n_stage_params_;

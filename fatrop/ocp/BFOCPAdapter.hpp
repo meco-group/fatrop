@@ -12,7 +12,7 @@ namespace fatrop
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ngineqexpr(RefCountPtr<BFOCP>(ocptempl_)), nstageparamsexpr(RefCountPtr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl->get_n_global_parms(), 0.0), ocptempl(ocptempl_)
+        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ngineqexpr(RefCountPtr<BFOCP>(ocptempl_)), nstageparamsexpr(RefCountPtr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
         {
         }
         int evalHess(

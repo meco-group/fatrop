@@ -14,7 +14,7 @@ namespace fatrop
         virtual int get_nuk(const int k) const = 0;
         virtual int get_ngk(const int k) const = 0;
         virtual int get_n_stage_params_k(const int k) const = 0;
-        virtual int get_n_global_parms() const = 0;
+        virtual int get_n_global_parmas() const = 0;
         virtual int get_ng_ineq_k(const int k) const = 0;
         virtual int get_horizon_length() const = 0;
         virtual int eval_BAbtk(

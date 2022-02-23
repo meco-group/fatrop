@@ -18,17 +18,17 @@ class TraGenSpec(OCPSpecificationInterface):
         self.nx = 12
         self.nu = 3
         self.n_stage_params = 1 + 3 + 3 # dt, 3 invariants, 3 end_pos
-    def Dynamics(self, uk, xk, stage_params):
+    def Dynamics(self, uk, xk, stage_params, global_params):
         return self.fsdyns.dynamics(uk, xk, stage_params[self.ind_params_dt])
-    def StageCost(self, uk, xk, stage_params):
+    def StageCost(self, uk, xk, stage_params, global_params):
         err_invars = self.w_invars*(uk- stage_params[self.ind_params_inv])
         return cas.dot(err_invars, err_invars)
-    def StageCostFinal(self, xK, stage_params):
+    def StageCostFinal(self, xK, stage_params, global_params):
         return 0
-    def EqConstrInitial(self, uk, xk, stage_params):
+    def EqConstrInitial(self, uk, xk, stage_params, global_params):
         pass
-    def EqConstrFinal(self, xK, stage_params):
+    def EqConstrFinal(self, xK, stage_params, global_params):
         pass
-    def StageWiseInequality(self, uk, xk, stage_params):
+    def StageWiseInequality(self, uk, xk, stage_params, global_params):
         pass
     
