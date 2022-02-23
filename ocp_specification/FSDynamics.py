@@ -1,6 +1,10 @@
 import casadi as cas
 import numpy as np
 
+def VecToRot(vec):
+    return vec.reshape(3,3).T
+def RotToVec(Rot):
+    return (Rot.T).reshape(9,1)
 
 class FSDynamics:
     def __init__(self):
@@ -36,9 +40,9 @@ class FSDynamics:
         return (R_t_plus1, p_obj_plus1)
 
     def dynamics(self, uk, xk, dt):
-        Rk = xk[self.indR].reshape(3, 3).T
+        Rk = VecToRot(xk[self.indR])
         Rkp1, pkp1 = self.geo_integrator_tra(Rk, uk, dt)
         xkp1 = cas.SX.zeros(12, 1)
-        xkp1[self.indR] = (Rkp1.T).reshape(9, 1)
+        xkp1[self.indR] = RotToVec(Rkp1)
         xkp1[self.indp] = pkp1
         return xkp1

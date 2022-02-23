@@ -10,14 +10,19 @@ class TraGenSpec(OCPSpecificationInterface):
         self.indR = self.fsdyns.indR
         self.ind_params_dt = [0]
         self.ind_params_inv = range(1,4) 
-        self.ind_params_end_pos = range(4,7) 
+        ## global params
+        self.ind_params_R0 = range(9)
+        self.ind_params_p0 = range(9,12)
+        self.ind_params_RF= range(12,21)
+        self.ind_params_pF = range(21,24)
+        ## hard_coded params
         self.w_pos = w_pos
         self.w_rot = w_rot
         self.w_invars = w_invars
     def SetProblemDimensions(self):
         self.nx = 12
         self.nu = 3
-        self.n_stage_params = 1 + 3 + 3 # dt, 3 invariants, 3 end_pos
+        self.n_stage_params = 1 + 3 # dt, 3 invariants
     def Dynamics(self, uk, xk, stage_params, global_params):
         return self.fsdyns.dynamics(uk, xk, stage_params[self.ind_params_dt])
     def StageCost(self, uk, xk, stage_params, global_params):
@@ -26,9 +31,9 @@ class TraGenSpec(OCPSpecificationInterface):
     def StageCostFinal(self, xK, stage_params, global_params):
         return 0
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
-        pass
+        return vertcat(xk[self.indR] - global_params[self.ind_params_R0],xk[self.indp] - global_params[self.ind_params_p0]) 
     def EqConstrFinal(self, xK, stage_params, global_params):
-        pass
+        return vertcat(xK[self.indR] - global_params[self.ind_params_RF],xK[self.indp] - global_params[self.ind_params_pF]) 
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         pass
     
