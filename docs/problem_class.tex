@@ -1,0 +1,19 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, array} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+\usepackage{mathtools}
+\usepackage{blkarray}
+\DeclareMathOperator*{\minimize}{minimize}
+\begin{document}
+\begin{subequations}
+    \begin{align}
+        \minimize_{\substack{x_k, u_k,x_K}} \quad & l_K(x_K) + \sum_{k=0}^{K-1} l_k(u_k, x_k) \label{eq:LQOCP-objective} \\
+        \textrm{subject to} \quad                 & x_{k+1} = F(u_k, x_k)\label{eq:LQOCP-dynamicsconstraints}            \\
+                                                  & G_K(x_{K})  =  - g_K   \label{eq:LQOCP-endconstraint}                \\
+                                                  & L_K \leq I_K(x_{K})  \leq U_K    \label{eq:LQOCP-endineq}            \\
+                                                  & G_{k}(u_k, x_k)   = - g_k         \label{eq:LQOCP-stageconstraints} \\ 
+                                                  & L_k \leq I_k(u_{k}, x_{k})  \leq U_k    \label{eq:LQOCP-stageineq}   
+    \end{align}
+    \label{eq:LQOCP}
+\end{subequations}
+\end{document}
