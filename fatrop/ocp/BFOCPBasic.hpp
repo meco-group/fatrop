@@ -132,6 +132,7 @@ namespace fatrop
             }
             return ng_ineq_;
         }
+        int get_n_global_parms() const override { return 0; };
         int get_n_stage_params_k(const int k) const override
         {
             return n_stage_params_;
@@ -141,14 +142,16 @@ namespace fatrop
                        const double *inputs_k,
                        const double *states_k,
                        const double *stage_params_k,
+                       const double *global_params,
                        MAT *res,
                        const int k) override
         {
-            const double *args[4];
+            const double *args[5];
             args[0] = states_kp1;
             args[1] = inputs_k;
             args[2] = states_k;
             args[3] = stage_params_k;
+            args[4] = global_params;
             return BAbtf.eval_bf(args, res);
         }
         int eval_RSQrqtk(const double *objective_scale,
@@ -158,10 +161,11 @@ namespace fatrop
                          const double *lam_eq_k,
                          const double *lam_ineq_k,
                          const double *stage_params_k,
+                         const double *global_params,
                          MAT *res,
                          const int k) override
         {
-            const double *args[7];
+            const double *args[8];
             args[0] = objective_scale;
             args[1] = inputs_k;
             args[2] = states_k;
@@ -169,6 +173,7 @@ namespace fatrop
             args[4] = lam_eq_k;
             args[5] = lam_ineq_k;
             args[6] = stage_params_k;
+            args[7] = global_params;
             if (k == 0)
                 return RSQrqtIf.eval_bf(args, res);
             if (k == K_ - 1)
@@ -179,13 +184,15 @@ namespace fatrop
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             MAT *res,
             const int k) override
         {
-            const double *args[3];
+            const double *args[4];
             args[0] = inputs_k;
             args[1] = states_k;
             args[2] = stage_params_k;
+            args[3] = global_params;
             if (k == K_ - 1)
                 return GgtFf.eval_bf(args, res);
             if (k == 0)
@@ -196,15 +203,17 @@ namespace fatrop
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             MAT *res,
             const int k) override
         {
             if (k == K_ - 1)
                 return 0;
-            const double *args[3];
+            const double *args[4];
             args[0] = inputs_k;
             args[1] = states_k;
             args[2] = stage_params_k;
+            args[3] = global_params;
             return Ggt_ineqf.eval_bf(args, res);
         };
         int eval_bk(
@@ -212,27 +221,31 @@ namespace fatrop
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             double *constraint_violation_k,
             const int k) override
         {
-            const double *args[4];
+            const double *args[5];
             args[0] = states_kp1;
             args[1] = inputs_k;
             args[2] = states_k;
             args[3] = stage_params_k;
+            args[4] = global_params;
             return bkf.eval_array(args, constraint_violation_k);
         };
         int eval_gk(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
-            const double *args[3];
+            const double *args[4];
             args[0] = inputs_k;
             args[1] = states_k;
             args[2] = stage_params_k;
+            args[3] = global_params;
             if (k == K_ - 1)
                 return gFf.eval_array(args, res);
             if (k == 0)
@@ -243,15 +256,17 @@ namespace fatrop
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
             if (k == K_ - 1)
                 return 0;
-            const double *args[3];
+            const double *args[4];
             args[0] = inputs_k;
             args[1] = states_k;
             args[2] = stage_params_k;
+            args[3] = global_params;
             return g_ineqf.eval_array(args, res);
         }
         int eval_rqk(
@@ -259,14 +274,16 @@ namespace fatrop
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
-            const double *args[4];
+            const double *args[5];
             args[0] = objective_scale;
             args[1] = inputs_k;
             args[2] = states_k;
             args[3] = stage_params_k;
+            args[4] = global_params;
             if (k == K_ - 1)
                 return rqFf.eval_array(args, res);
             if (k == 0)
@@ -279,14 +296,16 @@ namespace fatrop
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
-            const double *args[4];
+            const double *args[5];
             args[0] = objective_scale;
             args[1] = inputs_k;
             args[2] = states_k;
             args[3] = stage_params_k;
+            args[4] = global_params;
             if (k == K_ - 1)
                 return LFf.eval_array(args, res);
             return Lkf.eval_array(args, res);

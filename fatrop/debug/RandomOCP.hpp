@@ -16,12 +16,14 @@ namespace fatrop
         int get_nuk(const int k) const override { return nu_.at(k); };
         int get_ngk(const int k) const override { return ng_.at(k); };
         int get_ng_ineq_k(const int k) const override { return 0; };
-        int get_n_stage_params_k(const int k) const override {return 0;};
+        int get_n_stage_params_k(const int k) const override { return 0; };
+        int get_n_global_parms() const override{return 0;};
         int get_horizon_length() const override { return K_; };
         int eval_BAbtk(const double *states_kp1,
                        const double *states_k,
                        const double *inputs_k,
                        const double *stage_params_k,
+                       const double *global_params,
                        MAT *res,
                        const int k) override
         {
@@ -38,7 +40,8 @@ namespace fatrop
                          const double *lam_dyn_k,
                          const double *lam_eq_k,
                          const double *lam_ineq_eq_k,
-                       const double *stage_params_k,
+                         const double *stage_params_k,
+                         const double *global_params,
                          MAT *res,
                          const int k) override
         {
@@ -61,7 +64,8 @@ namespace fatrop
         }
         int eval_Ggtk(const double *states_k,
                       const double *inputs_k,
-                       const double *stage_params_k,
+                      const double *stage_params_k,
+                      const double *global_params,
                       MAT *res,
                       const int k) override
         {
@@ -73,10 +77,11 @@ namespace fatrop
             return 0;
         };
         int eval_Ggt_ineqk(const double *states_k,
-                      const double *inputs_k,
-                       const double *stage_params_k,
-                      MAT *res,
-                      const int k) override
+                           const double *inputs_k,
+                           const double *stage_params_k,
+                           const double *global_params,
+                           MAT *res,
+                           const int k) override
         {
             assert(false); // feature not implemented yet
             return 0;
@@ -85,7 +90,8 @@ namespace fatrop
             const double *states_kp1,
             const double *states_k,
             const double *inputs_k,
-                       const double *stage_params_k,
+            const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
@@ -95,7 +101,8 @@ namespace fatrop
         int eval_gk(
             const double *states_k,
             const double *inputs_k,
-                       const double *stage_params_k,
+            const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
@@ -105,7 +112,8 @@ namespace fatrop
         int eval_gineqk(
             const double *states_k,
             const double *inputs_k,
-                       const double *stage_params_k,
+            const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
@@ -116,7 +124,8 @@ namespace fatrop
             const double *objective_scale,
             const double *states_k,
             const double *inputs_k,
-                       const double *stage_params_k,
+            const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {
@@ -127,7 +136,8 @@ namespace fatrop
             const double *objective_scale,
             const double *states_k,
             const double *inputs_k,
-                       const double *stage_params_k,
+            const double *stage_params_k,
+            const double *global_params,
             double *res,
             const int k) override
         {

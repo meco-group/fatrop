@@ -12,7 +12,7 @@ namespace fatrop
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ngineqexpr(RefCountPtr<BFOCP>(ocptempl_)), nstageparamsexpr(RefCountPtr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), ocptempl(ocptempl_)
+        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ngineqexpr(RefCountPtr<BFOCP>(ocptempl_)), nstageparamsexpr(RefCountPtr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl->get_n_global_parms(), 0.0), ocptempl(ocptempl_)
         {
         }
         int evalHess(
@@ -30,6 +30,7 @@ namespace fatrop
             int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
             int *offs_stageparams_p = (int *)offs_stageparams.data();
             double *stageparams_p = (double *)stageparams.data();
+            double *globalparams_p = (double *)globalparams.data();
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
@@ -52,6 +53,7 @@ namespace fatrop
                     lam_data + offs_g_k,
                     lam_data + offs_ineq_k,
                     stageparams_p + offs_stageparams_k,
+                    globalparams_p,
                     RSQrqt_p + k,
                     k);
             }
@@ -69,6 +71,7 @@ namespace fatrop
             int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
             int *offs_stageparams_p = (int *)offs_stageparams.data();
             double *stageparams_p = (double *)stageparams.data();
+            double *globalparams_p = (double *)globalparams.data();
             OCPMACRO(MAT *, BAbt, _p);
             OCPMACRO(MAT *, Ggt, _p);
             OCPMACRO(MAT *, Ggt_ineq, _p);
@@ -91,6 +94,7 @@ namespace fatrop
                     primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
                     stageparams_p + offs_stageparams_k,
+                    globalparams_p,
                     BAbt_p + k,
                     k);
             }
@@ -106,6 +110,7 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
                         stageparams_p + offs_stageparams_k,
+                        globalparams_p,
                         Ggt_p + k,
                         k);
                 }
@@ -125,6 +130,7 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
                         stageparams_p + offs_stageparams_k,
+                        globalparams_p,
                         Ggt_ineq_p + k,
                         k);
                     // rewrite problem
@@ -149,6 +155,7 @@ namespace fatrop
             int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
             int *offs_stageparams_p = (int *)offs_stageparams.data();
             double *stageparams_p = (double *)stageparams.data();
+            double *globalparams_p = (double *)globalparams.data();
             double *cv_p = ((VEC *)constraint_violation)->pa;
             OCPMACRO(int *, nu, _p);
             OCPMACRO(int *, ng, _p);
@@ -169,6 +176,7 @@ namespace fatrop
                     primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
                     stageparams_p + offs_stageparams_k,
+                    globalparams_p,
                     cv_p + offs_dyn_eq_k,
                     k);
             }
@@ -185,6 +193,7 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
                         stageparams_p + offs_stageparams_k,
+                        globalparams_p,
                         cv_p + offs_g_k,
                         k);
                 }
@@ -206,6 +215,7 @@ namespace fatrop
                         primal_data + offs_ux_k,
                         primal_data + offs_ux_k + nu_k,
                         stageparams_p + offs_stageparams_k,
+                        globalparams_p,
                         cv_p + offs_g_ineq_k,
                         k);
                     // rewrite problem
@@ -230,6 +240,7 @@ namespace fatrop
             double *primal_data = primal_vars_p->pa;
             int *offs_stageparams_p = (int *)offs_stageparams.data();
             double *stageparams_p = (double *)stageparams.data();
+            double *globalparams_p = (double *)globalparams.data();
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
@@ -240,6 +251,7 @@ namespace fatrop
                     primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
                     stageparams_p + offs_stageparams_k,
+                    globalparams_p,
                     grad_p + offs_ux_k,
                     k);
             }
@@ -257,6 +269,7 @@ namespace fatrop
             const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
             int *offs_stageparams_p = (int *)offs_stageparams.data();
             double *stageparams_p = (double *)stageparams.data();
+            double *globalparams_p = (double *)globalparams.data();
             OCPMACRO(int *, nu, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
             double *primal_data = primal_vars_p->pa;
@@ -272,6 +285,7 @@ namespace fatrop
                     primal_data + offs_ux_k,
                     primal_data + offs_ux_k + nu_k,
                     stageparams_p + offs_stageparams_k,
+                    globalparams_p,
                     &resk,
                     k);
                 restot += resk;
@@ -344,6 +358,7 @@ namespace fatrop
         nStageParamsExpr nstageparamsexpr;
         FatropVector<int> offs_stageparams;
         vector<double> stageparams;
+        vector<double> globalparams;
 
     private:
         RefCountPtr<BFOCP> ocptempl;
