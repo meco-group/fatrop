@@ -6,7 +6,6 @@ class FSDynamics:
     def __init__(self):
         self.indR = range(9)
         self.indp = range(9, 12)
-        pass
 
     def geo_integrator_tra(R_t, p_obj, u, h):
         """Integrate invariants over interval h starting from a current state (object pose + moving frames)"""
@@ -38,7 +37,7 @@ class FSDynamics:
 
     def dynamics(self, uk, xk, dt):
         Rk = xk[self.indR].reshape(3, 3).T
-        Rkp1, pkp1 = self.geo_integrator_tra(xk, uk, dt)
+        Rkp1, pkp1 = self.geo_integrator_tra(Rk, uk, dt)
         xkp1 = cas.SX.zeros(12, 1)
         xkp1[self.indR] = (Rkp1.T).reshape(9, 1)
         xkp1[self.indp] = pkp1
