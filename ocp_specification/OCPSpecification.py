@@ -188,16 +188,14 @@ class OptiBuilder:
     def __init__(self, ocpspec):
         self.ocpspec = ocpspec
 
-    def set_up_Opti(self, K, stage_params_in = None , global_params_in = None):
+    def set_up_Opti(self, K):
         # all scales are set to 1.0
         # get problem dimensions
-        if stage_params_in == None:
-            stage_params_in = DM.zeros(0, K)
-        if global_params_in == None:
-            global_params_in = DM.zeros(0)
         nu = self.ocpspec.nu
         nx = self.ocpspec.nx
         self.opti = Opti()
+        self.stage_params_in = self.opti.parameter(self.ocpspec.n_stage_params, K)
+        self.global_params_in = self.opti.parameter(self.ocpspec.n_global_params, 0)
         self.N_vars = K*nx + (K-1)*nu
         self.opti_vars = self.opti.variable(self.N_vars)
         self.x_vars = MX.zeros(nx, K)
@@ -234,15 +232,15 @@ class OptiBuilder:
         if ngI > 0:
             EqIf = Function("eqI", [x_sym, u_sym, stage_params_sym, global_params_sym], [eqI])
             self.opti.subject_to(
-                EqIf(self.x_vars[:, 0], self.u_vars[:, 0], stage_params_in[:,0], global_params_in) == 0.0)
+                EqIf(self.x_vars[:, 0], self.u_vars[:, 0], self.stage_params_in[:,0], self.global_params_in) == 0.0)
         if ngF > 0:
             EqFf = Function("eqF", [x_sym, stage_params_sym, global_params_sym], [eqF])
-            self.opti.subject_to(EqFf(self.x_vars[:, K-1], stage_params_in[:,K-1], global_params_in) == 0.0)
+            self.opti.subject_to(EqFf(self.x_vars[:, K-1], self.stage_params_in[:,K-1], self.global_params_in) == 0.0)
         J = 0
         for k in range(K-1):
-            J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k], stage_params_in[:,k], global_params_in)
+            J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:,k], self.global_params_in)
             self.opti.subject_to(
-                Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k], stage_params_in[:,k], global_params_in) == 0.0)
+                Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:,k], self.global_params_in) == 0.0)
         if ngIneq > 0:
             Ineqf = Function("ineqf", [u_sym, x_sym, stage_params_sym, global_params_sym], [ineq])
             for k in range(K-1):
@@ -250,14 +248,14 @@ class OptiBuilder:
                     if lower[i] == -inf:
                         # self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
                         self.opti.subject_to(upper[i] > Ineqf(
-                            self.u_vars[:, k], self.x_vars[:, k], stage_params_in[:,k], global_params_in)[i])
+                            self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:,k], self.global_params_in)[i])
                     elif upper[i] == inf:
                         self.opti.subject_to(lower[i] < Ineqf(
-                            self.u_vars[:, k], self.x_vars[:, k], stage_params_in[:,k], global_params_in)[i])
+                            self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:,k], self.global_params_in)[i])
                     else:
                         self.opti.subject_to(lower[i] < Ineqf(
-                            self.u_vars, self.x_vars, stage_params_in[:,k], global_params_in)[i] < upper[i])
-        J += LkFf(1.0, self.x_vars[:, K-1], stage_params_in[:,K-1], global_params_in)
+                            self.u_vars, self.x_vars, self.stage_params_in[:,k], self.global_params_in)[i] < upper[i])
+        J += LkFf(1.0, self.x_vars[:, K-1], self.stage_params_in[:,K-1], self.global_params_in)
         self.opti.minimize(J)
         return self.opti
     pass

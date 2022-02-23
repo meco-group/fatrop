@@ -36,4 +36,3 @@ class TraGenSpec(OCPSpecificationInterface):
         return vertcat(xK[self.indR] - global_params[self.ind_params_RF],xK[self.indp] - global_params[self.ind_params_pF]) 
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         pass
-    
