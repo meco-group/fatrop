@@ -7,8 +7,10 @@ rocketspec = RocketSpec.RocketSpec()
 codegen = OCPSpecification.FatropOCPCodeGenerator(rocketspec)
 codegen.generate_code("f.c")
 optibuilder = OCPSpecification.OptiBuilder(rocketspec)
-opti = optibuilder.set_up_Opti(100)
-opti.set_initial(optibuilder.opti_vars, DM.ones(1,optibuilder.N_vars))
+K = 100
+opti = optibuilder.set_up_Opti(K)
+opti.set_initial(optibuilder.u_vars, DM.ones(rocketspec.nu, K-1))
+opti.set_initial(optibuilder.x_vars, DM.ones(rocketspec.nx, K))
 opti.solver("ipopt")
 opti.solve()
 
@@ -34,4 +36,4 @@ opti.solve()
 # opti.set_initial(OCP.opti_vars, DM.ones(1,OCP.N_vars))
 # opti.solve()
 # OCP.generate_code("f.c")
-#gcc -fPIC -march=native -shared -O3 f.c -o f.so
+# gcc -fPIC -march=native -shared -O3 f.c -o f.so

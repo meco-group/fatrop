@@ -197,9 +197,8 @@ class OptiBuilder:
         self.stage_params_in = self.opti.parameter(self.ocpspec.n_stage_params, K)
         self.global_params_in = self.opti.parameter(self.ocpspec.n_global_params, 0)
         self.N_vars = K*nx + (K-1)*nu
-        self.opti_vars = self.opti.variable(self.N_vars)
-        self.x_vars = MX.zeros(nx, K)
-        self.u_vars = MX.zeros(nu, K)
+        self.x_vars = self.opti.variable(nx, K)
+        self.u_vars = self.opti.variable(nu, K-1)
         # make symbols for variables
         u_sym = SX.sym("inputs", nu)
         x_sym = SX.sym("states", nx)
@@ -217,12 +216,6 @@ class OptiBuilder:
         ngI = eqI.shape[0]
         ngF = eqF.shape[0]
         ngIneq = ineq.shape[0]
-        for k in range(K-1):
-            offs = k*(nu+nx)
-            self.u_vars[:, k] = self.opti_vars[offs:offs+nu]
-            self.x_vars[:, k] = self.opti_vars[offs+nu:offs+nu+nx]
-        offs = (K-1)*(nu+nx)
-        self.x_vars[:, K-1] = self.opti_vars[offs:offs+nx]
         Lkf = Function(
             "Lk", [obj_scale, x_sym, u_sym, stage_params_sym, global_params_sym], [Lk])
         LkFf = Function("LF", [obj_scale, x_sym, stage_params_sym, global_params_sym], [LF])
