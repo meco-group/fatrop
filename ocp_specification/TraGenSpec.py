@@ -22,7 +22,11 @@ class TraGenSpec(OCPSpecificationInterface):
     def SetProblemDimensions(self):
         self.nx = 12
         self.nu = 3
+        self.ngI = 12 
+        self.ngF = 12 
+        self.ngIneq = 0
         self.n_stage_params = 1 + 3 # dt, 3 invariants
+        self.n_global_params = 24 
     def Dynamics(self, uk, xk, stage_params, global_params):
         return self.fsdyns.dynamics(uk, xk, stage_params[self.ind_params_dt])
     def StageCost(self, uk, xk, stage_params, global_params):
@@ -35,4 +39,4 @@ class TraGenSpec(OCPSpecificationInterface):
     def EqConstrFinal(self, xK, stage_params, global_params):
         return vertcat(xK[self.indR] - global_params[self.ind_params_RF],xK[self.indp] - global_params[self.ind_params_pF]) 
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        pass
+        return DM.zeros(0), DM.zeros(0), DM.zeros(0) 

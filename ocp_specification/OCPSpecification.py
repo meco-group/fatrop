@@ -195,7 +195,7 @@ class OptiBuilder:
         nx = self.ocpspec.nx
         self.opti = Opti()
         self.stage_params_in = self.opti.parameter(self.ocpspec.n_stage_params, K)
-        self.global_params_in = self.opti.parameter(self.ocpspec.n_global_params, 0)
+        self.global_params_in = self.opti.parameter(self.ocpspec.n_global_params, 1)
         self.N_vars = K*nx + (K-1)*nu
         self.x_vars = self.opti.variable(nx, K)
         self.u_vars = self.opti.variable(nu, K-1)

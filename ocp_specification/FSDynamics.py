@@ -2,16 +2,15 @@ import casadi as cas
 import numpy as np
 
 def VecToRot(vec):
-    return vec.reshape(3,3).T
+    return vec.reshape((3,3))
 def RotToVec(Rot):
-    return (Rot.T).reshape(9,1)
-
+    return (Rot).reshape((9,1))
 class FSDynamics:
     def __init__(self):
         self.indR = range(9)
         self.indp = range(9, 12)
 
-    def geo_integrator_tra(R_t, p_obj, u, h):
+    def geo_integrator_tra(self,R_t, p_obj, u, h):
         """Integrate invariants over interval h starting from a current state (object pose + moving frames)"""
         # Define a geometric integrator for eFSI,
         # (meaning rigid-body motion is perfectly integrated assuming constant invariants)
@@ -41,7 +40,8 @@ class FSDynamics:
 
     def dynamics(self, uk, xk, dt):
         Rk = VecToRot(xk[self.indR])
-        Rkp1, pkp1 = self.geo_integrator_tra(Rk, uk, dt)
+        pk = xk[self.indp]
+        Rkp1, pkp1 = self.geo_integrator_tra(Rk,pk, uk, dt)
         xkp1 = cas.SX.zeros(12, 1)
         xkp1[self.indR] = RotToVec(Rkp1)
         xkp1[self.indp] = pkp1
