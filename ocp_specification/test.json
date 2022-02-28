@@ -1,8 +1,8 @@
 {
   "nx": 12,
   "nu": 3,
-  "ngI": 9,
-  "ngF": 9,
+  "ngI": 6,
+  "ngF": 12,
   "ng_ineq": 0,
   "n_stage_params": 4,
   "n_global_params": 24,
