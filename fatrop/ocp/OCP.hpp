@@ -4,6 +4,7 @@
 #include "OCPDims.hpp"
 #include "aux/SmartPtr.hpp"
 #include "ocp/OCPKKT.hpp"
+#include "solver/FatropData.hpp"
 namespace fatrop
 { 
     /** \brief interface class for OCP operations*/
@@ -35,6 +36,8 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             double &res) = 0;
         virtual OCPDims GetOCPDims() const = 0;
+        virtual void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) = 0;
+        virtual void SetInitial(const int K, const RefCountPtr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) = 0;
     };
 } // namespace fatrop
 #endif // OCPINCLUDED

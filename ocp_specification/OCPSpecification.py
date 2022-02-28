@@ -1,5 +1,8 @@
 from abc import abstractmethod
 from casadi import *
+import json
+
+from matplotlib.font_manager import json_dump
 
 
 class OCPSpecificationInterface:
@@ -37,12 +40,42 @@ class OCPSpecificationInterface:
     @abstractmethod
     def EqConstrFinal(self, xK, stage_params):
         return SX.zeros(0)
+
     @abstractmethod
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         return SX.zeros(0)
+
     @abstractmethod
     def DefaultStageParams(self):
         return SX.zeros(self.n_stage_params)
+
+
+class JSONGenerator:
+    def __init__(self, ocpspec):
+        self.ocpspec = ocpspec
+
+    def generate_JSON(self, filename, K, stage_params, global_params, initial_x=None, initial_u=None):
+        # problem dimensions
+        JSONdict = {'nx': self.ocpspec.nx,        'nu': self.ocpspec.nu,        'ngI': self.ocpspec.ngI,        'ngF': self.ocpspec.ngF,
+                    'ng_ineq': self.ocpspec.ngIneq,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
+        # stage params
+        JSONdict['stage_params'] = stage_params.ravel(order='f').tolist()
+        JSONdict['global_params'] = global_params.ravel(order='f').tolist()
+        # params
+        JSONdict['params'] = stage_params.ravel(order='f').tolist()
+        # initial x
+        # if initial_x != None:
+        JSONdict['initial_x'] = initial_x.ravel(order='f').tolist()
+        # else:
+        # JSONdict['initial_x'] = np.zeros(self.ocpspec.nx*K).tolist()
+        # initial u
+        # if initial_u != None:
+        JSONdict['initial_u'] = initial_u.ravel(order='f').tolist()
+        # else:
+        # JSONdict['initial_u'] = np.zeros(self.ocpspec.nu*K).tolist()
+        # bounds
+        print(json_dump(JSONdict, "test.json"))
+        return
 
 
 class FatropOCPCodeGenerator:
@@ -194,8 +227,10 @@ class OptiBuilder:
         nu = self.ocpspec.nu
         nx = self.ocpspec.nx
         self.opti = Opti()
-        self.stage_params_in = self.opti.parameter(self.ocpspec.n_stage_params, K)
-        self.global_params_in = self.opti.parameter(self.ocpspec.n_global_params, 1)
+        self.stage_params_in = self.opti.parameter(
+            self.ocpspec.n_stage_params, K)
+        self.global_params_in = self.opti.parameter(
+            self.ocpspec.n_global_params, 1)
         self.N_vars = K*nx + (K-1)*nu
         self.x_vars = self.opti.variable(nx, K)
         self.u_vars = self.opti.variable(nu, K-1)
@@ -206,11 +241,16 @@ class OptiBuilder:
         global_params_sym = SX.sym("stageparams", self.ocpspec.n_global_params)
         obj_scale = SX.sym("obj_scale", 1)
         # make expressions for functions
-        dynamics = self.ocpspec.Dynamics(u_sym, x_sym, stage_params_sym, global_params_sym)
-        Lk = self.ocpspec.StageCost(u_sym, x_sym, stage_params_sym, global_params_sym)
-        LF = self.ocpspec.StageCostFinal(x_sym, stage_params_sym, global_params_sym)
-        eqI = self.ocpspec.EqConstrInitial(u_sym, x_sym, stage_params_sym, global_params_sym)
-        eqF = self.ocpspec.EqConstrFinal(x_sym, stage_params_sym, global_params_sym)
+        dynamics = self.ocpspec.Dynamics(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
+        Lk = self.ocpspec.StageCost(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
+        LF = self.ocpspec.StageCostFinal(
+            x_sym, stage_params_sym, global_params_sym)
+        eqI = self.ocpspec.EqConstrInitial(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
+        eqF = self.ocpspec.EqConstrFinal(
+            x_sym, stage_params_sym, global_params_sym)
         lower, ineq, upper = self.ocpspec.StageWiseInequality(
             u_sym, x_sym, stage_params_sym, global_params_sym)
         ngI = eqI.shape[0]
@@ -218,37 +258,44 @@ class OptiBuilder:
         ngIneq = ineq.shape[0]
         Lkf = Function(
             "Lk", [obj_scale, x_sym, u_sym, stage_params_sym, global_params_sym], [Lk])
-        LkFf = Function("LF", [obj_scale, x_sym, stage_params_sym, global_params_sym], [LF])
+        LkFf = Function(
+            "LF", [obj_scale, x_sym, stage_params_sym, global_params_sym], [LF])
         stateskp1 = SX.sym("stateskp1", nx)
         Dynamcisf = Function(
             "F", [stateskp1, x_sym, u_sym, stage_params_sym, global_params_sym], [-stateskp1 + dynamics])
         if ngI > 0:
-            EqIf = Function("eqI", [x_sym, u_sym, stage_params_sym, global_params_sym], [eqI])
+            EqIf = Function(
+                "eqI", [x_sym, u_sym, stage_params_sym, global_params_sym], [eqI])
             self.opti.subject_to(
-                EqIf(self.x_vars[:, 0], self.u_vars[:, 0], self.stage_params_in[:,0], self.global_params_in) == 0.0)
+                EqIf(self.x_vars[:, 0], self.u_vars[:, 0], self.stage_params_in[:, 0], self.global_params_in) == 0.0)
         if ngF > 0:
-            EqFf = Function("eqF", [x_sym, stage_params_sym, global_params_sym], [eqF])
-            self.opti.subject_to(EqFf(self.x_vars[:, K-1], self.stage_params_in[:,K-1], self.global_params_in) == 0.0)
+            EqFf = Function(
+                "eqF", [x_sym, stage_params_sym, global_params_sym], [eqF])
+            self.opti.subject_to(EqFf(
+                self.x_vars[:, K-1], self.stage_params_in[:, K-1], self.global_params_in) == 0.0)
         J = 0
         for k in range(K-1):
-            J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:,k], self.global_params_in)
+            J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k],
+                     self.stage_params_in[:, k], self.global_params_in)
             self.opti.subject_to(
-                Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:,k], self.global_params_in) == 0.0)
+                Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:, k], self.global_params_in) == 0.0)
         if ngIneq > 0:
-            Ineqf = Function("ineqf", [u_sym, x_sym, stage_params_sym, global_params_sym], [ineq])
+            Ineqf = Function(
+                "ineqf", [u_sym, x_sym, stage_params_sym, global_params_sym], [ineq])
             for k in range(K-1):
                 for i in range(ngIneq):
                     if lower[i] == -inf:
                         # self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
                         self.opti.subject_to(upper[i] > Ineqf(
-                            self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:,k], self.global_params_in)[i])
+                            self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:, k], self.global_params_in)[i])
                     elif upper[i] == inf:
                         self.opti.subject_to(lower[i] < Ineqf(
-                            self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:,k], self.global_params_in)[i])
+                            self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:, k], self.global_params_in)[i])
                     else:
                         self.opti.subject_to(lower[i] < Ineqf(
-                            self.u_vars, self.x_vars, self.stage_params_in[:,k], self.global_params_in)[i] < upper[i])
-        J += LkFf(1.0, self.x_vars[:, K-1], self.stage_params_in[:,K-1], self.global_params_in)
+                            self.u_vars, self.x_vars, self.stage_params_in[:, k], self.global_params_in)[i] < upper[i])
+        J += LkFf(1.0, self.x_vars[:, K-1],
+                  self.stage_params_in[:, K-1], self.global_params_in)
         self.opti.minimize(J)
         return self.opti
     pass

@@ -15,6 +15,7 @@ function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluati
 ocp/BFOCP.hpp                               ocp/BFOCP.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
 ocp/BFOCPBasic.hpp                          ocp/BFOCPBasic.cpp
+ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp

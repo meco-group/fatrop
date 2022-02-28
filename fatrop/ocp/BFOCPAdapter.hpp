@@ -2,6 +2,7 @@
 #define OCPEVALUATORINCLUDED
 #include "OCPKKT.hpp"
 #include "BFOCP.hpp"
+#include "solver/FatropData.hpp"
 #include "aux/SmartPtr.hpp"
 #include "OCP.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
@@ -349,6 +350,35 @@ namespace fatrop
         private:
             const RefCountPtr<BFOCP> parent;
         };
+
+    public:
+        void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override
+        {
+            stageparams = stage_params_in;
+            globalparams = global_params_in;
+            return;
+        }
+        void SetInitial(const int K, const RefCountPtr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
+        {
+            // offsets
+            VEC *ux_curr_p = (VEC *)fatropdata->x_curr;
+            double *u_p = initial_u.data();
+            double *x_p = initial_x.data();
+            int offs_nu = 0;
+            int offs_nx = 0;
+            int offs_nux = 0;
+            for (int k = 0; k < K; k++)
+            {
+                int nu_k = ocptempl->get_nuk(k);
+                int nx_k = ocptempl->get_nxk(k);
+                PACKVEC(nu_k, u_p+ offs_nu, 1, ux_curr_p, offs_nux);
+                PACKVEC(nx_k, x_p+ offs_nx, 1, ux_curr_p, offs_nux + nu_k);
+                offs_nu += nu_k;
+                offs_nx += nx_k;
+                offs_nux += nu_k + nx_k;
+            }
+            return;
+        }
 
     public:
         nuExpr nuexpr;

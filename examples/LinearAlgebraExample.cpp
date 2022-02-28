@@ -30,32 +30,34 @@ int main()
     example["emptyarray"] = std::vector<std::string>();
     example["boolean"].set_boolean(true);
     example["null"].set_null();
-    // Serialize the new object
-    std::string serial = (std::string)example;
-    cout << serial << endl;
-    // get new object
-    json::jobject res = json::jobject::parse(serial);
+    vector<int> test = example["array"].get_number_array<int>("%d");
+    cout << "test" << endl;
+    // vector<int> resd = res[0].get_number_array<int>("%d");
+    // cout <<(std::string) res << endl;
+    // vector<int> vectorrr = res[0].get_number_array<int>("%d");
+    // auto resss = res[0];
+    // cout << (string) res << endl;
     // json::jobject::const_value res2 = json::jobject::parse(res.get("array"));
     // cout << (int)res2.array(0) << endl;
     // vector<int> testarray = res2.get_number_array<int>();
-    blasfeo_dmat sA;
-    blasfeo_dmat sB;
-    blasfeo_dmat sC;
-    blasfeo_dmat sD;
-    blasfeo_allocate_dmat(12, 12, &sA);
-    blasfeo_allocate_dmat(12, 12, &sB);
-    blasfeo_allocate_dmat(12, 12, &sC);
-    blasfeo_allocate_dmat(12, 12, &sD);
-    GESE(12, 12, 0.0, &sA, 0, 0);
-    GESE(12, 12, 0.0, &sB, 0, 0);
-    GESE(12, 12, 0.0, &sC, 0, 0); // 12x12
-    GESE(12, 12, 0.0, &sD, 0, 0);
-    // D <- A@B^T + C
-    GEMM_NT(11, 11, 11, 1.0, &sA, 0, 0, &sB, 1, 0, 1.0, &sC, 0, 0, &sD, 0, 0);
-    blasfeo_free_dmat(&sA);
-    blasfeo_free_dmat(&sB);
-    blasfeo_free_dmat(&sC);
-    blasfeo_free_dmat(&sD);
+    // blasfeo_dmat sA;
+    // blasfeo_dmat sB;
+    // blasfeo_dmat sC;
+    // blasfeo_dmat sD;
+    // blasfeo_allocate_dmat(12, 12, &sA);
+    // blasfeo_allocate_dmat(12, 12, &sB);
+    // blasfeo_allocate_dmat(12, 12, &sC);
+    // blasfeo_allocate_dmat(12, 12, &sD);
+    // GESE(12, 12, 0.0, &sA, 0, 0);
+    // GESE(12, 12, 0.0, &sB, 0, 0);
+    // GESE(12, 12, 0.0, &sC, 0, 0); // 12x12
+    // GESE(12, 12, 0.0, &sD, 0, 0);
+    // // D <- A@B^T + C
+    // GEMM_NT(11, 11, 11, 1.0, &sA, 0, 0, &sB, 1, 0, 1.0, &sC, 0, 0, &sD, 0, 0);
+    // blasfeo_free_dmat(&sA);
+    // blasfeo_free_dmat(&sB);
+    // blasfeo_free_dmat(&sC);
+    // blasfeo_free_dmat(&sD);
 
     // FatropMemoryMatBF A(100, 100, 1);
     // FatropMemoryMatBF lower(vector<int>(1, 100), vector<int>(1, 100), 1);

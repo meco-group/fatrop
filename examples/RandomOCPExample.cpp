@@ -39,7 +39,7 @@ int main()
     ocpalg.EvalJac(ux[0], ux[0]);
     double el = blasfeo_toc(&timer);
     cout << "el time FE " << el << endl;
-    int N = 1;
+    int N = 1000;
     blasfeo_tic(&timer);
     for (int i = 0; i < N; i++)
     {

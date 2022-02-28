@@ -27,13 +27,13 @@ namespace json
 		 *
 		 * @param key The key that was not valid
 		 */
-		inline invalid_key(const std::string &key) : key(key) { }
+		inline invalid_key(const std::string &key) : key(key) {}
 
 		/*! \brief Destructor */
-		inline virtual ~invalid_key() throw() { }
+		inline virtual ~invalid_key() throw() {}
 
 		/*! \brief Returns the invalid key */
-		virtual const char* what() const throw()
+		virtual const char *what() const throw()
 		{
 			return key.c_str();
 		}
@@ -43,36 +43,37 @@ namespace json
 	class parsing_error : public std::invalid_argument
 	{
 	public:
-		/*! \brief Constructor 
+		/*! \brief Constructor
 		 *
 		 * @param message Details regarding the parsing error
 		 */
-		inline parsing_error(const char *message) : std::invalid_argument(message) { }
+		inline parsing_error(const char *message) : std::invalid_argument(message) {}
 
 		/*! \brief Destructor */
-		inline virtual ~parsing_error() throw() { }
+		inline virtual ~parsing_error() throw() {}
 	};
 
 	/* \brief Namespace for handling of JSON data types */
 	namespace jtype
 	{
 		/*! \brief Descriptor for the type of JSON data */
-		enum jtype { 
-			jstring, ///< String value
-			jnumber, ///< Number value
-			jobject, ///< JSON object
-			jarray, ///< JSON array
-			jbool, ///< Boolean value
-			jnull, ///< Null value
+		enum jtype
+		{
+			jstring,  ///< String value
+			jnumber,  ///< Number value
+			jobject,  ///< JSON object
+			jarray,	  ///< JSON array
+			jbool,	  ///< Boolean value
+			jnull,	  ///< Null value
 			not_valid ///< Value does not conform to JSON standard
-			};
+		};
 
 		/*! \brief Geven a string, determines the type of value the string contains
-		 * 
+		 *
 		 * @param input The string to be tested
 		 * @return The type of JSON value encountered
-		 * 
-		 * \note The function will only determine the type of the first value encountered in the string. 
+		 *
+		 * \note The function will only determine the type of the first value encountered in the string.
 		 */
 		jtype detect(const char *input);
 	}
@@ -82,17 +83,17 @@ namespace json
 	{
 		/*! \brief (t)rims (l)eading (w)hite (s)pace
 		 *
-		 * \details Given a string, returns a pointer to the first character that is not white space. Spaces, tabs, and carriage returns are all considered white space. 
+		 * \details Given a string, returns a pointer to the first character that is not white space. Spaces, tabs, and carriage returns are all considered white space.
 		 * @param start The string to examine
 		 * @return A pointer within the input string that points at the first charactor that is not white space
 		 * \note If the string consists of entirely white space, then the null terminator is returned
 		 * \warning The behavior of this function with string that is not null-terminated is undefined
 		 */
-		const char* tlws(const char *start);
+		const char *tlws(const char *start);
 
 		/*! \brief Reads a set of digits from a string
-		 * 
-		 * \details This function will take an input string and read the digits at the front of the string until a character other than a digit (0-9) is encountered. 
+		 *
+		 * \details This function will take an input string and read the digits at the front of the string until a character other than a digit (0-9) is encountered.
 		 * @param input A string that starts with a set of digits (0-9)
 		 * @return A string containing the digits
 		 */
@@ -103,7 +104,7 @@ namespace json
 		 * \details See json::parsing::unescape_quotes() for the reverse function
 		 * @param input A string potentially containing quotes
 		 * @return A string that has all quotes escaped
-		 * @see unescape_quotes() 
+		 * @see unescape_quotes()
 		 */
 		std::string escape_quotes(const char *input);
 
@@ -120,10 +121,10 @@ namespace json
 		struct parse_results
 		{
 			/*! \brief The type of value encountered while parsing */
-			jtype::jtype type; 
+			jtype::jtype type;
 
 			/*! \brief The parsed value encountered */
-			std::string value; 
+			std::string value;
 
 			/*! \brief A pointer to the first character after the parsed value */
 			const char *remainder;
@@ -132,20 +133,20 @@ namespace json
 		/*! \brief Parses the first value encountered in a JSON string
 		 *
 		 * @param input The string to be parsed
-		 * @return Details regarding the first value encountered 
+		 * @return Details regarding the first value encountered
 		 * \exception json::parsing_error Exception thrown when the input is not valid JSON
 		 */
 		parse_results parse(const char *input);
-		
-		/*! \brief Template for reading a numeric value 
-		 * 
+
+		/*! \brief Template for reading a numeric value
+		 *
 		 * @tparam T The C data type the input will be convered to
 		 * @param input The string to conver to a number
 		 * @param format The format to use when converting the string to a number
 		 * @return The numeric value contained by the input
 		 */
 		template <typename T>
-		T get_number(const char *input, const char* format)
+		T get_number(const char *input, const char *format)
 		{
 			T result;
 			std::sscanf(input, format, &result);
@@ -153,20 +154,23 @@ namespace json
 		}
 
 		/*! \brief Converts a number to a string
-		 * 
+		 *
 		 * @tparam The C data type of the number to be converted
 		 * @param number A reference to the number to be converted
 		 * @param format The format to be used when converting the number
 		 * @return A string representation of the input number
-		 */ 
+		 */
 		template <typename T>
 		std::string get_number_string(const T &number, const char *format)
 		{
 			std::vector<char> cstr(6);
 			int remainder = std::snprintf(&cstr[0], cstr.size(), format, number);
-			if(remainder < 0) {
+			if (remainder < 0)
+			{
 				return std::string();
-			} else if(remainder >= (int)cstr.size()) {
+			}
+			else if (remainder >= (int)cstr.size())
+			{
 				cstr.resize(remainder + 1);
 				std::snprintf(&cstr[0], cstr.size(), format, number);
 			}
@@ -194,7 +198,7 @@ namespace json
 	 *
 	 * \example rootarray.cpp
 	 * This is an example of how to handle JSON where the root object is an array
-	 * 
+	 *
 	 * \example objectarray.cpp
 	 * This is an example of how to handle an array of JSON objects
 	 */
@@ -213,20 +217,22 @@ namespace json
 	public:
 		/*! \brief Default constructor
 		 *
-		 * @param array If true, the instance is initialized as an array. If false, the instance is initalized as an object. 
+		 * @param array If true, the instance is initialized as an array. If false, the instance is initalized as an object.
 		 */
 		inline jobject(bool array = false)
-			: array_flag(array) 
-			{ }
+			: array_flag(array)
+		{
+		}
 
 		/*! \brief Copy constructor */
 		inline jobject(const jobject &other)
 			: data(other.data),
-			array_flag(other.array_flag)
-		{ }
+			  array_flag(other.array_flag)
+		{
+		}
 
 		/*! \brief Destructor */
-		inline virtual ~jobject() { }
+		inline virtual ~jobject() {}
 
 		/*! \brief Flag for differentiating objects and arrays
 		 *
@@ -244,13 +250,13 @@ namespace json
 		 *
 		 * \todo Currently, the comparison just seralizes both objects and compares the strings, which is probably not as efficent as it could be
 		 */
-		bool operator== (const json::jobject other) const { return ((std::string)(*this)) == (std::string)other; }
+		bool operator==(const json::jobject other) const { return ((std::string)(*this)) == (std::string)other; }
 
 		/*! \brief Comparison operator */
-		bool operator!= (const json::jobject other) const { return ((std::string)(*this)) != (std::string)other; }
+		bool operator!=(const json::jobject other) const { return ((std::string)(*this)) != (std::string)other; }
 
 		/*! \brief Assignment operator */
-		inline jobject& operator=(const jobject rhs)
+		inline jobject &operator=(const jobject rhs)
 		{
 			this->array_flag = rhs.array_flag;
 			this->data = rhs.data;
@@ -261,28 +267,33 @@ namespace json
 		 *
 		 * \exception json::parsing_error Thrown if the key-value is incompatable with the existing object (object/array mismatch)
 		 */
-		jobject& operator+=(const kvp& other)
+		jobject &operator+=(const kvp &other)
 		{
-			if (!this->array_flag && this->has_key(other.first)) throw json::parsing_error("Key conflict");
-			if(this->array_flag && other.first != "") throw json::parsing_error("Array cannot have key");
-			if(!this->array_flag && other.first == "") throw json::parsing_error("Missing key");
+			if (!this->array_flag && this->has_key(other.first))
+				throw json::parsing_error("Key conflict");
+			if (this->array_flag && other.first != "")
+				throw json::parsing_error("Array cannot have key");
+			if (!this->array_flag && other.first == "")
+				throw json::parsing_error("Missing key");
 			this->data.push_back(other);
 			return *this;
 		}
 
 		/*! \brief Appends one JSON object to another */
-		jobject& operator+=(const jobject& other)
+		jobject &operator+=(const jobject &other)
 		{
-			if(this->array_flag != other.array_flag) throw json::parsing_error("Array/object mismatch");
+			if (this->array_flag != other.array_flag)
+				throw json::parsing_error("Array/object mismatch");
 			json::jobject copy(other);
-			for (size_t i = 0; i < copy.size(); i++) {
+			for (size_t i = 0; i < copy.size(); i++)
+			{
 				this->operator+=(copy.data.at(i));
 			}
 			return *this;
 		}
 
 		/*! \brief Merges two JSON objects */
-		jobject operator+(jobject& other)
+		jobject operator+(jobject &other)
 		{
 			jobject result = *this;
 			result += other;
@@ -297,14 +308,14 @@ namespace json
 		 */
 		static jobject parse(const char *input);
 
-		/*! \brief Parses a serialized JSON string 
+		/*! \brief Parses a serialized JSON string
 		 *
 		 * @see json::jobject::parse(const char*)
 		 */
 		static inline jobject parse(const std::string input) { return parse(input.c_str()); }
 
 		/*! /brief Attempts to parse the input string
-		 * 
+		 *
 		 * @param input A serialized JSON object or array
 		 * @param[out] output Should the parsing attempt be successful, the resultant JSON object or array
 		 * @return True of the parsing attempt was successful and false if the parsing attempt was not successful
@@ -315,7 +326,7 @@ namespace json
 			{
 				output = parse(input);
 			}
-			catch(...)
+			catch (...)
 			{
 				return false;
 			}
@@ -330,14 +341,17 @@ namespace json
 		 */
 		inline bool has_key(const std::string &key) const
 		{
-			if(this->array_flag) return false;
-			for (size_t i = 0; i < this->size(); i++) if (this->data.at(i).first == key) return true;
+			if (this->array_flag)
+				return false;
+			for (size_t i = 0; i < this->size(); i++)
+				if (this->data.at(i).first == key)
+					return true;
 			return false;
 		}
 
 		/*! \brief Sets the value assocaited with the key
 		 *
-		 * \details If the key exists, then the value is updated. If the key does not exist, then the key value pair is added to the object. 
+		 * \details If the key exists, then the value is updated. If the key does not exist, then the key value pair is added to the object.
 		 * @param key The key for the entry
 		 * @param value The value for the entry
 		 * \exception json::invalid_key Exception thrown if the object actually represents a JSON array
@@ -355,15 +369,18 @@ namespace json
 		}
 
 		/*! \brief Returns the serialized value associated with a key
-		 * 
+		 *
 		 * @param key The key for the desired element
 		 * @return A serialized representation of the value associated with the key
 		 * \exception json::invalid_key Exception thrown if the key does not exist in the object or the object actually represents a JSON array
 		 */
 		inline std::string get(const std::string &key) const
 		{
-			if(this->array_flag) throw json::invalid_key(key);
-			for (size_t i = 0; i < this->size(); i++) if (this->data.at(i).first == key) return this->get(i);
+			if (this->array_flag)
+				throw json::invalid_key(key);
+			for (size_t i = 0; i < this->size(); i++)
+				if (this->data.at(i).first == key)
+					return this->get(i);
 			throw json::invalid_key(key);
 		}
 
@@ -391,7 +408,7 @@ namespace json
 			 *
 			 * @return A string represnting the entry's serialized value
 			 */
-			virtual const std::string& ref() const = 0;
+			virtual const std::string &ref() const = 0;
 
 			/*! \brief Converts an serialzed value to a numeric value
 			 *
@@ -399,20 +416,21 @@ namespace json
 			 * @param format The format used to convert the serialized value to a numeric value
 			 * @return The value as a number
 			 */
-			template<typename T>
-			inline T get_number(const char* format) const
+			template <typename T>
+			inline T get_number(const char *format) const
 			{
 				return json::parsing::get_number<T>(this->ref().c_str(), format);
 			}
 
+		public:
 			/*! \brief Converts a serialized array of numbers to a vector of numbers
 			 *
 			 * @tparam The C data type used to represent the values in the array
 			 * @param format The format used to convert the serialized values in the array to numeric values
 			 * @return The value as a vector of numbers
 			 */
-			template<typename T>
-			inline std::vector<T> get_number_array(const char* format) const
+			template <typename T>
+			inline std::vector<T> get_number_array(const char *format) const
 			{
 				std::vector<std::string> numbers = json::parsing::parse_array(this->ref().c_str());
 				std::vector<T> result;
@@ -428,21 +446,20 @@ namespace json
 			inline std::string as_string() const
 			{
 				return json::parsing::unescape_quotes(
-					json::parsing::parse(this->ref().c_str()).value.c_str()
-					);
+					json::parsing::parse(this->ref().c_str()).value.c_str());
 			}
 
 			/*! @see json::jobject::entry::as_string() */
-			inline operator std::string() const 
+			inline operator std::string() const
 			{
 				return this->as_string();
 			}
 
 			/*! \brief Comparison operator */
-			bool operator== (const std::string other) const { return ((std::string)(*this)) == other; }
+			bool operator==(const std::string other) const { return ((std::string)(*this)) == other; }
 
 			/*! \brief Comparison operator */
-			bool operator!= (const std::string other) const { return !(((std::string)(*this)) == other); }
+			bool operator!=(const std::string other) const { return !(((std::string)(*this)) == other); }
 
 			/*! \brief Casts the value as an integer */
 			operator int() const;
@@ -462,7 +479,7 @@ namespace json
 			/*! \brief Casts the value as a floating point numer */
 			operator float() const;
 
-			/*! \brief Casts the value as a double-precision floating point number */ 
+			/*! \brief Casts the value as a double-precision floating point number */
 			operator double() const;
 
 			/*! \brief Casts the value as a JSON object
@@ -506,7 +523,8 @@ namespace json
 			{
 				const std::vector<std::string> objs = json::parsing::parse_array(this->ref().c_str());
 				std::vector<json::jobject> results;
-				for (size_t i = 0; i < objs.size(); i++) results.push_back(json::jobject::parse(objs[i].c_str()));
+				for (size_t i = 0; i < objs.size(); i++)
+					results.push_back(json::jobject::parse(objs[i].c_str()));
 				return results;
 			}
 
@@ -517,7 +535,7 @@ namespace json
 			 *
 			 * @tparam T The type of array to be cast to
 			 */
-			template<typename T>
+			template <typename T>
 			inline std::vector<T> as_array() const
 			{
 				return (std::vector<T>)(*this);
@@ -535,6 +553,17 @@ namespace json
 			{
 				return json::parsing::parse(this->ref().c_str()).type == json::jtype::jnull;
 			}
+			// template <typename T>
+			// std::vector<T> as_vector() const
+			// {
+			// 	std::vector<T> res;
+			// 	res.reserve(this->ref().data.size());
+			// 	for (size_t i = 0; i < this->ref().data.size(); i++)
+			// 	{
+			// 		res.push_back((T)this->array(i));
+			// 	}
+			// 	return res;
+			// }
 		};
 
 		/*! \brief Represents an entry as a constant value */
@@ -549,24 +578,25 @@ namespace json
 			 *
 			 * @return A reference to the copied entry data
 			 */
-			inline const std::string& ref() const 
+			inline const std::string &ref() const
 			{
 				return this->data;
 			}
-		
+
 		public:
 			/*! \brief Constructs a proxy with the provided value
 			 *
 			 * @param value The entry value to copy
 			 */
 			inline const_value(std::string value)
-			: data(value)
-			{ }
+				: data(value)
+			{
+			}
 
 			/*! \brief Returns another constant value from this object
 			 *
 			 * This method assumed the entry contains a JSON object and returns another constant value from within
-			 * 
+			 *
 			 * @param key The key of the subvalue to return
 			 * @return A proxy for the value for the key
 			 */
@@ -578,7 +608,7 @@ namespace json
 			/*! \brief Returns another constant value from this array
 			 *
 			 * This method assumed the entry contains a JSON array and returns another constant value from within
-			 * 
+			 *
 			 * @param index The index of the subvalue to return
 			 * @return A proxy for the value for the index
 			 */
@@ -603,9 +633,11 @@ namespace json
 			const std::string key;
 
 			/*! \brief Returns a reference to the value */
-			inline const std::string& ref() const 
+			inline const std::string &ref() const
 			{
-				for (size_t i = 0; i < this->source.size(); i++) if (this->source.data.at(i).first == key) return this->source.data.at(i).second;
+				for (size_t i = 0; i < this->source.size(); i++)
+					if (this->source.data.at(i).first == key)
+						return this->source.data.at(i).second;
 				throw json::invalid_key(key);
 			}
 
@@ -615,22 +647,23 @@ namespace json
 			 * @param source The JSON object the value is being sourced from
 			 * @param key The key for the value being referenced
 			 */
-			const_proxy(const jobject &source, const std::string key) : source(source), key(key) 
-			{ 
-				if(source.array_flag) throw std::logic_error("Source cannot be an array");
+			const_proxy(const jobject &source, const std::string key) : source(source), key(key)
+			{
+				if (source.array_flag)
+					throw std::logic_error("Source cannot be an array");
 			}
 
 			/*! \brief Returns another constant value from this array
 			 *
 			 * This method assumed the entry contains a JSON array and returns another constant value from within
-			 * 
+			 *
 			 * @param index The index of the subvalue to return
 			 * @return A proxy for the value for the index
 			 */
 			const_value array(size_t index) const
 			{
 				const char *value = this->ref().c_str();
-				if(json::jtype::detect(value) != json::jtype::jarray)
+				if (json::jtype::detect(value) != json::jtype::jarray)
 					throw std::invalid_argument("Input is not an array");
 				const std::vector<std::string> values = json::parsing::parse_array(value);
 				return const_value(values[index]);
@@ -648,19 +681,19 @@ namespace json
 			jobject &sink;
 
 		protected:
-			/*! \brief Sets a number value in the parent object 
-			 * 
+			/*! \brief Sets a number value in the parent object
+			 *
 			 * @tparam T The data type to be translated into JSON
 			 * @param value The value to be translated to JSON
 			 * @param format The format to use when translating the number
 			 */
-			template<typename T>
-			inline void set_number(const T value, const char* format)
+			template <typename T>
+			inline void set_number(const T value, const char *format)
 			{
 				this->sink.set(key, json::parsing::get_number_string(value, format));
 			}
 
-			/*! \brief Stores an array of values 
+			/*! \brief Stores an array of values
 			 *
 			 * @param values The values to store as an array
 			 * @param wrap When true, the values are wrapped in quotes. When false, the values are stored as-is
@@ -668,13 +701,13 @@ namespace json
 			void set_array(const std::vector<std::string> &values, const bool wrap = false);
 
 			/*! \brief Stores an array of numbers
-			 * 
+			 *
 			 * @tparam T The data type to be translated into JSON
 			 * @param values The array of values to be translated into JSON
 			 * @param format The format to use when translating the numbers
 			 */
-			template<typename T>
-			inline void set_number_array(const std::vector<T> &values, const char* format)
+			template <typename T>
+			inline void set_number_array(const std::vector<T> &values, const char *format)
 			{
 				std::vector<std::string> numbers;
 				for (size_t i = 0; i < values.size(); i++)
@@ -683,25 +716,27 @@ namespace json
 				}
 				this->set_array(numbers);
 			}
+
 		public:
-			/*! \brief Constructor 
+			/*! \brief Constructor
 			 *
 			 * @param source The JSON object that will be updated when a value is assigned
 			 * @param key The key for the value to be updated
 			 */
-			proxy(jobject &source, const std::string key) 
+			proxy(jobject &source, const std::string key)
 				: json::jobject::const_proxy(source, key),
-				sink(source)
-			{ }
+				  sink(source)
+			{
+			}
 
 			/*! \brief Assigns a string value */
-			inline void operator= (const std::string value)
+			inline void operator=(const std::string value)
 			{
 				this->sink.set(this->key, "\"" + json::parsing::escape_quotes(value.c_str()) + "\"");
 			}
 
 			/*! \brief Assigns a string value */
-			inline void operator= (const char* value)
+			inline void operator=(const char *value)
 			{
 				this->operator=(std::string(value));
 			}
@@ -774,8 +809,10 @@ namespace json
 			 */
 			inline void set_boolean(const bool value)
 			{
-				if (value) this->sink.set(key, "true");
-				else this->sink.set(key, "false");
+				if (value)
+					this->sink.set(key, "true");
+				else
+					this->sink.set(key, "false");
 			}
 
 			/*! Sets a null value */
@@ -792,26 +829,28 @@ namespace json
 		};
 
 		/*! \brief Returns an element of the JSON object
-		 * 
+		 *
 		 * @param key The key of the element to be returned
 		 * @return A proxy for the value paired with the key
 		 * \exception json::invalid_key Exception thrown if the object is actually a JSON array
 		 */
 		inline virtual jobject::proxy operator[](const std::string key)
 		{
-			if(this->array_flag) throw json::invalid_key(key);
+			if (this->array_flag)
+				throw json::invalid_key(key);
 			return jobject::proxy(*this, key);
 		}
 
 		/*! \brief Returns an element of the JSON object
-		 * 
+		 *
 		 * @param key The key of the element to be returned
 		 * @return A proxy for the value paired with the key
 		 * \exception json::invalid_key Exception thrown if the object is actually a JSON array
 		 */
 		inline virtual const jobject::const_proxy operator[](const std::string key) const
 		{
-			if(this->array_flag) throw json::invalid_key(key);
+			if (this->array_flag)
+				throw json::invalid_key(key);
 			return jobject::const_proxy(*this, key);
 		}
 
@@ -819,7 +858,7 @@ namespace json
 		 *
 		 * @param index The index of the element to be returned
 		 * @return A proxy for the value
-		 * 
+		 *
 		 * \note While this method is intended for JSON arrays, this method is also valid for JSON objects
 		 */
 		inline const jobject::const_value array(const size_t index) const
@@ -830,16 +869,27 @@ namespace json
 		/*! \see json::jobject::as_string() */
 		operator std::string() const;
 
-		/*! \brief Serialzes the object or array 
-		 * \note The serialized object or array will be in the most compact form and will not contain any extra white space, even if the serialized string used to generate the object or array contained extra white space. 
+		/*! \brief Serialzes the object or array
+		 * \note The serialized object or array will be in the most compact form and will not contain any extra white space, even if the serialized string used to generate the object or array contained extra white space.
 		 */
 		inline std::string as_string() const
 		{
 			return this->operator std::string();
 		}
+		// template <typename T>
+		// std::vector<T> as_vector()
+		// {
+		// 	std::vector<T> res;
+		// 	res.reserve(this->data.size());
+		// 	for (size_t i = 0; i < data.size(); i++)
+		// 	{
+		// 		res.push_back((T)this->array(i));
+		// 	}
+		// 	return res;
+		// }
 
 		/*! \brief Returns a pretty (multi-line indented) serialzed representation of the object or array
-		 * 
+		 *
 		 * @param indent_level The number of indents (tabs) to start with
 		 * @return A "pretty" version of the serizlied object or array
 		 */

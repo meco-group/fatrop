@@ -42,6 +42,7 @@
 #define GEMV_N blasfeo_dgemv_n
 #define VECSE blasfeo_dvecse
 #define PACKMAT blasfeo_pack_dmat
+#define PACKVEC blasfeo_pack_dvec
 #define PMAT PermMat
 #define AXPY blasfeo_daxpy
 #define AXPBY blasfeo_daxpby
