@@ -5,15 +5,7 @@
 #include <cmath>
 namespace fatrop
 {
-    bool check_reg(const int m, MAT *sA, const int ai, const int aj)
-    {
-        for (int i = 0; i < m; i++)
-        {
-            if (MATEL(sA, ai + i, aj + i) < 1e-12)
-                return false;
-        }
-        return true;
-    }
+    bool check_reg(const int m, MAT *sA, const int ai, const int aj);
     class OCPLSRiccati : public OCPLinearSolver
     {
     public:
@@ -59,11 +51,11 @@ namespace fatrop
         {
             if (inertia_correction_c == 0.0)
             {
-                return computeSDnor(OCP, inertia_correction_w, mu,kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
+                return computeSDnor(OCP, inertia_correction_w, mu, kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
             else
             {
-                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, mu,kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
+                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, mu, kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
         }
         // solve a KKT system
@@ -281,7 +273,7 @@ namespace fatrop
                     // calculate delta_s
                     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
                     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-                    GEMV_T(nu + nx,ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+                    GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
                     // calculate lamineq
                     for (int i = 0; i < ng_ineq; i++)
                     {
@@ -406,7 +398,7 @@ namespace fatrop
                 const int offs_g_ineq_k = offs_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-                if (Hp1_size > nu + nx)
+                if (Hp1_size + ng> nu + nx)
                     return -1;
                 // gamma_k <- number of eqs represented by Ggt_stripe
                 const int gamma_k = Hp1_size + ng;
@@ -761,7 +753,7 @@ namespace fatrop
                 const int offs_ineq_k = offs_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-                if (Hp1_size > nu + nx)
+                if (Hp1_size + ng> nu + nx)
                     return -1;
                 // gamma_k <- number of eqs represented by Ggt_stripe
                 const int gamma_k = Hp1_size + ng;
@@ -863,6 +855,7 @@ namespace fatrop
                         // GL <- Ggt_tilde_k @ RSQ[:rho,:nu+nx] + RSQrqt[rho:nu+nx+1, rho:] (with RSQ[:rho,:nu+nx] = RSQrqt[:nu+nx,:rho]^T)
                         // GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         // split up because valgrind was giving invalid read errors when C matrix has nonzero row offset
+                        // GgLt[0].print();
                         GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
                         GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
                         // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
