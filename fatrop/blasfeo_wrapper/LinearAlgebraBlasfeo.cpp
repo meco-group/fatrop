@@ -53,6 +53,37 @@ namespace fatrop
     }
     // /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     // // this is an experimental, more efficient, but the corner cases are not treated in unrolled loop!! it achieves a speed-up of about factor 3 w.r.t naive implementation
+    void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
+    {
+        for (int aj = n - 1; aj >= 0; aj--)
+        {
+            double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
+            double inv_ajj = 1.0 / ajj;
+            double scjj = alpha * inv_ajj;
+            for (int k = 0; k < m; k++)
+            {
+                // todo, check if possible to incude in main loop
+                MATEL(sD, offs_di + k, offs_dj + aj) = scjj * MATEL(sB, offs_bi + k, offs_bj + aj);
+            }
+            for (int k = 0; k < m; k++)
+            {
+                double res = 0.0;
+                // double res4 = 0.0;
+                // double res5 = 0.0;
+                // double res6 = 0.0;
+                // double res7 = 0.0;
+                for (int ai = aj + 1; ai < n; ai = ai + 1)
+                {
+                    // todo unroll loop -> more independent operations -> filled pipelines
+                    double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
+                    res += sc * MATEL(sD, offs_di + k, offs_dj + ai);
+                }
+                MATEL(sD, offs_di + k, offs_dj + aj) += res ;
+            }
+        }
+    }
+    // /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
+    // // this is an experimental, more efficient, but the corner cases are not treated in unrolled loop!! it achieves a speed-up of about factor 3 w.r.t naive implementation
     // void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
     // {
     //     for (int aj = n - 1; aj >= 0; aj--)

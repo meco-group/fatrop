@@ -79,7 +79,11 @@ namespace fatrop
             RefCountPtr<Journaller> journaller(new Journaller(params->maxiter + 1));
             RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
             RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
             fatropalg->Optimize();
+            double el = blasfeo_toc(&timer);
+            cout << "el time " << el << endl;
         }
     };
 }

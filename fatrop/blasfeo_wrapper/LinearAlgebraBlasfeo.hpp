@@ -22,7 +22,7 @@
 #define VECCP blasfeo_dveccp
 #define VECCPSC blasfeo_dveccpsc
 #define VECCPR fatrop_dveccp_reversed
-#define TRSM_RLNN fatrop_dtrsm_rlnn // TODO this is not implemented by blasfeo so we defined our own (naive) implementation
+#define TRSM_RLNN fatrop_dtrsm_rlnn_alt // TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 #define VECEL BLASFEO_DVECEL
 #define MEMSIZE_VEC blasfeo_memsize_dvec
 #define CREATE_VEC blasfeo_create_dvec
@@ -245,6 +245,7 @@ namespace fatrop
             // size to store date
             for (int i = 0; i < N_; i++)
             {
+                // result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
                 result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
             }
             return result;
@@ -503,7 +504,7 @@ namespace fatrop
             for (int i = 0; i < N_; i++)
             {
                 CREATE_VEC(nels_.at(i), vec + i, data_p);
-                data_p += (vec + i)->memsize;
+                data_p += MEMSIZE_VEC(nels_.at(i));
             }
             double *d_ptr_end = (double *)data_p;
             for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)

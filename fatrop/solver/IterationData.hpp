@@ -46,11 +46,11 @@ namespace fatrop
                 // }
                 if (iterationdata_i.reg == 0.0)
                 {
-                    printf("%3d, %.5e, %.2e, %.2e, %4.1f,  -.-, %.2e, %.2e, %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
+                    printf("%3d, %.15e, %.12e, %.12e, %4.1f,  -.-, %.2e, %.2e, %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
                 }
                 else
                 {
-                    printf("%3d, %.5e, %.2e, %.2e, %4.1f, %4.1f, %.2e, %.2e, %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), log10(iterationdata_i.reg), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
+                    printf("%3d, %.15e, %.12e, %.12e, %4.1f, %4.1f, %.2e, %.2e, %d%c \n", iterationdata_i.iter, iterationdata_i.objective, iterationdata_i.constraint_violation, iterationdata_i.du_inf, log10(iterationdata_i.mu), log10(iterationdata_i.reg), iterationdata_i.alpha_du, iterationdata_i.alpha_pr, iterationdata_i.ls, iterationdata_i.type);
                 }
             }
             print_count = iterationdata.size();
