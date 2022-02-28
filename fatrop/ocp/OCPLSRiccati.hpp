@@ -124,7 +124,7 @@ namespace fatrop
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 DIARE(nx, inertia_correction_w, Ppt_p + K - 1, 0, 0);
-                GECP(nx + 1, nx, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
+                GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
                 SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
                 TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
             }
@@ -398,7 +398,7 @@ namespace fatrop
                 const int offs_g_ineq_k = offs_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-                if (Hp1_size + ng> nu + nx)
+                if (Hp1_size + ng > nu + nx)
                     return -1;
                 // gamma_k <- number of eqs represented by Ggt_stripe
                 const int gamma_k = Hp1_size + ng;
@@ -524,6 +524,10 @@ namespace fatrop
             {
                 const int nx = nx_p[0];
                 int gamma_I = gamma_p[0] - rho_p[0];
+                if (gamma_I > nx)
+                {
+                    return -3;
+                }
                 if (gamma_I > 0)
                 {
                     GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
@@ -753,7 +757,7 @@ namespace fatrop
                 const int offs_ineq_k = offs_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-                if (Hp1_size + ng> nu + nx)
+                if (Hp1_size + ng > nu + nx)
                     return -1;
                 // gamma_k <- number of eqs represented by Ggt_stripe
                 const int gamma_k = Hp1_size + ng;
@@ -895,6 +899,10 @@ namespace fatrop
             {
                 const int nx = nx_p[0];
                 int gamma_I = gamma_p[0] - rho_p[0];
+                if (gamma_I > nx)
+                {
+                    return -3;
+                }
                 if (gamma_I > 0)
                 {
                     GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
