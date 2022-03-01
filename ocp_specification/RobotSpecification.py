@@ -8,15 +8,17 @@ class RobotSpecification(OCPSpecificationInterface):
     def __init__(self, w_pos=1, w_rot=1, w_invars=(10**-3)*np.array([1.0, 1.0, 1.0])):
         root_link = "panda_link0"
         end_link = "panda_hand"
-        robot_parser = u2c.URDFparser()
-        robot_parser.from_file("./panda_arm_model.urdf")
+        self.robot_parser = u2c.URDFparser()
+        self.robot_parser.from_file("./panda_arm_model.urdf")
         # Also supports .from_server for ros parameter server, or .from_string if you have the URDF as a string.
-        fk_dict = robot_parser.get_forward_kinematics(root_link, end_link)
-        self.n_joints = robot_parser.get_n_joints(root_link, end_link)
+        self.fk_dict = self.robot_parser.get_forward_kinematics(root_link, end_link)
+        self.n_joints = self.robot_parser.get_n_joints(root_link, end_link)
         # should give ['q', 'upper', 'lower', 'dual_quaternion_fk', 'joint_names', 'T_fk', 'joint_list', 'quaternion_fk']
-        self.forward_kinematics = fk_dict["T_fk"]
-        self.lower = np.array(fk_dict["lower"])
-        self.upper = np.array(fk_dict["upper"])
+        self.forward_kinematics = self.fk_dict["T_fk"]
+        self.joint_lower = np.array(self.fk_dict["lower"])
+        self.joint_upper = np.array(self.fk_dict["upper"])
+        self.lower = np.hstack((self.joint_lower, np.array(7*[0.2**2])))
+        self.upper = np.hstack((self.joint_upper, np.array(7*[1e5])))
         super().__init__()
         return
 
@@ -25,7 +27,7 @@ class RobotSpecification(OCPSpecificationInterface):
         self.nu = self.n_joints 
         self.ngI = self.n_joints 
         self.ngF =  3 
-        self.ngIneq = self.n_joints 
+        self.ngIneq = self.n_joints + 7
         self.n_stage_params = 1  # dt
         self.n_global_params = 3 # endpos 
 
@@ -43,10 +45,31 @@ class RobotSpecification(OCPSpecificationInterface):
     
 
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
-        return 0.5*(self.lower + self.upper) - xk
+        return 0.5*(self.joint_lower + self.joint_upper) - xk
 
     def EqConstrFinal(self, xK, stage_params, global_params):
         return self.forward_kinematics(xK)[:3,3] - global_params
 
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        return [self.lower, xk, self.upper]
+        root_link = "panda_link0"
+        joint_expr0 = np.eye(4)
+        joint_expr1 = joint_expr0 @ self.robot_parser.get_forward_kinematics("panda_link0", "panda_link1")["T_fk"](xk[0])
+        joint_expr2 = joint_expr1 @ self.robot_parser.get_forward_kinematics("panda_link1", "panda_link2")["T_fk"](xk[1])
+        joint_expr3 = joint_expr2 @ self.robot_parser.get_forward_kinematics("panda_link2", "panda_link3")["T_fk"](xk[2])
+        joint_expr4 = joint_expr3 @ self.robot_parser.get_forward_kinematics("panda_link3", "panda_link4")["T_fk"](xk[3])
+        joint_expr5 = joint_expr4 @ self.robot_parser.get_forward_kinematics("panda_link4", "panda_link5")["T_fk"](xk[4])
+        joint_expr6 = joint_expr5 @ self.robot_parser.get_forward_kinematics("panda_link5", "panda_link6")["T_fk"](xk[5])
+        joint_expr7 = joint_expr6 @ self.robot_parser.get_forward_kinematics("panda_link6", "panda_link7")["T_fk"](xk[6])
+        joint_pos1 = joint_expr1[:3,3]
+        joint_pos2 = joint_expr2[:3,3]
+        joint_pos3 = joint_expr3[:3,3]
+        joint_pos4 = joint_expr4[:3,3]
+        joint_pos5 = joint_expr5[:3,3]
+        joint_pos6 = joint_expr6[:3,3]
+        joint_pos7 = joint_expr7[:3,3]
+        jointposlist = [joint_pos1, joint_pos2, joint_pos3, joint_pos4, joint_pos5, joint_pos6, joint_pos7]
+        obstaclepos = DM([0.3, 0.0, 0.5])
+        distancelist = SX.zeros(7)
+        for i in range(7):
+            distancelist[i] = sum1((jointposlist[i]-obstaclepos)**2)
+        return [self.lower, vertcat(xk, SX(distancelist)), self.upper]

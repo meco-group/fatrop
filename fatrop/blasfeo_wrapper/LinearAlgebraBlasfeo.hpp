@@ -343,6 +343,13 @@ namespace fatrop
                 this->at(ai) = fm.get_el(ai);
             }
         }
+        void operator=(const vector<double> &fm)
+        {
+            for (int ai = 0; ai < nels_; ai++)
+            {
+                this->at(ai) = fm.at(ai);
+            }
+        }
         /** \brief set data pointer*/
         void set_datap(VEC *vecbf)
         {
