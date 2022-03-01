@@ -74,7 +74,10 @@ namespace fatrop
             RefCountPtr<FatropData> fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
             vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
             vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
+            vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
+            vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
             ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
+            fatropdata ->SetBounds(lower, upper);
             RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
             RefCountPtr<Journaller> journaller(new Journaller(params->maxiter + 1));
             RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);

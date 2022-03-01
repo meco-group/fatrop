@@ -388,6 +388,11 @@ namespace fatrop
             }
             return;
         }
+        void SetBounds(const vector<double>& lowerin, const vector<double>& upperin)
+        {
+            s_lower = lowerin;
+            s_upper = upperin;
+        }
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;

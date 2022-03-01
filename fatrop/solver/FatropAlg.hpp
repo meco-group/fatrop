@@ -115,6 +115,7 @@ namespace fatrop
                 // todo make an update class for regularization
                 double deltac_candidate = delta_c_stripe * pow(mu, kappa_c);
                 deltaw = 0.0;
+                // deltaw = 1e-8*mu;
                 deltac = 0.0;
                 int regularity = ComputeSD(deltaw, deltac, mu);
                 if (regularity < 0)

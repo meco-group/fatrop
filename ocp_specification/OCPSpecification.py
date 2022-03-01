@@ -54,7 +54,7 @@ class JSONGenerator:
     def __init__(self, ocpspec):
         self.ocpspec = ocpspec
 
-    def generate_JSON(self, filename, K, stage_params, global_params, initial_x=None, initial_u=None):
+    def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u, lower =np.array([]), upper = np.array([])):
         # problem dimensions
         JSONdict = {'nx': self.ocpspec.nx,        'nu': self.ocpspec.nu,        'ngI': self.ocpspec.ngI,        'ngF': self.ocpspec.ngF,
                     'ng_ineq': self.ocpspec.ngIneq,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
@@ -66,6 +66,7 @@ class JSONGenerator:
         # initial x
         # if initial_x != None:
         JSONdict['initial_x'] = initial_x.ravel(order='f').tolist()
+
         # else:
         # JSONdict['initial_x'] = np.zeros(self.ocpspec.nx*K).tolist()
         # initial u
@@ -74,6 +75,8 @@ class JSONGenerator:
         # else:
         # JSONdict['initial_u'] = np.zeros(self.ocpspec.nu*K).tolist()
         # bounds
+        JSONdict['lower'] = lower.ravel(order='f').tolist()
+        JSONdict['upper'] = upper.ravel(order='f').tolist()
         print(json_dump(JSONdict, "test.json"))
         return
 
