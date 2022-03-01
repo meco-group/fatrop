@@ -132,8 +132,7 @@ class FatropOCPCodeGenerator:
         RSQrqtI = SX.zeros(nu+nx+1, nu + nx)
         [RSQI, rqI] = hessian(Lk, vertcat(u_sym, x_sym))
         if ngI > 0:
-            RSQI += hessian(dual_eqI.T@eqI,
-                            vertcat(u_sym, x_sym))[0]
+            RSQI += hessian(dual_eqI.T@eqI, vertcat(u_sym, x_sym))[0]
         RSQI += hessian(dual_dyn.T@dynamics,
                         vertcat(u_sym, x_sym))[0]
         if ngIneq > 0:
@@ -292,8 +291,8 @@ class OptiBuilder:
                         self.opti.subject_to(lower[i] < Ineqf(
                             self.u_vars[:, k], self.x_vars[:, k], self.stage_params_in[:, k], self.global_params_in)[i])
                     else:
-                        self.opti.subject_to(lower[i] < Ineqf(
-                            self.u_vars, self.x_vars, self.stage_params_in[:, k], self.global_params_in)[i] < upper[i])
+                        self.opti.subject_to(lower[i] < (Ineqf(
+                            self.u_vars[:,k], self.x_vars[:,k], self.stage_params_in[:, k], self.global_params_in)[i] < upper[i]))
         J += LkFf(1.0, self.x_vars[:, K-1],
                   self.stage_params_in[:, K-1], self.global_params_in)
         self.opti.minimize(J)
