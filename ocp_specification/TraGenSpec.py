@@ -24,8 +24,8 @@ class TraGenSpec(OCPSpecificationInterface):
     def SetProblemDimensions(self):
         self.nx = 12
         self.nu = 3
-        self.ngI = 6 
-        self.ngF =  12 
+        self.ngI = 12 
+        self.ngF =  6 
         self.ngIneq = 0
         self.n_stage_params = 1 + 3  # dt, 3 invariants
         self.n_global_params = 24
@@ -41,10 +41,11 @@ class TraGenSpec(OCPSpecificationInterface):
         return 0
 
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
-        return vertcat(xk[self.indR[ind_lower]] - global_params[self.ind_params_R0[ind_lower]], xk[self.indp] - global_params[self.ind_params_p0])
+        return vertcat(xk[self.indR[:]] - global_params[self.ind_params_R0[:]], xk[self.indp] - global_params[self.ind_params_p0])
 
     def EqConstrFinal(self, xK, stage_params, global_params):
-        return vertcat(xK[self.indR[:]] - global_params[self.ind_params_RF[:]], xK[self.indp] - global_params[self.ind_params_pF])
+        deltaR =FSDynamics.RotToVec(FSDynamics.VecToRot(xK[self.indR[:]]).T @ FSDynamics.VecToRot(global_params[self.ind_params_RF[:]]))
+        return vertcat(deltaR[ind_lower], xK[self.indp] - global_params[self.ind_params_pF])
 
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         return DM.zeros(0), DM.zeros(0), DM.zeros(0)
