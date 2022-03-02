@@ -4,6 +4,7 @@ import FSDynamics
 from casadi import *
 from urdf2casadi import urdfparser as u2c
 ind_lower = np.array([1, 2, 5])
+radius = np.array([0.12,0.15, 0.12,0.1, 0,14,0.08, 0.14])
 class RobotSpecification(OCPSpecificationInterface):
     def __init__(self, w_pos=1, w_rot=1, w_invars=(10**-3)*np.array([1.0, 1.0, 1.0])):
         root_link = "panda_link0"
@@ -17,6 +18,8 @@ class RobotSpecification(OCPSpecificationInterface):
         self.forward_kinematics = self.fk_dict["T_fk"]
         self.joint_lower = np.array(self.fk_dict["lower"])
         self.joint_upper = np.array(self.fk_dict["upper"])
+        print("lower " , self.joint_lower)
+        print("upper " , self.joint_upper)
         self.lower = np.hstack((self.joint_lower, np.array(7*[0.2**2])))
         self.upper = np.hstack((self.joint_upper, np.array(7*[1e5])))
         super().__init__()
@@ -45,7 +48,8 @@ class RobotSpecification(OCPSpecificationInterface):
     
 
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
-        return 0.5*(self.joint_lower + self.joint_upper) - xk
+        # return 0.5*(self.joint_lower + self.joint_upper) - xk
+        return np.array(3*[0.0] + [-1.0] + 3*[0.0]) - xk
 
     def EqConstrFinal(self, xK, stage_params, global_params):
         return self.forward_kinematics(xK)[:3,3] - global_params
@@ -68,7 +72,7 @@ class RobotSpecification(OCPSpecificationInterface):
         joint_pos6 = joint_expr6[:3,3]
         joint_pos7 = joint_expr7[:3,3]
         jointposlist = [joint_pos1, joint_pos2, joint_pos3, joint_pos4, joint_pos5, joint_pos6, joint_pos7]
-        obstaclepos = DM([0.3, 0.0, 0.5])
+        obstaclepos = DM([100.0, 0.0, 0.5])
         distancelist = SX.zeros(7)
         for i in range(7):
             distancelist[i] = sum1((jointposlist[i]-obstaclepos)**2)

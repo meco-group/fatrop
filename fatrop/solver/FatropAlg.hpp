@@ -98,9 +98,10 @@ namespace fatrop
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
-                    // cout << "found solution :) " << endl;
-                    // cout << "riccati time " << sd_time << endl;
-                    // cout << "hess time " << hess_time << endl;
+                    cout << "found solution :) " << endl;
+                    cout << "riccati time " << sd_time << endl;
+                    cout << "hess time " << hess_time << endl;
+                    cout << "jac time " << jac_time << endl;
                     return 0;
                 }
                 // update mu
@@ -169,9 +170,13 @@ namespace fatrop
         }
         inline int EvalJac()
         {
-            return fatropnlp_->EvalJac(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res =  fatropnlp_->EvalJac(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr);
+            jac_time += blasfeo_toc(&timer);
+            return res;
         }
         inline int EvalCVCurr()
         {

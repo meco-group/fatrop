@@ -1,0 +1,11 @@
+Metadata-Version: 1.2
+Name: OCPSpecification
+Version: 0.0.1
+Summary: package for fatrop problem specification
+Home-page: UNKNOWN
+Author: Lander Vanroye
+Author-email: lander.vanroye@kuleuven.be
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.6

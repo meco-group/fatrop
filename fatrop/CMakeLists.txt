@@ -114,7 +114,7 @@ sparse
 templates)
 foreach(incl IN LISTS INCLUDEDIRSFATROP) 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
-        DESTINATION "fatrop/${incl}" # target directory
+        DESTINATION "include/fatrop/${incl}" # target directory
         FILES_MATCHING # install only matched files
         PATTERN "*.hpp" # select header files
 )
