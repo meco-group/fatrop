@@ -102,6 +102,22 @@ target_include_directories(fatrop
         ${PROJECT_SOURCE_DIR}/fatrop
 )
 # set_target_properties(fatrop PROPERTIES PUBLIC_HEADER ${FATROPHEADERS})
-set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
+# set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
+list(APPEND INCLUDEDIRSFATROP
+aux
+blasfeo_wrapper
+debug
+function_evaluation
+json
+solver
+sparse
+templates)
+foreach(incl IN LISTS INCLUDEDIRSFATROP) 
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
+        DESTINATION "fatrop/${incl}" # target directory
+        FILES_MATCHING # install only matched files
+        PATTERN "*.hpp" # select header files
+)
+endforeach()
 install(TARGETS fatrop
 PUBLIC_HEADER DESTINATION fatrop)
