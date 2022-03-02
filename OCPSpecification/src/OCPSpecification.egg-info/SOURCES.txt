@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-setup.py
-src/OCPSpecification/OCPSpecification.py
-src/OCPSpecification/__init__.py
-src/OCPSpecification.egg-info/PKG-INFO
-src/OCPSpecification.egg-info/SOURCES.txt
-src/OCPSpecification.egg-info/dependency_links.txt
-src/OCPSpecification.egg-info/top_level.txt
