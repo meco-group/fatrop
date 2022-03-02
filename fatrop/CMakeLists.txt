@@ -101,3 +101,7 @@ target_include_directories(fatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
 )
+# set_target_properties(fatrop PROPERTIES PUBLIC_HEADER ${FATROPHEADERS})
+set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
+install(TARGETS fatrop
+PUBLIC_HEADER DESTINATION fatrop)
