@@ -1,13 +1,13 @@
 from casadi import *
-import OCPSpecification
+import FatropOCPSpecification
 import RocketDynamics
 import RocketSpec
 
 rocketspec = RocketSpec.RocketSpec()
-codegen = OCPSpecification.FatropOCPCodeGenerator(rocketspec)
+codegen = FatropOCPSpecification.FatropOCPCodeGenerator(rocketspec)
 codegen.generate_code("f.c")
-optibuilder = OCPSpecification.OptiBuilder(rocketspec)
-jsongen = OCPSpecification.JSONGenerator(rocketspec)
+optibuilder = FatropOCPSpecification.OptiBuilder(rocketspec)
+jsongen = FatropOCPSpecification.JSONGenerator(rocketspec)
 K = 100
 # jsongen.generate_JSON("rocket.json", 100, np.zeros((0,K)), np.zeros((0,K)), np.ones((rocketspec.nx, K)), np.ones(rocketspec.nu,K-1))
 opti = optibuilder.set_up_Opti(K)

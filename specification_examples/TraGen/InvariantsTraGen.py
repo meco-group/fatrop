@@ -1,5 +1,5 @@
 from matplotlib.font_manager import json_load
-from OCPSpecification import *
+from FatropOCPSpecification import *
 import TraGenSpec
 
 import numpy as np

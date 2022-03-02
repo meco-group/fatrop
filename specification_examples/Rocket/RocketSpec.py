@@ -1,4 +1,5 @@
-from OCPSpecification import *
+from FatropOCPSpecification import *
+
 import RocketDynamics
 
 class RocketSpec(OCPSpecificationInterface):

@@ -1,6 +1,4 @@
-
-from OCPSpecification import *
-import FSDynamics
+from FatropOCPSpecification import *
 from casadi import *
 from urdf2casadi import urdfparser as u2c
 ind_lower = np.array([1, 2, 5])

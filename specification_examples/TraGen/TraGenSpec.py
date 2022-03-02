@@ -1,8 +1,7 @@
-from OCPSpecification import *
+from FatropOCPSpecification import *
 import FSDynamics
 import casadi as cas
 import numpy as np
-from FatropOCPSpecification import *
 # ind_lower = np.array([0, 1, 2, 4, 5, 8])
 ind_lower = np.array([1, 2, 5])
 class TraGenSpec(OCPSpecificationInterface):

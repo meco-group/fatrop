@@ -1,6 +1,7 @@
 from RobotSpecification import *
 import numpy as np
 import numpy.matlib
+from FatropOCPSpecification import *
 K = 50
 robotspecification = RobotSpecification()
 optibuilder = OptiBuilder(robotspecification)
