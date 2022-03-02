@@ -26,8 +26,11 @@ invariants/trans_FS/f.c
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+*.egg
 
-build/
+*egg-info/
+
+*build/
 release/
 
 CMakeLists.txt.user
