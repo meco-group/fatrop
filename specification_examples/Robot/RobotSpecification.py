@@ -2,7 +2,7 @@ from FatropOCPSpecification import *
 from casadi import *
 from urdf2casadi import urdfparser as u2c
 ind_lower = np.array([1, 2, 5])
-radius = np.array([0.12,0.15, 0.12,0.1, 0,14,0.08, 0.14])
+radius = np.array([0.12,0.15, 0.12,0.1, 0.14,0.08, 0.14])
 class RobotSpecification(OCPSpecificationInterface):
     def __init__(self, w_pos=1, w_rot=1, w_invars=(10**-3)*np.array([1.0, 1.0, 1.0])):
         root_link = "panda_link0"
