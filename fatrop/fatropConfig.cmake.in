@@ -1,0 +1,12 @@
+set(fatrop_VERSION @VERSION@)
+
+@PACKAGE_INIT@
+
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/fatropTargets.cmake")
+
+SET_AND_CHECK(fatrop_LIB_DIR "@PACKAGE_LIBRARY_INSTALL_DIR@")
+
+message(STATUS "Fatrop version: ${fatrop_VERSION}")
+message(STATUS "Fatrop location: ${fatrop_LIB_DIR}")
+
+check_required_components(fatrop)

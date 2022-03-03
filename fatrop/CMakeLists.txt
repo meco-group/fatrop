@@ -104,11 +104,13 @@ target_include_directories(fatrop
 # set_target_properties(fatrop PROPERTIES PUBLIC_HEADER ${FATROPHEADERS})
 # set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
 list(APPEND INCLUDEDIRSFATROP
+.
 aux
 blasfeo_wrapper
 debug
 function_evaluation
 json
+ocp
 solver
 sparse
 templates)
@@ -116,8 +118,53 @@ foreach(incl IN LISTS INCLUDEDIRSFATROP)
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
         DESTINATION "include/fatrop/${incl}" # target directory
         FILES_MATCHING # install only matched files
-        PATTERN "*.hpp" # select header files
+        PATTERN "*.hpp" # select C++ header files
+        PATTERN "*.h" # select C header files
 )
 endforeach()
-install(TARGETS fatrop
-PUBLIC_HEADER DESTINATION fatrop)
+#install(TARGETS fatrop
+#PUBLIC_HEADER DESTINATION fatrop)
+
+set(INCLUDE_INSTALL_DIR "include/fatrop")
+set(LIBRARY_INSTALL_DIR "lib/fatrop")
+set(SYSCONFIG_INSTALL_DIR "etc/fatrop")
+
+# Create the distribution package(s)
+set(CPACK_PACKAGE_VERSION ${VERSION})
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+
+set(CPACK_PACKAGE_NAME "fatrop")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+
+INSTALL(TARGETS fatrop 
+  EXPORT fatropTargets
+  LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+  ARCHIVE DESTINATION ${LIBRARY_INSTALL_DIR}
+  INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
+  )
+
+include(CMakePackageConfigHelpers)
+set(ConfigFileInstallDir cmake/fatrop)
+set(INCLUDE_INSTALL_DIR include CACHE PATH "install path for include files")
+set(LIBRARY_INSTALL_DIR lib CACHE PATH "install path for libraries")
+configure_package_config_file(fatropConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
+  INSTALL_DESTINATION "${ConfigFileInstallDir}"
+  PATH_VARS INCLUDE_INSTALL_DIR LIBRARY_INSTALL_DIR
+  )
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
+  VERSION "${VERSION}"
+  COMPATIBILITY SameMajorVersion)
+
+EXPORT(EXPORT fatropTargets
+  FILE fatropTargets.cmake)
+
+INSTALL(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/fatropTargets.cmake"
+  DESTINATION "${ConfigFileInstallDir}")
+
+include(CPack)

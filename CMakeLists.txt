@@ -2,7 +2,8 @@
 # To find the cmake version run
 # $ cmake --version
 cmake_minimum_required(VERSION 3.14)
-project(FATROP LANGUAGES C CXX Fortran)
+set(VERSION 0.0.1)
+project(FATROP VERSION "${VERSION}" LANGUAGES C CXX Fortran)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -14,7 +15,6 @@ set(CMAKE_CXX_STANDARD 11)
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # FetchContent_MakeAvailable(googletest)
-
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
