@@ -53,6 +53,7 @@ namespace fatrop
             kappa1 = params->kappa1;
             kappa2 = params->kappa2;
             kappa_d = params->kappa_d;
+            kappa_sigma = params -> kappa_sigma;
             n_ineqs_r = nIneqsR();
         }
         int Reset()
@@ -228,7 +229,12 @@ namespace fatrop
                     double pL = MIN(kappa1 * MAX(1.0, abs(loweri)), kappa2 * (upperi - loweri));
                     double pR = MIN(kappa1 * MAX(1.0, abs(upperi)), kappa2 * (upperi - loweri));
                     // project
+                    // double veccache = VECEL(s_curr_p, i);
                     VECEL(s_curr_p, i) = MIN(MAX(VECEL(s_curr_p, i), loweri + pL), upperi - pR);
+                    // if(VECEL(s_curr_p, i) != veccache)
+                    // {
+                    //     cout << "changed slack to be in bounds"<< endl;
+                    // }
                 }
                 else if (lower_bounded)
                 {
@@ -237,6 +243,39 @@ namespace fatrop
                 else if (upper_bounded)
                 {
                     VECEL(s_curr_p, i) = MIN(VECEL(s_curr_p, i), upperi - kappa1 * MAX(1.0, abs(upperi)));
+                }
+            }
+            return 0;
+        }
+        int AdaptDualBounds(double mu)
+        {
+            VEC *s_lower_p = (VEC *)s_lower;
+            VEC *s_upper_p = (VEC *)s_upper;
+            VEC *s_next_p = (VEC *)s_next;
+            VEC * zL_curr_p = (VEC* )zL_curr;
+            VEC * zU_curr_p = (VEC* )zU_curr;
+            VEC * zL_next_p = (VEC* )zL_next;
+            VEC * zU_next_p = (VEC* )zU_next;
+            double kappa_sigma = this->kappa_sigma;
+            VEC* delta_zL_p = (VEC*) delta_zL;
+            VEC* delta_zU_p = (VEC*) delta_zU;
+            for (int i = 0; i < n_ineqs; i++)
+            {
+                double loweri = VECEL(s_lower_p, i);
+                double upperi = VECEL(s_upper_p, i);
+                bool lower_bounded = !isinf(loweri);
+                bool upper_bounded = !isinf(upperi);
+                if (lower_bounded)
+                {
+                    double dist_lower = VECEL(s_next_p, i) - VECEL(s_lower_p, i);
+                    double zL_next_v = VECEL(zL_curr_p, i) + VECEL(delta_zL_p, i);
+                    VECEL(delta_zL_p, i) =  MAX(MIN(zL_next_v, kappa_sigma*mu/dist_lower), mu/(kappa_sigma*dist_lower)) -VECEL(zL_curr_p, i);
+                }
+                if (upper_bounded)
+                {
+                    double dist_upper = VECEL(s_upper_p, i) -VECEL(s_next_p, i);
+                    double zU_next_v = VECEL(zU_curr_p, i) + VECEL(delta_zU_p, i);
+                    VECEL(delta_zU_p, i) =  MAX(MIN(zU_next_v, kappa_sigma*mu/dist_upper), mu/(kappa_sigma*dist_upper))-VECEL(zU_curr_p, i);
                 }
             }
             return 0;
@@ -457,6 +496,7 @@ namespace fatrop
         double kappa1;
         double kappa2;
         double kappa_d;
+        double kappa_sigma;
     };
 }
 #endif // FATROPDATAINCLUDED

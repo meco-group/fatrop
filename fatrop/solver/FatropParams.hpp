@@ -19,6 +19,7 @@ namespace fatrop
         double kappa_wmin = 1.0/3.0;
         double kappa_wplus = 8;
         double kappa_wplusem = 100;
+        double kappa_sigma = 1e10;
         double s_phi = 2.3;
         double delta = 1.0;
         double s_theta = 1.1;
