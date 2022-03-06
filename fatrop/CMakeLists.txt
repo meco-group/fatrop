@@ -38,12 +38,12 @@ solver/IterationData.hpp                    solver/IterationData.cpp
 solver/LineSearch.hpp                       solver/LineSearch.cpp
 solver/StepAcceptor.hpp                     solver/StepAcceptor.cpp
 solver/Timer.hpp                            solver/Timer.cpp
-sparse/FatropSparse.hpp                     sparse/FatropSparse.cpp
-sparse/Interface.hpp                        sparse/Interface.cpp
-sparse/InterfaceMA57.hpp                    sparse/InterfaceMA57.cpp
-sparse/InterfaceMUMPS.hpp                   sparse/InterfaceMUMPS.cpp
-sparse/InterfacePardiso.hpp                 sparse/InterfacePardiso.cpp
-sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
+# sparse/FatropSparse.hpp                     sparse/FatropSparse.cpp
+# sparse/Interface.hpp                        sparse/Interface.cpp
+# sparse/InterfaceMA57.hpp                    sparse/InterfaceMA57.cpp
+# sparse/InterfaceMUMPS.hpp                   sparse/InterfaceMUMPS.cpp
+# sparse/InterfacePardiso.hpp                 sparse/InterfacePardiso.cpp
+# sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
 json/json.h json/json.cpp
 )
@@ -85,18 +85,18 @@ solver/IterationData.hpp
 solver/LineSearch.hpp
 solver/StepAcceptor.hpp
 solver/Timer.hpp
-sparse/FatropSparse.hpp
-sparse/Interface.hpp
-sparse/InterfaceMA57.hpp
-sparse/InterfaceMUMPS.hpp
-sparse/InterfacePardiso.hpp
-sparse/SparseOCP.hpp
+# sparse/FatropSparse.hpp
+# sparse/Interface.hpp
+# sparse/InterfaceMA57.hpp
+# sparse/InterfaceMUMPS.hpp
+# sparse/InterfacePardiso.hpp
+# sparse/SparseOCP.hpp
 templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
 find_package(MUMPS)
-target_link_libraries(fatrop MUMPS::MPISEQ)
-target_link_libraries(fatrop MUMPS::DMUMPS)
+# target_link_libraries(fatrop MUMPS::MPISEQ)
+# target_link_libraries(fatrop MUMPS::DMUMPS)
 target_include_directories(fatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
@@ -112,7 +112,7 @@ function_evaluation
 json
 ocp
 solver
-sparse
+# sparse
 templates)
 foreach(incl IN LISTS INCLUDEDIRSFATROP) 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory

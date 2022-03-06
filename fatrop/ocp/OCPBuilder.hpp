@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include "json/json.h"
+#include <sstream>
 namespace fatrop
 {
     class OCPBuilder
@@ -75,7 +76,8 @@ namespace fatrop
             vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
             vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
             vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
-            vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
+            // vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
+            vector<double> upper = vector<double>(lower.size(), INFINITY);
             ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
             fatropdata ->SetBounds(lower, upper);
             RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));

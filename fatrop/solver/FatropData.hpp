@@ -252,8 +252,10 @@ namespace fatrop
             VEC *s_lower_p = (VEC *)s_lower;
             VEC *s_upper_p = (VEC *)s_upper;
             VEC *s_next_p = (VEC *)s_next;
-            VEC * zL_curr_p = (VEC* )zL_curr;
-            VEC * zU_curr_p = (VEC* )zU_curr;
+            // VEC *s_curr_p = (VEC *)s_curr;
+            // VEC *delta_s_p = (VEC *)delta_s;
+            // VEC * zL_curr_p = (VEC* )zL_curr;
+            // VEC * zU_curr_p = (VEC* )zU_curr;
             VEC * zL_next_p = (VEC* )zL_next;
             VEC * zU_next_p = (VEC* )zU_next;
             double kappa_sigma = this->kappa_sigma;
@@ -267,15 +269,17 @@ namespace fatrop
                 bool upper_bounded = !isinf(upperi);
                 if (lower_bounded)
                 {
-                    double dist_lower = VECEL(s_next_p, i) - VECEL(s_lower_p, i);
-                    double zL_next_v = VECEL(zL_curr_p, i) + VECEL(delta_zL_p, i);
-                    VECEL(delta_zL_p, i) =  MAX(MIN(zL_next_v, kappa_sigma*mu/dist_lower), mu/(kappa_sigma*dist_lower)) -VECEL(zL_curr_p, i);
+                    double s_next_v =  VECEL(s_next_p,i);
+                    double dist_lower = s_next_v - VECEL(s_lower_p, i);
+                    double zL_next_v = VECEL(zL_next_p, i);
+                    VECEL(zL_next_p, i) =  MAX(MIN(zL_next_v, kappa_sigma*mu/dist_lower), mu/(kappa_sigma*dist_lower));
                 }
                 if (upper_bounded)
                 {
-                    double dist_upper = VECEL(s_upper_p, i) -VECEL(s_next_p, i);
-                    double zU_next_v = VECEL(zU_curr_p, i) + VECEL(delta_zU_p, i);
-                    VECEL(delta_zU_p, i) =  MAX(MIN(zU_next_v, kappa_sigma*mu/dist_upper), mu/(kappa_sigma*dist_upper))-VECEL(zU_curr_p, i);
+                    double s_next_v = VECEL(s_next_p, i);
+                    double dist_upper = VECEL(s_upper_p, i) -s_next_v;
+                    double zU_next_v = VECEL(zU_next_p,i);
+                    VECEL(zU_next_p, i) =  MAX(MIN(zU_next_v, kappa_sigma*mu/dist_upper), mu/(kappa_sigma*dist_upper));
                 }
             }
             return 0;

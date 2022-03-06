@@ -66,8 +66,6 @@ namespace fatrop
         {
             double alpha_primal = 1.0;
             double alpha_dual = 1.0;
-            fatropdata_->AdaptDualBounds(mu);
-            fatropdata_->TryStep(alpha_primal, alpha_dual);
             fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
             fatropdata_->TryStep(alpha_primal, alpha_dual);
             double cv_curr = fatropdata_->CVL1Curr();
