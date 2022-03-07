@@ -146,8 +146,8 @@ INSTALL(TARGETS fatrop
 
 include(CMakePackageConfigHelpers)
 set(ConfigFileInstallDir cmake/fatrop)
-set(INCLUDE_INSTALL_DIR include CACHE PATH "install path for include files")
-set(LIBRARY_INSTALL_DIR lib CACHE PATH "install path for libraries")
+set(INCLUDE_INSTALL_DIR ${INCLUDE_INSTALL_DIR} CACHE PATH "install path for include files")
+set(LIBRARY_INSTALL_DIR ${LIBRARY_INSTALL_DIR} CACHE PATH "install path for libraries")
 configure_package_config_file(fatropConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
   INSTALL_DESTINATION "${ConfigFileInstallDir}"
