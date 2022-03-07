@@ -2,7 +2,7 @@ from RobotSpecification import *
 import numpy as np
 import numpy.matlib
 from FatropOCPSpecification import *
-K = 20 
+K = 3 
 robotspecification = RobotSpecification()
 # print(robotspecification.lower)
 optibuilder = OptiBuilder(robotspecification)
@@ -20,7 +20,7 @@ opti.set_initial(optibuilder.x_vars, inits_x)
 opti.set_initial(optibuilder.u_vars, inits_u)
 # opti.solver("ipopt", {"expand":True}, {'print_level':5, 'max_soc':0, 'tol':1e-5})
 # opti.solver("ipopt", {"expand":True}, {'print_level':8, 'tol':1e-5, 'max_iter':500, "max_soc":0, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':None})
-opti.solver("ipopt", {"expand":True}, {'print_level':5, 'tol':1e-5, 'max_iter':500, "max_soc":0, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':'none', 'kappa_sigma':1e10})
+opti.solver("ipopt", {"expand":True}, {'constr_mult_init_max':1e3,'print_level':5, 'tol':1e-5, 'max_iter':500, "max_soc":5, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':'none', 'kappa_sigma':1e10})
 opti.solve()
 # opti.solve()
 lower = np.matlib.repmat(robotspecification.lower[:,np.newaxis], 1,K-1)

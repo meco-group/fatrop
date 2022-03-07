@@ -81,6 +81,17 @@ namespace fatrop
             double deltac = 0.0;
             for (int i = 0; i < maxiter; i++)
             {
+                // cout << "iteration " << i << endl;
+                // cout << "x_curr " << endl;
+                // fatropdata_-> x_curr.print();
+                // cout << "s_curr " << endl;
+                // fatropdata_-> s_curr.print();
+                // cout << "lam_curr " << endl;
+                // fatropdata_-> lam_curr.print();
+                // cout << "zL_curr " << endl;
+                // fatropdata_-> zL_curr.print();
+                // cout << "zU_curr " << endl;
+                // fatropdata_-> zU_curr.print();
                 fatropdata_->obj_curr = EvalObjCurr();
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
