@@ -27,10 +27,10 @@ class RobotSpecification(OCPSpecificationInterface):
         max_vel = pi # rad/sec
         self.lower = np.hstack((self.joint_lower, -max_vel*np.ones(self.n_joints), radius**2))
         self.upper = np.hstack((self.joint_upper, max_vel *np.ones(self.n_joints),np.array(n_points*6*[1e5])))
-        # self.lowerF = np.hstack((self.joint_lower, radius**2))
-        # self.upperF = np.hstack((self.joint_upper, np.array(n_points*6*[1e5])))
-        self.lowerF = self.joint_lower 
-        self.upperF = self.joint_upper
+        self.lowerF = np.hstack((self.joint_lower, radius**2))
+        self.upperF = np.hstack((self.joint_upper, np.array(n_points*6*[1e5])))
+        # self.lowerF = self.joint_lower 
+        # self.upperF = self.joint_upper
         super().__init__()
         return
 
@@ -40,8 +40,8 @@ class RobotSpecification(OCPSpecificationInterface):
         self.ngI = self.n_joints 
         self.ngF =  3 
         self.ngIneq = self.n_joints+ self.n_joints + n_points*6
-        # self.ngIneqF = self.n_joints + n_points*6
-        self.ngIneqF = self.n_joints 
+        self.ngIneqF = self.n_joints + n_points*6
+        # self.ngIneqF = self.n_joints 
         self.n_stage_params = 1  # dt
         self.n_global_params = 3 # endpos 
 
@@ -120,4 +120,4 @@ class RobotSpecification(OCPSpecificationInterface):
             distance_all[i] = sum1((jointposlist[i]-obstaclepos)**2)
         
         # return [self.lowerF, vertcat(xk, distance_all), self.upperF]
-        return [self.lowerF[:7], vertcat(xk), self.upperF[:7]]
+        return [self.lowerF, vertcat(xk, distance_all), self.upperF]
