@@ -2,7 +2,7 @@ from RobotSpecification import *
 import numpy as np
 import numpy.matlib
 from FatropOCPSpecification import *
-K = 50
+K = 20 
 robotspecification = RobotSpecification()
 # print(robotspecification.lower)
 optibuilder = OptiBuilder(robotspecification)
@@ -29,5 +29,6 @@ lowerF = robotspecification.lowerF
 upperF = robotspecification.upperF
 jsongen = JSONGenerator(robotspecification)
 jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u, lower, upper, lowerF, upperF)
+# jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u, lower, upper)
 codegen = FatropOCPCodeGenerator(robotspecification)
 codegen.generate_code("f.c")

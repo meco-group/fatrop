@@ -84,6 +84,8 @@ namespace fatrop
             vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
             vector<double> lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
             vector<double> upperF = json_spec["upperF"].get_number_array<double>("%lf");
+            lower.insert(lower.end(), lowerF.begin(), lowerF.end());
+            upper.insert(upper.end(), upperF.begin(), upperF.end());
             // vector<double> upper = vector<double>(lower.size(), INFINITY);
             ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
             fatropdata ->SetBounds(lower, upper);

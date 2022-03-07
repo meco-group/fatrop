@@ -121,9 +121,44 @@ namespace fatrop
                 const int nx = nx_p[K - 1];
                 const int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
                 const int ng = ng_p[K - 1];
+                const int ng_ineq = ng_ineq_p[K - 1];
+                const int offs_ineq_k = offs_ineq_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 DIARE(nx, inertia_correction_w, Ppt_p + K - 1, 0, 0);
+                //// inequalities
+                if (ng_ineq > 0)
+                {
+                    GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+                    for (int i = 0; i < ng_ineq; i++)
+                    {
+                        double scaling_factor = inertia_correction_w;
+                        double zLi = VECEL(zL_p, offs_ineq_k + i);
+                        double zUi = VECEL(zU_p, offs_ineq_k + i);
+                        double si = VECEL(s_p, offs_ineq_k + i);
+                        double loweri = VECEL(lower_p, offs_ineq_k + i);
+                        double upperi = VECEL(upper_p, offs_ineq_k + i);
+                        double grad_barrier = 0.0;
+                        if (!isinf(loweri))
+                        {
+                            double dist = si - loweri;
+                            double dist_m1 = 1.0 / dist;
+                            scaling_factor += zLi * dist_m1;
+                            grad_barrier -= mu * dist_m1;
+                        }
+                        if (!isinf(upperi))
+                        {
+                            double dist = upperi - si;
+                            double dist_m1 = 1.0 / dist;
+                            scaling_factor += zUi * dist_m1;
+                            grad_barrier += mu * dist_m1;
+                        }
+                        COLSC(nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                        MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
+                    }
+                    // add the penalty
+                    SYRK_LN_MN(nu + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+                }
                 GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
                 SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
                 TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
@@ -379,9 +414,38 @@ namespace fatrop
                 const int nx = nx_p[K - 1];
                 const int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
                 const int ng = ng_p[K - 1];
+                const int ng_ineq = ng_ineq_p[K-1];
+                const int offs_ineq_k = offs_ineq_p[K-1];
+                const int offs_g_ineq_k = offs_ineq_p[K-1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 // DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
+                //// inequalities
+                if (ng_ineq > 0)
+                {
+                    GECP(nx, ng_ineq, Ggt_ineq_p + K-1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+                    for (int i = 0; i < ng_ineq; i++)
+                    {
+                        double zLi = VECEL(zL_p, offs_ineq_k + i);
+                        double zUi = VECEL(zU_p, offs_ineq_k + i);
+                        double loweri = VECEL(lower_p, offs_ineq_k + i);
+                        double upperi = VECEL(upper_p, offs_ineq_k + i);
+                        double grad_barrier = 0.0;
+                        if (!isinf(loweri))
+                        {
+                            grad_barrier -= zLi;
+                        }
+                        if (!isinf(upperi))
+                        {
+                            grad_barrier += zUi;
+                        }
+                        // COLSC(nu + nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                        MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier;
+                        VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier;
+                    }
+                    // add the penalty
+                    SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K-1, nu, 0, 1.0, Ppt_p + K-1, 0, 0, Ppt_p + K-1, 0, 0);
+                }
                 // Hh_Km1 <- Gg_Km1
                 GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
                 gamma_p[K - 1] = ng;
@@ -738,9 +802,44 @@ namespace fatrop
                 const int nx = nx_p[K - 1];
                 const int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
                 const int ng = ng_p[K - 1];
+                const int ng_ineq = ng_ineq_p[K - 1];
+                const int offs_ineq_k = offs_ineq_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
+                //// inequalities
+                if (ng_ineq > 0)
+                {
+                    GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+                    for (int i = 0; i < ng_ineq; i++)
+                    {
+                        double scaling_factor = inertia_correction;
+                        double zLi = VECEL(zL_p, offs_ineq_k + i);
+                        double zUi = VECEL(zU_p, offs_ineq_k + i);
+                        double si = VECEL(s_p, offs_ineq_k + i);
+                        double loweri = VECEL(lower_p, offs_ineq_k + i);
+                        double upperi = VECEL(upper_p, offs_ineq_k + i);
+                        double grad_barrier = 0.0;
+                        if (!isinf(loweri))
+                        {
+                            double dist = si - loweri;
+                            double dist_m1 = 1.0 / dist;
+                            scaling_factor += zLi * dist_m1;
+                            grad_barrier -= mu * dist_m1;
+                        }
+                        if (!isinf(upperi))
+                        {
+                            double dist = upperi - si;
+                            double dist_m1 = 1.0 / dist;
+                            scaling_factor += zUi * dist_m1;
+                            grad_barrier += mu * dist_m1;
+                        }
+                        COLSC(nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                        MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
+                    }
+                    // add the penalty
+                    SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+                }
                 // Hh_Km1 <- Gg_Km1
                 GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
                 gamma_p[K - 1] = ng;

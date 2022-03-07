@@ -44,7 +44,7 @@ namespace fatrop
                                             ngI_(ngI),
                                             ngF_(ngF),
                                             ng_ineq_(ng_ineq),
-                                            ng_ineqF_(ng_ineq),
+                                            ng_ineqF_(ng_ineqF),
                                             n_stage_params_(n_stage_params),
                                             n_global_params_(n_global_params),
                                             K_(K),
@@ -217,11 +217,10 @@ namespace fatrop
         {
             if (k == K_ - 1)
             {
-                const double *args[4];
-                args[0] = inputs_k;
-                args[1] = states_k;
-                args[2] = stage_params_k;
-                args[3] = global_params;
+                const double *args[3];
+                args[0] = states_k;
+                args[1] = stage_params_k;
+                args[2] = global_params;
                 return Ggt_ineqFf.eval_bf(args, res);
             }
             const double *args[4];
@@ -277,11 +276,10 @@ namespace fatrop
         {
             if (k == K_ - 1)
             {
-                const double *args[4];
-                args[0] = inputs_k;
-                args[1] = states_k;
-                args[2] = stage_params_k;
-                args[3] = global_params;
+                const double *args[3];
+                args[0] = states_k;
+                args[1] = stage_params_k;
+                args[2] = global_params;
                 return g_ineqFf.eval_array(args, res);
             }
             const double *args[4];

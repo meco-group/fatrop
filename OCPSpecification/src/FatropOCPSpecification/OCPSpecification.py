@@ -39,16 +39,16 @@ class OCPSpecificationInterface:
         return SX.zeros(0)
 
     @abstractmethod
-    def EqConstrFinal(self, xK, stage_params):
+    def EqConstrFinal(self, xK, stage_params, global_params):
         return SX.zeros(0)
 
     @abstractmethod
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        return SX.zeros(0)
+        return DM.zeros(0), SX.zeros(0), DM.zeros(0)
 
     @abstractmethod
     def FinalInequality(self, xk, stage_params, global_params):
-        return SX.zeros(0)
+        return DM.zeros(0), SX.zeros(0), DM.zeros(0)
 
     @abstractmethod
     def DefaultStageParams(self):
