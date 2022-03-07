@@ -4,6 +4,7 @@ import numpy.matlib
 from FatropOCPSpecification import *
 K = 50
 robotspecification = RobotSpecification()
+# print(robotspecification.lower)
 optibuilder = OptiBuilder(robotspecification)
 opti = optibuilder.set_up_Opti(K)
 dt = 2.0/K
@@ -19,12 +20,14 @@ opti.set_initial(optibuilder.x_vars, inits_x)
 opti.set_initial(optibuilder.u_vars, inits_u)
 # opti.solver("ipopt", {"expand":True}, {'print_level':5, 'max_soc':0, 'tol':1e-5})
 # opti.solver("ipopt", {"expand":True}, {'print_level':8, 'tol':1e-5, 'max_iter':500, "max_soc":0, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':None})
-opti.solver("ipopt", {"expand":True}, {'print_level':5, 'tol':1e-5, 'max_iter':500, "max_soc":0, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':'none', 'kappa_sigma':0.1})
+opti.solver("ipopt", {"expand":True}, {'print_level':5, 'tol':1e-5, 'max_iter':500, "max_soc":0, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':'none', 'kappa_sigma':1e10})
 opti.solve()
 # opti.solve()
 lower = np.matlib.repmat(robotspecification.lower[:,np.newaxis], 1,K-1)
 upper = np.matlib.repmat(robotspecification.upper[:,np.newaxis], 1,K-1)
+lowerF = robotspecification.lowerF
+upperF = robotspecification.upperF
 jsongen = JSONGenerator(robotspecification)
-jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u, lower, upper)
+jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u, lower, upper, lowerF, upperF)
 codegen = FatropOCPCodeGenerator(robotspecification)
 codegen.generate_code("f.c")

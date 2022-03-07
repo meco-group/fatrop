@@ -24,8 +24,11 @@ class RobotSpecification(OCPSpecificationInterface):
         self.joint_upper = np.array(self.fk_dict["upper"])
         print("lower " , self.joint_lower)
         print("upper " , self.joint_upper)
-        self.lower = np.hstack((self.joint_lower, radius**2))
-        self.upper = np.hstack((self.joint_upper, np.array(n_points*6*[1e3])))
+        max_vel = pi # rad/sec
+        self.lower = np.hstack((self.joint_lower, -max_vel*np.ones(self.n_joints), radius**2))
+        self.upper = np.hstack((self.joint_upper, max_vel *np.ones(self.n_joints),np.array(n_points*6*[1e5])))
+        self.lowerF = np.hstack((self.joint_lower, radius**2))
+        self.upperF = np.hstack((self.joint_upper, np.array(n_points*6*[1e5])))
         super().__init__()
         return
 
@@ -34,7 +37,8 @@ class RobotSpecification(OCPSpecificationInterface):
         self.nu = self.n_joints 
         self.ngI = self.n_joints 
         self.ngF =  3 
-        self.ngIneq = self.n_joints + n_points*6
+        self.ngIneq = self.n_joints+ self.n_joints + n_points*6
+        self.ngIneqF = self.n_joints + n_points*6
         self.n_stage_params = 1  # dt
         self.n_global_params = 3 # endpos 
 
@@ -67,6 +71,7 @@ class RobotSpecification(OCPSpecificationInterface):
         joint_expr5 = joint_expr4 @ self.robot_parser.get_forward_kinematics("panda_link4", "panda_link5")["T_fk"](xk[4])
         joint_expr6 = joint_expr5 @ self.robot_parser.get_forward_kinematics("panda_link5", "panda_link6")["T_fk"](xk[5])
         joint_expr7 = joint_expr6 @ self.robot_parser.get_forward_kinematics("panda_link6", "panda_link7")["T_fk"](xk[6])
+        # joint_expr8 = joint_expr7 @ self.robot_parser.get_forward_kinematics("panda_link7", "panda_hand")["T_fk"](0)
         joint_pos1 = joint_expr1[:3,3]
         joint_pos2 = joint_expr2[:3,3]
         joint_pos3 = joint_expr3[:3,3]
@@ -74,13 +79,41 @@ class RobotSpecification(OCPSpecificationInterface):
         joint_pos5 = joint_expr5[:3,3]
         joint_pos6 = joint_expr6[:3,3]
         joint_pos7 = joint_expr7[:3,3]
+        # joint_pos8 = joint_expr8[:3,3]
         jointposlist = [joint_pos2, joint_pos3, joint_pos4, joint_pos5, joint_pos6, joint_pos7]
         distancelist = SX.zeros(6)
         distance_all = SX.zeros(6*n_points)
         for point in range(n_points):
-            obstaclepos = np.array([0.2, 0.0,0.2]) +0.1* np.random.rand(3)
+            obstaclepos = np.array([0.5, 0.0,-10]) +0.00* np.random.rand(3)
             for i in range(6):
                 distance_all[point*6+i] = sum1((jointposlist[i]-obstaclepos)**2)
             # distance_all[point*6:(point+1)*6] = distancelist[:]
+        joint_vel = uk/global_params[0]
         
-        return [self.lower, vertcat(xk, distance_all), self.upper]
+        return [self.lower, vertcat(xk, joint_vel, distance_all), self.upper]
+    def FinalInequality(self, xk, stage_params, global_params):
+        root_link = "panda_link0"
+        joint_expr0 = np.eye(4)
+        joint_expr1 = joint_expr0 @ self.robot_parser.get_forward_kinematics("panda_link0", "panda_link1")["T_fk"](xk[0])
+        joint_expr2 = joint_expr1 @ self.robot_parser.get_forward_kinematics("panda_link1", "panda_link2")["T_fk"](xk[1])
+        joint_expr3 = joint_expr2 @ self.robot_parser.get_forward_kinematics("panda_link2", "panda_link3")["T_fk"](xk[2])
+        joint_expr4 = joint_expr3 @ self.robot_parser.get_forward_kinematics("panda_link3", "panda_link4")["T_fk"](xk[3])
+        joint_expr5 = joint_expr4 @ self.robot_parser.get_forward_kinematics("panda_link4", "panda_link5")["T_fk"](xk[4])
+        joint_expr6 = joint_expr5 @ self.robot_parser.get_forward_kinematics("panda_link5", "panda_link6")["T_fk"](xk[5])
+        joint_expr7 = joint_expr6 @ self.robot_parser.get_forward_kinematics("panda_link6", "panda_link7")["T_fk"](xk[6])
+        # joint_expr8 = joint_expr7 @ self.robot_parser.get_forward_kinematics("panda_link7", "panda_hand")["T_fk"](0)
+        joint_pos1 = joint_expr1[:3,3]
+        joint_pos2 = joint_expr2[:3,3]
+        joint_pos3 = joint_expr3[:3,3]
+        joint_pos4 = joint_expr4[:3,3]
+        joint_pos5 = joint_expr5[:3,3]
+        joint_pos6 = joint_expr6[:3,3]
+        joint_pos7 = joint_expr7[:3,3]
+        # joint_pos8 = joint_expr8[:3,3]
+        jointposlist = [joint_pos2, joint_pos3, joint_pos4, joint_pos5, joint_pos6, joint_pos7]
+        distance_all = SX.zeros(6)
+        obstaclepos = np.array([0.5, 0.0,-10.0]) +0.00* np.random.rand(3)
+        for i in range(6):
+            distance_all[i] = sum1((jointposlist[i]-obstaclepos)**2)
+        
+        return [self.lowerF, vertcat(xk, distance_all), self.upperF]

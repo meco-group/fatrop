@@ -13,6 +13,7 @@ class OCPSpecificationInterface:
         self.ngI = 0
         self.ngF = 0
         self.ngIneq = 0
+        self.ngIneqF = 0
         self.n_stage_params = 0
         self.n_global_params = 0
         self.SetProblemDimensions()
@@ -46,6 +47,10 @@ class OCPSpecificationInterface:
         return SX.zeros(0)
 
     @abstractmethod
+    def FinalInequality(self, xk, stage_params, global_params):
+        return SX.zeros(0)
+
+    @abstractmethod
     def DefaultStageParams(self):
         return SX.zeros(self.n_stage_params)
 
@@ -54,10 +59,10 @@ class JSONGenerator:
     def __init__(self, ocpspec):
         self.ocpspec = ocpspec
 
-    def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u, lower =np.array([]), upper = np.array([])):
+    def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u, lower =np.array([]), upper = np.array([]), lowerF =np.array([]), upperF = np.array([])):
         # problem dimensions
         JSONdict = {'nx': self.ocpspec.nx,        'nu': self.ocpspec.nu,        'ngI': self.ocpspec.ngI,        'ngF': self.ocpspec.ngF,
-                    'ng_ineq': self.ocpspec.ngIneq,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
+                    'ng_ineq': self.ocpspec.ngIneq, 'ng_ineqF': self.ocpspec.ngIneqF,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
         # stage params
         JSONdict['stage_params'] = stage_params.ravel(order='f').tolist()
         JSONdict['global_params'] = global_params.ravel(order='f').tolist()
@@ -77,6 +82,8 @@ class JSONGenerator:
         # bounds
         JSONdict['lower'] = lower.ravel(order='f').tolist()
         JSONdict['upper'] = upper.ravel(order='f').tolist()
+        JSONdict['lowerF'] =  lowerF.tolist()
+        JSONdict['upperF'] =  upperF.tolist()
         print(json_dump(JSONdict, "test.json"))
         return
 
@@ -110,13 +117,17 @@ class FatropOCPCodeGenerator:
             x_sym, stage_params_sym, global_params_sym)
         ineq = self.ocpspec.StageWiseInequality(
             u_sym, x_sym, stage_params_sym, global_params_sym)[1]
+        ineqF = self.ocpspec.FinalInequality(
+            x_sym, stage_params_sym, global_params_sym)[1]
         ngI = eqI.shape[0]
         ngF = eqF.shape[0]
         ngIneq = ineq.shape[0]
+        ngIneqF = ineqF.shape[0]
         # make symbols for dual variables
         dual_dyn = SX.sym("d_dyn", nx)
         dual_eqI = SX.sym("d_EqI", ngI)
         dualIneq = SX.sym("dualineq", ngIneq)
+        dualIneqF = SX.sym("dualineqF", ngIneqF)
         dual_eqF = SX.sym("d_EqF", ngF)
         obj_scale = SX.sym("obj_scale")
         # BAbt
@@ -172,12 +183,15 @@ class FatropOCPCodeGenerator:
         if ngF > 0:
             RSQF += hessian(dual_eqF.T@eqF,
                             vertcat(x_sym))[0]
+        if ngIneqF > 0:
+            RSQF += hessian(dualIneqF.T@ineqF,
+                           vertcat(x_sym))[0]
         # if ngIneq>-1:
         #     RSQF += hessian(dualIneq.T@ineq, vertcat(u_sym, x_sym))[-1]
         RSQrqtF[:nx, :] = RSQF
         RSQrqtF[nx, :] = rqF[:]
         C.add(Function("RSQrqtF", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqF, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtF)]))
+              dual_dyn, dual_eqF, dualIneqF, stage_params_sym, global_params_sym], [densify(RSQrqtF)]))
         # rqF
         C.add(Function("rqF", [obj_scale,
               u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqF)]))
@@ -212,6 +226,15 @@ class FatropOCPCodeGenerator:
               x_sym, stage_params_sym, global_params_sym], [densify(Ggineqt)]))
         C.add(Function("gineq", [u_sym, x_sym, stage_params_sym, global_params_sym], [
               densify(ineq[:])]))
+        # GgineqFt
+        GgineqFt = SX.zeros(nx+1, ngIneqF)
+        GgineqFt[:nx,
+                :] = jacobian(ineqF, vertcat(x_sym)).T
+        GgineqFt[nx, :] = ineqF[:].T
+        C.add(Function("GgineqFt", [
+              x_sym, stage_params_sym, global_params_sym], [densify(GgineqFt)]))
+        C.add(Function("gineqF", [x_sym, stage_params_sym, global_params_sym], [
+              densify(ineqF[:])]))
         C.add(Function("default_stage_params", [], [
               densify(self.ocpspec.DefaultStageParams())]))
 
@@ -255,9 +278,12 @@ class OptiBuilder:
             x_sym, stage_params_sym, global_params_sym)
         lower, ineq, upper = self.ocpspec.StageWiseInequality(
             u_sym, x_sym, stage_params_sym, global_params_sym)
+        lowerF, ineqF, upperF = self.ocpspec.FinalInequality(
+            x_sym, stage_params_sym, global_params_sym)
         ngI = eqI.shape[0]
         ngF = eqF.shape[0]
         ngIneq = ineq.shape[0]
+        ngIneqF = ineqF.shape[0]
         Lkf = Function(
             "Lk", [obj_scale, x_sym, u_sym, stage_params_sym, global_params_sym], [Lk])
         LkFf = Function(
@@ -296,6 +322,20 @@ class OptiBuilder:
                     else:
                         self.opti.subject_to(lower[i] < (Ineqf(
                             self.u_vars[:,k], self.x_vars[:,k], self.stage_params_in[:, k], self.global_params_in)[i] < upper[i]))
+        if ngIneqF > 0:
+            IneqFf = Function(
+                "ineqFf", [x_sym, stage_params_sym, global_params_sym], [ineqF])
+            for i in range(ngIneqF):
+                if lowerF[i] == -inf:
+                    # self.opti.subject_to(IneqFf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                    self.opti.subject_to(upperF[i] > IneqFf(
+                       self.x_vars[:, K-1], self.stage_params_in[:, K-1], self.global_params_in)[i])
+                elif upperF[i] == inf:
+                    self.opti.subject_to(lowerF[i] < IneqFf(
+                        self.x_vars[:, K-1], self.stage_params_in[:, K-1], self.global_params_in)[i])
+                else:
+                    self.opti.subject_to(lowerF[i] < (IneqFf(
+                        self.x_vars[:,K-1], self.stage_params_in[:, K-1], self.global_params_in)[i] < upperF[i]))
         J += LkFf(1.0, self.x_vars[:, K-1],
                   self.stage_params_in[:, K-1], self.global_params_in)
         self.opti.minimize(J)

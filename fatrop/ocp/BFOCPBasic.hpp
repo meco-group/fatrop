@@ -18,6 +18,7 @@ namespace fatrop
                    const int ngI,
                    const int ngF,
                    const int ng_ineq,
+                   const int ng_ineqF,
                    const int n_stage_params,
                    const int n_global_params,
                    const int K,
@@ -35,12 +36,15 @@ namespace fatrop
                    const EvalCasGen &gFf,
                    const EvalCasGen &Ggt_ineqf,
                    const EvalCasGen &gineqf,
+                   const EvalCasGen &Ggt_ineqFf,
+                   const EvalCasGen &gineqFf,
                    const EvalCasGen &Lkf,
                    const EvalCasGen &LFf) : nu_(nu),
                                             nx_(nx),
                                             ngI_(ngI),
                                             ngF_(ngF),
                                             ng_ineq_(ng_ineq),
+                                            ng_ineqF_(ng_ineq),
                                             n_stage_params_(n_stage_params),
                                             n_global_params_(n_global_params),
                                             K_(K),
@@ -58,6 +62,8 @@ namespace fatrop
                                             gFf(gFf),
                                             Ggt_ineqf(Ggt_ineqf),
                                             g_ineqf(gineqf),
+                                            Ggt_ineqFf(Ggt_ineqFf),
+                                            g_ineqFf(gineqFf),
                                             Lkf(Lkf),
                                             LFf(LFf)
         {
@@ -65,48 +71,48 @@ namespace fatrop
         // TODO Create Builder class
         // static BFOCPBasic from_shared_lib(const string &filename, const int K)
         // {
-            // RefCountPtr<DLHandler> handle = new DLHandler(filename);
-            // EvalCasGen BAbtf(handle, "BAbt");
-            // EvalCasGen bkf(handle, "bk");
-            // EvalCasGen RSQrqtIf(handle, "RSQrqtI");
-            // EvalCasGen rqIf(handle, "rqI");
-            // EvalCasGen RSQrqtf(handle, "RSQrqt");
-            // EvalCasGen rqf(handle, "rqk");
-            // EvalCasGen RSQrqtFf(handle, "RSQrqtF");
-            // EvalCasGen rqFf(handle, "rqF");
-            // EvalCasGen GgtIf(handle, "GgtI");
-            // EvalCasGen gIf(handle, "gI");
-            // EvalCasGen GgtFf(handle, "GgtF");
-            // EvalCasGen gFf(handle, "gF");
-            // EvalCasGen Lkf(handle, "Lk");
-            // EvalCasGen LFf(handle, "LF");
-            // EvalCasGen Ggineqtf(handle, "Ggineqt");
-            // EvalCasGen gineqf(handle, "gineq");
-            // EvalCasGen defaultstageparamsf(handle, "gineq");
+        // RefCountPtr<DLHandler> handle = new DLHandler(filename);
+        // EvalCasGen BAbtf(handle, "BAbt");
+        // EvalCasGen bkf(handle, "bk");
+        // EvalCasGen RSQrqtIf(handle, "RSQrqtI");
+        // EvalCasGen rqIf(handle, "rqI");
+        // EvalCasGen RSQrqtf(handle, "RSQrqt");
+        // EvalCasGen rqf(handle, "rqk");
+        // EvalCasGen RSQrqtFf(handle, "RSQrqtF");
+        // EvalCasGen rqFf(handle, "rqF");
+        // EvalCasGen GgtIf(handle, "GgtI");
+        // EvalCasGen gIf(handle, "gI");
+        // EvalCasGen GgtFf(handle, "GgtF");
+        // EvalCasGen gFf(handle, "gF");
+        // EvalCasGen Lkf(handle, "Lk");
+        // EvalCasGen LFf(handle, "LF");
+        // EvalCasGen Ggineqtf(handle, "Ggineqt");
+        // EvalCasGen gineqf(handle, "gineq");
+        // EvalCasGen defaultstageparamsf(handle, "gineq");
 
-            // const int nx = BAbtf.out_n;
-            // const int nu = BAbtf.out_m - nx - 1;
-            // const int ngI = GgtIf.out_n;
-            // const int ngF = GgtFf.out_n;
-            // const int ng_ineq = Ggineqtf.out_n;
-            // const int n_stage_params = defaultstageparamsf.out_m;
-            // return BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, n_stage_params, K,
-            //                   BAbtf,
-            //                   bkf,
-            //                   RSQrqtIf,
-            //                   rqIf,
-            //                   RSQrqtf,
-            //                   rqf,
-            //                   RSQrqtFf,
-            //                   rqFf,
-            //                   GgtIf,
-            //                   gIf,
-            //                   GgtFf,
-            //                   gFf,
-            //                   Ggineqtf,
-            //                   gineqf,
-            //                   Lkf,
-            //                   LFf);
+        // const int nx = BAbtf.out_n;
+        // const int nu = BAbtf.out_m - nx - 1;
+        // const int ngI = GgtIf.out_n;
+        // const int ngF = GgtFf.out_n;
+        // const int ng_ineq = Ggineqtf.out_n;
+        // const int n_stage_params = defaultstageparamsf.out_m;
+        // return BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, n_stage_params, K,
+        //                   BAbtf,
+        //                   bkf,
+        //                   RSQrqtIf,
+        //                   rqIf,
+        //                   RSQrqtf,
+        //                   rqf,
+        //                   RSQrqtFf,
+        //                   rqFf,
+        //                   GgtIf,
+        //                   gIf,
+        //                   GgtFf,
+        //                   gFf,
+        //                   Ggineqtf,
+        //                   gineqf,
+        //                   Lkf,
+        //                   LFf);
         // }
         int get_nxk(const int k) const override
         {
@@ -130,7 +136,7 @@ namespace fatrop
         {
             if (k == K_ - 1)
             {
-                return 0;
+                return ng_ineqF_;
             }
             return ng_ineq_;
         }
@@ -210,7 +216,14 @@ namespace fatrop
             const int k) override
         {
             if (k == K_ - 1)
-                return 0;
+            {
+                const double *args[4];
+                args[0] = inputs_k;
+                args[1] = states_k;
+                args[2] = stage_params_k;
+                args[3] = global_params;
+                return Ggt_ineqFf.eval_bf(args, res);
+            }
             const double *args[4];
             args[0] = inputs_k;
             args[1] = states_k;
@@ -263,7 +276,14 @@ namespace fatrop
             const int k) override
         {
             if (k == K_ - 1)
-                return 0;
+            {
+                const double *args[4];
+                args[0] = inputs_k;
+                args[1] = states_k;
+                args[2] = stage_params_k;
+                args[3] = global_params;
+                return g_ineqFf.eval_array(args, res);
+            }
             const double *args[4];
             args[0] = inputs_k;
             args[1] = states_k;
@@ -319,6 +339,7 @@ namespace fatrop
         const int ngI_;
         const int ngF_;
         const int ng_ineq_;
+        const int ng_ineqF_;
         const int n_stage_params_;
         const int n_global_params_;
         const int K_;
@@ -336,6 +357,8 @@ namespace fatrop
         EvalCasGen gFf;
         EvalCasGen Ggt_ineqf;
         EvalCasGen g_ineqf;
+        EvalCasGen Ggt_ineqFf;
+        EvalCasGen g_ineqFf;
         EvalCasGen Lkf;
         EvalCasGen LFf;
     };

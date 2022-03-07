@@ -30,6 +30,7 @@ namespace fatrop
             const int ngI = json_spec["ngI"];
             const int ngF = json_spec["ngF"];
             const int ng_ineq = json_spec["ng_ineq"];
+            const int ng_ineqF = json_spec["ng_ineqF"];
             const int n_stage_params = json_spec["n_stage_params"];
             const int n_global_params = json_spec["n_global_params"];
             RefCountPtr<DLHandler> handle = new DLHandler(functions);
@@ -49,7 +50,9 @@ namespace fatrop
             EvalCasGen LFf(handle, "LF");
             EvalCasGen Ggineqtf(handle, "Ggineqt");
             EvalCasGen gineqf(handle, "gineq");
-            RefCountPtr<BFOCP> ocptemplatebasic = new BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, n_stage_params, n_global_params, K,
+            EvalCasGen GgineqFtf(handle, "GgineqFt");
+            EvalCasGen gineqFf(handle, "gineqF");
+            RefCountPtr<BFOCP> ocptemplatebasic = new BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
                                                                  BAbtf,
                                                                  bkf,
                                                                  RSQrqtIf,
@@ -64,6 +67,8 @@ namespace fatrop
                                                                  gFf,
                                                                  Ggineqtf,
                                                                  gineqf,
+                                                                 GgineqFtf,
+                                                                 gineqFf,
                                                                  Lkf,
                                                                  LFf);
             RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
@@ -76,8 +81,10 @@ namespace fatrop
             vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
             vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
             vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
-            // vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
-            vector<double> upper = vector<double>(lower.size(), INFINITY);
+            vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
+            vector<double> lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
+            vector<double> upperF = json_spec["upperF"].get_number_array<double>("%lf");
+            // vector<double> upper = vector<double>(lower.size(), INFINITY);
             ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
             fatropdata ->SetBounds(lower, upper);
             RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
