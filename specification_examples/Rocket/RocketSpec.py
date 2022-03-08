@@ -28,6 +28,10 @@ class RocketSpec(OCPSpecificationInterface):
     def EqConstrFinal(self, xK, stage_params, global_params):
         return vertcat(xK[self.ind_pos]-10*DM.ones(2,1))
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        return [0], uk[0], [1e3]
+        return uk[0]
+    def StageWiseInequality(self):
+        return [0, 1e3]
     def FinalInequality(self, xk, stage_params, global_params):
         return [0, 0], xk[self.ind_vel], [1e-1, 1e-1]
+    def FinalInequality(self):
+        return [np.array([0, 0]), np.array([1e-1, 1e-1])]

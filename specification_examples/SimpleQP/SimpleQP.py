@@ -17,9 +17,7 @@ opti.set_initial(optibuilder.u_vars, inits_u)
 opti.solver("ipopt", {"expand":True}, {'print_level':5, 'tol':1e-5, 'max_iter':500, "max_soc":0, "min_refinement_steps":0, 'bound_relax_factor':0.0, 'nlp_scaling_method':'none', 'kappa_sigma':1e10})
 opti.solve()
 # opti.solve()
-lowerF = qpspecification.lowerF
-upperF = qpspecification.upperF
 jsongen = JSONGenerator(qpspecification)
-jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u, np.zeros((0, K)), np.zeros((0,K)), lowerF, upperF)
+jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u)
 codegen = FatropOCPCodeGenerator(qpspecification)
 codegen.generate_code("f.c")

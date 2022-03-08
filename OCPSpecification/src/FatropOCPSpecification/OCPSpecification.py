@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from casadi import *
 import json
+import numpy as np
+import numpy.matlib
 
 from matplotlib.font_manager import json_dump
 
@@ -44,11 +46,16 @@ class OCPSpecificationInterface:
 
     @abstractmethod
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        return DM.zeros(0), SX.zeros(0), DM.zeros(0)
-
+        return SX.zeros(0)
+    @abstractmethod
+    def StageWiseInequalityBounds(self):
+        return np.array([]), np.array([]) 
     @abstractmethod
     def FinalInequality(self, xk, stage_params, global_params):
-        return DM.zeros(0), SX.zeros(0), DM.zeros(0)
+        return SX.zeros(0)
+    @abstractmethod
+    def FinalInequalityBounds(self):
+        return np.array([]), np.array([]) 
 
     @abstractmethod
     def DefaultStageParams(self):
@@ -56,10 +63,10 @@ class OCPSpecificationInterface:
 
 
 class JSONGenerator:
-    def __init__(self, ocpspec):
+    def __init__(self, ocpspec: OCPSpecificationInterface):
         self.ocpspec = ocpspec
 
-    def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u, lower =np.array([]), upper = np.array([]), lowerF =np.array([]), upperF = np.array([])):
+    def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u):
         # problem dimensions
         JSONdict = {'nx': self.ocpspec.nx,        'nu': self.ocpspec.nu,        'ngI': self.ocpspec.ngI,        'ngF': self.ocpspec.ngF,
                     'ng_ineq': self.ocpspec.ngIneq, 'ng_ineqF': self.ocpspec.ngIneqF,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
@@ -80,11 +87,13 @@ class JSONGenerator:
         # else:
         # JSONdict['initial_u'] = np.zeros(self.ocpspec.nu*K).tolist()
         # bounds
-        JSONdict['lower'] = lower.ravel(order='f').tolist()
-        JSONdict['upper'] = upper.ravel(order='f').tolist()
+        lower, upper = self.ocpspec.StageWiseInequalityBounds()
+        lowerF, upperF = self.ocpspec.FinalInequalityBounds()
+        JSONdict['lower'] = np.matlib.repmat(lower[:,np.newaxis], 1, K-1).ravel(order='f').tolist()
+        JSONdict['upper'] = np.matlib.repmat(upper[:,np.newaxis], 1, K-1).ravel(order='f').tolist()
         JSONdict['lowerF'] =  lowerF.tolist()
         JSONdict['upperF'] =  upperF.tolist()
-        print(json_dump(JSONdict, "test.json"))
+        print(json_dump(JSONdict, filename))
         return
 
 
@@ -116,9 +125,9 @@ class FatropOCPCodeGenerator:
         eqF = self.ocpspec.EqConstrFinal(
             x_sym, stage_params_sym, global_params_sym)
         ineq = self.ocpspec.StageWiseInequality(
-            u_sym, x_sym, stage_params_sym, global_params_sym)[1]
+            u_sym, x_sym, stage_params_sym, global_params_sym)
         ineqF = self.ocpspec.FinalInequality(
-            x_sym, stage_params_sym, global_params_sym)[1]
+            x_sym, stage_params_sym, global_params_sym)
         ngI = eqI.shape[0]
         ngF = eqF.shape[0]
         ngIneq = ineq.shape[0]
@@ -243,10 +252,10 @@ class FatropOCPCodeGenerator:
 
 
 class OptiBuilder:
-    def __init__(self, ocpspec):
+    def __init__(self, ocpspec: OCPSpecificationInterface):
         self.ocpspec = ocpspec
 
-    def set_up_Opti(self, K):
+    def set_up_Opti(self, K: int):
         # all scales are set to 1.0
         # get problem dimensions
         nu = self.ocpspec.nu
@@ -276,10 +285,12 @@ class OptiBuilder:
             u_sym, x_sym, stage_params_sym, global_params_sym)
         eqF = self.ocpspec.EqConstrFinal(
             x_sym, stage_params_sym, global_params_sym)
-        lower, ineq, upper = self.ocpspec.StageWiseInequality(
+        ineq = self.ocpspec.StageWiseInequality(
             u_sym, x_sym, stage_params_sym, global_params_sym)
-        lowerF, ineqF, upperF = self.ocpspec.FinalInequality(
+        lower, upper = self.ocpspec.StageWiseInequalityBounds()
+        ineqF = self.ocpspec.FinalInequality(
             x_sym, stage_params_sym, global_params_sym)
+        lowerF, upperF = self.ocpspec.FinalInequalityBounds()
         ngI = eqI.shape[0]
         ngF = eqF.shape[0]
         ngIneq = ineq.shape[0]

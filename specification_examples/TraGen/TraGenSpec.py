@@ -47,6 +47,3 @@ class TraGenSpec(OCPSpecificationInterface):
     def EqConstrFinal(self, xK, stage_params, global_params):
         deltaR =FSDynamics.RotToVec(FSDynamics.VecToRot(xK[self.indR[:]]).T @ FSDynamics.VecToRot(global_params[self.ind_params_RF[:]]))
         return vertcat(deltaR[ind_lower], xK[self.indp] - global_params[self.ind_params_pF])
-
-    def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        return DM.zeros(0), DM.zeros(0), DM.zeros(0)

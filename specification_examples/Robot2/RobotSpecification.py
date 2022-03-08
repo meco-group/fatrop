@@ -93,7 +93,9 @@ class RobotSpecification(OCPSpecificationInterface):
             # distance_all[point*6:(point+1)*6] = distancelist[:]
         joint_vel = uk/global_params[0]
         
-        return [self.lower, vertcat(xk, joint_vel, distance_all), self.upper]
+        return vertcat(xk, joint_vel, distance_all)
+    def StageWiseInequalityBounds(self):
+        return [self.lower, self.upper]
     def FinalInequality(self, xk, stage_params, global_params):
         root_link = "panda_link0"
         joint_expr0 = np.eye(4)
@@ -120,4 +122,6 @@ class RobotSpecification(OCPSpecificationInterface):
             distance_all[i] = sum1((jointposlist[i]-obstaclepos)**2)
         
         # return [self.lowerF, vertcat(xk, distance_all), self.upperF]
-        return [self.lowerF, vertcat(xk, distance_all), self.upperF]
+        return vertcat(xk, distance_all)
+    def FinalInequalityBounds(self):
+        return [self.lowerF, self.upperF]
