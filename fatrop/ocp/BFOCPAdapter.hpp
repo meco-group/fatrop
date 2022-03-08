@@ -361,7 +361,7 @@ namespace fatrop
         void SetInitial(const int K, const RefCountPtr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
         {
             // offsets
-            VEC *ux_curr_p = (VEC *)fatropdata->x_curr;
+            VEC *ux_intial_p = (VEC *)fatropdata->x_initial;
             double *u_p = initial_u.data();
             double *x_p = initial_x.data();
             int offs_nu = 0;
@@ -371,8 +371,8 @@ namespace fatrop
             {
                 int nu_k = ocptempl->get_nuk(k);
                 int nx_k = ocptempl->get_nxk(k);
-                PACKVEC(nu_k, u_p+ offs_nu, 1, ux_curr_p, offs_nux);
-                PACKVEC(nx_k, x_p+ offs_nx, 1, ux_curr_p, offs_nux + nu_k);
+                PACKVEC(nu_k, u_p+ offs_nu, 1, ux_intial_p, offs_nux);
+                PACKVEC(nx_k, x_p+ offs_nx, 1, ux_intial_p, offs_nux + nu_k);
                 offs_nu += nu_k;
                 offs_nx += nx_k;
                 offs_nux += nu_k + nx_k;

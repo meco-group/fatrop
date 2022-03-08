@@ -343,6 +343,11 @@ namespace fatrop
                 this->at(ai) = fm.get_el(ai);
             }
         }
+        void copy(const FatropVecBF &fm)
+        {
+            VEC* fm_p = (VEC*) fm;
+            VECCP(nels(), fm_p, 0, vec_, 0);
+        }
         void operator=(const vector<double> &fm)
         {
             for (int ai = 0; ai < nels_; ai++)

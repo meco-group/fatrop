@@ -15,22 +15,23 @@ namespace fatrop
         FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                       n_eqs(nlpdims.neqs),
                                                                                       n_ineqs(nlpdims.nineqs),
-                                                                                      memvars(nlpdims.nvars, 7),
+                                                                                      memvars(nlpdims.nvars, 8),
                                                                                       memeqs(nlpdims.neqs, 6),
                                                                                       memineqs(nlpdims.nineqs, 12),
                                                                                       x_curr(memvars[0]),
                                                                                       x_next(memvars[1]),
-                                                                                      delta_x(memvars[2]),
-                                                                                      x_scales(memvars[3]),
+                                                                                      x_initial(memvars[2]),
+                                                                                      delta_x(memvars[3]),
+                                                                                      x_scales(memvars[4]),
                                                                                       lam_curr(memeqs[0]),
                                                                                       lam_next(memeqs[1]),
                                                                                       lam_calc(memeqs[2]),
                                                                                       lam_scales(memeqs[3]),
                                                                                       g_curr(memeqs[4]),
                                                                                       g_next(memeqs[5]),
-                                                                                      grad_curr(memvars[4]),
-                                                                                      grad_next(memvars[5]),
-                                                                                      du_inf_curr(memvars[6]),
+                                                                                      grad_curr(memvars[5]),
+                                                                                      grad_next(memvars[6]),
+                                                                                      du_inf_curr(memvars[7]),
                                                                                       du_inf_curr_s(memineqs[0]),
                                                                                       s_curr(memineqs[1]),
                                                                                       s_next(memineqs[2]),
@@ -62,6 +63,7 @@ namespace fatrop
             VECSE(zU_curr.nels(), 1.0, (VEC *)zU_curr, 0);
             VECSE(lam_curr.nels(), 0.0, (VEC *)lam_curr, 0);
             VECSE(s_curr.nels(), 0.0, (VEC *)s_curr, 0);
+            x_curr.copy(x_initial);
             cache_curr = EvalCache();
             cache_next = EvalCache();
             return 0;
@@ -450,6 +452,7 @@ namespace fatrop
         FatropMemoryVecBF memineqs;
         FatropVecBF x_curr;
         FatropVecBF x_next;
+        FatropVecBF x_initial;
         FatropVecBF delta_x;
         FatropVecBF x_scales;
         FatropVecBF lam_curr;
