@@ -26,9 +26,9 @@ class RobotSpecification(OCPSpecificationInterface):
         print("upper " , self.joint_upper)
         max_vel = pi # rad/sec
         self.lower = np.hstack((self.joint_lower, -max_vel*np.ones(self.n_joints), radius**2))
-        self.upper = np.hstack((self.joint_upper, max_vel *np.ones(self.n_joints),np.array(n_points*6*[1e5])))
+        self.upper = np.hstack((self.joint_upper, max_vel *np.ones(self.n_joints),np.array(n_points*6*[inf])))
         self.lowerF = np.hstack((self.joint_lower, radius**2))
-        self.upperF = np.hstack((self.joint_upper, np.array(n_points*6*[1e5])))
+        self.upperF = np.hstack((self.joint_upper, np.array(n_points*6*[inf])))
         # self.lowerF = self.joint_lower 
         # self.upperF = self.joint_upper
         super().__init__()

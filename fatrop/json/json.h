@@ -12,6 +12,8 @@
 #include <utility>
 #include <stdexcept>
 #include <cctype>
+#include <string.h>
+#include <limits>
 
 /*! \brief Base namespace for simpleson */
 namespace json
@@ -59,8 +61,9 @@ namespace json
 		/*! \brief Descriptor for the type of JSON data */
 		enum jtype
 		{
-			jstring,  ///< String value
-			jnumber,  ///< Number value
+			jstring, ///< String value
+			jnumber, ///< Number value
+			jinfinity,
 			jobject,  ///< JSON object
 			jarray,	  ///< JSON array
 			jbool,	  ///< Boolean value
@@ -149,6 +152,14 @@ namespace json
 		T get_number(const char *input, const char *format)
 		{
 			T result;
+			if (strncmp(input, "Infinity", 8)==0)
+			{
+				return std::numeric_limits<T>::infinity();
+			};
+			if (strncmp(input, "-Infinity", 8)==0)
+			{
+				return -std::numeric_limits<T>::infinity();
+			};
 			std::sscanf(input, format, &result);
 			return result;
 		}
@@ -419,6 +430,14 @@ namespace json
 			template <typename T>
 			inline T get_number(const char *format) const
 			{
+				if (strncmp(this->ref().c_str(), "Infinity", 8)==0)
+				{
+					return std::numeric_limits<T>::infinity();
+				};
+				if (strncmp(this->ref().c_str(), "-Infinity", 8)==0)
+				{
+					return -std::numeric_limits<T>::infinity();
+				};
 				return json::parsing::get_number<T>(this->ref().c_str(), format);
 			}
 
