@@ -2,9 +2,9 @@
   "nx": 9,
   "nu": 2,
   "ngI": 4,
-  "ngF": 4,
+  "ngF": 2,
   "ng_ineq": 1,
-  "ng_ineqF": 0,
+  "ng_ineqF": 2,
   "n_stage_params": 0,
   "n_global_params": 0,
   "K": 100,
@@ -1315,6 +1315,12 @@
     1000.0,
     1000.0
   ],
-  "lowerF": [],
-  "upperF": []
+  "lowerF": [
+    0.0,
+    0.0
+  ],
+  "upperF": [
+    0.1,
+    0.1
+  ]
 }

@@ -9,7 +9,7 @@ codegen.generate_code("f.c")
 optibuilder = FatropOCPSpecification.OptiBuilder(rocketspec)
 jsongen = FatropOCPSpecification.JSONGenerator(rocketspec)
 K = 100
-jsongen.generate_JSON("test.json", K, np.zeros((0,K)), np.zeros((0,K)), np.ones((rocketspec.nx, K)), np.ones((rocketspec.nu,K-1)), np.zeros((1,K-1)), 1e3*np.ones((1,K-1)))
+jsongen.generate_JSON("test.json", K, np.zeros((0,K)), np.zeros((0,K)), np.ones((rocketspec.nx, K)), np.ones((rocketspec.nu,K-1)), np.zeros((1,K-1)), 1e3*np.ones((1,K-1)), np.zeros(2), 1e-1*np.ones(2))
 opti = optibuilder.set_up_Opti(K)
 opti.set_initial(optibuilder.u_vars, DM.ones(rocketspec.nu, K-1))
 opti.set_initial(optibuilder.x_vars, DM.ones(rocketspec.nx, K))

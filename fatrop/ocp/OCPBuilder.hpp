@@ -24,7 +24,7 @@ namespace fatrop
             std::stringstream buffer;
             buffer << t.rdbuf();
             json::jobject json_spec = json::jobject::parse(buffer.str());
-            const int K = json_spec["K"];
+            K = json_spec["K"];
             const int nx = json_spec["nx"];
             const int nu = json_spec["nu"];
             const int ngI = json_spec["ngI"];
@@ -71,34 +71,59 @@ namespace fatrop
                                                                  gineqFf,
                                                                  Lkf,
                                                                  LFf);
-            RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
+            ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
             ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
-            RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
-            RefCountPtr<FatropParams> params = new FatropParams();
-            RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
-            RefCountPtr<FatropNLP> fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
-            RefCountPtr<FatropData> fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
-            vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
-            vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
-            vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
-            vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
-            vector<double> lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
-            vector<double> upperF = json_spec["upperF"].get_number_array<double>("%lf");
+            ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
+            params = new FatropParams();
+            ocpscaler = new OCPNoScaling(params);
+            fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
+            fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
+            initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
+            initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
+            lower = json_spec["lower"].get_number_array<double>("%lf");
+            upper = json_spec["upper"].get_number_array<double>("%lf");
+            lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
+            upperF = json_spec["upperF"].get_number_array<double>("%lf");
             lower.insert(lower.end(), lowerF.begin(), lowerF.end());
             upper.insert(upper.end(), upperF.begin(), upperF.end());
+            SetBounds();
+            SetInitial();
             // vector<double> upper = vector<double>(lower.size(), INFINITY);
-            ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
-            fatropdata ->SetBounds(lower, upper);
-            RefCountPtr<Filter> filter(new Filter(params->maxiter + 1));
-            RefCountPtr<Journaller> journaller(new Journaller(params->maxiter + 1));
-            RefCountPtr<LineSearch> linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
-            RefCountPtr<FatropAlg> fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
-            fatropalg->Optimize();
-            double el = blasfeo_toc(&timer);
-            cout << "el time " << el << endl;
+            filter = new Filter(params->maxiter + 1);
+            journaller = new Journaller(params->maxiter + 1);
+            linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
+            fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
+            // blasfeo_timer timer;
+            // blasfeo_tic(&timer);
+            // fatropalg->Optimize();
+            // double el = blasfeo_toc(&timer);
+            // cout << "el time " << el << endl;
         }
+        void SetBounds()
+        {
+            ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
+        }
+        void SetInitial()
+        {
+            fatropdata->SetBounds(lower, upper);
+        }
+        int K;
+        RefCountPtr<OCP> ocptempladapter;
+        RefCountPtr<OCPLinearSolver> ocplsriccati;
+        RefCountPtr<FatropParams> params;
+        RefCountPtr<OCPScalingMethod> ocpscaler;
+        RefCountPtr<FatropNLP> fatropocp;
+        RefCountPtr<FatropData> fatropdata;
+        vector<double> initial_u;
+        vector<double> initial_x;
+        vector<double> lower;
+        vector<double> upper;
+        vector<double> lowerF;
+        vector<double> upperF;
+        RefCountPtr<Filter> filter;
+        RefCountPtr<Journaller> journaller;
+        RefCountPtr<LineSearch> linesearch;
+        RefCountPtr<FatropAlg> fatropalg;
     };
 }
 #endif // OCPBUILDERINCLUDED

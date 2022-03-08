@@ -13,7 +13,8 @@ class RocketSpec(OCPSpecificationInterface):
         self.nx = 9
         self.nu = 2
         self.ngIneq = 1
-        self.ngF = 4
+        self.ngIneqF = 2
+        self.ngF = 2
         self.ngI = 4
         self.rocketdynamics = RocketDynamics.RockDyns()
     def Dynamics(self, uk, xk, stage_params, global_params):
@@ -25,6 +26,8 @@ class RocketSpec(OCPSpecificationInterface):
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
         return vertcat(xk[self.ind_pos],xk[self.ind_vel])
     def EqConstrFinal(self, xK, stage_params, global_params):
-        return vertcat(xK[self.ind_pos]-10*DM.ones(2,1),xK[self.ind_vel])
+        return vertcat(xK[self.ind_pos]-10*DM.ones(2,1))
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         return [0], uk[0], [1e3]
+    def FinalInequality(self, xk, stage_params, global_params):
+        return [0, 0], xk[self.ind_vel], [1e-1, 1e-1]

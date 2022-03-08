@@ -4,6 +4,7 @@
   "ngI": 12,
   "ngF": 6,
   "ng_ineq": 0,
+  "ng_ineqF": 0,
   "n_stage_params": 4,
   "n_global_params": 24,
   "K": 152,
@@ -3535,5 +3536,7 @@
     -0.10117244499313235
   ],
   "lower": [],
-  "upper": []
+  "upper": [],
+  "lowerF": [],
+  "upperF": []
 }
