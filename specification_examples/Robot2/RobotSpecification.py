@@ -120,8 +120,6 @@ class RobotSpecification(OCPSpecificationInterface):
         obstaclepos = np.array([0.5, 0.0,-10.0]) +0.00* np.random.rand(3)
         for i in range(6):
             distance_all[i] = sum1((jointposlist[i]-obstaclepos)**2)
-        
-        # return [self.lowerF, vertcat(xk, distance_all), self.upperF]
         return vertcat(xk, distance_all)
     def FinalInequalityBounds(self):
         return [self.lowerF, self.upperF]

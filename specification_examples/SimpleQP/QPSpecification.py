@@ -5,8 +5,8 @@ from casadi import *
 
 class QPSpecification(OCPSpecificationInterface):
     def __init__(self, w_pos=1, w_rot=1, w_invars=(10**-3)*np.array([1.0, 1.0, 1.0])):
-        self.lowerF = np.array([1.0, 1.0])
-        self.upperF = np.array([2.0, 2.0])
+        self.lowerF = np.array([1.0])
+        self.upperF = np.array([2.0])
         super().__init__()
         return
 
@@ -14,9 +14,9 @@ class QPSpecification(OCPSpecificationInterface):
         self.nx = 2
         self.nu = 2
         self.ngI = 0
-        self.ngF = 0
+        self.ngF = 1
         self.ngIneq = 0
-        self.ngIneqF = 2
+        self.ngIneqF = 1
         self.n_stage_params = 0  # dt
         self.n_global_params = 0  # endpos
 
@@ -26,14 +26,16 @@ class QPSpecification(OCPSpecificationInterface):
     def StageCost(self, uk, xk, stage_params, global_params):
         ukxk = vertcat(uk, xk)
         H = np.eye(self.nx+self.nu)
-        return 0.5 * (ukxk.T@H@ukxk)
+        return 0.5 * (ukxk.T@H@ukxk) + 10*sum1(xk) + sum1(uk)
+    def EqConstrFinal(self, xK, stage_params, global_params):
+        return xK[0] 
 
     def StageCostFinal(self, xK, stage_params, global_params):
         H = np.eye(self.nx)
-        return 0.5 * (xK.T@H@xK)
+        return 0.5 * (xK.T@H@xK) + 10*sum1(xK)
 
     def FinalInequality(self, xk, stage_params, global_params):
-        return xk
+        return xk[1]
 
     def FinalInequalityBounds(self):
         return self.lowerF, self.upperF

@@ -32,7 +32,7 @@ invariants/trans_FS/f.c
 
 *build/
 release/
-
+fatropspec.json
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles

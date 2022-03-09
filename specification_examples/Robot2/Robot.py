@@ -23,6 +23,6 @@ opti.solver("ipopt", {"expand":True}, {'constr_mult_init_max':1e3,'print_level':
 opti.solve()
 # json + codegen for fatrop
 jsongen = JSONGenerator(robotspecification)
-jsongen.generate_JSON('test.json', K, stage_params, global_params, inits_x, inits_u)
+jsongen.generate_JSON('fatropspec.json', K, stage_params, global_params, inits_x, inits_u)
 codegen = FatropOCPCodeGenerator(robotspecification)
 codegen.generate_code("f.c")
