@@ -70,15 +70,12 @@ namespace fatrop
         }
         double EMuCurr(double mu)
         {
-            EvalDuInfSlacksEqs();
             double res = 0.0;
             double z_L1 = +ZL1Curr();
             double lammean = (LamL1Curr() + z_L1) / (n_eqs  + n_ineqs_r);
             double z_mean = z_L1 / n_ineqs_r;
             double cv = CVLinfCurr();
             double du = DuInfLinfCurr();
-            double dus = Linf(du_inf_curr_s);
-            du = MAX(du, dus);
             double compl_slack = EvalCompSlackInf(mu);
             double sd = 0.0;
             double sc = 0.0;
@@ -390,7 +387,7 @@ namespace fatrop
         }
         double DuInfLinfCurr()
         {
-            return CACHEMACRO(cache_curr.du_inf_linf, Linf(du_inf_curr));
+            return CACHEMACRO(cache_curr.du_inf_linf, MAX(Linf(du_inf_curr), Linf(du_inf_curr_s)));
         }
         double LinDecrCurr()
         {

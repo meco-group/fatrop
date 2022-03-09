@@ -215,11 +215,13 @@ namespace fatrop
         }
         int EvalDuInf()
         {
-            return fatropnlp_->EvalDuInf(
+            fatropnlp_->EvalDuInf(
                 fatropdata_->obj_scale,
                 fatropdata_->lam_curr,
                 fatropdata_->grad_curr,
                 fatropdata_->du_inf_curr);
+            fatropdata_->EvalDuInfSlacksEqs();
+            return 0;
         }
         inline int Initialization()
         {
