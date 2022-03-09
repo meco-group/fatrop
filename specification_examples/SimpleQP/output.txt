@@ -8,7 +8,7 @@ List of options:
                                  max_soc = 0                         1
                     min_refinement_steps = 0                         1
                       nlp_scaling_method = none                      1
-                             print_level = 8                         2
+                             print_level = 7                         2
                                      tol = 1e-05                     2
 
 ******************************************************************************
@@ -20,142 +20,49 @@ This program contains Ipopt, a library for large-scale nonlinear optimization.
 This is Ipopt version 3.12.3, running with linear solver mumps.
 NOTE: Other linear solvers might be more efficient (see Ipopt documentation).
 
-Number of nonzeros in equality constraint Jacobian...:      114
-Number of nonzeros in inequality constraint Jacobian.:        2
+Number of nonzeros in equality constraint Jacobian...:      115
+Number of nonzeros in inequality constraint Jacobian.:       20
 Number of nonzeros in Lagrangian Hessian.............:       78
 
 objective scaling factor = 1
 No x scaling provided
 No c scaling provided
 No d scaling provided
-DenseVector "modified x_L scaled" with 0 elements:
-DenseVector "modified x_U scaled" with 0 elements:
-DenseVector "modified d_L scaled" with 2 elements:
-modified d_L scaled[    1]= 1.0000000000000000e+00
-modified d_L scaled[    2]= 1.0000000000000000e+00
-DenseVector "modified d_U scaled" with 2 elements:
-modified d_U scaled[    1]= 2.0000000000000000e+00
-modified d_U scaled[    2]= 2.0000000000000000e+00
-DenseVector "initial x unscaled" with 78 elements:
-initial x unscaled[    1]= 0.0000000000000000e+00
-initial x unscaled[    2]= 0.0000000000000000e+00
-initial x unscaled[    3]= 0.0000000000000000e+00
-initial x unscaled[    4]= 0.0000000000000000e+00
-initial x unscaled[    5]= 0.0000000000000000e+00
-initial x unscaled[    6]= 0.0000000000000000e+00
-initial x unscaled[    7]= 0.0000000000000000e+00
-initial x unscaled[    8]= 0.0000000000000000e+00
-initial x unscaled[    9]= 0.0000000000000000e+00
-initial x unscaled[   10]= 0.0000000000000000e+00
-initial x unscaled[   11]= 0.0000000000000000e+00
-initial x unscaled[   12]= 0.0000000000000000e+00
-initial x unscaled[   13]= 0.0000000000000000e+00
-initial x unscaled[   14]= 0.0000000000000000e+00
-initial x unscaled[   15]= 0.0000000000000000e+00
-initial x unscaled[   16]= 0.0000000000000000e+00
-initial x unscaled[   17]= 0.0000000000000000e+00
-initial x unscaled[   18]= 0.0000000000000000e+00
-initial x unscaled[   19]= 0.0000000000000000e+00
-initial x unscaled[   20]= 0.0000000000000000e+00
-initial x unscaled[   21]= 0.0000000000000000e+00
-initial x unscaled[   22]= 0.0000000000000000e+00
-initial x unscaled[   23]= 0.0000000000000000e+00
-initial x unscaled[   24]= 0.0000000000000000e+00
-initial x unscaled[   25]= 0.0000000000000000e+00
-initial x unscaled[   26]= 0.0000000000000000e+00
-initial x unscaled[   27]= 0.0000000000000000e+00
-initial x unscaled[   28]= 0.0000000000000000e+00
-initial x unscaled[   29]= 0.0000000000000000e+00
-initial x unscaled[   30]= 0.0000000000000000e+00
-initial x unscaled[   31]= 0.0000000000000000e+00
-initial x unscaled[   32]= 0.0000000000000000e+00
-initial x unscaled[   33]= 0.0000000000000000e+00
-initial x unscaled[   34]= 0.0000000000000000e+00
-initial x unscaled[   35]= 0.0000000000000000e+00
-initial x unscaled[   36]= 0.0000000000000000e+00
-initial x unscaled[   37]= 0.0000000000000000e+00
-initial x unscaled[   38]= 0.0000000000000000e+00
-initial x unscaled[   39]= 0.0000000000000000e+00
-initial x unscaled[   40]= 0.0000000000000000e+00
-initial x unscaled[   41]= 0.0000000000000000e+00
-initial x unscaled[   42]= 0.0000000000000000e+00
-initial x unscaled[   43]= 0.0000000000000000e+00
-initial x unscaled[   44]= 0.0000000000000000e+00
-initial x unscaled[   45]= 0.0000000000000000e+00
-initial x unscaled[   46]= 0.0000000000000000e+00
-initial x unscaled[   47]= 0.0000000000000000e+00
-initial x unscaled[   48]= 0.0000000000000000e+00
-initial x unscaled[   49]= 0.0000000000000000e+00
-initial x unscaled[   50]= 0.0000000000000000e+00
-initial x unscaled[   51]= 0.0000000000000000e+00
-initial x unscaled[   52]= 0.0000000000000000e+00
-initial x unscaled[   53]= 0.0000000000000000e+00
-initial x unscaled[   54]= 0.0000000000000000e+00
-initial x unscaled[   55]= 0.0000000000000000e+00
-initial x unscaled[   56]= 0.0000000000000000e+00
-initial x unscaled[   57]= 0.0000000000000000e+00
-initial x unscaled[   58]= 0.0000000000000000e+00
-initial x unscaled[   59]= 0.0000000000000000e+00
-initial x unscaled[   60]= 0.0000000000000000e+00
-initial x unscaled[   61]= 0.0000000000000000e+00
-initial x unscaled[   62]= 0.0000000000000000e+00
-initial x unscaled[   63]= 0.0000000000000000e+00
-initial x unscaled[   64]= 0.0000000000000000e+00
-initial x unscaled[   65]= 0.0000000000000000e+00
-initial x unscaled[   66]= 0.0000000000000000e+00
-initial x unscaled[   67]= 0.0000000000000000e+00
-initial x unscaled[   68]= 0.0000000000000000e+00
-initial x unscaled[   69]= 0.0000000000000000e+00
-initial x unscaled[   70]= 0.0000000000000000e+00
-initial x unscaled[   71]= 0.0000000000000000e+00
-initial x unscaled[   72]= 0.0000000000000000e+00
-initial x unscaled[   73]= 0.0000000000000000e+00
-initial x unscaled[   74]= 0.0000000000000000e+00
-initial x unscaled[   75]= 0.0000000000000000e+00
-initial x unscaled[   76]= 0.0000000000000000e+00
-initial x unscaled[   77]= 0.0000000000000000e+00
-initial x unscaled[   78]= 0.0000000000000000e+00
 Initial values of x sufficiently inside the bounds.
 Moved initial values of s sufficiently inside the bounds.
-DenseVector "original vars" with 2 elements:
-original vars[    1]= 1.0000000000000000e+00
-original vars[    2]= 1.0000000000000000e+00
-DenseVector "new vars" with 2 elements:
-new vars[    1]= 1.0100000000000000e+00
-new vars[    2]= 1.0100000000000000e+00
-Calling MUMPS-1 for symbolic factorization at cpu time      0.257 (wall      0.000).
-Done with MUMPS-1 for symbolic factorization at cpu time      0.257 (wall      0.000).
+Calling MUMPS-1 for symbolic factorization at cpu time      0.192 (wall      0.000).
+Done with MUMPS-1 for symbolic factorization at cpu time      0.192 (wall      0.000).
 MUMPS used permuting_scaling 5 and pivot_order 5.
            scaling will be 77.
-Calling MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.000).
-Done with MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.000).
-Number of doubles for MUMPS to hold factorization (INFO(9)) = 392
-Number of integers for MUMPS to hold factorization (INFO(10)) = 1468
-Calling MUMPS-3 for solve at cpu time      0.257 (wall      0.000).
-Done with MUMPS-3 for solve at cpu time      0.257 (wall      0.000).
+Calling MUMPS-2 for numerical factorization at cpu time      0.192 (wall      0.000).
+Done with MUMPS-2 for numerical factorization at cpu time      0.192 (wall      0.000).
+Number of doubles for MUMPS to hold factorization (INFO(9)) = 519
+Number of integers for MUMPS to hold factorization (INFO(10)) = 1714
+Calling MUMPS-3 for solve at cpu time      0.192 (wall      0.000).
+Done with MUMPS-3 for solve at cpu time      0.192 (wall      0.000).
 Factorization successful.
-Least square estimates max(y_c) = 0.000000e+00, max(y_d) = 0.000000e+00
+Least square estimates max(y_c) = 1.718034e+01, max(y_d) = 5.866025e+00
 Total number of variables............................:       78
                      variables with only lower bounds:        0
                 variables with lower and upper bounds:        0
                      variables with only upper bounds:        0
-Total number of equality constraints.................:       38
-Total number of inequality constraints...............:        2
-        inequality constraints with only lower bounds:        0
-   inequality constraints with lower and upper bounds:        2
+Total number of equality constraints.................:       39
+Total number of inequality constraints...............:       20
+        inequality constraints with only lower bounds:       20
+   inequality constraints with lower and upper bounds:        0
         inequality constraints with only upper bounds:        0
 
 Convergence Check:
-  overall_error =  1.0000000000000000e+00   IpData().tol()   =  1.0000000000000001e-05
-  dual_inf      =  0.0000000000000000e+00   dual_inf_tol_    =  1.0000000000000000e+00
-  constr_viol   =  1.0000000000000000e+00   constr_viol_tol_ =  1.0000000000000000e-04
-  compl_inf     =  9.8999999999999999e-01   compl_inf_tol_   =  1.0000000000000000e-04
+  overall_error =  1.0000000000000000e+01   IpData().tol()   =  1.0000000000000001e-05
+  dual_inf      =  9.9994674602748699e+00   dual_inf_tol_    =  1.0000000000000000e+00
+  constr_viol   =  1.0000000000000000e+01   constr_viol_tol_ =  1.0000000000000000e-04
+  compl_inf     =  9.9999999999999645e-02   compl_inf_tol_   =  1.0000000000000000e-04
 obj val update iter = 0
 Acceptable Check:
-  overall_error =  1.0000000000000000e+00   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  0.0000000000000000e+00   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  1.0000000000000000e+00   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  9.8999999999999999e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  overall_error =  1.0000000000000000e+01   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  9.9994674602748699e+00   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  1.0000000000000000e+01   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  9.9999999999999645e-02   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
   curr_obj_val_ =  0.0000000000000000e+00   last_obj_val                = -1.0000000000000001e+50
   fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.0000000000000001e+50 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 0
@@ -171,7 +78,7 @@ test iter = 0
 **************************************************
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   0  0.0000000e+00 1.00e+00 0.00e+00  -1.0 0.00e+00    -  0.00e+00 0.00e+00   0 y
+   0  0.0000000e+00 1.00e+01 1.00e+01  -1.0 0.00e+00    -  0.00e+00 0.00e+00   0 y
 
 **************************************************
 *** Beginning Iteration 0 from the following point:
@@ -181,290 +88,26 @@ Current barrier parameter mu = 1.0000000000000001e-01
 Current fraction-to-the-boundary parameter tau = 9.8999999999999999e-01
 
 ||curr_x||_inf   = 0.0000000000000000e+00
-||curr_s||_inf   = 1.0100000000000000e+00
-||curr_y_c||_inf = 0.0000000000000000e+00
-||curr_y_d||_inf = 0.0000000000000000e+00
+||curr_s||_inf   = 1.0100000000000000e+01
+||curr_y_c||_inf = 1.7180339871687668e+01
+||curr_y_d||_inf = 5.8660254037781350e+00
 ||curr_z_L||_inf = 0.0000000000000000e+00
 ||curr_z_U||_inf = 0.0000000000000000e+00
 ||curr_v_L||_inf = 1.0000000000000000e+00
-||curr_v_U||_inf = 1.0000000000000000e+00
+||curr_v_U||_inf = 0.0000000000000000e+00
 
 No search direction has been computed yet.
-DenseVector "curr_x" with 78 elements:
-curr_x[    1]= 0.0000000000000000e+00
-curr_x[    2]= 0.0000000000000000e+00
-curr_x[    3]= 0.0000000000000000e+00
-curr_x[    4]= 0.0000000000000000e+00
-curr_x[    5]= 0.0000000000000000e+00
-curr_x[    6]= 0.0000000000000000e+00
-curr_x[    7]= 0.0000000000000000e+00
-curr_x[    8]= 0.0000000000000000e+00
-curr_x[    9]= 0.0000000000000000e+00
-curr_x[   10]= 0.0000000000000000e+00
-curr_x[   11]= 0.0000000000000000e+00
-curr_x[   12]= 0.0000000000000000e+00
-curr_x[   13]= 0.0000000000000000e+00
-curr_x[   14]= 0.0000000000000000e+00
-curr_x[   15]= 0.0000000000000000e+00
-curr_x[   16]= 0.0000000000000000e+00
-curr_x[   17]= 0.0000000000000000e+00
-curr_x[   18]= 0.0000000000000000e+00
-curr_x[   19]= 0.0000000000000000e+00
-curr_x[   20]= 0.0000000000000000e+00
-curr_x[   21]= 0.0000000000000000e+00
-curr_x[   22]= 0.0000000000000000e+00
-curr_x[   23]= 0.0000000000000000e+00
-curr_x[   24]= 0.0000000000000000e+00
-curr_x[   25]= 0.0000000000000000e+00
-curr_x[   26]= 0.0000000000000000e+00
-curr_x[   27]= 0.0000000000000000e+00
-curr_x[   28]= 0.0000000000000000e+00
-curr_x[   29]= 0.0000000000000000e+00
-curr_x[   30]= 0.0000000000000000e+00
-curr_x[   31]= 0.0000000000000000e+00
-curr_x[   32]= 0.0000000000000000e+00
-curr_x[   33]= 0.0000000000000000e+00
-curr_x[   34]= 0.0000000000000000e+00
-curr_x[   35]= 0.0000000000000000e+00
-curr_x[   36]= 0.0000000000000000e+00
-curr_x[   37]= 0.0000000000000000e+00
-curr_x[   38]= 0.0000000000000000e+00
-curr_x[   39]= 0.0000000000000000e+00
-curr_x[   40]= 0.0000000000000000e+00
-curr_x[   41]= 0.0000000000000000e+00
-curr_x[   42]= 0.0000000000000000e+00
-curr_x[   43]= 0.0000000000000000e+00
-curr_x[   44]= 0.0000000000000000e+00
-curr_x[   45]= 0.0000000000000000e+00
-curr_x[   46]= 0.0000000000000000e+00
-curr_x[   47]= 0.0000000000000000e+00
-curr_x[   48]= 0.0000000000000000e+00
-curr_x[   49]= 0.0000000000000000e+00
-curr_x[   50]= 0.0000000000000000e+00
-curr_x[   51]= 0.0000000000000000e+00
-curr_x[   52]= 0.0000000000000000e+00
-curr_x[   53]= 0.0000000000000000e+00
-curr_x[   54]= 0.0000000000000000e+00
-curr_x[   55]= 0.0000000000000000e+00
-curr_x[   56]= 0.0000000000000000e+00
-curr_x[   57]= 0.0000000000000000e+00
-curr_x[   58]= 0.0000000000000000e+00
-curr_x[   59]= 0.0000000000000000e+00
-curr_x[   60]= 0.0000000000000000e+00
-curr_x[   61]= 0.0000000000000000e+00
-curr_x[   62]= 0.0000000000000000e+00
-curr_x[   63]= 0.0000000000000000e+00
-curr_x[   64]= 0.0000000000000000e+00
-curr_x[   65]= 0.0000000000000000e+00
-curr_x[   66]= 0.0000000000000000e+00
-curr_x[   67]= 0.0000000000000000e+00
-curr_x[   68]= 0.0000000000000000e+00
-curr_x[   69]= 0.0000000000000000e+00
-curr_x[   70]= 0.0000000000000000e+00
-curr_x[   71]= 0.0000000000000000e+00
-curr_x[   72]= 0.0000000000000000e+00
-curr_x[   73]= 0.0000000000000000e+00
-curr_x[   74]= 0.0000000000000000e+00
-curr_x[   75]= 0.0000000000000000e+00
-curr_x[   76]= 0.0000000000000000e+00
-curr_x[   77]= 0.0000000000000000e+00
-curr_x[   78]= 0.0000000000000000e+00
-DenseVector "curr_s" with 2 elements:
-curr_s[    1]= 1.0100000000000000e+00
-curr_s[    2]= 1.0100000000000000e+00
-DenseVector "curr_y_c" with 38 elements:
-curr_y_c[    1]=-0.0000000000000000e+00
-curr_y_c[    2]=-0.0000000000000000e+00
-curr_y_c[    3]=-0.0000000000000000e+00
-curr_y_c[    4]=-0.0000000000000000e+00
-curr_y_c[    5]=-0.0000000000000000e+00
-curr_y_c[    6]=-0.0000000000000000e+00
-curr_y_c[    7]=-0.0000000000000000e+00
-curr_y_c[    8]=-0.0000000000000000e+00
-curr_y_c[    9]=-0.0000000000000000e+00
-curr_y_c[   10]=-0.0000000000000000e+00
-curr_y_c[   11]=-0.0000000000000000e+00
-curr_y_c[   12]=-0.0000000000000000e+00
-curr_y_c[   13]=-0.0000000000000000e+00
-curr_y_c[   14]=-0.0000000000000000e+00
-curr_y_c[   15]=-0.0000000000000000e+00
-curr_y_c[   16]=-0.0000000000000000e+00
-curr_y_c[   17]=-0.0000000000000000e+00
-curr_y_c[   18]=-0.0000000000000000e+00
-curr_y_c[   19]=-0.0000000000000000e+00
-curr_y_c[   20]=-0.0000000000000000e+00
-curr_y_c[   21]=-0.0000000000000000e+00
-curr_y_c[   22]=-0.0000000000000000e+00
-curr_y_c[   23]=-0.0000000000000000e+00
-curr_y_c[   24]=-0.0000000000000000e+00
-curr_y_c[   25]=-0.0000000000000000e+00
-curr_y_c[   26]=-0.0000000000000000e+00
-curr_y_c[   27]=-0.0000000000000000e+00
-curr_y_c[   28]=-0.0000000000000000e+00
-curr_y_c[   29]=-0.0000000000000000e+00
-curr_y_c[   30]=-0.0000000000000000e+00
-curr_y_c[   31]=-0.0000000000000000e+00
-curr_y_c[   32]=-0.0000000000000000e+00
-curr_y_c[   33]=-0.0000000000000000e+00
-curr_y_c[   34]=-0.0000000000000000e+00
-curr_y_c[   35]=-0.0000000000000000e+00
-curr_y_c[   36]=-0.0000000000000000e+00
-curr_y_c[   37]=-0.0000000000000000e+00
-curr_y_c[   38]=-0.0000000000000000e+00
-DenseVector "curr_y_d" with 2 elements:
-curr_y_d[    1]=-0.0000000000000000e+00
-curr_y_d[    2]=-0.0000000000000000e+00
-DenseVector "curr_slack_x_L" with 0 elements:
-DenseVector "curr_slack_x_U" with 0 elements:
-DenseVector "curr_z_L" with 0 elements:
-Homogeneous vector, all elements have value  1.0000000000000000e+00
-DenseVector "curr_z_U" with 0 elements:
-Homogeneous vector, all elements have value  1.0000000000000000e+00
-DenseVector "curr_slack_s_L" with 2 elements:
-curr_slack_s_L[    1]= 1.0000000000000009e-02
-curr_slack_s_L[    2]= 1.0000000000000009e-02
-DenseVector "curr_slack_s_U" with 2 elements:
-curr_slack_s_U[    1]= 9.8999999999999999e-01
-curr_slack_s_U[    2]= 9.8999999999999999e-01
-DenseVector "curr_v_L" with 2 elements:
-Homogeneous vector, all elements have value  1.0000000000000000e+00
-DenseVector "curr_v_U" with 2 elements:
-Homogeneous vector, all elements have value  1.0000000000000000e+00
 
 
 ***Current NLP Values for Iteration 0:
 
                                    (scaled)                 (unscaled)
 Objective...............:   0.0000000000000000e+00    0.0000000000000000e+00
-Dual infeasibility......:   0.0000000000000000e+00    0.0000000000000000e+00
-Constraint violation....:   1.0000000000000000e+00    1.0000000000000000e+00
-Complementarity.........:   9.8999999999999999e-01    9.8999999999999999e-01
-Overall NLP error.......:   1.0000000000000000e+00    1.0000000000000000e+00
+Dual infeasibility......:   9.9994674602748699e+00    9.9994674602748699e+00
+Constraint violation....:   1.0000000000000000e+01    1.0000000000000000e+01
+Complementarity.........:   9.9999999999999645e-02    9.9999999999999645e-02
+Overall NLP error.......:   1.0000000000000000e+01    1.0000000000000000e+01
 
-DenseVector "grad_f" with 78 elements:
-grad_f[    1]= 0.0000000000000000e+00
-grad_f[    2]= 0.0000000000000000e+00
-grad_f[    3]= 0.0000000000000000e+00
-grad_f[    4]= 0.0000000000000000e+00
-grad_f[    5]= 0.0000000000000000e+00
-grad_f[    6]= 0.0000000000000000e+00
-grad_f[    7]= 0.0000000000000000e+00
-grad_f[    8]= 0.0000000000000000e+00
-grad_f[    9]= 0.0000000000000000e+00
-grad_f[   10]= 0.0000000000000000e+00
-grad_f[   11]= 0.0000000000000000e+00
-grad_f[   12]= 0.0000000000000000e+00
-grad_f[   13]= 0.0000000000000000e+00
-grad_f[   14]= 0.0000000000000000e+00
-grad_f[   15]= 0.0000000000000000e+00
-grad_f[   16]= 0.0000000000000000e+00
-grad_f[   17]= 0.0000000000000000e+00
-grad_f[   18]= 0.0000000000000000e+00
-grad_f[   19]= 0.0000000000000000e+00
-grad_f[   20]= 0.0000000000000000e+00
-grad_f[   21]= 0.0000000000000000e+00
-grad_f[   22]= 0.0000000000000000e+00
-grad_f[   23]= 0.0000000000000000e+00
-grad_f[   24]= 0.0000000000000000e+00
-grad_f[   25]= 0.0000000000000000e+00
-grad_f[   26]= 0.0000000000000000e+00
-grad_f[   27]= 0.0000000000000000e+00
-grad_f[   28]= 0.0000000000000000e+00
-grad_f[   29]= 0.0000000000000000e+00
-grad_f[   30]= 0.0000000000000000e+00
-grad_f[   31]= 0.0000000000000000e+00
-grad_f[   32]= 0.0000000000000000e+00
-grad_f[   33]= 0.0000000000000000e+00
-grad_f[   34]= 0.0000000000000000e+00
-grad_f[   35]= 0.0000000000000000e+00
-grad_f[   36]= 0.0000000000000000e+00
-grad_f[   37]= 0.0000000000000000e+00
-grad_f[   38]= 0.0000000000000000e+00
-grad_f[   39]= 0.0000000000000000e+00
-grad_f[   40]= 0.0000000000000000e+00
-grad_f[   41]= 0.0000000000000000e+00
-grad_f[   42]= 0.0000000000000000e+00
-grad_f[   43]= 0.0000000000000000e+00
-grad_f[   44]= 0.0000000000000000e+00
-grad_f[   45]= 0.0000000000000000e+00
-grad_f[   46]= 0.0000000000000000e+00
-grad_f[   47]= 0.0000000000000000e+00
-grad_f[   48]= 0.0000000000000000e+00
-grad_f[   49]= 0.0000000000000000e+00
-grad_f[   50]= 0.0000000000000000e+00
-grad_f[   51]= 0.0000000000000000e+00
-grad_f[   52]= 0.0000000000000000e+00
-grad_f[   53]= 0.0000000000000000e+00
-grad_f[   54]= 0.0000000000000000e+00
-grad_f[   55]= 0.0000000000000000e+00
-grad_f[   56]= 0.0000000000000000e+00
-grad_f[   57]= 0.0000000000000000e+00
-grad_f[   58]= 0.0000000000000000e+00
-grad_f[   59]= 0.0000000000000000e+00
-grad_f[   60]= 0.0000000000000000e+00
-grad_f[   61]= 0.0000000000000000e+00
-grad_f[   62]= 0.0000000000000000e+00
-grad_f[   63]= 0.0000000000000000e+00
-grad_f[   64]= 0.0000000000000000e+00
-grad_f[   65]= 0.0000000000000000e+00
-grad_f[   66]= 0.0000000000000000e+00
-grad_f[   67]= 0.0000000000000000e+00
-grad_f[   68]= 0.0000000000000000e+00
-grad_f[   69]= 0.0000000000000000e+00
-grad_f[   70]= 0.0000000000000000e+00
-grad_f[   71]= 0.0000000000000000e+00
-grad_f[   72]= 0.0000000000000000e+00
-grad_f[   73]= 0.0000000000000000e+00
-grad_f[   74]= 0.0000000000000000e+00
-grad_f[   75]= 0.0000000000000000e+00
-grad_f[   76]= 0.0000000000000000e+00
-grad_f[   77]= 0.0000000000000000e+00
-grad_f[   78]= 0.0000000000000000e+00
-DenseVector "curr_c" with 38 elements:
-curr_c[    1]= 0.0000000000000000e+00
-curr_c[    2]= 0.0000000000000000e+00
-curr_c[    3]= 0.0000000000000000e+00
-curr_c[    4]= 0.0000000000000000e+00
-curr_c[    5]= 0.0000000000000000e+00
-curr_c[    6]= 0.0000000000000000e+00
-curr_c[    7]= 0.0000000000000000e+00
-curr_c[    8]= 0.0000000000000000e+00
-curr_c[    9]= 0.0000000000000000e+00
-curr_c[   10]= 0.0000000000000000e+00
-curr_c[   11]= 0.0000000000000000e+00
-curr_c[   12]= 0.0000000000000000e+00
-curr_c[   13]= 0.0000000000000000e+00
-curr_c[   14]= 0.0000000000000000e+00
-curr_c[   15]= 0.0000000000000000e+00
-curr_c[   16]= 0.0000000000000000e+00
-curr_c[   17]= 0.0000000000000000e+00
-curr_c[   18]= 0.0000000000000000e+00
-curr_c[   19]= 0.0000000000000000e+00
-curr_c[   20]= 0.0000000000000000e+00
-curr_c[   21]= 0.0000000000000000e+00
-curr_c[   22]= 0.0000000000000000e+00
-curr_c[   23]= 0.0000000000000000e+00
-curr_c[   24]= 0.0000000000000000e+00
-curr_c[   25]= 0.0000000000000000e+00
-curr_c[   26]= 0.0000000000000000e+00
-curr_c[   27]= 0.0000000000000000e+00
-curr_c[   28]= 0.0000000000000000e+00
-curr_c[   29]= 0.0000000000000000e+00
-curr_c[   30]= 0.0000000000000000e+00
-curr_c[   31]= 0.0000000000000000e+00
-curr_c[   32]= 0.0000000000000000e+00
-curr_c[   33]= 0.0000000000000000e+00
-curr_c[   34]= 0.0000000000000000e+00
-curr_c[   35]= 0.0000000000000000e+00
-curr_c[   36]= 0.0000000000000000e+00
-curr_c[   37]= 0.0000000000000000e+00
-curr_c[   38]= 0.0000000000000000e+00
-DenseVector "curr_d" with 2 elements:
-curr_d[    1]= 0.0000000000000000e+00
-curr_d[    2]= 0.0000000000000000e+00
-DenseVector "curr_d - curr_s" with 2 elements:
-curr_d - curr_s[    1]=-1.0100000000000000e+00
-curr_d - curr_s[    2]=-1.0100000000000000e+00
 
 
 
@@ -472,7 +115,7 @@ curr_d - curr_s[    2]=-1.0100000000000000e+00
 *** Update Barrier Parameter for Iteration 0:
 **************************************************
 
-Optimality Error for Barrier Sub-problem = 1.010000e+00
+Optimality Error for Barrier Sub-problem = 1.010000e+01
 Barrier Parameter: 1.000000e-01
 
 **************************************************
@@ -481,26 +124,26 @@ Barrier Parameter: 1.000000e-01
 
 Solving system with delta_x=0.000000e+00 delta_s=0.000000e+00
                     delta_c=0.000000e+00 delta_d=0.000000e+00
-Calling MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.001).
-Done with MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.001).
-Number of doubles for MUMPS to hold factorization (INFO(9)) = 392
-Number of integers for MUMPS to hold factorization (INFO(10)) = 1468
-Calling MUMPS-3 for solve at cpu time      0.257 (wall      0.001).
-Done with MUMPS-3 for solve at cpu time      0.257 (wall      0.001).
+Calling MUMPS-2 for numerical factorization at cpu time      0.192 (wall      0.001).
+Done with MUMPS-2 for numerical factorization at cpu time      0.192 (wall      0.001).
+Number of doubles for MUMPS to hold factorization (INFO(9)) = 519
+Number of integers for MUMPS to hold factorization (INFO(10)) = 1714
+Calling MUMPS-3 for solve at cpu time      0.192 (wall      0.001).
+Done with MUMPS-3 for solve at cpu time      0.192 (wall      0.001).
 Factorization successful.
 Number of trial factorizations performed: 1
 Perturbation parameters: delta_x=0.000000e+00 delta_s=0.000000e+00
                          delta_c=0.000000e+00 delta_d=0.000000e+00
-max-norm resid_x  7.105427e-15
-max-norm resid_s  9.769963e-15
-max-norm resid_c  1.665335e-16
+max-norm resid_x  1.696421e-13
+max-norm resid_s  1.421085e-14
+max-norm resid_c  2.478161e-15
 max-norm resid_d  0.000000e+00
 max-norm resid_zL 0.000000e+00
 max-norm resid_zU 0.000000e+00
-max-norm resid_vL 0.000000e+00
+max-norm resid_vL 2.220446e-16
 max-norm resid_vU 0.000000e+00
-nrm_rhs = 1.01e+00 nrm_sol = 1.76e+00 nrm_resid = 9.77e-15
-residual_ratio = 3.521321e-15
+nrm_rhs = 1.01e+01 nrm_sol = 2.30e+01 nrm_resid = 1.70e-13
+residual_ratio = 5.122368e-15
 
 **************************************************
 *** Finding Acceptable Trial Point for Iteration 0:
@@ -509,40 +152,40 @@ residual_ratio = 3.521321e-15
 --> Starting line search in iteration 0 <--
 Mu has changed in line search - resetting watchdog counters.
 Acceptable Check:
-  overall_error =  1.0000000000000000e+00   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  0.0000000000000000e+00   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  1.0000000000000000e+00   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  9.8999999999999999e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  overall_error =  1.0000000000000000e+01   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  9.9994674602748699e+00   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  1.0000000000000000e+01   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  9.9999999999999645e-02   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
   curr_obj_val_ =  0.0000000000000000e+00   last_obj_val                = -1.0000000000000001e+50
   fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.0000000000000001e+50 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 0
 The current filter has 0 entries.
-Relative step size for delta_x = 1.090531e+00
-minimal step size ALPHA_MIN = 6.334843E-10
-Starting checks for alpha (primal) = 1.00e+00
-trial_max is initialized to 2.020000e+04
-trial_min is initialized to 2.020000e-04
-Checking acceptability for trial step size alpha_primal_test= 1.000000e+00:
-  New values of barrier function     =  2.4236515429498167e+00  (reference  9.2304410436831841e-01):
-  New values of constraint violation =  8.5149726087258373e-16  (reference  2.0200000000000000e+00):
-reference_theta = 2.020000e+00 reference_gradBarrTDelta = -1.594357e+00
+Relative step size for delta_x = 9.999467e+00
+minimal step size ALPHA_MIN = 4.853790E-10
+Starting checks for alpha (primal) = 4.30e-02
+trial_max is initialized to 1.929100e+06
+trial_min is initialized to 1.929100e-02
+Checking acceptability for trial step size alpha_primal_test= 4.301000e-02:
+  New values of barrier function     =  7.2282548453339412e-01  (reference  4.8354306052875042e+00):
+  New values of constraint violation =  1.8461294109298473e+02  (reference  1.9290999999999994e+02):
+reference_theta = 1.929100e+02 reference_gradBarrTDelta = -1.987210e+02
 Checking sufficient reduction...
 Succeeded...
 Checking filter acceptability...
 Succeeded...
-reference_theta = 2.020000e+00 reference_gradBarrTDelta = -1.594357e+00
+reference_theta = 1.929100e+02 reference_gradBarrTDelta = -1.987210e+02
 Convergence Check:
-  overall_error =  1.7625277988914179e-01   IpData().tol()   =  1.0000000000000001e-05
-  dual_inf      =  9.7699626167013776e-15   dual_inf_tol_    =  1.0000000000000000e+00
-  constr_viol   =  2.2204460492503131e-16   constr_viol_tol_ =  1.0000000000000000e-04
-  compl_inf     =  1.7625277988914179e-01   compl_inf_tol_   =  1.0000000000000000e-04
+  overall_error =  1.7627590433607530e+01   IpData().tol()   =  1.0000000000000001e-05
+  dual_inf      =  1.7627590433607530e+01   dual_inf_tol_    =  1.0000000000000000e+00
+  constr_viol   =  9.6645990101039150e+00   constr_viol_tol_ =  1.0000000000000000e-04
+  compl_inf     =  5.0693260905320781e-01   compl_inf_tol_   =  1.0000000000000000e-04
 obj val update iter = 1
 Acceptable Check:
-  overall_error =  1.7625277988914179e-01   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  9.7699626167013776e-15   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  2.2204460492503131e-16   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  1.7625277988914179e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
-  curr_obj_val_ =  1.9242606471874621e+00   last_obj_val                =  0.0000000000000000e+00
+  overall_error =  1.7627590433607530e+01   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  1.7627590433607530e+01   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  9.6645990101039150e+00   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  5.0693260905320781e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ = -7.0211120241301046e+00   last_obj_val                =  0.0000000000000000e+00
   fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.0000000000000000e+00 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 1
 
@@ -557,7 +200,7 @@ test iter = 1
 **************************************************
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   1  1.9242606e+00 2.22e-16 9.77e-15  -1.0 1.09e+00    -  1.00e+00 1.00e+00h  1 
+   1 -7.0211120e+00 9.66e+00 1.76e+01  -1.0 1.00e+01    -  1.00e+00 4.30e-02f  1 
 
 **************************************************
 *** Beginning Iteration 1 from the following point:
@@ -566,298 +209,34 @@ iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
 Current barrier parameter mu = 1.0000000000000001e-01
 Current fraction-to-the-boundary parameter tau = 9.8999999999999999e-01
 
-||curr_x||_inf   = 1.0905312848220914e+00
-||curr_s||_inf   = 1.0905312848220914e+00
-||curr_y_c||_inf = 6.7398539981514483e-01
-||curr_y_d||_inf = 1.7645166846372433e+00
+||curr_x||_inf   = 4.3007708546307877e-01
+||curr_s||_inf   = 1.0028926427434421e+01
+||curr_y_c||_inf = 1.7180339871687668e+01
+||curr_y_d||_inf = 6.3903129150747713e+00
 ||curr_z_L||_inf = 0.0000000000000000e+00
 ||curr_z_U||_inf = 0.0000000000000000e+00
-||curr_v_L||_inf = 1.9468715177908611e+00
-||curr_v_U||_inf = 1.8235483315362766e-01
+||curr_v_L||_inf = 2.4017903348682303e+01
+||curr_v_U||_inf = 0.0000000000000000e+00
 
-||delta_x||_inf   = 1.0905312848220914e+00
-||delta_s||_inf   = 8.0531284822091376e-02
-||delta_y_c||_inf = 6.7398539981514483e-01
-||delta_y_d||_inf = 1.7645166846372433e+00
+||delta_x||_inf   = 9.9994674602748717e+00
+||delta_s||_inf   = 2.3017903348682216e+00
+||delta_y_c||_inf = 6.4734152896963906e+00
+||delta_y_d||_inf = 1.8419826137347897e+01
 ||delta_z_L||_inf = 0.0000000000000000e+00
 ||delta_z_U||_inf = 0.0000000000000000e+00
-||delta_v_L||_inf = 9.4687151779086121e-01
-||delta_v_U||_inf = 8.1764516684637234e-01
-DenseVector "curr_x" with 78 elements:
-curr_x[    1]= 1.7242695604778659e-08
-curr_x[    2]= 1.7242695604778659e-08
-curr_x[    3]= 3.4485391209557311e-08
-curr_x[    4]= 3.4485391209557311e-08
-curr_x[    5]= 8.6213478023893270e-08
-curr_x[    6]= 8.6213478023893270e-08
-curr_x[    7]= 2.2415504286212250e-07
-curr_x[    8]= 2.2415504286212250e-07
-curr_x[    9]= 5.8625165056247430e-07
-curr_x[   10]= 5.8625165056247430e-07
-curr_x[   11]= 1.5345999088253000e-06
-curr_x[   12]= 1.5345999088253000e-06
-curr_x[   13]= 4.0175480759134252e-06
-curr_x[   14]= 4.0175480759134252e-06
-curr_x[   15]= 1.0518044318914979e-05
-curr_x[   16]= 1.0518044318914979e-05
-curr_x[   17]= 2.7536584880831493e-05
-curr_x[   18]= 2.7536584880831493e-05
-curr_x[   19]= 7.2091710323579536e-05
-curr_x[   20]= 7.2091710323579536e-05
-curr_x[   21]= 1.8873854608990705e-04
-curr_x[   22]= 1.8873854608990705e-04
-curr_x[   23]= 4.9412392794614176e-04
-curr_x[   24]= 4.9412392794614176e-04
-curr_x[   25]= 1.2936332377485177e-03
-curr_x[   26]= 1.2936332377485177e-03
-curr_x[   27]= 3.3867757852994109e-03
-curr_x[   28]= 3.3867757852994109e-03
-curr_x[   29]= 8.8666941181497171e-03
-curr_x[   30]= 8.8666941181497171e-03
-curr_x[   31]= 2.3213306569149737e-02
-curr_x[   32]= 2.3213306569149737e-02
-curr_x[   33]= 6.0773225589299477e-02
-curr_x[   34]= 6.0773225589299477e-02
-curr_x[   35]= 1.5910637019874868e-01
-curr_x[   36]= 1.5910637019874868e-01
-curr_x[   37]= 4.1654588500694689e-01
-curr_x[   38]= 4.1654588500694689e-01
-curr_x[   39]= 1.0905312848220914e+00
-curr_x[   40]= 1.0905312848220914e+00
-curr_x[   41]= 1.7242695604778655e-08
-curr_x[   42]= 1.7242695604778655e-08
-curr_x[   43]= 5.1728086814335973e-08
-curr_x[   44]= 5.1728086814335973e-08
-curr_x[   45]= 1.3794156483822924e-07
-curr_x[   46]= 1.3794156483822924e-07
-curr_x[   47]= 3.6209660770035180e-07
-curr_x[   48]= 3.6209660770035180e-07
-curr_x[   49]= 9.4834825826282588e-07
-curr_x[   50]= 9.4834825826282588e-07
-curr_x[   51]= 2.4829481670881261e-06
-curr_x[   52]= 2.4829481670881261e-06
-curr_x[   53]= 6.5004962430015525e-06
-curr_x[   54]= 6.5004962430015525e-06
-curr_x[   55]= 1.7018540561916534e-05
-curr_x[   56]= 1.7018540561916534e-05
-curr_x[   57]= 4.4555125442748029e-05
-curr_x[   58]= 4.4555125442748029e-05
-curr_x[   59]= 1.1664683576632756e-04
-curr_x[   60]= 1.1664683576632756e-04
-curr_x[   61]= 3.0538538185623465e-04
-curr_x[   62]= 3.0538538185623465e-04
-curr_x[   63]= 7.9950930980237614e-04
-curr_x[   64]= 7.9950930980237614e-04
-curr_x[   65]= 2.0931425475508936e-03
-curr_x[   66]= 2.0931425475508936e-03
-curr_x[   67]= 5.4799183328503049e-03
-curr_x[   68]= 5.4799183328503049e-03
-curr_x[   69]= 1.4346612451000020e-02
-curr_x[   70]= 1.4346612451000020e-02
-curr_x[   71]= 3.7559919020149747e-02
-curr_x[   72]= 3.7559919020149747e-02
-curr_x[   73]= 9.8333144609449225e-02
-curr_x[   74]= 9.8333144609449225e-02
-curr_x[   75]= 2.5743951480819804e-01
-curr_x[   76]= 2.5743951480819804e-01
-curr_x[   77]= 6.7398539981514460e-01
-curr_x[   78]= 6.7398539981514460e-01
-DenseVector "curr_s" with 2 elements:
-curr_s[    1]= 1.0905312848220914e+00
-curr_s[    2]= 1.0905312848220914e+00
-DenseVector "curr_y_c" with 38 elements:
-curr_y_c[    1]=-1.7242695604778659e-08
-curr_y_c[    2]=-1.7242695604778659e-08
-curr_y_c[    3]=-5.1728086814335973e-08
-curr_y_c[    4]=-5.1728086814335973e-08
-curr_y_c[    5]=-1.3794156483822924e-07
-curr_y_c[    6]=-1.3794156483822924e-07
-curr_y_c[    7]=-3.6209660770035174e-07
-curr_y_c[    8]=-3.6209660770035174e-07
-curr_y_c[    9]=-9.4834825826282598e-07
-curr_y_c[   10]=-9.4834825826282598e-07
-curr_y_c[   11]=-2.4829481670881261e-06
-curr_y_c[   12]=-2.4829481670881261e-06
-curr_y_c[   13]=-6.5004962430015516e-06
-curr_y_c[   14]=-6.5004962430015516e-06
-curr_y_c[   15]=-1.7018540561916530e-05
-curr_y_c[   16]=-1.7018540561916530e-05
-curr_y_c[   17]=-4.4555125442748023e-05
-curr_y_c[   18]=-4.4555125442748023e-05
-curr_y_c[   19]=-1.1664683576632756e-04
-curr_y_c[   20]=-1.1664683576632756e-04
-curr_y_c[   21]=-3.0538538185623460e-04
-curr_y_c[   22]=-3.0538538185623460e-04
-curr_y_c[   23]=-7.9950930980237636e-04
-curr_y_c[   24]=-7.9950930980237636e-04
-curr_y_c[   25]=-2.0931425475508940e-03
-curr_y_c[   26]=-2.0931425475508940e-03
-curr_y_c[   27]=-5.4799183328503049e-03
-curr_y_c[   28]=-5.4799183328503049e-03
-curr_y_c[   29]=-1.4346612451000022e-02
-curr_y_c[   30]=-1.4346612451000022e-02
-curr_y_c[   31]=-3.7559919020149761e-02
-curr_y_c[   32]=-3.7559919020149761e-02
-curr_y_c[   33]=-9.8333144609449238e-02
-curr_y_c[   34]=-9.8333144609449238e-02
-curr_y_c[   35]=-2.5743951480819793e-01
-curr_y_c[   36]=-2.5743951480819793e-01
-curr_y_c[   37]=-6.7398539981514483e-01
-curr_y_c[   38]=-6.7398539981514483e-01
-DenseVector "curr_y_d" with 2 elements:
-curr_y_d[    1]=-1.7645166846372433e+00
-curr_y_d[    2]=-1.7645166846372433e+00
-DenseVector "curr_slack_x_L" with 0 elements:
-DenseVector "curr_slack_x_U" with 0 elements:
-DenseVector "curr_z_L" with 0 elements:
-DenseVector "curr_z_U" with 0 elements:
-DenseVector "curr_slack_s_L" with 2 elements:
-curr_slack_s_L[    1]= 9.0531284822091385e-02
-curr_slack_s_L[    2]= 9.0531284822091385e-02
-DenseVector "curr_slack_s_U" with 2 elements:
-curr_slack_s_U[    1]= 9.0946871517790862e-01
-curr_slack_s_U[    2]= 9.0946871517790862e-01
-DenseVector "curr_v_L" with 2 elements:
-curr_v_L[    1]= 1.9468715177908611e+00
-curr_v_L[    2]= 1.9468715177908611e+00
-DenseVector "curr_v_U" with 2 elements:
-curr_v_U[    1]= 1.8235483315362766e-01
-curr_v_U[    2]= 1.8235483315362766e-01
+||delta_v_L||_inf = 2.3017903348682303e+01
+||delta_v_U||_inf = 0.0000000000000000e+00
 
 
 ***Current NLP Values for Iteration 1:
 
                                    (scaled)                 (unscaled)
-Objective...............:   1.9242606471874621e+00    1.9242606471874621e+00
-Dual infeasibility......:   9.7699626167013776e-15    9.7699626167013776e-15
-Constraint violation....:   2.2204460492503131e-16    2.2204460492503131e-16
-Complementarity.........:   1.7625277988914179e-01    1.7625277988914179e-01
-Overall NLP error.......:   1.7625277988914179e-01    1.7625277988914179e-01
+Objective...............:  -7.0211120241301046e+00   -7.0211120241301046e+00
+Dual infeasibility......:   1.7627590433607530e+01    1.7627590433607530e+01
+Constraint violation....:   9.6645990101039150e+00    9.6645990101039150e+00
+Complementarity.........:   5.0693260905320781e-01    5.0693260905320781e-01
+Overall NLP error.......:   1.7627590433607530e+01    1.7627590433607530e+01
 
-DenseVector "grad_f" with 78 elements:
-grad_f[    1]= 1.7242695604778659e-08
-grad_f[    2]= 1.7242695604778659e-08
-grad_f[    3]= 3.4485391209557311e-08
-grad_f[    4]= 3.4485391209557311e-08
-grad_f[    5]= 8.6213478023893270e-08
-grad_f[    6]= 8.6213478023893270e-08
-grad_f[    7]= 2.2415504286212250e-07
-grad_f[    8]= 2.2415504286212250e-07
-grad_f[    9]= 5.8625165056247430e-07
-grad_f[   10]= 5.8625165056247430e-07
-grad_f[   11]= 1.5345999088253000e-06
-grad_f[   12]= 1.5345999088253000e-06
-grad_f[   13]= 4.0175480759134252e-06
-grad_f[   14]= 4.0175480759134252e-06
-grad_f[   15]= 1.0518044318914979e-05
-grad_f[   16]= 1.0518044318914979e-05
-grad_f[   17]= 2.7536584880831493e-05
-grad_f[   18]= 2.7536584880831493e-05
-grad_f[   19]= 7.2091710323579536e-05
-grad_f[   20]= 7.2091710323579536e-05
-grad_f[   21]= 1.8873854608990705e-04
-grad_f[   22]= 1.8873854608990705e-04
-grad_f[   23]= 4.9412392794614176e-04
-grad_f[   24]= 4.9412392794614176e-04
-grad_f[   25]= 1.2936332377485177e-03
-grad_f[   26]= 1.2936332377485177e-03
-grad_f[   27]= 3.3867757852994109e-03
-grad_f[   28]= 3.3867757852994109e-03
-grad_f[   29]= 8.8666941181497171e-03
-grad_f[   30]= 8.8666941181497171e-03
-grad_f[   31]= 2.3213306569149737e-02
-grad_f[   32]= 2.3213306569149737e-02
-grad_f[   33]= 6.0773225589299477e-02
-grad_f[   34]= 6.0773225589299477e-02
-grad_f[   35]= 1.5910637019874868e-01
-grad_f[   36]= 1.5910637019874868e-01
-grad_f[   37]= 4.1654588500694689e-01
-grad_f[   38]= 4.1654588500694689e-01
-grad_f[   39]= 1.0905312848220914e+00
-grad_f[   40]= 1.0905312848220914e+00
-grad_f[   41]= 1.7242695604778655e-08
-grad_f[   42]= 1.7242695604778655e-08
-grad_f[   43]= 5.1728086814335973e-08
-grad_f[   44]= 5.1728086814335973e-08
-grad_f[   45]= 1.3794156483822924e-07
-grad_f[   46]= 1.3794156483822924e-07
-grad_f[   47]= 3.6209660770035180e-07
-grad_f[   48]= 3.6209660770035180e-07
-grad_f[   49]= 9.4834825826282588e-07
-grad_f[   50]= 9.4834825826282588e-07
-grad_f[   51]= 2.4829481670881261e-06
-grad_f[   52]= 2.4829481670881261e-06
-grad_f[   53]= 6.5004962430015525e-06
-grad_f[   54]= 6.5004962430015525e-06
-grad_f[   55]= 1.7018540561916534e-05
-grad_f[   56]= 1.7018540561916534e-05
-grad_f[   57]= 4.4555125442748029e-05
-grad_f[   58]= 4.4555125442748029e-05
-grad_f[   59]= 1.1664683576632756e-04
-grad_f[   60]= 1.1664683576632756e-04
-grad_f[   61]= 3.0538538185623465e-04
-grad_f[   62]= 3.0538538185623465e-04
-grad_f[   63]= 7.9950930980237614e-04
-grad_f[   64]= 7.9950930980237614e-04
-grad_f[   65]= 2.0931425475508936e-03
-grad_f[   66]= 2.0931425475508936e-03
-grad_f[   67]= 5.4799183328503049e-03
-grad_f[   68]= 5.4799183328503049e-03
-grad_f[   69]= 1.4346612451000020e-02
-grad_f[   70]= 1.4346612451000020e-02
-grad_f[   71]= 3.7559919020149747e-02
-grad_f[   72]= 3.7559919020149747e-02
-grad_f[   73]= 9.8333144609449225e-02
-grad_f[   74]= 9.8333144609449225e-02
-grad_f[   75]= 2.5743951480819804e-01
-grad_f[   76]= 2.5743951480819804e-01
-grad_f[   77]= 6.7398539981514460e-01
-grad_f[   78]= 6.7398539981514460e-01
-DenseVector "curr_c" with 38 elements:
-curr_c[    1]= 0.0000000000000000e+00
-curr_c[    2]= 0.0000000000000000e+00
-curr_c[    3]= 1.3234889800848443e-23
-curr_c[    4]= 1.3234889800848443e-23
-curr_c[    5]= 0.0000000000000000e+00
-curr_c[    6]= 0.0000000000000000e+00
-curr_c[    7]= 0.0000000000000000e+00
-curr_c[    8]= 0.0000000000000000e+00
-curr_c[    9]= 2.1175823681357508e-22
-curr_c[   10]= 2.1175823681357508e-22
-curr_c[   11]= 8.4703294725430034e-22
-curr_c[   12]= 8.4703294725430034e-22
-curr_c[   13]=-1.6940658945086007e-21
-curr_c[   14]=-1.6940658945086007e-21
-curr_c[   15]= 2.0328790734103208e-20
-curr_c[   16]= 2.0328790734103208e-20
-curr_c[   17]=-1.3552527156068805e-20
-curr_c[   18]=-1.3552527156068805e-20
-curr_c[   19]= 5.4210108624275222e-20
-curr_c[   20]= 5.4210108624275222e-20
-curr_c[   21]= 0.0000000000000000e+00
-curr_c[   22]= 0.0000000000000000e+00
-curr_c[   23]= 2.1684043449710089e-19
-curr_c[   24]= 2.1684043449710089e-19
-curr_c[   25]= 4.3368086899420177e-19
-curr_c[   26]= 4.3368086899420177e-19
-curr_c[   27]=-1.7347234759768071e-18
-curr_c[   28]=-1.7347234759768071e-18
-curr_c[   29]= 0.0000000000000000e+00
-curr_c[   30]= 0.0000000000000000e+00
-curr_c[   31]= 6.9388939039072284e-18
-curr_c[   32]= 6.9388939039072284e-18
-curr_c[   33]= 2.7755575615628914e-17
-curr_c[   34]= 2.7755575615628914e-17
-curr_c[   35]=-1.6653345369377348e-16
-curr_c[   36]=-1.6653345369377348e-16
-curr_c[   37]= 2.2204460492503131e-16
-curr_c[   38]= 2.2204460492503131e-16
-DenseVector "curr_d" with 2 elements:
-curr_d[    1]= 1.0905312848220914e+00
-curr_d[    2]= 1.0905312848220914e+00
-DenseVector "curr_d - curr_s" with 2 elements:
-curr_d - curr_s[    1]= 0.0000000000000000e+00
-curr_d - curr_s[    2]= 0.0000000000000000e+00
 
 
 
@@ -865,12 +244,8 @@ curr_d - curr_s[    2]= 0.0000000000000000e+00
 *** Update Barrier Parameter for Iteration 1:
 **************************************************
 
-Optimality Error for Barrier Sub-problem = 7.625278e-02
-  sub_problem_error < kappa_eps * mu (1.000000e+00)
-Updating mu=   1.0000000000000001e-01 and tau=   9.8999999999999999e-01 to new_mu=   2.0000000000000004e-02 and new_tau=   9.8999999999999999e-01
-  sub_problem_error < kappa_eps * mu (2.000000e-01)
-Updating mu=   2.0000000000000004e-02 and tau=   9.8999999999999999e-01 to new_mu=   2.8284271247461909e-03 and new_tau=   9.9717157287525382e-01
-Barrier Parameter: 2.828427e-03
+Optimality Error for Barrier Sub-problem = 1.762759e+01
+Barrier Parameter: 1.000000e-01
 
 **************************************************
 *** Solving the Primal Dual System for Iteration 1:
@@ -878,67 +253,66 @@ Barrier Parameter: 2.828427e-03
 
 Solving system with delta_x=0.000000e+00 delta_s=0.000000e+00
                     delta_c=0.000000e+00 delta_d=0.000000e+00
-Calling MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.002).
-Done with MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.002).
-Number of doubles for MUMPS to hold factorization (INFO(9)) = 392
-Number of integers for MUMPS to hold factorization (INFO(10)) = 1468
-Calling MUMPS-3 for solve at cpu time      0.257 (wall      0.002).
-Done with MUMPS-3 for solve at cpu time      0.257 (wall      0.002).
+Calling MUMPS-2 for numerical factorization at cpu time      0.192 (wall      0.001).
+Done with MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.001).
+Number of doubles for MUMPS to hold factorization (INFO(9)) = 519
+Number of integers for MUMPS to hold factorization (INFO(10)) = 1714
+Calling MUMPS-3 for solve at cpu time      0.193 (wall      0.001).
+Done with MUMPS-3 for solve at cpu time      0.193 (wall      0.001).
 Factorization successful.
 Number of trial factorizations performed: 1
 Perturbation parameters: delta_x=0.000000e+00 delta_s=0.000000e+00
                          delta_c=0.000000e+00 delta_d=0.000000e+00
-max-norm resid_x  2.081668e-16
-max-norm resid_s  2.775558e-17
-max-norm resid_c  1.387779e-17
+max-norm resid_x  5.258638e-11
+max-norm resid_s  5.920597e-12
+max-norm resid_c  2.538768e-15
 max-norm resid_d  0.000000e+00
 max-norm resid_zL 0.000000e+00
 max-norm resid_zU 0.000000e+00
-max-norm resid_vL 0.000000e+00
+max-norm resid_vL 3.469447e-18
 max-norm resid_vU 0.000000e+00
-nrm_rhs = 1.73e-01 nrm_sol = 3.15e-01 nrm_resid = 2.08e-16
-residual_ratio = 4.265227e-16
+nrm_rhs = 1.76e+01 nrm_sol = 2.26e+01 nrm_resid = 5.26e-11
+residual_ratio = 1.307424e-12
 
 **************************************************
 *** Finding Acceptable Trial Point for Iteration 1:
 **************************************************
 
 --> Starting line search in iteration 1 <--
-Mu has changed in line search - resetting watchdog counters.
 Acceptable Check:
-  overall_error =  1.7625277988914179e-01   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  9.7699626167013776e-15   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  2.2204460492503131e-16   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  1.7625277988914179e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
-  curr_obj_val_ =  1.9242606471874621e+00   last_obj_val                =  0.0000000000000000e+00
+  overall_error =  1.7627590433607530e+01   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  1.7627590433607530e+01   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  9.6645990101039150e+00   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  5.0693260905320781e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ = -7.0211120241301046e+00   last_obj_val                =  0.0000000000000000e+00
   fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.0000000000000000e+00 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 1
 The current filter has 0 entries.
-Relative step size for delta_x = 3.561192e-02
-minimal step size ALPHA_MIN = 1.646741E-24
+Relative step size for delta_x = 7.240189e+00
+minimal step size ALPHA_MIN = 5.000000E-07
 Starting checks for alpha (primal) = 1.00e+00
 Checking acceptability for trial step size alpha_primal_test= 1.000000e+00:
-  New values of barrier function     =  1.6939539919534716e+00  (reference  1.9383855547417175e+00):
-  New values of constraint violation =  5.6064541678500703e-17  (reference  8.5149726087258373e-16):
-reference_theta = 8.514973e-16 reference_gradBarrTDelta = -2.585401e-01
-Checking Armijo Condition...
+  New values of barrier function     =  1.9951926836904611e+03  (reference  7.2282548453339412e-01):
+  New values of constraint violation =  2.8421709430404007e-14  (reference  1.8461294109298473e+02):
+reference_theta = 1.846129e+02 reference_gradBarrTDelta = 2.373374e+02
+Checking sufficient reduction...
 Succeeded...
 Checking filter acceptability...
 Succeeded...
-reference_theta = 8.514973e-16 reference_gradBarrTDelta = -2.585401e-01
+reference_theta = 1.846129e+02 reference_gradBarrTDelta = 2.373374e+02
 Convergence Check:
-  overall_error =  2.6573462936526043e-02   IpData().tol()   =  1.0000000000000001e-05
-  dual_inf      =  7.6511273130621671e-03   dual_inf_tol_    =  1.0000000000000000e+00
-  constr_viol   =  2.7755575615628914e-17   constr_viol_tol_ =  1.0000000000000000e-04
-  compl_inf     =  2.6573462936526043e-02   compl_inf_tol_   =  1.0000000000000000e-04
+  overall_error =  1.1468401466245885e-01   IpData().tol()   =  1.0000000000000001e-05
+  dual_inf      =  1.0000010952637695e-06   dual_inf_tol_    =  1.0000000000000000e+00
+  constr_viol   =  3.5527136788005009e-15   constr_viol_tol_ =  1.0000000000000000e-04
+  compl_inf     =  1.1468401466245885e-01   compl_inf_tol_   =  1.0000000000000000e-04
 obj val update iter = 2
 Acceptable Check:
-  overall_error =  2.6573462936526043e-02   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  7.6511273130621671e-03   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  2.7755575615628914e-17   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  2.6573462936526043e-02   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
-  curr_obj_val_ =  1.6704996621187178e+00   last_obj_val                =  1.9242606471874621e+00
-  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.5190723519626204e-01 acceptable_obj_change_tol_ =  1.0000000000000000e+20
+  overall_error =  1.1468401466245885e-01   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  1.0000010952637695e-06   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  3.5527136788005009e-15   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  1.1468401466245885e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ =  1.9839364091271730e+03   last_obj_val                = -7.0211120241301046e+00
+  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.0035389803785189e+00 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 2
 
 **************************************************
@@ -952,307 +326,43 @@ test iter = 2
 **************************************************
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   2  1.6704997e+00 2.78e-17 7.65e-03  -2.5 7.44e-02    -  9.36e-01 1.00e+00f  1 Nhj 
+   2  1.9839364e+03 3.55e-15 1.00e-06  -1.0 9.67e+00    -  1.00e+00 1.00e+00h  1 Nhj 
 
 **************************************************
 *** Beginning Iteration 2 from the following point:
 **************************************************
 
-Current barrier parameter mu = 2.8284271247461909e-03
-Current fraction-to-the-boundary parameter tau = 9.9717157287525382e-01
+Current barrier parameter mu = 1.0000000000000001e-01
+Current fraction-to-the-boundary parameter tau = 9.8999999999999999e-01
 
-||curr_x||_inf   = 1.0160834460734920e+00
-||curr_s||_inf   = 1.0160834460734920e+00
-||curr_y_c||_inf = 6.2797410507953877e-01
-||curr_y_d||_inf = 1.6440575511530306e+00
+||curr_x||_inf   = 1.0003956789946304e+01
+||curr_s||_inf   = 1.0003956789946304e+01
+||curr_y_c||_inf = 1.7180339871687668e+01
+||curr_y_d||_inf = 2.8984103847313108e+01
 ||curr_z_L||_inf = 0.0000000000000000e+00
 ||curr_z_U||_inf = 0.0000000000000000e+00
-||curr_v_L||_inf = 1.6522244558225132e+00
-||curr_v_U||_inf = 5.1577735642027722e-04
+||curr_v_L||_inf = 2.8984104847307187e+01
+||curr_v_U||_inf = 0.0000000000000000e+00
 
-||delta_x||_inf   = 7.4447838748599324e-02
-||delta_s||_inf   = 7.4447838748599324e-02
-||delta_y_c||_inf = 4.6011294735606029e-02
-||delta_y_d||_inf = 1.2045913348421267e-01
+||delta_x||_inf   = 9.6685558000502194e+00
+||delta_s||_inf   = 2.5660750080680472e-02
+||delta_y_c||_inf = 8.4336385767383035e+00
+||delta_y_d||_inf = 2.2593790932238335e+01
 ||delta_z_L||_inf = 0.0000000000000000e+00
 ||delta_z_U||_inf = 0.0000000000000000e+00
-||delta_v_L||_inf = 3.1463130120859739e-01
-||delta_v_U||_inf = 1.9417216772439452e-01
-DenseVector "curr_x" with 78 elements:
-curr_x[    1]= 1.6065579973304421e-08
-curr_x[    2]= 1.6065579973304421e-08
-curr_x[    3]= 3.2131159946608836e-08
-curr_x[    4]= 3.2131159946608836e-08
-curr_x[    5]= 8.0327899866522097e-08
-curr_x[    6]= 8.0327899866522097e-08
-curr_x[    7]= 2.0885253965295744e-07
-curr_x[    8]= 2.0885253965295744e-07
-curr_x[    9]= 5.4622971909235028e-07
-curr_x[   10]= 5.4622971909235028e-07
-curr_x[   11]= 1.4298366176240932e-06
-curr_x[   12]= 1.4298366176240932e-06
-curr_x[   13]= 3.7432801337799298e-06
-curr_x[   14]= 3.7432801337799298e-06
-curr_x[   15]= 9.8000037837156955e-06
-curr_x[   16]= 9.8000037837156955e-06
-curr_x[   17]= 2.5656731217367160e-05
-curr_x[   18]= 2.5656731217367160e-05
-curr_x[   19]= 6.7170189868385780e-05
-curr_x[   20]= 6.7170189868385780e-05
-curr_x[   21]= 1.7585383838779019e-04
-curr_x[   22]= 1.7585383838779019e-04
-curr_x[   23]= 4.6039132529498484e-04
-curr_x[   24]= 4.6039132529498484e-04
-curr_x[   25]= 1.2053201374971644e-03
-curr_x[   26]= 1.2053201374971644e-03
-curr_x[   27]= 3.1555690871965083e-03
-curr_x[   28]= 3.1555690871965083e-03
-curr_x[   29]= 8.2613871240923599e-03
-curr_x[   30]= 8.2613871240923599e-03
-curr_x[   31]= 2.1628592285080572e-02
-curr_x[   32]= 2.1628592285080572e-02
-curr_x[   33]= 5.6624389731149354e-02
-curr_x[   34]= 5.6624389731149354e-02
-curr_x[   35]= 1.4824457690836751e-01
-curr_x[   36]= 1.4824457690836751e-01
-curr_x[   37]= 3.8810934099395317e-01
-curr_x[   38]= 3.8810934099395317e-01
-curr_x[   39]= 1.0160834460734920e+00
-curr_x[   40]= 1.0160834460734920e+00
-curr_x[   41]= 1.6065579973304421e-08
-curr_x[   42]= 1.6065579973304421e-08
-curr_x[   43]= 4.8196739919913261e-08
-curr_x[   44]= 4.8196739919913261e-08
-curr_x[   45]= 1.2852463978643537e-07
-curr_x[   46]= 1.2852463978643537e-07
-curr_x[   47]= 3.3737717943939279e-07
-curr_x[   48]= 3.3737717943939279e-07
-curr_x[   49]= 8.8360689853174296e-07
-curr_x[   50]= 8.8360689853174296e-07
-curr_x[   51]= 2.3134435161558363e-06
-curr_x[   52]= 2.3134435161558363e-06
-curr_x[   53]= 6.0567236499357669e-06
-curr_x[   54]= 6.0567236499357669e-06
-curr_x[   55]= 1.5856727433651461e-05
-curr_x[   56]= 1.5856727433651461e-05
-curr_x[   57]= 4.1513458651018620e-05
-curr_x[   58]= 4.1513458651018620e-05
-curr_x[   59]= 1.0868364851940440e-04
-curr_x[   60]= 1.0868364851940440e-04
-curr_x[   61]= 2.8453748690719459e-04
-curr_x[   62]= 2.8453748690719459e-04
-curr_x[   63]= 7.4492881220217938e-04
-curr_x[   64]= 7.4492881220217938e-04
-curr_x[   65]= 1.9502489496993438e-03
-curr_x[   66]= 1.9502489496993438e-03
-curr_x[   67]= 5.1058180368958516e-03
-curr_x[   68]= 5.1058180368958516e-03
-curr_x[   69]= 1.3367205160988211e-02
-curr_x[   70]= 1.3367205160988211e-02
-curr_x[   71]= 3.4995797446068781e-02
-curr_x[   72]= 3.4995797446068781e-02
-curr_x[   73]= 9.1620187177218135e-02
-curr_x[   74]= 9.1620187177218135e-02
-curr_x[   75]= 2.3986476408558566e-01
-curr_x[   76]= 2.3986476408558566e-01
-curr_x[   77]= 6.2797410507953877e-01
-curr_x[   78]= 6.2797410507953877e-01
-DenseVector "curr_s" with 2 elements:
-curr_s[    1]= 1.0160834460734920e+00
-curr_s[    2]= 1.0160834460734920e+00
-DenseVector "curr_y_c" with 38 elements:
-curr_y_c[    1]=-1.6065579973304421e-08
-curr_y_c[    2]=-1.6065579973304421e-08
-curr_y_c[    3]=-4.8196739919913261e-08
-curr_y_c[    4]=-4.8196739919913261e-08
-curr_y_c[    5]=-1.2852463978643537e-07
-curr_y_c[    6]=-1.2852463978643537e-07
-curr_y_c[    7]=-3.3737717943939279e-07
-curr_y_c[    8]=-3.3737717943939279e-07
-curr_y_c[    9]=-8.8360689853174307e-07
-curr_y_c[   10]=-8.8360689853174307e-07
-curr_y_c[   11]=-2.3134435161558363e-06
-curr_y_c[   12]=-2.3134435161558363e-06
-curr_y_c[   13]=-6.0567236499357669e-06
-curr_y_c[   14]=-6.0567236499357669e-06
-curr_y_c[   15]=-1.5856727433651461e-05
-curr_y_c[   16]=-1.5856727433651461e-05
-curr_y_c[   17]=-4.1513458651018620e-05
-curr_y_c[   18]=-4.1513458651018620e-05
-curr_y_c[   19]=-1.0868364851940440e-04
-curr_y_c[   20]=-1.0868364851940440e-04
-curr_y_c[   21]=-2.8453748690719459e-04
-curr_y_c[   22]=-2.8453748690719459e-04
-curr_y_c[   23]=-7.4492881220217938e-04
-curr_y_c[   24]=-7.4492881220217938e-04
-curr_y_c[   25]=-1.9502489496993438e-03
-curr_y_c[   26]=-1.9502489496993438e-03
-curr_y_c[   27]=-5.1058180368958516e-03
-curr_y_c[   28]=-5.1058180368958516e-03
-curr_y_c[   29]=-1.3367205160988211e-02
-curr_y_c[   30]=-1.3367205160988211e-02
-curr_y_c[   31]=-3.4995797446068781e-02
-curr_y_c[   32]=-3.4995797446068781e-02
-curr_y_c[   33]=-9.1620187177218135e-02
-curr_y_c[   34]=-9.1620187177218135e-02
-curr_y_c[   35]=-2.3986476408558566e-01
-curr_y_c[   36]=-2.3986476408558566e-01
-curr_y_c[   37]=-6.2797410507953877e-01
-curr_y_c[   38]=-6.2797410507953877e-01
-DenseVector "curr_y_d" with 2 elements:
-curr_y_d[    1]=-1.6440575511530306e+00
-curr_y_d[    2]=-1.6440575511530306e+00
-DenseVector "curr_slack_x_L" with 0 elements:
-DenseVector "curr_slack_x_U" with 0 elements:
-DenseVector "curr_z_L" with 0 elements:
-DenseVector "curr_z_U" with 0 elements:
-DenseVector "curr_slack_s_L" with 2 elements:
-curr_slack_s_L[    1]= 1.6083446073491992e-02
-curr_slack_s_L[    2]= 1.6083446073491992e-02
-DenseVector "curr_slack_s_U" with 2 elements:
-curr_slack_s_U[    1]= 9.8391655392650801e-01
-curr_slack_s_U[    2]= 9.8391655392650801e-01
-DenseVector "curr_v_L" with 2 elements:
-curr_v_L[    1]= 1.6522244558225132e+00
-curr_v_L[    2]= 1.6522244558225132e+00
-DenseVector "curr_v_U" with 2 elements:
-curr_v_U[    1]= 5.1577735642027722e-04
-curr_v_U[    2]= 5.1577735642027722e-04
+||delta_v_L||_inf = 4.9662014986248852e+00
+||delta_v_U||_inf = 0.0000000000000000e+00
 
 
 ***Current NLP Values for Iteration 2:
 
                                    (scaled)                 (unscaled)
-Objective...............:   1.6704996621187178e+00    1.6704996621187178e+00
-Dual infeasibility......:   7.6511273130621671e-03    7.6511273130621671e-03
-Constraint violation....:   2.7755575615628914e-17    2.7755575615628914e-17
-Complementarity.........:   2.6573462936526043e-02    2.6573462936526043e-02
-Overall NLP error.......:   2.6573462936526043e-02    2.6573462936526043e-02
+Objective...............:   1.9839364091271730e+03    1.9839364091271730e+03
+Dual infeasibility......:   1.0000010952637695e-06    1.0000010952637695e-06
+Constraint violation....:   3.5527136788005009e-15    3.5527136788005009e-15
+Complementarity.........:   1.1468401466245885e-01    1.1468401466245885e-01
+Overall NLP error.......:   1.1468401466245885e-01    1.1468401466245885e-01
 
-DenseVector "grad_f" with 78 elements:
-grad_f[    1]= 1.6065579973304421e-08
-grad_f[    2]= 1.6065579973304421e-08
-grad_f[    3]= 3.2131159946608836e-08
-grad_f[    4]= 3.2131159946608836e-08
-grad_f[    5]= 8.0327899866522097e-08
-grad_f[    6]= 8.0327899866522097e-08
-grad_f[    7]= 2.0885253965295744e-07
-grad_f[    8]= 2.0885253965295744e-07
-grad_f[    9]= 5.4622971909235028e-07
-grad_f[   10]= 5.4622971909235028e-07
-grad_f[   11]= 1.4298366176240932e-06
-grad_f[   12]= 1.4298366176240932e-06
-grad_f[   13]= 3.7432801337799298e-06
-grad_f[   14]= 3.7432801337799298e-06
-grad_f[   15]= 9.8000037837156955e-06
-grad_f[   16]= 9.8000037837156955e-06
-grad_f[   17]= 2.5656731217367160e-05
-grad_f[   18]= 2.5656731217367160e-05
-grad_f[   19]= 6.7170189868385780e-05
-grad_f[   20]= 6.7170189868385780e-05
-grad_f[   21]= 1.7585383838779019e-04
-grad_f[   22]= 1.7585383838779019e-04
-grad_f[   23]= 4.6039132529498484e-04
-grad_f[   24]= 4.6039132529498484e-04
-grad_f[   25]= 1.2053201374971644e-03
-grad_f[   26]= 1.2053201374971644e-03
-grad_f[   27]= 3.1555690871965083e-03
-grad_f[   28]= 3.1555690871965083e-03
-grad_f[   29]= 8.2613871240923599e-03
-grad_f[   30]= 8.2613871240923599e-03
-grad_f[   31]= 2.1628592285080572e-02
-grad_f[   32]= 2.1628592285080572e-02
-grad_f[   33]= 5.6624389731149354e-02
-grad_f[   34]= 5.6624389731149354e-02
-grad_f[   35]= 1.4824457690836751e-01
-grad_f[   36]= 1.4824457690836751e-01
-grad_f[   37]= 3.8810934099395317e-01
-grad_f[   38]= 3.8810934099395317e-01
-grad_f[   39]= 1.0160834460734920e+00
-grad_f[   40]= 1.0160834460734920e+00
-grad_f[   41]= 1.6065579973304421e-08
-grad_f[   42]= 1.6065579973304421e-08
-grad_f[   43]= 4.8196739919913261e-08
-grad_f[   44]= 4.8196739919913261e-08
-grad_f[   45]= 1.2852463978643537e-07
-grad_f[   46]= 1.2852463978643537e-07
-grad_f[   47]= 3.3737717943939279e-07
-grad_f[   48]= 3.3737717943939279e-07
-grad_f[   49]= 8.8360689853174296e-07
-grad_f[   50]= 8.8360689853174296e-07
-grad_f[   51]= 2.3134435161558363e-06
-grad_f[   52]= 2.3134435161558363e-06
-grad_f[   53]= 6.0567236499357669e-06
-grad_f[   54]= 6.0567236499357669e-06
-grad_f[   55]= 1.5856727433651461e-05
-grad_f[   56]= 1.5856727433651461e-05
-grad_f[   57]= 4.1513458651018620e-05
-grad_f[   58]= 4.1513458651018620e-05
-grad_f[   59]= 1.0868364851940440e-04
-grad_f[   60]= 1.0868364851940440e-04
-grad_f[   61]= 2.8453748690719459e-04
-grad_f[   62]= 2.8453748690719459e-04
-grad_f[   63]= 7.4492881220217938e-04
-grad_f[   64]= 7.4492881220217938e-04
-grad_f[   65]= 1.9502489496993438e-03
-grad_f[   66]= 1.9502489496993438e-03
-grad_f[   67]= 5.1058180368958516e-03
-grad_f[   68]= 5.1058180368958516e-03
-grad_f[   69]= 1.3367205160988211e-02
-grad_f[   70]= 1.3367205160988211e-02
-grad_f[   71]= 3.4995797446068781e-02
-grad_f[   72]= 3.4995797446068781e-02
-grad_f[   73]= 9.1620187177218135e-02
-grad_f[   74]= 9.1620187177218135e-02
-grad_f[   75]= 2.3986476408558566e-01
-grad_f[   76]= 2.3986476408558566e-01
-grad_f[   77]= 6.2797410507953877e-01
-grad_f[   78]= 6.2797410507953877e-01
-DenseVector "curr_c" with 38 elements:
-curr_c[    1]= 6.6174449004242214e-24
-curr_c[    2]= 6.6174449004242214e-24
-curr_c[    3]= 0.0000000000000000e+00
-curr_c[    4]= 0.0000000000000000e+00
-curr_c[    5]= 2.6469779601696886e-23
-curr_c[    6]= 2.6469779601696886e-23
-curr_c[    7]=-1.0587911840678754e-22
-curr_c[    8]=-1.0587911840678754e-22
-curr_c[    9]= 0.0000000000000000e+00
-curr_c[   10]= 0.0000000000000000e+00
-curr_c[   11]=-4.2351647362715017e-22
-curr_c[   12]=-4.2351647362715017e-22
-curr_c[   13]= 1.6940658945086007e-21
-curr_c[   14]= 1.6940658945086007e-21
-curr_c[   15]=-3.3881317890172014e-21
-curr_c[   16]=-3.3881317890172014e-21
-curr_c[   17]= 0.0000000000000000e+00
-curr_c[   18]= 0.0000000000000000e+00
-curr_c[   19]= 0.0000000000000000e+00
-curr_c[   20]= 0.0000000000000000e+00
-curr_c[   21]=-5.4210108624275222e-20
-curr_c[   22]=-5.4210108624275222e-20
-curr_c[   23]=-2.1684043449710089e-19
-curr_c[   24]=-2.1684043449710089e-19
-curr_c[   25]= 0.0000000000000000e+00
-curr_c[   26]= 0.0000000000000000e+00
-curr_c[   27]= 0.0000000000000000e+00
-curr_c[   28]= 0.0000000000000000e+00
-curr_c[   29]= 0.0000000000000000e+00
-curr_c[   30]= 0.0000000000000000e+00
-curr_c[   31]= 0.0000000000000000e+00
-curr_c[   32]= 0.0000000000000000e+00
-curr_c[   33]=-2.7755575615628914e-17
-curr_c[   34]=-2.7755575615628914e-17
-curr_c[   35]= 0.0000000000000000e+00
-curr_c[   36]= 0.0000000000000000e+00
-curr_c[   37]= 0.0000000000000000e+00
-curr_c[   38]= 0.0000000000000000e+00
-DenseVector "curr_d" with 2 elements:
-curr_d[    1]= 1.0160834460734920e+00
-curr_d[    2]= 1.0160834460734920e+00
-DenseVector "curr_d - curr_s" with 2 elements:
-curr_d - curr_s[    1]= 0.0000000000000000e+00
-curr_d - curr_s[    2]= 0.0000000000000000e+00
 
 
 
@@ -1260,10 +370,12 @@ curr_d - curr_s[    2]= 0.0000000000000000e+00
 *** Update Barrier Parameter for Iteration 2:
 **************************************************
 
-Optimality Error for Barrier Sub-problem = 2.374504e-02
-  sub_problem_error < kappa_eps * mu (2.828427e-02)
-Updating mu=   2.8284271247461909e-03 and tau=   9.9717157287525382e-01 to new_mu=   1.5042412372345582e-04 and new_tau=   9.9984957587627654e-01
-Barrier Parameter: 1.504241e-04
+Optimality Error for Barrier Sub-problem = 3.837074e-02
+  sub_problem_error < kappa_eps * mu (1.000000e+00)
+Updating mu=   1.0000000000000001e-01 and tau=   9.8999999999999999e-01 to new_mu=   2.0000000000000004e-02 and new_tau=   9.8999999999999999e-01
+  sub_problem_error < kappa_eps * mu (2.000000e-01)
+Updating mu=   2.0000000000000004e-02 and tau=   9.8999999999999999e-01 to new_mu=   2.8284271247461909e-03 and new_tau=   9.9717157287525382e-01
+Barrier Parameter: 2.828427e-03
 
 **************************************************
 *** Solving the Primal Dual System for Iteration 2:
@@ -1271,26 +383,26 @@ Barrier Parameter: 1.504241e-04
 
 Solving system with delta_x=0.000000e+00 delta_s=0.000000e+00
                     delta_c=0.000000e+00 delta_d=0.000000e+00
-Calling MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.002).
-Done with MUMPS-2 for numerical factorization at cpu time      0.257 (wall      0.002).
-Number of doubles for MUMPS to hold factorization (INFO(9)) = 392
-Number of integers for MUMPS to hold factorization (INFO(10)) = 1468
-Calling MUMPS-3 for solve at cpu time      0.257 (wall      0.002).
-Done with MUMPS-3 for solve at cpu time      0.257 (wall      0.002).
+Calling MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.001).
+Done with MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.001).
+Number of doubles for MUMPS to hold factorization (INFO(9)) = 519
+Number of integers for MUMPS to hold factorization (INFO(10)) = 1714
+Calling MUMPS-3 for solve at cpu time      0.193 (wall      0.001).
+Done with MUMPS-3 for solve at cpu time      0.193 (wall      0.001).
 Factorization successful.
 Number of trial factorizations performed: 1
 Perturbation parameters: delta_x=0.000000e+00 delta_s=0.000000e+00
                          delta_c=0.000000e+00 delta_d=0.000000e+00
-max-norm resid_x  9.020562e-17
-max-norm resid_s  1.387779e-17
-max-norm resid_c  1.734723e-18
+max-norm resid_x  5.965714e-15
+max-norm resid_s  4.829470e-15
+max-norm resid_c  3.944305e-31
 max-norm resid_d  0.000000e+00
 max-norm resid_zL 0.000000e+00
 max-norm resid_zU 0.000000e+00
 max-norm resid_vL 0.000000e+00
 max-norm resid_vU 0.000000e+00
-nrm_rhs = 2.64e-02 nrm_sol = 3.34e-02 nrm_resid = 9.02e-17
-residual_ratio = 1.508559e-15
+nrm_rhs = 1.12e-01 nrm_sol = 4.15e-02 nrm_resid = 5.97e-15
+residual_ratio = 3.889538e-14
 
 **************************************************
 *** Finding Acceptable Trial Point for Iteration 2:
@@ -1299,39 +411,39 @@ residual_ratio = 1.508559e-15
 --> Starting line search in iteration 2 <--
 Mu has changed in line search - resetting watchdog counters.
 Acceptable Check:
-  overall_error =  2.6573462936526043e-02   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  7.6511273130621671e-03   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  2.7755575615628914e-17   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  2.6573462936526043e-02   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
-  curr_obj_val_ =  1.6704996621187178e+00   last_obj_val                =  1.9242606471874621e+00
-  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.5190723519626204e-01 acceptable_obj_change_tol_ =  1.0000000000000000e+20
+  overall_error =  1.1468401466245885e-01   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  1.0000010952637695e-06   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  3.5527136788005009e-15   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  1.1468401466245885e-01   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ =  1.9839364091271730e+03   last_obj_val                = -7.0211120241301046e+00
+  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  1.0035389803785189e+00 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 2
 The current filter has 0 entries.
-Relative step size for delta_x = 7.771274e-03
-minimal step size ALPHA_MIN = 5.472019E-25
+Relative step size for delta_x = 1.121154e-02
+minimal step size ALPHA_MIN = 1.152980E-23
 Starting checks for alpha (primal) = 1.00e+00
 Checking acceptability for trial step size alpha_primal_test= 1.000000e+00:
-  New values of barrier function     =  1.6217224195682169e+00  (reference  1.6717470327799755e+00):
-  New values of constraint violation =  4.5108591375261995e-16  (reference  5.6064541678500703e-17):
-reference_theta = 5.606454e-17 reference_gradBarrTDelta = -5.122839e-02
+  New values of barrier function     =  1.9831463319300242e+03  (reference  1.9842547846501568e+03):
+  New values of constraint violation =  2.5979218776228663e-14  (reference  2.8421709430404007e-14):
+reference_theta = 2.842171e-14 reference_gradBarrTDelta = -1.232533e+00
 Checking Armijo Condition...
 Succeeded...
 Checking filter acceptability...
 Succeeded...
-reference_theta = 5.606454e-17 reference_gradBarrTDelta = -5.122839e-02
+reference_theta = 2.842171e-14 reference_gradBarrTDelta = -1.232533e+00
 Convergence Check:
-  overall_error =  6.7329438707820863e-04   IpData().tol()   =  1.0000000000000001e-05
-  dual_inf      =  3.4694469519536142e-18   dual_inf_tol_    =  1.0000000000000000e+00
-  constr_viol   =  2.2204460492503131e-16   constr_viol_tol_ =  1.0000000000000000e-04
-  compl_inf     =  6.7329438707820863e-04   compl_inf_tol_   =  1.0000000000000000e-04
+  overall_error =  3.7706462351868157e-03   IpData().tol()   =  1.0000000000000001e-05
+  dual_inf      =  2.8284276254453289e-08   dual_inf_tol_    =  1.0000000000000000e+00
+  constr_viol   =  1.7763568394002505e-15   constr_viol_tol_ =  1.0000000000000000e-04
+  compl_inf     =  3.7706462351868157e-03   compl_inf_tol_   =  1.0000000000000000e-04
 obj val update iter = 3
 Acceptable Check:
-  overall_error =  6.7329438707820863e-04   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  3.4694469519536142e-18   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  2.2204460492503131e-16   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  6.7329438707820863e-04   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
-  curr_obj_val_ =  1.6193801772975545e+00   last_obj_val                =  1.6704996621187178e+00
-  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  3.1567315407350673e-02 acceptable_obj_change_tol_ =  1.0000000000000000e+20
+  overall_error =  3.7706462351868157e-03   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  2.8284276254453289e-08   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  1.7763568394002505e-15   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  3.7706462351868157e-03   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ =  1.9826503051540221e+03   last_obj_val                =  1.9839364091271730e+03
+  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  6.4867917948390754e-04 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 3
 
 **************************************************
@@ -1345,307 +457,43 @@ test iter = 3
 **************************************************
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   3  1.6193802e+00 2.22e-16 3.47e-18  -3.8 1.57e-02    -  1.00e+00 1.00e+00f  1 
+   3  1.9826503e+03 1.78e-15 2.83e-08  -2.5 2.27e-02    -  1.00e+00 1.00e+00f  1 
 
 **************************************************
 *** Beginning Iteration 3 from the following point:
 **************************************************
 
-Current barrier parameter mu = 1.5042412372345582e-04
-Current fraction-to-the-boundary parameter tau = 9.9984957587627654e-01
+Current barrier parameter mu = 2.8284271247461909e-03
+Current fraction-to-the-boundary parameter tau = 9.9717157287525382e-01
 
-||curr_x||_inf   = 1.0004159086488578e+00
-||curr_s||_inf   = 1.0004159086488578e+00
-||curr_y_c||_inf = 6.1829103443110378e-01
-||curr_y_d||_inf = 1.6187069430799614e+00
+||curr_x||_inf   = 1.0000149403663411e+01
+||curr_s||_inf   = 1.0000149403663411e+01
+||curr_y_c||_inf = 1.7180339871687668e+01
+||curr_y_d||_inf = 2.8998888662229039e+01
 ||curr_z_L||_inf = 0.0000000000000000e+00
 ||curr_z_U||_inf = 0.0000000000000000e+00
-||curr_v_L||_inf = 1.6188516130340556e+00
-||curr_v_U||_inf = 1.4466995409408905e-04
+||curr_v_L||_inf = 2.8998888690513315e+01
+||curr_v_U||_inf = 0.0000000000000000e+00
 
-||delta_x||_inf   = 1.5667537424634323e-02
-||delta_s||_inf   = 1.5667537424634323e-02
-||delta_y_c||_inf = 9.6830706484349813e-03
-||delta_y_d||_inf = 2.5350608073069214e-02
+||delta_x||_inf   = 2.2691565030747828e-02
+||delta_s||_inf   = 2.2691565030747828e-02
+||delta_y_c||_inf = 1.8830342312993409e-02
+||delta_y_d||_inf = 4.1521907343636588e-02
 ||delta_z_L||_inf = 0.0000000000000000e+00
 ||delta_z_U||_inf = 0.0000000000000000e+00
-||delta_v_L||_inf = 3.3372842788457584e-02
-||delta_v_U||_inf = 3.7110740232618818e-04
-DenseVector "curr_x" with 78 elements:
-curr_x[    1]= 1.5817856150568315e-08
-curr_x[    2]= 1.5817856150568315e-08
-curr_x[    3]= 3.1635712301136631e-08
-curr_x[    4]= 3.1635712301136631e-08
-curr_x[    5]= 7.9089280752841584e-08
-curr_x[    6]= 7.9089280752841584e-08
-curr_x[    7]= 2.0563212995738812e-07
-curr_x[    8]= 2.0563212995738812e-07
-curr_x[    9]= 5.3780710911932271e-07
-curr_x[   10]= 5.3780710911932271e-07
-curr_x[   11]= 1.4077891974005801e-06
-curr_x[   12]= 1.4077891974005801e-06
-curr_x[   13]= 3.6855604830824174e-06
-curr_x[   14]= 3.6855604830824174e-06
-curr_x[   15]= 9.6488922518466730e-06
-curr_x[   16]= 9.6488922518466730e-06
-curr_x[   17]= 2.5261116272457599e-05
-curr_x[   18]= 2.5261116272457599e-05
-curr_x[   19]= 6.6134456565526123e-05
-curr_x[   20]= 6.6134456565526123e-05
-curr_x[   21]= 1.7314225342412079e-04
-curr_x[   22]= 1.7314225342412079e-04
-curr_x[   23]= 4.5329230370683626e-04
-curr_x[   24]= 4.5329230370683626e-04
-curr_x[   25]= 1.1867346576963879e-03
-curr_x[   26]= 1.1867346576963879e-03
-curr_x[   27]= 3.1069116693823277e-03
-curr_x[   28]= 3.1069116693823277e-03
-curr_x[   29]= 8.1340003504505945e-03
-curr_x[   30]= 8.1340003504505945e-03
-curr_x[   31]= 2.1295089381969459e-02
-curr_x[   32]= 2.1295089381969459e-02
-curr_x[   33]= 5.5751267795457776e-02
-curr_x[   34]= 5.5751267795457776e-02
-curr_x[   35]= 1.4595871400440386e-01
-curr_x[   36]= 1.4595871400440386e-01
-curr_x[   37]= 3.8212487421775382e-01
-curr_x[   38]= 3.8212487421775382e-01
-curr_x[   39]= 1.0004159086488578e+00
-curr_x[   40]= 1.0004159086488578e+00
-curr_x[   41]= 1.5817856150568315e-08
-curr_x[   42]= 1.5817856150568315e-08
-curr_x[   43]= 4.7453568451704953e-08
-curr_x[   44]= 4.7453568451704953e-08
-curr_x[   45]= 1.2654284920454652e-07
-curr_x[   46]= 1.2654284920454652e-07
-curr_x[   47]= 3.3217497916193465e-07
-curr_x[   48]= 3.3217497916193465e-07
-curr_x[   49]= 8.6998208828125736e-07
-curr_x[   50]= 8.6998208828125736e-07
-curr_x[   51]= 2.2777712856818373e-06
-curr_x[   52]= 2.2777712856818373e-06
-curr_x[   53]= 5.9633317687642543e-06
-curr_x[   54]= 5.9633317687642543e-06
-curr_x[   55]= 1.5612224020610926e-05
-curr_x[   56]= 1.5612224020610926e-05
-curr_x[   57]= 4.0873340293068524e-05
-curr_x[   58]= 4.0873340293068524e-05
-curr_x[   59]= 1.0700779685859465e-04
-curr_x[   60]= 1.0700779685859465e-04
-curr_x[   61]= 2.8015005028271544e-04
-curr_x[   62]= 2.8015005028271544e-04
-curr_x[   63]= 7.3344235398955170e-04
-curr_x[   64]= 7.3344235398955170e-04
-curr_x[   65]= 1.9201770116859397e-03
-curr_x[   66]= 1.9201770116859397e-03
-curr_x[   67]= 5.0270886810682668e-03
-curr_x[   68]= 5.0270886810682668e-03
-curr_x[   69]= 1.3161089031518861e-02
-curr_x[   70]= 1.3161089031518861e-02
-curr_x[   71]= 3.4456178413488317e-02
-curr_x[   72]= 3.4456178413488317e-02
-curr_x[   73]= 9.0207446208946093e-02
-curr_x[   74]= 9.0207446208946093e-02
-curr_x[   75]= 2.3616616021334996e-01
-curr_x[   76]= 2.3616616021334996e-01
-curr_x[   77]= 6.1829103443110378e-01
-curr_x[   78]= 6.1829103443110378e-01
-DenseVector "curr_s" with 2 elements:
-curr_s[    1]= 1.0004159086488578e+00
-curr_s[    2]= 1.0004159086488578e+00
-DenseVector "curr_y_c" with 38 elements:
-curr_y_c[    1]=-1.5817856150568315e-08
-curr_y_c[    2]=-1.5817856150568315e-08
-curr_y_c[    3]=-4.7453568451704953e-08
-curr_y_c[    4]=-4.7453568451704953e-08
-curr_y_c[    5]=-1.2654284920454652e-07
-curr_y_c[    6]=-1.2654284920454652e-07
-curr_y_c[    7]=-3.3217497916193465e-07
-curr_y_c[    8]=-3.3217497916193465e-07
-curr_y_c[    9]=-8.6998208828125736e-07
-curr_y_c[   10]=-8.6998208828125736e-07
-curr_y_c[   11]=-2.2777712856818373e-06
-curr_y_c[   12]=-2.2777712856818373e-06
-curr_y_c[   13]=-5.9633317687642543e-06
-curr_y_c[   14]=-5.9633317687642543e-06
-curr_y_c[   15]=-1.5612224020610926e-05
-curr_y_c[   16]=-1.5612224020610926e-05
-curr_y_c[   17]=-4.0873340293068524e-05
-curr_y_c[   18]=-4.0873340293068524e-05
-curr_y_c[   19]=-1.0700779685859465e-04
-curr_y_c[   20]=-1.0700779685859465e-04
-curr_y_c[   21]=-2.8015005028271544e-04
-curr_y_c[   22]=-2.8015005028271544e-04
-curr_y_c[   23]=-7.3344235398955170e-04
-curr_y_c[   24]=-7.3344235398955170e-04
-curr_y_c[   25]=-1.9201770116859397e-03
-curr_y_c[   26]=-1.9201770116859397e-03
-curr_y_c[   27]=-5.0270886810682668e-03
-curr_y_c[   28]=-5.0270886810682668e-03
-curr_y_c[   29]=-1.3161089031518861e-02
-curr_y_c[   30]=-1.3161089031518861e-02
-curr_y_c[   31]=-3.4456178413488317e-02
-curr_y_c[   32]=-3.4456178413488317e-02
-curr_y_c[   33]=-9.0207446208946093e-02
-curr_y_c[   34]=-9.0207446208946093e-02
-curr_y_c[   35]=-2.3616616021334996e-01
-curr_y_c[   36]=-2.3616616021334996e-01
-curr_y_c[   37]=-6.1829103443110378e-01
-curr_y_c[   38]=-6.1829103443110378e-01
-DenseVector "curr_y_d" with 2 elements:
-curr_y_d[    1]=-1.6187069430799614e+00
-curr_y_d[    2]=-1.6187069430799614e+00
-DenseVector "curr_slack_x_L" with 0 elements:
-DenseVector "curr_slack_x_U" with 0 elements:
-DenseVector "curr_z_L" with 0 elements:
-DenseVector "curr_z_U" with 0 elements:
-DenseVector "curr_slack_s_L" with 2 elements:
-curr_slack_s_L[    1]= 4.1590864885776568e-04
-curr_slack_s_L[    2]= 4.1590864885776568e-04
-DenseVector "curr_slack_s_U" with 2 elements:
-curr_slack_s_U[    1]= 9.9958409135114223e-01
-curr_slack_s_U[    2]= 9.9958409135114223e-01
-DenseVector "curr_v_L" with 2 elements:
-curr_v_L[    1]= 1.6188516130340556e+00
-curr_v_L[    2]= 1.6188516130340556e+00
-DenseVector "curr_v_U" with 2 elements:
-curr_v_U[    1]= 1.4466995409408905e-04
-curr_v_U[    2]= 1.4466995409408905e-04
+||delta_v_L||_inf = 4.1522879059407554e-02
+||delta_v_U||_inf = 0.0000000000000000e+00
 
 
 ***Current NLP Values for Iteration 3:
 
                                    (scaled)                 (unscaled)
-Objective...............:   1.6193801772975545e+00    1.6193801772975545e+00
-Dual infeasibility......:   3.4694469519536142e-18    3.4694469519536142e-18
-Constraint violation....:   2.2204460492503131e-16    2.2204460492503131e-16
-Complementarity.........:   6.7329438707820863e-04    6.7329438707820863e-04
-Overall NLP error.......:   6.7329438707820863e-04    6.7329438707820863e-04
+Objective...............:   1.9826503051540221e+03    1.9826503051540221e+03
+Dual infeasibility......:   2.8284276254453289e-08    2.8284276254453289e-08
+Constraint violation....:   1.7763568394002505e-15    1.7763568394002505e-15
+Complementarity.........:   3.7706462351868157e-03    3.7706462351868157e-03
+Overall NLP error.......:   3.7706462351868157e-03    3.7706462351868157e-03
 
-DenseVector "grad_f" with 78 elements:
-grad_f[    1]= 1.5817856150568315e-08
-grad_f[    2]= 1.5817856150568315e-08
-grad_f[    3]= 3.1635712301136631e-08
-grad_f[    4]= 3.1635712301136631e-08
-grad_f[    5]= 7.9089280752841584e-08
-grad_f[    6]= 7.9089280752841584e-08
-grad_f[    7]= 2.0563212995738812e-07
-grad_f[    8]= 2.0563212995738812e-07
-grad_f[    9]= 5.3780710911932271e-07
-grad_f[   10]= 5.3780710911932271e-07
-grad_f[   11]= 1.4077891974005801e-06
-grad_f[   12]= 1.4077891974005801e-06
-grad_f[   13]= 3.6855604830824174e-06
-grad_f[   14]= 3.6855604830824174e-06
-grad_f[   15]= 9.6488922518466730e-06
-grad_f[   16]= 9.6488922518466730e-06
-grad_f[   17]= 2.5261116272457599e-05
-grad_f[   18]= 2.5261116272457599e-05
-grad_f[   19]= 6.6134456565526123e-05
-grad_f[   20]= 6.6134456565526123e-05
-grad_f[   21]= 1.7314225342412079e-04
-grad_f[   22]= 1.7314225342412079e-04
-grad_f[   23]= 4.5329230370683626e-04
-grad_f[   24]= 4.5329230370683626e-04
-grad_f[   25]= 1.1867346576963879e-03
-grad_f[   26]= 1.1867346576963879e-03
-grad_f[   27]= 3.1069116693823277e-03
-grad_f[   28]= 3.1069116693823277e-03
-grad_f[   29]= 8.1340003504505945e-03
-grad_f[   30]= 8.1340003504505945e-03
-grad_f[   31]= 2.1295089381969459e-02
-grad_f[   32]= 2.1295089381969459e-02
-grad_f[   33]= 5.5751267795457776e-02
-grad_f[   34]= 5.5751267795457776e-02
-grad_f[   35]= 1.4595871400440386e-01
-grad_f[   36]= 1.4595871400440386e-01
-grad_f[   37]= 3.8212487421775382e-01
-grad_f[   38]= 3.8212487421775382e-01
-grad_f[   39]= 1.0004159086488578e+00
-grad_f[   40]= 1.0004159086488578e+00
-grad_f[   41]= 1.5817856150568315e-08
-grad_f[   42]= 1.5817856150568315e-08
-grad_f[   43]= 4.7453568451704953e-08
-grad_f[   44]= 4.7453568451704953e-08
-grad_f[   45]= 1.2654284920454652e-07
-grad_f[   46]= 1.2654284920454652e-07
-grad_f[   47]= 3.3217497916193465e-07
-grad_f[   48]= 3.3217497916193465e-07
-grad_f[   49]= 8.6998208828125736e-07
-grad_f[   50]= 8.6998208828125736e-07
-grad_f[   51]= 2.2777712856818373e-06
-grad_f[   52]= 2.2777712856818373e-06
-grad_f[   53]= 5.9633317687642543e-06
-grad_f[   54]= 5.9633317687642543e-06
-grad_f[   55]= 1.5612224020610926e-05
-grad_f[   56]= 1.5612224020610926e-05
-grad_f[   57]= 4.0873340293068524e-05
-grad_f[   58]= 4.0873340293068524e-05
-grad_f[   59]= 1.0700779685859465e-04
-grad_f[   60]= 1.0700779685859465e-04
-grad_f[   61]= 2.8015005028271544e-04
-grad_f[   62]= 2.8015005028271544e-04
-grad_f[   63]= 7.3344235398955170e-04
-grad_f[   64]= 7.3344235398955170e-04
-grad_f[   65]= 1.9201770116859397e-03
-grad_f[   66]= 1.9201770116859397e-03
-grad_f[   67]= 5.0270886810682668e-03
-grad_f[   68]= 5.0270886810682668e-03
-grad_f[   69]= 1.3161089031518861e-02
-grad_f[   70]= 1.3161089031518861e-02
-grad_f[   71]= 3.4456178413488317e-02
-grad_f[   72]= 3.4456178413488317e-02
-grad_f[   73]= 9.0207446208946093e-02
-grad_f[   74]= 9.0207446208946093e-02
-grad_f[   75]= 2.3616616021334996e-01
-grad_f[   76]= 2.3616616021334996e-01
-grad_f[   77]= 6.1829103443110378e-01
-grad_f[   78]= 6.1829103443110378e-01
-DenseVector "curr_c" with 38 elements:
-curr_c[    1]= 0.0000000000000000e+00
-curr_c[    2]= 0.0000000000000000e+00
-curr_c[    3]= 0.0000000000000000e+00
-curr_c[    4]= 0.0000000000000000e+00
-curr_c[    5]= 0.0000000000000000e+00
-curr_c[    6]= 0.0000000000000000e+00
-curr_c[    7]= 1.0587911840678754e-22
-curr_c[    8]= 1.0587911840678754e-22
-curr_c[    9]= 0.0000000000000000e+00
-curr_c[   10]= 0.0000000000000000e+00
-curr_c[   11]= 0.0000000000000000e+00
-curr_c[   12]= 0.0000000000000000e+00
-curr_c[   13]=-1.6940658945086007e-21
-curr_c[   14]=-1.6940658945086007e-21
-curr_c[   15]= 0.0000000000000000e+00
-curr_c[   16]= 0.0000000000000000e+00
-curr_c[   17]= 0.0000000000000000e+00
-curr_c[   18]= 0.0000000000000000e+00
-curr_c[   19]=-2.7105054312137611e-20
-curr_c[   20]=-2.7105054312137611e-20
-curr_c[   21]= 0.0000000000000000e+00
-curr_c[   22]= 0.0000000000000000e+00
-curr_c[   23]= 0.0000000000000000e+00
-curr_c[   24]= 0.0000000000000000e+00
-curr_c[   25]= 0.0000000000000000e+00
-curr_c[   26]= 0.0000000000000000e+00
-curr_c[   27]= 0.0000000000000000e+00
-curr_c[   28]= 0.0000000000000000e+00
-curr_c[   29]=-3.4694469519536142e-18
-curr_c[   30]=-3.4694469519536142e-18
-curr_c[   31]= 0.0000000000000000e+00
-curr_c[   32]= 0.0000000000000000e+00
-curr_c[   33]= 0.0000000000000000e+00
-curr_c[   34]= 0.0000000000000000e+00
-curr_c[   35]= 0.0000000000000000e+00
-curr_c[   36]= 0.0000000000000000e+00
-curr_c[   37]=-2.2204460492503131e-16
-curr_c[   38]=-2.2204460492503131e-16
-DenseVector "curr_d" with 2 elements:
-curr_d[    1]= 1.0004159086488578e+00
-curr_d[    2]= 1.0004159086488578e+00
-DenseVector "curr_d - curr_s" with 2 elements:
-curr_d - curr_s[    1]= 0.0000000000000000e+00
-curr_d - curr_s[    2]= 0.0000000000000000e+00
 
 
 
@@ -1653,10 +501,10 @@ curr_d - curr_s[    2]= 0.0000000000000000e+00
 *** Update Barrier Parameter for Iteration 3:
 **************************************************
 
-Optimality Error for Barrier Sub-problem = 5.228703e-04
-  sub_problem_error < kappa_eps * mu (1.504241e-03)
-Updating mu=   1.5042412372345582e-04 and tau=   9.9984957587627654e-01 to new_mu=   1.8449144625279508e-06 and new_tau=   9.9999815508553747e-01
-Barrier Parameter: 1.844914e-06
+Optimality Error for Barrier Sub-problem = 9.422191e-04
+  sub_problem_error < kappa_eps * mu (2.828427e-02)
+Updating mu=   2.8284271247461909e-03 and tau=   9.9717157287525382e-01 to new_mu=   1.5042412372345582e-04 and new_tau=   9.9984957587627654e-01
+Barrier Parameter: 1.504241e-04
 
 **************************************************
 *** Solving the Primal Dual System for Iteration 3:
@@ -1664,26 +512,26 @@ Barrier Parameter: 1.844914e-06
 
 Solving system with delta_x=0.000000e+00 delta_s=0.000000e+00
                     delta_c=0.000000e+00 delta_d=0.000000e+00
-Calling MUMPS-2 for numerical factorization at cpu time      0.258 (wall      0.003).
-Done with MUMPS-2 for numerical factorization at cpu time      0.258 (wall      0.003).
-Number of doubles for MUMPS to hold factorization (INFO(9)) = 392
-Number of integers for MUMPS to hold factorization (INFO(10)) = 1468
-Calling MUMPS-3 for solve at cpu time      0.258 (wall      0.003).
-Done with MUMPS-3 for solve at cpu time      0.258 (wall      0.003).
+Calling MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.002).
+Done with MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.002).
+Number of doubles for MUMPS to hold factorization (INFO(9)) = 519
+Number of integers for MUMPS to hold factorization (INFO(10)) = 1714
+Calling MUMPS-3 for solve at cpu time      0.193 (wall      0.002).
+Done with MUMPS-3 for solve at cpu time      0.193 (wall      0.002).
 Factorization successful.
 Number of trial factorizations performed: 1
 Perturbation parameters: delta_x=0.000000e+00 delta_s=0.000000e+00
                          delta_c=0.000000e+00 delta_d=0.000000e+00
-max-norm resid_x  9.866240e-17
-max-norm resid_s  7.372575e-17
-max-norm resid_c  5.421011e-20
+max-norm resid_x  6.790656e-15
+max-norm resid_s  4.183963e-15
+max-norm resid_c  6.776264e-21
 max-norm resid_d  0.000000e+00
 max-norm resid_zL 0.000000e+00
 max-norm resid_zU 0.000000e+00
-max-norm resid_vL 0.000000e+00
+max-norm resid_vL 1.323489e-23
 max-norm resid_vU 0.000000e+00
-nrm_rhs = 6.71e-04 nrm_sol = 8.14e-04 nrm_resid = 9.87e-17
-residual_ratio = 6.643459e-14
+nrm_rhs = 3.62e-03 nrm_sol = 2.32e-03 nrm_resid = 6.79e-15
+residual_ratio = 1.143311e-12
 
 **************************************************
 *** Finding Acceptable Trial Point for Iteration 3:
@@ -1692,31 +540,45 @@ residual_ratio = 6.643459e-14
 --> Starting line search in iteration 3 <--
 Mu has changed in line search - resetting watchdog counters.
 Acceptable Check:
-  overall_error =  6.7329438707820863e-04   acceptable_tol_             =  9.9999999999999995e-07
-  dual_inf      =  3.4694469519536142e-18   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
-  constr_viol   =  2.2204460492503131e-16   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
-  compl_inf     =  6.7329438707820863e-04   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
-  curr_obj_val_ =  1.6193801772975545e+00   last_obj_val                =  1.6704996621187178e+00
-  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  3.1567315407350673e-02 acceptable_obj_change_tol_ =  1.0000000000000000e+20
+  overall_error =  3.7706462351868157e-03   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  2.8284276254453289e-08   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  1.7763568394002505e-15   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  3.7706462351868157e-03   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ =  1.9826503051540221e+03   last_obj_val                =  1.9839364091271730e+03
+  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  6.4867917948390754e-04 acceptable_obj_change_tol_ =  1.0000000000000000e+20
 test iter = 3
 The current filter has 0 entries.
-Relative step size for delta_x = 2.072369e-04
-minimal step size ALPHA_MIN = 1.685136E-22
+Relative step size for delta_x = 6.020217e-04
+minimal step size ALPHA_MIN = 2.509478E-22
 Starting checks for alpha (primal) = 1.00e+00
 Checking acceptability for trial step size alpha_primal_test= 1.000000e+00:
-  New values of barrier function     =  1.6180882263260314e+00  (reference  1.6194089043164190e+00):
-  New values of constraint violation =  5.6111062316150685e-17  (reference  4.5108591375261995e-16):
-reference_theta = 4.510859e-16 reference_gradBarrTDelta = -1.338426e-03
+  New values of barrier function     =  1.9826309470262347e+03  (reference  1.9826766853256979e+03):
+  New values of constraint violation =  9.7699626167013776e-15  (reference  2.5979218776228663e-14):
+reference_theta = 2.597922e-14 reference_gradBarrTDelta = -5.176221e-02
 Checking Armijo Condition...
 Succeeded...
 Checking filter acceptability...
 Succeeded...
-reference_theta = 4.510859e-16 reference_gradBarrTDelta = -1.338426e-03
+reference_theta = 2.597922e-14 reference_gradBarrTDelta = -5.176221e-02
 Convergence Check:
-  overall_error =  2.1822238232002388e-06   IpData().tol()   =  1.0000000000000001e-05
-  dual_inf      =  2.2204460492503131e-16   dual_inf_tol_    =  1.0000000000000000e+00
-  constr_viol   =  2.7755575615628914e-17   constr_viol_tol_ =  1.0000000000000000e-04
-  compl_inf     =  2.1822238232002388e-06   compl_inf_tol_   =  1.0000000000000000e-04
+  overall_error =  1.5321834549824820e-04   IpData().tol()   =  1.0000000000000001e-05
+  dual_inf      =  1.5042438405998837e-09   dual_inf_tol_    =  1.0000000000000000e+00
+  constr_viol   =  1.7763568394002505e-15   constr_viol_tol_ =  1.0000000000000000e-04
+  compl_inf     =  1.5321834549824820e-04   compl_inf_tol_   =  1.0000000000000000e-04
+obj val update iter = 4
+Acceptable Check:
+  overall_error =  1.5321834549824820e-04   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  1.5042438405998837e-09   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  1.7763568394002505e-15   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  1.5321834549824820e-04   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ =  1.9825956937953006e+03   last_obj_val                =  1.9826503051540221e+03
+  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  2.7545383505305429e-05 acceptable_obj_change_tol_ =  1.0000000000000000e+20
+test iter = 4
+
+**************************************************
+*** Update HessianMatrix for Iteration 4:
+**************************************************
+
 
 
 **************************************************
@@ -1724,588 +586,187 @@ Convergence Check:
 **************************************************
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   4  1.6180384e+00 2.78e-17 2.22e-16  -5.7 4.15e-04    -  1.00e+00 1.00e+00f  1 
+   4  1.9825957e+03 1.78e-15 1.50e-09  -3.8 1.20e-03    -  1.00e+00 1.00e+00f  1 
 
 **************************************************
 *** Beginning Iteration 4 from the following point:
 **************************************************
 
-Current barrier parameter mu = 1.8449144625279508e-06
-Current fraction-to-the-boundary parameter tau = 9.9999815508553747e-01
+Current barrier parameter mu = 1.5042412372345582e-04
+Current fraction-to-the-boundary parameter tau = 9.9984957587627654e-01
 
-||curr_x||_inf   = 1.0000013486851864e+00
-||curr_s||_inf   = 1.0000013486851864e+00
-||curr_y_c||_inf = 6.1803482228318007e-01
-||curr_y_d||_inf = 1.6180361709683664e+00
+||curr_x||_inf   = 1.0000007918163043e+01
+||curr_s||_inf   = 1.0000007918163043e+01
+||curr_y_c||_inf = 1.7180339871687668e+01
+||curr_y_d||_inf = 2.8999956957610291e+01
 ||curr_z_L||_inf = 0.0000000000000000e+00
 ||curr_z_U||_inf = 0.0000000000000000e+00
-||curr_v_L||_inf = 1.6180379566511389e+00
-||curr_v_U||_inf = 1.7856827725235480e-06
+||curr_v_L||_inf = 2.8999956959114535e+01
+||curr_v_U||_inf = 0.0000000000000000e+00
 
-||delta_x||_inf   = 4.1455996367142591e-04
-||delta_s||_inf   = 4.1455996367142591e-04
-||delta_y_c||_inf = 2.5621214792372537e-04
-||delta_y_d||_inf = 6.7077211159505268e-04
+||delta_x||_inf   = 1.2047994680581811e-03
+||delta_s||_inf   = 1.2047994680581811e-03
+||delta_y_c||_inf = 1.1144159568412526e-03
+||delta_y_d||_inf = 2.3192154248974362e-03
 ||delta_z_L||_inf = 0.0000000000000000e+00
 ||delta_z_U||_inf = 0.0000000000000000e+00
-||delta_v_L||_inf = 8.1365638291669190e-04
-||delta_v_U||_inf = 1.4288427132156550e-04
-DenseVector "curr_x" with 78 elements:
-curr_x[    1]= 1.5811301426863460e-08
-curr_x[    2]= 1.5811301426863460e-08
-curr_x[    3]= 3.1622602853726920e-08
-curr_x[    4]= 3.1622602853726920e-08
-curr_x[    5]= 7.9056507134317299e-08
-curr_x[    6]= 7.9056507134317299e-08
-curr_x[    7]= 2.0554691854922498e-07
-curr_x[    8]= 2.0554691854922498e-07
-curr_x[    9]= 5.3758424851335774e-07
-curr_x[   10]= 5.3758424851335774e-07
-curr_x[   11]= 1.4072058269908481e-06
-curr_x[   12]= 1.4072058269908481e-06
-curr_x[   13]= 3.6840332324591864e-06
-curr_x[   14]= 3.6840332324591864e-06
-curr_x[   15]= 9.6448938703867101e-06
-curr_x[   16]= 9.6448938703867101e-06
-curr_x[   17]= 2.5250648378700946e-05
-curr_x[   18]= 2.5250648378700946e-05
-curr_x[   19]= 6.6107051265716128e-05
-curr_x[   20]= 6.6107051265716128e-05
-curr_x[   21]= 1.7307050541844740e-04
-curr_x[   22]= 1.7307050541844740e-04
-curr_x[   23]= 4.5310446498962614e-04
-curr_x[   24]= 4.5310446498962614e-04
-curr_x[   25]= 1.1862428895504308e-03
-curr_x[   26]= 1.1862428895504308e-03
-curr_x[   27]= 3.1056242036616669e-03
-curr_x[   28]= 3.1056242036616669e-03
-curr_x[   29]= 8.1306297214345704e-03
-curr_x[   30]= 8.1306297214345704e-03
-curr_x[   31]= 2.1286264960642044e-02
-curr_x[   32]= 2.1286264960642044e-02
-curr_x[   33]= 5.5728165160491561e-02
-curr_x[   34]= 5.5728165160491561e-02
-curr_x[   35]= 1.4589823052083262e-01
-curr_x[   36]= 1.4589823052083262e-01
-curr_x[   37]= 3.8196652640200635e-01
-curr_x[   38]= 3.8196652640200635e-01
-curr_x[   39]= 1.0000013486851864e+00
-curr_x[   40]= 1.0000013486851864e+00
-curr_x[   41]= 1.5811301426863460e-08
-curr_x[   42]= 1.5811301426863460e-08
-curr_x[   43]= 4.7433904280590380e-08
-curr_x[   44]= 4.7433904280590380e-08
-curr_x[   45]= 1.2649041141490768e-07
-curr_x[   46]= 1.2649041141490768e-07
-curr_x[   47]= 3.3203732996413266e-07
-curr_x[   48]= 3.3203732996413266e-07
-curr_x[   49]= 8.6962157847749040e-07
-curr_x[   50]= 8.6962157847749040e-07
-curr_x[   51]= 2.2768274054683382e-06
-curr_x[   52]= 2.2768274054683382e-06
-curr_x[   53]= 5.9608606379275250e-06
-curr_x[   54]= 5.9608606379275250e-06
-curr_x[   55]= 1.5605754508314236e-05
-curr_x[   56]= 1.5605754508314236e-05
-curr_x[   57]= 4.0856402887015182e-05
-curr_x[   58]= 4.0856402887015182e-05
-curr_x[   59]= 1.0696345415273130e-04
-curr_x[   60]= 1.0696345415273130e-04
-curr_x[   61]= 2.8003395957117871e-04
-curr_x[   62]= 2.8003395957117871e-04
-curr_x[   63]= 7.3313842456080485e-04
-curr_x[   64]= 7.3313842456080485e-04
-curr_x[   65]= 1.9193813141112359e-03
-curr_x[   66]= 1.9193813141112359e-03
-curr_x[   67]= 5.0250055177729035e-03
-curr_x[   68]= 5.0250055177729035e-03
-curr_x[   69]= 1.3155635239207474e-02
-curr_x[   70]= 1.3155635239207474e-02
-curr_x[   71]= 3.4441900199849516e-02
-curr_x[   72]= 3.4441900199849516e-02
-curr_x[   73]= 9.0170065360341084e-02
-curr_x[   74]= 9.0170065360341084e-02
-curr_x[   75]= 2.3606829588117373e-01
-curr_x[   76]= 2.3606829588117373e-01
-curr_x[   77]= 6.1803482228318007e-01
-curr_x[   78]= 6.1803482228318007e-01
-DenseVector "curr_s" with 2 elements:
-curr_s[    1]= 1.0000013486851864e+00
-curr_s[    2]= 1.0000013486851864e+00
-DenseVector "curr_y_c" with 38 elements:
-curr_y_c[    1]=-1.5811301426863460e-08
-curr_y_c[    2]=-1.5811301426863460e-08
-curr_y_c[    3]=-4.7433904280590380e-08
-curr_y_c[    4]=-4.7433904280590380e-08
-curr_y_c[    5]=-1.2649041141490768e-07
-curr_y_c[    6]=-1.2649041141490768e-07
-curr_y_c[    7]=-3.3203732996413266e-07
-curr_y_c[    8]=-3.3203732996413266e-07
-curr_y_c[    9]=-8.6962157847749040e-07
-curr_y_c[   10]=-8.6962157847749040e-07
-curr_y_c[   11]=-2.2768274054683382e-06
-curr_y_c[   12]=-2.2768274054683382e-06
-curr_y_c[   13]=-5.9608606379275250e-06
-curr_y_c[   14]=-5.9608606379275250e-06
-curr_y_c[   15]=-1.5605754508314236e-05
-curr_y_c[   16]=-1.5605754508314236e-05
-curr_y_c[   17]=-4.0856402887015182e-05
-curr_y_c[   18]=-4.0856402887015182e-05
-curr_y_c[   19]=-1.0696345415273130e-04
-curr_y_c[   20]=-1.0696345415273130e-04
-curr_y_c[   21]=-2.8003395957117871e-04
-curr_y_c[   22]=-2.8003395957117871e-04
-curr_y_c[   23]=-7.3313842456080485e-04
-curr_y_c[   24]=-7.3313842456080485e-04
-curr_y_c[   25]=-1.9193813141112359e-03
-curr_y_c[   26]=-1.9193813141112359e-03
-curr_y_c[   27]=-5.0250055177729035e-03
-curr_y_c[   28]=-5.0250055177729035e-03
-curr_y_c[   29]=-1.3155635239207474e-02
-curr_y_c[   30]=-1.3155635239207474e-02
-curr_y_c[   31]=-3.4441900199849516e-02
-curr_y_c[   32]=-3.4441900199849516e-02
-curr_y_c[   33]=-9.0170065360341084e-02
-curr_y_c[   34]=-9.0170065360341084e-02
-curr_y_c[   35]=-2.3606829588117373e-01
-curr_y_c[   36]=-2.3606829588117373e-01
-curr_y_c[   37]=-6.1803482228318007e-01
-curr_y_c[   38]=-6.1803482228318007e-01
-DenseVector "curr_y_d" with 2 elements:
-curr_y_d[    1]=-1.6180361709683664e+00
-curr_y_d[    2]=-1.6180361709683664e+00
-DenseVector "curr_slack_x_L" with 0 elements:
-DenseVector "curr_slack_x_U" with 0 elements:
-DenseVector "curr_z_L" with 0 elements:
-DenseVector "curr_z_U" with 0 elements:
-DenseVector "curr_slack_s_L" with 2 elements:
-curr_slack_s_L[    1]= 1.3486851864197291e-06
-curr_slack_s_L[    2]= 1.3486851864197291e-06
-DenseVector "curr_slack_s_U" with 2 elements:
-curr_slack_s_U[    1]= 9.9999865131481358e-01
-curr_slack_s_U[    2]= 9.9999865131481358e-01
-DenseVector "curr_v_L" with 2 elements:
-curr_v_L[    1]= 1.6180379566511389e+00
-curr_v_L[    2]= 1.6180379566511389e+00
-DenseVector "curr_v_U" with 2 elements:
-curr_v_U[    1]= 1.7856827725235480e-06
-curr_v_U[    2]= 1.7856827725235480e-06
+||delta_v_L||_inf = 2.3192422049277926e-03
+||delta_v_U||_inf = 0.0000000000000000e+00
 
 
 ***Current NLP Values for Iteration 4:
 
                                    (scaled)                 (unscaled)
-Objective...............:   1.6180383531897813e+00    1.6180383531897813e+00
-Dual infeasibility......:   2.2204460492503131e-16    2.2204460492503131e-16
-Constraint violation....:   2.7755575615628914e-17    2.7755575615628914e-17
-Complementarity.........:   2.1822238232002388e-06    2.1822238232002388e-06
-Overall NLP error.......:   2.1822238232002388e-06    2.1822238232002388e-06
-
-DenseVector "grad_f" with 78 elements:
-grad_f[    1]= 1.5811301426863460e-08
-grad_f[    2]= 1.5811301426863460e-08
-grad_f[    3]= 3.1622602853726920e-08
-grad_f[    4]= 3.1622602853726920e-08
-grad_f[    5]= 7.9056507134317299e-08
-grad_f[    6]= 7.9056507134317299e-08
-grad_f[    7]= 2.0554691854922498e-07
-grad_f[    8]= 2.0554691854922498e-07
-grad_f[    9]= 5.3758424851335774e-07
-grad_f[   10]= 5.3758424851335774e-07
-grad_f[   11]= 1.4072058269908481e-06
-grad_f[   12]= 1.4072058269908481e-06
-grad_f[   13]= 3.6840332324591864e-06
-grad_f[   14]= 3.6840332324591864e-06
-grad_f[   15]= 9.6448938703867101e-06
-grad_f[   16]= 9.6448938703867101e-06
-grad_f[   17]= 2.5250648378700946e-05
-grad_f[   18]= 2.5250648378700946e-05
-grad_f[   19]= 6.6107051265716128e-05
-grad_f[   20]= 6.6107051265716128e-05
-grad_f[   21]= 1.7307050541844740e-04
-grad_f[   22]= 1.7307050541844740e-04
-grad_f[   23]= 4.5310446498962614e-04
-grad_f[   24]= 4.5310446498962614e-04
-grad_f[   25]= 1.1862428895504308e-03
-grad_f[   26]= 1.1862428895504308e-03
-grad_f[   27]= 3.1056242036616669e-03
-grad_f[   28]= 3.1056242036616669e-03
-grad_f[   29]= 8.1306297214345704e-03
-grad_f[   30]= 8.1306297214345704e-03
-grad_f[   31]= 2.1286264960642044e-02
-grad_f[   32]= 2.1286264960642044e-02
-grad_f[   33]= 5.5728165160491561e-02
-grad_f[   34]= 5.5728165160491561e-02
-grad_f[   35]= 1.4589823052083262e-01
-grad_f[   36]= 1.4589823052083262e-01
-grad_f[   37]= 3.8196652640200635e-01
-grad_f[   38]= 3.8196652640200635e-01
-grad_f[   39]= 1.0000013486851864e+00
-grad_f[   40]= 1.0000013486851864e+00
-grad_f[   41]= 1.5811301426863460e-08
-grad_f[   42]= 1.5811301426863460e-08
-grad_f[   43]= 4.7433904280590380e-08
-grad_f[   44]= 4.7433904280590380e-08
-grad_f[   45]= 1.2649041141490768e-07
-grad_f[   46]= 1.2649041141490768e-07
-grad_f[   47]= 3.3203732996413266e-07
-grad_f[   48]= 3.3203732996413266e-07
-grad_f[   49]= 8.6962157847749040e-07
-grad_f[   50]= 8.6962157847749040e-07
-grad_f[   51]= 2.2768274054683382e-06
-grad_f[   52]= 2.2768274054683382e-06
-grad_f[   53]= 5.9608606379275250e-06
-grad_f[   54]= 5.9608606379275250e-06
-grad_f[   55]= 1.5605754508314236e-05
-grad_f[   56]= 1.5605754508314236e-05
-grad_f[   57]= 4.0856402887015182e-05
-grad_f[   58]= 4.0856402887015182e-05
-grad_f[   59]= 1.0696345415273130e-04
-grad_f[   60]= 1.0696345415273130e-04
-grad_f[   61]= 2.8003395957117871e-04
-grad_f[   62]= 2.8003395957117871e-04
-grad_f[   63]= 7.3313842456080485e-04
-grad_f[   64]= 7.3313842456080485e-04
-grad_f[   65]= 1.9193813141112359e-03
-grad_f[   66]= 1.9193813141112359e-03
-grad_f[   67]= 5.0250055177729035e-03
-grad_f[   68]= 5.0250055177729035e-03
-grad_f[   69]= 1.3155635239207474e-02
-grad_f[   70]= 1.3155635239207474e-02
-grad_f[   71]= 3.4441900199849516e-02
-grad_f[   72]= 3.4441900199849516e-02
-grad_f[   73]= 9.0170065360341084e-02
-grad_f[   74]= 9.0170065360341084e-02
-grad_f[   75]= 2.3606829588117373e-01
-grad_f[   76]= 2.3606829588117373e-01
-grad_f[   77]= 6.1803482228318007e-01
-grad_f[   78]= 6.1803482228318007e-01
-DenseVector "curr_c" with 38 elements:
-curr_c[    1]= 0.0000000000000000e+00
-curr_c[    2]= 0.0000000000000000e+00
-curr_c[    3]= 0.0000000000000000e+00
-curr_c[    4]= 0.0000000000000000e+00
-curr_c[    5]= 0.0000000000000000e+00
-curr_c[    6]= 0.0000000000000000e+00
-curr_c[    7]=-1.0587911840678754e-22
-curr_c[    8]=-1.0587911840678754e-22
-curr_c[    9]= 0.0000000000000000e+00
-curr_c[   10]= 0.0000000000000000e+00
-curr_c[   11]= 0.0000000000000000e+00
-curr_c[   12]= 0.0000000000000000e+00
-curr_c[   13]= 1.6940658945086007e-21
-curr_c[   14]= 1.6940658945086007e-21
-curr_c[   15]= 0.0000000000000000e+00
-curr_c[   16]= 0.0000000000000000e+00
-curr_c[   17]= 0.0000000000000000e+00
-curr_c[   18]= 0.0000000000000000e+00
-curr_c[   19]= 2.7105054312137611e-20
-curr_c[   20]= 2.7105054312137611e-20
-curr_c[   21]=-5.4210108624275222e-20
-curr_c[   22]=-5.4210108624275222e-20
-curr_c[   23]= 2.1684043449710089e-19
-curr_c[   24]= 2.1684043449710089e-19
-curr_c[   25]= 0.0000000000000000e+00
-curr_c[   26]= 0.0000000000000000e+00
-curr_c[   27]= 0.0000000000000000e+00
-curr_c[   28]= 0.0000000000000000e+00
-curr_c[   29]= 0.0000000000000000e+00
-curr_c[   30]= 0.0000000000000000e+00
-curr_c[   31]= 0.0000000000000000e+00
-curr_c[   32]= 0.0000000000000000e+00
-curr_c[   33]= 2.7755575615628914e-17
-curr_c[   34]= 2.7755575615628914e-17
-curr_c[   35]= 0.0000000000000000e+00
-curr_c[   36]= 0.0000000000000000e+00
-curr_c[   37]= 0.0000000000000000e+00
-curr_c[   38]= 0.0000000000000000e+00
-DenseVector "curr_d" with 2 elements:
-curr_d[    1]= 1.0000013486851864e+00
-curr_d[    2]= 1.0000013486851864e+00
-DenseVector "curr_d - curr_s" with 2 elements:
-curr_d - curr_s[    1]= 0.0000000000000000e+00
-curr_d - curr_s[    2]= 0.0000000000000000e+00
+Objective...............:   1.9825956937953006e+03    1.9825956937953006e+03
+Dual infeasibility......:   1.5042438405998837e-09    1.5042438405998837e-09
+Constraint violation....:   1.7763568394002505e-15    1.7763568394002505e-15
+Complementarity.........:   1.5321834549824820e-04    1.5321834549824820e-04
+Overall NLP error.......:   1.5321834549824820e-04    1.5321834549824820e-04
 
 
 
-Number of Iterations....: 4
+
+**************************************************
+*** Update Barrier Parameter for Iteration 4:
+**************************************************
+
+Optimality Error for Barrier Sub-problem = 2.794222e-06
+  sub_problem_error < kappa_eps * mu (1.504241e-03)
+Updating mu=   1.5042412372345582e-04 and tau=   9.9984957587627654e-01 to new_mu=   1.8449144625279508e-06 and new_tau=   9.9999815508553747e-01
+Barrier Parameter: 1.844914e-06
+
+**************************************************
+*** Solving the Primal Dual System for Iteration 4:
+**************************************************
+
+Solving system with delta_x=0.000000e+00 delta_s=0.000000e+00
+                    delta_c=0.000000e+00 delta_d=0.000000e+00
+Calling MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.002).
+Done with MUMPS-2 for numerical factorization at cpu time      0.193 (wall      0.002).
+Number of doubles for MUMPS to hold factorization (INFO(9)) = 635
+Number of integers for MUMPS to hold factorization (INFO(10)) = 1804
+Calling MUMPS-3 for solve at cpu time      0.193 (wall      0.002).
+Done with MUMPS-3 for solve at cpu time      0.193 (wall      0.002).
+Factorization successful.
+Number of trial factorizations performed: 1
+Perturbation parameters: delta_x=0.000000e+00 delta_s=0.000000e+00
+                         delta_c=0.000000e+00 delta_d=0.000000e+00
+max-norm resid_x  4.952026e-16
+max-norm resid_s  6.377126e-15
+max-norm resid_c  6.776264e-21
+max-norm resid_d  3.388132e-21
+max-norm resid_zL 0.000000e+00
+max-norm resid_zU 0.000000e+00
+max-norm resid_vL 2.584939e-26
+max-norm resid_vU 0.000000e+00
+nrm_rhs = 1.51e-04 nrm_sol = 9.58e-05 nrm_resid = 6.38e-15
+residual_ratio = 2.580120e-11
+
+**************************************************
+*** Finding Acceptable Trial Point for Iteration 4:
+**************************************************
+
+--> Starting line search in iteration 4 <--
+Mu has changed in line search - resetting watchdog counters.
+Acceptable Check:
+  overall_error =  1.5321834549824820e-04   acceptable_tol_             =  9.9999999999999995e-07
+  dual_inf      =  1.5042438405998837e-09   acceptable_dual_inf_tol_    =  1.0000000000000000e+10
+  constr_viol   =  1.7763568394002505e-15   acceptable_constr_viol_tol_ =  1.0000000000000000e-02
+  compl_inf     =  1.5321834549824820e-04   acceptable_compl_inf_tol_   =  1.0000000000000000e-02
+  curr_obj_val_ =  1.9825956937953006e+03   last_obj_val                =  1.9826503051540221e+03
+  fabs(curr_obj_val_-last_obj_val_)/Max(1., fabs(curr_obj_val_)) =  2.7545383505305429e-05 acceptable_obj_change_tol_ =  1.0000000000000000e+20
+test iter = 4
+The current filter has 0 entries.
+Relative step size for delta_x = 2.522663e-05
+minimal step size ALPHA_MIN = 1.662597E-21
+Starting checks for alpha (primal) = 1.00e+00
+Checking acceptability for trial step size alpha_primal_test= 1.000000e+00:
+  New values of barrier function     =  1.9825933139825238e+03  (reference  1.9825961261674095e+03):
+  New values of constraint violation =  1.5099033134902129e-14  (reference  9.7699626167013776e-15):
+reference_theta = 9.769963e-15 reference_gradBarrTDelta = -2.938163e-03
+Checking Armijo Condition...
+Succeeded...
+Checking filter acceptability...
+Succeeded...
+reference_theta = 9.769963e-15 reference_gradBarrTDelta = -2.938163e-03
+Convergence Check:
+  overall_error =  1.8497475275305382e-06   IpData().tol()   =  1.0000000000000001e-05
+  dual_inf      =  1.8452794847689802e-11   dual_inf_tol_    =  1.0000000000000000e+00
+  constr_viol   =  1.7763568394002505e-15   constr_viol_tol_ =  1.0000000000000000e-04
+  compl_inf     =  1.8497475275305382e-06   compl_inf_tol_   =  1.0000000000000000e-04
+
+
+**************************************************
+*** Summary of Iteration: 5:
+**************************************************
+
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+   5  1.9825927e+03 1.78e-15 1.85e-11  -5.7 5.05e-05    -  1.00e+00 1.00e+00f  1 
+
+**************************************************
+*** Beginning Iteration 5 from the following point:
+**************************************************
+
+Current barrier parameter mu = 1.8449144625279508e-06
+Current fraction-to-the-boundary parameter tau = 9.9999815508553747e-01
+
+||curr_x||_inf   = 1.0000000097104142e+01
+||curr_s||_inf   = 1.0000000097104142e+01
+||curr_y_c||_inf = 1.7180339871687668e+01
+||curr_y_d||_inf = 2.8999999481999094e+01
+||curr_z_L||_inf = 0.0000000000000000e+00
+||curr_z_U||_inf = 0.0000000000000000e+00
+||curr_v_L||_inf = 2.8999999482017543e+01
+||curr_v_U||_inf = 0.0000000000000000e+00
+
+||delta_x||_inf   = 5.0454548944044370e-05
+||delta_s||_inf   = 5.0454548944044370e-05
+||delta_y_c||_inf = 4.5334442178468493e-05
+||delta_y_d||_inf = 9.5788991122613965e-05
+||delta_z_L||_inf = 0.0000000000000000e+00
+||delta_z_U||_inf = 0.0000000000000000e+00
+||delta_v_L||_inf = 9.5790476915194296e-05
+||delta_v_U||_inf = 0.0000000000000000e+00
+
+
+***Current NLP Values for Iteration 5:
 
                                    (scaled)                 (unscaled)
-Objective...............:   1.6180383531897813e+00    1.6180383531897813e+00
-Dual infeasibility......:   2.2204460492503131e-16    2.2204460492503131e-16
-Constraint violation....:   2.7755575615628914e-17    2.7755575615628914e-17
-Complementarity.........:   2.1822238232002388e-06    2.1822238232002388e-06
-Overall NLP error.......:   2.1822238232002388e-06    2.1822238232002388e-06
+Objective...............:   1.9825927191889280e+03    1.9825927191889280e+03
+Dual infeasibility......:   1.8452794847689802e-11    1.8452794847689802e-11
+Constraint violation....:   1.7763568394002505e-15    1.7763568394002505e-15
+Complementarity.........:   1.8497475275305382e-06    1.8497475275305382e-06
+Overall NLP error.......:   1.8497475275305382e-06    1.8497475275305382e-06
 
-DenseVector "x" with 78 elements:
-x[    1]= 1.5811301426863460e-08
-x[    2]= 1.5811301426863460e-08
-x[    3]= 3.1622602853726920e-08
-x[    4]= 3.1622602853726920e-08
-x[    5]= 7.9056507134317299e-08
-x[    6]= 7.9056507134317299e-08
-x[    7]= 2.0554691854922498e-07
-x[    8]= 2.0554691854922498e-07
-x[    9]= 5.3758424851335774e-07
-x[   10]= 5.3758424851335774e-07
-x[   11]= 1.4072058269908481e-06
-x[   12]= 1.4072058269908481e-06
-x[   13]= 3.6840332324591864e-06
-x[   14]= 3.6840332324591864e-06
-x[   15]= 9.6448938703867101e-06
-x[   16]= 9.6448938703867101e-06
-x[   17]= 2.5250648378700946e-05
-x[   18]= 2.5250648378700946e-05
-x[   19]= 6.6107051265716128e-05
-x[   20]= 6.6107051265716128e-05
-x[   21]= 1.7307050541844740e-04
-x[   22]= 1.7307050541844740e-04
-x[   23]= 4.5310446498962614e-04
-x[   24]= 4.5310446498962614e-04
-x[   25]= 1.1862428895504308e-03
-x[   26]= 1.1862428895504308e-03
-x[   27]= 3.1056242036616669e-03
-x[   28]= 3.1056242036616669e-03
-x[   29]= 8.1306297214345704e-03
-x[   30]= 8.1306297214345704e-03
-x[   31]= 2.1286264960642044e-02
-x[   32]= 2.1286264960642044e-02
-x[   33]= 5.5728165160491561e-02
-x[   34]= 5.5728165160491561e-02
-x[   35]= 1.4589823052083262e-01
-x[   36]= 1.4589823052083262e-01
-x[   37]= 3.8196652640200635e-01
-x[   38]= 3.8196652640200635e-01
-x[   39]= 1.0000013486851864e+00
-x[   40]= 1.0000013486851864e+00
-x[   41]= 1.5811301426863460e-08
-x[   42]= 1.5811301426863460e-08
-x[   43]= 4.7433904280590380e-08
-x[   44]= 4.7433904280590380e-08
-x[   45]= 1.2649041141490768e-07
-x[   46]= 1.2649041141490768e-07
-x[   47]= 3.3203732996413266e-07
-x[   48]= 3.3203732996413266e-07
-x[   49]= 8.6962157847749040e-07
-x[   50]= 8.6962157847749040e-07
-x[   51]= 2.2768274054683382e-06
-x[   52]= 2.2768274054683382e-06
-x[   53]= 5.9608606379275250e-06
-x[   54]= 5.9608606379275250e-06
-x[   55]= 1.5605754508314236e-05
-x[   56]= 1.5605754508314236e-05
-x[   57]= 4.0856402887015182e-05
-x[   58]= 4.0856402887015182e-05
-x[   59]= 1.0696345415273130e-04
-x[   60]= 1.0696345415273130e-04
-x[   61]= 2.8003395957117871e-04
-x[   62]= 2.8003395957117871e-04
-x[   63]= 7.3313842456080485e-04
-x[   64]= 7.3313842456080485e-04
-x[   65]= 1.9193813141112359e-03
-x[   66]= 1.9193813141112359e-03
-x[   67]= 5.0250055177729035e-03
-x[   68]= 5.0250055177729035e-03
-x[   69]= 1.3155635239207474e-02
-x[   70]= 1.3155635239207474e-02
-x[   71]= 3.4441900199849516e-02
-x[   72]= 3.4441900199849516e-02
-x[   73]= 9.0170065360341084e-02
-x[   74]= 9.0170065360341084e-02
-x[   75]= 2.3606829588117373e-01
-x[   76]= 2.3606829588117373e-01
-x[   77]= 6.1803482228318007e-01
-x[   78]= 6.1803482228318007e-01
-DenseVector "y_c" with 38 elements:
-y_c[    1]=-1.5811301426863460e-08
-y_c[    2]=-1.5811301426863460e-08
-y_c[    3]=-4.7433904280590380e-08
-y_c[    4]=-4.7433904280590380e-08
-y_c[    5]=-1.2649041141490768e-07
-y_c[    6]=-1.2649041141490768e-07
-y_c[    7]=-3.3203732996413266e-07
-y_c[    8]=-3.3203732996413266e-07
-y_c[    9]=-8.6962157847749040e-07
-y_c[   10]=-8.6962157847749040e-07
-y_c[   11]=-2.2768274054683382e-06
-y_c[   12]=-2.2768274054683382e-06
-y_c[   13]=-5.9608606379275250e-06
-y_c[   14]=-5.9608606379275250e-06
-y_c[   15]=-1.5605754508314236e-05
-y_c[   16]=-1.5605754508314236e-05
-y_c[   17]=-4.0856402887015182e-05
-y_c[   18]=-4.0856402887015182e-05
-y_c[   19]=-1.0696345415273130e-04
-y_c[   20]=-1.0696345415273130e-04
-y_c[   21]=-2.8003395957117871e-04
-y_c[   22]=-2.8003395957117871e-04
-y_c[   23]=-7.3313842456080485e-04
-y_c[   24]=-7.3313842456080485e-04
-y_c[   25]=-1.9193813141112359e-03
-y_c[   26]=-1.9193813141112359e-03
-y_c[   27]=-5.0250055177729035e-03
-y_c[   28]=-5.0250055177729035e-03
-y_c[   29]=-1.3155635239207474e-02
-y_c[   30]=-1.3155635239207474e-02
-y_c[   31]=-3.4441900199849516e-02
-y_c[   32]=-3.4441900199849516e-02
-y_c[   33]=-9.0170065360341084e-02
-y_c[   34]=-9.0170065360341084e-02
-y_c[   35]=-2.3606829588117373e-01
-y_c[   36]=-2.3606829588117373e-01
-y_c[   37]=-6.1803482228318007e-01
-y_c[   38]=-6.1803482228318007e-01
-DenseVector "y_d" with 2 elements:
-y_d[    1]=-1.6180361709683664e+00
-y_d[    2]=-1.6180361709683664e+00
-DenseVector "z_L" with 0 elements:
-DenseVector "z_U" with 0 elements:
-DenseVector "v_L" with 2 elements:
-v_L[    1]= 1.6180379566511389e+00
-v_L[    2]= 1.6180379566511389e+00
-DenseVector "v_U" with 2 elements:
-v_U[    1]= 1.7856827725235480e-06
-v_U[    2]= 1.7856827725235480e-06
 
-Number of objective function evaluations             = 5
-Number of objective gradient evaluations             = 5
-Number of equality constraint evaluations            = 5
-Number of inequality constraint evaluations          = 5
-Number of equality constraint Jacobian evaluations   = 5
-Number of inequality constraint Jacobian evaluations = 5
-Number of Lagrangian Hessian evaluations             = 4
+
+
+Number of Iterations....: 5
+
+                                   (scaled)                 (unscaled)
+Objective...............:   1.9825927191889280e+03    1.9825927191889280e+03
+Dual infeasibility......:   1.8452794847689802e-11    1.8452794847689802e-11
+Constraint violation....:   1.7763568394002505e-15    1.7763568394002505e-15
+Complementarity.........:   1.8497475275305382e-06    1.8497475275305382e-06
+Overall NLP error.......:   1.8497475275305382e-06    1.8497475275305382e-06
+
+
+Number of objective function evaluations             = 6
+Number of objective gradient evaluations             = 6
+Number of equality constraint evaluations            = 6
+Number of inequality constraint evaluations          = 6
+Number of equality constraint Jacobian evaluations   = 6
+Number of inequality constraint Jacobian evaluations = 6
+Number of Lagrangian Hessian evaluations             = 5
 Total CPU secs in IPOPT (w/o function evaluations)   =      0.001
 Total CPU secs in NLP function evaluations           =      0.000
 
 EXIT: Optimal Solution Found.
-DenseVector "final x unscaled" with 78 elements:
-final x unscaled[    1]= 1.5811301426863460e-08
-final x unscaled[    2]= 1.5811301426863460e-08
-final x unscaled[    3]= 3.1622602853726920e-08
-final x unscaled[    4]= 3.1622602853726920e-08
-final x unscaled[    5]= 7.9056507134317299e-08
-final x unscaled[    6]= 7.9056507134317299e-08
-final x unscaled[    7]= 2.0554691854922498e-07
-final x unscaled[    8]= 2.0554691854922498e-07
-final x unscaled[    9]= 5.3758424851335774e-07
-final x unscaled[   10]= 5.3758424851335774e-07
-final x unscaled[   11]= 1.4072058269908481e-06
-final x unscaled[   12]= 1.4072058269908481e-06
-final x unscaled[   13]= 3.6840332324591864e-06
-final x unscaled[   14]= 3.6840332324591864e-06
-final x unscaled[   15]= 9.6448938703867101e-06
-final x unscaled[   16]= 9.6448938703867101e-06
-final x unscaled[   17]= 2.5250648378700946e-05
-final x unscaled[   18]= 2.5250648378700946e-05
-final x unscaled[   19]= 6.6107051265716128e-05
-final x unscaled[   20]= 6.6107051265716128e-05
-final x unscaled[   21]= 1.7307050541844740e-04
-final x unscaled[   22]= 1.7307050541844740e-04
-final x unscaled[   23]= 4.5310446498962614e-04
-final x unscaled[   24]= 4.5310446498962614e-04
-final x unscaled[   25]= 1.1862428895504308e-03
-final x unscaled[   26]= 1.1862428895504308e-03
-final x unscaled[   27]= 3.1056242036616669e-03
-final x unscaled[   28]= 3.1056242036616669e-03
-final x unscaled[   29]= 8.1306297214345704e-03
-final x unscaled[   30]= 8.1306297214345704e-03
-final x unscaled[   31]= 2.1286264960642044e-02
-final x unscaled[   32]= 2.1286264960642044e-02
-final x unscaled[   33]= 5.5728165160491561e-02
-final x unscaled[   34]= 5.5728165160491561e-02
-final x unscaled[   35]= 1.4589823052083262e-01
-final x unscaled[   36]= 1.4589823052083262e-01
-final x unscaled[   37]= 3.8196652640200635e-01
-final x unscaled[   38]= 3.8196652640200635e-01
-final x unscaled[   39]= 1.0000013486851864e+00
-final x unscaled[   40]= 1.0000013486851864e+00
-final x unscaled[   41]= 1.5811301426863460e-08
-final x unscaled[   42]= 1.5811301426863460e-08
-final x unscaled[   43]= 4.7433904280590380e-08
-final x unscaled[   44]= 4.7433904280590380e-08
-final x unscaled[   45]= 1.2649041141490768e-07
-final x unscaled[   46]= 1.2649041141490768e-07
-final x unscaled[   47]= 3.3203732996413266e-07
-final x unscaled[   48]= 3.3203732996413266e-07
-final x unscaled[   49]= 8.6962157847749040e-07
-final x unscaled[   50]= 8.6962157847749040e-07
-final x unscaled[   51]= 2.2768274054683382e-06
-final x unscaled[   52]= 2.2768274054683382e-06
-final x unscaled[   53]= 5.9608606379275250e-06
-final x unscaled[   54]= 5.9608606379275250e-06
-final x unscaled[   55]= 1.5605754508314236e-05
-final x unscaled[   56]= 1.5605754508314236e-05
-final x unscaled[   57]= 4.0856402887015182e-05
-final x unscaled[   58]= 4.0856402887015182e-05
-final x unscaled[   59]= 1.0696345415273130e-04
-final x unscaled[   60]= 1.0696345415273130e-04
-final x unscaled[   61]= 2.8003395957117871e-04
-final x unscaled[   62]= 2.8003395957117871e-04
-final x unscaled[   63]= 7.3313842456080485e-04
-final x unscaled[   64]= 7.3313842456080485e-04
-final x unscaled[   65]= 1.9193813141112359e-03
-final x unscaled[   66]= 1.9193813141112359e-03
-final x unscaled[   67]= 5.0250055177729035e-03
-final x unscaled[   68]= 5.0250055177729035e-03
-final x unscaled[   69]= 1.3155635239207474e-02
-final x unscaled[   70]= 1.3155635239207474e-02
-final x unscaled[   71]= 3.4441900199849516e-02
-final x unscaled[   72]= 3.4441900199849516e-02
-final x unscaled[   73]= 9.0170065360341084e-02
-final x unscaled[   74]= 9.0170065360341084e-02
-final x unscaled[   75]= 2.3606829588117373e-01
-final x unscaled[   76]= 2.3606829588117373e-01
-final x unscaled[   77]= 6.1803482228318007e-01
-final x unscaled[   78]= 6.1803482228318007e-01
-DenseVector "final y_c unscaled" with 38 elements:
-final y_c unscaled[    1]=-1.5811301426863460e-08
-final y_c unscaled[    2]=-1.5811301426863460e-08
-final y_c unscaled[    3]=-4.7433904280590380e-08
-final y_c unscaled[    4]=-4.7433904280590380e-08
-final y_c unscaled[    5]=-1.2649041141490768e-07
-final y_c unscaled[    6]=-1.2649041141490768e-07
-final y_c unscaled[    7]=-3.3203732996413266e-07
-final y_c unscaled[    8]=-3.3203732996413266e-07
-final y_c unscaled[    9]=-8.6962157847749040e-07
-final y_c unscaled[   10]=-8.6962157847749040e-07
-final y_c unscaled[   11]=-2.2768274054683382e-06
-final y_c unscaled[   12]=-2.2768274054683382e-06
-final y_c unscaled[   13]=-5.9608606379275250e-06
-final y_c unscaled[   14]=-5.9608606379275250e-06
-final y_c unscaled[   15]=-1.5605754508314236e-05
-final y_c unscaled[   16]=-1.5605754508314236e-05
-final y_c unscaled[   17]=-4.0856402887015182e-05
-final y_c unscaled[   18]=-4.0856402887015182e-05
-final y_c unscaled[   19]=-1.0696345415273130e-04
-final y_c unscaled[   20]=-1.0696345415273130e-04
-final y_c unscaled[   21]=-2.8003395957117871e-04
-final y_c unscaled[   22]=-2.8003395957117871e-04
-final y_c unscaled[   23]=-7.3313842456080485e-04
-final y_c unscaled[   24]=-7.3313842456080485e-04
-final y_c unscaled[   25]=-1.9193813141112359e-03
-final y_c unscaled[   26]=-1.9193813141112359e-03
-final y_c unscaled[   27]=-5.0250055177729035e-03
-final y_c unscaled[   28]=-5.0250055177729035e-03
-final y_c unscaled[   29]=-1.3155635239207474e-02
-final y_c unscaled[   30]=-1.3155635239207474e-02
-final y_c unscaled[   31]=-3.4441900199849516e-02
-final y_c unscaled[   32]=-3.4441900199849516e-02
-final y_c unscaled[   33]=-9.0170065360341084e-02
-final y_c unscaled[   34]=-9.0170065360341084e-02
-final y_c unscaled[   35]=-2.3606829588117373e-01
-final y_c unscaled[   36]=-2.3606829588117373e-01
-final y_c unscaled[   37]=-6.1803482228318007e-01
-final y_c unscaled[   38]=-6.1803482228318007e-01
-DenseVector "final y_d unscaled" with 2 elements:
-final y_d unscaled[    1]=-1.6180361709683664e+00
-final y_d unscaled[    2]=-1.6180361709683664e+00
-DenseVector "final z_L unscaled" with 0 elements:
-DenseVector "final z_U unscaled" with 0 elements:
       solver  :   t_proc      (avg)   t_wall      (avg)    n_eval
-       nlp_f  |   7.00us (  1.40us)   6.01us (  1.20us)         5
-       nlp_g  |   8.00us (  1.60us)   8.17us (  1.63us)         5
-  nlp_grad_f  |  10.00us (  2.00us)   8.92us (  1.78us)         5
-  nlp_hess_l  |   8.00us (  2.00us)   6.12us (  1.53us)         4
-   nlp_jac_g  |   7.00us (  1.40us)   6.19us (  1.24us)         5
-       total  |   3.80ms (  3.80ms)   3.80ms (  3.80ms)         1
+       nlp_f  |   8.00us (  1.33us)   7.67us (  1.28us)         6
+       nlp_g  |  10.00us (  1.67us)   9.98us (  1.66us)         6
+  nlp_grad_f  |  12.00us (  2.00us)  10.45us (  1.74us)         6
+  nlp_hess_l  |   5.00us (  1.00us)   4.15us (830.00ns)         5
+   nlp_jac_g  |   6.00us (  1.00us)   6.76us (  1.13us)         6
+       total  |   2.36ms (  2.36ms)   2.36ms (  2.36ms)         1
 None

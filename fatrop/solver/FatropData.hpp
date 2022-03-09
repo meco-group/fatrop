@@ -70,12 +70,15 @@ namespace fatrop
         }
         double EMuCurr(double mu)
         {
+            EvalDuInfSlacksEqs();
             double res = 0.0;
             double z_L1 = +ZL1Curr();
-            double lammean = (LamL1Curr() + z_L1) / (n_eqs + n_ineqs_r);
+            double lammean = (LamL1Curr() + z_L1) / (n_eqs  + n_ineqs_r);
             double z_mean = z_L1 / n_ineqs_r;
             double cv = CVLinfCurr();
             double du = DuInfLinfCurr();
+            double dus = Linf(du_inf_curr_s);
+            du = MAX(du, dus);
             double compl_slack = EvalCompSlackInf(mu);
             double sd = 0.0;
             double sc = 0.0;
@@ -98,7 +101,8 @@ namespace fatrop
             VEC *upper_bound_p = (VEC *)s_upper;
             VEC *lam_curr_p = (VEC *)lam_curr;
             VEC *du_inf_curr_s_p = (VEC *)du_inf_curr_s;
-            VECCPSC(n_ineqs, -1.0, lam_curr_p, n_eqs, du_inf_curr_s_p, 0);
+            VECCPSC(n_ineqs, -1.0, lam_curr_p, n_eqs - n_ineqs, du_inf_curr_s_p, 0);
+            // lam_curr.print();
             VEC *zL_p = (VEC *)zL_curr;
             VEC *zU_p = (VEC *)zU_curr;
             for (int i = 0; i < n_ineqs; i++)
