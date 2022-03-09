@@ -232,7 +232,7 @@ namespace fatrop
                     double pR = MIN(kappa1 * MAX(1.0, abs(upperi)), kappa2 * (upperi - loweri));
                     DBGASSERT((pL>0)&&(pR>0));
                     VECEL(s_curr_p, i) = MIN(MAX(VECEL(s_curr_p, i), loweri + pL), upperi - pR);
-                    DBGASSERT((VECEL(s_curr_p,i)<loweri)||(VECEL(s_curr_p,i)>upperi))
+                    DBGASSERT((VECEL(s_curr_p,i)>loweri)||(VECEL(s_curr_p,i)<upperi));
                 }
                 else if (lower_bounded)
                 {
