@@ -416,7 +416,7 @@ namespace fatrop
                 const int ng = ng_p[K - 1];
                 const int ng_ineq = ng_ineq_p[K - 1];
                 const int offs_ineq_k = offs_ineq_p[K - 1];
-                const int offs_g_ineq_k = offs_ineq_p[K - 1];
+                const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 // DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
@@ -459,7 +459,7 @@ namespace fatrop
                 const int ng = ng_p[k];
                 const int ng_ineq = ng_ineq_p[k];
                 const int offs_ineq_k = offs_ineq_p[k];
-                const int offs_g_ineq_k = offs_ineq_p[k];
+                const int offs_g_ineq_k = offs_g_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
                 if (Hp1_size + ng > nu + nx)
