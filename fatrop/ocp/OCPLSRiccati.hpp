@@ -414,16 +414,16 @@ namespace fatrop
                 const int nx = nx_p[K - 1];
                 const int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
                 const int ng = ng_p[K - 1];
-                const int ng_ineq = ng_ineq_p[K-1];
-                const int offs_ineq_k = offs_ineq_p[K-1];
-                const int offs_g_ineq_k = offs_ineq_p[K-1];
+                const int ng_ineq = ng_ineq_p[K - 1];
+                const int offs_ineq_k = offs_ineq_p[K - 1];
+                const int offs_g_ineq_k = offs_ineq_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 // DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
                 //// inequalities
                 if (ng_ineq > 0)
                 {
-                    GECP(nx, ng_ineq, Ggt_ineq_p + K-1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+                    GECP(nx, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
                     for (int i = 0; i < ng_ineq; i++)
                     {
                         double zLi = VECEL(zL_p, offs_ineq_k + i);
@@ -444,7 +444,7 @@ namespace fatrop
                         VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier;
                     }
                     // add the penalty
-                    SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K-1, nu, 0, 1.0, Ppt_p + K-1, 0, 0, Ppt_p + K-1, 0, 0);
+                    SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
                 }
                 // Hh_Km1 <- Gg_Km1
                 GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
@@ -1173,6 +1173,27 @@ namespace fatrop
                     }
                 }
             }
+            // {
+            //     FatropMemoryVecBF test(100, 1);
+            //     VEC *test_p = (VEC *)test[0];
+            //     const int k = K - 1;
+            //     const int nx = nx_p[k];
+            //     const int ng = ng_p[k];
+            //     const int nxm1 = nx_p[k - 1];
+            //     const int nu = nu_p[k];
+            //     const int ng_ineq = ng_ineq_p[k];
+            //     const int offs = offs_ux[k];
+            //     const int offs_g_ineq_k = offs_g_ineq_p[k];
+            //     const int offs_ineq_k = offs_ineq_p[k];
+            //     const int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
+            //     const int offs_g_k = offs_g[k];
+            //     ROWEX(nx, 1.0, RSQrqt_p + k, nu + nx, nu, test_p, 0);
+            //     GEMV_N(nx, nx, 1.0, RSQrqt_p+k, nu, nu, ux_p, offs +nu,1.0, test_p, 0, test_p, 0);
+            //     AXPY(nx, -1.0, lam_p, offs_dyn_eq_km1, test_p, 0, test_p, 0);
+            //     GEMV_N(nx, ng, 1.0, Ggt_p+k, nu, nu, lam_p, offs_g_k,1.0, test_p, 0, test_p, 0);
+            //     GEMV_N(nx, ng_ineq, 1.0, Ggt_ineq_p+k, nu, nu, lam_p, offs_g_ineq_k,1.0, test_p, 0, test_p, 0);
+            //     cout << "Linf " << Linf(test[0]) << endl;
+            // }
             // double el = blasfeo_toc(&timer);
             // cout << "el time " << el << endl;
             return 0;
