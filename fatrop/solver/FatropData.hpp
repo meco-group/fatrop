@@ -230,18 +230,9 @@ namespace fatrop
                 {
                     double pL = MIN(kappa1 * MAX(1.0, abs(loweri)), kappa2 * (upperi - loweri));
                     double pR = MIN(kappa1 * MAX(1.0, abs(upperi)), kappa2 * (upperi - loweri));
-                    assert((pL>0)&&(pR>0));
-                    // project
-                    // double veccache = VECEL(s_curr_p, i);
+                    DBGASSERT((pL>0)&&(pR>0));
                     VECEL(s_curr_p, i) = MIN(MAX(VECEL(s_curr_p, i), loweri + pL), upperi - pR);
-                    if((VECEL(s_curr_p,i)<loweri)||(VECEL(s_curr_p,i)>upperi))
-                    {
-                        cout << "error"<<endl;
-                    }
-                    // if(VECEL(s_curr_p, i) != veccache)
-                    // {
-                    //     cout << "changed slack to be in bounds"<< endl;
-                    // }
+                    DBGASSERT((VECEL(s_curr_p,i)<loweri)||(VECEL(s_curr_p,i)>upperi))
                 }
                 else if (lower_bounded)
                 {
