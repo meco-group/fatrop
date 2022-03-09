@@ -112,7 +112,7 @@ namespace fatrop
                 }
                 if (!isinf(upperi))
                 {
-                    VECEL(du_inf_curr_s_p, i) -= VECEL(zU_p, i);
+                    VECEL(du_inf_curr_s_p, i) += VECEL(zU_p, i);
                 }
             }
             return 0;
