@@ -466,7 +466,7 @@ namespace fatrop
         {
             return 0.0;
         }
-        double res = abs(VECEL(va_p, offset);
+        double res = abs(VECEL(va_p, offset));
         for (int i = offset+1; i < nels + offset; i++)
         {
             res = MIN(res, abs(VECEL(va_p, i)));
