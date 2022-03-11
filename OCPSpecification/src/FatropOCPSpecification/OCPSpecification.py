@@ -38,28 +38,28 @@ class OCPSpecificationInterface:
 
     @abstractmethod
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
-        return SX.zeros(0)
+        return MX.zeros(0)
 
     @abstractmethod
     def EqConstrFinal(self, xK, stage_params, global_params):
-        return SX.zeros(0)
+        return MX.zeros(0)
 
     @abstractmethod
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
-        return SX.zeros(0)
+        return MX.zeros(0)
     @abstractmethod
     def StageWiseInequalityBounds(self):
         return np.array([]), np.array([]) 
     @abstractmethod
     def FinalInequality(self, xk, stage_params, global_params):
-        return SX.zeros(0)
+        return MX.zeros(0)
     @abstractmethod
     def FinalInequalityBounds(self):
         return np.array([]), np.array([]) 
 
     @abstractmethod
     def DefaultStageParams(self):
-        return SX.zeros(self.n_stage_params)
+        return MX.zeros(self.n_stage_params)
 
 
 class JSONGenerator:
@@ -109,10 +109,10 @@ class FatropOCPCodeGenerator:
         n_stage_params = self.ocpspec.n_stage_params
         n_global_params = self.ocpspec.n_global_params
         # make symbols for variables
-        u_sym = SX.sym("inputs", nu)
-        x_sym = SX.sym("states", nx)
-        stage_params_sym = SX.sym("states", n_stage_params)
-        global_params_sym = SX.sym("states", n_global_params)
+        u_sym = MX.sym("inputs", nu)
+        x_sym = MX.sym("states", nx)
+        stage_params_sym = MX.sym("states", n_stage_params)
+        global_params_sym = MX.sym("states", n_global_params)
         # make expressions for functions
         dynamics = self.ocpspec.Dynamics(
             u_sym, x_sym, stage_params_sym, global_params_sym)
@@ -133,26 +133,26 @@ class FatropOCPCodeGenerator:
         ngIneq = ineq.shape[0]
         ngIneqF = ineqF.shape[0]
         # make symbols for dual variables
-        dual_dyn = SX.sym("d_dyn", nx)
-        dual_eqI = SX.sym("d_EqI", ngI)
-        dualIneq = SX.sym("dualineq", ngIneq)
-        dualIneqF = SX.sym("dualineqF", ngIneqF)
-        dual_eqF = SX.sym("d_EqF", ngF)
-        obj_scale = SX.sym("obj_scale")
+        dual_dyn = MX.sym("d_dyn", nx)
+        dual_eqI = MX.sym("d_EqI", ngI)
+        dualIneq = MX.sym("dualineq", ngIneq)
+        dualIneqF = MX.sym("dualineqF", ngIneqF)
+        dual_eqF = MX.sym("d_EqF", ngF)
+        obj_scale = MX.sym("obj_scale")
         # BAbt
-        stateskp1 = SX.sym("states_kp1", nx)
-        BAbt = SX.zeros(nu+nx+1, nx)
+        stateskp1 = MX.sym("states_kp1", nx)
+        BAbt = MX.zeros(nu+nx+1, nx)
         BAbt[:nu+nx,
              :] = jacobian(dynamics, vertcat(u_sym, x_sym)).T
         b = (-stateskp1 + dynamics)[:]
         BAbt[nu+nx, :] = b
         C.add(
-            Function("BAbt", [stateskp1, u_sym, x_sym, stage_params_sym, global_params_sym], [densify(BAbt)]))
+            Function("BAbt", [stateskp1, u_sym, x_sym, stage_params_sym, global_params_sym], [densify(BAbt)]).expand())
         # b
         C.add(Function("bk", [stateskp1, u_sym,
-                              x_sym, stage_params_sym, global_params_sym], [densify(b)]))
+                              x_sym, stage_params_sym, global_params_sym], [densify(b)]).expand())
         # RSQrqtI
-        RSQrqtI = SX.zeros(nu+nx+1, nu + nx)
+        RSQrqtI = MX.zeros(nu+nx+1, nu + nx)
         [RSQI, rqI] = hessian(Lk, vertcat(u_sym, x_sym))
         if ngI > 0:
             RSQI += hessian(dual_eqI.T@eqI, vertcat(u_sym, x_sym))[0]
@@ -164,12 +164,12 @@ class FatropOCPCodeGenerator:
         RSQrqtI[:nu+nx, :] = RSQI
         RSQrqtI[nu+nx, :] = rqI[:]
         C.add(Function("RSQrqtI", [obj_scale, u_sym,
-              x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtI)]))
+              x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
         rqI
         C.add(Function("rqI", [obj_scale,
-              u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqI)]))
+              u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqI)]).expand())
         # RSQrqt
-        RSQrqt = SX.zeros(nu+nx+1, nu + nx)
+        RSQrqt = MX.zeros(nu+nx+1, nu + nx)
         [RSQ, rq] = hessian(Lk, vertcat(u_sym, x_sym))
         RSQ += hessian(dual_dyn.T@dynamics,
                        vertcat(u_sym, x_sym))[0]
@@ -179,15 +179,15 @@ class FatropOCPCodeGenerator:
         RSQrqt[:nu+nx, :] = RSQ
         RSQrqt[nu+nx, :] = rq[:]
         C.add(Function("RSQrqt", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]))
+              dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
         # rqF
         C.add(Function("rqk", [obj_scale,
-              u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rq)]))
+              u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rq)]).expand())
         # Lk
         C.add(Function("Lk", [obj_scale, u_sym,
-              x_sym, stage_params_sym, global_params_sym], [densify(Lk)]))
+              x_sym, stage_params_sym, global_params_sym], [densify(Lk)]).expand())
         # RSQrqtF
-        RSQrqtF = SX.zeros(nx+1, nx)
+        RSQrqtF = MX.zeros(nx+1, nx)
         [RSQF, rqF] = hessian(LF, vertcat(x_sym))
         if ngF > 0:
             RSQF += hessian(dual_eqF.T@eqF,
@@ -200,52 +200,52 @@ class FatropOCPCodeGenerator:
         RSQrqtF[:nx, :] = RSQF
         RSQrqtF[nx, :] = rqF[:]
         C.add(Function("RSQrqtF", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqF, dualIneqF, stage_params_sym, global_params_sym], [densify(RSQrqtF)]))
+              dual_dyn, dual_eqF, dualIneqF, stage_params_sym, global_params_sym], [densify(RSQrqtF)]).expand())
         # rqF
         C.add(Function("rqF", [obj_scale,
-              u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqF)]))
+              u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqF)]).expand())
         # LF
         C.add(Function("LF", [obj_scale, u_sym,
-              x_sym, stage_params_sym, global_params_sym], [densify(LF)]))
+              x_sym, stage_params_sym, global_params_sym], [densify(LF)]).expand())
         # GgtI
-        GgtI = SX.zeros(nu+nx+1, ngI)
+        GgtI = MX.zeros(nu+nx+1, ngI)
         GgtI[:nu+nx,
              :] = jacobian(eqI, vertcat(u_sym, x_sym)).T
         GgtI[nu+nx, :] = eqI[:].T
         C.add(Function(
-            "GgtI", [u_sym, x_sym, stage_params_sym, global_params_sym], [densify(GgtI)]))
+            "GgtI", [u_sym, x_sym, stage_params_sym, global_params_sym], [densify(GgtI)]).expand())
         # g_I
         C.add(Function("gI", [u_sym, x_sym, stage_params_sym,
-              global_params_sym], [densify(eqI[:])]))
+              global_params_sym], [densify(eqI[:])]).expand())
         # GgtF
-        GgtF = SX.zeros(nx+1, ngF)
+        GgtF = MX.zeros(nx+1, ngF)
         GgtF[:nx, :] = jacobian(eqF, x_sym).T
         GgtF[nx, :] = eqF[:].T
         C.add(Function(
-            "GgtF", [u_sym, x_sym, stage_params_sym, global_params_sym], [densify(GgtF)]))
+            "GgtF", [u_sym, x_sym, stage_params_sym, global_params_sym], [densify(GgtF)]).expand())
         # g_F
         C.add(Function("gF", [u_sym, x_sym, stage_params_sym,
-              global_params_sym], [densify(eqF[:])]))
+              global_params_sym], [densify(eqF[:])]).expand())
         # Ggineqt
-        Ggineqt = SX.zeros(nu+nx+1, ngIneq)
+        Ggineqt = MX.zeros(nu+nx+1, ngIneq)
         Ggineqt[:nu+nx,
                 :] = jacobian(ineq, vertcat(u_sym, x_sym)).T
         Ggineqt[nu+nx, :] = ineq[:].T
         C.add(Function("Ggineqt", [u_sym,
-              x_sym, stage_params_sym, global_params_sym], [densify(Ggineqt)]))
+              x_sym, stage_params_sym, global_params_sym], [densify(Ggineqt)]).expand())
         C.add(Function("gineq", [u_sym, x_sym, stage_params_sym, global_params_sym], [
-              densify(ineq[:])]))
+              densify(ineq[:])]).expand())
         # GgineqFt
-        GgineqFt = SX.zeros(nx+1, ngIneqF)
+        GgineqFt = MX.zeros(nx+1, ngIneqF)
         GgineqFt[:nx,
                 :] = jacobian(ineqF, vertcat(x_sym)).T
         GgineqFt[nx, :] = ineqF[:].T
         C.add(Function("GgineqFt", [
-              x_sym, stage_params_sym, global_params_sym], [densify(GgineqFt)]))
+              x_sym, stage_params_sym, global_params_sym], [densify(GgineqFt)]).expand())
         C.add(Function("gineqF", [x_sym, stage_params_sym, global_params_sym], [
-              densify(ineqF[:])]))
+              densify(ineqF[:])]).expand())
         C.add(Function("default_stage_params", [], [
-              densify(self.ocpspec.DefaultStageParams())]))
+              densify(self.ocpspec.DefaultStageParams())]).expand())
 
         C.generate()
         return
@@ -269,11 +269,11 @@ class OptiBuilder:
         self.x_vars = self.opti.variable(nx, K)
         self.u_vars = self.opti.variable(nu, K-1)
         # make symbols for variables
-        u_sym = SX.sym("inputs", nu)
-        x_sym = SX.sym("states", nx)
-        stage_params_sym = SX.sym("stageparams", self.ocpspec.n_stage_params)
-        global_params_sym = SX.sym("stageparams", self.ocpspec.n_global_params)
-        obj_scale = SX.sym("obj_scale", 1)
+        u_sym = MX.sym("inputs", nu)
+        x_sym = MX.sym("states", nx)
+        stage_params_sym = MX.sym("stageparams", self.ocpspec.n_stage_params)
+        global_params_sym = MX.sym("stageparams", self.ocpspec.n_global_params)
+        obj_scale = MX.sym("obj_scale", 1)
         # make expressions for functions
         dynamics = self.ocpspec.Dynamics(
             u_sym, x_sym, stage_params_sym, global_params_sym)
@@ -299,7 +299,7 @@ class OptiBuilder:
             "Lk", [obj_scale, x_sym, u_sym, stage_params_sym, global_params_sym], [Lk])
         LkFf = Function(
             "LF", [obj_scale, x_sym, stage_params_sym, global_params_sym], [LF])
-        stateskp1 = SX.sym("stateskp1", nx)
+        stateskp1 = MX.sym("stateskp1", nx)
         Dynamcisf = Function(
             "F", [stateskp1, x_sym, u_sym, stage_params_sym, global_params_sym], [-stateskp1 + dynamics])
         if ngI > 0:
@@ -360,26 +360,26 @@ class OptiBuilder:
 #         self.ngI = 0
 #         self.ngF = 0
 #         self.ngIneq = 0
-#         self.eqI = SX.sym("EqI", 0)
-#         self.dual_eqI = SX.sym("d_EqI", 0)
-#         self.dualIneq = SX.sym("dualineq", 0)
-#         self.eqF = SX.sym("d_EqI", 0)
-#         self.dual_eqF = SX.sym("d_EqF", 0)
-#         self.obj_scale = SX.sym("obj_scale")
-#         self.ineq = SX.sym("d_EqI", 0)
+#         self.eqI = MX.sym("EqI", 0)
+#         self.dual_eqI = MX.sym("d_EqI", 0)
+#         self.dualIneq = MX.sym("dualineq", 0)
+#         self.eqF = MX.sym("d_EqI", 0)
+#         self.dual_eqF = MX.sym("d_EqF", 0)
+#         self.obj_scale = MX.sym("obj_scale")
+#         self.ineq = MX.sym("d_EqI", 0)
 
 #     def get_states(self, nx):
 #         self.nx = nx
-#         self.x_sym = SX.sym('states', nx)
+#         self.x_sym = MX.sym('states', nx)
 #         return self.x_sym
 
 #     def get_inputs(self, nu):
 #         self.nu = nu
-#         self.u_sym = SX.sym('inputs', nu)
+#         self.u_sym = MX.sym('inputs', nu)
 #         return self.u_sym
 
 #     def set_dynamics(self, xkp1):
-#         self.dual_dyn = SX.sym("dual_dyn", self.nx)
+#         self.dual_dyn = MX.sym("dual_dyn", self.nx)
 #         self.dynamics = xkp1
 
 #     def set_stagecost(self, Lk):
@@ -390,18 +390,18 @@ class OptiBuilder:
 
 #     def set_eq_initial(self, eq):
 #         self.ngI = eq.shape[0]
-#         self.dual_eqI = SX.sym("dual_eqI", self.ngI)
+#         self.dual_eqI = MX.sym("dual_eqI", self.ngI)
 #         self.eqI = eq
 
 #     def set_eq_final(self, eq):
 #         self.ngF = eq.shape[0]
-#         self.dual_eqF = SX.sym("dual_eqF", self.ngF)
+#         self.dual_eqF = MX.sym("dual_eqF", self.ngF)
 #         self.eqF = eq
 
 #     def set_ineq(self, ineq, lower, upper):
 #         # todo no ineq on final stage x
 #         self.ngIneq = ineq.shape[0]
-#         self.dualIneq = SX.sym("dual_Ineq", self.ngIneq)
+#         self.dualIneq = MX.sym("dual_Ineq", self.ngIneq)
 #         self.ineq = ineq
 #         self.lower = lower
 #         self.upper = upper
@@ -424,7 +424,7 @@ class OptiBuilder:
 #         Lkf = Function(
 #             "Lk", [self.obj_scale, self.x_sym, self.u_sym], [self.Lk])
 #         LkFf = Function("LF", [self.obj_scale, self.x_sym], [self.LF])
-#         stateskp1 = SX.sym("stateskp1", nx)
+#         stateskp1 = MX.sym("stateskp1", nx)
 #         Dynamcisf = Function(
 #             "F", [stateskp1, self.x_sym, self.u_sym], [-stateskp1 + self.dynamics])
 #         if self.ngI > 0:
@@ -460,8 +460,8 @@ class OptiBuilder:
 #     def generate_code(self, filename):
 #         C = CodeGenerator(filename)
 #         # BAbt
-#         stateskp1 = SX.sym("states_kp1", self.nx)
-#         BAbt = SX.zeros(self.nu+self.nx+1, self.nx)
+#         stateskp1 = MX.sym("states_kp1", self.nx)
+#         BAbt = MX.zeros(self.nu+self.nx+1, self.nx)
 #         BAbt[:self.nu+self.nx,
 #              :] = jacobian(self.dynamics, vertcat(self.u_sym, self.x_sym)).T
 #         b = (-stateskp1 + self.dynamics)[:]
@@ -472,7 +472,7 @@ class OptiBuilder:
 #         C.add(Function("bk", [stateskp1, self.u_sym,
 #                               self.x_sym], [densify(b)]))
 #         # RSQrqtI
-#         RSQrqtI = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
+#         RSQrqtI = MX.zeros(self.nu+self.nx+1, self.nu + self.nx)
 #         [RSQI, rqI] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
 #         if self.ngI > 0:
 #             RSQI += hessian(self.dual_eqI.T@self.eqI,
@@ -490,7 +490,7 @@ class OptiBuilder:
 #         C.add(Function("rqI", [self.obj_scale,
 #               self.u_sym, self.x_sym], [densify(rqI)]))
 #         # RSQrqt
-#         RSQrqt = SX.zeros(self.nu+self.nx+1, self.nu + self.nx)
+#         RSQrqt = MX.zeros(self.nu+self.nx+1, self.nu + self.nx)
 #         [RSQ, rq] = hessian(self.Lk, vertcat(self.u_sym, self.x_sym))
 #         RSQ += hessian(self.dual_dyn.T@self.dynamics,
 #                        vertcat(self.u_sym, self.x_sym))[0]
@@ -508,7 +508,7 @@ class OptiBuilder:
 #         C.add(Function("Lk", [self.obj_scale, self.u_sym,
 #               self.x_sym], [densify(self.Lk)]))
 #         # RSQrqtF
-#         RSQrqtF = SX.zeros(self.nx+1, self.nx)
+#         RSQrqtF = MX.zeros(self.nx+1, self.nx)
 #         [RSQF, rqF] = hessian(self.LF, vertcat(self.x_sym))
 #         if self.ngF > 0:
 #             RSQF += hessian(self.dual_eqF.T@self.eqF,
@@ -526,7 +526,7 @@ class OptiBuilder:
 #         C.add(Function("LF", [self.obj_scale, self.u_sym,
 #               self.x_sym], [densify(self.LF)]))
 #         # GgtI
-#         GgtI = SX.zeros(self.nu+self.nx+1, self.ngI)
+#         GgtI = MX.zeros(self.nu+self.nx+1, self.ngI)
 #         GgtI[:self.nu+self.nx,
 #              :] = jacobian(self.eqI, vertcat(self.u_sym, self.x_sym)).T
 #         GgtI[self.nu+self.nx, :] = self.eqI[:].T
@@ -534,14 +534,14 @@ class OptiBuilder:
 #         # g_I
 #         C.add(Function("gI", [self.u_sym, self.x_sym], [densify(self.eqI[:])]))
 #         # GgtF
-#         GgtF = SX.zeros(self.nx+1, self.ngF)
+#         GgtF = MX.zeros(self.nx+1, self.ngF)
 #         GgtF[:self.nx, :] = jacobian(self.eqF, self.x_sym).T
 #         GgtF[self.nx, :] = self.eqF[:].T
 #         C.add(Function("GgtF", [self.u_sym, self.x_sym], [densify(GgtF)]))
 #         # g_F
 #         C.add(Function("gF", [self.u_sym, self.x_sym], [densify(self.eqF[:])]))
 #         # Ggineqt
-#         Ggineqt = SX.zeros(self.nu+self.nx+1, self.ngIneq)
+#         Ggineqt = MX.zeros(self.nu+self.nx+1, self.ngIneq)
 #         Ggineqt[:self.nu+self.nx,
 #                 :] = jacobian(self.ineq, vertcat(self.u_sym, self.x_sym)).T
 #         Ggineqt[self.nu+self.nx, :] = self.ineq[:].T

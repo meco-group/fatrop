@@ -12,8 +12,8 @@ class RockDyns:
        self.xk_rot = reshape(xk[self.ind_rot], 2,2)
        self.xk_vel = xk[self.ind_vel]
        self.xk_omega = xk[self.ind_omega]
-       xkp1 = SX.zeros(nx)
-       drot = SX.zeros(2,2)
+       xkp1 = MX.zeros(nx)
+       drot = MX.zeros(2,2)
        drot[0,0] =cos(self.xk_omega*dt)
        drot[0,1] = -sin(self.xk_omega*dt)
        drot[1,0] = sin(self.xk_omega*dt)
