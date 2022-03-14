@@ -27,6 +27,7 @@ namespace fatrop
         // double gamma_theta = 1e-8;
         double gamma_theta = 1e-5; // todo check!!
         double gamma_phi = 1e-8;
+        double gamma_alpha = 0.05;
         double eta_phi = 1e-4;
         double delta_c_stripe = 1e-8;
         double kappa_c = 0.25;

@@ -61,6 +61,7 @@ namespace fatrop
             gamma_theta = fatrop_params_->gamma_theta;
             gamma_phi = fatrop_params_->gamma_phi;
             eta_phi = fatrop_params_->eta_phi;
+            gamma_alpha = fatrop_params_->gamma_alpha;
         }
         int FindAcceptableTrialPoint(double mu)
         {
@@ -75,10 +76,23 @@ namespace fatrop
             double lin_decr_curr = fatropdata_->LinDecrCurr();
             double barrier_decr_curr = fatropdata_->EvalBarrierLinDecr(mu);
             lin_decr_curr += barrier_decr_curr;
+            double theta_min = fatropdata_->theta_min;
+            // calculation of alpha_min
+            double alpha_min = gamma_alpha *
+                               (lin_decr_curr > 0 ? gamma_theta
+                                                  : MIN(gamma_theta,
+                                                        cv_curr < theta_min ? MIN(-gamma_phi * cv_curr / lin_decr_curr, delta * pow(cv_curr, s_theta) / (pow(-lin_decr_curr, s_phi)))
+                                                                            : -gamma_phi * cv_curr / lin_decr_curr));
+
+            cout << "alpha_min " << alpha_min << endl;
             // cout << "lindecr " << lin_decr_curr << endl;
             for (int ll = 1; ll < 50; ll++)
             {
                 fatropdata_->TryStep(alpha_primal, alpha_dual);
+                if (alpha_primal < alpha_min)
+                {
+                    return 0;
+                }
                 EvalCVNext();
                 double cv_next = fatropdata_->CVL1Next();
                 double obj_next = EvalObjNext();
@@ -90,7 +104,7 @@ namespace fatrop
                 {
                     bool switch_cond = (lin_decr_curr < 0) && (alpha_primal * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
                     bool armijo = obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr;
-                    if (switch_cond && (cv_curr <= fatropdata_->theta_min))
+                    if (switch_cond && (cv_curr <= theta_min))
                     {
                         // f-step
                         if (armijo)
@@ -132,6 +146,7 @@ namespace fatrop
         double gamma_theta;
         double gamma_phi;
         double eta_phi;
+        double gamma_alpha;
     };
 } // namespace fatrop
 #endif // LINESEARCHINCLUDED

@@ -179,6 +179,12 @@ namespace fatrop
                 // cout << "regularization  " << (deltaw) << endl;
                 // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
                 ls = linesearch_->FindAcceptableTrialPoint(mu);
+                if(ls ==0)
+                {
+                    cout << "error: restoration phase not implemented yet" << endl;
+                    return 1;
+                }
+                // if linesearch unsucesful -> resto phase
                 fatropdata_->AdaptDualBounds(mu);
             }
             return 0;
