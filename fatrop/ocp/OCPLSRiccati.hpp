@@ -376,8 +376,6 @@ namespace fatrop
                             double dz = grad_barrier_U - z + scaling_factor_U * ds;
                             VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                             lamIi += +z + dz;
-                            VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-                            // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                         }
                         // double grad_barrier = grad_barrier_L + grad_barrier_U;
                         if (!(lower_bounded && upper_bounded))
@@ -868,21 +866,27 @@ namespace fatrop
                         double loweri = VECEL(lower_p, offs_ineq_k + i);
                         double upperi = VECEL(upper_p, offs_ineq_k + i);
                         double grad_barrier = 0.0;
-                        if (!isinf(loweri))
+                        bool lower_bounded = !isinf(loweri);
+                        bool upper_bounded = !isinf(upperi);
+                        if (lower_bounded)
                         {
                             double dist = si - loweri;
                             double dist_m1 = 1.0 / dist;
                             scaling_factor += zLi * dist_m1;
                             grad_barrier -= mu * dist_m1;
                         }
-                        if (!isinf(upperi))
+                        if (upper_bounded)
                         {
                             double dist = upperi - si;
                             double dist_m1 = 1.0 / dist;
                             scaling_factor += zUi * dist_m1;
                             grad_barrier += mu * dist_m1;
                         }
-                        COLSC(nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                        if (!(lower_bounded && upper_bounded))
+                        {
+                            grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
+                        }
+                        COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                         MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
                     }
                     // add the penalty
