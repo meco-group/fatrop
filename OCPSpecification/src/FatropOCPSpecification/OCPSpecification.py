@@ -551,3 +551,23 @@ class OptiBuilder:
 #               densify(self.ineq[:])]))
 #         C.generate()
 #         return
+class OptiCodeGenerator:
+    def __init__(self, opti_in:Opti, filename):
+        self.opti_in = opti_in
+        self.filename = filename
+        self.ng = opti_in.ng
+        self.np = opti_in.np
+        self.nx = opti_in.nx
+    def GenerateCode(self):
+        lag = self.opti_in.j + self.opti_in.lam_g.T@self.opti_in.g
+        constr = self.opti_in.g
+        hess_lag = hessian(lag, self.opti_in.x)[0]
+        grad_f = jacobian(self.opti_in.j, self.opti_in.x)
+        jac_g = jacobian(constr, self.opti_in.x)
+        cg = CodeGenerator(self.filename + '.c')
+        cg.add(Function('hess_lag', [self.opti_in.x, self.opti_in.p], [hess_lag]).expand())
+        cg.add(Function('grad_f', [self.opti_in.x, self.opti_in.p], [grad_f]).expand())
+        cg.add(Function('jac_g', [self.opti_in.x, self.opti_in.p], [jac_g]).expand())
+        cg.generate()
+    def GetOpti():
+        pass
