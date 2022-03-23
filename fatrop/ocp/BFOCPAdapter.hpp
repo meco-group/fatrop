@@ -34,6 +34,7 @@ namespace fatrop
             double *globalparams_p = (double *)globalparams.data();
             OCPMACRO(MAT *, RSQrqt, _p);
             OCPMACRO(int *, nu, _p);
+            OCPMACRO(int *, nx, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
             SOLVERMACRO(VEC *, lam, _p);
             double *primal_data = primal_vars_p->pa;
@@ -41,8 +42,10 @@ namespace fatrop
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
+                int nx_k = nx_p[k];
                 int offs_ux_k = offs_ux[k];
                 int offs_dyn_eq_k = offs_dyn_eq[k];
+                int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
                 int offs_g_k = offs_g[k];
                 int offs_ineq_k = offs_ineq[k];
                 int offs_stageparams_k = offs_stageparams_p[k];
@@ -57,6 +60,10 @@ namespace fatrop
                     globalparams_p,
                     RSQrqt_p + k,
                     k);
+                if (k > 0)
+                {
+                    ROWAD(nx_k, -1.0, lam_p, offs_dyn_eq_km1, RSQrqt_p + k, nu_k + nx_k, nu_k);
+                }
             }
             return 0;
         }
@@ -371,8 +378,8 @@ namespace fatrop
             {
                 int nu_k = ocptempl->get_nuk(k);
                 int nx_k = ocptempl->get_nxk(k);
-                PACKVEC(nu_k, u_p+ offs_nu, 1, ux_intial_p, offs_nux);
-                PACKVEC(nx_k, x_p+ offs_nx, 1, ux_intial_p, offs_nux + nu_k);
+                PACKVEC(nu_k, u_p + offs_nu, 1, ux_intial_p, offs_nux);
+                PACKVEC(nx_k, x_p + offs_nx, 1, ux_intial_p, offs_nux + nu_k);
                 offs_nu += nu_k;
                 offs_nx += nx_k;
                 offs_nux += nu_k + nx_k;

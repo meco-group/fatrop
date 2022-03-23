@@ -40,6 +40,7 @@ namespace fatrop
             const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
+            const FatropVecBF &lam_curr,
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
@@ -51,11 +52,11 @@ namespace fatrop
         {
             if (inertia_correction_c == 0.0)
             {
-                return computeSDnor(OCP, inertia_correction_w, mu, kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
+                return computeSDnor(OCP, inertia_correction_w, mu, kappa_d, ux, lam, lam_curr, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
             else
             {
-                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, mu, kappa_d, ux, lam, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
+                return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, mu, kappa_d, ux, lam, lam_curr, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
             }
         }
         // solve a KKT system
@@ -67,6 +68,7 @@ namespace fatrop
             double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
+            const FatropVecBF &lam_curr,
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
@@ -98,6 +100,7 @@ namespace fatrop
             SOLVERMACRO(MAT *, Ggt_ineq_temp, _p);
             SOLVERMACRO(VEC *, ux, _p);
             SOLVERMACRO(VEC *, lam, _p);
+            SOLVERMACRO(VEC *, lam_curr, _p);
             SOLVERMACRO(VEC *, s, _p);
             SOLVERMACRO(VEC *, zL, _p);
             SOLVERMACRO(VEC *, zU, _p);
@@ -113,6 +116,7 @@ namespace fatrop
             MAT *RSQrq_hat_curr_p;
             double delta_cmin1 = 1 / inertia_correction_c;
             int *offs_ineq_p = (int *)OCP->aux.ineq_offs.data();
+            int *offs_g_ineq_p = (int *)OCP->aux.g_ineq_offs.data();
 
             /////////////// recursion ///////////////
 
@@ -123,6 +127,7 @@ namespace fatrop
                 const int ng = ng_p[K - 1];
                 const int ng_ineq = ng_ineq_p[K - 1];
                 const int offs_ineq_k = offs_ineq_p[K - 1];
+                const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 DIARE(nx, inertia_correction_w, Ppt_p + K - 1, 0, 0);
@@ -138,7 +143,7 @@ namespace fatrop
                         double si = VECEL(s_p, offs_ineq_k + i);
                         double loweri = VECEL(lower_p, offs_ineq_k + i);
                         double upperi = VECEL(upper_p, offs_ineq_k + i);
-                        double grad_barrier = 0.0;
+                        double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k+i);
                         if (!isinf(loweri))
                         {
                             double dist = si - loweri;
@@ -171,6 +176,7 @@ namespace fatrop
                 const int ng = ng_p[k];
                 const int ng_ineq = ng_ineq_p[k];
                 const int offs_ineq_k = offs_ineq_p[k];
+                const int offs_g_ineq_k = offs_g_ineq_p[k];
                 //////// SUBSDYN
                 {
                     // AL <- [BAb]^T_k P_kp1
@@ -194,7 +200,7 @@ namespace fatrop
                             double si = VECEL(s_p, offs_ineq_k + i);
                             double loweri = VECEL(lower_p, offs_ineq_k + i);
                             double upperi = VECEL(upper_p, offs_ineq_k + i);
-                            double grad_barrier = 0.0;
+                            double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k+i);
                             if (!isinf(loweri))
                             {
                                 double dist = si - loweri;
@@ -255,7 +261,6 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-            int *offs_g_ineq_p = (int *)OCP->aux.g_ineq_offs.data();
             // other stages
             // for (int k = 0; k < K - 1; k++)
             // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
@@ -382,7 +387,7 @@ namespace fatrop
                         {
                             lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi;
+                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi-VECEL(lam_curr_p, offs_g_ineq_k+i);
                         // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }
@@ -469,7 +474,7 @@ namespace fatrop
                 //// inequalities
                 if (ng_ineq > 0)
                 {
-                    GECP(nx, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+                    GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
                     for (int i = 0; i < ng_ineq; i++)
                     {
                         double zLi = VECEL(zL_p, offs_ineq_k + i);
@@ -780,6 +785,7 @@ namespace fatrop
             const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
+            const FatropVecBF &lam_curr,
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
@@ -823,6 +829,7 @@ namespace fatrop
             SOLVERMACRO(PMAT *, PrI, _p);
             SOLVERMACRO(VEC *, ux, _p);
             SOLVERMACRO(VEC *, lam, _p);
+            SOLVERMACRO(VEC *, lam_curr, _p);
             SOLVERMACRO(VEC *, s, _p);
             SOLVERMACRO(VEC *, zL, _p);
             SOLVERMACRO(VEC *, zU, _p);
@@ -840,6 +847,7 @@ namespace fatrop
             MAT *RSQrq_hat_curr_p;
             int rank_k;
             int *offs_ineq_p = (int *)OCP->aux.ineq_offs.data();
+            int *offs_g_ineq_p = (int *)OCP->aux.g_ineq_offs.data();
 
             /////////////// recursion ///////////////
 
@@ -850,6 +858,7 @@ namespace fatrop
                 const int ng = ng_p[K - 1];
                 const int ng_ineq = ng_ineq_p[K - 1];
                 const int offs_ineq_k = offs_ineq_p[K - 1];
+                const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
                 // Pp_Km1 <- Qq_Km1
                 GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
                 DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
@@ -865,7 +874,7 @@ namespace fatrop
                         double si = VECEL(s_p, offs_ineq_k + i);
                         double loweri = VECEL(lower_p, offs_ineq_k + i);
                         double upperi = VECEL(upper_p, offs_ineq_k + i);
-                        double grad_barrier = 0.0;
+                        double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
                         bool lower_bounded = !isinf(loweri);
                         bool upper_bounded = !isinf(upperi);
                         if (lower_bounded)
@@ -906,6 +915,7 @@ namespace fatrop
                 const int ng_ineq = ng_ineq_p[k];
                 // const int offs_g_k = offs_g_p[k];
                 const int offs_ineq_k = offs_ineq_p[k];
+                const int offs_g_ineq_k = offs_g_ineq_p[k];
                 // calculate the size of H_{k+1} matrix
                 const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
                 if (Hp1_size + ng > nu + nx)
@@ -932,7 +942,7 @@ namespace fatrop
                             double si = VECEL(s_p, offs_ineq_k + i);
                             double loweri = VECEL(lower_p, offs_ineq_k + i);
                             double upperi = VECEL(upper_p, offs_ineq_k + i);
-                            double grad_barrier = 0.0;
+                            double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
                             bool lower_bounded = !isinf(loweri);
                             bool upper_bounded = !isinf(upperi);
                             if (lower_bounded)
@@ -1113,7 +1123,6 @@ namespace fatrop
             int *offs_ux = (int *)OCP->aux.ux_offs.data();
             int *offs_g = (int *)OCP->aux.g_offs.data();
             int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-            int *offs_g_ineq_p = (int *)OCP->aux.g_ineq_offs.data();
             // other stages
             // for (int k = 0; k < K - 1; k++)
             // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
@@ -1269,7 +1278,7 @@ namespace fatrop
                         {
                             lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi;
+                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k+i);
                         // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }

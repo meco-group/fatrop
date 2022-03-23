@@ -109,6 +109,7 @@ namespace fatrop
             const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
+            const FatropVecBF &lam_curr,
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,

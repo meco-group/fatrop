@@ -71,7 +71,7 @@ namespace fatrop
             fatropdata_->BoundSlacks();
             if (fatropdata_->LamLinfCalc() < lammax)
             {
-                // cout << "accepted lam " << endl;
+                cout << "accepted lam " << endl;
                 fatropdata_->AcceptInitialization();
             }
             EvalCVCurr();
@@ -85,7 +85,7 @@ namespace fatrop
                 // cout << "x_curr " << endl;
                 // fatropdata_-> x_curr.print();
                 // cout << "s_curr " << endl;
-                // fatropdata_-> s_curr.print();
+                // fatropdata_-> s_curr.print(); //
                 // cout << "lam_curr " << endl;
                 // fatropdata_-> lam_curr.print();
                 // cout << "zL_curr " << endl;
@@ -247,6 +247,7 @@ namespace fatrop
                 kappa_d,
                 fatropdata_->delta_x,
                 fatropdata_->lam_calc,
+                fatropdata_->lam_curr,
                 fatropdata_->s_curr,
                 fatropdata_->zL_curr,
                 fatropdata_->zU_curr,

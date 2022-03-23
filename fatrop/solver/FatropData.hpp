@@ -293,7 +293,8 @@ namespace fatrop
             axpy(alpha_primal, delta_s, s_curr, s_next);
             axpy(alpha_dual, delta_zL, zL_curr, zL_next);
             axpy(alpha_dual, delta_zU, zU_curr, zU_next);
-            axpby(alpha_primal, lam_calc, 1.0 - alpha_primal, lam_curr, lam_next);
+            axpy(alpha_primal, lam_calc, lam_curr, lam_next);
+            // axpby(alpha_primal, lam_calc, 1.0 - alpha_primal, lam_curr, lam_next);
             // reset evaluation flags
             cache_next = EvalCache();
             return 0;

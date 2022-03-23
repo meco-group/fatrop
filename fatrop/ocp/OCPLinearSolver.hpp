@@ -16,6 +16,7 @@ namespace fatrop
             const double kappa_d,
             const FatropVecBF &dprimal_vars,
             const FatropVecBF &dlam,
+            const FatropVecBF &lam_curr,
             const FatropVecBF &s,
             const FatropVecBF &zL,
             const FatropVecBF &zU,
