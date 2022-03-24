@@ -143,7 +143,7 @@ namespace fatrop
                         double si = VECEL(s_p, offs_ineq_k + i);
                         double loweri = VECEL(lower_p, offs_ineq_k + i);
                         double upperi = VECEL(upper_p, offs_ineq_k + i);
-                        double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k+i);
+                        double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
                         if (!isinf(loweri))
                         {
                             double dist = si - loweri;
@@ -200,7 +200,7 @@ namespace fatrop
                             double si = VECEL(s_p, offs_ineq_k + i);
                             double loweri = VECEL(lower_p, offs_ineq_k + i);
                             double upperi = VECEL(upper_p, offs_ineq_k + i);
-                            double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k+i);
+                            double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
                             if (!isinf(loweri))
                             {
                                 double dist = si - loweri;
@@ -387,7 +387,7 @@ namespace fatrop
                         {
                             lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi-VECEL(lam_curr_p, offs_g_ineq_k+i);
+                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k + i);
                         // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }
@@ -900,6 +900,7 @@ namespace fatrop
                     }
                     // add the penalty
                     SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+                    TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
                 }
                 // Hh_Km1 <- Gg_Km1
                 GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
@@ -1278,7 +1279,7 @@ namespace fatrop
                         {
                             lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                         }
-                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k+i);
+                        VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k + i);
                         // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
                     }
                 }
