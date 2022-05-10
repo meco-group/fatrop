@@ -69,6 +69,8 @@ namespace fatrop
             const FatropVecBF &zU,
             const FatropVecBF &lower,
             const FatropVecBF &upper) = 0;
+        virtual void Finalize() {};
+        virtual void Reset() {};
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

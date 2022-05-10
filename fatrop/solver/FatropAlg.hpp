@@ -55,9 +55,19 @@ namespace fatrop
             filter_->Reset();
             fatropdata_->Reset();
             journaller_->Reset();
+            fatropnlp_->Reset();
+            sd_time = 0.0;
+            hess_time = 0.0;
+            jac_time = 0.0;
+            cv_time = 0.0;
+            grad_time = 0.0;
+            obj_time = 0.0;
+            init_time = 0.0;
         }
         int Optimize()
         {
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
             Reset();
             // optimization algorithm parameters
             const double mu_min = tol / 10;
@@ -105,14 +115,19 @@ namespace fatrop
                 it_curr.ls = ls;
                 it_curr.reg = deltaw;
                 journaller_->Push();
-                journaller_->PrintIterations();
+                // journaller_->PrintIterations();
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
+                    double el = blasfeo_toc(&timer);
                     cout << "found solution :) " << endl;
                     cout << "riccati time " << sd_time << endl;
-                    cout << "hess time " << hess_time << endl;
-                    cout << "jac time " << jac_time << endl;
+                    cout << "init time " << init_time << endl;
+                    // cout << "jac time " << jac_time << endl;
+                    journaller_->PrintIterations();
+                    fatropnlp_->Finalize();
+                    cout << "rest time " << el - sd_time - init_time << endl;
+                    cout << "el time total " << el << endl;
                     return 0;
                 }
                 // update mu
@@ -184,7 +199,7 @@ namespace fatrop
         {
             blasfeo_timer timer;
             blasfeo_tic(&timer);
-            int res =  fatropnlp_->EvalJac(
+            int res = fatropnlp_->EvalJac(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr);
             jac_time += blasfeo_toc(&timer);
@@ -192,25 +207,36 @@ namespace fatrop
         }
         inline int EvalCVCurr()
         {
-            return fatropnlp_->EvalConstraintViolation(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = fatropnlp_->EvalConstraintViolation(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr,
                 fatropdata_->g_curr);
+            cv_time += blasfeo_toc(&timer);
+            return res;
         }
         inline int EvalGradCurr()
         {
-            return fatropnlp_->EvalGrad(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = fatropnlp_->EvalGrad(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
                 fatropdata_->grad_curr);
+            cv_time += blasfeo_toc(&timer);
+            return res;
         }
         double EvalObjCurr()
         {
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
             double res = 0.0;
             fatropnlp_->EvalObj(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
                 res);
+            obj_time += blasfeo_toc(&timer);
             return res;
         }
         int EvalDuInf()
@@ -225,7 +251,9 @@ namespace fatrop
         }
         inline int Initialization()
         {
-            return fatropnlp_->Initialization(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = fatropnlp_->Initialization(
                 fatropdata_->grad_curr,
                 fatropdata_->lam_calc,
                 fatropdata_->delta_x,
@@ -235,6 +263,8 @@ namespace fatrop
                 fatropdata_->zU_curr,
                 fatropdata_->s_lower,
                 fatropdata_->s_upper);
+            init_time += blasfeo_toc(&timer);
+            return res;
         }
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu)
         {
@@ -285,6 +315,10 @@ namespace fatrop
         double sd_time = 0.0;
         double hess_time = 0.0;
         double jac_time = 0.0;
+        double cv_time = 0.0;
+        double grad_time = 0.0;
+        double obj_time = 0.0;
+        double init_time = 0.0;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

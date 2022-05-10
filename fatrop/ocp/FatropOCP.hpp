@@ -24,20 +24,28 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) override
         {
-            return ocp_->evalHess(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = ocp_->evalHess(
                 &ocpkktmemory_,
                 obj_scale,
                 primal_vars,
                 lam);
+            FE_time += blasfeo_toc(&timer);
+            return res;
         };
         int EvalJac(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override
         {
-            return ocp_->evalJac(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = ocp_->evalJac(
                 &ocpkktmemory_,
                 primal_vars,
                 slack_vars);
+            FE_time += blasfeo_toc(&timer);
+            return res;
         };
         int ComputeSD(
             const double inertia_correction_w,
@@ -93,22 +101,30 @@ namespace fatrop
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override
         {
-            return ocp_->EvalConstraintViolation(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = ocp_->EvalConstraintViolation(
                 &ocpkktmemory_,
                 primal_vars,
                 slack_vars,
                 constraint_violation);
+            FE_time += blasfeo_toc(&timer);
+            return res;
         };
         int EvalGrad(
             double obj_scale,
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) override
         {
-            return ocp_->EvalGrad(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int res = ocp_->EvalGrad(
                 &ocpkktmemory_,
                 obj_scale,
                 primal_vars,
                 gradient);
+            FE_time += blasfeo_toc(&timer);
+            return res;
         };
         int EvalObj(
             double obj_scale,
@@ -116,11 +132,15 @@ namespace fatrop
             double &res) override
         {
 
-            return ocp_->EvalObj(
+            blasfeo_timer timer;
+            blasfeo_tic(&timer);
+            int resi =  ocp_->EvalObj(
                 &ocpkktmemory_,
                 obj_scale,
                 primal_vars,
                 res);
+            FE_time += blasfeo_toc(&timer);
+            return resi;
         };
         int EvalDuInf(
             double obj_scale,
@@ -161,6 +181,14 @@ namespace fatrop
             res.nineqs = sum(ocpkktmemory_.ng_ineq);
             return res;
         };
+        void Finalize() override
+        {
+            cout << "FE time: " << FE_time << endl; 
+        }
+        void Reset() override
+        {
+            FE_time = 0.0;
+        }
 
     public:
         RefCountPtr<OCP> ocp_;
@@ -169,6 +197,7 @@ namespace fatrop
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;
+        double FE_time = 0.0;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED

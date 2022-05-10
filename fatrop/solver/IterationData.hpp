@@ -62,7 +62,7 @@ namespace fatrop
         void Reset()
         {
             iterationdata.resize(0);
-            // print_count = 0;
+            print_count = 0;
         }
         int print_count = 0;
         vector<IterationData> iterationdata;
