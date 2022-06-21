@@ -184,7 +184,7 @@ namespace fatrop
                     cout << "error: restoration phase not implemented yet" << endl;
                     return 1;
                 }
-                // if linesearch unsuccesful -> resto phase
+                // if linesearch unsuccessful -> resto phase
                 fatropdata_->AdaptDualBounds(mu);
             }
             return 0;
