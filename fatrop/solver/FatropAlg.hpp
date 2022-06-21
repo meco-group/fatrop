@@ -121,13 +121,13 @@ namespace fatrop
                 {
                     double el = blasfeo_toc(&timer);
                     cout << "found solution :) " << endl;
-                    cout << "riccati time " << sd_time << endl;
-                    cout << "init time " << init_time << endl;
+                    cout << "riccati time: " << sd_time << endl;
+                    cout << "init time: " << init_time << endl;
                     // cout << "jac time " << jac_time << endl;
                     journaller_->PrintIterations();
                     fatropnlp_->Finalize();
-                    cout << "rest time " << el - sd_time - init_time << endl;
-                    cout << "el time total " << el << endl;
+                    cout << "rest time: " << el - sd_time - init_time << endl;
+                    cout << "el time total: " << el << endl;
                     return 0;
                 }
                 // update mu
@@ -184,7 +184,7 @@ namespace fatrop
                     cout << "error: restoration phase not implemented yet" << endl;
                     return 1;
                 }
-                // if linesearch unsucesful -> resto phase
+                // if linesearch unsuccesful -> resto phase
                 fatropdata_->AdaptDualBounds(mu);
             }
             return 0;

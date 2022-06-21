@@ -31,7 +31,7 @@ namespace fatrop
         {
             if (print_count == 0)
             {
-                printf(" it  obj          cv        du       lg(mu)  reg  alpha_du   alpha_pr ls\n");
+                printf(" it  obj                    cv                  du                  lg(mu) reg  alpha_du  alpha_pr  ls\n");
             }
             for (std::vector<double>::size_type i = print_count; i < iterationdata.size(); i++)
             {

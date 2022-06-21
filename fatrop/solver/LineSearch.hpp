@@ -84,7 +84,7 @@ namespace fatrop
                                                         cv_curr < theta_min ? MIN(-gamma_phi * cv_curr / lin_decr_curr, delta * pow(cv_curr, s_theta) / (pow(-lin_decr_curr, s_phi)))
                                                                             : -gamma_phi * cv_curr / lin_decr_curr));
 
-            cout << "alpha_min " << alpha_min << endl;
+            // cout << "alpha_min " << alpha_min << endl;
             // cout << "lindecr " << lin_decr_curr << endl;
             for (int ll = 1; ll < 50; ll++)
             {
