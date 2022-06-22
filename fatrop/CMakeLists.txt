@@ -135,7 +135,7 @@ endforeach()
 #PUBLIC_HEADER DESTINATION fatrop)
 
 set(INCLUDE_INSTALL_DIR "include/fatrop")
-set(LIBRARY_INSTALL_DIR "lib/fatrop")
+set(LIBRARY_INSTALL_DIR "lib")
 set(RUNTIME_INSTALL_DIR "bin")
 set(SYSCONFIG_INSTALL_DIR "etc/fatrop")
 
