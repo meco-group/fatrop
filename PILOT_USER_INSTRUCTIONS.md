@@ -6,7 +6,7 @@ This file contains installation and usage instructions for pilot users. Note tha
 
 # Service desk
 
-If you encounter any problems when installing or using fatrop, you can send an e-mail the [service desk](mailto:gitlab-incoming+robotgenskill-fatrop-fatrop-5447-issue-@kuleuven.be). This will create an issue, that Lander and I, and the other pilot users can respond to and follow [here](https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/issues/service_desk).
+If you encounter any problems when installing or using fatrop, you can send an e-mail to the [service desk](mailto:gitlab-incoming+robotgenskill-fatrop-fatrop-5447-issue-@kuleuven.be). This will create an issue, that Lander and I, and the other pilot users can respond to and follow [here](https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/issues/service_desk).
 
 # Installation
 
