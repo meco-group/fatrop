@@ -95,7 +95,7 @@ templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
 
-find_package(MUMPS)
+# find_package(MUMPS)
 # target_link_libraries(fatrop MUMPS::MPISEQ)
 # target_link_libraries(fatrop MUMPS::DMUMPS)
 target_include_directories(fatrop

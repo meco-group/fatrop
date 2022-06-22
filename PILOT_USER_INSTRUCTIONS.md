@@ -22,19 +22,6 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * build blasfeo: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
 * install blasfeo: `sudo make install`
 
-### Mumps - you can skip this if you do not want to benchmark
-
-* mumps is not required for fatrop itself, but used for benchmarking.
-* install dependencies: `sudo apt install intel-mkl-full libmetis-dev libscotch-dev openmpi-bin libopenmpi-dev`
-* go to the directory in which you want to clone mumps, for example: `cd ~/git`
-* clone mumps (we use Mumps via CMake): `git clone https://github.com/scivision/mumps`
-* configure building mumps: `cd mumps && mkdir -p build && cd build && ccmake ..`
-* in `ccmake` set parallel to `OFF`
-* if you have a too old version of cmake, install a more recent one with snap: `sudo snap install cmake`
-* press `c` to configure, `g` to generate
-* build mumps: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
-* install mumps: `sudo make install`
-
 ## Install Fatrop
 
 * install eigen: `sudo apt install libeigen3-dev`
@@ -55,10 +42,25 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * optional, but preferred: activate the Python virtual environment you want to use
 * `python setup.py install --user`
 
-## Get the Fatrop examples
+## Get and run the Fatrop examples
 
 * go to the directory in which you want to clone the fatrop-examples, for example: `cd ~/git`
 * clone the examples: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop-examples.git`
 * run the rocket example: `cd rocket && python Rocket_example.py`
-* this solves the example problem with ipopt
+* this solves the example problem with ipopt, and generates C-code and a json configuration file that are used by Fatrop
 * to solve the problem with fatrop: first compile the generated C-code, `gcc -fPIC -march=native -shared -O3 Rocket_example.c -o Rocket_example.so`, and then run fatrop: `RunFatrop ./Rocket_example.so Rocket_example.json`
+
+## Additional steps
+
+### Installing Mumps - not needed to use Fatrop, but used for a.o. benchmarking linear solvers
+
+* mumps is not required for fatrop itself, but used for benchmarking.
+* install dependencies: `sudo apt install intel-mkl-full libmetis-dev libscotch-dev openmpi-bin libopenmpi-dev`
+* go to the directory in which you want to clone mumps, for example: `cd ~/git`
+* clone mumps (we use Mumps via CMake): `git clone https://github.com/scivision/mumps`
+* configure building mumps: `cd mumps && mkdir -p build && cd build && ccmake ..`
+* in `ccmake` set parallel to `OFF`
+* if you have a too old version of cmake, install a more recent one with snap: `sudo snap install cmake`
+* press `c` to configure, `g` to generate
+* build mumps: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
+* install mumps: `sudo make install`
