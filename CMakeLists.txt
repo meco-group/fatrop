@@ -41,7 +41,7 @@ option(BUILD_DOCS "Build documentation" OFF)
 # find_package(MUMPS)
 find_package(blasfeo)
 add_subdirectory(fatrop)
-add_subdirectory(examples)
+# add_subdirectory(examples)
 # add_subdirectory(SWIG)
 # add_subdirectory(test)
 

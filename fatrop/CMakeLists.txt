@@ -94,6 +94,7 @@ solver/Timer.hpp
 templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
+
 find_package(MUMPS)
 # target_link_libraries(fatrop MUMPS::MPISEQ)
 # target_link_libraries(fatrop MUMPS::DMUMPS)
@@ -101,6 +102,14 @@ target_include_directories(fatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
 )
+
+add_executable(RunFatrop executables/RunFatrop.cpp)
+target_link_libraries(RunFatrop fatrop) 
+target_include_directories(RunFatrop
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/fatrop
+)
+
 # set_target_properties(fatrop PROPERTIES PUBLIC_HEADER ${FATROPHEADERS})
 # set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
 list(APPEND INCLUDEDIRSFATROP
@@ -127,6 +136,7 @@ endforeach()
 
 set(INCLUDE_INSTALL_DIR "include/fatrop")
 set(LIBRARY_INSTALL_DIR "lib/fatrop")
+set(RUNTIME_INSTALL_DIR "bin")
 set(SYSCONFIG_INSTALL_DIR "etc/fatrop")
 
 # Create the distribution package(s)
@@ -137,17 +147,20 @@ set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_NAME "fatrop")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
-INSTALL(TARGETS fatrop 
+INSTALL(TARGETS fatrop RunFatrop
   EXPORT fatropTargets
   LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
   ARCHIVE DESTINATION ${LIBRARY_INSTALL_DIR}
   INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
+  RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
   )
 
 include(CMakePackageConfigHelpers)
 set(ConfigFileInstallDir cmake/fatrop)
-set(INCLUDE_INSTALL_DIR ${INCLUDE_INSTALL_DIR} CACHE PATH "install path for include files")
-set(LIBRARY_INSTALL_DIR ${LIBRARY_INSTALL_DIR} CACHE PATH "install path for libraries")
+# to do: make the install dirs not-hard coded
+# set(INCLUDE_INSTALL_DIR ${INCLUDE_INSTALL_DIR} CACHE PATH "install path for include files")
+# set(LIBRARY_INSTALL_DIR ${LIBRARY_INSTALL_DIR} CACHE PATH "install path for libraries")
+# set(RUNTIME_INSTALL_DIR ${RUNTIME_INSTALL_DIR} CACHE PATH "install path for runtimes")
 configure_package_config_file(fatropConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
   INSTALL_DESTINATION "${ConfigFileInstallDir}"
