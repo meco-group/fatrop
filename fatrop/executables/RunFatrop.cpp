@@ -13,6 +13,6 @@ int main(int argc, char **argv)
     }
     else
     {
-        cout << "run me as ./RunFatrop f.so f.json" << endl;
+        cout << "run me as RunFatrop f.so f.json" << endl;
     }
 }
