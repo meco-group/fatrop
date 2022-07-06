@@ -29,6 +29,8 @@ class RocketSpec(OCPSpecificationInterface):
         return vertcat(xK[self.ind_pos]-10*DM.ones(2,1))
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         return uk[0]
+    def StageWiseInequalityBounds(self):
+        return [np.array([0.0]), np.array([inf])]
     def FinalInequality(self, xk, stage_params, global_params):
         return xk[self.ind_vel]
     def FinalInequalityBounds(self):
