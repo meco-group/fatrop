@@ -5,7 +5,17 @@ import numpy as np
 import numpy.matlib
 
 from matplotlib.font_manager import json_dump
-
+class OCPStage:
+    def __init(nu, nx, nstage_params, ng, ngineq, self):
+        self.nu = nu
+        self.nx = nx
+        self.nstage_params = nstage_params
+        self.ng= ng
+        self.ngineq = ngineq
+        pass
+class FatropOCP:
+    def AddStage(self):
+        pass
 
 class OCPSpecificationInterface:
     def __init__(self):
