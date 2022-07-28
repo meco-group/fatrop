@@ -5,7 +5,7 @@ import numpy as np
 
 cdef class OCP:
     cdef OCPBuilder *myOCPBuilder  # Hold a C++ instance which we are wrapping
-    cdef public dict OCPspecs # Public dict attritbute to contain specs as defined in json file
+    cdef public dict OCPspecs # Public dict attribute to contain specs as defined in json file
     
     def __cinit__(self, functions, specfile):
         self.myOCPBuilder = new OCPBuilder(functions.encode('utf-8'),specfile.encode('utf-8'))
