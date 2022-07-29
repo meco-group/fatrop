@@ -230,7 +230,7 @@ namespace fatrop
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
                 fatropdata_->grad_curr);
-            cv_time += blasfeo_toc(&timer);
+            grad_time += blasfeo_toc(&timer);
             return res;
         }
         double EvalObjCurr()
