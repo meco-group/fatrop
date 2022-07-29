@@ -124,7 +124,11 @@ namespace fatrop
                     cout << "found solution :) " << endl;
                     cout << "riccati time: " << sd_time << endl;
                     cout << "init time: " << init_time << endl;
-                    // cout << "jac time " << jac_time << endl;
+                    cout << "fe time nlp_f: " << obj_time << endl;
+                    cout << "fe time nlp_g: " << cv_time << endl;
+                    cout << "fe time nlp_grad_f: " << grad_time << endl;
+                    cout << "fe time nlp_hess_l: " << hess_time << endl;
+                    cout << "fe time nlp_jac_g: " << jac_time << endl;
                     journaller_->PrintIterations();
                     fatropnlp_->Finalize();
                     cout << "rest time: " << total_time - sd_time - init_time << endl;
@@ -231,7 +235,7 @@ namespace fatrop
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
                 fatropdata_->grad_curr);
-            cv_time += blasfeo_toc(&timer);
+            grad_time += blasfeo_toc(&timer);
             return res;
         }
         double EvalObjCurr()
