@@ -28,7 +28,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * go to the directory in which you want to clone fatrop, for example: `cd ~/git`
 * clone the fatrop repository: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop.git`
 * `cd fatrop`
-* switch to the develop branch: `git checkout develop`
+* switch to the python_interface branch: `git checkout python_interface`
 * configure building fatrop: `mkdir -p build && cd build && ccmake ..`
 * press `c` to configure, `g` to generate
 * build fatrop: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
@@ -38,6 +38,14 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 ## Install the Fatrop Python package
 
+### Fatropy
+
+* `cd ..` (you should go one directory higher than `build`)
+* `cd fatropy`
+* optional, but preferred: activate the Python virtual environment you want to use
+* `python setup.py install --user`
+
+### OCPSpecification
 * `cd ..` (you should go one directory higher than `build`)
 * `cd OCPSpecification`
 * optional, but preferred: activate the Python virtual environment you want to use
@@ -49,8 +57,8 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * clone the examples: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop-examples.git`
 * `cd fatrop-examples`
 * run the rocket example: `cd rocket && python Rocket_example.py`
-* this solves the example problem with ipopt, and generates C-code and a json configuration file that are used by Fatrop
-* to solve the problem with fatrop: first compile the generated C-code, `gcc -fPIC -march=native -shared -O3 Rocket_example.c -o Rocket_example.so`, and then run fatrop: `RunFatrop ./Rocket_example.so Rocket_example.json`
+* this solves the example problem with ipopt, generates C-code and a json configuration file that are used by Fatrop, and then solves the problem using Fatrop
+* (optionally, you can also solve the problem with fatrop from the terminal: first compile the generated C-code, `gcc -fPIC -march=native -shared -O3 Rocket_example.c -o Rocket_example.so`, and then run Fatrop: `RunFatrop ./Rocket_example.so Rocket_example.json`)
 
 ## Additional steps
 

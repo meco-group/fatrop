@@ -63,6 +63,7 @@ namespace fatrop
             grad_time = 0.0;
             obj_time = 0.0;
             init_time = 0.0;
+            total_time = 0.0;
         }
         int Optimize()
         {
@@ -119,15 +120,19 @@ namespace fatrop
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
-                    double el = blasfeo_toc(&timer);
+                    total_time = blasfeo_toc(&timer);
                     cout << "found solution :) " << endl;
                     cout << "riccati time: " << sd_time << endl;
                     cout << "init time: " << init_time << endl;
-                    // cout << "jac time " << jac_time << endl;
+                    cout << "fe time nlp_f: " << obj_time << endl;
+                    cout << "fe time nlp_g: " << cv_time << endl;
+                    cout << "fe time nlp_grad_f: " << grad_time << endl;
+                    cout << "fe time nlp_hess_l: " << hess_time << endl;
+                    cout << "fe time nlp_jac_g: " << jac_time << endl;
                     journaller_->PrintIterations();
                     fatropnlp_->Finalize();
-                    cout << "rest time: " << el - sd_time - init_time << endl;
-                    cout << "el time total: " << el << endl;
+                    cout << "rest time: " << total_time - sd_time - init_time << endl;
+                    cout << "el time total: " << total_time << endl;
                     return 0;
                 }
                 // update mu
@@ -302,10 +307,20 @@ namespace fatrop
         RefCountPtr<LineSearch> linesearch_;
         RefCountPtr<Journaller> journaller_;
 
-    private:
-        double lammax;
+    public:
         double tol;
         int maxiter;
+        double sd_time = 0.0;
+        double hess_time = 0.0;
+        double jac_time = 0.0;
+        double cv_time = 0.0;
+        double grad_time = 0.0;
+        double obj_time = 0.0;
+        double init_time = 0.0;
+        double total_time = 0.0;
+    
+    private:
+        double lammax;
         double mu0;
         double kappa_eta;
         double kappa_mu;
@@ -318,13 +333,6 @@ namespace fatrop
         double delta_c_stripe;
         double kappa_c;
         double kappa_d;
-        double sd_time = 0.0;
-        double hess_time = 0.0;
-        double jac_time = 0.0;
-        double cv_time = 0.0;
-        double grad_time = 0.0;
-        double obj_time = 0.0;
-        double init_time = 0.0;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED
