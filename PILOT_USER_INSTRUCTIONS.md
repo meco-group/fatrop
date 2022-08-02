@@ -28,7 +28,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * go to the directory in which you want to clone fatrop, for example: `cd ~/git`
 * clone the fatrop repository: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop.git`
 * `cd fatrop`
-* switch to the python_interface branch: `git checkout python_interface`
+* switch to the develop branch: `git checkout develop`
 * configure building fatrop: `mkdir -p build && cd build && ccmake ..`
 * press `c` to configure, `g` to generate
 * build fatrop: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
@@ -36,7 +36,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * update links to shared libraries: `sudo ldconfig`
 
-## Install the Fatrop Python package
+## Install the Fatrop Python packages (TODO: merge them)
 
 ### Fatropy
 
