@@ -218,8 +218,6 @@ namespace fatrop
         }
         inline int EvalHess()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res =
                 fatropnlp_->EvalHess(
                     fatropdata_->obj_scale,
@@ -229,8 +227,6 @@ namespace fatrop
         }
         inline int EvalJac()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res = fatropnlp_->EvalJac(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr);
@@ -238,8 +234,6 @@ namespace fatrop
         }
         inline int EvalCVCurr()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res = fatropnlp_->EvalConstraintViolation(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr,
@@ -248,8 +242,6 @@ namespace fatrop
         }
         inline int EvalGradCurr()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res = fatropnlp_->EvalGrad(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
@@ -258,8 +250,6 @@ namespace fatrop
         }
         double EvalObjCurr()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             double res = 0.0;
             fatropnlp_->EvalObj(
                 fatropdata_->obj_scale,

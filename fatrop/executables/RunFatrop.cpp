@@ -8,6 +8,13 @@ int main(int argc, char **argv)
 {
     if (argc == 3)
     {
+        
+        #ifdef ENABLE_MULTITHREADING
+            cout << "Multithreading enabled" << endl;
+        #else
+            cout << "Multithreading disabled" << endl;
+        #endif
+
         OCPBuilder ocpbuilder(argv[1], argv[2]);
         ocpbuilder.fatropalg->Optimize();
     }
