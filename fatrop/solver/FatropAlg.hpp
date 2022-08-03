@@ -76,11 +76,11 @@ namespace fatrop
             double delta_w_last = 0.0;
             // initialization
 #ifdef ENABLE_MULTITHREADING //TODO control cores to which threads are assigned and take into account hyperthreading in this.
-            std::thread tj([this] { EvalJac(); });
+            // std::thread tj([this] { EvalJac(); });
             std::thread th;
-            //EvalJac(); // todo twice evaluation
+            EvalJac(); // todo twice evaluation
             EvalGradCurr();
-            tj.join();
+            // tj.join();
 #else
             EvalJac(); // todo twice evaluation
             EvalGradCurr();
@@ -112,11 +112,11 @@ namespace fatrop
                 // fatropdata_-> zU_curr.print();
                 fatropdata_->obj_curr = EvalObjCurr();
 #ifdef ENABLE_MULTITHREADING
-                tj = thread(([this] { EvalJac(); }));
+                // tj = thread(([this] { EvalJac(); }));
                 th = thread(([this] { EvalHess(); }));
-                //EvalJac();
+                EvalJac();
                 EvalGradCurr();
-                tj.join();
+                // tj.join();
 #else
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
