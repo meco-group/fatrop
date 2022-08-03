@@ -20,25 +20,25 @@ cdef class OCP:
     def sd_time(self):
         return self.myOCPBuilder.fatropalg.GetRawPtr().sd_time
 
-    @property
-    def hess_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().hess_time
+    # @property
+    # def hess_time(self):
+    #     return self.myOCPBuilder.fatropalg.GetRawPtr().hess_time
 
-    @property
-    def jac_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().jac_time
+    # @property
+    # def jac_time(self):
+    #     return self.myOCPBuilder.fatropalg.GetRawPtr().jac_time
 
-    @property
-    def cv_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().cv_time
+    # @property
+    # def cv_time(self):
+    #     return self.myOCPBuilder.fatropalg.GetRawPtr().cv_time
 
-    @property
-    def grad_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().grad_time
+    # @property
+    # def grad_time(self):
+    #     return self.myOCPBuilder.fatropalg.GetRawPtr().grad_time
 
-    @property
-    def obj_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().obj_time
+    # @property
+    # def obj_time(self):
+    #     return self.myOCPBuilder.fatropalg.GetRawPtr().obj_time
 
     @property
     def init_time(self):

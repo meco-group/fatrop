@@ -10,11 +10,11 @@ cdef extern from "FatropAlg.hpp" namespace "fatrop":
     cdef cppclass FatropAlg:
         int Optimize()
         double sd_time
-        double hess_time
-        double jac_time
-        double cv_time
-        double grad_time
-        double obj_time
+        # double hess_time
+        # double jac_time
+        # double cv_time
+        # double grad_time
+        # double obj_time
         double init_time
         double total_time
 
