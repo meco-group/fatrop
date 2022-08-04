@@ -113,6 +113,7 @@ namespace fatrop
                 fatropdata_->obj_curr = EvalObjCurr();
 #ifdef ENABLE_MULTITHREADING
                 // tj = thread(([this] { EvalJac(); }));
+                // TODO: this creates a new thread, not efficient
                 th = thread(([this] { EvalHess(); }));
                 EvalJac();
                 EvalGradCurr();
