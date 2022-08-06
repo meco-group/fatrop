@@ -113,7 +113,7 @@ namespace fatrop
                 fatropdata_->obj_curr = EvalObjCurr();
 #ifdef ENABLE_MULTITHREADING
                 // tj = thread(([this] { EvalJac(); }));
-                // TODO: this creates a new thread, not efficient, checking more efficient options (looking into condition_variables)
+                // TODO: this creates a new thread, not efficient, checking more efficient options (looking into synchronization mechanisms)
                 th = thread(([this] { EvalHess(); }));
                 EvalJac();
                 EvalGradCurr();
@@ -216,6 +216,15 @@ namespace fatrop
                 fatropdata_->AdaptDualBounds(mu);
             }
             return 0;
+        }
+        inline int EvalHessMT()
+        {
+            int res =
+                fatropnlp_->EvalHess(
+                    fatropdata_->obj_scale,
+                    fatropdata_->x_curr,
+                    fatropdata_->lam_curr);
+            return res;
         }
         inline int EvalHess()
         {
