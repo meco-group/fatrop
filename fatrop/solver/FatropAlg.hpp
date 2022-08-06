@@ -217,15 +217,6 @@ namespace fatrop
             }
             return 0;
         }
-        inline int EvalHessMT()
-        {
-            int res =
-                fatropnlp_->EvalHess(
-                    fatropdata_->obj_scale,
-                    fatropdata_->x_curr,
-                    fatropdata_->lam_curr);
-            return res;
-        }
         inline int EvalHess()
         {
             int res =
