@@ -6,13 +6,14 @@
 #include "aux/Common.hpp"
 #include "FatropParams.hpp"
 #include <cmath>
+#include <memory>
 using namespace std;
 namespace fatrop
 {
 #define CACHEMACRO(instance, val) instance.evaluated ? instance.value : instance.SetValue(val)
-    struct FatropData : public RefCountedObj
+    struct FatropData  
     {
-        FatropData(const NLPDims &nlpdims, const RefCountPtr<FatropParams> &params) : nlpdims(nlpdims),
+        FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                       n_eqs(nlpdims.neqs),
                                                                                       n_ineqs(nlpdims.nineqs),
                                                                                       memvars(nlpdims.nvars, 8),
@@ -493,7 +494,7 @@ namespace fatrop
         EvalCache cache_next;
         double obj_curr;
         double theta_min = 1e-4;
-        const RefCountPtr<FatropParams> params;
+        const shared_ptr<FatropParams> params;
         // algorithm parameters
         double smax;
         double kappa1;

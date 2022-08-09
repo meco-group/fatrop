@@ -20,7 +20,7 @@ namespace fatrop
         double alpha_du = 0.0;
         char type = 'x';
     };
-    class Journaller : public RefCountedObj
+    class Journaller 
     {
     public:
         Journaller(const int maxiter)

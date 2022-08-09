@@ -2,7 +2,7 @@
 using namespace fatrop;
 using namespace std;
 
-EvalCasGen::EvalCasGen(const RefCountPtr<DLHandler> &handle_, const std::string &function_name) : handle(handle_)
+EvalCasGen::EvalCasGen(const shared_ptr<DLHandler> &handle_, const std::string &function_name) : handle(handle_)
 {
     void *handle_p = handle_->handle;
 

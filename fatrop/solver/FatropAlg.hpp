@@ -8,19 +8,21 @@
 #include "StepAcceptor.hpp"
 #include <cmath>
 #include "IterationData.hpp"
+#include <memory>
+using namespace std;
 // #include "AlgorithmQuantities.hpp"
 namespace fatrop
 {
-    class FatropAlg : public RefCountedObj
+    class FatropAlg 
     {
     public:
         FatropAlg(
-            const RefCountPtr<FatropNLP> &fatropnlp,
-            const RefCountPtr<FatropData> &fatropdata,
-            const RefCountPtr<FatropParams> &fatropparams,
-            const RefCountPtr<Filter> &filter,
-            const RefCountPtr<LineSearch> &linesearch,
-            const RefCountPtr<Journaller> &journaller)
+            const shared_ptr<FatropNLP> &fatropnlp,
+            const shared_ptr<FatropData> &fatropdata,
+            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<Filter> &filter,
+            const shared_ptr<LineSearch> &linesearch,
+            const shared_ptr<Journaller> &journaller)
             : fatropnlp_(fatropnlp),
               fatropdata_(fatropdata),
               fatropparams_(fatropparams),
@@ -295,12 +297,12 @@ namespace fatrop
             sd_time += blasfeo_toc(&timer);
             return res;
         }
-        RefCountPtr<FatropNLP> fatropnlp_;
-        RefCountPtr<FatropData> fatropdata_;
-        RefCountPtr<FatropParams> fatropparams_;
-        RefCountPtr<Filter> filter_;
-        RefCountPtr<LineSearch> linesearch_;
-        RefCountPtr<Journaller> journaller_;
+        shared_ptr<FatropNLP> fatropnlp_;
+        shared_ptr<FatropData> fatropdata_;
+        shared_ptr<FatropParams> fatropparams_;
+        shared_ptr<Filter> filter_;
+        shared_ptr<LineSearch> linesearch_;
+        shared_ptr<Journaller> journaller_;
 
     private:
         double lammax;

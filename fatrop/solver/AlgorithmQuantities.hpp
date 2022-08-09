@@ -12,14 +12,15 @@
 
 #ifndef ALGORITHMQUANTITIESINCLUDED
 #define ALGORITHMQUANTITIESINCLUDED
-#include "aux/SmartPtr.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "FatropData.hpp"
+#include <memory>
 namespace fatrop
 {
+    using namespace std;
     class AlgorithmQuantities
     {
-        RefCountPtr<FatropData> fatropdata_;
+        shared_ptr<FatropData> fatropdata_;
         // RefCountPtr<F
     };
 } // namespace fatrop

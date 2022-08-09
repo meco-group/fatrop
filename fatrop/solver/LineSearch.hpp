@@ -7,15 +7,17 @@
 #include "solver/FatropData.hpp"
 #include "solver/Filter.hpp"
 #include <cmath>
+#include <memory>
+using namespace std;
 namespace fatrop
 {
     class LineSearch : public AlgStrategy
     {
     public:
         LineSearch(
-            const RefCountPtr<FatropParams> &fatropparams,
-            const RefCountPtr<FatropNLP> &nlp,
-            const RefCountPtr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
+            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<FatropNLP> &nlp,
+            const shared_ptr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
                                                          fatropnlp_(nlp),
                                                          fatropdata_(fatropdata){};
         virtual int FindAcceptableTrialPoint(double mu) = 0;
@@ -35,19 +37,19 @@ namespace fatrop
                 res);
             return res;
         }
-        RefCountPtr<FatropNLP> fatropnlp_;
-        RefCountPtr<FatropData> fatropdata_;
+        shared_ptr<FatropNLP> fatropnlp_;
+        shared_ptr<FatropData> fatropdata_;
     };
 
     class BackTrackingLineSearch : public LineSearch
     {
     public:
         BackTrackingLineSearch(
-            const RefCountPtr<FatropParams> &fatropparams,
-            const RefCountPtr<FatropNLP> &nlp,
-            const RefCountPtr<FatropData> &fatropdata,
-            const RefCountPtr<Filter> &filter,
-            const RefCountPtr<Journaller> &journaller)
+            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<FatropNLP> &nlp,
+            const shared_ptr<FatropData> &fatropdata,
+            const shared_ptr<Filter> &filter,
+            const shared_ptr<Journaller> &journaller)
             : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller)
         {
             Initialize();
@@ -138,8 +140,8 @@ namespace fatrop
             assert(false);
             return 0;
         };
-        RefCountPtr<Filter> filter_;
-        RefCountPtr<Journaller> journaller_;
+        shared_ptr<Filter> filter_;
+        shared_ptr<Journaller> journaller_;
         double s_phi;
         double delta;
         double s_theta;

@@ -3,7 +3,7 @@
 #include "aux/SmartPtr.hpp"
 namespace fatrop
 {
-    class FatropParams: public RefCountedObj
+    class FatropParams
     {
         public:
         int maxiter = 100;

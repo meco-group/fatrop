@@ -10,15 +10,17 @@
 #include "OCPInitializer.hpp"
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
+#include <memory>
+using namespace std;
 namespace fatrop
 {
     class FatropOCP : public FatropNLP
     {
     public:
         FatropOCP(
-            const RefCountPtr<OCP> &ocp,
-            const RefCountPtr<OCPLinearSolver> &ls,
-            const RefCountPtr<OCPScalingMethod> &scaler) : ocp_(ocp), ls_(ls), scaler_(scaler), ocpkktmemory_(ocp_->GetOCPDims()){};
+            const shared_ptr<OCP> &ocp,
+            const shared_ptr<OCPLinearSolver> &ls,
+            const shared_ptr<OCPScalingMethod> &scaler) : ocp_(ocp), ls_(ls), scaler_(scaler), ocpkktmemory_(ocp_->GetOCPDims()){};
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -191,9 +193,9 @@ namespace fatrop
         }
 
     public:
-        RefCountPtr<OCP> ocp_;
-        RefCountPtr<OCPLinearSolver> ls_;
-        RefCountPtr<OCPScalingMethod> scaler_;
+        shared_ptr<OCP> ocp_;
+        shared_ptr<OCPLinearSolver> ls_;
+        shared_ptr<OCPScalingMethod> scaler_;
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;

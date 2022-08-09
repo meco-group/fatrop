@@ -22,12 +22,12 @@ int main()
     // ng_.at(K - 1) = nx;
     // ng_.at(0) = nx;
 
-    RefCountPtr<BFOCP> ocptemplatebasic =
-        new RandomOCP(nu_, nx_, ng_, K);
-    RefCountPtr<OCP> ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
-    RefCountPtr<OCPLinearSolver> ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
-    RefCountPtr<FatropParams> params = new FatropParams();
-    RefCountPtr<OCPScalingMethod> ocpscaler = new OCPNoScaling(params);
+    shared_ptr<BFOCP> ocptemplatebasic =
+        make_shared<RandomOCP>(nu_, nx_, ng_, K);
+    shared_ptr<OCP> ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
+    shared_ptr<OCPLinearSolver> ocplsriccati = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
+    shared_ptr<FatropParams> params = make_shared<FatropParams>();
+    shared_ptr<OCPScalingMethod> ocpscaler = make_shared<OCPNoScaling>(params);
     FatropOCP ocpalg(ocptempladapter, ocplsriccati, ocpscaler);
     int N_opti_vars = sum(nu_ + nx_);
     int N_lags = sum(nx_) - nx_.at(0) + sum(ng_);
@@ -47,7 +47,7 @@ int main()
     }
     el = blasfeo_toc(&timer);
     cout << "el time riccati " << el / N << endl;
-    RefCountPtr<OCPLinearSolver> ocplssparse = new Sparse_OCP(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
+    shared_ptr<OCPLinearSolver> ocplssparse = make_shared<Sparse_OCP>(ocptempladapter->GetOCPDims(), ocpalg.ocpkktmemory_);
     ocplssparse->computeSD(&ocpalg.ocpkktmemory_, 0.0, 0.0,0.0,0.0, ux[1], lags[1], lags[0], lags[0], lags[0], lags[0], lags[0], lags[0], lags[0], lags[0], lags[0]);
     // ocpalg.ocpkktmemory_.BAbt[0].print();
     // cout << Eig(ux[0]) -Eig(ux[1]) << endl;

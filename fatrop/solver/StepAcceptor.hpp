@@ -4,14 +4,16 @@
 #include "FatropData.hpp"
 #include "FatropParams.hpp"
 #include "Filter.hpp"
+#include <memory>
+using namespace std;
 namespace fatrop
 {
     class StepAcceptor
     {
         StepAcceptor(
-        const RefCountPtr<FatropData>& fatropdata,
-        const RefCountPtr<Filter>& filter,
-        const RefCountPtr<FatropParams>& fatropparams
+        const shared_ptr<FatropData>& fatropdata,
+        const shared_ptr<Filter>& filter,
+        const shared_ptr<FatropParams>& fatropparams
     ): fatropdata_(fatropdata), filter_(filter), fatropparams_(fatropparams)
     {
         Initialize();
@@ -25,9 +27,9 @@ namespace fatrop
         {
         }
         private:
-        RefCountPtr<FatropData> fatropdata_;
-        RefCountPtr<Filter> filter_;
-        RefCountPtr<FatropParams> fatropparams_;
+        shared_ptr<FatropData> fatropdata_;
+        shared_ptr<Filter> filter_;
+        shared_ptr<FatropParams> fatropparams_;
     };
 } // namespace fatrop
 

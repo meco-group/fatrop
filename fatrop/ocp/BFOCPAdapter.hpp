@@ -5,15 +5,17 @@
 #include "solver/FatropData.hpp"
 #include "aux/SmartPtr.hpp"
 #include "OCP.hpp"
+#include <memory>
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
 namespace fatrop
 {
+    using namespace std;
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const RefCountPtr<BFOCP> &ocptempl_) : nuexpr(RefCountPtr<BFOCP>(ocptempl_)), nxexpr(RefCountPtr<BFOCP>(ocptempl_)), ngexpr(RefCountPtr<BFOCP>(ocptempl_)), ngineqexpr(RefCountPtr<BFOCP>(ocptempl_)), nstageparamsexpr(RefCountPtr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
+        BFOCPAdapter(const shared_ptr<BFOCP> &ocptempl_) : nuexpr(shared_ptr<BFOCP>(ocptempl_)), nxexpr(shared_ptr<BFOCP>(ocptempl_)), ngexpr(shared_ptr<BFOCP>(ocptempl_)), ngineqexpr(shared_ptr<BFOCP>(ocptempl_)), nstageparamsexpr(shared_ptr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
         {
         }
         int evalHess(
@@ -310,52 +312,52 @@ namespace fatrop
         class nxExpr : public VecExpr<nxExpr, int>
         {
         public:
-            nxExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            nxExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_nxk(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<BFOCP> parent;
+            const shared_ptr<BFOCP> parent;
         };
         class nuExpr : public VecExpr<nuExpr, int>
         {
         public:
-            nuExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            nuExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_nuk(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<BFOCP> parent;
+            const shared_ptr<BFOCP> parent;
         };
         class ngExpr : public VecExpr<ngExpr, int>
         {
         public:
-            ngExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            ngExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_ngk(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<BFOCP> parent;
+            const shared_ptr<BFOCP> parent;
         };
         class ngIneqExpr : public VecExpr<ngIneqExpr, int>
         {
         public:
-            ngIneqExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            ngIneqExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_ng_ineq_k(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<BFOCP> parent;
+            const shared_ptr<BFOCP> parent;
         };
         class nStageParamsExpr : public VecExpr<nStageParamsExpr, int>
         {
         public:
-            nStageParamsExpr(const RefCountPtr<BFOCP> &parent) : parent(parent){};
+            nStageParamsExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
             int getEl(const int ai) const { return parent->get_n_stage_params_k(ai); };
             int size() const { return parent->get_horizon_length(); };
 
         private:
-            const RefCountPtr<BFOCP> parent;
+            const shared_ptr<BFOCP> parent;
         };
 
     public:
@@ -365,7 +367,7 @@ namespace fatrop
             globalparams = global_params_in;
             return;
         }
-        void SetInitial(const int K, const RefCountPtr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
+        void SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
         {
             // offsets
             VEC *ux_intial_p = (VEC *)fatropdata->x_initial;
@@ -398,7 +400,7 @@ namespace fatrop
         vector<double> globalparams;
 
     private:
-        RefCountPtr<BFOCP> ocptempl;
+        shared_ptr<BFOCP> ocptempl;
     };
 } // namespace fatrop
 

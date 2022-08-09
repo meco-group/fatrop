@@ -6,7 +6,7 @@
 using namespace std;
 namespace fatrop
 {
-    class DLHandler : public RefCountedObj
+    class DLHandler 
     {
     public:
         DLHandler(const string &filename);

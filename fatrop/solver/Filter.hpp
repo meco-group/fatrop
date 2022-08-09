@@ -15,7 +15,7 @@ namespace fatrop
         /** \brief constraint violation value */
         const double theta = 0.0;
     };
-    class Filter: public RefCountedObj
+    class Filter
     {
     public:
         Filter(const int size)

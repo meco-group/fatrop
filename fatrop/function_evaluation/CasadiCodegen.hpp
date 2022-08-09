@@ -21,7 +21,7 @@ namespace fatrop
     public:
         EvalCasGen();
         /// constructor from file
-        EvalCasGen(const RefCountPtr<DLHandler> &handle, const std::string &function_name);
+        EvalCasGen(const shared_ptr<DLHandler> &handle, const std::string &function_name);
         /// pointer to result_buffer
         double *output_buffer_p;
         /// pointer to casadi codegen evalutation function
@@ -47,7 +47,7 @@ namespace fatrop
         /// evaluate function and save res in "ccs format with lda==out_m"
         int eval_buffer(const double **arg);
         /// for reference counting of handle pointer
-        RefCountPtr<DLHandler> handle;
+        shared_ptr<DLHandler> handle;
         ~EvalCasGen();
     };
 } // fatrop

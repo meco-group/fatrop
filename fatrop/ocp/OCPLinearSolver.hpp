@@ -5,7 +5,7 @@
 #include "OCPKKT.hpp"
 namespace fatrop
 {
-    class OCPLinearSolver : public RefCountedObj
+    class OCPLinearSolver 
     {
     public:
         virtual int computeSD(

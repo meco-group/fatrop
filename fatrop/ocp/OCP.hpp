@@ -5,10 +5,12 @@
 #include "aux/SmartPtr.hpp"
 #include "ocp/OCPKKT.hpp"
 #include "solver/FatropData.hpp"
+#include <memory>
+using namespace std;
 namespace fatrop
 { 
     /** \brief interface class for OCP operations*/
-    class OCP : public RefCountedObj
+    class OCP 
     {
     public:
         virtual int evalHess(
@@ -37,7 +39,7 @@ namespace fatrop
             double &res) = 0;
         virtual OCPDims GetOCPDims() const = 0;
         virtual void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) = 0;
-        virtual void SetInitial(const int K, const RefCountPtr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) = 0;
+        virtual void SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) = 0;
     };
 } // namespace fatrop
 #endif // OCPINCLUDED

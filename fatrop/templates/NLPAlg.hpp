@@ -10,7 +10,7 @@ namespace fatrop
         int neqs;
         int nineqs;
     };
-    class FatropNLP : public RefCountedObj
+    class FatropNLP 
     {
     public:
         virtual int EvalHess(

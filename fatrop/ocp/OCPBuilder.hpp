@@ -33,7 +33,7 @@ namespace fatrop
             const int ng_ineqF = json_spec["ng_ineqF"];
             const int n_stage_params = json_spec["n_stage_params"];
             const int n_global_params = json_spec["n_global_params"];
-            RefCountPtr<DLHandler> handle = new DLHandler(functions);
+            shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
             EvalCasGen BAbtf(handle, "BAbt");
             EvalCasGen bkf(handle, "bk");
             EvalCasGen RSQrqtIf(handle, "RSQrqtI");
@@ -52,7 +52,7 @@ namespace fatrop
             EvalCasGen gineqf(handle, "gineq");
             EvalCasGen GgineqFtf(handle, "GgineqFt");
             EvalCasGen gineqFf(handle, "gineqF");
-            RefCountPtr<BFOCP> ocptemplatebasic = new BFOCPBasic(nu, nx, ngI, ngF, ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
+            shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ngF, ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
                                                                  BAbtf,
                                                                  bkf,
                                                                  RSQrqtIf,
@@ -71,13 +71,13 @@ namespace fatrop
                                                                  gineqFf,
                                                                  Lkf,
                                                                  LFf);
-            ocptempladapter = new BFOCPAdapter(ocptemplatebasic);
+            ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
             ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
-            ocplsriccati = new OCPLSRiccati(ocptempladapter->GetOCPDims());
-            params = new FatropParams();
-            ocpscaler = new OCPNoScaling(params);
-            fatropocp = new FatropOCP(ocptempladapter, ocplsriccati, ocpscaler);
-            fatropdata = new FatropData(fatropocp->GetNLPDims(), params);
+            ocplsriccati = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
+            params = make_shared<FatropParams>();
+            ocpscaler = make_shared<OCPNoScaling>(params);
+            fatropocp = make_shared<FatropOCP>(ocptempladapter, ocplsriccati, ocpscaler);
+            fatropdata = make_shared<FatropData>(fatropocp->GetNLPDims(), params);
             initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
             initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
             lower = json_spec["lower"].get_number_array<double>("%lf");
@@ -89,10 +89,10 @@ namespace fatrop
             SetBounds();
             SetInitial();
             // vector<double> upper = vector<double>(lower.size(), INFINITY);
-            filter = new Filter(params->maxiter + 1);
-            journaller = new Journaller(params->maxiter + 1);
-            linesearch = new BackTrackingLineSearch(params, fatropocp, fatropdata, filter, journaller);
-            fatropalg = new FatropAlg(fatropocp, fatropdata, params, filter, linesearch, journaller);
+            filter = make_shared<Filter>(params->maxiter + 1);
+            journaller = make_shared<Journaller>(params->maxiter + 1);
+            linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+            fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
             // blasfeo_timer timer;
             // blasfeo_tic(&timer);
             // fatropalg->Optimize();
@@ -108,22 +108,22 @@ namespace fatrop
             fatropdata->SetBounds(lower, upper);
         }
         int K;
-        RefCountPtr<OCP> ocptempladapter;
-        RefCountPtr<OCPLinearSolver> ocplsriccati;
-        RefCountPtr<FatropParams> params;
-        RefCountPtr<OCPScalingMethod> ocpscaler;
-        RefCountPtr<FatropNLP> fatropocp;
-        RefCountPtr<FatropData> fatropdata;
+        shared_ptr<OCP> ocptempladapter;
+        shared_ptr<OCPLinearSolver> ocplsriccati;
+        shared_ptr<FatropParams> params;
+        shared_ptr<OCPScalingMethod> ocpscaler;
+        shared_ptr<FatropNLP> fatropocp;
+        shared_ptr<FatropData> fatropdata;
         vector<double> initial_u;
         vector<double> initial_x;
         vector<double> lower;
         vector<double> upper;
         vector<double> lowerF;
         vector<double> upperF;
-        RefCountPtr<Filter> filter;
-        RefCountPtr<Journaller> journaller;
-        RefCountPtr<LineSearch> linesearch;
-        RefCountPtr<FatropAlg> fatropalg;
+        shared_ptr<Filter> filter;
+        shared_ptr<Journaller> journaller;
+        shared_ptr<LineSearch> linesearch;
+        shared_ptr<FatropAlg> fatropalg;
     };
 }
 #endif // OCPBUILDERINCLUDED

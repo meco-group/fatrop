@@ -2,13 +2,15 @@
 #define ALGSTRATEGYINCLUDED
 #include "aux/SmartPtr.hpp"
 #include "FatropParams.hpp"
+#include <memory>
+using namespace std;
 namespace fatrop
 {
-    class AlgStrategy: public RefCountedObj
+    class AlgStrategy
     {
         public:
-        AlgStrategy(const RefCountPtr<FatropParams>& fatrop_params):fatrop_params_(fatrop_params){};
-        RefCountPtr<FatropParams> fatrop_params_;
+        AlgStrategy(const shared_ptr<FatropParams>& fatrop_params):fatrop_params_(fatrop_params){};
+        shared_ptr<FatropParams> fatrop_params_;
     };
 };
 #endif // !ALGSTRATEGYINCLUDED
