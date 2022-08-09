@@ -115,6 +115,7 @@ namespace fatrop
                 fatropdata_->obj_curr = EvalObjCurr();
 #ifdef ENABLE_MULTITHREADING
                 // tj = thread(([this] { EvalJac(); }));
+                // TODO: this creates a new thread, not efficient, checking more efficient options (looking into synchronization mechanisms)
                 th = thread(([this] { EvalHess(); }));
                 EvalJac();
                 EvalGradCurr();
@@ -220,8 +221,6 @@ namespace fatrop
         }
         inline int EvalHess()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res =
                 fatropnlp_->EvalHess(
                     fatropdata_->obj_scale,
@@ -231,8 +230,6 @@ namespace fatrop
         }
         inline int EvalJac()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res = fatropnlp_->EvalJac(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr);
@@ -240,8 +237,6 @@ namespace fatrop
         }
         inline int EvalCVCurr()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res = fatropnlp_->EvalConstraintViolation(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr,
@@ -250,8 +245,6 @@ namespace fatrop
         }
         inline int EvalGradCurr()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             int res = fatropnlp_->EvalGrad(
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
@@ -260,8 +253,6 @@ namespace fatrop
         }
         double EvalObjCurr()
         {
-            blasfeo_timer timer;
-            blasfeo_tic(&timer);
             double res = 0.0;
             fatropnlp_->EvalObj(
                 fatropdata_->obj_scale,

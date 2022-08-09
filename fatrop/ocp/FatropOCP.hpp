@@ -12,6 +12,7 @@
 #include "OCP.hpp"
 #include <memory>
 using namespace std;
+// #include <unistd.h>
 namespace fatrop
 {
     class FatropOCP : public FatropNLP
@@ -33,7 +34,8 @@ namespace fatrop
                 obj_scale,
                 primal_vars,
                 lam);
-            FE_time += blasfeo_toc(&timer);
+            hess_time += blasfeo_toc(&timer);
+            hess_count += 1;
             return res;
         };
         int EvalJac(
@@ -46,7 +48,8 @@ namespace fatrop
                 &ocpkktmemory_,
                 primal_vars,
                 slack_vars);
-            FE_time += blasfeo_toc(&timer);
+            jac_time += blasfeo_toc(&timer);
+            jac_count += 1;
             return res;
         };
         int ComputeSD(
@@ -110,7 +113,8 @@ namespace fatrop
                 primal_vars,
                 slack_vars,
                 constraint_violation);
-            FE_time += blasfeo_toc(&timer);
+            cv_time += blasfeo_toc(&timer);
+            cv_count += 1;
             return res;
         };
         int EvalGrad(
@@ -125,7 +129,8 @@ namespace fatrop
                 obj_scale,
                 primal_vars,
                 gradient);
-            FE_time += blasfeo_toc(&timer);
+            grad_time += blasfeo_toc(&timer);
+            grad_count += 1;
             return res;
         };
         int EvalObj(
@@ -141,7 +146,8 @@ namespace fatrop
                 obj_scale,
                 primal_vars,
                 res);
-            FE_time += blasfeo_toc(&timer);
+            obj_time += blasfeo_toc(&timer);
+            obj_count += 1;
             return resi;
         };
         int EvalDuInf(
@@ -185,11 +191,27 @@ namespace fatrop
         };
         void Finalize() override
         {
-            cout << "FE time: " << FE_time << endl; 
+            FE_time = hess_time + jac_time + cv_time + grad_time + obj_time;
+            cout << "hess time: " << hess_time << ", count: " << hess_count << endl; 
+            cout << "jac time:  " << jac_time << ", count: " << jac_count << endl; 
+            cout << "cv time:   " << cv_time << ", count: " << cv_count << endl; 
+            cout << "grad time: " << grad_time << ", count: " << grad_count << endl; 
+            cout << "obj time:  " << obj_time << ", count: " << obj_count << endl; 
+            cout << "FE time:   " << FE_time << endl; 
         }
         void Reset() override
         {
             FE_time = 0.0;
+            hess_time = 0.0;
+            jac_time = 0.0;
+            cv_time = 0.0;
+            grad_time = 0.0;
+            obj_time = 0.0;
+            hess_count = 0;
+            jac_count = 0;
+            cv_count = 0;
+            grad_count = 0;
+            obj_count = 0;
         }
 
     public:
@@ -200,6 +222,16 @@ namespace fatrop
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;
         double FE_time = 0.0;
+        double hess_time = 0.0;
+        double jac_time = 0.0;
+        double cv_time = 0.0;
+        double grad_time = 0.0;
+        double obj_time = 0.0;
+        int hess_count = 0;
+        int jac_count = 0;
+        int cv_count = 0;
+        int grad_count = 0;
+        int obj_count = 0;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED

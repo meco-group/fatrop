@@ -29,13 +29,20 @@ execute_process(COMMAND "getconf" "LEVEL1_DCACHE_LINESIZE" OUTPUT_VARIABLE L1_CA
 set(CACHE_LINE_SIZE "${L1_CACHE_LINE_SIZE}" CACHE STRING "cache line size used for cache aligning")
 math(EXPR L1_CACHE_LINE_SIZE "${CACHE_LINE_SIZE}")
 
-
 # set(CMAKE_CXX_FLAGS_DEBUG "-pg -fprofile-arcs -ftest-coverage -g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
 # set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fno-split-loops -fno-loop-unroll-and-jam -fno-tree-loop-vectorize -fno-split-loops -fno-align-loops -fno-loop-interchange -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
 option(BUILD_DOCS "Build documentation" OFF)
+
+# TODO write this is a more modern way
+set(ENABLE_MULTITHREADING OFF CACHE BOOL "Enable multithreading")
+if(${ENABLE_MULTITHREADING})
+  add_definitions(-DENABLE_MULTITHREADING)
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
+endif()
+
 
 # include(FindMUMPS.cmake)
 # find_package(MUMPS)
