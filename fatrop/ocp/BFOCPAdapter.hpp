@@ -47,7 +47,6 @@ namespace fatrop
                 int nx_k = nx_p[k];
                 int offs_ux_k = offs_ux[k];
                 int offs_dyn_eq_k = offs_dyn_eq[k];
-                int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
                 int offs_g_k = offs_g[k];
                 int offs_ineq_k = offs_ineq[k];
                 int offs_stageparams_k = offs_stageparams_p[k];
@@ -64,6 +63,7 @@ namespace fatrop
                     k);
                 if (k > 0)
                 {
+                    int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
                     ROWAD(nx_k, -1.0, lam_p, offs_dyn_eq_km1, RSQrqt_p + k, nu_k + nx_k, nu_k);
                 }
             }

@@ -11,6 +11,10 @@
 #include <memory>
 using namespace std;
 // #include "AlgorithmQuantities.hpp"
+#ifdef ENABLE_MULTITHREADING
+#include <thread>
+#endif
+
 namespace fatrop
 {
     class FatropAlg 
@@ -59,12 +63,8 @@ namespace fatrop
             journaller_->Reset();
             fatropnlp_->Reset();
             sd_time = 0.0;
-            hess_time = 0.0;
-            jac_time = 0.0;
-            cv_time = 0.0;
-            grad_time = 0.0;
-            obj_time = 0.0;
             init_time = 0.0;
+            total_time = 0.0;
         }
         int Optimize()
         {
@@ -77,8 +77,16 @@ namespace fatrop
             double mu = mu0;
             double delta_w_last = 0.0;
             // initialization
+#ifdef ENABLE_MULTITHREADING //TODO control cores to which threads are assigned and take into account hyperthreading in this.
+            // std::thread tj([this] { EvalJac(); });
+            std::thread th;
             EvalJac(); // todo twice evaluation
             EvalGradCurr();
+            // tj.join();
+#else
+            EvalJac(); // todo twice evaluation
+            EvalGradCurr();
+#endif
             Initialization();
             fatropdata_->BoundSlacks();
             if (fatropdata_->LamLinfCalc() < lammax)
@@ -105,8 +113,16 @@ namespace fatrop
                 // cout << "zU_curr " << endl;
                 // fatropdata_-> zU_curr.print();
                 fatropdata_->obj_curr = EvalObjCurr();
+#ifdef ENABLE_MULTITHREADING
+                // tj = thread(([this] { EvalJac(); }));
+                th = thread(([this] { EvalHess(); }));
+                EvalJac();
+                EvalGradCurr();
+                // tj.join();
+#else
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
+#endif
                 EvalDuInf();
                 IterationData &it_curr = journaller_->it_curr;
                 it_curr.iter = i;
@@ -121,15 +137,22 @@ namespace fatrop
                 double emu = fatropdata_->EMuCurr(0.0);
                 if (emu < tol)
                 {
-                    double el = blasfeo_toc(&timer);
+                    total_time = blasfeo_toc(&timer);
                     cout << "found solution :) " << endl;
                     cout << "riccati time: " << sd_time << endl;
                     cout << "init time: " << init_time << endl;
-                    // cout << "jac time " << jac_time << endl;
+                    cout << "fe time nlp_f: " << "to be added" << endl;
+                    cout << "fe time nlp_g: " << "to be added" << endl;
+                    cout << "fe time nlp_grad_f: " << "to be added" << endl;
+                    cout << "fe time nlp_hess_l: " << "to be added" << endl;
+                    cout << "fe time nlp_jac_g: " << "to be added" << endl;
                     journaller_->PrintIterations();
                     fatropnlp_->Finalize();
-                    cout << "rest time: " << el - sd_time - init_time << endl;
-                    cout << "el time total: " << el << endl;
+                    cout << "rest time: " << total_time - sd_time - init_time << endl;
+                    cout << "el time total: " << total_time << endl;
+#ifdef ENABLE_MULTITHREADING
+                    th.join();
+#endif
                     return 0;
                 }
                 // update mu
@@ -140,7 +163,11 @@ namespace fatrop
                     filter_->Reset();
                 }
                 // Hessian is necessary for calculating search direction
+#ifdef ENABLE_MULTITHREADING
+                th.join();
+#else
                 EvalHess();
+#endif
                 // todo make an update class for regularization
                 double deltac_candidate = delta_c_stripe * pow(mu, kappa_c);
                 deltaw = 0.0;
@@ -181,7 +208,7 @@ namespace fatrop
                 // cout << "regularization  " << (deltaw) << endl;
                 // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
                 ls = linesearch_->FindAcceptableTrialPoint(mu);
-                if(ls ==0)
+                if (ls == 0)
                 {
                     cout << "error: restoration phase not implemented yet" << endl;
                     return 1;
@@ -200,7 +227,6 @@ namespace fatrop
                     fatropdata_->obj_scale,
                     fatropdata_->x_curr,
                     fatropdata_->lam_curr);
-            hess_time += blasfeo_toc(&timer);
             return res;
         }
         inline int EvalJac()
@@ -210,7 +236,6 @@ namespace fatrop
             int res = fatropnlp_->EvalJac(
                 fatropdata_->x_curr,
                 fatropdata_->s_curr);
-            jac_time += blasfeo_toc(&timer);
             return res;
         }
         inline int EvalCVCurr()
@@ -221,7 +246,6 @@ namespace fatrop
                 fatropdata_->x_curr,
                 fatropdata_->s_curr,
                 fatropdata_->g_curr);
-            cv_time += blasfeo_toc(&timer);
             return res;
         }
         inline int EvalGradCurr()
@@ -232,7 +256,6 @@ namespace fatrop
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
                 fatropdata_->grad_curr);
-            cv_time += blasfeo_toc(&timer);
             return res;
         }
         double EvalObjCurr()
@@ -244,7 +267,6 @@ namespace fatrop
                 fatropdata_->obj_scale,
                 fatropdata_->x_curr,
                 res);
-            obj_time += blasfeo_toc(&timer);
             return res;
         }
         int EvalDuInf()
@@ -304,10 +326,15 @@ namespace fatrop
         shared_ptr<LineSearch> linesearch_;
         shared_ptr<Journaller> journaller_;
 
-    private:
-        double lammax;
+    public:
         double tol;
         int maxiter;
+        double sd_time = 0.0;
+        double init_time = 0.0;
+        double total_time = 0.0;
+
+    private:
+        double lammax;
         double mu0;
         double kappa_eta;
         double kappa_mu;
@@ -320,13 +347,6 @@ namespace fatrop
         double delta_c_stripe;
         double kappa_c;
         double kappa_d;
-        double sd_time = 0.0;
-        double hess_time = 0.0;
-        double jac_time = 0.0;
-        double cv_time = 0.0;
-        double grad_time = 0.0;
-        double obj_time = 0.0;
-        double init_time = 0.0;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED
