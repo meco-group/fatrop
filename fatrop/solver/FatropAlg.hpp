@@ -12,7 +12,7 @@
 using namespace std;
 // #include "AlgorithmQuantities.hpp"
 #ifdef ENABLE_MULTITHREADING
-#include <thread>
+#include "aux/Worker.hpp"
 #endif
 
 namespace fatrop
@@ -78,11 +78,10 @@ namespace fatrop
             double delta_w_last = 0.0;
             // initialization
 #ifdef ENABLE_MULTITHREADING //TODO control cores to which threads are assigned and take into account hyperthreading in this.
-            // std::thread tj([this] { EvalJac(); });
-            std::thread th;
+            // TODO check if it is more interesting to make worker a member variable.            
+            Worker worker([&](){this->EvalHess();});
             EvalJac(); // todo twice evaluation
             EvalGradCurr();
-            // tj.join();
 #else
             EvalJac(); // todo twice evaluation
             EvalGradCurr();
@@ -114,12 +113,9 @@ namespace fatrop
                 // fatropdata_-> zU_curr.print();
                 fatropdata_->obj_curr = EvalObjCurr();
 #ifdef ENABLE_MULTITHREADING
-                // tj = thread(([this] { EvalJac(); }));
-                // TODO: this creates a new thread, not efficient, checking more efficient options (looking into synchronization mechanisms)
-                th = thread(([this] { EvalHess(); }));
+                worker.eval();
                 EvalJac();
                 EvalGradCurr();
-                // tj.join();
 #else
                 EvalJac();      // needed for dual inf
                 EvalGradCurr(); // needed for dual inf
@@ -152,7 +148,7 @@ namespace fatrop
                     cout << "rest time: " << total_time - sd_time - init_time << endl;
                     cout << "el time total: " << total_time << endl;
 #ifdef ENABLE_MULTITHREADING
-                    th.join();
+                    worker.wait();
 #endif
                     return 0;
                 }
@@ -165,7 +161,7 @@ namespace fatrop
                 }
                 // Hessian is necessary for calculating search direction
 #ifdef ENABLE_MULTITHREADING
-                th.join();
+                worker.wait();
 #else
                 EvalHess();
 #endif
