@@ -78,7 +78,8 @@ namespace fatrop
             double delta_w_last = 0.0;
             // initialization
 #ifdef ENABLE_MULTITHREADING //TODO control cores to which threads are assigned and take into account hyperthreading in this.
-            // TODO check if it is more interesting to make worker a member variable.            
+            // TODO check if it is more interesting to make worker a member variable.
+            // TODO parallelize functions themselves            
             Worker worker([&](){this->EvalHess();});
             EvalJac(); // todo twice evaluation
             EvalGradCurr();

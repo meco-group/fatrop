@@ -13,7 +13,8 @@ namespace fatrop
     {
         binary_semaphore signal2worker;
         binary_semaphore signal2main;
-        const WorkFunction wf;
+        // const WorkFunction wf;
+        WorkFunction wf;
         atomic<bool> running;
         thread t1;
         void run()
@@ -35,7 +36,7 @@ namespace fatrop
         }
 
     public:
-        Worker(WorkFunction wf) : signal2worker(0), signal2main(1), wf(wf), running(true), t1(&Worker::run, this)
+        Worker(WorkFunction &&wf) : signal2worker(0), signal2main(1), wf(wf), running(true), t1(&Worker::run, this)
         {
         }
         /** \brief Wait for function evaluation to be completed */
