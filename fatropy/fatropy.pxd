@@ -1,10 +1,11 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+from libcpp.memory cimport shared_ptr 
 
-cdef extern from "SmartPtr.hpp" namespace "fatrop":
-    cdef cppclass RefCountPtr[T]:
-        RefCountPtr() except +
-        T* GetRawPtr()
+# cdef extern from "SmartPtr.hpp" namespace "fatrop":
+#     cdef cppclass shared_ptr[T]:
+#         shared_ptr() except +
+#         T* GetRawPtr()
 
 cdef extern from "FatropAlg.hpp" namespace "fatrop":
     cdef cppclass FatropAlg:
@@ -39,9 +40,9 @@ cdef extern from "FatropParams.hpp" namespace "fatrop":
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:
         OCPBuilder(const string &functions, const string &json_spec_file) except +
-        RefCountPtr[FatropAlg] fatropalg
-        RefCountPtr[FatropData] fatropdata
-        RefCountPtr[FatropParams] fatropparams
+        shared_ptr[FatropAlg] fatropalg
+        shared_ptr[FatropData] fatropdata
+        shared_ptr[FatropParams] fatropparams
         vector[double] initial_u
         vector[double] initial_x
         vector[double] lower

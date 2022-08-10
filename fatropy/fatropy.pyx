@@ -14,39 +14,39 @@ cdef class OCP:
         specfile_object.close()
 
     def Optimize(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().Optimize()
+        return self.myOCPBuilder.fatropalg.get().Optimize()
 
     @property
     def sd_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().sd_time
+        return self.myOCPBuilder.fatropalg.get().sd_time
 
     # @property
     # def hess_time(self):
-    #     return self.myOCPBuilder.fatropalg.GetRawPtr().hess_time
+    #     return self.myOCPBuilder.fatropalg.get().hess_time
 
     # @property
     # def jac_time(self):
-    #     return self.myOCPBuilder.fatropalg.GetRawPtr().jac_time
+    #     return self.myOCPBuilder.fatropalg.get().jac_time
 
     # @property
     # def cv_time(self):
-    #     return self.myOCPBuilder.fatropalg.GetRawPtr().cv_time
+    #     return self.myOCPBuilder.fatropalg.get().cv_time
 
     # @property
     # def grad_time(self):
-    #     return self.myOCPBuilder.fatropalg.GetRawPtr().grad_time
+    #     return self.myOCPBuilder.fatropalg.get().grad_time
 
     # @property
     # def obj_time(self):
-    #     return self.myOCPBuilder.fatropalg.GetRawPtr().obj_time
+    #     return self.myOCPBuilder.fatropalg.get().obj_time
 
     @property
     def init_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().init_time
+        return self.myOCPBuilder.fatropalg.get().init_time
 
     @property
     def total_time(self):
-        return self.myOCPBuilder.fatropalg.GetRawPtr().total_time
+        return self.myOCPBuilder.fatropalg.get().total_time
 
     def SetBounds(self):
         self.myOCPBuilder.SetBounds()
@@ -105,19 +105,19 @@ cdef class OCP:
     # Attribute access
     @property
     def x_curr(self):
-        nels = self.myOCPBuilder.fatropdata.GetRawPtr().x_curr.nels()
+        nels = self.myOCPBuilder.fatropdata.get().x_curr.nels()
         retval = np.empty(nels)
         for ii in range(nels):
-           retval[ii] = self.myOCPBuilder.fatropdata.GetRawPtr().x_curr.get_el(ii)
+           retval[ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(ii)
         return retval
     
     # Attribute access
     @property
     def x_next(self):
-        nels = self.myOCPBuilder.fatropdata.GetRawPtr().x_next.nels()
+        nels = self.myOCPBuilder.fatropdata.get().x_next.nels()
         retval = np.empty(nels)
         for ii in range(nels):
-           retval[ii] = self.myOCPBuilder.fatropdata.GetRawPtr().x_next.get_el(ii)
+           retval[ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(ii)
         return retval
 
     # Attribute access
@@ -127,7 +127,7 @@ cdef class OCP:
         nu = self.OCPspecs["nu"]
         retval = np.empty(nu)
         for ii in range(nu):
-           retval[ii] = self.myOCPBuilder.fatropdata.GetRawPtr().x_next.get_el(ii)
+           retval[ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(ii)
         return retval
 
     # Attribute access
@@ -140,7 +140,7 @@ cdef class OCP:
         retval = np.empty((nu,K-1))
         for ii in range(K-1):
             for jj in range(nu):               
-                retval[jj,ii] = self.myOCPBuilder.fatropdata.GetRawPtr().x_next.get_el(jj+ii*(nx_plus_nu))
+                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(jj+ii*(nx_plus_nu))
         return retval
 
     @property
@@ -153,20 +153,20 @@ cdef class OCP:
         retval = np.ones((nx,K))
         for ii in range(K-1):
             for jj in range(nx):               
-                retval[jj,ii] = self.myOCPBuilder.fatropdata.GetRawPtr().x_next.get_el(nu+jj+ii*(nx_plus_nu))
+                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(nu+jj+ii*(nx_plus_nu))
         for jj in range(nx):
-            retval[jj,K-1] = self.myOCPBuilder.fatropdata.GetRawPtr().x_next.get_el(jj+(K-1)*(nx_plus_nu))
+            retval[jj,K-1] = self.myOCPBuilder.fatropdata.get().x_next.get_el(jj+(K-1)*(nx_plus_nu))
         return retval
 
     # Attribute access
     @property
     def n_eqs(self):
-        return self.myOCPBuilder.fatropdata.GetRawPtr().n_eqs
+        return self.myOCPBuilder.fatropdata.get().n_eqs
 
     # Attribute access
     @property
     def n_ineqs(self):
-        return self.myOCPBuilder.fatropdata.GetRawPtr().n_ineqs
+        return self.myOCPBuilder.fatropdata.get().n_ineqs
 
     def __dealloc__(self):
         del self.myOCPBuilder
