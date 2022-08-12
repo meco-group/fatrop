@@ -241,7 +241,7 @@ namespace fatrop
             // size to store structs
             result += N_ * sizeof(MAT);
             // sufficient space for cache alignment
-            result = (result + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE + LEVEL1_DCACHE_LINE_SIZE;
+            result = (result + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE + CACHE_LINE_SIZE;
             // size to store date
             for (int i = 0; i < N_; i++)
             {
@@ -261,7 +261,7 @@ namespace fatrop
             bf_ptr += N_;
             // align with cache line
             long long l_ptr = (long long)bf_ptr;
-            l_ptr = (l_ptr + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE;
+            l_ptr = (l_ptr + CACHE_LINE_SIZE - 1) /CACHE_LINE_SIZE * CACHE_LINE_SIZE;
             data_p = (char *)l_ptr;
             double *d_ptr_begin = (double *)data_p;
             for (int i = 0; i < N_; i++)
@@ -507,7 +507,7 @@ namespace fatrop
             // size to store structs
             result += N_ * sizeof(VEC);
             // sufficient space for cache alignment
-            result = (result + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE + LEVEL1_DCACHE_LINE_SIZE;
+            result = (result + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE + CACHE_LINE_SIZE;
             // size to store date
             for (int i = 0; i < N_; i++)
             {
@@ -526,7 +526,7 @@ namespace fatrop
             bf_ptr += N_;
             // align with cache line
             long long l_ptr = (long long)bf_ptr;
-            l_ptr = (l_ptr + LEVEL1_DCACHE_LINE_SIZE - 1) / LEVEL1_DCACHE_LINE_SIZE * LEVEL1_DCACHE_LINE_SIZE;
+            l_ptr = (l_ptr + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE;
             data_p = (char *)l_ptr;
             double *d_ptr_begin = (double *)data_p;
             for (int i = 0; i < N_; i++)
