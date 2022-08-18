@@ -1,6 +1,9 @@
 import setuptools
 from Cython.Build import cythonize
 
+with open("README.md", 'r') as f:
+    long_description = f.read()
+
 fatrop_extension = setuptools.Extension(
     name="fatropy",
     sources=["src/fatropy/fatropy.pyx"],
@@ -12,6 +15,7 @@ fatrop_extension = setuptools.Extension(
 )
 setuptools.setup(
     package_dir={"": "src"},
+    long_description=long_description,
     packages=setuptools.find_packages(exclude=["fatropy"]),
     ext_modules=cythonize([fatrop_extension],compiler_directives={'language_level' : "3"})
 )
