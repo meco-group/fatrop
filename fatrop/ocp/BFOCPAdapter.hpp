@@ -9,6 +9,16 @@
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
+// #ifdef ENABLE_MULTITHREADING
+// #include <omp.h>
+// #endif
+
+// Example: you can make a for loop parallel with the following code. But to be further investigated to do this in an efficient way...
+// #ifdef ENABLE_MULTITHREADING
+// #pragma omp parallel for
+// <your for loop>
+// #endif
+
 namespace fatrop
 {
     using namespace std;
@@ -41,6 +51,7 @@ namespace fatrop
             SOLVERMACRO(VEC *, lam, _p);
             double *primal_data = primal_vars_p->pa;
             double *lam_data = lam_p->pa;
+
             for (int k = 0; k < K; k++)
             {
                 int nu_k = nu_p[k];
@@ -172,7 +183,9 @@ namespace fatrop
             OCPMACRO(int *, ng_ineq, _p);
             SOLVERMACRO(VEC *, primal_vars, _p);
             double *primal_data = primal_vars_p->pa;
-
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
             for (int k = 0; k < K - 1; k++)
             {
                 int nu_k = nu_p[k];
