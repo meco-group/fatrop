@@ -36,20 +36,12 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * update links to shared libraries: `sudo ldconfig`
 
-## Install the Fatrop Python packages (TODO: merge them)
-
-### Fatropy
+## Install the Fatrop Python packages
 
 * `cd ..` (you should go one directory higher than `build`)
 * `cd fatropy`
 * optional, but preferred: activate the Python virtual environment you want to use
-* `python setup.py install --user`
-
-### OCPSpecification
-* `cd ..` (you should go one directory higher than `build`)
-* `cd OCPSpecification`
-* optional, but preferred: activate the Python virtual environment you want to use
-* `python setup.py install --user`
+* `pip install -e .`
 
 ## Get and run the Fatrop examples
 

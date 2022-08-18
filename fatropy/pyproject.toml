@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "cython", "numpy>=1.17"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fatrop"
+description = "Fast Trajectory Optimizer"
+version = "0.0.3"
+authors = [
+    { name = "Lander Vanroye", email = "lander.vanroye@kuleuven.be" },
+    { name = "Wilm Decre", email = "wilm.decre@kuleuven.be" }
+]
+requires-python = ">=3.7"
