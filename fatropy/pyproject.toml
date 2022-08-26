@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "fatrop"
 description = "Fast Trajectory Optimizer"
 version = "0.0.1"
+readme = "README.md"
 authors = [
     { name = "Lander Vanroye", email = "lander.vanroye@kuleuven.be" },
     { name = "Wilm Decre", email = "wilm.decre@kuleuven.be" }
