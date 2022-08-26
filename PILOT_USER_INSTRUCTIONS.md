@@ -28,6 +28,10 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * install eigen: `sudo apt install libeigen3-dev`
 
+### Cython (for Fatropy)
+
+* `pip install Cython`
+
 ## Install Fatrop
 
 * go to the directory in which you want to clone fatrop, for example: `cd ~/git`
