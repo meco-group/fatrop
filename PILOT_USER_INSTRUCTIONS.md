@@ -14,6 +14,10 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 ## Install dependencies
 
+### gcc
+
+* `sudo apt install gcc-11`
+
 ### Blasfeo
 
 * go to the directory in which you want to clone Blasfeo, for example: `cd ~/git`
@@ -28,8 +32,10 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * install eigen: `sudo apt install libeigen3-dev`
 
-### Cython (for Fatropy)
+### Python packages and tools (for Fatropy)
 
+* `pip install pip --upgrade`
+* `pip install setuptools --upgrade`
 * `pip install Cython`
 
 ## Install Fatrop
