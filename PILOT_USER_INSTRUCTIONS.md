@@ -32,7 +32,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * install eigen: `sudo apt install libeigen3-dev`
 
-### Python packages and tools (for Fatropy)
+### Python packages and tools (for fatropy, will however be automatically installed with fatropy as well)
 
 * `pip install pip --upgrade`
 * `pip install setuptools --upgrade`
