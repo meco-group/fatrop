@@ -22,9 +22,12 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * build blasfeo: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
 * install blasfeo: `sudo make install`
 
-## Install Fatrop
+### Eigen
 
 * install eigen: `sudo apt install libeigen3-dev`
+
+## Install Fatrop
+
 * go to the directory in which you want to clone fatrop, for example: `cd ~/git`
 * clone the fatrop repository: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop.git`
 * `cd fatrop`
