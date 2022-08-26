@@ -19,7 +19,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * go to the directory in which you want to clone Blasfeo, for example: `cd ~/git`
 * clone Blasfeo: `git clone https://github.com/giaf/blasfeo.git`
 * configure building blasfeo: `cd blasfeo && mkdir -p build && cd build && ccmake ..`
-* In ccmake, press `c` to configure initially and set the following: `CMAKE_INSTALL_PREFIX` to `/usr/local` (other options are also possible of course, but this is convenient), and `TARGET` to `X64_AUTOMATIC`
+* In ccmake, press `c` to configure initially and set the following: `CMAKE_INSTALL_PREFIX` to `/usr/local` (other options are also possible of course, but this is convenient), and `TARGET` to `X64_AUTOMATIC`, `BUILD_SHARED_LIBS` to `ON`.
 * press `c` to configure, `g` to generate
 * build blasfeo: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
 * install blasfeo: `sudo make install`
