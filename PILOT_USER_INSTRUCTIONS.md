@@ -18,6 +18,12 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * `sudo apt install gcc-11`
 
+(Note: this package cannot be found on ubuntu20, probably missing a PPA here. But my gcc version 9.4.0 was sufficient anyway.)
+
+### CMake
+
+    sudo apt-get install cmake-curses-gui
+
 ### Blasfeo
 
 * go to the directory in which you want to clone Blasfeo, for example: `cd ~/git`
