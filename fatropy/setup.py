@@ -16,6 +16,6 @@ fatrop_extension = setuptools.Extension(
 setuptools.setup(
     package_dir={"": "src"},
     long_description=long_description,
-    packages=setuptools.find_packages('src',exclude=["fatropy"]),
+    packages=setuptools.find_packages(where='src',exclude=["fatropy"]),
     ext_modules=cythonize([fatrop_extension],compiler_directives={'language_level' : "3"})
 )
