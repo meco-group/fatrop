@@ -1,1 +1,15 @@
 #include "solver/StepAcceptor.hpp"
+using namespace fatrop;
+StepAcceptor::StepAcceptor(
+    const shared_ptr<FatropData> &fatropdata,
+    const shared_ptr<Filter> &filter,
+    const shared_ptr<FatropParams> &fatropparams) : fatropdata_(fatropdata), filter_(filter), fatropparams_(fatropparams)
+{
+    Initialize();
+};
+void StepAcceptor::Initialize()
+{
+}
+void StepAcceptor::AcceptTrialStep()
+{
+}

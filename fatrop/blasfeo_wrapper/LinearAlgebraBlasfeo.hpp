@@ -93,81 +93,16 @@ namespace fatrop
     void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj);
     void fatrop_identity(const int m, MAT *sA, const int ai, const int aj);
     void fatrop_drowad(int kmax, double alpha, struct blasfeo_dvec *sx, int xi, struct blasfeo_dmat *sA, int ai, int aj);
-
-    // // permute the rows of a matrix struct
-    // void fatrop_drowpe(int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
-    // {
-
-    //     // invalidate stored inverse diagonal
-    //     sA->use_dA = 0;
-
-    //     int ii;
-    //     for (ii = 0; ii < kmax; ii++)
-    //     {
-    //         if (ipiv[ii] != ii)
-    //             blasfeo_drowsw(size, sA, ai + ii, aj, sA, ai + ipiv[ii], aj);
-    //     }
-    //     return;
-    // }
-
-    // // inverse permute the rows of a matrix struct
-    // void fatrop_drowpei(const int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
-    // {
-
-    //     // invalidate stored inverse diagonal
-    //     sA->use_dA = 0;
-
-    //     int ii;
-    //     for (ii = kmax - 1; ii >= 0; ii--)
-    //     {
-    //         if (ipiv[ii] != ii)
-    //             blasfeo_drowsw(size, sA, ai + ii, aj, sA, ai + ipiv[ii], aj);
-    //     }
-    //     return;
-    // }
-
-    // // permute the cols of a matrix struct
-    // void fatrop_dcolpe(const int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
-    // {
-
-    //     // invalidate stored inverse diagonal
-    //     sA->use_dA = 0;
-
-    //     int ii;
-    //     for (ii = 0; ii < kmax; ii++)
-    //     {
-    //         if (ipiv[ii] != ii)
-    //             blasfeo_dcolsw(size, sA, ai, aj + ii, sA, ai, aj + ipiv[ii]);
-    //     }
-    //     return;
-    // }
-
-    // // inverse permute the cols of a matrix struct
-    // void fatrop_dcolpei(const int size, int kmax, int *ipiv, struct blasfeo_dmat *sA, const int ai, const int aj)
-    // {
-
-    //     // invalidate stored inverse diagonal
-    //     sA->use_dA = 0;
-
-    //     int ii;
-    //     for (ii = kmax - 1; ii >= 0; ii--)
-    //     {
-    //         if (ipiv[ii] != ii)
-    //             blasfeo_dcolsw(size, sA, ai, aj + ii, sA, ai, aj + ipiv[ii]);
-    //     }
-    //     return;
-    // }
-
     /** \brief this class is used for blasfeo matrices*/
     class FatropMatBF : public FatropMat
     {
     public:
         /** \brief constructor memory still has to be allocated*/
-        FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset);
         /** \brief constructor memory already allocated*/
-        FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols) {}
+        FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf);
         /** \brief constructor memory already allocated*/
-        FatropMatBF(MAT *matbf) : mat_(matbf), row_offset_(0), col_offset_(0), nrows_(matbf->m), ncols_(matbf->n) {}
+        FatropMatBF(MAT *matbf);
         /** \brief type conversion to blasfeo matrix pointer*/
         inline explicit operator MAT *() const
         {
@@ -189,18 +124,7 @@ namespace fatrop
         /** \brief get number of cols */
         inline int ncols() const { return ncols_; };
         /** \brief copies all elements from a given fatrop_matrix to this matrix*/
-        void operator=(const FatropMat &fm)
-        {
-            for (int ai = 0; ai < fm.nrows(); ai++)
-            // for (int ai = 0; ai < nrows_; ai++)
-            {
-                for (int aj = 0; aj < fm.ncols(); aj++)
-                // for (int aj = 0; aj < ncols_; aj++)
-                {
-                    this->at(ai, aj) = fm.get_el(ai, aj);
-                }
-            }
-        }
+        void operator=(const FatropMat &fm);
         /** \brief set data pointer*/
         void set_datap(MAT *matbf)
         {
@@ -225,70 +149,15 @@ namespace fatrop
     {
     public:
         /** \brief constuction for allocation on fatrop_memory_allocator*/
-        FatropMemoryMatBF(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N) : N_(N), nrows_(nrows), ncols_(ncols)
-        // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
-        {
-            set_up();
-        }
-        FatropMemoryMatBF(const int nrows, const int ncols, int N) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
-        {
-            set_up();
-        }
+        FatropMemoryMatBF(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N);
+        // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.;
+        FatropMemoryMatBF(const int nrows, const int ncols, int N);
         /** \brief calculate memory size*/
-        int memory_size() const
-        {
-            int result = 0;
-            // size to store structs
-            result += N_ * sizeof(MAT);
-            // sufficient space for cache alignment
-            result = (result + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE + CACHE_LINE_SIZE;
-            // size to store date
-            for (int i = 0; i < N_; i++)
-            {
-                // result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
-                result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
-            }
-            return result;
-        };
+        int memory_size() const;
         /** \brief set up memory element and advance pointer */
-        void set_up()
-        {
-            free(mem);
-            mem = malloc(this->memory_size());
-            char *data_p = (char *)mem;
-            MAT *bf_ptr = (MAT *)data_p;
-            this->mat = bf_ptr;
-            bf_ptr += N_;
-            // align with cache line
-            long long l_ptr = (long long)bf_ptr;
-            l_ptr = (l_ptr + CACHE_LINE_SIZE - 1) /CACHE_LINE_SIZE * CACHE_LINE_SIZE;
-            data_p = (char *)l_ptr;
-            double *d_ptr_begin = (double *)data_p;
-            for (int i = 0; i < N_; i++)
-            {
-                CREATE_MAT(nrows_.at(i), ncols_.at(i), mat + i, data_p);
-                data_p += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
-                // data_p += (mat + i)->memsize;
-            }
-            double *d_ptr_end = (double *)data_p;
-            for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)
-            {
-                *d_ptr = 0.0;
-            }
-            // cout << "allocated memory size " << this->memory_size()<< endl;
-            // cout << "used memory size " << (unsigned long long) d_ptr_end - (unsigned long long) mem << endl;
-            // cout << "difference " << this->memory_size()-((unsigned long long) d_ptr_end - (unsigned long long) mem)<< endl;
-        }
+        void set_up();
         /** \brief get fatrop matrix bf */
-        FatropMatBF operator[](const int N) const
-        {
-#if DEBUG
-            assert(N < N_);
-#endif
-            MAT *resmat = mat + N;
-            FatropMatBF res(resmat->m, resmat->n, 0, 0, resmat);
-            return res;
-        }
+        FatropMatBF operator[](const int N) const;
         /** \brief get first blasfeo_xmat* struct */
         explicit operator MAT *() const
         {
@@ -296,10 +165,7 @@ namespace fatrop
         }
         FatropMemoryMatBF(const FatropMemoryMatBF &cpy) = delete;
         FatropMemoryMatBF &operator=(const FatropMemoryMatBF &) = delete;
-        ~FatropMemoryMatBF()
-        {
-            free(mem);
-        }
+        ~FatropMemoryMatBF();
 
     private:
         void *mem = NULL;
@@ -313,66 +179,28 @@ namespace fatrop
     {
     public:
         /** \brief constructor memory still has to be allocated*/
-        FatropVecBF(const int nels, const int offset) : offset_(offset), nels_(nels) {}
+        FatropVecBF(const int nels, const int offset);
         /** \brief constructor memory already allocated*/
-        FatropVecBF(const int nels, const int offset, VEC *vecbf) : vec_(vecbf), offset_(offset), nels_(nels) {}
+        FatropVecBF(const int nels, const int offset, VEC *vecbf);
         /** \brief type conversion to blasfeo vector pointer*/
-        inline explicit operator VEC *() const
-        {
-            return this->vec_;
-        }
+        explicit operator VEC *() const;
         /** \brief access to element of matrix */
-        double &at(const int ai) const
-        {
-#if DEBUG
-            assert(ai < nels_);
-#endif
-            return VECEL(vec_, ai + offset_);
-        };
+        double &at(const int ai) const;
         /** \brief get element of vector */
-        double get_el(const int ai) const { return this->at(ai); };
+        double get_el(const int ai) const;
         /** \brief get number of elements */
-        int nels() const { return nels_; };
+        int nels() const;
         /** \brief get offset */
-        int offset() const { return offset_; };
+        int offset() const;
         /** \brief copies all elements from a given fatrop_vector to this vector*/
-        void operator=(const FatropVec &fm)
-        {
-            for (int ai = 0; ai < nels_; ai++)
-            {
-                this->at(ai) = fm.get_el(ai);
-            }
-        }
-        void copy(const FatropVecBF &fm)
-        {
-            VEC *fm_p = (VEC *)fm;
-            VECCP(nels(), fm_p, 0, vec_, 0);
-        }
-        void operator=(const vector<double> &fm)
-        {
-            for (int ai = 0; ai < nels_; ai++)
-            {
-                this->at(ai) = fm.at(ai);
-            }
-        }
+        void operator=(const FatropVec &fm);
+        void copy(const FatropVecBF &fm);
+        void operator=(const vector<double> &fm);
         /** \brief set data pointer*/
-        void set_datap(VEC *vecbf)
-        {
-            vec_ = vecbf;
-        }
+        void set_datap(VEC *vecbf);
         /** \brief take a block of size (p), starting at (i)*/
-        FatropVecBF block(const int i, const int p) const
-        {
-            return FatropVecBF(p, offset_ + i, this->vec_);
-        }
-        inline void SwapWith(FatropVecBF &vb)
-        {
-            DBGASSERT(vb.offset_ == offset_);
-            DBGASSERT(vb.nels_ == nels_);
-            VEC *tmp = vec_;
-            vec_ = vb.vec_;
-            vb.vec_ = tmp;
-        }
+        FatropVecBF block(const int i, const int p) const;
+        void SwapWith(FatropVecBF &vb);
 
     protected:
         VEC *vec_ = NULL;
@@ -380,176 +208,28 @@ namespace fatrop
         const int nels_;
     };
 
-    // class CachedQuantity
-    // {
-    // public:
-    //     virtual double eval();
-    //     inline double get()
-    //     {
-    //         return evaluated ? value : SetValue(eval());
-    //     }
-    // private:
-    //     double SetValue(const double value_)
-    //     {
-    //         value = value;
-    //         evaluated = true;
-    //         return value;
-    //     }
-    //     bool evaluated = false;
-    //     double value = 0.0;
-    // };
-    // class L1Quantity: public CachedQuantity
-    // {
-    //     // double eval() override{
-    //     //     return
-    //     // }
-    // };
-    // /** \brief decorator for FatropVecBF that allows computation of certain quantities*/
-    // class FatropVecBFCached : public FatropVecBF
-    // {
-    // public:
-    //     FatropVecBFCached(const FatropVecBF &fatropvecbf) : FatropVecBF(fatropvecbf){};
-
-    // private:
-    // };
-
-    inline void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, FatropVecBF &vc)
-    {
-        DBGASSERT(va.nels() == vb.nels());
-        DBGASSERT(va.nels() == vc.nels());
-        VEC *va_p = (VEC *)va;
-        VEC *vb_p = (VEC *)vb;
-        VEC *vc_p = (VEC *)vc;
-        AXPY(va.nels(), alpha, va_p, va.offset(), vb_p, vb.offset(), vc_p, vc.offset());
-    };
-    inline void copy(const FatropVecBF &va, const FatropVecBF &vb)
-    {
-        DBGASSERT(va.nels() == vb.nels());
-        VEC *va_p = (VEC *)va;
-        VEC *vb_p = (VEC *)vb;
-        VECCP(va.nels(), va_p, va.offset(), vb_p, vb.offset());
-    };
-    inline void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc)
-    {
-        DBGASSERT(va.nels() == vb.nels());
-        DBGASSERT(va.nels() == vc.nels());
-        VEC *va_p = (VEC *)va;
-        VEC *vb_p = (VEC *)vb;
-        VEC *vc_p = (VEC *)vc;
-        AXPBY(va.nels(), alpha, va_p, va.offset(), beta, vb_p, vb.offset(), vc_p, vc.offset());
-    };
-    inline double dot(const FatropVecBF &va, FatropVecBF &vb)
-    {
-        DBGASSERT(va.nels() == vb.nels());
-        VEC *va_p = (VEC *)va;
-        VEC *vb_p = (VEC *)vb;
-        return DOT(va.nels(), va_p, va.offset(), vb_p, vb.offset());
-    };
-    inline double Linf(const FatropVecBF &va)
-    {
-        VEC *va_p = (VEC *)va;
-        int nels = va.nels();
-        int offset = va.offset();
-        double res = 0.0;
-        for (int i = offset; i < nels + offset; i++)
-        {
-            res = MAX(res, abs(VECEL(va_p, i)));
-        }
-        return res;
-    };
-    inline double minabs(const FatropVecBF &va)
-    {
-        VEC *va_p = (VEC *)va;
-        int nels = va.nels();
-        int offset = va.offset();
-        if (nels == 0)
-        {
-            return 0.0;
-        }
-        double res = abs(VECEL(va_p, offset));
-        for (int i = offset+1; i < nels + offset; i++)
-        {
-            res = MIN(res, abs(VECEL(va_p, i)));
-        }
-        return res;
-    };
-    inline double L1(const FatropVecBF &va)
-    {
-        VEC *va_p = (VEC *)va;
-        int nels = va.nels();
-        int offset = va.offset();
-        double res = 0.0;
-        for (int i = offset; i < nels + offset; i++)
-        {
-            res += abs(VECEL(va_p, i));
-        }
-        return res;
-    };
+    void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, FatropVecBF &vc);
+    void copy(const FatropVecBF &va, const FatropVecBF &vb);
+    void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc);
+    double dot(const FatropVecBF &va, FatropVecBF &vb);
+    double Linf(const FatropVecBF &va);
+    double minabs(const FatropVecBF &va);
+    double L1(const FatropVecBF &va);
 
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
     class FatropMemoryVecBF
     {
     public:
         /** \brief constuction for allocation on MemoryAllocator*/
-        FatropMemoryVecBF(const FatropVector<int> &nels, int N) : N_(N), nels_(nels)
-        // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
-        {
-            set_up();
-        }
-        FatropMemoryVecBF(const int nels, int N) : N_(N), nels_(vector<int>(N, nels))
-        {
-            set_up();
-        }
+        FatropMemoryVecBF(const FatropVector<int> &nels, int N);
+        // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.;
+        FatropMemoryVecBF(const int nels, int N);
         /** \brief calculate memory size*/
-        int memory_size() const
-        {
-            int result = 0;
-            // size to store structs
-            result += N_ * sizeof(VEC);
-            // sufficient space for cache alignment
-            result = (result + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE + CACHE_LINE_SIZE;
-            // size to store date
-            for (int i = 0; i < N_; i++)
-            {
-                result += MEMSIZE_VEC(nels_.at(i));
-            }
-            return result;
-        };
+        int memory_size() const;
         /** \brief set up memory element and advance pointer */
-        void set_up()
-        {
-            free(mem);
-            mem = malloc(this->memory_size());
-            char *data_p = (char *)mem;
-            VEC *bf_ptr = (VEC *)data_p;
-            this->vec = bf_ptr;
-            bf_ptr += N_;
-            // align with cache line
-            long long l_ptr = (long long)bf_ptr;
-            l_ptr = (l_ptr + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE;
-            data_p = (char *)l_ptr;
-            double *d_ptr_begin = (double *)data_p;
-            for (int i = 0; i < N_; i++)
-            {
-                CREATE_VEC(nels_.at(i), vec + i, data_p);
-                data_p += MEMSIZE_VEC(nels_.at(i));
-            }
-            double *d_ptr_end = (double *)data_p;
-            for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)
-            {
-                *d_ptr = 0.0;
-            }
-        }
+        void set_up();
         /** \brief get fatrop matrix bf */
-        FatropVecBF operator[](const int N) const
-        {
-#if DEBUG
-            assert(N < N_);
-#endif
-            VEC *resvec = vec + N;
-            FatropVecBF res(resvec->m, 0, resvec);
-            return res;
-        }
+        FatropVecBF operator[](const int N) const;
         /** \brief get first blasfeo_xmat* struct */
         explicit operator VEC *() const
         {
@@ -557,10 +237,7 @@ namespace fatrop
         }
         FatropMemoryVecBF(const FatropMemoryVecBF &cpy) = delete;
         FatropMemoryVecBF &operator=(const FatropMemoryVecBF &) = delete;
-        ~FatropMemoryVecBF()
-        {
-            free(mem);
-        }
+        ~FatropMemoryVecBF();
 
     private:
         void *mem = NULL;
@@ -574,125 +251,37 @@ namespace fatrop
     {
     public:
         /** \brief constructor memory still has to be allocated */
-        PermMat(const int dim) : dim_(dim){};
+        PermMat(const int dim);
+        ;
         /** \brief constructor memory already allocated */
-        PermMat(const int dim, int *data) : dim_(dim), data_(data){};
+        PermMat(const int dim, int *data);
+        ;
         /** \brief get number of rows */
         int nrows() const { return dim_; };
         /** \brief get number of columns */
         int ncols() const { return dim_; };
         /** \brief get element of matrix represented by this permutation matrix - only used for debugging and testing purposes */
-        double get_el(const int ai, const int aj) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            int aj_one = data_[ai];
-            int row_curr = ai - 1;
-            while (row_curr >= 0)
-            {
-                if (aj_one == data_[row_curr])
-                {
-                    aj_one = row_curr;
-                }
-                row_curr--;
-            }
-            if (aj == aj_one)
-            {
-                return 1.0;
-            }
-            else
-            {
-                return 0.0;
-            }
-        };
-        void print(const int kmax) const
-        {
-            for (int k = 0; k < kmax; k++)
-            {
-                cout << k << " <-> " << data_[k] << endl;
-            }
-        }
+        double get_el(const int ai, const int aj) const;
+        void print(const int kmax) const;
         /** \brief set data pointer*/
-        void set_datap(int *data)
-        {
-            data_ = data;
-        }
+        void set_datap(int *data);
         /** \brief set data point*/
-        void set_datap(const int i, const int val)
-        {
-#if DEBUG
-            assert(data_ != NULL);
-            assert(i < dim_);
-#endif
-            data_[i] = val;
-        }
+        void set_datap(const int i, const int val);
         /** \brief apply row permutation*/
-        void PM(const int kmax, MAT *M) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            ROWPE(kmax, data_, M);
-        }
+        void PM(const int kmax, MAT *M) const;
         /** \brief apply vec permutation*/
-        void PV(const int kmax, VEC *V, const int offs) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            VECPE(kmax, data_, V, offs);
-        }
+        void PV(const int kmax, VEC *V, const int offs) const;
         /** \brief apply vec permutation*/
-        void PtV(const int kmax, VEC *V, const int offs) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            VECPEI(kmax, data_, V, offs);
-        }
+        void PtV(const int kmax, VEC *V, const int offs) const;
         /** \brief apply row permutation on partial matrix*/
-        void PM(const int kmax, const int n, MAT *M, const int ai, const int aj) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            // invalidate stored inverse diagonal
-            M->use_dA = 0;
-
-            int ii;
-            for (ii = 0; ii < kmax; ii++)
-            {
-                if (data_[ii] != ii)
-                    ROWSW(n, M, ai + ii, aj, M, ai + data_[ii], aj);
-            }
-            return;
-        }
+        void PM(const int kmax, const int n, MAT *M, const int ai, const int aj) const;
         /** \brief apply inverse row permutation*/
         void
-        PtM(const int kmax, MAT *M) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            ROWPEI(kmax, data_, M);
-        }
+        PtM(const int kmax, MAT *M) const;
         /** \brief apply inverse col permutation*/
-        void MP(const int kmax, MAT *M) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            COLPEI(kmax, data_, M);
-        }
+        void MP(const int kmax, MAT *M) const;
         /** \brief apply col permutation*/
-        void MPt(const int kmax, MAT *M) const
-        {
-#if DEBUG
-            assert(data_ != NULL);
-#endif
-            COLPE(kmax, data_, M);
-        }
+        void MPt(const int kmax, MAT *M) const;
         /** int pointer of permutation vector */
         explicit operator int *() { return data_; };
 
@@ -706,46 +295,18 @@ namespace fatrop
     {
     public:
         /** \brief constructor */
-        MemoryPermMat(const int dim, const int N) : PermMat(dim), dim_(dim), N_(N)
-        {
-            set_up();
-        };
+        MemoryPermMat(const int dim, const int N);
         /** \brief calculate needed memory size*/
-        int memory_size() const
-        {
-            int size = 0;
-            size += N_ * sizeof(PermMat) + N_ * dim_ * sizeof(int);
-            return size;
-        }
+        int memory_size() const;
         /** \brief set up memory*/
-        void set_up()
+        void set_up();
+        explicit operator PermMat *()
         {
-            free(mem);
-            mem = malloc(this->memory_size());
-            char *char_p = (char *)mem;
-            perm_p = (PermMat *)char_p;
-            PermMat *perm_pp = perm_p;
-            for (int i = 0; i < N_; i++)
-            {
-                new (perm_pp) PermMat(dim_);
-                perm_pp++;
-            }
-            int *data_p = (int *)perm_pp;
-            this->set_datap(data_p);
-            for (int i = 0; i < N_; i++)
-            {
-                perm_p[i].set_datap(data_p);
-                data_p += dim_;
-            }
-            char_p = (char *)data_p;
-        }
-        explicit operator PermMat *() { return perm_p; };
+            return perm_p;
+        };
         MemoryPermMat(const MemoryPermMat &cpy) = delete;
         MemoryPermMat &operator=(const MemoryPermMat &) = delete;
-        ~MemoryPermMat()
-        {
-            free(mem);
-        }
+        ~MemoryPermMat();
 
     private:
         void *mem = NULL;

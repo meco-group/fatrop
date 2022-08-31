@@ -11,22 +11,15 @@ namespace fatrop
     class StepAcceptor
     {
         StepAcceptor(
-        const shared_ptr<FatropData>& fatropdata,
-        const shared_ptr<Filter>& filter,
-        const shared_ptr<FatropParams>& fatropparams
-    ): fatropdata_(fatropdata), filter_(filter), fatropparams_(fatropparams)
-    {
-        Initialize();
-    };
-        public:
-        void Initialize()
-        {
+            const shared_ptr<FatropData> &fatropdata,
+            const shared_ptr<Filter> &filter,
+            const shared_ptr<FatropParams> &fatropparams);
 
-        }
-        void AcceptTrialStep()
-        {
-        }
-        private:
+    public:
+        void Initialize();
+        void AcceptTrialStep();
+
+    private:
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<Filter> filter_;
         shared_ptr<FatropParams> fatropparams_;
