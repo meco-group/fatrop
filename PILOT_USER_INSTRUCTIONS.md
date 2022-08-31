@@ -4,6 +4,8 @@ Fast Trajectory Optimizer (FATROP) is an efficient and reliable solver for nonli
 
 This file contains installation and usage instructions for pilot users. Note that Fatrop is still in development, such that these instructions might change without notice.
 
+Instructions are given and tested for Ubuntu 20.04 and 22.04.
+
 # Service desk
 
 If you encounter any problems when installing or using fatrop, you can send an e-mail to the [service desk](mailto:gitlab-incoming+robotgenskill-fatrop-fatrop-5447-issue-@kuleuven.be). This will create an issue, that Lander and I, and the other pilot users can respond to and follow [here](https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/issues/service_desk).
@@ -12,19 +14,38 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 ## Install dependencies
 
+### gcc
+
+* `sudo apt install gcc-11`
+
+(Note: this package cannot be found on ubuntu20, probably missing a PPA here. But my gcc version 9.4.0 was sufficient anyway.)
+
+### CMake
+
+    sudo apt-get install cmake-curses-gui
+
 ### Blasfeo
 
 * go to the directory in which you want to clone Blasfeo, for example: `cd ~/git`
 * clone Blasfeo: `git clone https://github.com/giaf/blasfeo.git`
 * configure building blasfeo: `cd blasfeo && mkdir -p build && cd build && ccmake ..`
-* In ccmake, press `c` to configure initially and set the following: `CMAKE_INSTALL_PREFIX` to `/usr/local` (other options are also possible of course, but this is convenient), and `TARGET` to `X64_AUTOMATIC`
+* In ccmake, press `c` to configure initially and set the following: `CMAKE_INSTALL_PREFIX` to `/usr/local` (other options are also possible of course, but this is convenient), and `TARGET` to `X64_AUTOMATIC`, `BUILD_SHARED_LIBS` to `ON`.
 * press `c` to configure, `g` to generate
 * build blasfeo: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
 * install blasfeo: `sudo make install`
 
-## Install Fatrop
+### Eigen
 
 * install eigen: `sudo apt install libeigen3-dev`
+
+### Python packages and tools (for fatropy, will however be automatically installed with fatropy as well)
+
+* `pip install pip --upgrade`
+* `pip install setuptools --upgrade`
+* `pip install Cython`
+
+## Install Fatrop
+
 * go to the directory in which you want to clone fatrop, for example: `cd ~/git`
 * clone the fatrop repository: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop.git`
 * `cd fatrop`
@@ -36,20 +57,12 @@ If you encounter any problems when installing or using fatrop, you can send an e
 
 * update links to shared libraries: `sudo ldconfig`
 
-## Install the Fatrop Python packages (TODO: merge them)
-
-### Fatropy
+## Install the Fatrop Python packages
 
 * `cd ..` (you should go one directory higher than `build`)
 * `cd fatropy`
 * optional, but preferred: activate the Python virtual environment you want to use
-* `python setup.py install --user`
-
-### OCPSpecification
-* `cd ..` (you should go one directory higher than `build`)
-* `cd OCPSpecification`
-* optional, but preferred: activate the Python virtual environment you want to use
-* `python setup.py install --user`
+* `pip install -e .`
 
 ## Get and run the Fatrop examples
 
