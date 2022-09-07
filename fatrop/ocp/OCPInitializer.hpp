@@ -14,7 +14,7 @@ namespace fatrop
         int AdaptKKTInitial(
             OCPKKTMemory *OCP,
             const FatropVecBF &grad,
-            FatropVecBF& s);
+            FatropVecBF &s);
     };
 } // namespace fatrop
 #endif //  OCPINITIALIZERINCLUDED

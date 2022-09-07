@@ -8,9 +8,9 @@
 #include <memory>
 using namespace std;
 namespace fatrop
-{ 
+{
     /** \brief interface class for OCP operations*/
-    class OCP 
+    class OCP
     {
     public:
         virtual int evalHess(

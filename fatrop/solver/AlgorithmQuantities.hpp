@@ -1,15 +1,3 @@
-/**
- *
- *
- *
- * TODO
- *
- *
- *
- * 
- */
-
-
 #ifndef ALGORITHMQUANTITIESINCLUDED
 #define ALGORITHMQUANTITIESINCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"

@@ -7,7 +7,7 @@
 #include "OCPDims.hpp"
 namespace fatrop
 {
-    class BFOCP 
+    class BFOCP
     {
     public:
         virtual int get_nxk(const int k) const = 0;
@@ -86,7 +86,7 @@ namespace fatrop
             const double *states_k,
             const double *stage_params_k,
             const double *global_params_k,
-            double * res,
+            double *res,
             const int k) = 0;
     };
 };     // namespace fatrop

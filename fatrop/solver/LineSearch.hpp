@@ -2,7 +2,6 @@
 #define LINESEARCHINCLUDED
 #include "AlgStrategy.hpp"
 #include "IterationData.hpp"
-// #include "FatropAlg.hpp"
 #include "templates/NLPAlg.hpp"
 #include "solver/FatropData.hpp"
 #include "solver/Filter.hpp"
@@ -17,7 +16,7 @@ namespace fatrop
         LineSearch(
             const shared_ptr<FatropParams> &fatropparams,
             const shared_ptr<FatropNLP> &nlp,
-            const shared_ptr<FatropData> &fatropdata) ;
+            const shared_ptr<FatropData> &fatropdata);
         virtual int FindAcceptableTrialPoint(double mu) = 0;
         inline int EvalCVNext();
         double EvalObjNext();

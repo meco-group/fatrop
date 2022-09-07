@@ -17,7 +17,7 @@ using namespace std;
 
 namespace fatrop
 {
-    class FatropAlg 
+    class FatropAlg
     {
     public:
         FatropAlg(

@@ -9,13 +9,13 @@
 using namespace std;
 namespace fatrop
 {
-    class OCPScalingMethod : public AlgStrategy//this is an OCP strategy
+    class OCPScalingMethod : public AlgStrategy // this is an OCP strategy
     {
     public:
-        OCPScalingMethod(const shared_ptr<FatropParams>& fatrop_params):AlgStrategy(fatrop_params){};
+        OCPScalingMethod(const shared_ptr<FatropParams> &fatrop_params) : AlgStrategy(fatrop_params){};
         virtual int ComputeScalings(
             OCPKKTMemory *OCP,
-            double& obj_scale,
+            double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr) = 0;
