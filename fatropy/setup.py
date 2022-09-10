@@ -6,7 +6,7 @@ with open("README.md", 'r') as f:
 
 fatrop_extension = setuptools.Extension(
     name="fatropy",
-    sources=["src/fatropy/fatropy.pyx"],
+    sources=["src/fatrop/fatropy/fatropy.pyx"],
     libraries=["fatrop"],
     library_dirs=["../build/fatrop"],
     include_dirs=["../fatrop/ocp","../fatrop/aux","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop"],

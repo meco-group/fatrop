@@ -1,2 +1,2 @@
-import fatropy
-import ocpspecification
+import fatrop.fatropy as fatropy
+import fatrop.ocpspecification as ocpspecification
