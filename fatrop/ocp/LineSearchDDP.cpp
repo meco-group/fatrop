@@ -58,14 +58,14 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
         // assume aliasing is possible for last two elements
         GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, delta_ux_p, nu + rankI, 1.0, delta_ux_p, nu, delta_ux_p, nu);
         //// lag
-        ROWEX(rankI, -alpha_primal, Ppt_p, nx, 0, lam_p, 0);
+        // ROWEX(rankI, -alpha_primal, Ppt_p, nx, 0, lam_p, 0);
         // assume aliasing is possible for last two elements
-        GEMV_T(nx, rankI, -1.0, Ppt_p, 0, 0, delta_ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
+        // GEMV_T(nx, rankI, -1.0, Ppt_p, 0, 0, delta_ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
         // U^-T
-        TRSV_LNN(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
+        // TRSV_LNN(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
         // L^-T
-        TRSV_UNU(rankI, rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
-        (PlI_p)->PtV(rankI, lam_p, 0);
+        // TRSV_UNU(rankI, rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
+        // (PlI_p)->PtV(rankI, lam_p, 0);
         (PrI_p)->PtV(rankI, delta_ux_p, nu);
         AXPY(nx, 1.0, delta_ux_p, nu, curr_ux_p, nu, next_ux_p, nu);
     }
@@ -108,10 +108,10 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
             // calculate lamda_tilde_k
             // copy vk to right location
             // we implemented a version of vector copy that starts with copy of last element, to avoid aliasing error
-            VECCPR(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
-            ROWEX(rho_k, -alpha_primal, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
+            // VECCPR(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
+            // ROWEX(rho_k, -alpha_primal, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
             // assume aliasing of last two eliments is allowed
-            GEMV_T(nu + nx, rho_k, -1.0, RSQrqt_tilde_p + k, 0, 0, delta_ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+            // GEMV_T(nu + nx, rho_k, -1.0, RSQrqt_tilde_p + k, 0, 0, delta_ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
             // nu-rank_k+nx,0
             // needless copy because feature not implemented yet in trsv_lnn
             GECP(rho_k, gamma_k, Ggt_tilde_p + k, nu - rho_k + nx + 1, 0, AL_p, 0, 0);
