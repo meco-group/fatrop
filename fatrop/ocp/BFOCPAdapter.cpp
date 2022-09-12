@@ -288,6 +288,33 @@ int BFOCPAdapter::EvalObj(
     res = restot;
     return 0;
 };
+
+int BFOCPAdapter::EvalDynamics(
+    OCPKKTMemory *OCP,
+    const int k,
+    const FatropVecBF &uk,
+    const FatropVecBF &xk,
+    FatropVecBF &xkp1)
+{
+    // offsets
+    int *offs_stageparams_p = (int *)offs_stageparams.data();
+    int offs_stageparams_k = offs_stageparams_p[k];
+    double *stageparams_p = (double *)stageparams.data();
+    double *globalparams_p = (double *)globalparams.data();
+    double * ukp = ((blasfeo_dvec*)uk)->pa + uk.offset();
+    double * xkp = ((blasfeo_dvec*)xk)->pa + xk.offset();
+    double * xkp1p = ((blasfeo_dvec*)xkp1)->pa + xkp1.offset();
+    double * x_dummy_p = x_dummy.data();
+    ocptempl->eval_bk(
+        x_dummy_p,
+        ukp,
+        xkp,
+        stageparams_p + offs_stageparams_k,
+        globalparams_p,
+        xkp1p,
+        k);
+    return 0;
+};
 void BFOCPAdapter::SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in)
 {
     stageparams = stage_params_in;

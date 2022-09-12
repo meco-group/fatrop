@@ -20,6 +20,7 @@ namespace fatrop
         virtual int FindAcceptableTrialPoint(double mu) = 0;
         inline int EvalCVNext();
         double EvalObjNext();
+        virtual int TryStep(double alpha_pr, double alpha_du) const;
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
     };

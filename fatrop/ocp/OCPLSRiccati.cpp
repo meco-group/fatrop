@@ -1305,5 +1305,9 @@ int OCPLSRiccati::computeSDnor(
     // }
     // double el = blasfeo_toc(&timer);
     // cout << "el time " << el << endl;
+    lastused_.rankI = rankI;
+    lastused_.inertia_correction = inertia_correction;
+    lastused_.kappa_d = kappa_d;
+    lastused_.mu = mu;
     return 0;
 }

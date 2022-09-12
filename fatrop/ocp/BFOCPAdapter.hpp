@@ -27,6 +27,7 @@ namespace fatrop
     public:
         BFOCPAdapter(const shared_ptr<BFOCP> &ocptempl_) : nuexpr(shared_ptr<BFOCP>(ocptempl_)), nxexpr(shared_ptr<BFOCP>(ocptempl_)), ngexpr(shared_ptr<BFOCP>(ocptempl_)), ngineqexpr(shared_ptr<BFOCP>(ocptempl_)), nstageparamsexpr(shared_ptr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
         {
+            x_dummy = vector<double>(max(nxexpr), 0.0);
         }
         int evalHess(
             OCPKKTMemory *OCP,
@@ -52,6 +53,12 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             double &res);
+        int EvalDynamics(
+            OCPKKTMemory *OCP,
+            const int k,
+            const FatropVecBF &uk,
+            const FatropVecBF &xk,
+            FatropVecBF &xkp1);
         OCPDims GetOCPDims() const override
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr);
@@ -122,6 +129,7 @@ namespace fatrop
         FatropVector<int> offs_stageparams;
         vector<double> stageparams;
         vector<double> globalparams;
+        vector<double> x_dummy;
 
     private:
         shared_ptr<BFOCP> ocptempl;

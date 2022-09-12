@@ -27,6 +27,7 @@ ocp/OCPLinearSolver.hpp                     ocp/OCPLinearSolver.cpp
 ocp/OCPLSRiccati.hpp                        ocp/OCPLSRiccati.cpp
 ocp/OCPNoScaling.hpp                        ocp/OCPNoScaling.cpp
 ocp/OCPScalingMethod.hpp                    ocp/OCPScalingMethod.cpp
+ocp/LineSearchDDP.hpp                       ocp/LineSearchDDP.cpp
 solver/AlgorithmQuantities.hpp              solver/AlgorithmQuantities.cpp
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp
 solver/FatropAlg.hpp                        solver/FatropAlg.cpp
@@ -74,6 +75,7 @@ ocp/OCPLinearSolver.hpp
 ocp/OCPLSRiccati.hpp
 ocp/OCPNoScaling.hpp
 ocp/OCPScalingMethod.hpp
+ocp/LineSearchDDP.hpp
 solver/AlgorithmQuantities.hpp
 solver/AlgStrategy.hpp
 solver/FatropAlg.hpp
