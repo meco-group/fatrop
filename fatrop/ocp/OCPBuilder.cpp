@@ -55,10 +55,12 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
                                                                  LFf);
     ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
     ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
-    ocplsriccati = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
+    shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
+    ocplsriccati = ocplsriccati1;
     params = make_shared<FatropParams>();
     ocpscaler = make_shared<OCPNoScaling>(params);
-    fatropocp = make_shared<FatropOCP>(ocptempladapter, ocplsriccati, ocpscaler);
+    shared_ptr<FatropOCP> fatropocp1 = make_shared<FatropOCP>(ocptempladapter, ocplsriccati, ocpscaler);
+    fatropocp = fatropocp1;
     fatropdata = make_shared<FatropData>(fatropocp->GetNLPDims(), params);
     initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
     initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
@@ -73,7 +75,8 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
     journaller = make_shared<Journaller>(params->maxiter + 1);
-    linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    // linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    linesearch = make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);

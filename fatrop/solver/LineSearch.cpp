@@ -22,6 +22,10 @@ double LineSearch::EvalObjNext()
         res);
     return res;
 }
+int LineSearch::TryStep(double alpha_pr, double alpha_du) const
+{
+    return fatropdata_->TryStep(alpha_pr, alpha_du);
+};
 BackTrackingLineSearch::BackTrackingLineSearch(
     const shared_ptr<FatropParams> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,
@@ -48,7 +52,7 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu)
     double alpha_primal = 1.0;
     double alpha_dual = 1.0;
     fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
-    fatropdata_->TryStep(alpha_primal, alpha_dual);
+    TryStep(alpha_primal, alpha_dual);
     double cv_curr = fatropdata_->CVL1Curr();
     double obj_curr = fatropdata_->obj_curr;
     double barrier_curr = fatropdata_->EvalBarrierCurr(mu);
@@ -68,7 +72,7 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu)
     // cout << "lindecr " << lin_decr_curr << endl;
     for (int ll = 1; ll < 50; ll++)
     {
-        fatropdata_->TryStep(alpha_primal, alpha_dual);
+        TryStep(alpha_primal, alpha_dual);
         if (alpha_primal < alpha_min)
         {
             return 0;

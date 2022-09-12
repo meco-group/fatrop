@@ -97,6 +97,13 @@ namespace fatrop
         MemoryPermMat PrI;
         FatropVector<int> gamma;
         FatropVector<int> rho;
+        struct LastUsed
+        {
+            int rankI = 0;
+            double inertia_correction = 0;
+            double kappa_d = 0;
+            double mu = 0;
+        } lastused_;
     };
 };     // namespace
 #endif // OCPLSRICCATIINCLUDED

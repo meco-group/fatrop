@@ -8,6 +8,7 @@
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"
+#include "ocp/LineSearchDDP.hpp"
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
 #include <memory>
