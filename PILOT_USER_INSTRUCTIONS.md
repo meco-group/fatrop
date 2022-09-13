@@ -15,7 +15,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * `pip install --upgrade pip numpy casadi matplotlib`
 * `pip install -i https://test.pypi.org/simple/ fatrop`
 
-You can now jump to installing the Fatrop examples.
+You can now jump to [Get and run the Fatrop examples](#header-get-and-run-the-fatrop-examples).
 
 # Alternative: installation from source
 
