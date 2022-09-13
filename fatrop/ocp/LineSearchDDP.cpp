@@ -184,7 +184,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
                     grad_barrier_L = -mu * dist_m1;
                     double z = VECEL(zL_p, offs_ineq_k + i);
                     double dz = -grad_barrier_L - z - scaling_factor_L * ds;
-                    // VECEL(delta_zL_p, offs_ineq_k + i) = dz;
+                    VECEL(delta_zL_p, offs_ineq_k + i) = dz;
                     lamIi += -z - dz;
                 }
                 if (upper_bounded)
@@ -197,7 +197,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
                     double dz = grad_barrier_U - z + scaling_factor_U * ds;
                     // VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                     lamIi += +z + dz;
-                    // VECEL(delta_zU_p, offs_ineq_k + i) = dz;
+                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                     // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                 }
                 // double grad_barrier = grad_barrier_L + grad_barrier_U;
@@ -220,8 +220,8 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     // cout << "alpha dual " << alpha_max_du << endl;
     axpy(alpha_max_pr,fatropdata_-> delta_x,fatropdata_-> x_curr,fatropdata_-> x_next);
     axpy(alpha_max_pr,fatropdata_-> delta_s, fatropdata_->s_curr,fatropdata_-> s_next);
-    axpy(alpha_dual,fatropdata_-> delta_zL,fatropdata_-> zL_curr,fatropdata_-> zL_next);
-    axpy(alpha_dual,fatropdata_-> delta_zU,fatropdata_-> zU_curr,fatropdata_-> zU_next);
+    axpy(alpha_max_du,fatropdata_-> delta_zL,fatropdata_-> zL_curr,fatropdata_-> zL_next);
+    axpy(alpha_max_du,fatropdata_-> delta_zU,fatropdata_-> zU_curr,fatropdata_-> zU_next);
     axpy(alpha_max_pr,fatropdata_-> lam_calc,fatropdata_-> lam_curr,fatropdata_-> lam_next);
     // axpby(alpha_primal, lam_calc, 1.0 - alpha_primal, lam_curr, lam_next);
     // reset evaluation flags
