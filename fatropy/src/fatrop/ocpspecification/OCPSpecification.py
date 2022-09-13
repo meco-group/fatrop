@@ -71,6 +71,32 @@ class OCPSpecificationInterface:
     def DefaultStageParams(self):
         return MX.zeros(self.n_stage_params)
 
+class Simulator:
+    def __init__(self, ocpspec: OCPSpecificationInterface):
+        self.ocpspec = ocpspec
+    def Simulate(self, x0, inputs, global_parms, stage_parms, K):
+        nu = self.ocpspec.nu
+        nx = self.ocpspec.nx
+        n_stage_params = self.ocpspec.n_stage_params
+        n_global_params = self.ocpspec.n_global_params
+        # make symbols for variables
+        u_sym = MX.sym("inputs", nu)
+        x_sym = MX.sym("states", nx)
+        stage_params_sym = MX.sym("states", n_stage_params)
+        global_params_sym = MX.sym("states", n_global_params)
+        # make expressions for functions
+        dynamics = self.ocpspec.Dynamics(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
+        # BAbt
+        stateskp1 = MX.sym("states_kp1", nx)
+        dynamicsF  = Function('dyn',[u_sym, x_sym, stage_params_sym, global_params_sym], [(dynamics)[:]])
+
+        states = np.zeros((nx, K))
+        states[:,0] = x0[:]
+        for k in range(1, K):
+            states[:,[k]] = dynamicsF(inputs[:, k-1], states[:,k-1], stage_parms[:,k-1], global_parms)
+        return states
+
 
 class JSONGenerator:
     def __init__(self, ocpspec: OCPSpecificationInterface):
