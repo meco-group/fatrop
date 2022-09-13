@@ -1,14 +1,15 @@
 [build-system]
-requires = ["setuptools>=61", "wheel", "cython", "numpy>=1.17", "casadi", "matplotlib"]
+requires = ["setuptools>=61", "wheel", "cython"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "fatrop"
 description = "Fast Trajectory Optimizer"
-version = "0.0.1"
+version = "0.0.3"
 readme = "README.md"
 authors = [
     { name = "Lander Vanroye", email = "lander.vanroye@kuleuven.be" },
     { name = "Wilm Decre", email = "wilm.decre@kuleuven.be" }
 ]
 requires-python = ">=3.7"
+dependencies = ["numpy>=1.17", "casadi", "matplotlib"]
