@@ -10,7 +10,14 @@ Instructions are given and tested for Ubuntu 20.04 and 22.04.
 
 If you encounter any problems when installing or using fatrop, you can send an e-mail to the [service desk](mailto:gitlab-incoming+robotgenskill-fatrop-fatrop-5447-issue-@kuleuven.be). This will create an issue, that Lander and I, and the other pilot users can respond to and follow [here](https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/issues/service_desk).
 
-# Installation
+# Installation using binaries
+
+* `pip install --upgrade pip numpy casadi matplotlib`
+* `pip install -i https://test.pypi.org/simple/ fatrop`
+
+You can now jump to installing the [Fatrop examples](#fatropexamples).
+
+# Alternative: installation from source
 
 ## Install dependencies
 
@@ -66,7 +73,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * optional, but preferred: activate the Python virtual environment you want to use
 * `pip install -e .`
 
-## Get and run the Fatrop examples
+## Get and run the Fatrop examples {#fatropexamples}
 
 * go to the directory in which you want to clone the fatrop-examples, for example: `cd ~/git`
 * clone the examples: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop-examples.git`
