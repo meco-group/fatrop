@@ -15,7 +15,7 @@ If you encounter any problems when installing or using fatrop, you can send an e
 * `pip install --upgrade pip numpy casadi matplotlib`
 * `pip install -i https://test.pypi.org/simple/ fatrop`
 
-You can now jump to installing the [Fatrop examples](#fatropexamples).
+You can now jump to installing the [Fatrop examples](#header-get-and-run-the-fatrop-examples).
 
 # Alternative: installation from source
 
@@ -73,7 +73,7 @@ You can now jump to installing the [Fatrop examples](#fatropexamples).
 * optional, but preferred: activate the Python virtual environment you want to use
 * `pip install -e .`
 
-## Get and run the Fatrop examples {#fatropexamples}
+## Get and run the Fatrop examples
 
 * go to the directory in which you want to clone the fatrop-examples, for example: `cd ~/git`
 * clone the examples: `git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop-examples.git`
