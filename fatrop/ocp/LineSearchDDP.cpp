@@ -22,13 +22,13 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     VEC * delta_ux_p = (VEC *) fatropdata_->delta_x;
     VEC * next_ux_p = (VEC *) fatropdata_->x_next;
     VEC * curr_ux_p = (VEC *) fatropdata_->x_curr;
-    VEC * lam_p = (VEC *) fatropdata_->lam_calc;
+    // VEC * lam_p = (VEC *) fatropdata_->lam_calc;
     VEC * lam_curr_p = (VEC *) fatropdata_->lam_curr;
     VEC * s_p = (VEC *) fatropdata_->s_curr;
     VEC * zL_p = (VEC *) fatropdata_->zL_curr;
     VEC * zU_p = (VEC *) fatropdata_->zU_curr;
-    VEC * delta_zL_p = (VEC *) fatropdata_->delta_zL;
-    VEC * delta_zU_p = (VEC *) fatropdata_->delta_zU;
+    // VEC * delta_zL_p = (VEC *) fatropdata_->delta_zL;
+    // VEC * delta_zU_p = (VEC *) fatropdata_->delta_zU;
     VEC * lower_p = (VEC *) fatropdata_->s_lower;
     VEC * upper_p = (VEC *) fatropdata_->s_upper;
     VEC * delta_s_p = (VEC *) fatropdata_->delta_s;
@@ -58,14 +58,14 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
         // assume aliasing is possible for last two elements
         GEMV_T(nx - rankI, rankI, 1.0, GgIt_tilde_p, 0, 0, delta_ux_p, nu + rankI, 1.0, delta_ux_p, nu, delta_ux_p, nu);
         //// lag
-        ROWEX(rankI, -alpha_primal, Ppt_p, nx, 0, lam_p, 0);
+        // ROWEX(rankI, -alpha_primal, Ppt_p, nx, 0, lam_p, 0);
         // assume aliasing is possible for last two elements
-        GEMV_T(nx, rankI, -1.0, Ppt_p, 0, 0, delta_ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
+        // GEMV_T(nx, rankI, -1.0, Ppt_p, 0, 0, delta_ux_p, nu, 1.0, lam_p, 0, lam_p, 0);
         // U^-T
-        TRSV_LNN(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
+        // TRSV_LNN(rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
         // L^-T
-        TRSV_UNU(rankI, rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
-        (PlI_p)->PtV(rankI, lam_p, 0);
+        // TRSV_UNU(rankI, rankI, HhIt_p, 0, 0, lam_p, 0, lam_p, 0);
+        // (PlI_p)->PtV(rankI, lam_p, 0);
         (PrI_p)->PtV(rankI, delta_ux_p, nu);
         AXPY(nx, 1.0, delta_ux_p, nu, curr_ux_p, nu, next_ux_p, nu);
     }
@@ -108,18 +108,18 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
             // calculate lamda_tilde_k
             // copy vk to right location
             // we implemented a version of vector copy that starts with copy of last element, to avoid aliasing error
-            VECCPR(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
-            ROWEX(rho_k, -alpha_primal, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
+            // VECCPR(gammamrho_k, lam_p, offs_g_k, lam_p, offs_g_k + rho_k);
+            // ROWEX(rho_k, -alpha_primal, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
             // assume aliasing of last two eliments is allowed
-            GEMV_T(nu + nx, rho_k, -1.0, RSQrqt_tilde_p + k, 0, 0, delta_ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+            // GEMV_T(nu + nx, rho_k, -1.0, RSQrqt_tilde_p + k, 0, 0, delta_ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
             // nu-rank_k+nx,0
             // needless copy because feature not implemented yet in trsv_lnn
             GECP(rho_k, gamma_k, Ggt_tilde_p + k, nu - rho_k + nx + 1, 0, AL_p, 0, 0);
             // U^-T
-            TRSV_LNN(rho_k, AL_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
+            // TRSV_LNN(rho_k, AL_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
             // L^-T
-            TRSV_UNU(rho_k, gamma_k, AL_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
-            (Pl_p + k)->PtV(rho_k, lam_p, offs_g_k);
+            // TRSV_UNU(rho_k, gamma_k, AL_p, 0, 0, lam_p, offs_g_k, lam_p, offs_g_k);
+            // (Pl_p + k)->PtV(rho_k, lam_p, offs_g_k);
             (Pr_p + k)->PtV(rho_k, delta_ux_p, offs);
         }
         // calculate xkp1
@@ -135,16 +135,16 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
         AXPY(nu, 1.0, delta_ux_p, offs, curr_ux_p, offs, next_ux_p, offs);
         FatropVecBF xp1vec = FatropVecBF(nxp1, offsp1+nup1, next_ux_p);
         ocpinterface_ -> EvalDynamics(OCP_, k, FatropVecBF(nu, offs, next_ux_p), FatropVecBF(nx, offs+nu, next_ux_p), xp1vec);
-
-
-
-        ROWEX(nxp1,1.0- alpha_primal, BAbt_p + k, nu + nx, 0, delta_ux_p, offsp1 + nup1);
+        ROWEX(nxp1,1.0-alpha_primal, BAbt_p + k, nu + nx, 0, delta_ux_p, offsp1 + nup1);
         AXPY(nxp1, -1.0, delta_ux_p, offsp1+nup1, next_ux_p, offsp1+nup1, next_ux_p, offsp1+nup1);
         AXPY(nxp1, -1.0, curr_ux_p, offsp1+nup1, next_ux_p, offsp1+nup1, delta_ux_p, offsp1+nup1);
+        
+
+
         // calculate lam_dyn xp1
-        ROWEX(nxp1, alpha_primal, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
-        GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, delta_ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
-        GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        // ROWEX(nxp1, alpha_primal, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+        // GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, delta_ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        // GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
     }
     for (int k = 0; k < K; k++)
     {
@@ -184,7 +184,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
                     grad_barrier_L = -mu * dist_m1;
                     double z = VECEL(zL_p, offs_ineq_k + i);
                     double dz = -grad_barrier_L - z - scaling_factor_L * ds;
-                    VECEL(delta_zL_p, offs_ineq_k + i) = dz;
+                    // VECEL(delta_zL_p, offs_ineq_k + i) = dz;
                     lamIi += -z - dz;
                 }
                 if (upper_bounded)
@@ -197,7 +197,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
                     double dz = grad_barrier_U - z + scaling_factor_U * ds;
                     // VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                     lamIi += +z + dz;
-                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
+                    // VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                     // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                 }
                 // double grad_barrier = grad_barrier_L + grad_barrier_U;
@@ -205,7 +205,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
                 {
                     lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                 }
-                VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k + i);
+                // VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k + i);
                 // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
             }
         }
@@ -218,11 +218,11 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     // cout << "alpha dual " << alpha_dual << endl;
     // cout << "alpha prim " << alpha_max_pr << endl;
     // cout << "alpha dual " << alpha_max_du << endl;
-    axpy(alpha_max_pr,fatropdata_-> delta_x,fatropdata_-> x_curr,fatropdata_-> x_next);
+    // axpy(alpha_max_pr,fatropdata_-> delta_x,fatropdata_-> x_curr,fatropdata_-> x_next);
     axpy(alpha_max_pr,fatropdata_-> delta_s, fatropdata_->s_curr,fatropdata_-> s_next);
-    axpy(alpha_max_du,fatropdata_-> delta_zL,fatropdata_-> zL_curr,fatropdata_-> zL_next);
-    axpy(alpha_max_du,fatropdata_-> delta_zU,fatropdata_-> zU_curr,fatropdata_-> zU_next);
-    axpy(alpha_max_pr,fatropdata_-> lam_calc,fatropdata_-> lam_curr,fatropdata_-> lam_next);
+    axpy(alpha_dual,fatropdata_-> delta_zL,fatropdata_-> zL_curr,fatropdata_-> zL_next);
+    axpy(alpha_dual,fatropdata_-> delta_zU,fatropdata_-> zU_curr,fatropdata_-> zU_next);
+    axpy(alpha_primal,fatropdata_-> lam_calc,fatropdata_-> lam_curr,fatropdata_-> lam_next);
     // axpby(alpha_primal, lam_calc, 1.0 - alpha_primal, lam_curr, lam_next);
     // reset evaluation flags
     fatropdata_->cache_next = FatropData::EvalCache();
