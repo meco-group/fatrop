@@ -73,9 +73,6 @@ namespace fatrop
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr);
         }
-
-    private:
-
     public:
         void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override;
         void SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x);

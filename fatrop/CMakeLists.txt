@@ -13,6 +13,7 @@ debug/LinearAlgebraEigen.hpp                debug/LinearAlgebraEigen.cpp
 debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/BFOCP.hpp                               ocp/BFOCP.cpp
+ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
 ocp/BFOCPBasic.hpp                          ocp/BFOCPBasic.cpp
 ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
@@ -46,6 +47,7 @@ solver/Timer.hpp                            solver/Timer.cpp
 # sparse/InterfacePardiso.hpp                 sparse/InterfacePardiso.cpp
 # sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
+templates/FatropNLPAL.hpp                   templates/FatropNLPAL.cpp
 json/json.h json/json.cpp
 )
 set(FATROPHEADERS
