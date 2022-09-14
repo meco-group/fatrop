@@ -4,15 +4,16 @@
  * @brief This file containts the FatropVector, which is derived from the std::vector but also allows templated expressions (implemented with CRTP - static polymorphism) such as vector-vector sum and vector-scalar sum. https://en.wikipedia.org/wiki/Expression_templates
  * @version 0.1
  * @date 2021-12-03
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 #ifndef FATROP_VECTOR_INCLUDED
 #define FATROP_VECTOR_INCLUDED
 #include <vector>
 #include <assert.h>
 #include <utility>
+#include <functional>
 using namespace std;
 namespace fatrop
 {
@@ -84,7 +85,7 @@ namespace fatrop
         FatropVector(vector<T> &&vec) : vector<T>(move(vec)){};
         T getEl(const int ai) const { return vector<T>::at(ai); };
         int size() const { return vector<T>::size(); };
-        operator T*(){return this->data();};
+        operator T *() { return this->data(); };
     };
     template <typename T, typename E1, typename E2>
     VecSum<T, E1, E2> operator+(const VecExpr<E1, T> &expr1, const VecExpr<E2, T> &expr2)
@@ -118,6 +119,17 @@ namespace fatrop
     {
         return VecRotate<T, E1>(expr, shift);
     };
+    template <typename T>
+    vector<T> TransformRange(const int begin, const int end, const function<T(int)>& func)
+    {
+        int size = end - begin;
+        vector<T> res(size);
+        for (int i = 0; i < size; i++)
+        {
+            res.at(i) = func(begin + i);
+        }
+        return res;
+    }
 } // namespace fatrop
 
 #endif // FATROP_VECTOR_INCLUDED

@@ -25,7 +25,17 @@ namespace fatrop
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const shared_ptr<BFOCP> &ocptempl_) : nuexpr(shared_ptr<BFOCP>(ocptempl_)), nxexpr(shared_ptr<BFOCP>(ocptempl_)), ngexpr(shared_ptr<BFOCP>(ocptempl_)), ngineqexpr(shared_ptr<BFOCP>(ocptempl_)), nstageparamsexpr(shared_ptr<BFOCP>(ocptempl_)), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
+        BFOCPAdapter(const shared_ptr<BFOCP> &ocptempl_) : K(ocptempl_->get_horizon_length()),
+                                                           nuexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                                                      { return ocptempl_->get_nuk(k); })),
+                                                           nxexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                                                      { return ocptempl_->get_nxk(k); })),
+                                                           ngexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                                                      { return ocptempl_->get_ngk(k); })),
+                                                           ngineqexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                                                          { return ocptempl_->get_ng_ineq_k(k); })),
+                                                           nstageparamsexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                                                          { return ocptempl_->get_n_stage_params_k(k); })), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
         {
             x_dummy = vector<double>(max(nxexpr), 0.0);
         }
@@ -65,67 +75,18 @@ namespace fatrop
         }
 
     private:
-        class nxExpr : public VecExpr<nxExpr, int>
-        {
-        public:
-            nxExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
-            int getEl(const int ai) const { return parent->get_nxk(ai); };
-            int size() const { return parent->get_horizon_length(); };
-
-        private:
-            const shared_ptr<BFOCP> parent;
-        };
-        class nuExpr : public VecExpr<nuExpr, int>
-        {
-        public:
-            nuExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
-            int getEl(const int ai) const { return parent->get_nuk(ai); };
-            int size() const { return parent->get_horizon_length(); };
-
-        private:
-            const shared_ptr<BFOCP> parent;
-        };
-        class ngExpr : public VecExpr<ngExpr, int>
-        {
-        public:
-            ngExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
-            int getEl(const int ai) const { return parent->get_ngk(ai); };
-            int size() const { return parent->get_horizon_length(); };
-
-        private:
-            const shared_ptr<BFOCP> parent;
-        };
-        class ngIneqExpr : public VecExpr<ngIneqExpr, int>
-        {
-        public:
-            ngIneqExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
-            int getEl(const int ai) const { return parent->get_ng_ineq_k(ai); };
-            int size() const { return parent->get_horizon_length(); };
-
-        private:
-            const shared_ptr<BFOCP> parent;
-        };
-        class nStageParamsExpr : public VecExpr<nStageParamsExpr, int>
-        {
-        public:
-            nStageParamsExpr(const shared_ptr<BFOCP> &parent) : parent(parent){};
-            int getEl(const int ai) const { return parent->get_n_stage_params_k(ai); };
-            int size() const { return parent->get_horizon_length(); };
-
-        private:
-            const shared_ptr<BFOCP> parent;
-        };
 
     public:
         void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override;
         void SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x);
 
     public:
-        nuExpr nuexpr;
-        nxExpr nxexpr;
-        ngExpr ngexpr;
-        ngIneqExpr ngineqexpr;
-        nStageParamsExpr nstageparamsexpr;
+        int K;
+        FatropVector<int> nuexpr;
+        FatropVector<int> nxexpr;
+        FatropVector<int> ngexpr;
+        FatropVector<int> ngineqexpr;
+        FatropVector<int> nstageparamsexpr;
         FatropVector<int> offs_stageparams;
         vector<double> stageparams;
         vector<double> globalparams;
