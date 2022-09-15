@@ -70,18 +70,83 @@ int BFOCPAL::eval_RSQrqtk(
     MAT *res,
     const int k)
 {
+    int no_ineqsk = no_ineqs.at(k);
+    int nuk = nu.at(k);
+    int nxk = nx.at(k);
+    int offs = ineqs_offsets.at(k);
+    double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
+    double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
+    double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
+    double *ineq_lagsp = ((blasfeo_dvec *)ineq_lags)->pa + offs;
+    double *gradvecp = ((blasfeo_dvec *)gradvec)->pa;
+    double *lagsupdatedp = ((blasfeo_dvec *)lagsupdated)->pa;
+    double penalty = this->penalty;
+    MAT *tmpmatp = (MAT *)this->tmpmat;
+    // evaluate ineq Jacobian
+    this->eval_Ggt_ineqk_AL(
+        inputs_k,
+        states_k,
+        stage_params_k,
+        global_params_k,
+        tmpmatp,
+        k);
+    // evaluate ineq vector
+    // todo with ROWEX
+    this->eval_gineqk_AL(
+        states_k,
+        inputs_k,
+        stage_params_k,
+        global_params_k,
+        tmpviolationp,
+        k);
+    // calculate updated lagineqs and vector for gradient
+    for (int i = 0; i < no_ineqsk; i++)
+    {
+        double ineqlagsi = ineq_lagsp[i];
+        // lambdai = 0
+        if (ineqlagsi == 0)
+        {
+            // gradvecp[i] = 0.0;
+            lagsupdatedp[i] = 0.0;
+        }
+        // lambdai != 0
+        else
+        {
+            double violationi = tmpviolationp[i];
+            double loweri = lowerp[i];
+            double upperi = upperp[i];
+            double dist_low = violationi - loweri;
+            double dist_up = upperi - violationi;
+            double lagineqi = ineq_lagsp[i];
+            if (dist_low < 0)
+            {
+                lagsupdatedp[i] = -lagineqi + penalty * (std::max(0.0, -dist_low));
+            }
+            else if (dist_up < 0)
+            {
+                lagsupdatedp[i] = lagineqi - penalty * (std::max(0.0, -dist_up));
+            }
+            else
+            {
+                lagsupdatedp[i] = 0;
+            }
+            // gradvecp[i] =;
+        }
+    }
     ocp_->eval_RSQrqtk(
         objective_scale,
         inputs_k,
         states_k,
         lam_dyn_k,
         lam_eq_k,
-        lam_eq_ineq_k,
+        lagsupdatedp,
         stage_params_k,
         global_params_k,
         res,
         k);
-    // TODO add penalty
+    // TODO add extra penalty
+    SYRK_LN_MN(nuk + nxk, nuk + nxk, no_ineqsk, 2 * penalty, tmpmatp, 0, 0, tmpmatp, 0, 0, 0.0, res, 0, 0, res, 0, 0);
+    return 0;
 };
 
 int BFOCPAL::eval_Ggtk(
@@ -110,6 +175,22 @@ int BFOCPAL::eval_Ggt_ineqk(
     const int k)
 {
     return 0;
+};
+int BFOCPAL::eval_Ggt_ineqk_AL(
+    const double *inputs_k,
+    const double *states_k,
+    const double *stage_params_k,
+    const double *global_params_k,
+    MAT *res,
+    const int k)
+{
+    ocp_->eval_Ggt_ineqk(
+        inputs_k,
+        states_k,
+        stage_params_k,
+        global_params_k,
+        res,
+        k);
 };
 
 int BFOCPAL::eval_bk(
@@ -192,6 +273,7 @@ int BFOCPAL::eval_rqk(
         global_params_k,
         res,
         k);
+    // TODO add penalty
 };
 
 int BFOCPAL::eval_Lk(

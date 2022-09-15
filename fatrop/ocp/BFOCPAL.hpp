@@ -5,6 +5,7 @@
 #define BFOCPALINCLUDED
 #include "BFOCP.hpp"
 #include <memory>
+#include <algorithm>
 namespace fatrop
 {
     class BFOCPAL : public BFOCP
@@ -19,8 +20,13 @@ namespace fatrop
                                                                                  { return ocp->get_nuk(k); })),
                                                           ineqs_offsets(offsets(no_ineqs)),
                                                           ineq_lags(sum(no_ineqs), 1),
-                                                          penalties(sum(no_ineqs), 1),
-                                                          tmpmat(max(nu + nx), max(no_ineqs), 1){};
+                                                          lower_bounds(sum(no_ineqs), 1),
+                                                          upper_bounds(sum(no_ineqs), 1),
+                                                          penalty(penalty),
+                                                          tmpmat(max(nu + nx), max(no_ineqs), 1),
+                                                          tmpviolation(max(no_ineqs), 1),
+                                                          gradvec(max(no_ineqs), 1),
+                                                          lagsupdated(max(no_ineqs), 1){};
         int get_nxk(const int k) const;
         int get_nuk(const int k) const;
         int get_ngk(const int k) const;
@@ -56,6 +62,13 @@ namespace fatrop
             MAT *res,
             const int k);
         int eval_Ggt_ineqk(
+            const double *inputs_k,
+            const double *states_k,
+            const double *stage_params_k,
+            const double *global_params_k,
+            MAT *res,
+            const int k);
+        int eval_Ggt_ineqk_AL(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
@@ -119,10 +132,20 @@ namespace fatrop
         FatropVector<int> ineqs_offsets;
         // vector with inequality lags
         FatropMemoryVecBF ineq_lags;
+        // vector with inequality lags
+        FatropMemoryVecBF lower_bounds;
+        // vector with inequality lags
+        FatropMemoryVecBF upper_bounds;
         // penalty parameter
-        FatropMemoryVecBF penalties;
+        double penalty = 0.0;
         // blasfeo matrix for temp results
         FatropMemoryMatBF tmpmat;
+        // blasfeo matrix for temp results
+        FatropMemoryVecBF tmpviolation;
+        // blasfeo matrix for temp results
+        FatropMemoryVecBF gradvec;
+        // blasfeo matrix for temp results
+        FatropMemoryVecBF lagsupdated;
     };
 } // namespace fatrop
 #endif // BFOCPALINCLUDED
