@@ -266,6 +266,62 @@ int BFOCPAL::eval_rqk(
     double *res,
     const int k)
 {
+    int no_ineqsk = no_ineqs.at(k);
+    int nuk = nu.at(k);
+    int nxk = nx.at(k);
+    int offs = ineqs_offsets.at(k);
+    double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
+    double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
+    double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
+    double *ineq_lagsp = ((blasfeo_dvec *)ineq_lags)->pa + offs;
+    double *gradvecp = ((blasfeo_dvec *)gradvec)->pa;
+    double *lagsupdatedp = ((blasfeo_dvec *)lagsupdated)->pa;
+    double penalty = this->penalty;
+    MAT *tmpmatp = (MAT *)this->tmpmat;
+    // evaluate ineq Jacobian
+    this->eval_Ggt_ineqk_AL(
+        inputs_k,
+        states_k,
+        stage_params_k,
+        global_params_k,
+        tmpmatp,
+        k);
+    // evaluate ineq vector
+    // todo with ROWEX
+    this->eval_gineqk_AL(
+        states_k,
+        inputs_k,
+        stage_params_k,
+        global_params_k,
+        tmpviolationp,
+        k);
+    // calculate updated lagineqs and vector for gradient
+    for (int i = 0; i < no_ineqsk; i++)
+    {
+        double ineqlagsi = ineq_lagsp[i];
+        // lambdai = 0
+        double violationi = tmpviolationp[i];
+        double loweri = lowerp[i];
+        bool lower_bounded = !isinf(loweri);
+        double upperi = upperp[i];
+        bool upper_bounded = !isinf(upperi);
+        double dist_low = violationi - loweri;
+        double dist_up = upperi - violationi;
+        double lagineqi = ineq_lagsp[i];
+        if (lower_bounded && (ineqlagsi != 0.0) && (dist_low < 0))
+        {
+            gradvecp[i] = -ineqlagsi + dist_low;
+        }
+        else if (upper_bounded && (ineqlagsi != 0.0) && (dist_up < 0))
+        {
+            gradvecp[i] = ineqlagsi - dist_low;
+        }
+        else
+        {
+            gradvecp[i] = 0;
+        }
+        // gradvecp[i] =;
+    }
     ocp_->eval_rqk(
         objective_scale,
         inputs_k,
@@ -274,7 +330,10 @@ int BFOCPAL::eval_rqk(
         global_params_k,
         res,
         k);
+    VEC resbf;
+    CREATE_VEC(no_ineqsk, &resbf, res);
     // TODO add penalty
+    GEMV_N(nuk + nxk, no_ineqsk, 1.0, tmpmatp, 0, 0, (VEC *)gradvec, 0, 1.0, &resbf, 0, &resbf, 0);
     return 0;
 };
 
@@ -339,6 +398,5 @@ int BFOCPAL::eval_Lk(
         res,
         k);
     *res += obj_penalty;
-    // TODO add penalty
     return 0;
 };
