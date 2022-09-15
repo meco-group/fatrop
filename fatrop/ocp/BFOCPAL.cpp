@@ -7,22 +7,22 @@ int BFOCPAL::get_nxk(const int k) const
 
 int BFOCPAL::get_nuk(const int k) const
 {
-    ocp_->get_nuk(k);
+    return ocp_->get_nuk(k);
 };
 
 int BFOCPAL::get_ngk(const int k) const
 {
-    ocp_->get_ngk(k);
+    return ocp_->get_ngk(k);
 }
 
 int BFOCPAL::get_n_stage_params_k(const int k) const
 {
-    ocp_->get_n_stage_params_k(k);
+    return ocp_->get_n_stage_params_k(k);
 }
 
 int BFOCPAL::get_n_global_parmas() const
 {
-    ocp_->get_n_global_parmas();
+    return ocp_->get_n_global_parmas();
 }
 
 int BFOCPAL::get_ng_ineq_k(const int k) const
@@ -36,7 +36,7 @@ int BFOCPAL::get_ng_ineq_k_AL(const int k) const
 
 int BFOCPAL::get_horizon_length() const
 {
-    ocp_->get_horizon_length();
+    return ocp_->get_horizon_length();
 }
 
 int BFOCPAL::eval_BAbtk(
@@ -56,6 +56,7 @@ int BFOCPAL::eval_BAbtk(
         global_params_k,
         res,
         k);
+    return 0;
 };
 
 int BFOCPAL::eval_RSQrqtk(
@@ -82,6 +83,7 @@ int BFOCPAL::eval_RSQrqtk(
         res,
         k);
     // TODO add penalty
+    return 0;
 };
 
 int BFOCPAL::eval_Ggtk(
@@ -99,6 +101,7 @@ int BFOCPAL::eval_Ggtk(
         global_params_k,
         res,
         k);
+    return 0;
 };
 
 int BFOCPAL::eval_Ggt_ineqk(
@@ -129,6 +132,7 @@ int BFOCPAL::eval_bk(
         global_params_k,
         res,
         k);
+    return 0;
 };
 
 int BFOCPAL::eval_gk(
@@ -146,6 +150,7 @@ int BFOCPAL::eval_gk(
         global_params_k,
         res,
         k);
+    return 0;
 };
 
 int BFOCPAL::eval_gineqk(
@@ -173,6 +178,7 @@ int BFOCPAL::eval_gineqk_AL(
         global_params_k,
         res,
         k);
+    return 0;
 }
 
 int BFOCPAL::eval_rqk(
@@ -192,6 +198,7 @@ int BFOCPAL::eval_rqk(
         global_params_k,
         res,
         k);
+    return 0;
 };
 
 int BFOCPAL::eval_Lk(
@@ -212,4 +219,5 @@ int BFOCPAL::eval_Lk(
         res,
         k);
     // TODO add penalty
+    return 0;
 };
