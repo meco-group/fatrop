@@ -107,15 +107,17 @@ int BFOCPAL::eval_RSQrqtk(
         // lambdai = 0
         double violationi = tmpviolationp[i];
         double loweri = lowerp[i];
+        bool lower_bounded = !isinf(loweri);
         double upperi = upperp[i];
+        bool upper_bounded = !isinf(upperi);
         double dist_low = violationi - loweri;
         double dist_up = upperi - violationi;
         double lagineqi = ineq_lagsp[i];
-        if ((ineqlagsi != 0.0) && (dist_low < 0))
+        if (lower_bounded && (ineqlagsi != 0.0) && (dist_low < 0))
         {
             lagsupdatedp[i] = -lagineqi + penalty * (std::max(0.0, -dist_low));
         }
-        else if ((ineqlagsi != 0.0) && (dist_up < 0))
+        else if (upper_bounded && (ineqlagsi != 0.0) && (dist_up < 0))
         {
             lagsupdatedp[i] = lagineqi - penalty * (std::max(0.0, -dist_up));
         }
@@ -138,8 +140,8 @@ int BFOCPAL::eval_RSQrqtk(
         global_params_k,
         res,
         k);
-    // TODO add extra penalty
     SYRK_LN_MN(nuk + nxk, nuk + nxk, no_ineqsk, penalty, tmpmatp, 0, 0, tmpmatp, 0, 0, 1.0, res, 0, 0, res, 0, 0);
+    TRTR_L(nuk + nxk, res, 0, 0, res, 0, 0);
     return 0;
 };
 
@@ -285,6 +287,49 @@ int BFOCPAL::eval_Lk(
     double *res,
     const int k)
 {
+    int no_ineqsk = no_ineqs.at(k);
+    int nuk = nu.at(k);
+    int nxk = nx.at(k);
+    int offs = ineqs_offsets.at(k);
+    double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
+    double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
+    double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
+    double *ineq_lagsp = ((blasfeo_dvec *)ineq_lags)->pa + offs;
+    double *gradvecp = ((blasfeo_dvec *)gradvec)->pa;
+    double *lagsupdatedp = ((blasfeo_dvec *)lagsupdated)->pa;
+    double penalty = this->penalty;
+    MAT *tmpmatp = (MAT *)this->tmpmat;
+    double obj_penalty = 0.0;
+    this->eval_gineqk_AL(
+        states_k,
+        inputs_k,
+        stage_params_k,
+        global_params_k,
+        tmpviolationp,
+        k);
+    // calculate updated lagineqs and vector for gradient
+    for (int i = 0; i < no_ineqsk; i++)
+    {
+        double ineqlagsi = ineq_lagsp[i];
+        // lambdai = 0
+        double violationi = tmpviolationp[i];
+        double loweri = lowerp[i];
+        bool lower_bounded = !isinf(loweri);
+        double upperi = upperp[i];
+        bool upper_bounded = !isinf(upperi);
+        double dist_low = violationi - loweri;
+        double dist_up = upperi - violationi;
+        double lagineqi = ineq_lagsp[i];
+        if (lower_bounded && (ineqlagsi != 0.0) && (dist_low < 0))
+        {
+            obj_penalty += -ineqlagsi * dist_low + 0.5 * penalty * dist_low * dist_low;
+        }
+        else if (upper_bounded && (ineqlagsi != 0.0) && (dist_up < 0))
+        {
+            obj_penalty += -ineqlagsi * dist_up + 0.5 * penalty * dist_up * dist_up;
+        }
+        // gradvecp[i] =;
+    }
     ocp_->eval_Lk(
         objective_scale,
         inputs_k,
@@ -293,6 +338,7 @@ int BFOCPAL::eval_Lk(
         global_params_k,
         res,
         k);
+    *res += obj_penalty;
     // TODO add penalty
     return 0;
 };

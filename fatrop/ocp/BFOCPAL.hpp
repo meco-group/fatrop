@@ -6,6 +6,7 @@
 #include "BFOCP.hpp"
 #include <memory>
 #include <algorithm>
+#include <cmath>
 namespace fatrop
 {
     class BFOCPAL : public BFOCP
