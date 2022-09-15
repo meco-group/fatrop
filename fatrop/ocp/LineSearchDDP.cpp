@@ -6,24 +6,24 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     // make variables local for efficiency
     MAT *BAbt_p = (MAT *)OCP_->BAbt;
     MAT *Ggt_ineq_p = (MAT *)OCP_->Ggt_ineq;
-    MAT *Ppt_p = (MAT *) ocplsriccati_->Ppt;
-    MAT * Hh_p = (MAT *) ocplsriccati_->Hh;
+    // MAT *Ppt_p = (MAT *) ocplsriccati_->Ppt;
+    // MAT * Hh_p = (MAT *) ocplsriccati_->Hh;
     MAT * AL_p = (MAT *) ocplsriccati_->AL;
-    MAT * RSQrqt_tilde_p = (MAT *) ocplsriccati_->RSQrqt_tilde;
+    // MAT * RSQrqt_tilde_p = (MAT *) ocplsriccati_->RSQrqt_tilde;
     MAT * Ggt_tilde_p = (MAT *) ocplsriccati_->Ggt_tilde;
-    PMAT * Pl_p = (PMAT *) ocplsriccati_->Pl;
+    // PMAT * Pl_p = (PMAT *) ocplsriccati_->Pl;
     PMAT * Pr_p = (PMAT *) ocplsriccati_->Pr;
     MAT * Llt_p = (MAT *) ocplsriccati_->Llt;
     MAT * GgIt_tilde_p = (MAT *) ocplsriccati_->GgIt_tilde;
-    MAT * HhIt_p = (MAT *) ocplsriccati_->HhIt;
+    // MAT * HhIt_p = (MAT *) ocplsriccati_->HhIt;
     MAT * LlIt_p = (MAT *) ocplsriccati_->LlIt;
-    PMAT * PlI_p = (PMAT *) ocplsriccati_->PlI;
+    // PMAT * PlI_p = (PMAT *) ocplsriccati_->PlI;
     PMAT * PrI_p = (PMAT *) ocplsriccati_->PrI;
     VEC * delta_ux_p = (VEC *) fatropdata_->delta_x;
     VEC * next_ux_p = (VEC *) fatropdata_->x_next;
     VEC * curr_ux_p = (VEC *) fatropdata_->x_curr;
     // VEC * lam_p = (VEC *) fatropdata_->lam_calc;
-    VEC * lam_curr_p = (VEC *) fatropdata_->lam_curr;
+    // VEC * lam_curr_p = (VEC *) fatropdata_->lam_curr;
     VEC * s_p = (VEC *) fatropdata_->s_curr;
     VEC * zL_p = (VEC *) fatropdata_->zL_curr;
     VEC * zU_p = (VEC *) fatropdata_->zU_curr;
@@ -38,7 +38,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     int * gamma_p = (int *) ocplsriccati_->gamma;
     int * rho_p = (int *) ocplsriccati_->rho;
     int *offs_ineq_p = (int *)OCP_->aux.ineq_offs.data();
-    int *offs_g_ineq_p = (int *)OCP_->aux.g_ineq_offs.data();
+    // int *offs_g_ineq_p = (int *)OCP_->aux.g_ineq_offs.data();
     int rankI = ocplsriccati_->lastused_.rankI;
     double inertia_correction = ocplsriccati_->lastused_.inertia_correction;
     double kappa_d = ocplsriccati_->lastused_.kappa_d;
@@ -70,8 +70,8 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
         AXPY(nx, 1.0, delta_ux_p, nu, curr_ux_p, nu, next_ux_p, nu);
     }
     int *offs_ux = (int *)OCP_->aux.ux_offs.data();
-    int *offs_g = (int *)OCP_->aux.g_offs.data();
-    int *offs_dyn_eq = (int *)OCP_->aux.dyn_eq_offs.data();
+    // int *offs_g = (int *)OCP_->aux.g_offs.data();
+    // int *offs_dyn_eq = (int *)OCP_->aux.dyn_eq_offs.data();
     // other stages
     // for (int k = 0; k < K - 1; k++)
     // int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
@@ -85,12 +85,12 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
         const int offs = offs_ux[k];
         const int rho_k = rho_p[k];
         const int numrho_k = nu - rho_k;
-        const int offs_g_k = offs_g[k];
-        const int offs_dyn_eq_k = offs_dyn_eq[k];
-        const int offs_g_kp1 = offs_g[k + 1];
-        const int gammamrho_k = gamma_p[k] - rho_p[k];
+        // const int offs_g_k = offs_g[k];
+        // const int offs_dyn_eq_k = offs_dyn_eq[k];
+        // const int offs_g_kp1 = offs_g[k + 1];
+        // const int gammamrho_k = gamma_p[k] - rho_p[k];
         const int gamma_k = gamma_p[k];
-        const int gammamrho_kp1 = gamma_p[k + 1] - rho_p[k + 1];
+        // const int gammamrho_kp1 = gamma_p[k + 1] - rho_p[k + 1];
         if (numrho_k > 0)
         {
             /// calculate ukb_tilde
@@ -152,7 +152,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
         const int nu = nu_p[k];
         const int ng_ineq = ng_ineq_p[k];
         const int offs = offs_ux[k];
-        const int offs_g_ineq_k = offs_g_ineq_p[k];
+        // const int offs_g_ineq_k = offs_g_ineq_p[k];
         const int offs_ineq_k = offs_ineq_p[k];
         if (ng_ineq > 0)
         {
