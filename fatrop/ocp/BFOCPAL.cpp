@@ -129,6 +129,8 @@ int BFOCPAL::eval_RSQrqtk(
             }
             else
             {
+                // turn off penalty
+                GESE(nuk + nxk, 1, 0.0, tmpmatp, 0, 0);
                 lagsupdatedp[i] = 0;
             }
             // gradvecp[i] =;
