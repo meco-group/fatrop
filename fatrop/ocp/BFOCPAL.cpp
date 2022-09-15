@@ -146,7 +146,7 @@ int BFOCPAL::eval_RSQrqtk(
         res,
         k);
     // TODO add extra penalty
-    SYRK_LN_MN(nuk + nxk, nuk + nxk, no_ineqsk, 2 * penalty, tmpmatp, 0, 0, tmpmatp, 0, 0, 1.0, res, 0, 0, res, 0, 0);
+    SYRK_LN_MN(nuk + nxk, nuk + nxk, no_ineqsk, penalty, tmpmatp, 0, 0, tmpmatp, 0, 0, 1.0, res, 0, 0, res, 0, 0);
     return 0;
 };
 
