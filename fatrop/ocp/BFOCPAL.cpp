@@ -105,36 +105,27 @@ int BFOCPAL::eval_RSQrqtk(
     {
         double ineqlagsi = ineq_lagsp[i];
         // lambdai = 0
-        if (ineqlagsi == 0)
+        double violationi = tmpviolationp[i];
+        double loweri = lowerp[i];
+        double upperi = upperp[i];
+        double dist_low = violationi - loweri;
+        double dist_up = upperi - violationi;
+        double lagineqi = ineq_lagsp[i];
+        if ((ineqlagsi != 0.0) && (dist_low < 0))
         {
-            // gradvecp[i] = 0.0;
-            lagsupdatedp[i] = 0.0;
+            lagsupdatedp[i] = -lagineqi + penalty * (std::max(0.0, -dist_low));
         }
-        // lambdai != 0
+        else if ((ineqlagsi != 0.0) && (dist_up < 0))
+        {
+            lagsupdatedp[i] = lagineqi - penalty * (std::max(0.0, -dist_up));
+        }
         else
         {
-            double violationi = tmpviolationp[i];
-            double loweri = lowerp[i];
-            double upperi = upperp[i];
-            double dist_low = violationi - loweri;
-            double dist_up = upperi - violationi;
-            double lagineqi = ineq_lagsp[i];
-            if (dist_low < 0)
-            {
-                lagsupdatedp[i] = -lagineqi + penalty * (std::max(0.0, -dist_low));
-            }
-            else if (dist_up < 0)
-            {
-                lagsupdatedp[i] = lagineqi - penalty * (std::max(0.0, -dist_up));
-            }
-            else
-            {
-                // turn off penalty
-                GESE(nuk + nxk, 1, 0.0, tmpmatp, 0, 0);
-                lagsupdatedp[i] = 0;
-            }
-            // gradvecp[i] =;
+            // turn off penalty
+            GESE(nuk + nxk, 1, 0.0, tmpmatp, 0, 0);
+            lagsupdatedp[i] = 0;
         }
+        // gradvecp[i] =;
     }
     ocp_->eval_RSQrqtk(
         objective_scale,
