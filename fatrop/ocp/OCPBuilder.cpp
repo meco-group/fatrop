@@ -53,7 +53,9 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
                                                                  gineqFf,
                                                                  Lkf,
                                                                  LFf);
-    ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
+    shared_ptr<BFOCPAL> bfocpal = make_shared<BFOCPAL>(ocptemplatebasic, 1.0);
+    // ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
+    ocptempladapter = make_shared<BFOCPAdapter>(bfocpal);
     ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
     ocplsriccati = ocplsriccati1;

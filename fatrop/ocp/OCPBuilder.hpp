@@ -1,6 +1,7 @@
 #ifndef OCPBUILDERINCLUDED
 #define OCPBUILDERINCLUDED
 #include "ocp/BFOCPBasic.hpp"
+#include "ocp/BFOCPAL.hpp"
 #include "ocp/BFOCPAdapter.hpp"
 #include "ocp/OCPLSRiccati.hpp"
 #include "ocp/OCPNoScaling.hpp"

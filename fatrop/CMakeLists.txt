@@ -15,12 +15,15 @@ function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluati
 ocp/BFOCP.hpp                               ocp/BFOCP.cpp
 ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
+ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
 ocp/BFOCPBasic.hpp                          ocp/BFOCPBasic.cpp
 ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
+ocp/FatropOCPAL.hpp                         ocp/FatropOCPAL.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp
 ocp/OCP.hpp                                 ocp/OCP.cpp
+ocp/OCPAL.hpp                               ocp/OCPAL.cpp
 ocp/OCPDims.hpp                             ocp/OCPDims.cpp
 ocp/OCPInitializer.hpp                      ocp/OCPInitializer.cpp
 ocp/OCPKKT.hpp                              ocp/OCPKKT.cpp
@@ -68,8 +71,10 @@ ocp/BFOCPAdapter.hpp
 ocp/BFOCPBasic.hpp
 ocp/DuInfEvaluator.hpp
 ocp/FatropOCP.hpp
+ocp/FatropOCPAL.hpp
 ocp/FatropOCPBuilder.hpp
 ocp/OCP.hpp
+ocp/OCPAL.hpp
 ocp/OCPDims.hpp
 ocp/OCPInitializer.hpp
 ocp/OCPKKT.hpp
