@@ -24,7 +24,7 @@ namespace fatrop
                                                           lower_bounds(sum(no_ineqs), 1),
                                                           upper_bounds(sum(no_ineqs), 1),
                                                           penalty(penalty),
-                                                          tmpmat(max(nu + nx), max(no_ineqs), 1),
+                                                          tmpmat(max(nu + nx) +1, max(no_ineqs), 1),
                                                           tmpviolation(max(no_ineqs), 1),
                                                           gradvec(max(no_ineqs), 1),
                                                           lagsupdated(max(no_ineqs), 1){};

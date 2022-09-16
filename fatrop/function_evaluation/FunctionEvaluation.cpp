@@ -3,8 +3,8 @@ using namespace fatrop;
 int EvalBase::eval_bf(const double **arg, MAT *bf_mat)
 {
 #if DEBUG
-    assert(bf_mat->m == out_m);
-    assert(bf_mat->n == out_n);
+    assert(bf_mat->m >= out_m);
+    assert(bf_mat->n >= out_n);
 #endif
     double *buffer_p = buffer.data();
     // todo make this static polymorphism using CRTP
