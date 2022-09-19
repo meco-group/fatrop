@@ -137,11 +137,11 @@ namespace fatrop
         // vector with inequality lags
         FatropMemoryVecBF ineq_lagsU;
         // vector with inequality lags
-        FatropMemoryVecBF lower_bounds;
+        vector<double> lower_bounds;
         // vector with inequality lags
-        FatropMemoryVecBF upper_bounds;
+        vector<double> upper_bounds;
         // penalty parameter
-        double penalty = 0.0;
+        double penalty = 1.0;
         // blasfeo matrix for temp results
         FatropMemoryMatBF tmpmat;
         // blasfeo matrix for temp results

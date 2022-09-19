@@ -6,7 +6,8 @@ using namespace fatrop;
 
 int main(int argc, char **argv)
 {
-    if (argc == 3)
+    // if (argc == 3)
+    if (true)
     {
         
         #ifdef ENABLE_MULTITHREADING
@@ -15,7 +16,10 @@ int main(int argc, char **argv)
             cout << "Multithreading disabled" << endl;
         #endif
 
-        OCPBuilder ocpbuilder(argv[1], argv[2]);
+        // OCPBuilder ocpbuilder(argv[1], argv[2]);
+        // OCPBuilder ocpbuilder("../robot.so","../robot.json");
+        OCPBuilder ocpbuilder("../Rocket_example.so","../Rocket_example.json");
+
         ocpbuilder.fatropalg->Optimize();
     }
     else

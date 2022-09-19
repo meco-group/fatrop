@@ -3,10 +3,10 @@
 #include "OCP.hpp"
 namespace fatrop
 {
-    class OCPAL : public OCP
+    class OCPAL 
     {
     public:
-        virtual int SetIneqsBounds(const FatropVecBF &lower_boundsin, const FatropVecBF &upper_boundsin) = 0;
+        virtual int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin) = 0;
         virtual int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU) = 0;
         virtual int SetPenalty(double penalty) = 0;
     };

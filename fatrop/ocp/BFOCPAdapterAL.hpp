@@ -12,9 +12,9 @@ namespace fatrop
         BFOCPAdapterAL(const shared_ptr<BFOCPAL> &ocptempl) : BFOCPAdapter(ocptempl), ocptempl_(ocptempl)
         {
         }
-        int SetIneqsBounds(const FatropVecBF &lower_boundsin, const FatropVecBF &upper_boundsin);
-        int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU);
-        int SetPenalty(double penalty);
+        int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin) override;
+        int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU) override;
+        int SetPenalty(double penalty) override;
         const shared_ptr<BFOCPAL> ocptempl_;
     };
 } // namespace fatrop

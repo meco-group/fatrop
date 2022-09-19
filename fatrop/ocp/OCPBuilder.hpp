@@ -3,6 +3,7 @@
 #include "ocp/BFOCPBasic.hpp"
 #include "ocp/BFOCPAL.hpp"
 #include "ocp/BFOCPAdapter.hpp"
+#include "ocp/BFOCPAdapterAL.hpp"
 #include "ocp/OCPLSRiccati.hpp"
 #include "ocp/OCPNoScaling.hpp"
 #include "solver/FatropParams.hpp"
@@ -24,6 +25,7 @@ namespace fatrop
         void SetInitial();
         int K;
         shared_ptr<OCP> ocptempladapter;
+        shared_ptr<OCPAL> ocptempladapterAL;
         shared_ptr<OCPLinearSolver> ocplsriccati;
         shared_ptr<FatropParams> params;
         shared_ptr<OCPScalingMethod> ocpscaler;

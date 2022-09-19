@@ -1,9 +1,11 @@
 #include "BFOCPAdapterAL.hpp"
 using namespace fatrop;
-int BFOCPAdapterAL::SetIneqsBounds(const FatropVecBF &lower_boundsin, const FatropVecBF &upper_boundsin)
+int BFOCPAdapterAL::SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin)
 {
-    copy(lower_boundsin, (ocptempl_->lower_bounds)[0]);
-    copy(upper_boundsin, (ocptempl_->upper_bounds)[0]);
+    // copy(lower_boundsin, (ocptempl_->lower_bounds)[0]);
+    // copy(upper_boundsin, (ocptempl_->upper_bounds)[0]);
+    ocptempl_->lower_bounds = lower_boundsin ;
+    ocptempl_->upper_bounds = upper_boundsin ;
     return 0;
 }
 

@@ -75,8 +75,8 @@ int BFOCPAL::eval_RSQrqtk(
     int nuk = nu.at(k);
     int nxk = nx.at(k);
     int offs = ineqs_offsets.at(k);
-    double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
-    double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
+    double *lowerp =lower_bounds.data();
+    double *upperp =upper_bounds.data();
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
     double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
     double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
@@ -274,8 +274,8 @@ int BFOCPAL::eval_rqk(
     int nuk = nu.at(k);
     int nxk = nx.at(k);
     int offs = ineqs_offsets.at(k);
-    double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
-    double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
+    double *lowerp = lower_bounds.data();
+    double *upperp = upper_bounds.data();
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
     double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
     double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
@@ -348,8 +348,8 @@ int BFOCPAL::eval_Lk(
 {
     int no_ineqsk = no_ineqs.at(k);
     int offs = ineqs_offsets.at(k);
-    double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
-    double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
+    double *lowerp = lower_bounds.data();
+    double *upperp = upper_bounds.data();
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
     double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
     double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;

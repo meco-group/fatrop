@@ -14,7 +14,7 @@ namespace fatrop
             const shared_ptr<OCPScalingMethod> &scaler) : FatropOCP(ocp, ls, scaler), ocp_(ocp)
         {
         }
-            int SetIneqsBounds(const FatropVecBF &lower_boundsin, const FatropVecBF &upper_boundsin)
+            int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin)
         {
             return ocp_->SetIneqsBounds(lower_boundsin, upper_boundsin);
         };
