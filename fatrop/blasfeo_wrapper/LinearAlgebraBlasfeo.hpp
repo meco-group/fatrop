@@ -19,6 +19,7 @@
 #define GEAD blasfeo_dgead
 #define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
+#define GESC blasfeo_dgesc
 #define VECCP blasfeo_dveccp
 #define VECCPSC blasfeo_dveccpsc
 #define VECCPR fatrop_dveccp_reversed

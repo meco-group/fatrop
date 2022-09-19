@@ -7,9 +7,10 @@ int BFOCPAdapterAL::SetIneqsBounds(const FatropVecBF &lower_boundsin, const Fatr
     return 0;
 }
 
-int BFOCPAdapterAL::SetIneqLagrMult(const FatropVecBF &ineqlagrmult)
+int BFOCPAdapterAL::SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU)
 {
-    copy(ineqlagrmult, (ocptempl_->ineq_lags)[0]);
+    copy(ineqlagrmultL, (ocptempl_->ineq_lagsL)[0]);
+    copy(ineqlagrmultU, (ocptempl_->ineq_lagsU)[0]);
     return 0;
 }
 

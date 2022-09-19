@@ -20,7 +20,8 @@ namespace fatrop
                                                           nx(TransformRange<int>(0, K, [&ocp](int k)
                                                                                  { return ocp->get_nuk(k); })),
                                                           ineqs_offsets(offsets(no_ineqs)),
-                                                          ineq_lags(sum(no_ineqs), 1),
+                                                          ineq_lagsL(sum(no_ineqs), 1),
+                                                          ineq_lagsU(sum(no_ineqs), 1),
                                                           lower_bounds(sum(no_ineqs), 1),
                                                           upper_bounds(sum(no_ineqs), 1),
                                                           penalty(penalty),
@@ -132,7 +133,9 @@ namespace fatrop
         // vector with ineqs offsets
         FatropVector<int> ineqs_offsets;
         // vector with inequality lags
-        FatropMemoryVecBF ineq_lags;
+        FatropMemoryVecBF ineq_lagsL;
+        // vector with inequality lags
+        FatropMemoryVecBF ineq_lagsU;
         // vector with inequality lags
         FatropMemoryVecBF lower_bounds;
         // vector with inequality lags

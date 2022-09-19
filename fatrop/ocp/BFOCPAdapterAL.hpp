@@ -13,7 +13,7 @@ namespace fatrop
         {
         }
         int SetIneqsBounds(const FatropVecBF &lower_boundsin, const FatropVecBF &upper_boundsin);
-        int SetIneqLagrMult(const FatropVecBF &ineqlagrmult);
+        int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU);
         int SetPenalty(double penalty);
         const shared_ptr<BFOCPAL> ocptempl_;
     };

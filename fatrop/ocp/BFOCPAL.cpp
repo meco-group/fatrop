@@ -78,7 +78,8 @@ int BFOCPAL::eval_RSQrqtk(
     double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
     double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
-    double *ineq_lagsp = ((blasfeo_dvec *)ineq_lags)->pa + offs;
+    double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
+    double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
     double *lagsupdatedp = ((blasfeo_dvec *)lagsupdated)->pa;
     double penalty = this->penalty;
     MAT *tmpmatp = (MAT *)this->tmpmat;
@@ -102,29 +103,33 @@ int BFOCPAL::eval_RSQrqtk(
     // calculate updated lagineqs and vector for gradient
     for (int i = 0; i < no_ineqsk; i++)
     {
-        double ineqlagsi = ineq_lagsp[i];
+        double ineqlagsLi = ineq_lagsLp[i];
+        double ineqlagsUi = ineq_lagsUp[i];
         // lambdai = 0
         double violationi = tmpviolationp[i];
         double loweri = lowerp[i];
         bool lower_bounded = !isinf(loweri);
         double upperi = upperp[i];
         bool upper_bounded = !isinf(upperi);
-        double dist_low = violationi - loweri;
-        double dist_up = upperi - violationi;
-        double lagineqi = ineq_lagsp[i];
-        if (lower_bounded && (ineqlagsi != 0.0) && (dist_low < 0))
+        double dist_low = lower_bounded ? -ineqlagsLi + penalty*(violationi - loweri) : 0.0;
+        double dist_up = upper_bounded ? -ineqlagsUi +  penalty*(upperi - violationi): 0.0;
+        lagsupdatedp[i] = 0;
+        if (dist_low < 0.0)
         {
-            lagsupdatedp[i] = -lagineqi + penalty * (std::max(0.0, -dist_low));
+            lagsupdatedp[i] += dist_low;
         }
-        else if (upper_bounded && (ineqlagsi != 0.0) && (dist_up < 0))
+        if (dist_up < 0.0)
         {
-            lagsupdatedp[i] = lagineqi - penalty * (std::max(0.0, -dist_up));
+            lagsupdatedp[i] += -dist_up;
         }
-        else
+        if (dist_low < 0.0 && dist_up < 0.0)
+        {
+            GESC(nuk + nxk, 1, sqrt(2), tmpmatp, 0, 0);
+        }
+        if (dist_low >= 0.0 && dist_up >= 0.0)
         {
             // turn off penalty
             GESE(nuk + nxk, 1, 0.0, tmpmatp, 0, 0);
-            lagsupdatedp[i] = 0;
         }
         // gradvecp[i] =;
     }
@@ -272,7 +277,8 @@ int BFOCPAL::eval_rqk(
     double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
     double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
-    double *ineq_lagsp = ((blasfeo_dvec *)ineq_lags)->pa + offs;
+    double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
+    double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
     double *gradvecp = ((blasfeo_dvec *)gradvec)->pa;
     double penalty = this->penalty;
     MAT *tmpmatp = (MAT *)this->tmpmat;
@@ -296,28 +302,25 @@ int BFOCPAL::eval_rqk(
     // calculate updated lagineqs and vector for gradient
     for (int i = 0; i < no_ineqsk; i++)
     {
-        double ineqlagsi = ineq_lagsp[i];
+        double ineqlagsLi = ineq_lagsLp[i];
+        double ineqlagsUi = ineq_lagsUp[i];
         // lambdai = 0
         double violationi = tmpviolationp[i];
         double loweri = lowerp[i];
         bool lower_bounded = !isinf(loweri);
         double upperi = upperp[i];
         bool upper_bounded = !isinf(upperi);
-        double dist_low = violationi - loweri;
-        double dist_up = upperi - violationi;
-        if (lower_bounded && (ineqlagsi != 0.0) && (dist_low < 0))
+        double dist_low = lower_bounded ? -ineqlagsLi + penalty*(violationi - loweri) : 0.0;
+        double dist_up = upper_bounded ? -ineqlagsUi +  penalty*(upperi - violationi): 0.0;
+        gradvecp[i] = 0;
+        if (dist_low < 0.0)
         {
-            gradvecp[i] = -ineqlagsi + penalty*dist_low;
+            gradvecp[i] += dist_low;
         }
-        else if (upper_bounded && (ineqlagsi != 0.0) && (dist_up < 0))
+        if (dist_up < 0.0)
         {
-            gradvecp[i] = ineqlagsi - penalty* dist_low;
+            gradvecp[i] += -dist_up;
         }
-        else
-        {
-            gradvecp[i] = 0;
-        }
-        // gradvecp[i] =;
     }
     ocp_->eval_rqk(
         objective_scale,
@@ -348,8 +351,10 @@ int BFOCPAL::eval_Lk(
     double *lowerp = ((blasfeo_dvec *)lower_bounds)->pa + offs;
     double *upperp = ((blasfeo_dvec *)upper_bounds)->pa + offs;
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
-    double *ineq_lagsp = ((blasfeo_dvec *)ineq_lags)->pa + offs;
+    double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
+    double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
     double penalty = this->penalty;
+    double penaltym1 = 1.0/penalty;
     double obj_penalty = 0.0;
     this->eval_gineqk_AL(
         states_k,
@@ -361,24 +366,24 @@ int BFOCPAL::eval_Lk(
     // calculate updated lagineqs and vector for gradient
     for (int i = 0; i < no_ineqsk; i++)
     {
-        double ineqlagsi = ineq_lagsp[i];
+        double ineqlagsLi = ineq_lagsLp[i];
+        double ineqlagsUi = ineq_lagsUp[i];
         // lambdai = 0
         double violationi = tmpviolationp[i];
         double loweri = lowerp[i];
         bool lower_bounded = !isinf(loweri);
         double upperi = upperp[i];
         bool upper_bounded = !isinf(upperi);
-        double dist_low = violationi - loweri;
-        double dist_up = upperi - violationi;
-        if (lower_bounded && (ineqlagsi != 0.0) && (dist_low < 0))
+        double dist_low = lower_bounded ? -ineqlagsLi + penalty*(violationi - loweri) : 0.0;
+        double dist_up = upper_bounded ? -ineqlagsUi +  penalty*(upperi - violationi): 0.0;
+        if (dist_low < 0.0)
         {
-            obj_penalty += -ineqlagsi * dist_low + 0.5 * penalty * dist_low * dist_low;
+            obj_penalty += 0.5*penaltym1*dist_low*dist_low;
         }
-        else if (upper_bounded && (ineqlagsi != 0.0) && (dist_up < 0))
+        if (dist_up < 0.0)
         {
-            obj_penalty += -ineqlagsi * dist_up + 0.5 * penalty * dist_up * dist_up;
+            obj_penalty += 0.5*penaltym1*dist_up*dist_up;
         }
-        // gradvecp[i] =;
     }
     ocp_->eval_Lk(
         objective_scale,
