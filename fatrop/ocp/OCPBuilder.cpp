@@ -53,14 +53,7 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
                                                                  gineqFf,
                                                                  Lkf,
                                                                  LFf);
-    shared_ptr<BFOCPAL> bfocpal = make_shared<BFOCPAL>(ocptemplatebasic, 1.0);
-    // ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
-    // ocptempladapterAL =  make_shared<BFOCPAdapterAL>(bfocpal);
-    shared_ptr<BFOCPAdapterAL> bfocpadapteral = make_shared<BFOCPAdapterAL>(bfocpal);
-    // ocptempladapter = make_shared<BFOCPAdapter>(bfocpal);
-    ocptempladapter = bfocpadapteral;
-    // ocptempladapter = ocptempladapterAL;
-    // ocptempladapter = ocptempladapterAL;
+    ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
     ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
     ocplsriccati = ocplsriccati1;
@@ -77,15 +70,13 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
     upperF = json_spec["upperF"].get_number_array<double>("%lf");
     lower.insert(lower.end(), lowerF.begin(), lowerF.end());
     upper.insert(upper.end(), upperF.begin(), upperF.end());
-    bfocpadapteral ->SetIneqsBounds(lower, upper);
-    // bfocpal
-    // SetBounds();
+    SetBounds();
     SetInitial();
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
     journaller = make_shared<Journaller>(params->maxiter + 1);
-    linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
-    // linesearch = make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter);
+    // linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    linesearch = make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
@@ -95,9 +86,9 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
 }
 void OCPBuilder::SetBounds()
 {
-    fatropdata->SetBounds(lower, upper);
+    ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
 }
 void OCPBuilder::SetInitial()
 {
-    ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
+    fatropdata->SetBounds(lower, upper);
 }
