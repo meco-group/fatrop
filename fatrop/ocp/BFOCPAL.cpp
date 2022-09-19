@@ -75,8 +75,8 @@ int BFOCPAL::eval_RSQrqtk(
     int nuk = nu.at(k);
     int nxk = nx.at(k);
     int offs = ineqs_offsets.at(k);
-    double *lowerp =lower_bounds.data();
-    double *upperp =upper_bounds.data();
+    double *lowerp =lower_bounds.data() + offs;
+    double *upperp =upper_bounds.data() + offs;
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
     double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
     double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
@@ -94,8 +94,8 @@ int BFOCPAL::eval_RSQrqtk(
     // evaluate ineq vector
     // todo with ROWEX
     this->eval_gineqk_AL(
-        states_k,
         inputs_k,
+        states_k,
         stage_params_k,
         global_params_k,
         tmpviolationp,
@@ -216,16 +216,16 @@ int BFOCPAL::eval_bk(
 };
 
 int BFOCPAL::eval_gk(
-    const double *states_k,
     const double *inputs_k,
+    const double *states_k,
     const double *stage_params_k,
     const double *global_params_k,
     double *res,
     const int k)
 {
     ocp_->eval_gk(
-        states_k,
         inputs_k,
+        states_k,
         stage_params_k,
         global_params_k,
         res,
@@ -234,8 +234,8 @@ int BFOCPAL::eval_gk(
 };
 
 int BFOCPAL::eval_gineqk(
-    const double *states_k,
     const double *inputs_k,
+    const double *states_k,
     const double *stage_params_k,
     const double *global_params_k,
     double *res,
@@ -244,16 +244,16 @@ int BFOCPAL::eval_gineqk(
     return 0;
 };
 int BFOCPAL::eval_gineqk_AL(
-    const double *states_k,
     const double *inputs_k,
+    const double *states_k,
     const double *stage_params_k,
     const double *global_params_k,
     double *res,
     const int k)
 {
     ocp_->eval_gineqk(
-        states_k,
         inputs_k,
+        states_k,
         stage_params_k,
         global_params_k,
         res,
@@ -274,8 +274,8 @@ int BFOCPAL::eval_rqk(
     int nuk = nu.at(k);
     int nxk = nx.at(k);
     int offs = ineqs_offsets.at(k);
-    double *lowerp = lower_bounds.data();
-    double *upperp = upper_bounds.data();
+    double *lowerp = lower_bounds.data() + offs;
+    double *upperp = upper_bounds.data() + offs ;
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
     double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
     double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
@@ -293,8 +293,8 @@ int BFOCPAL::eval_rqk(
     // evaluate ineq vector
     // todo with ROWEX
     this->eval_gineqk_AL(
-        states_k,
         inputs_k,
+        states_k,
         stage_params_k,
         global_params_k,
         tmpviolationp,
@@ -346,10 +346,11 @@ int BFOCPAL::eval_Lk(
     double *res,
     const int k)
 {
+    // cout << "--------- " << k << endl;
     int no_ineqsk = no_ineqs.at(k);
     int offs = ineqs_offsets.at(k);
-    double *lowerp = lower_bounds.data();
-    double *upperp = upper_bounds.data();
+    double *lowerp = lower_bounds.data()+ offs;
+    double *upperp = upper_bounds.data() + offs;
     double *tmpviolationp = ((blasfeo_dvec *)tmpviolation)->pa;
     double *ineq_lagsLp = ((blasfeo_dvec *)ineq_lagsL)->pa + offs;
     double *ineq_lagsUp = ((blasfeo_dvec *)ineq_lagsU)->pa + offs;
@@ -357,8 +358,8 @@ int BFOCPAL::eval_Lk(
     double penaltym1 = 1.0/penalty;
     double obj_penalty = 0.0;
     this->eval_gineqk_AL(
-        states_k,
         inputs_k,
+        states_k,
         stage_params_k,
         global_params_k,
         tmpviolationp,
@@ -373,9 +374,11 @@ int BFOCPAL::eval_Lk(
         double loweri = lowerp[i];
         bool lower_bounded = !isinf(loweri);
         double upperi = upperp[i];
+        // cout << upperi << endl;
         bool upper_bounded = !isinf(upperi);
         double dist_low = lower_bounded ? -ineqlagsLi + penalty*(violationi - loweri) : 0.0;
         double dist_up = upper_bounded ? -ineqlagsUi +  penalty*(upperi - violationi): 0.0;
+        // cout << "L  " << loweri<< " violi   "<< violationi << endl;
         if (dist_low < 0.0)
         {
             obj_penalty += 0.5*penaltym1*dist_low*dist_low;
@@ -393,6 +396,6 @@ int BFOCPAL::eval_Lk(
         global_params_k,
         res,
         k);
-    *res += obj_penalty;
+    *res = *res + (*objective_scale) * obj_penalty;
     return 0;
 };
