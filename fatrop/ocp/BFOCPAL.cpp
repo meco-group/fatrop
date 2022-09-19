@@ -124,12 +124,12 @@ int BFOCPAL::eval_RSQrqtk(
         }
         if (dist_low < 0.0 && dist_up < 0.0)
         {
-            GESC(nuk + nxk, 1, sqrt(2), tmpmatp, 0, 0);
+            GESC(nuk + nxk, 1, sqrt(2), tmpmatp, 0, i);
         }
         if (dist_low >= 0.0 && dist_up >= 0.0)
         {
             // turn off penalty
-            GESE(nuk + nxk, 1, 0.0, tmpmatp, 0, 0);
+            GESE(nuk + nxk, 1, 0.0, tmpmatp, 0, i);
         }
         // gradvecp[i] =;
     }
