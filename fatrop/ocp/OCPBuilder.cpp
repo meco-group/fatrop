@@ -75,8 +75,8 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file)
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
     journaller = make_shared<Journaller>(params->maxiter + 1);
-    // linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
-    linesearch = make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter);
+    linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    // linesearch = make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
