@@ -14,14 +14,22 @@ namespace fatrop
             const shared_ptr<OCPScalingMethod> &scaler) : FatropOCP(ocp, ls, scaler), ocp_(ocp)
         {
         }
-            int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin)
+        int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin)
         {
             return ocp_->SetIneqsBounds(lower_boundsin, upper_boundsin);
         };
-        int SetIneqLagrMult(const FatropVecBF &ineqlagrmult)
+        int EvalInequalities(
+            const FatropVecBF &primal_vars,
+            FatropVecBF &inequalities)
         {
-            return ocp_->SetIneqLagrMult(ineqlagrmult);
-        };
+            return ocp_-> EvalInequalities(
+                primal_vars,
+                inequalities);
+        }
+        int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU)
+        {
+            return ocp_->SetIneqLagrMult(ineqlagrmultL, ineqlagrmultU);
+        }
         int SetPenalty(double penalty)
         {
             return ocp_->SetPenalty(penalty);
@@ -29,5 +37,5 @@ namespace fatrop
         const shared_ptr<OCPAL> ocp_;
     };
 
-    }  // namespace fatrop
+} // namespace fatrop
 #endif // FATROPOCPALINCLUDED
