@@ -44,6 +44,8 @@ solver/IterationData.hpp                    solver/IterationData.cpp
 solver/LineSearch.hpp                       solver/LineSearch.cpp
 solver/StepAcceptor.hpp                     solver/StepAcceptor.cpp
 solver/Timer.hpp                            solver/Timer.cpp
+alm_solver/FatropALMAlg.hpp                 alm_solver/FatropALMAlg.cpp
+alm_solver/FatropALMData.hpp                alm_solver/FatropALMData.cpp
 # sparse/FatropSparse.hpp                     sparse/FatropSparse.cpp
 # sparse/Interface.hpp                        sparse/Interface.cpp
 # sparse/InterfaceMA57.hpp                    sparse/InterfaceMA57.cpp
