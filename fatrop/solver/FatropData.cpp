@@ -52,6 +52,11 @@ int FatropData::Reset()
     VECSE(lam_curr.nels(), 0.0, (VEC *)lam_curr, 0);
     VECSE(s_curr.nels(), 0.0, (VEC *)s_curr, 0);
     x_curr.copy(x_initial);
+    ResetCaches();
+    return 0;
+}
+int FatropData::ResetCaches()
+{
     cache_curr = EvalCache();
     cache_next = EvalCache();
     return 0;

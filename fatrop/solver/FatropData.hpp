@@ -16,6 +16,7 @@ namespace fatrop
         FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) ;
         void Initialize();
         int Reset();
+        int ResetCaches();
         double EMuCurr(double mu);
         int EvalDuInfSlacksEqs();
         double EvalCompSlackInf(double mu);

@@ -15,6 +15,7 @@ namespace fatrop
         BFOCPAL(shared_ptr<BFOCP> &ocp, double penalty) : ocp_(ocp), K(ocp_->get_horizon_length()),
                                                           no_ineqs(TransformRange<int>(0, K, [&ocp](int k)
                                                                                        { return ocp->get_ng_ineq_k(k); })),
+                                                          no_ineqs_total(sum(no_ineqs)),
                                                           nu(TransformRange<int>(0, K, [&ocp](int k)
                                                                                  { return ocp->get_nxk(k); })),
                                                           nx(TransformRange<int>(0, K, [&ocp](int k)
@@ -25,7 +26,7 @@ namespace fatrop
                                                           lower_bounds(sum(no_ineqs), 1),
                                                           upper_bounds(sum(no_ineqs), 1),
                                                           penalty(penalty),
-                                                          tmpmat(max(nu + nx) +1, max(no_ineqs), 1),
+                                                          tmpmat(max(nu + nx) + 1, max(no_ineqs), 1),
                                                           tmpviolation(max(no_ineqs), 1),
                                                           gradvec(max(no_ineqs), 1),
                                                           lagsupdated(max(no_ineqs), 1){};
@@ -122,10 +123,15 @@ namespace fatrop
             const double *global_params_k,
             double *res,
             const int k);
+        int GetTotalNOIneqs()
+        {
+            return no_ineqs_total;
+        }
         shared_ptr<BFOCP> ocp_;
         const int K;
         // vector with number of ineqs each stage
         FatropVector<int> no_ineqs;
+        const int no_ineqs_total;
         // vector with number of inputs
         FatropVector<int> nu;
         // vector with number of states

@@ -69,8 +69,8 @@ int FatropAlg::Optimize()
     EvalJac(); // todo twice evaluation
     EvalGradCurr();
 #endif
-    Initialization();
     fatropdata_->BoundSlacks();
+    Initialization();
     if (fatropdata_->LamLinfCalc() < lammax)
     {
         cout << "accepted lam " << endl;

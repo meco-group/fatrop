@@ -174,6 +174,11 @@ namespace fatrop
         {
             return ocp_->SetPenalty(penalty);
         };
+
+        int GetNOIneqs()
+        {
+            return ocp_->GetTotalNOIneqs();
+        };
         const shared_ptr<OCPAL> ocp_;
     };
 

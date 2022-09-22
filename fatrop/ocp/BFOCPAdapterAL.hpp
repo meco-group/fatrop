@@ -102,6 +102,7 @@ namespace fatrop
         int EvalInequalities(OCPKKTMemory *OCP,
                              const FatropVecBF &primal_vars,
                              FatropVecBF &g_ineq) override;
+        int GetTotalNOIneqs();
         const shared_ptr<BFOCPAL> ocptempl_;
     };
 } // namespace fatrop

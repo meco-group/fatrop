@@ -30,16 +30,16 @@ int BFOCPAdapterAL::EvalInequalities(OCPKKTMemory *OCP,
     int *offs_stageparams_p = (int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
-    int* nu_p = OCP->nu.data();
-    int* offs_ineq = ocptempl_->ineqs_offsets.data();
-    VEC* primal_vars_p = (VEC*) primal_vars;
+    int *nu_p = OCP->nu.data();
+    int *offs_ineq = ocptempl_->ineqs_offsets.data();
+    VEC *primal_vars_p = (VEC *)primal_vars;
     double *primal_data = primal_vars_p->pa;
-    double * res_p = ((VEC*) g_ineq) -> pa;
+    double *res_p = ((VEC *)g_ineq)->pa;
     for (int k = 0; k < K; k++)
     {
         const int offs = offs_ux_p[k];
         const int nu = nu_p[k];
-        const double *inputs_k = primal_data+offs;
+        const double *inputs_k = primal_data + offs;
         const double *states_k = primal_data + (offs + nu);
         const double *stage_params_k = stageparams_p + offs_stageparams_p[k];
         const double *global_params_k = globalparams_p;
@@ -53,4 +53,8 @@ int BFOCPAdapterAL::EvalInequalities(OCPKKTMemory *OCP,
             k);
     }
     return 0;
+}
+int BFOCPAdapterAL::GetTotalNOIneqs()
+{
+    return ocptempl_->GetTotalNOIneqs();
 }

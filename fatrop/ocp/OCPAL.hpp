@@ -12,6 +12,7 @@ namespace fatrop
         virtual int EvalInequalities(OCPKKTMemory *OCP,
                                      const FatropVecBF &primal_vars,
                                      FatropVecBF &g_ineq) = 0;
+        virtual int GetTotalNOIneqs() = 0;
     };
 } // namespace fatrop
 #endif // OCPALINCLUDED
