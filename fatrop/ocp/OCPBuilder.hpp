@@ -20,7 +20,7 @@ namespace fatrop
     class OCPBuilder
     {
     public:
-        OCPBuilder(const string &functions, const string &json_spec_file);
+        OCPBuilder(const string &functions, const string &json_spec_file, bool GN = false, bool DDP = false);
         void SetBounds();
         void SetInitial();
         int K;

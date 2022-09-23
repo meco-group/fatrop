@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "ocp/OCPBuilder.hpp"
+#include "ocp/OCPBuilderAL.hpp"
 #include <string>
 using namespace fatrop;
 
@@ -17,8 +17,8 @@ int main(int argc, char **argv)
         #endif
 
         // OCPBuilder ocpbuilder(argv[1], argv[2]);
-        // OCPBuilder ocpbuilder("../robot.so","../robot.json");
-        OCPBuilder ocpbuilder("../Rocket_example.so","../Rocket_example.json");
+        // OCPBuilderAL ocpbuilder("../robot.so","../robot.json");
+        OCPBuilderAL ocpbuilder("../Rocket_example.so","../Rocket_example.json");
 
         ocpbuilder.fatropalg->Optimize();
     }

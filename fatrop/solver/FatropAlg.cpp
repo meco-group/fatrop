@@ -73,7 +73,7 @@ int FatropAlg::Optimize()
     Initialization();
     if (fatropdata_->LamLinfCalc() < lammax)
     {
-        cout << "accepted lam " << endl;
+        // cout << "accepted lam " << endl;
         fatropdata_->AcceptInitialization();
     }
     EvalCVCurr();
@@ -118,23 +118,23 @@ int FatropAlg::Optimize()
         if (emu < tol)
         {
             total_time = blasfeo_toc(&timer);
-            cout << "found solution :) " << endl;
-            cout << "riccati time: " << sd_time << endl;
-            cout << "init time: " << init_time << endl;
-            cout << "fe time nlp_f: "
-                 << "to be added" << endl;
-            cout << "fe time nlp_g: "
-                 << "to be added" << endl;
-            cout << "fe time nlp_grad_f: "
-                 << "to be added" << endl;
-            cout << "fe time nlp_hess_l: "
-                 << "to be added" << endl;
-            cout << "fe time nlp_jac_g: "
-                 << "to be added" << endl;
+            // cout << "found solution :) " << endl;
+            // cout << "riccati time: " << sd_time << endl;
+            // cout << "init time: " << init_time << endl;
+            // cout << "fe time nlp_f: "
+            //      << "to be added" << endl;
+            // cout << "fe time nlp_g: "
+            //      << "to be added" << endl;
+            // cout << "fe time nlp_grad_f: "
+            //      << "to be added" << endl;
+            // cout << "fe time nlp_hess_l: "
+            //      << "to be added" << endl;
+            // cout << "fe time nlp_jac_g: "
+            //      << "to be added" << endl;
             journaller_->PrintIterations();
             fatropnlp_->Finalize();
-            cout << "rest time: " << total_time - sd_time - init_time << endl;
-            cout << "el time total: " << total_time << endl;
+            // cout << "rest time: " << total_time - sd_time - init_time << endl;
+            // cout << "el time total: " << total_time << endl;
 #ifdef ENABLE_MULTITHREADING
             worker.wait();
 #endif
