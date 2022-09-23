@@ -20,6 +20,7 @@ int main(int argc, char **argv)
         // OCPBuilder ocpbuilder(argv[1], argv[2]);
         // OCPBuilder ocpbuilder("../robot.so","../robot.json");
         OCPBuilder ocpbuilder("../Rocket_example.so","../Rocket_example.json");
+        ocpbuilder.Build();
 
         ocpbuilder.fatropalg->Optimize();
     }
