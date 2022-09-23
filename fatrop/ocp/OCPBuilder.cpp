@@ -1,6 +1,10 @@
 #include "OCPBuilder.hpp"
 using namespace fatrop;
-OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file, bool GN, bool DDP) {
+OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file):functions(functions), json_spec_file(json_spec_file)
+{
+}
+shared_ptr<FatropApplication> OCPBuilder::Build()
+{
     std::ifstream t(json_spec_file);
     std::stringstream buffer;
     buffer << t.rdbuf();
@@ -17,11 +21,11 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file, bo
     shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
-    EvalCasGen RSQrqtIf = GN?EvalCasGen(handle, "RSQrqtIGN"):EvalCasGen(handle, "RSQrqtI");
+    EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
     EvalCasGen rqIf(handle, "rqI");
-    EvalCasGen RSQrqtf = GN?EvalCasGen(handle, "RSQrqtGN"):EvalCasGen(handle, "RSQrqt");
+    EvalCasGen RSQrqtf = GN ? EvalCasGen(handle, "RSQrqtGN") : EvalCasGen(handle, "RSQrqt");
     EvalCasGen rqf(handle, "rqk");
-    EvalCasGen RSQrqtFf = GN?EvalCasGen(handle, "RSQrqtFGN"):EvalCasGen(handle, "RSQrqtF");
+    EvalCasGen RSQrqtFf = GN ? EvalCasGen(handle, "RSQrqtFGN") : EvalCasGen(handle, "RSQrqtF");
     EvalCasGen rqFf(handle, "rqF");
     EvalCasGen GgtIf(handle, "GgtI");
     EvalCasGen gIf(handle, "gI");
@@ -74,13 +78,9 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file, bo
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
     journaller = make_shared<Journaller>(params->maxiter + 1);
-    linesearch =DDP?make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter):make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    linesearch = DDP ? make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter) : make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
-    // blasfeo_timer timer;
-    // blasfeo_tic(&timer);
-    // fatropalg->Optimize();
-    // double el = blasfeo_toc(&timer);
-    // cout << "el time " << el << endl;
+    return fatropalg;
 }
 void OCPBuilder::SetBounds()
 {

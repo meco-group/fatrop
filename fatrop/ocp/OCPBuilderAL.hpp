@@ -18,14 +18,20 @@
 #include "json/json.h"
 #include <sstream>
 #include <templates/FatropNLPAL.hpp>
+#include <templates/FatropApplication.hpp>
 namespace fatrop
 {
     class OCPBuilderAL
     {
     public:
-        OCPBuilderAL(const string &functions, const string &json_spec_file, bool GN=false, bool DDP=false);
+        OCPBuilderAL(const string &functions, const string &json_spec_file);
+        shared_ptr<FatropApplication> Build();
         void SetBounds();
         void SetInitial();
+        const string functions;
+        const string json_spec_file;
+        bool GN = false;
+        bool DDP = false;
         int K;
         shared_ptr<OCP> ocptempladapter;
         shared_ptr<OCPAL> ocptempladapterAL;

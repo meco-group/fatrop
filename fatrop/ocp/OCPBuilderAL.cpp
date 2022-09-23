@@ -1,6 +1,10 @@
 #include "OCPBuilderAL.hpp"
 using namespace fatrop;
-OCPBuilderAL::OCPBuilderAL(const string &functions, const string &json_spec_file, bool GN, bool DDP)
+OCPBuilderAL::OCPBuilderAL(const string &functions, const string &json_spec_file) : functions(functions), json_spec_file(json_spec_file)
+{
+}
+
+shared_ptr<FatropApplication> OCPBuilderAL::Build()
 {
     std::ifstream t(json_spec_file);
     std::stringstream buffer;
@@ -18,11 +22,11 @@ OCPBuilderAL::OCPBuilderAL(const string &functions, const string &json_spec_file
     shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
-    EvalCasGen RSQrqtIf = GN?EvalCasGen(handle, "RSQrqtIGN"):EvalCasGen(handle, "RSQrqtI");
+    EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
     EvalCasGen rqIf(handle, "rqI");
-    EvalCasGen RSQrqtf = GN?EvalCasGen(handle, "RSQrqtGN"):EvalCasGen(handle, "RSQrqt");
+    EvalCasGen RSQrqtf = GN ? EvalCasGen(handle, "RSQrqtGN") : EvalCasGen(handle, "RSQrqt");
     EvalCasGen rqf(handle, "rqk");
-    EvalCasGen RSQrqtFf = GN?EvalCasGen(handle, "RSQrqtFGN"):EvalCasGen(handle, "RSQrqtF");
+    EvalCasGen RSQrqtFf = GN ? EvalCasGen(handle, "RSQrqtFGN") : EvalCasGen(handle, "RSQrqtF");
     EvalCasGen rqFf(handle, "rqF");
     EvalCasGen GgtIf(handle, "GgtI");
     EvalCasGen gIf(handle, "gI");
@@ -78,6 +82,7 @@ OCPBuilderAL::OCPBuilderAL(const string &functions, const string &json_spec_file
     linesearch = make_shared<BackTrackingLineSearch>(params, fatropocpal, fatropdata, filter, journaller);
     fatropalg = make_shared<FatropALMAlg>(fatropocpal, fatropdata, params, filter, linesearch, journaller);
     fatropalg->SetBounds(lower, upper);
+    return fatropalg;
 }
 void OCPBuilderAL::SetBounds()
 {

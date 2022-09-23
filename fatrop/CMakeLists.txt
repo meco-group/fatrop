@@ -54,6 +54,7 @@ alm_solver/FatropALMData.hpp                alm_solver/FatropALMData.cpp
 # sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
 templates/FatropNLPAL.hpp                   templates/FatropNLPAL.cpp
+templates/FatropApplication.hpp             templates/FatropApplication.cpp
 json/json.h json/json.cpp
 )
 set(FATROPHEADERS
