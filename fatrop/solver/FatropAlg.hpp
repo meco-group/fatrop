@@ -8,6 +8,7 @@
 #include "StepAcceptor.hpp"
 #include <cmath>
 #include "IterationData.hpp"
+#include "templates/FatropApplication.hpp"
 #include <memory>
 using namespace std;
 // #include "AlgorithmQuantities.hpp"
@@ -17,7 +18,7 @@ using namespace std;
 
 namespace fatrop
 {
-    class FatropAlg
+    class FatropAlg : public FatropApplication
     {
     public:
         FatropAlg(
@@ -27,9 +28,12 @@ namespace fatrop
             const shared_ptr<Filter> &filter,
             const shared_ptr<LineSearch> &linesearch,
             const shared_ptr<Journaller> &journaller);
-        void Initialize();
-        void Reset();
-        int Optimize();
+        void Initialize() override;
+        void Reset() override;
+        void SetBounds(const vector<double> &lower, const vector<double> &upper) override;
+        void SetInitial(const vector<double> &initial) override;
+        void GetSolution(vector<double> &sol) override;
+        int Optimize() override;
         inline int EvalHess();
         inline int EvalJac();
         inline int EvalCVCurr();

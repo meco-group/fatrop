@@ -47,6 +47,19 @@ void FatropAlg::Reset()
     init_time = 0.0;
     total_time = 0.0;
 }
+void FatropAlg::SetBounds(const vector<double> &lower, const vector<double> &upper) 
+{
+    fatropdata_->s_lower = lower;
+    fatropdata_->s_upper = upper;
+};
+void FatropAlg::SetInitial(const vector<double> &initial) 
+{
+    fatropdata_->x_initial = initial;
+};
+void FatropAlg::GetSolution(vector<double> &sol) 
+{
+    fatropdata_->x_curr.copyto(sol);
+};
 int FatropAlg::Optimize()
 {
     blasfeo_timer timer;
