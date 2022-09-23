@@ -6,6 +6,7 @@ namespace fatrop
 {
     class FatropApplication
     {
+        public:
         virtual void Initialize() = 0;
         virtual void Reset() = 0;
         virtual void SetBounds(const vector<double>& lower, const vector<double>& upper) = 0;

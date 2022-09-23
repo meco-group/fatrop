@@ -17,12 +17,13 @@ int main(int argc, char **argv)
             cout << "Multithreading disabled" << endl;
         #endif
 
-        // OCPBuilder ocpbuilder(argv[1], argv[2]);
+        OCPBuilder ocpbuilder(argv[1], argv[2]);
         // OCPBuilder ocpbuilder("../robot.so","../robot.json");
-        OCPBuilder ocpbuilder("../Rocket_example.so","../Rocket_example.json");
-        ocpbuilder.Build();
+        // OCPBuilder ocpbuilder("../Rocket_example.so","../Rocket_example.json");
+        shared_ptr<FatropApplication> solver = ocpbuilder.Build();
+        solver->Optimize();
 
-        ocpbuilder.fatropalg->Optimize();
+
     }
     else
     {
