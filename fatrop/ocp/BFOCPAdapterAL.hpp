@@ -6,7 +6,7 @@
 // but contains methods to set parameters specifically to inner problem (bounds, lagrangemultipliers, ...)
 namespace fatrop
 {
-    class BFOCPAdapterAL : public OCPAL, BFOCPAdapter
+    class BFOCPAdapterAL : public OCPAL, public BFOCPAdapter
     {
     public:
         BFOCPAdapterAL(const shared_ptr<BFOCPAL> &ocptempl) : BFOCPAdapter(ocptempl), ocptempl_(ocptempl)
@@ -98,6 +98,7 @@ namespace fatrop
         };
         int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin) override;
         int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU) override;
+        int ResetIneqLagrMult() override;
         int SetPenalty(double penalty) override;
         int EvalInequalities(OCPKKTMemory *OCP,
                              const FatropVecBF &primal_vars,

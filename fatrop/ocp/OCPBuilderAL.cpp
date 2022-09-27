@@ -58,7 +58,8 @@ shared_ptr<FatropApplication> OCPBuilderAL::Build()
                                                                  Lkf,
                                                                  LFf);
     shared_ptr<BFOCPAL> bfocpal = make_shared<BFOCPAL>(ocptemplatebasic, 1.0);
-    ocptempladapterAL = make_shared<BFOCPAdapterAL>(bfocpal);
+    ocptempladapterALor = make_shared<BFOCPAdapterAL>(bfocpal);
+    ocptempladapterAL = ocptempladapterALor;
     ocptempladapterAL->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapterAL->GetOCPDims());
     ocplsriccati = ocplsriccati1;

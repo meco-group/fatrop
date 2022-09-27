@@ -56,7 +56,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
                                                                  gineqFf,
                                                                  Lkf,
                                                                  LFf);
-    ocptempladapter = make_shared<BFOCPAdapter>(ocptemplatebasic);
+    ocptempladapteror = make_shared<BFOCPAdapter>(ocptemplatebasic);
+    ocptempladapter = ocptempladapteror;
     ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
     ocplsriccati = ocplsriccati1;

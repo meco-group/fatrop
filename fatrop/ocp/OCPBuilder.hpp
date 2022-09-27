@@ -23,13 +23,12 @@ namespace fatrop
     public:
         OCPBuilder(const string &functions, const string &json_spec_file);
         shared_ptr<FatropApplication> Build();
-        void SetBounds();
-        void SetInitial();
         int K;
         const string functions;
         const string json_spec_file;
         bool GN = false;
         bool DDP = false;
+        shared_ptr<BFOCPAdapter> ocptempladapteror;
         shared_ptr<OCP> ocptempladapter;
         shared_ptr<OCPAL> ocptempladapterAL;
         shared_ptr<OCPLinearSolver> ocplsriccati;
@@ -47,6 +46,13 @@ namespace fatrop
         shared_ptr<Journaller> journaller;
         shared_ptr<LineSearch> linesearch;
         shared_ptr<FatropAlg> fatropalg;
+        vector<double>& GlobalParams()
+        {
+            return ocptempladapteror->globalparams;
+        }
+    private:
+        void SetBounds();
+        void SetInitial();
     };
 }
 #endif // OCPBUILDERINCLUDED

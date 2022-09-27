@@ -190,6 +190,7 @@ class FatropOCPCodeGenerator:
         # RSQrqtI
         RSQrqtI = MX.zeros(nu+nx+1, nu + nx)
         [RSQI, rqI] = hessian(Lk, vertcat(u_sym, x_sym))
+        RSQIGN = RSQI
         rqlagI = rqI
         if ngI > 0:
             [H, h]= hessian(dual_eqI.T@eqI, vertcat(u_sym, x_sym))
@@ -209,12 +210,17 @@ class FatropOCPCodeGenerator:
         RSQrqtI[nu+nx, :] = rqlagI[:]
         C.add(Function("RSQrqtI", [obj_scale, u_sym,
               x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
+        RSQrqtI[:nu+nx, :] = RSQIGN
+        RSQrqtI[nu+nx, :] = rqlagI[:]
+        C.add(Function("RSQrqtIGN", [obj_scale, u_sym,
+              x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
         # rqI
         C.add(Function("rqI", [obj_scale,
               u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqI)]).expand())
         # RSQrqt
         RSQrqt = MX.zeros(nu+nx+1, nu + nx)
         [RSQ, rq] = hessian(Lk, vertcat(u_sym, x_sym))
+        RSQGN = RSQ
         rqlag = rq
         [H,h]= hessian(dual_dyn.T@dynamics,
                        vertcat(u_sym, x_sym))
@@ -230,6 +236,10 @@ class FatropOCPCodeGenerator:
         RSQrqt[nu+nx, :] = rqlag[:]
         C.add(Function("RSQrqt", [obj_scale, u_sym, x_sym,
               dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
+        RSQrqt[:nu+nx, :] = RSQGN
+        RSQrqt[nu+nx, :] = rqlag[:]
+        C.add(Function("RSQrqtGN", [obj_scale, u_sym, x_sym,
+              dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
         # rqF
         C.add(Function("rqk", [obj_scale,
               u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rq)]).expand())
@@ -239,6 +249,7 @@ class FatropOCPCodeGenerator:
         # RSQrqtF
         RSQrqtF = MX.zeros(nx+1, nx)
         [RSQF, rqF] = hessian(LF, vertcat(x_sym))
+        RSQFGN = RSQF
         rqlagF = rqF
         if ngF > 0:
             [H, h]= hessian(dual_eqF.T@eqF,
@@ -255,6 +266,10 @@ class FatropOCPCodeGenerator:
         RSQrqtF[:nx, :] = RSQF
         RSQrqtF[nx, :] = rqlagF[:]
         C.add(Function("RSQrqtF", [obj_scale, u_sym, x_sym,
+              dual_dyn, dual_eqF, dualIneqF, stage_params_sym, global_params_sym], [densify(RSQrqtF)]).expand())
+        RSQrqtF[:nx, :] = RSQFGN
+        RSQrqtF[nx, :] = rqlagF[:]
+        C.add(Function("RSQrqtFGN", [obj_scale, u_sym, x_sym,
               dual_dyn, dual_eqF, dualIneqF, stage_params_sym, global_params_sym], [densify(RSQrqtF)]).expand())
         # rqF
         C.add(Function("rqF", [obj_scale,

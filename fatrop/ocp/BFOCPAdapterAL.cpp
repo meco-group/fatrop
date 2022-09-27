@@ -15,6 +15,13 @@ int BFOCPAdapterAL::SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const Fatr
     copy(ineqlagrmultU, (ocptempl_->ineq_lagsU)[0]);
     return 0;
 }
+int BFOCPAdapterAL::ResetIneqLagrMult()
+{
+    int n_ineqs = ocptempl_->ineq_lagsL[0].nels();
+    VECSE(n_ineqs,0.0, (VEC*) ocptempl_->ineq_lagsL, 0);
+    VECSE(n_ineqs,0.0, (VEC*) ocptempl_->ineq_lagsU, 0);
+    return 0;
+}
 
 int BFOCPAdapterAL::SetPenalty(double penalty)
 {

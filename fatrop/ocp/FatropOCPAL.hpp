@@ -170,6 +170,10 @@ namespace fatrop
         {
             return ocp_->SetIneqLagrMult(ineqlagrmultL, ineqlagrmultU);
         }
+        int ResetIneqLagrMult()
+        {
+            return ocp_->ResetIneqLagrMult();
+        }
         int SetPenalty(double penalty)
         {
             return ocp_->SetPenalty(penalty);

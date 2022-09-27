@@ -9,7 +9,7 @@ using namespace std;
 using namespace std;
 namespace fatrop
 {
-    class FatropALMAlg: public FatropApplication
+    class FatropALMAlg : public FatropApplication
     {
     public:
         FatropALMAlg(
@@ -24,14 +24,15 @@ namespace fatrop
                                                                                                 filter,
                                                                                                 linesearch,
                                                                                                 journaller),
-                                                        almdata_(fatropnlpal->GetNOIneqs())
+                                                        almdata_(fatropnlpal->GetNOIneqs(), fatropnlpal->GetNLPDims().nvars)
         {
+             fatropdata->x_initial.copyto(almdata_.initial_x);
         }
-        void Initialize() override {};
-        void Reset() override {};
+        void Initialize() override{};
+        void Reset() override{};
         void SetBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin) override;
-        void SetInitial(const vector<double>& initial) override;
-        void GetSolution(vector<double>& sol) override;
+        void SetInitial(const vector<double> &initial) override;
+        void GetSolution(vector<double> &sol) override;
         int Optimize() override;
         const shared_ptr<FatropNLPAL> fatropnlpal_;
         FatropAlg innersolver_;

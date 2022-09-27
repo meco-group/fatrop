@@ -104,6 +104,7 @@ solver/Timer.hpp
 # sparse/InterfaceMUMPS.hpp
 # sparse/InterfacePardiso.hpp
 # sparse/SparseOCP.hpp
+templates/FatropApplication.hpp
 templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
