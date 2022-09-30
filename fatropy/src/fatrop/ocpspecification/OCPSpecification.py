@@ -5,84 +5,6 @@ import numpy as np
 import numpy.matlib
 from matplotlib.font_manager import json_dump
 from typing import List
-class OCPStageDims:
-    def __init__(self, nu, nx, nstage_params, ng, ngineq):
-        self.nu = nu
-        self.nx = nx
-        self.nstage_params = nstage_params
-        self.ng= ng
-        self.ngineq = ngineq
-class OCPStageIneqBounds:
-    def __init__(self, lower_bounds, upper_bounds):
-        self.lower_bounds = lower_bounds
-        self.upper_bounds = upper_bounds
-
-class OCPStageFuncs:
-    def __init__(self, costf:str, dynamicsf:str, eqcf:str, ineqcf:str):
-        self.costf = costf
-        self.dynamicsf = dynamicsf
-        self.eqcf = eqcf
-        self.ineqf = ineqcf
-
-class OCPStage:
-    def __init__(self, ocpstagedims:OCPStageDims, ocpstagefuncs:OCPStageFuncs, ocpstageineqbounds:OCPStageIneqBounds):
-        self.ocpstagedims = ocpstagedims
-        self.ocpstagefuncs = ocpstagefuncs
-        self.stageineqbounds = ocpstageineqbounds
-    
-class FatropOCP:
-    def __init__(self):
-        self.stages:List[OCPStage] = []
-        self.functionDict = {}
-    def AddStage(self, ocpstage:OCPStage):
-        self.stages.append(ocpstage)
-    def AddFunc(self, name:str, func:Function):
-        self.functionDict[name] = func
-
-class FatropFunctionGenerator:
-    ## function name identifiers format
-    ## Lk -> 001_
-    ## Dynamics -> 002_
-    ## eq -> 003_
-    ## ineq -> 004_
-    ## BAbt -> 005_ + dyn
-    ## b -> 006_ + dyn
-    ## RSQrq -> 007_ + Lk + dyn + eqs + ineqs
-    ## rq -> 008_ + Lk
-    ## RSQrq_GN -> 009_ + Lk + dyn + eqs + ineqs
-    ## Ggt -> 010_ + eq
-    ## g -> 011_ + eq
-    ## Ggineqt -> 012_ + ineq
-    ## gineq -> 013_ + ineq
-    def __init__(self, ocp:FatropOCP):
-        self.functions = {}
-        K = len(ocp.stages)
-        pass
-    def GenerateStage(self, stage:OCPStage, functionsdict):
-        nx = stage.ocpstagedims.nx
-        nu = stage.ocpstagedims.nu
-        nstage_params = stage.ocpstagedims.nstage_params
-        ng = stage.ocpstagedims.ng
-        ngineq = stage.ocpstagedims.ngineq
-        ## Lk -> 001_
-        name = "001_" + stage.ocpstagefuncs.costf
-        if name not in self.functions:
-            self.functions[name] = functionsdict[stage.ocpstagefuncs.costf]
-        ## Dynamics -> 002_
-        ## eq -> 003_
-        ## ineq -> 004_
-        ## BAbt -> 005_ + dyn
-        ## b -> 006_ + dyn
-        ## RSQrq -> 007_ + Lk + dyn + eqs + ineqs
-        ## rq -> 008_ + Lk
-        ## RSQrq_GN -> 009_ + Lk + dyn + eqs + ineqs
-        ## Ggt -> 010_ + eq
-        ## g -> 011_ + eq
-        ## Ggineqt -> 012_ + ineq
-        ## gineq -> 013_ + ineq
-        pass
-    def Generate(self):
-        pass
 
 class BasicOCPInterface:
     def __init__(self):
@@ -733,4 +655,87 @@ class OptiCodeGenerator:
         cg.add(Function('jac_g', [self.opti_in.x, self.opti_in.p], [jac_g]).expand())
         cg.generate()
     def GetOpti():
+        pass
+
+##### NOTE this code currently only supports specification of OCP's of the 'basic' type. 
+##### fatrop is able to solve a more general class of ocp's the code from here is ongoing
+##### work on supporting specification of very general optimal control problems.
+
+class OCPStageDims:
+    def __init__(self, nu, nx, nstage_params, ng, ngineq):
+        self.nu = nu
+        self.nx = nx
+        self.nstage_params = nstage_params
+        self.ng= ng
+        self.ngineq = ngineq
+class OCPStageIneqBounds:
+    def __init__(self, lower_bounds, upper_bounds):
+        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper_bounds
+
+class OCPStageFuncs:
+    def __init__(self, costf:str, dynamicsf:str, eqcf:str, ineqcf:str):
+        self.costf = costf
+        self.dynamicsf = dynamicsf
+        self.eqcf = eqcf
+        self.ineqf = ineqcf
+
+class OCPStage:
+    def __init__(self, ocpstagedims:OCPStageDims, ocpstagefuncs:OCPStageFuncs, ocpstageineqbounds:OCPStageIneqBounds):
+        self.ocpstagedims = ocpstagedims
+        self.ocpstagefuncs = ocpstagefuncs
+        self.stageineqbounds = ocpstageineqbounds
+    
+class FatropOCP:
+    def __init__(self):
+        self.stages:List[OCPStage] = []
+        self.functionDict = {}
+    def AddStage(self, ocpstage:OCPStage):
+        self.stages.append(ocpstage)
+    def AddFunc(self, name:str, func:Function):
+        self.functionDict[name] = func
+
+class FatropFunctionGenerator:
+    ## function name identifiers format
+    ## Lk -> 001_
+    ## Dynamics -> 002_
+    ## eq -> 003_
+    ## ineq -> 004_
+    ## BAbt -> 005_ + dyn
+    ## b -> 006_ + dyn
+    ## RSQrq -> 007_ + Lk + dyn + eqs + ineqs
+    ## rq -> 008_ + Lk
+    ## RSQrq_GN -> 009_ + Lk + dyn + eqs + ineqs
+    ## Ggt -> 010_ + eq
+    ## g -> 011_ + eq
+    ## Ggineqt -> 012_ + ineq
+    ## gineq -> 013_ + ineq
+    def __init__(self, ocp:FatropOCP):
+        self.functions = {}
+        K = len(ocp.stages)
+        pass
+    def GenerateStage(self, stage:OCPStage, functionsdict):
+        nx = stage.ocpstagedims.nx
+        nu = stage.ocpstagedims.nu
+        nstage_params = stage.ocpstagedims.nstage_params
+        ng = stage.ocpstagedims.ng
+        ngineq = stage.ocpstagedims.ngineq
+        ## Lk -> 001_
+        name = "001_" + stage.ocpstagefuncs.costf
+        if name not in self.functions:
+            self.functions[name] = functionsdict[stage.ocpstagefuncs.costf]
+        ## Dynamics -> 002_
+        ## eq -> 003_
+        ## ineq -> 004_
+        ## BAbt -> 005_ + dyn
+        ## b -> 006_ + dyn
+        ## RSQrq -> 007_ + Lk + dyn + eqs + ineqs
+        ## rq -> 008_ + Lk
+        ## RSQrq_GN -> 009_ + Lk + dyn + eqs + ineqs
+        ## Ggt -> 010_ + eq
+        ## g -> 011_ + eq
+        ## Ggineqt -> 012_ + ineq
+        ## gineq -> 013_ + ineq
+        pass
+    def Generate(self):
         pass
