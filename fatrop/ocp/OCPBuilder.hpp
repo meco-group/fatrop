@@ -50,7 +50,7 @@ namespace fatrop
         {
             return ocptempladapteror->globalparams;
         }
-    private:
+    public:
         void SetBounds();
         void SetInitial();
     };

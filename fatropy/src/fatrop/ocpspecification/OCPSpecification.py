@@ -3,21 +3,88 @@ from casadi import *
 import json
 import numpy as np
 import numpy.matlib
-
 from matplotlib.font_manager import json_dump
-class OCPStage:
-    def __init(nu, nx, nstage_params, ng, ngineq, self):
+from typing import List
+class OCPStageDims:
+    def __init__(self, nu, nx, nstage_params, ng, ngineq):
         self.nu = nu
         self.nx = nx
         self.nstage_params = nstage_params
         self.ng= ng
         self.ngineq = ngineq
-        pass
+class OCPStageIneqBounds:
+    def __init__(self, lower_bounds, upper_bounds):
+        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper_bounds
+
+class OCPStageFuncs:
+    def __init__(self, costf:str, dynamicsf:str, eqcf:str, ineqcf:str):
+        self.costf = costf
+        self.dynamicsf = dynamicsf
+        self.eqcf = eqcf
+        self.ineqf = ineqcf
+
+class OCPStage:
+    def __init__(self, ocpstagedims:OCPStageDims, ocpstagefuncs:OCPStageFuncs, ocpstageineqbounds:OCPStageIneqBounds):
+        self.ocpstagedims = ocpstagedims
+        self.ocpstagefuncs = ocpstagefuncs
+        self.stageineqbounds = ocpstageineqbounds
+    
 class FatropOCP:
-    def AddStage(self):
+    def __init__(self):
+        self.stages:List[OCPStage] = []
+        self.functionDict = {}
+    def AddStage(self, ocpstage:OCPStage):
+        self.stages.append(ocpstage)
+    def AddFunc(self, name:str, func:Function):
+        self.functionDict[name] = func
+
+class FatropFunctionGenerator:
+    ## function name identifiers format
+    ## Lk -> 001_
+    ## Dynamics -> 002_
+    ## eq -> 003_
+    ## ineq -> 004_
+    ## BAbt -> 005_ + dyn
+    ## b -> 006_ + dyn
+    ## RSQrq -> 007_ + Lk + dyn + eqs + ineqs
+    ## rq -> 008_ + Lk
+    ## RSQrq_GN -> 009_ + Lk + dyn + eqs + ineqs
+    ## Ggt -> 010_ + eq
+    ## g -> 011_ + eq
+    ## Ggineqt -> 012_ + ineq
+    ## gineq -> 013_ + ineq
+    def __init__(self, ocp:FatropOCP):
+        self.functions = {}
+        K = len(ocp.stages)
+        pass
+    def GenerateStage(self, stage:OCPStage, functionsdict):
+        nx = stage.ocpstagedims.nx
+        nu = stage.ocpstagedims.nu
+        nstage_params = stage.ocpstagedims.nstage_params
+        ng = stage.ocpstagedims.ng
+        ngineq = stage.ocpstagedims.ngineq
+        ## Lk -> 001_
+        name = "001_" + stage.ocpstagefuncs.costf
+        if name not in self.functions:
+            self.functions[name] = functionsdict[stage.ocpstagefuncs.costf]
+        ## Dynamics -> 002_
+        ## eq -> 003_
+        ## ineq -> 004_
+        ## BAbt -> 005_ + dyn
+        ## b -> 006_ + dyn
+        ## RSQrq -> 007_ + Lk + dyn + eqs + ineqs
+        ## rq -> 008_ + Lk
+        ## RSQrq_GN -> 009_ + Lk + dyn + eqs + ineqs
+        ## Ggt -> 010_ + eq
+        ## g -> 011_ + eq
+        ## Ggineqt -> 012_ + ineq
+        ## gineq -> 013_ + ineq
+        pass
+    def Generate(self):
         pass
 
-class OCPSpecificationInterface:
+class BasicOCPInterface:
     def __init__(self):
         # problem dimensions
         self.nx = 0
@@ -33,27 +100,21 @@ class OCPSpecificationInterface:
     @abstractmethod
     def SetProblemDimensions(self):
         pass
-
     @abstractmethod
     def Dynamics(self, uk, xk, stage_params, global_params):
         pass
-
     @abstractmethod
     def StageCost(self, uk, xk, stage_params, global_params):
         pass
-
     @abstractmethod
     def StageCostFinal(self, xK, stage_params, global_params):
         pass
-
     @abstractmethod
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
         return MX.zeros(0)
-
     @abstractmethod
     def EqConstrFinal(self, xK, stage_params, global_params):
         return MX.zeros(0)
-
     @abstractmethod
     def StageWiseInequality(self, uk, xk, stage_params, global_params):
         return MX.zeros(0)
@@ -66,13 +127,46 @@ class OCPSpecificationInterface:
     @abstractmethod
     def FinalInequalityBounds(self):
         return np.array([]), np.array([]) 
-
     @abstractmethod
     def DefaultStageParams(self):
         return MX.zeros(self.n_stage_params)
+    
+class BasicOCPAdapter(FatropOCP):
+    def __init__(self, basicocp:BasicOCPInterface, K:int):
+        # symbols for generating functions
+        uk = MX.sym(basicocp.nu)
+        xk = MX.sym(basicocp.nx)
+        stage_params = MX.sym(basicocp.n_stage_params)
+        global_params = MX.sym(basicocp.n_global_params)
+        # initialize functions
+        self.AddFunc("Lk", Function([uk, xk, stage_params, global_params], [basicocp.StageCost(uk, xk, stage_params, global_params)]))
+        self.AddFunc("LkF", Function([uk, xk, stage_params, global_params], [basicocp.StageCostFinal(xk, stage_params, global_params)]))
+        self.AddFunc("dyn", Function([uk, xk, stage_params, global_params], [basicocp.Dynamics(uk, xk, stage_params, global_params)]))
+        self.AddFunc("eqI", Function([uk, xk, stage_params, global_params], [basicocp.EqConstrInitial(uk, xk, stage_params, global_params)]))
+        self.AddFunc("eqF", Function([uk, xk, stage_params, global_params], [basicocp.EqConstrFinal(xk, stage_params, global_params)]))
+        self.AddFunc("ineq", Function([uk, xk, stage_params, global_params], [basicocp.StageWiseInequality(uk, xk, stage_params, global_params)]))
+        self.AddFunc("ineqF", Function([uk, xk, stage_params, global_params], [basicocp.FinalInequality(xk, stage_params, global_params)]))
+        # initial stage
+        self.AddStage(\
+        OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
+        OCPStageFuncs("Lk", "dyn", "eqI", "ineq"),\
+        OCPStageIneqBounds(basicocp.StageWiseInequalityBounds()[0], basicocp.StageWiseInequalityBounds()[1])))
+        # middle stages
+        for k in range(1, K-1):
+            self.AddStage(\
+            OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
+            OCPStageFuncs("Lk", "dyn", "none", "ineq"),\
+            OCPStageIneqBounds(basicocp.StageWiseInequalityBounds()[0], basicocp.StageWiseInequalityBounds()[1])))
+            # self.AddStage()
+        # termminal stage
+        self.AddStage(\
+        OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
+        OCPStageFuncs("LkF", "none", "eqF", "ineqF"),\
+        OCPStageIneqBounds(basicocp.FinalInequalityBounds()[0], basicocp.FinalInequalityBounds()[1])))
+        return
 
 class Simulator:
-    def __init__(self, ocpspec: OCPSpecificationInterface):
+    def __init__(self, ocpspec: BasicOCPInterface):
         self.ocpspec = ocpspec
     def Simulate(self, x0, inputs, global_parms, stage_parms, K):
         nu = self.ocpspec.nu
@@ -99,7 +193,7 @@ class Simulator:
 
 
 class JSONGenerator:
-    def __init__(self, ocpspec: OCPSpecificationInterface):
+    def __init__(self, ocpspec: BasicOCPInterface):
         self.ocpspec = ocpspec
 
     def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u):
@@ -320,9 +414,8 @@ class FatropOCPCodeGenerator:
         C.generate()
         return
 
-
 class OptiBuilder:
-    def __init__(self, ocpspec: OCPSpecificationInterface):
+    def __init__(self, ocpspec: BasicOCPInterface):
         self.ocpspec = ocpspec
 
     def set_up_Opti(self, K: int):
