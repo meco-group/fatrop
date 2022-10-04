@@ -1,0 +1,17 @@
+1) Latent Stage Variables
+importance -, methodolical difficulty --, implementational difficulty -
+remarks: efficient solution of DAE's
+
+2) Small Dense solver 
+importance -, methodolical difficulty --, implementational difficulty --
+
+3) Feasibility Restoration Phase
+importrance ++, methodolical difficulty ++, implementational difficulty ++
+remarks: easy to implement inefficient version, possible to work step by step to efficient version
+
+4) Support for optimization on Lie Manifolds
+importance -, methodolical difficulty ++, implementational dificulty +
+
+5) Better ocp specification + builder
+importance ++, methodolical difficulty --, implementational dificulty -
+remarks: currently the fatrop solver is able to solve a more broad class of optimal control problem than what is possible to specify in python and built by the associated builder class
