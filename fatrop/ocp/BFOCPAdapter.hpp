@@ -88,7 +88,6 @@ namespace fatrop
         vector<double> stageparams;
         vector<double> globalparams;
         vector<double> x_dummy;
-
     private:
         shared_ptr<BFOCP> ocptempl;
     };
