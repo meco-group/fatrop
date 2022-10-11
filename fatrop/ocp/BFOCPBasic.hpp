@@ -16,7 +16,9 @@ namespace fatrop
         BFOCPBasic(const int nu,
                    const int nx,
                    const int ngI,
+                   const int ng,
                    const int ngF,
+                   const int ng_ineqI,
                    const int ng_ineq,
                    const int ng_ineqF,
                    const int n_stage_params,
@@ -32,12 +34,17 @@ namespace fatrop
                    const EvalCasGen &rqFf,
                    const EvalCasGen &GgtIf,
                    const EvalCasGen &gIf,
+                   const EvalCasGen &Ggtf,
+                   const EvalCasGen &gf,
                    const EvalCasGen &GgtFf,
                    const EvalCasGen &gFf,
+                   const EvalCasGen &Ggt_ineqIf,
+                   const EvalCasGen &gineqIf,
                    const EvalCasGen &Ggt_ineqf,
                    const EvalCasGen &gineqf,
                    const EvalCasGen &Ggt_ineqFf,
                    const EvalCasGen &gineqFf,
+                   const EvalCasGen &LkIf,
                    const EvalCasGen &Lkf,
                    const EvalCasGen &LFf);
         int get_nxk(const int k) const override;
@@ -122,7 +129,9 @@ namespace fatrop
         const int nu_;
         const int nx_;
         const int ngI_;
+        const int ng_;
         const int ngF_;
+        const int ng_ineqI_;
         const int ng_ineq_;
         const int ng_ineqF_;
         const int n_stage_params_;
@@ -138,12 +147,17 @@ namespace fatrop
         EvalCasGen rqFf;
         EvalCasGen GgtIf;
         EvalCasGen gIf;
+        EvalCasGen Ggtf;
+        EvalCasGen gf;
         EvalCasGen GgtFf;
         EvalCasGen gFf;
+        EvalCasGen Ggt_ineqIf;
+        EvalCasGen g_ineqIf;
         EvalCasGen Ggt_ineqf;
         EvalCasGen g_ineqf;
         EvalCasGen Ggt_ineqFf;
         EvalCasGen g_ineqFf;
+        EvalCasGen LkIf;
         EvalCasGen Lkf;
         EvalCasGen LFf;
     };

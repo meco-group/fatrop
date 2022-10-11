@@ -41,6 +41,8 @@ namespace fatrop
         shared_ptr<FatropData> fatropdata;
         vector<double> initial_u;
         vector<double> initial_x;
+        vector<double> lowerI;
+        vector<double> upperI;
         vector<double> lower;
         vector<double> upper;
         vector<double> lowerF;

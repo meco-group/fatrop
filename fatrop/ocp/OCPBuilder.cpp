@@ -13,7 +13,9 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     const int nx = json_spec["nx"];
     const int nu = json_spec["nu"];
     const int ngI = json_spec["ngI"];
+    const int ng = json_spec["ng"];
     const int ngF = json_spec["ngF"];
+    const int ng_ineqI = json_spec["ng_ineqI"];
     const int ng_ineq = json_spec["ng_ineq"];
     const int ng_ineqF = json_spec["ng_ineqF"];
     const int n_stage_params = json_spec["n_stage_params"];
@@ -29,15 +31,20 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     EvalCasGen rqFf(handle, "rqF");
     EvalCasGen GgtIf(handle, "GgtI");
     EvalCasGen gIf(handle, "gI");
+    EvalCasGen Ggtf(handle, "Ggt");
+    EvalCasGen gf(handle, "g");
     EvalCasGen GgtFf(handle, "GgtF");
     EvalCasGen gFf(handle, "gF");
+    EvalCasGen LIf(handle, "LI");
     EvalCasGen Lkf(handle, "Lk");
     EvalCasGen LFf(handle, "LF");
+    EvalCasGen GgineqItf(handle, "GgineqIt");
+    EvalCasGen gineqIf(handle, "gineqI");
     EvalCasGen Ggineqtf(handle, "Ggineqt");
     EvalCasGen gineqf(handle, "gineq");
     EvalCasGen GgineqFtf(handle, "GgineqFt");
     EvalCasGen gineqFf(handle, "gineqF");
-    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ngF, ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
+    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ngF,ng, ng_ineqI,ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
                                                                  BAbtf,
                                                                  bkf,
                                                                  RSQrqtIf,
@@ -48,12 +55,17 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
                                                                  rqFf,
                                                                  GgtIf,
                                                                  gIf,
+                                                                 Ggtf,
+                                                                 gf,
                                                                  GgtFf,
                                                                  gFf,
+                                                                 GgineqItf,
+                                                                 gineqIf,
                                                                  Ggineqtf,
                                                                  gineqf,
                                                                  GgineqFtf,
                                                                  gineqFf,
+                                                                 LIf,
                                                                  Lkf,
                                                                  LFf);
     ocptempladapteror = make_shared<BFOCPAdapter>(ocptemplatebasic);
@@ -68,10 +80,14 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     fatropdata = make_shared<FatropData>(fatropocp->GetNLPDims(), params);
     initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
     initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
+    lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
+    upperI = json_spec["upperI"].get_number_array<double>("%lf");
     lower = json_spec["lower"].get_number_array<double>("%lf");
     upper = json_spec["upper"].get_number_array<double>("%lf");
     lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
     upperF = json_spec["upperF"].get_number_array<double>("%lf");
+    lower.insert(lower.begin(), lowerI.begin(), lowerI.end());
+    upper.insert(upper.begin(), upperI.begin(), upperI.end());
     lower.insert(lower.end(), lowerF.begin(), lowerF.end());
     upper.insert(upper.end(), upperF.begin(), upperF.end());
     SetBounds();
