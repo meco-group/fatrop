@@ -45,7 +45,7 @@ shared_ptr<FatropApplication> OCPBuilderAL::Build()
     EvalCasGen gineqf(handle, "gineq");
     EvalCasGen GgineqFtf(handle, "GgineqFt");
     EvalCasGen gineqFf(handle, "gineqF");
-    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ngF,ng, ng_ineqI,ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
+    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ng,ngF, ng_ineqI,ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
                                                                  BAbtf,
                                                                  bkf,
                                                                  RSQrqtIf,

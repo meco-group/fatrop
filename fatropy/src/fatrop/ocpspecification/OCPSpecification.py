@@ -12,7 +12,9 @@ class BasicOCPInterface:
         self.nx = 0
         self.nu = 0
         self.ngI = 0
+        self.ng = 0
         self.ngF = 0
+        self.ngIneqI = 0
         self.ngIneq = 0
         self.ngIneqF = 0
         self.n_stage_params = 0
@@ -26,6 +28,9 @@ class BasicOCPInterface:
     def Dynamics(self, uk, xk, stage_params, global_params):
         pass
     @abstractmethod
+    def StageCostInitial(self, uk, xk, stage_params, global_params):
+        return self.StageCost(uk, xk, stage_params, global_params)
+    @abstractmethod
     def StageCost(self, uk, xk, stage_params, global_params):
         pass
     @abstractmethod
@@ -35,58 +40,33 @@ class BasicOCPInterface:
     def EqConstrInitial(self, uk, xk, stage_params, global_params):
         return MX.zeros(0)
     @abstractmethod
+    def EqConstr(self, uk, xk, stage_params, global_params):
+        return MX.zeros(0)
+    @abstractmethod
     def EqConstrFinal(self, xK, stage_params, global_params):
         return MX.zeros(0)
     @abstractmethod
-    def StageWiseInequality(self, uk, xk, stage_params, global_params):
+    def IneqInitial(self, uk, xk, stage_params, global_params):
+        return self.Ineq(uk, xk, stage_params, global_params)
+    @abstractmethod
+    def Ineq(self, uk, xk, stage_params, global_params):
         return MX.zeros(0)
     @abstractmethod
-    def StageWiseInequalityBounds(self):
+    def IneqFinal(self, xk, stage_params, global_params):
+        return MX.zeros(0)
+    @abstractmethod
+    def IneqInitialBounds(self):
+        return self.IneqBounds()
+    @abstractmethod
+    def IneqBounds(self):
         return np.array([]), np.array([]) 
     @abstractmethod
-    def FinalInequality(self, xk, stage_params, global_params):
-        return MX.zeros(0)
-    @abstractmethod
-    def FinalInequalityBounds(self):
+    def IneqFinalBounds(self):
         return np.array([]), np.array([]) 
     @abstractmethod
     def DefaultStageParams(self):
         return MX.zeros(self.n_stage_params)
     
-class BasicOCPAdapter(FatropOCP):
-    def __init__(self, basicocp:BasicOCPInterface, K:int):
-        # symbols for generating functions
-        uk = MX.sym(basicocp.nu)
-        xk = MX.sym(basicocp.nx)
-        stage_params = MX.sym(basicocp.n_stage_params)
-        global_params = MX.sym(basicocp.n_global_params)
-        # initialize functions
-        self.AddFunc("Lk", Function([uk, xk, stage_params, global_params], [basicocp.StageCost(uk, xk, stage_params, global_params)]))
-        self.AddFunc("LkF", Function([uk, xk, stage_params, global_params], [basicocp.StageCostFinal(xk, stage_params, global_params)]))
-        self.AddFunc("dyn", Function([uk, xk, stage_params, global_params], [basicocp.Dynamics(uk, xk, stage_params, global_params)]))
-        self.AddFunc("eqI", Function([uk, xk, stage_params, global_params], [basicocp.EqConstrInitial(uk, xk, stage_params, global_params)]))
-        self.AddFunc("eqF", Function([uk, xk, stage_params, global_params], [basicocp.EqConstrFinal(xk, stage_params, global_params)]))
-        self.AddFunc("ineq", Function([uk, xk, stage_params, global_params], [basicocp.StageWiseInequality(uk, xk, stage_params, global_params)]))
-        self.AddFunc("ineqF", Function([uk, xk, stage_params, global_params], [basicocp.FinalInequality(xk, stage_params, global_params)]))
-        # initial stage
-        self.AddStage(\
-        OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
-        OCPStageFuncs("Lk", "dyn", "eqI", "ineq"),\
-        OCPStageIneqBounds(basicocp.StageWiseInequalityBounds()[0], basicocp.StageWiseInequalityBounds()[1])))
-        # middle stages
-        for k in range(1, K-1):
-            self.AddStage(\
-            OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
-            OCPStageFuncs("Lk", "dyn", "none", "ineq"),\
-            OCPStageIneqBounds(basicocp.StageWiseInequalityBounds()[0], basicocp.StageWiseInequalityBounds()[1])))
-            # self.AddStage()
-        # termminal stage
-        self.AddStage(\
-        OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
-        OCPStageFuncs("LkF", "none", "eqF", "ineqF"),\
-        OCPStageIneqBounds(basicocp.FinalInequalityBounds()[0], basicocp.FinalInequalityBounds()[1])))
-        return
-
 class Simulator:
     def __init__(self, ocpspec: BasicOCPInterface):
         self.ocpspec = ocpspec
@@ -120,8 +100,8 @@ class JSONGenerator:
 
     def generate_JSON(self, filename, K, stage_params, global_params, initial_x, initial_u):
         # problem dimensions
-        JSONdict = {'nx': self.ocpspec.nx,        'nu': self.ocpspec.nu,        'ngI': self.ocpspec.ngI,        'ngF': self.ocpspec.ngF,
-                    'ng_ineq': self.ocpspec.ngIneq, 'ng_ineqF': self.ocpspec.ngIneqF,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
+        JSONdict = {'nx': self.ocpspec.nx,        'nu': self.ocpspec.nu,        'ngI': self.ocpspec.ngI,     'ng': self.ocpspec.ng,       'ngF': self.ocpspec.ngF,
+                   'ng_ineqI': self.ocpspec.ngIneqI, 'ng_ineq': self.ocpspec.ngIneq, 'ng_ineqF': self.ocpspec.ngIneqF,        'n_stage_params': self.ocpspec.n_stage_params,        'n_global_params': self.ocpspec.n_global_params, 'K': K}
         # stage params
         JSONdict['stage_params'] = stage_params.ravel(order='f').tolist()
         JSONdict['global_params'] = global_params.ravel(order='f').tolist()
@@ -139,10 +119,13 @@ class JSONGenerator:
         # else:
         # JSONdict['initial_u'] = np.zeros(self.ocpspec.nu*K).tolist()
         # bounds
-        lower, upper = self.ocpspec.StageWiseInequalityBounds()
-        lowerF, upperF = self.ocpspec.FinalInequalityBounds()
-        JSONdict['lower'] = np.matlib.repmat(lower[:,np.newaxis], 1, K-1).ravel(order='f').tolist()
-        JSONdict['upper'] = np.matlib.repmat(upper[:,np.newaxis], 1, K-1).ravel(order='f').tolist()
+        lowerI, upperI = self.ocpspec.IneqInitialBounds()
+        lower, upper = self.ocpspec.IneqBounds()
+        lowerF, upperF = self.ocpspec.IneqFinalBounds()
+        JSONdict['lowerI'] =  lowerI.tolist()
+        JSONdict['upperI'] =  upperI.tolist()
+        JSONdict['lower'] = np.matlib.repmat(lower[:,np.newaxis], 1, K-2).ravel(order='f').tolist()
+        JSONdict['upper'] = np.matlib.repmat(upper[:,np.newaxis], 1, K-2).ravel(order='f').tolist()
         JSONdict['lowerF'] =  lowerF.tolist()
         JSONdict['upperF'] =  upperF.tolist()
         print(json_dump(JSONdict, filename))
@@ -151,7 +134,7 @@ class JSONGenerator:
 
 class FatropOCPCodeGenerator:
     def __init__(self, ocpspec):
-        self.ocpspec = ocpspec
+        self.ocpspec: BasicOCPInterface = ocpspec
 
     def generate_code(self, filename):
         C = CodeGenerator(filename)
@@ -168,25 +151,35 @@ class FatropOCPCodeGenerator:
         # make expressions for functions
         dynamics = self.ocpspec.Dynamics(
             u_sym, x_sym, stage_params_sym, global_params_sym)
+        LI = self.ocpspec.StageCostInitial(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
         Lk = self.ocpspec.StageCost(
             u_sym, x_sym, stage_params_sym, global_params_sym)
         LF = self.ocpspec.StageCostFinal(
             x_sym, stage_params_sym, global_params_sym)
         eqI = self.ocpspec.EqConstrInitial(
             u_sym, x_sym, stage_params_sym, global_params_sym)
+        eq = self.ocpspec.EqConstr(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
         eqF = self.ocpspec.EqConstrFinal(
             x_sym, stage_params_sym, global_params_sym)
-        ineq = self.ocpspec.StageWiseInequality(
+        ineqI = self.ocpspec.IneqInitial(
             u_sym, x_sym, stage_params_sym, global_params_sym)
-        ineqF = self.ocpspec.FinalInequality(
+        ineq = self.ocpspec.Ineq(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
+        ineqF = self.ocpspec.IneqFinal(
             x_sym, stage_params_sym, global_params_sym)
         ngI = eqI.shape[0]
+        ng = eq.shape[0]
         ngF = eqF.shape[0]
+        ngIneqI = ineqI.shape[0]
         ngIneq = ineq.shape[0]
         ngIneqF = ineqF.shape[0]
         # make symbols for dual variables
         dual_dyn = MX.sym("d_dyn", nx)
         dual_eqI = MX.sym("d_EqI", ngI)
+        dual_eq = MX.sym("d_Eq", ng)
+        dualIneqI = MX.sym("dualineqI", ngIneqI)
         dualIneq = MX.sym("dualineq", ngIneq)
         dualIneqF = MX.sym("dualineqF", ngIneqF)
         dual_eqF = MX.sym("d_EqF", ngF)
@@ -217,19 +210,19 @@ class FatropOCPCodeGenerator:
         RSQI += H
         rqlagI += h
         
-        if ngIneq > 0:
-            [H,h] = hessian(dualIneq.T@ineq,
+        if ngIneqI > 0:
+            [H,h] = hessian(dualIneqI.T@ineqI,
                             vertcat(u_sym, x_sym))
             RSQI += H
             rqlagI += h
         RSQrqtI[:nu+nx, :] = RSQI
         RSQrqtI[nu+nx, :] = rqlagI[:]
         C.add(Function("RSQrqtI", [obj_scale, u_sym,
-              x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
+              x_sym, dual_dyn, dual_eqI, dualIneqI, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
         RSQrqtI[:nu+nx, :] = RSQIGN
         RSQrqtI[nu+nx, :] = rqlagI[:]
         C.add(Function("RSQrqtIGN", [obj_scale, u_sym,
-              x_sym, dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
+              x_sym, dual_dyn, dual_eqI, dualIneqI, stage_params_sym, global_params_sym], [densify(RSQrqtI)]).expand())
         # rqI
         C.add(Function("rqI", [obj_scale,
               u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rqI)]).expand())
@@ -238,6 +231,10 @@ class FatropOCPCodeGenerator:
         [RSQ, rq] = hessian(Lk, vertcat(u_sym, x_sym))
         RSQGN = RSQ
         rqlag = rq
+        if ng > 0:
+            [H, h]= hessian(dual_eq.T@eq, vertcat(u_sym, x_sym))
+            RSQI += H
+            rqlagI += h
         [H,h]= hessian(dual_dyn.T@dynamics,
                        vertcat(u_sym, x_sym))
         RSQ += H
@@ -251,14 +248,17 @@ class FatropOCPCodeGenerator:
         RSQrqt[:nu+nx, :] = RSQ
         RSQrqt[nu+nx, :] = rqlag[:]
         C.add(Function("RSQrqt", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
+              dual_dyn, dual_eq, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
         RSQrqt[:nu+nx, :] = RSQGN
         RSQrqt[nu+nx, :] = rqlag[:]
         C.add(Function("RSQrqtGN", [obj_scale, u_sym, x_sym,
-              dual_dyn, dual_eqI, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
+              dual_dyn, dual_eq, dualIneq, stage_params_sym, global_params_sym], [densify(RSQrqt)]).expand())
         # rqF
         C.add(Function("rqk", [obj_scale,
               u_sym, x_sym, stage_params_sym, global_params_sym], [densify(rq)]).expand())
+        # Lk
+        C.add(Function("LI", [obj_scale, u_sym,
+              x_sym, stage_params_sym, global_params_sym], [densify(LI)]).expand())
         # Lk
         C.add(Function("Lk", [obj_scale, u_sym,
               x_sym, stage_params_sym, global_params_sym], [densify(Lk)]).expand())
@@ -303,6 +303,16 @@ class FatropOCPCodeGenerator:
         # g_I
         C.add(Function("gI", [u_sym, x_sym, stage_params_sym,
               global_params_sym], [densify(eqI[:])]).expand())
+        # Ggt
+        Ggt = MX.zeros(nu+nx+1, ng)
+        Ggt[:nu+nx,
+             :] = jacobian(eq, vertcat(u_sym, x_sym)).T
+        Ggt[nu+nx, :] = eq[:].T
+        C.add(Function(
+            "Ggt", [u_sym, x_sym, stage_params_sym, global_params_sym], [densify(Ggt)]).expand())
+        # g
+        C.add(Function("g", [u_sym, x_sym, stage_params_sym,
+              global_params_sym], [densify(eq[:])]).expand())
         # GgtF
         GgtF = MX.zeros(nx+1, ngF)
         GgtF[:nx, :] = jacobian(eqF, x_sym).T
@@ -312,6 +322,15 @@ class FatropOCPCodeGenerator:
         # g_F
         C.add(Function("gF", [u_sym, x_sym, stage_params_sym,
               global_params_sym], [densify(eqF[:])]).expand())
+        # GgineqIt
+        GgineqIt = MX.zeros(nu+nx+1, ngIneqI)
+        GgineqIt[:nu+nx,
+                :] = jacobian(ineqI, vertcat(u_sym, x_sym)).T
+        GgineqIt[nu+nx, :] = ineqI[:].T
+        C.add(Function("GgineqIt", [u_sym,
+              x_sym, stage_params_sym, global_params_sym], [densify(GgineqIt)]).expand())
+        C.add(Function("gineqI", [u_sym, x_sym, stage_params_sym, global_params_sym], [
+              densify(ineqI[:])]).expand())
         # Ggineqt
         Ggineqt = MX.zeros(nu+nx+1, ngIneq)
         Ggineqt[:nu+nx,
@@ -362,24 +381,35 @@ class OptiBuilder:
         # make expressions for functions
         dynamics = self.ocpspec.Dynamics(
             u_sym, x_sym, stage_params_sym, global_params_sym)
+        LI = self.ocpspec.StageCostInitial(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
         Lk = self.ocpspec.StageCost(
             u_sym, x_sym, stage_params_sym, global_params_sym)
         LF = self.ocpspec.StageCostFinal(
             x_sym, stage_params_sym, global_params_sym)
         eqI = self.ocpspec.EqConstrInitial(
             u_sym, x_sym, stage_params_sym, global_params_sym)
+        eq = self.ocpspec.EqConstr(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
         eqF = self.ocpspec.EqConstrFinal(
             x_sym, stage_params_sym, global_params_sym)
-        ineq = self.ocpspec.StageWiseInequality(
+        ineqI = self.ocpspec.IneqInitial(
             u_sym, x_sym, stage_params_sym, global_params_sym)
-        lower, upper = self.ocpspec.StageWiseInequalityBounds()
-        ineqF = self.ocpspec.FinalInequality(
+        ineq = self.ocpspec.Ineq(
+            u_sym, x_sym, stage_params_sym, global_params_sym)
+        ineqF = self.ocpspec.IneqFinal(
             x_sym, stage_params_sym, global_params_sym)
-        lowerF, upperF = self.ocpspec.FinalInequalityBounds()
+        lowerI, upperI = self.ocpspec.IneqInitialBounds()
+        lower, upper = self.ocpspec.IneqBounds()
+        lowerF, upperF = self.ocpspec.IneqFinalBounds()
         ngI = eqI.shape[0]
+        ng = eq.shape[0]
         ngF = eqF.shape[0]
+        ngIneqI = ineqI.shape[0]
         ngIneq = ineq.shape[0]
         ngIneqF = ineqF.shape[0]
+        LIf = Function(
+            "LI", [obj_scale, x_sym, u_sym, stage_params_sym, global_params_sym], [LI])
         Lkf = Function(
             "Lk", [obj_scale, x_sym, u_sym, stage_params_sym, global_params_sym], [Lk])
         LkFf = Function(
@@ -392,21 +422,43 @@ class OptiBuilder:
                 "eqI", [x_sym, u_sym, stage_params_sym, global_params_sym], [eqI])
             self.opti.subject_to(
                 EqIf(self.x_vars[:, 0], self.u_vars[:, 0], self.stage_params_in[:, 0], self.global_params_in) == 0.0)
+        if ng > 0:
+            Eqf = Function(
+                "eq", [x_sym, u_sym, stage_params_sym, global_params_sym], [eq])
+            for k in range(1, K-1):
+                self.opti.subject_to(
+                    Eqf(self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:, 0], self.global_params_in) == 0.0)
         if ngF > 0:
             EqFf = Function(
                 "eqF", [x_sym, stage_params_sym, global_params_sym], [eqF])
             self.opti.subject_to(EqFf(
                 self.x_vars[:, K-1], self.stage_params_in[:, K-1], self.global_params_in) == 0.0)
-        J = 0
-        for k in range(K-1):
+        J =  LIf(1.0, self.x_vars[:, 0], self.u_vars[:, 0],
+                     self.stage_params_in[:, 0], self.global_params_in)
+        for k in range(1,K-1):
             J += Lkf(1.0, self.x_vars[:, k], self.u_vars[:, k],
                      self.stage_params_in[:, k], self.global_params_in)
+        for k in range(K-1):
             self.opti.subject_to(
                 Dynamcisf(self.x_vars[:, k+1], self.x_vars[:, k], self.u_vars[:, k], self.stage_params_in[:, k], self.global_params_in) == 0.0)
+        if ngIneqI > 0:
+            IneqIf = Function(
+                "ineqIf", [u_sym, x_sym, stage_params_sym, global_params_sym], [ineqI])
+            for i in range(ngIneqI):
+                if lowerI[i] == -inf:
+                    # self.opti.subject_to(IneqFf(self.u_sym, self.x_sym)[i]< self.upper[i])
+                    self.opti.subject_to(upperI[i] > IneqIf(
+                      self.u_vars[:, 0], self.x_vars[:, 0], self.stage_params_in[:, 0], self.global_params_in)[i])
+                elif upperI[i] == inf:
+                    self.opti.subject_to(lowerI[i] < IneqIf(
+                       self.u_vars[:, 0],  self.x_vars[:, 0], self.stage_params_in[:, 0], self.global_params_in)[i])
+                else:
+                    self.opti.subject_to(lowerI[i] < (IneqIf(
+                      self.u_vars[:, 0],   self.x_vars[:,0], self.stage_params_in[:, 0], self.global_params_in)[i] < upperI[i]))
         if ngIneq > 0:
             Ineqf = Function(
                 "ineqf", [u_sym, x_sym, stage_params_sym, global_params_sym], [ineq])
-            for k in range(K-1):
+            for k in range(1,K-1):
                 for i in range(ngIneq):
                     if lower[i] == -inf:
                         # self.opti.subject_to(Ineqf(self.u_sym, self.x_sym)[i]< self.upper[i])
@@ -739,3 +791,37 @@ class FatropFunctionGenerator:
         pass
     def Generate(self):
         pass
+
+class BasicOCPAdapter(FatropOCP):
+    def __init__(self, basicocp:BasicOCPInterface, K:int):
+        # symbols for generating functions
+        uk = MX.sym(basicocp.nu)
+        xk = MX.sym(basicocp.nx)
+        stage_params = MX.sym(basicocp.n_stage_params)
+        global_params = MX.sym(basicocp.n_global_params)
+        # initialize functions
+        self.AddFunc("Lk", Function([uk, xk, stage_params, global_params], [basicocp.StageCost(uk, xk, stage_params, global_params)]))
+        self.AddFunc("LkF", Function([uk, xk, stage_params, global_params], [basicocp.StageCostFinal(xk, stage_params, global_params)]))
+        self.AddFunc("dyn", Function([uk, xk, stage_params, global_params], [basicocp.Dynamics(uk, xk, stage_params, global_params)]))
+        self.AddFunc("eqI", Function([uk, xk, stage_params, global_params], [basicocp.EqConstrInitial(uk, xk, stage_params, global_params)]))
+        self.AddFunc("eqF", Function([uk, xk, stage_params, global_params], [basicocp.EqConstrFinal(xk, stage_params, global_params)]))
+        self.AddFunc("ineq", Function([uk, xk, stage_params, global_params], [basicocp.Ineq(uk, xk, stage_params, global_params)]))
+        self.AddFunc("ineqF", Function([uk, xk, stage_params, global_params], [basicocp.IneqFinal(xk, stage_params, global_params)]))
+        # initial stage
+        self.AddStage(\
+        OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
+        OCPStageFuncs("Lk", "dyn", "eqI", "ineq"),\
+        OCPStageIneqBounds(basicocp.IneqBounds()[0], basicocp.IneqBounds()[1])))
+        # middle stages
+        for k in range(1, K-1):
+            self.AddStage(\
+            OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
+            OCPStageFuncs("Lk", "dyn", "none", "ineq"),\
+            OCPStageIneqBounds(basicocp.IneqBounds()[0], basicocp.IneqBounds()[1])))
+            # self.AddStage()
+        # termminal stage
+        self.AddStage(\
+        OCPStage(OCPStageDims(basicocp.nu, basicocp.nx, basicocp.n_stage_params, basicocp.ngI, basicocp.ngIneq),\
+        OCPStageFuncs("LkF", "none", "eqF", "ineqF"),\
+        OCPStageIneqBounds(basicocp.IneqFinalBounds()[0], basicocp.IneqFinalBounds()[1])))
+        return
