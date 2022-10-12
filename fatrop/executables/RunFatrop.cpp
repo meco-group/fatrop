@@ -17,10 +17,10 @@ int main(int argc, char **argv)
         cout << "Multithreading disabled" << endl;
 #endif
 
-        // OCPBuilder ocpbuilder(argv[1], argv[2]);
+        OCPBuilder ocpbuilder(argv[1], argv[2]);
         // OCPBuilder ocpbuilder("../robot.so","../robot.json");
         // OCPBuilderAL ocpbuilderal("../Rocket_example.so", "../Rocket_example.json");
-        OCPBuilder ocpbuilder("../casadi_codegen.so", "../casadi_codegen.json");
+        // OCPBuilder ocpbuilder("../casadi_codegen.so", "../casadi_codegen.json");
         //OCPBuilder ocpbuilder("../Rocket_example.so", "../Rocket_example.json");
         // OCPBuilderAL ocpbuilderal("../invariants.so", "../invariants.json");
         // OCPBuilder ocpbuilder("../invariants.so", "../invariants.json");
