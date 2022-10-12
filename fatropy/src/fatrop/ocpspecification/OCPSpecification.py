@@ -198,7 +198,7 @@ class FatropOCPCodeGenerator:
                               x_sym, stage_params_sym, global_params_sym], [densify(b)]).expand())
         # RSQrqtI
         RSQrqtI = MX.zeros(nu+nx+1, nu + nx)
-        [RSQI, rqI] = hessian(Lk, vertcat(u_sym, x_sym))
+        [RSQI, rqI] = hessian(LI, vertcat(u_sym, x_sym))
         RSQIGN = RSQI
         rqlagI = rqI
         if ngI > 0:
