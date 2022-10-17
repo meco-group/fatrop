@@ -26,13 +26,13 @@ int FatropALMAlg::Optimize()
     fatropnlpal_->SetPenalty(penalty);
     fatropnlpal_->SetIneqLagrMult(almdata_.auglags_Lcurr, almdata_.auglags_Ucurr);
     innersolver_.Optimize();
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 200; i++)
     {
+        innersolver_.fatropdata_->x_initial.copy(innersolver_.fatropdata_->x_curr);
         fatropnlpal_->EvalInequalities(innersolver_.fatropdata_->x_curr, almdata_.ineq_curr);
         almdata_.UpdateLags(penalty);
-        innersolver_.fatropdata_->x_initial.copy(innersolver_.fatropdata_->x_curr);
         fatropnlpal_->SetIneqLagrMult(almdata_.auglags_Lcurr, almdata_.auglags_Ucurr);
-        if (i<5 || i>10) penalty *= 2;
+        if (true) penalty *= 1.1;
         fatropnlpal_->SetPenalty(penalty);
         innersolver_.Optimize();
     }
