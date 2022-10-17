@@ -131,9 +131,9 @@ int FatropAlg::Optimize()
         if (emu < tol)
         {
             total_time = blasfeo_toc(&timer);
-            // cout << "found solution :) " << endl;
-            // cout << "riccati time: " << sd_time << endl;
-            // cout << "init time: " << init_time << endl;
+            cout << "found solution :) " << endl;
+            cout << "riccati time: " << sd_time << endl;
+            cout << "init time: " << init_time << endl;
             // cout << "fe time nlp_f: "
             //      << "to be added" << endl;
             // cout << "fe time nlp_g: "

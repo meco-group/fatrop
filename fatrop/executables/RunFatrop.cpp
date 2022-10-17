@@ -18,7 +18,9 @@ int main(int argc, char **argv)
 #endif
 
         OCPBuilder ocpbuilder(argv[1], argv[2]);
+        // OCPBuilderAL ocpbuilderal(argv[1], argv[2]);
         // OCPBuilder ocpbuilder("../robot.so","../robot.json");
+        // OCPBuilderAL ocpbuilder("../robot.so","../robot.json");
         // OCPBuilderAL ocpbuilderal("../Rocket_example.so", "../Rocket_example.json");
         // OCPBuilder ocpbuilder("../casadi_codegen.so", "../casadi_codegen.json");
         //OCPBuilder ocpbuilder("../Rocket_example.so", "../Rocket_example.json");

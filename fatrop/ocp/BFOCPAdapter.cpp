@@ -49,6 +49,8 @@ int BFOCPAdapter::evalHess(
             int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
             ROWAD(nx_k, -1.0, lam_p, offs_dyn_eq_km1, RSQrqt_p + k, nu_k + nx_k, nu_k);
         }
+        // std::cout << "k " << k << std::endl;
+        // blasfeo_print_dmat(nu_k+nx_k+1, nu_k+nx_k,  RSQrqt_p +k, 0,0);
     }
     return 0;
 }
