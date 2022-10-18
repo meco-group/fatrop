@@ -43,6 +43,7 @@ namespace fatrop
         double LinDecrCurr();
         void AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau);
         void SetBounds(const vector<double>& lowerin, const vector<double>& upperin);
+        void RelaxBounds();
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
@@ -77,6 +78,8 @@ namespace fatrop
         FatropVecBF zU_next;
         FatropVecBF delta_zL;
         FatropVecBF delta_zU;
+        FatropVecBF s_lower_orig;
+        FatropVecBF s_upper_orig;
         FatropVecBF s_lower;
         FatropVecBF s_upper;
         struct EvalCache
@@ -109,6 +112,8 @@ namespace fatrop
         double kappa2;
         double kappa_d;
         double kappa_sigma;
+        double bound_relax_factor;
+        double constr_viol_tol;
     };
 }
 #endif // FATROPDATAINCLUDED

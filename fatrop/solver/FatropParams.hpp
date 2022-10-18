@@ -35,6 +35,8 @@ namespace fatrop
         double kappa1 = 1e-2;
         double kappa2 = 1e-2;
         double kappa_d = 1e-4;
+        double bound_relax_factor = 1e-8;
+        double constr_viol_tol = 1e-4; // currently only used to relax bounds
     };
 
 } // namespace fatrop

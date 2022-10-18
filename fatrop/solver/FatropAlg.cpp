@@ -49,8 +49,8 @@ void FatropAlg::Reset()
 }
 void FatropAlg::SetBounds(const vector<double> &lower, const vector<double> &upper) 
 {
-    fatropdata_->s_lower = lower;
-    fatropdata_->s_upper = upper;
+    fatropdata_->s_lower_orig = lower;
+    fatropdata_->s_upper_orig = upper;
 };
 void FatropAlg::SetInitial(const vector<double> &initial) 
 {

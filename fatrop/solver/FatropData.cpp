@@ -5,7 +5,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          n_ineqs(nlpdims.nineqs),
                                                                                          memvars(nlpdims.nvars, 8),
                                                                                          memeqs(nlpdims.neqs, 6),
-                                                                                         memineqs(nlpdims.nineqs, 12),
+                                                                                         memineqs(nlpdims.nineqs, 14),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
                                                                                          x_initial(memvars[2]),
@@ -30,8 +30,10 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          zU_next(memineqs[7]),
                                                                                          delta_zL(memineqs[8]),
                                                                                          delta_zU(memineqs[9]),
-                                                                                         s_lower(memineqs[10]),
-                                                                                         s_upper(memineqs[11]),
+                                                                                         s_lower_orig(memineqs[10]),
+                                                                                         s_upper_orig(memineqs[11]),
+                                                                                         s_lower(memineqs[12]),
+                                                                                         s_upper(memineqs[13]),
                                                                                          params(params)
 {
     Initialize();
@@ -43,7 +45,10 @@ void FatropData::Initialize()
     kappa2 = params->kappa2;
     kappa_d = params->kappa_d;
     kappa_sigma = params->kappa_sigma;
+    bound_relax_factor = params -> bound_relax_factor;
+    constr_viol_tol = params -> constr_viol_tol;
     n_ineqs_r = nIneqsR();
+    RelaxBounds();
 }
 int FatropData::Reset()
 {
@@ -424,6 +429,28 @@ void FatropData::AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau
 }
 void FatropData::SetBounds(const vector<double> &lowerin, const vector<double> &upperin)
 {
-    s_lower = lowerin;
-    s_upper = upperin;
+    s_lower_orig = lowerin;
+    s_upper_orig = upperin;
+    RelaxBounds();
 }
+void FatropData::RelaxBounds()
+{
+    VECCP(n_ineqs, (VEC*) s_lower_orig, 0, (VEC*) s_lower, 0);
+    VECCP(n_ineqs, (VEC*) s_upper_orig, 0, (VEC*) s_upper, 0);
+    VEC* s_lower_p = (VEC*) s_lower;
+    VEC* s_upper_p = (VEC*) s_upper;
+    for(int i = 0; i<n_ineqs; i++)
+    {
+        double lower_i = VECEL(s_lower_p, i);
+        if (!isinf(lower_i))
+        {
+            VECEL(s_lower_p, i) = lower_i - MIN(constr_viol_tol, bound_relax_factor * MAX(1.00,abs(lower_i)));
+        }
+        double upper_i =  VECEL(s_upper_p, i);
+        if (!isinf(upper_i))
+        {
+            VECEL(s_upper_p, i) = upper_i + MIN(constr_viol_tol, bound_relax_factor * MAX(1.00,abs(upper_i)));
+        }
+    }
+}
+// void FatropData::B
