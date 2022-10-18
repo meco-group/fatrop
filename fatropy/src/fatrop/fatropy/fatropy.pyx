@@ -1,20 +1,24 @@
 from fatropy cimport OCPBuilder
 from fatropy cimport FatropAlg
+from fatropy cimport FatropApplication
+from libcpp.memory cimport shared_ptr 
 import json
 import numpy as np
 
 cdef class OCP:
     cdef OCPBuilder *myOCPBuilder  # Hold a C++ instance which we are wrapping
     cdef public dict OCPspecs # Public dict attribute to contain specs as defined in json file
+    cdef shared_ptr[FatropApplication] myFatropApplication
     
     def __cinit__(self, functions, specfile):
         self.myOCPBuilder = new OCPBuilder(functions.encode('utf-8'),specfile.encode('utf-8'))
         specfile_object = open(specfile.encode('utf-8'),"r")
         self.OCPspecs = json.load(specfile_object)
         specfile_object.close()
+        self.myFatropApplication = self.myOCPBuilder.Build()
 
     def Optimize(self):
-        return self.myOCPBuilder.fatropalg.get().Optimize()
+        return self.myFatropApplication.get().Optimize()
 
     @property
     def sd_time(self):

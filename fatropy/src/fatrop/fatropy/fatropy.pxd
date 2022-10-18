@@ -37,6 +37,15 @@ cdef extern from "FatropParams.hpp" namespace "fatrop":
         int max_iter
         int tol
 
+cdef extern from "FatropApplication.hpp" namespace "fatrop":
+    cdef cppclass FatropApplication:
+        void Initialize()
+        void Reset()
+        void SetBounds(const vector[double]& lower, const vector[double]& upper)
+        void SetInitial(const vector[double]& initial)
+        void GetSolution(vector[double]& sol)
+        int Optimize()
+
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:
         OCPBuilder(const string &functions, const string &json_spec_file) except +
@@ -51,3 +60,4 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         vector[double] upperF
         void SetBounds()
         void SetInitial()
+        shared_ptr[FatropApplication] Build()
