@@ -113,6 +113,11 @@ int FatropAlg::Optimize()
         EvalJac();
         EvalGradCurr();
 #else
+        if(fatropdata_->LamLinfCurr()>1e5)
+        {
+            cout << "huge Lagrange multipliers -> set to zero" << endl;
+            fatropdata_->lam_curr.SetConstant(0.0);
+        }
         EvalJac();      // needed for dual inf
         EvalGradCurr(); // needed for dual inf
 #endif

@@ -203,6 +203,7 @@ namespace fatrop
         /** \brief take a block of size (p), starting at (i)*/
         FatropVecBF block(const int i, const int p) const;
         void SwapWith(FatropVecBF &vb);
+        void SetConstant(double constant);
 
     protected:
         VEC *vec_ = NULL;

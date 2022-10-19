@@ -539,6 +539,10 @@ void FatropVecBF::SwapWith(FatropVecBF &vb)
     vec_ = vb.vec_;
     vb.vec_ = tmp;
 }
+void FatropVecBF::SetConstant(double constant)
+{
+    VECSE(nels_, constant, vec_, offset_);
+}
 FatropVecBF FatropMemoryVecBF::operator[](const int N) const
 {
 #if DEBUG
