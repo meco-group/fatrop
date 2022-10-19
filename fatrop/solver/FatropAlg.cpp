@@ -47,16 +47,16 @@ void FatropAlg::Reset()
     init_time = 0.0;
     total_time = 0.0;
 }
-void FatropAlg::SetBounds(const vector<double> &lower, const vector<double> &upper) 
+void FatropAlg::SetBounds(const vector<double> &lower, const vector<double> &upper)
 {
     fatropdata_->s_lower_orig = lower;
     fatropdata_->s_upper_orig = upper;
 };
-void FatropAlg::SetInitial(const vector<double> &initial) 
+void FatropAlg::SetInitial(const vector<double> &initial)
 {
     fatropdata_->x_initial = initial;
 };
-void FatropAlg::GetSolution(vector<double> &sol) 
+void FatropAlg::GetSolution(vector<double> &sol)
 {
     fatropdata_->x_curr.copyto(sol);
 };
@@ -114,7 +114,7 @@ int FatropAlg::Optimize()
         EvalJac();
         EvalGradCurr();
 #else
-        if(fatropdata_->LamLinfCurr()>1e5)
+        if (fatropdata_->LamLinfCurr() > 1e5)
         {
             cout << "huge Lagrange multipliers -> set to zero" << endl;
             fatropdata_->lam_curr.SetConstant(0.0);
@@ -134,9 +134,9 @@ int FatropAlg::Optimize()
         journaller_->Push();
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
-        if (emu < tol || (small_search_direction&&mu<tol/10))
+        if (emu < tol || (small_search_direction && (mu <=mu_min)))
         {
-            if(small_search_direction)
+            if (small_search_direction)
             {
                 cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
@@ -167,13 +167,13 @@ int FatropAlg::Optimize()
         // todo make a seperate class
         while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || small_search_direction))
         {
-            if(small_search_direction)
-            {
-                cout << "small search direction" << endl;
-            }
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_->Reset();
-            small_search_direction = false;
+            if (small_search_direction)
+            {
+                break;
+                cout << "small search direction" << endl;
+            }
         }
         // Hessian is necessary for calculating search direction
 #ifdef ENABLE_MULTITHREADING
@@ -218,17 +218,20 @@ int FatropAlg::Optimize()
             }
             delta_w_last = deltaw;
         }
-        small_search_direction = Linf(fatropdata_->delta_x) <1e-12 ||  Linf(fatropdata_->delta_s) < 1e-12;
+        small_search_direction = Linf(fatropdata_->delta_x) < 1e-12 || Linf(fatropdata_->delta_s) < 1e-12;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-        ls = linesearch_->FindAcceptableTrialPoint(mu);
-        if (ls == 0)
+        if (!small_search_direction)
         {
-            cout << "error: restoration phase not implemented yet" << endl;
-            return 1;
+            ls = linesearch_->FindAcceptableTrialPoint(mu);
+            if (ls == 0)
+            {
+                cout << "error: restoration phase not implemented yet" << endl;
+                return 1;
+            }
+            fatropdata_->AdaptDualBounds(mu);
         }
         // if linesearch unsuccessful -> resto phase
-        fatropdata_->AdaptDualBounds(mu);
     }
     return 0;
 }
