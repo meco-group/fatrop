@@ -62,6 +62,7 @@ void FatropAlg::GetSolution(vector<double> &sol)
 };
 int FatropAlg::Optimize()
 {
+    bool small_search_direction = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -133,8 +134,12 @@ int FatropAlg::Optimize()
         journaller_->Push();
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
-        if (emu < tol)
+        if (emu < tol || (small_search_direction&&mu<tol/10))
         {
+            if(small_search_direction)
+            {
+                cout << "WARNING fatrop returned bc of very small search direction" << endl;
+            }
             total_time = blasfeo_toc(&timer);
             cout << "found solution :) " << endl;
             cout << "riccati time: " << sd_time << endl;
@@ -160,10 +165,15 @@ int FatropAlg::Optimize()
         }
         // update mu
         // todo make a seperate class
-        while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu))
+        while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || small_search_direction))
         {
+            if(small_search_direction)
+            {
+                cout << "small search direction" << endl;
+            }
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_->Reset();
+            small_search_direction = false;
         }
         // Hessian is necessary for calculating search direction
 #ifdef ENABLE_MULTITHREADING
@@ -208,6 +218,7 @@ int FatropAlg::Optimize()
             }
             delta_w_last = deltaw;
         }
+        small_search_direction = Linf(fatropdata_->delta_x) <1e-12 ||  Linf(fatropdata_->delta_s) < 1e-12;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
         ls = linesearch_->FindAcceptableTrialPoint(mu);
