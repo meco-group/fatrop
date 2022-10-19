@@ -134,7 +134,7 @@ int FatropAlg::Optimize()
         journaller_->Push();
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
-        if (emu < tol || (small_search_direction && (mu <=mu_min)))
+        if (emu < tol || (small_search_direction && (mu <= mu_min)))
         {
             if (small_search_direction)
             {
@@ -218,11 +218,12 @@ int FatropAlg::Optimize()
             }
             delta_w_last = deltaw;
         }
-        small_search_direction = Linf(fatropdata_->delta_x) < 1e-12 || Linf(fatropdata_->delta_s) < 1e-12;
+        bool small_search_direction_curr = Linf(fatropdata_->delta_x) < 1e-10 || Linf(fatropdata_->delta_s) < 1e-10;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-        if (!small_search_direction)
+        if (!small_search_direction_curr)
         {
+            small_search_direction = false;
             ls = linesearch_->FindAcceptableTrialPoint(mu);
             if (ls == 0)
             {
@@ -230,6 +231,23 @@ int FatropAlg::Optimize()
                 return 1;
             }
             fatropdata_->AdaptDualBounds(mu);
+        }
+        else
+        {
+            if (!small_search_direction)
+            {
+                // take the full step
+                cout << "full step small sd " << endl;
+                double alpha_primal = 1.0;
+                double alpha_dual = 1.0;
+                fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
+                fatropdata_->TryStep(alpha_primal, alpha_dual);
+                fatropdata_->TakeStep();
+                fatropdata_->AdaptDualBounds(mu);
+                journaller_->it_curr.alpha_pr = alpha_primal;
+                journaller_->it_curr.alpha_du = alpha_dual;
+            }
+            small_search_direction = true;
         }
         // if linesearch unsuccessful -> resto phase
     }
