@@ -171,8 +171,8 @@ int FatropAlg::Optimize()
             filter_->Reset();
             if (small_search_direction)
             {
-                break;
                 cout << "small search direction" << endl;
+                break;
             }
         }
         // Hessian is necessary for calculating search direction
