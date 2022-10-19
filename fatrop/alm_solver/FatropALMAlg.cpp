@@ -22,17 +22,18 @@ int FatropALMAlg::Optimize()
     VECSE(n_ineqs,0.0, (VEC*) almdata_.auglags_Lcurr, 0);
     VECSE(n_ineqs,0.0, (VEC*) almdata_.auglags_Ucurr, 0);
     innersolver_.fatropdata_->x_initial = almdata_.initial_x;
-    double penalty = 1e-1;
+    double penalty = 1e1;
     fatropnlpal_->SetPenalty(penalty);
     fatropnlpal_->SetIneqLagrMult(almdata_.auglags_Lcurr, almdata_.auglags_Ucurr);
     innersolver_.Optimize();
-    for (int i = 0; i < 200; i++)
+    for (int i = 0; i < 100; i++)
     {
         innersolver_.fatropdata_->x_initial.copy(innersolver_.fatropdata_->x_curr);
         fatropnlpal_->EvalInequalities(innersolver_.fatropdata_->x_curr, almdata_.ineq_curr);
+        if(almdata_.MaxDist()<1e-3) return 0;
         almdata_.UpdateLags(penalty);
         fatropnlpal_->SetIneqLagrMult(almdata_.auglags_Lcurr, almdata_.auglags_Ucurr);
-        if (true) penalty *= 1.1;
+        if (true) penalty *= 1.2;
         fatropnlpal_->SetPenalty(penalty);
         innersolver_.Optimize();
     }

@@ -20,7 +20,7 @@ namespace fatrop
             double* auglagsL_p = ((VEC*) auglags_Lcurr)->pa;
             double* auglagsU_p = ((VEC*) auglags_Ucurr)->pa;
             double max_dist = 0.0;
-            double lag_max = 1e2;
+            double lag_max = 1e4;
             for(int i = 0; i<n_ineqs_; i ++)
             {
                 double dist_lowi = ineq_curr_p[i]  - lower_p[i];
@@ -31,6 +31,22 @@ namespace fatrop
             }
             cout << "maximum violation " << max_dist << endl;
             return 0;
+        }
+        double MaxDist()
+        {
+            double* ineq_curr_p = ((VEC*) ineq_curr)->pa;
+            double* lower_p = ((VEC*) lower_bounds)->pa;
+            double* upper_p = ((VEC*) upper_bounds)->pa;
+            double* auglagsL_p = ((VEC*) auglags_Lcurr)->pa;
+            double* auglagsU_p = ((VEC*) auglags_Ucurr)->pa;
+            double max_dist = 0.0;
+            for(int i = 0; i<n_ineqs_; i ++)
+            {
+                double dist_lowi = ineq_curr_p[i]  - lower_p[i];
+                double dist_upperi = upper_p[i] - ineq_curr_p[i];
+                max_dist = std::max(std::max(max_dist, -dist_lowi), -dist_upperi);
+            }
+            return max_dist;
         }
         const int n_ineqs_;
         const int n_vars;
