@@ -37,8 +37,8 @@ namespace fatrop
             double* ineq_curr_p = ((VEC*) ineq_curr)->pa;
             double* lower_p = ((VEC*) lower_bounds)->pa;
             double* upper_p = ((VEC*) upper_bounds)->pa;
-            double* auglagsL_p = ((VEC*) auglags_Lcurr)->pa;
-            double* auglagsU_p = ((VEC*) auglags_Ucurr)->pa;
+            // double* auglagsL_p = ((VEC*) auglags_Lcurr)->pa;
+            // double* auglagsU_p = ((VEC*) auglags_Ucurr)->pa;
             double max_dist = 0.0;
             for(int i = 0; i<n_ineqs_; i ++)
             {
