@@ -20,7 +20,7 @@ namespace fatrop
             double* auglagsL_p = ((VEC*) auglags_Lcurr)->pa;
             double* auglagsU_p = ((VEC*) auglags_Ucurr)->pa;
             double max_dist = 0.0;
-            double lag_max = 1e4;
+            double lag_max = 1e3;
             for(int i = 0; i<n_ineqs_; i ++)
             {
                 double dist_lowi = ineq_curr_p[i]  - lower_p[i];

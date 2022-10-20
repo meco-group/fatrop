@@ -131,8 +131,8 @@ int FatropAlg::Optimize()
         it_curr.du_inf = fatropdata_->DuInfLinfCurr();
         it_curr.ls = ls;
         it_curr.reg = deltaw;
-        cout << Linf(fatropdata_->zL_curr)<< endl;
-        cout << Linf(fatropdata_->zU_curr)<< endl;
+        // cout << Linf(fatropdata_->zL_curr)<< endl;
+        // cout << Linf(fatropdata_->zU_curr)<< endl;
         journaller_->Push();
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
@@ -221,7 +221,7 @@ int FatropAlg::Optimize()
             delta_w_last = deltaw;
         }
         double stepsize = std::max(Linf(fatropdata_->delta_x), Linf(fatropdata_->delta_s));
-        cout << "step size " <<stepsize  << endl;
+        // cout << "step size " <<stepsize  << endl;
         bool small_search_direction_curr = stepsize < 1e-10;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;

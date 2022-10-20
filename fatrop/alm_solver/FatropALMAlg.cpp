@@ -22,7 +22,7 @@ int FatropALMAlg::Optimize()
     VECSE(n_ineqs,0.0, (VEC*) almdata_.auglags_Lcurr, 0);
     VECSE(n_ineqs,0.0, (VEC*) almdata_.auglags_Ucurr, 0);
     innersolver_.fatropdata_->x_initial = almdata_.initial_x;
-    double penalty = 1e1;
+    double penalty = 1e3;
     fatropnlpal_->SetPenalty(penalty);
     fatropnlpal_->SetIneqLagrMult(almdata_.auglags_Lcurr, almdata_.auglags_Ucurr);
     innersolver_.Optimize();
