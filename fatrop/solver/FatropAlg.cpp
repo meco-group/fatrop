@@ -136,7 +136,7 @@ int FatropAlg::Optimize()
         // cout << Linf(fatropdata_->zL_curr)<< endl;
         // cout << Linf(fatropdata_->zU_curr)<< endl;
         journaller_->Push();
-        journaller_->PrintIterations();
+        // journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
         if (emu < tol || (small_search_direction && (mu <= mu_min)))
         {
@@ -257,6 +257,7 @@ int FatropAlg::Optimize()
         }
         // if linesearch unsuccessful -> resto phase
     }
+    journaller_->PrintIterations();
     return 0;
 }
 inline int FatropAlg::EvalHess()
