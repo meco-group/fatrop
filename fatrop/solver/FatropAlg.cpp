@@ -62,6 +62,7 @@ void FatropAlg::GetSolution(vector<double> &sol)
 };
 int FatropAlg::Optimize()
 {
+    Initialize();
     bool small_search_direction = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
@@ -119,6 +120,7 @@ int FatropAlg::Optimize()
             cout << "huge Lagrange multipliers -> set to zero" << endl;
             fatropdata_->lam_curr.SetConstant(0.0);
         }
+        fatropdata_->RelaxBoundsVar(mu);
         EvalJac();      // needed for dual inf
         EvalGradCurr(); // needed for dual inf
 #endif
@@ -222,7 +224,7 @@ int FatropAlg::Optimize()
         }
         double stepsize = std::max(Linf(fatropdata_->delta_x), Linf(fatropdata_->delta_s));
         // cout << "step size " <<stepsize  << endl;
-        bool small_search_direction_curr = stepsize < 1e-10;
+        bool small_search_direction_curr = stepsize < 1e-6;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
         if (!small_search_direction_curr)

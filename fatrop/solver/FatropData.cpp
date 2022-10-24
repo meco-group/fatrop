@@ -45,8 +45,8 @@ void FatropData::Initialize()
     kappa2 = params->kappa2;
     kappa_d = params->kappa_d;
     kappa_sigma = params->kappa_sigma;
-    bound_relax_factor = params -> bound_relax_factor;
-    constr_viol_tol = params -> constr_viol_tol;
+    bound_relax_factor = params->bound_relax_factor;
+    constr_viol_tol = params->constr_viol_tol;
     n_ineqs_r = nIneqsR();
     RelaxBounds();
 }
@@ -435,21 +435,55 @@ void FatropData::SetBounds(const vector<double> &lowerin, const vector<double> &
 }
 void FatropData::RelaxBounds()
 {
-    VECCP(n_ineqs, (VEC*) s_lower_orig, 0, (VEC*) s_lower, 0);
-    VECCP(n_ineqs, (VEC*) s_upper_orig, 0, (VEC*) s_upper, 0);
-    VEC* s_lower_p = (VEC*) s_lower;
-    VEC* s_upper_p = (VEC*) s_upper;
-    for(int i = 0; i<n_ineqs; i++)
+    VECCP(n_ineqs, (VEC *)s_lower_orig, 0, (VEC *)s_lower, 0);
+    VECCP(n_ineqs, (VEC *)s_upper_orig, 0, (VEC *)s_upper, 0);
+    VEC *s_lower_p = (VEC *)s_lower;
+    VEC *s_upper_p = (VEC *)s_upper;
+    for (int i = 0; i < n_ineqs; i++)
     {
         double lower_i = VECEL(s_lower_p, i);
         if (!isinf(lower_i))
         {
-            VECEL(s_lower_p, i) = lower_i - MIN(constr_viol_tol, bound_relax_factor * MAX(1.00,abs(lower_i)));
+            VECEL(s_lower_p, i) = lower_i - MIN(constr_viol_tol, bound_relax_factor * MAX(1.00, abs(lower_i)));
         }
-        double upper_i =  VECEL(s_upper_p, i);
+        double upper_i = VECEL(s_upper_p, i);
         if (!isinf(upper_i))
         {
-            VECEL(s_upper_p, i) = upper_i + MIN(constr_viol_tol, bound_relax_factor * MAX(1.00,abs(upper_i)));
+            VECEL(s_upper_p, i) = upper_i + MIN(constr_viol_tol, bound_relax_factor * MAX(1.00, abs(upper_i)));
+        }
+    }
+}
+void FatropData::RelaxBoundsVar(double mu)
+{
+    double emach = 1e-10;
+    VEC *s_lower_p = (VEC *)s_lower;
+    VEC *s_upper_p = (VEC *)s_upper;
+    VEC *s_curr_p = (VEC *)s_curr;
+    for (int i = 0; i < n_ineqs; i++)
+    {
+        double loweri = VECEL(s_lower_p, i);
+        double upperi = VECEL(s_upper_p, i);
+        bool lower_bounded = !isinf(loweri);
+        bool upper_bounded = !isinf(upperi);
+        if (lower_bounded)
+        {
+            double s_curr_v = VECEL(s_curr_p, i);
+            double dist_lower = s_curr_v - loweri;
+            if (dist_lower < mu * emach)
+            {
+                cout << "slacks too small "<< endl;
+                VECEL(s_lower_p, i) -= std::pow(emach, 0.75) * std::max(1.0, loweri);
+            }
+        }
+        if (upper_bounded)
+        {
+            double s_curr_v = VECEL(s_curr_p, i);
+            double dist_upper = upperi - s_curr_v;
+            if (dist_upper < mu * emach)
+            {
+                cout << "slacks too small "<< endl;
+                VECEL(s_upper_p, i) += std::pow(emach, 0.75) * std::max(1.0, upperi);
+            }
         }
     }
 }

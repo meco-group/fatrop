@@ -44,6 +44,7 @@ namespace fatrop
         void AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau);
         void SetBounds(const vector<double>& lowerin, const vector<double>& upperin);
         void RelaxBounds();
+        void RelaxBoundsVar(double mu);
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
