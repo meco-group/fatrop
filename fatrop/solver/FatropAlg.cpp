@@ -161,7 +161,7 @@ int FatropAlg::Optimize()
             journaller_->PrintIterations();
             fatropnlp_->Finalize();
             // cout << "rest time: " << total_time - sd_time - init_time << endl;
-            // cout << "el time total: " << total_time << endl;
+            cout << "el time total: " << total_time << endl;
 #ifdef ENABLE_MULTITHREADING
             worker.wait();
 #endif
