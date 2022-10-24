@@ -70,6 +70,44 @@ int FatropOCP::ComputeSD(
         upper_bound,
         delta_s);
 };
+int FatropOCP::ComputeResidual(
+    const double inertia_correction_w,
+    const double inertia_correction_c,
+    const double mu,
+    const double kappa_d,
+    const FatropVecBF &dprimal_vars,
+    const FatropVecBF &dlam,
+    const FatropVecBF &lam_curr,
+    const FatropVecBF &s,
+    const FatropVecBF &zL_curr,
+    const FatropVecBF &zU_curr,
+    const FatropVecBF &delta_zL,
+    const FatropVecBF &delta_zU,
+    const FatropVecBF &lower_bound,
+    const FatropVecBF &upper_bound,
+    const FatropVecBF &delta_s, 
+    FatropVecBF &residual) 
+{
+    // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
+    return ls_->computeResidual(
+        &ocpkktmemory_,
+        inertia_correction_w,
+        inertia_correction_c,
+        mu,
+        kappa_d,
+        dprimal_vars,
+        dlam,
+        lam_curr,
+        s,
+        zL_curr,
+        zU_curr,
+        delta_zL,
+        delta_zU,
+        lower_bound,
+        upper_bound,
+        delta_s, 
+        residual);
+};
 int FatropOCP::ComputeScalings(
     double &obj_scale,
     FatropVecBF &x_scales,

@@ -51,7 +51,7 @@ int OCPLSRiccati::computeSD(
     const FatropVecBF &delta_zU,
     const FatropVecBF &lower,
     const FatropVecBF &upper,
-    const FatropVecBF &delta_s) 
+    const FatropVecBF &delta_s)
 {
     if (inertia_correction_c == 0.0)
     {
@@ -406,7 +406,7 @@ int OCPLSRiccati::SolveInitialization(
     const FatropVecBF &zL,
     const FatropVecBF &zU,
     const FatropVecBF &lower,
-    const FatropVecBF &upper) 
+    const FatropVecBF &upper)
 {
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
@@ -1312,3 +1312,85 @@ int OCPLSRiccati::computeSDnor(
     lastused_.mu = mu;
     return 0;
 }
+int OCPLSRiccati::computeResidual(
+    OCPKKTMemory *OCP,
+    const double intertia_correction_w,
+    const double intertia_correction_c,
+    const double mu,
+    const double kappa_d,
+    const FatropVecBF &dprimal_vars,
+    const FatropVecBF &dlam,
+    const FatropVecBF &lam_curr,
+    const FatropVecBF &s,
+    const FatropVecBF &zL,
+    const FatropVecBF &zU,
+    const FatropVecBF &delta_zL,
+    const FatropVecBF &delta_zU,
+    const FatropVecBF &lower,
+    const FatropVecBF &upper,
+    const FatropVecBF &delta_s,
+    FatropVecBF &residual)
+{
+    int K = OCP->K;
+    VEC *lam_p = (VEC *)dlam;
+    VEC *residual_p = (VEC *)residual;
+    VEC *dux = (VEC *)dprimal_vars;
+    OCPMACRO(MAT *, BAbt, _p);
+    OCPMACRO(MAT *, Ggt, _p);
+    OCPMACRO(MAT *, Ggt_ineq, _p);
+    OCPMACRO(MAT *, RSQrqt, _p);
+    OCPMACRO(int *, nu, _p);
+    OCPMACRO(int *, nx, _p);
+    OCPMACRO(int *, ng, _p);
+    OCPMACRO(int *, ng_ineq, _p);
+    // copy grad_f to du_inf
+    int *offs_ux = (int *)OCP->aux.ux_offs.data();
+    int *offs_g = (int *)OCP->aux.g_offs.data();
+    int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
+    int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
+    // RSQrqt contributiion
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int offs = offs_ux[k];
+        ROWEX(nu + nx, 1.0, RSQrqt_p + k, nu + nx, 0, residual_p, offs);
+        GEMV_N(nu + nx, nu + nx, 1.0, RSQrqt_p + k, 0, 0, dux, offs, 1.0, residual_p, offs, residual_p, offs);
+        AXPY(nu+nx, intertia_correction_w, dux, offs, residual_p, offs, residual_p, offs);
+    }
+    // contribution of dynamics constraints
+    for (int k = 0; k < K - 1; k++)
+    {
+        const int nu = nu_p[k];
+        const int nup1 = nu_p[k + 1];
+        const int nx = nx_p[k];
+        const int nxp1 = nx_p[k + 1];
+        const int offsp1 = offs_ux[k + 1];
+        const int offs = offs_ux[k];
+        const int offs_dyn_eq_k = offs_dyn_eq[k];
+        GEMV_N(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, lam_p, offs_dyn_eq_k, 1.0, residual_p, offs, residual_p, offs);
+        AXPY(nxp1, -1.0, lam_p, offs_dyn_eq_k, residual_p, offsp1 + nup1, residual_p, offsp1 + nup1);
+    }
+    // contribution of equality constraints
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng = ng_p[k];
+        const int offs = offs_ux[k];
+        const int offs_g_k = offs_g[k];
+        GEMV_N(nu + nx, ng, 1.0, Ggt_p + k, 0, 0, lam_p, offs_g_k, 1.0, residual_p, offs, residual_p, offs);
+    }
+    // constribution of inequality - slack constraints
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng_ineq = ng_ineq_p[k];
+        const int offs_g_ineq_k = offs_g_ineq[k];
+        const int offs = offs_ux[k];
+        GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, lam_p, offs_g_ineq_k, 1.0, residual_p, offs, residual_p, offs);
+    }
+    cout << "residual linf " << Linf(residual) << endl;
+    return 0;
+};

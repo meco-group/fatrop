@@ -68,6 +68,7 @@ namespace fatrop
         FatropVecBF grad_curr;
         FatropVecBF grad_next;
         FatropVecBF du_inf_curr;
+        FatropVecBF residual_vec;
         FatropVecBF du_inf_curr_s;
         // vectors neccessary for inequality constraints
         FatropVecBF s_curr;
