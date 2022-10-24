@@ -140,11 +140,12 @@ int FatropAlg::Optimize()
         double emu = fatropdata_->EMuCurr(0.0);
         if (emu < tol || (small_search_direction && (mu <= mu_min)))
         {
+            total_time = blasfeo_toc(&timer);
+            journaller_->PrintIterations();
             if (small_search_direction)
             {
                 cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
-            total_time = blasfeo_toc(&timer);
             cout << "found solution :) " << endl;
             cout << "riccati time: " << sd_time << endl;
             cout << "init time: " << init_time << endl;
@@ -158,7 +159,6 @@ int FatropAlg::Optimize()
             //      << "to be added" << endl;
             // cout << "fe time nlp_jac_g: "
             //      << "to be added" << endl;
-            journaller_->PrintIterations();
             fatropnlp_->Finalize();
             // cout << "rest time: " << total_time - sd_time - init_time << endl;
             cout << "el time total: " << total_time << endl;
