@@ -46,23 +46,6 @@ namespace fatrop
             const FatropVecBF &lower_bound,
             const FatropVecBF &upper_bound,
             const FatropVecBF &delta_s) override;
-        int ComputeResidual(
-            const double inertia_correction_w,
-            const double inertia_correction_c,
-            const double mu,
-            const double kappa_d,
-            const FatropVecBF &dprimal_vars,
-            const FatropVecBF &dlam,
-            const FatropVecBF &lam_curr,
-            const FatropVecBF &s,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr,
-            const FatropVecBF &delta_zL,
-            const FatropVecBF &delta_zU,
-            const FatropVecBF &lower_bound,
-            const FatropVecBF &upper_bound,
-            const FatropVecBF &delta_s,
-            FatropVecBF &residual) override;
         int ComputeScalings(
             double &obj_scale,
             FatropVecBF &x_scales,

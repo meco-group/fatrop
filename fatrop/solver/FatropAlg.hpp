@@ -42,7 +42,6 @@ namespace fatrop
         int EvalDuInf();
         inline int Initialization();
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu);
-        int ComputeResidual(double inertia_correction_w, double inertia_correction_c, double mu);
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<FatropParams> fatropparams_;

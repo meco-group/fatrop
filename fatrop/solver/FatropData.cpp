@@ -3,7 +3,7 @@ using namespace fatrop;
 FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                          n_eqs(nlpdims.neqs),
                                                                                          n_ineqs(nlpdims.nineqs),
-                                                                                         memvars(nlpdims.nvars, 9),
+                                                                                         memvars(nlpdims.nvars, 8),
                                                                                          memeqs(nlpdims.neqs, 6),
                                                                                          memineqs(nlpdims.nineqs, 14),
                                                                                          x_curr(memvars[0]),
@@ -20,7 +20,6 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          grad_curr(memvars[5]),
                                                                                          grad_next(memvars[6]),
                                                                                          du_inf_curr(memvars[7]),
-                                                                                         residual_vec(memvars[8]),
                                                                                          du_inf_curr_s(memineqs[0]),
                                                                                          s_curr(memineqs[1]),
                                                                                          s_next(memineqs[2]),
@@ -387,11 +386,6 @@ double FatropData::LamLinfCalc()
 }
 double FatropData::DuInfLinfCurr()
 {
-    // cout << "du_inf" << endl;
-    // cout << Linf(du_inf_curr) << endl;
-    // cout << "du_inf_s" << endl;
-    // cout << Linf(du_inf_curr_s) << endl;
-    // du_inf_curr.print();
     return CACHEMACRO(cache_curr.du_inf_linf, MAX(Linf(du_inf_curr), Linf(du_inf_curr_s)));
 }
 double FatropData::LinDecrCurr()

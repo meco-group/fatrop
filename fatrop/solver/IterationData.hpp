@@ -18,7 +18,6 @@ namespace fatrop
         double reg = 0.0;
         double alpha_pr = 0.0;
         double alpha_du = 0.0;
-        double steps_size = 0.00;
         char type = 'x';
     };
     class Journaller
