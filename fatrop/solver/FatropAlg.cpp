@@ -94,6 +94,7 @@ int FatropAlg::Optimize()
     }
     else
     {
+        cout << "rejected lam " << endl;
             fatropdata_->lam_curr.SetConstant(0.0);
     }
     EvalCVCurr();
