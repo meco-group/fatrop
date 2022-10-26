@@ -84,12 +84,17 @@ int FatropAlg::Optimize()
     EvalJac(); // todo twice evaluation
     EvalGradCurr();
 #endif
-    Initialization();
+    int initialization_res = Initialization();
+    // cout << " initializaiton res " << initialization_res << endl;
     fatropdata_->BoundSlacks();
-    if (fatropdata_->LamLinfCalc() < lammax)
+    if (initialization_res == 0 && fatropdata_->LamLinfCalc() < lammax)
     {
         cout << "accepted lam " << endl;
         fatropdata_->AcceptInitialization();
+    }
+    else
+    {
+            fatropdata_->lam_curr.SetConstant(0.0);
     }
     EvalCVCurr();
     fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
@@ -136,7 +141,7 @@ int FatropAlg::Optimize()
         // cout << Linf(fatropdata_->zL_curr)<< endl;
         // cout << Linf(fatropdata_->zU_curr)<< endl;
         journaller_->Push();
-        // journaller_->PrintIterations();
+        journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
         if (emu < tol || (small_search_direction && (mu <= mu_min)))
         {
