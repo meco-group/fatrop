@@ -55,6 +55,7 @@ namespace fatrop
         double sd_time = 0.0;
         double init_time = 0.0;
         double total_time = 0.0;
+        double hess_time = 0.0;
 
     private:
         double lammax;

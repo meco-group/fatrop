@@ -46,6 +46,7 @@ void FatropAlg::Reset()
     sd_time = 0.0;
     init_time = 0.0;
     total_time = 0.0;
+    hess_time = 0.0;
 }
 void FatropAlg::SetBounds(const vector<double> &lower, const vector<double> &upper)
 {
@@ -155,6 +156,7 @@ int FatropAlg::Optimize()
             cout << "found solution :) " << endl;
             cout << "riccati time: " << sd_time << endl;
             cout << "init time: " << init_time << endl;
+            cout << "hess time " << hess_time << endl;
             // cout << "fe time nlp_f: "
             //      << "to be added" << endl;
             // cout << "fe time nlp_g: "
@@ -268,11 +270,14 @@ int FatropAlg::Optimize()
 }
 inline int FatropAlg::EvalHess()
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res =
         fatropnlp_->EvalHess(
             fatropdata_->obj_scale,
             fatropdata_->x_curr,
             fatropdata_->lam_curr);
+    hess_time += blasfeo_toc(&timer);
     return res;
 }
 inline int FatropAlg::EvalJac()
