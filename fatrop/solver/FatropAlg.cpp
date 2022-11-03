@@ -122,7 +122,7 @@ int FatropAlg::Optimize()
         EvalJac();
         EvalGradCurr();
 #else
-        if (fatropdata_->LamLinfCurr() > 1e8)
+        if (fatropdata_->LamLinfCurr() > 1e20)
         {
             cout << "huge Lagrange multipliers -> set to zero" << endl;
             fatropdata_->lam_curr.SetConstant(0.0);
@@ -184,6 +184,7 @@ int FatropAlg::Optimize()
             if (small_search_direction)
             {
                 cout << "small search direction" << endl;
+                small_search_direction = false;
                 break;
             }
         }
