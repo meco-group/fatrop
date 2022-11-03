@@ -415,6 +415,11 @@ json::parsing::parse_results json::parsing::parse(const char *input)
             result.value += "Infinity";
             index += 8;
         }
+        else if (strncmp(index, "-Infinity", 9) == 0)
+        {
+            result.value += "Infinity";
+            index += 9;
+        }
         else
         {
             throw json::parsing_error("Input did not contain a valid inf");
