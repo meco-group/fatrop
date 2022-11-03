@@ -116,8 +116,8 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
                     if (!switch_cond || !(armijo))
                     {
                         filter_->Augment(FilterData(0, obj_curr - gamma_phi * cv_curr, cv_curr * (1 - gamma_theta)));
-                        (journaller_->it_curr).type = 'h';
                     }
+                    (journaller_->it_curr).type = 'h';
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
