@@ -51,7 +51,7 @@ int OCPLSRiccati::computeSD(
     const FatropVecBF &delta_zU,
     const FatropVecBF &lower,
     const FatropVecBF &upper,
-    const FatropVecBF &delta_s) 
+    const FatropVecBF &delta_s)
 {
     if (inertia_correction_c == 0.0)
     {
@@ -406,7 +406,7 @@ int OCPLSRiccati::SolveInitialization(
     const FatropVecBF &zL,
     const FatropVecBF &zU,
     const FatropVecBF &lower,
-    const FatropVecBF &upper) 
+    const FatropVecBF &upper)
 {
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
@@ -1258,7 +1258,7 @@ int OCPLSRiccati::computeSDnor(
                     double z = VECEL(zL_p, offs_ineq_k + i);
                     double dz = -grad_barrier_L - z - scaling_factor_L * ds;
                     VECEL(delta_zL_p, offs_ineq_k + i) = dz;
-                    lamIi += -z - dz;
+                    lamIi += grad_barrier_L + scaling_factor_L * ds;
                 }
                 if (upper_bounded)
                 {
@@ -1269,7 +1269,7 @@ int OCPLSRiccati::computeSDnor(
                     double z = VECEL(zU_p, offs_ineq_k + i);
                     double dz = grad_barrier_U - z + scaling_factor_U * ds;
                     VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-                    lamIi += +z + dz;
+                    lamIi += grad_barrier_U + scaling_factor_U * ds;
                     VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                     // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                 }
