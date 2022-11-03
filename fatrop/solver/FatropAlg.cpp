@@ -64,7 +64,7 @@ void FatropAlg::GetSolution(vector<double> &sol)
 int FatropAlg::Optimize()
 {
     Initialize();
-    bool small_search_direction = false;
+    int no_conse_small_sd = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -96,7 +96,7 @@ int FatropAlg::Optimize()
     else
     {
         cout << "rejected lam " << endl;
-            fatropdata_->lam_curr.SetConstant(0.0);
+        fatropdata_->lam_curr.SetConstant(0.0);
     }
     EvalCVCurr();
     fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
@@ -145,11 +145,11 @@ int FatropAlg::Optimize()
         journaller_->Push();
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
-        if (emu < tol || (small_search_direction && (mu <= mu_min)))
+        if (emu < tol || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         {
             total_time = blasfeo_toc(&timer);
             journaller_->PrintIterations();
-            if (small_search_direction)
+            if (no_conse_small_sd == 2)
             {
                 cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
@@ -177,14 +177,14 @@ int FatropAlg::Optimize()
         }
         // update mu
         // todo make a seperate class
-        while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || small_search_direction))
+        while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_->Reset();
-            if (small_search_direction)
+            if (no_conse_small_sd == 2)
             {
-                cout << "small search direction" << endl;
-                small_search_direction = false;
+                // cout << "small search direction" << endl;
+                no_conse_small_sd = 0;
                 break;
             }
         }
@@ -236,33 +236,25 @@ int FatropAlg::Optimize()
         bool small_search_direction_curr = stepsize < 1e-6;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-        if (!small_search_direction_curr)
+        ls = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr);
+        if (ls == 0)
         {
-            small_search_direction = false;
-            ls = linesearch_->FindAcceptableTrialPoint(mu);
-            if (ls == 0)
-            {
-                cout << "error: restoration phase not implemented yet" << endl;
-                return 1;
-            }
-            fatropdata_->AdaptDualBounds(mu);
+            cout << "error: restoration phase not implemented yet" << endl;
+            return 1;
         }
-        else
+        fatropdata_->AdaptDualBounds(mu);
+        if (small_search_direction_curr)
         {
-            if (!small_search_direction)
+            no_conse_small_sd++;
+            if (!no_conse_small_sd)
             {
                 // take the full step
                 cout << "full step small sd " << endl;
-                double alpha_primal = 1.0;
-                double alpha_dual = 1.0;
-                fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
-                fatropdata_->TryStep(alpha_primal, alpha_dual);
-                fatropdata_->TakeStep();
-                fatropdata_->AdaptDualBounds(mu);
-                journaller_->it_curr.alpha_pr = alpha_primal;
-                journaller_->it_curr.alpha_du = alpha_dual;
             }
-            small_search_direction = true;
+        }
+        else
+        {
+            no_conse_small_sd = 0;
         }
         // if linesearch unsuccessful -> resto phase
     }

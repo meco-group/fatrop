@@ -47,7 +47,7 @@ void BackTrackingLineSearch::Initialize()
     eta_phi = fatrop_params_->eta_phi;
     gamma_alpha = fatrop_params_->gamma_alpha;
 }
-int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu)
+int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
 {
     double alpha_primal = 1.0;
     double alpha_dual = 1.0;
@@ -83,7 +83,14 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu)
         double barrier_next = fatropdata_->EvalBarrierNext(mu);
         obj_next += barrier_next;
         // todo change iteration number from zero to real iteration number
-        (journaller_->it_curr).type = 'f';
+        if (small_sd)
+        {
+            (journaller_->it_curr).type = 's';
+            fatropdata_->TakeStep();
+            journaller_->it_curr.alpha_pr = alpha_primal;
+            journaller_->it_curr.alpha_du = alpha_dual;
+            return 1;
+        }
         if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
         {
             bool switch_cond = (lin_decr_curr < 0) && (alpha_primal * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
@@ -93,6 +100,7 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu)
                 // f-step
                 if (armijo)
                 {
+                    (journaller_->it_curr).type = 'f';
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;

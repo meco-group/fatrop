@@ -6,7 +6,7 @@ namespace fatrop
     {
         for (int i = 0; i < m; i++)
         {
-            if (MATEL(sA, ai + i, aj + i) < 1e-16)
+            if (MATEL(sA, ai + i, aj + i) == 0.0)
                 return false;
         }
         return true;
