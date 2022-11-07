@@ -47,8 +47,9 @@ void BackTrackingLineSearch::Initialize()
     eta_phi = fatrop_params_->eta_phi;
     gamma_alpha = fatrop_params_->gamma_alpha;
 }
-int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
+LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
 {
+    LineSearchInfo res;
     double alpha_primal = 1.0;
     double alpha_dual = 1.0;
     fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
@@ -75,7 +76,8 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
         TryStep(alpha_primal, alpha_dual);
         if (alpha_primal < alpha_min)
         {
-            return 0;
+            res.ls = 0;
+            return res;
         }
         EvalCVNext();
         double cv_next = fatropdata_->CVL1Next();
@@ -89,7 +91,8 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
             fatropdata_->TakeStep();
             journaller_->it_curr.alpha_pr = alpha_primal;
             journaller_->it_curr.alpha_du = alpha_dual;
-            return 1;
+            res.ls = 1;
+            return res;
         }
         if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
         {
@@ -104,7 +107,8 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
-                    return ll;
+                    res.ls = ll;
+                    return res;
                 }
             }
             else
@@ -121,12 +125,21 @@ int BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
-                    return ll;
+                    res.ls = ll;
+                    return res;
                 }
+            }
+        }
+        else
+        {
+            if(ll =1)
+            {
+                res.first_rejected_by_filter = true;
             }
         }
         alpha_primal /= 2.0;
     }
     assert(false);
-    return 0;
+    res.ls = 0;
+    return res;
 };

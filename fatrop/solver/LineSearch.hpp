@@ -10,6 +10,11 @@
 using namespace std;
 namespace fatrop
 {
+    struct LineSearchInfo
+    {
+        int ls = 0;
+        bool first_rejected_by_filter = false;
+    };
     class LineSearch : public AlgStrategy
     {
     public:
@@ -17,7 +22,7 @@ namespace fatrop
             const shared_ptr<FatropParams> &fatropparams,
             const shared_ptr<FatropNLP> &nlp,
             const shared_ptr<FatropData> &fatropdata);
-        virtual int FindAcceptableTrialPoint(double mu, bool small_sd) = 0;
+        virtual LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd) = 0;
         inline int EvalCVNext();
         double EvalObjNext();
         virtual int TryStep(double alpha_pr, double alpha_du) const;
@@ -35,7 +40,7 @@ namespace fatrop
             const shared_ptr<Filter> &filter,
             const shared_ptr<Journaller> &journaller);
         void Initialize();
-        int FindAcceptableTrialPoint(double mu, bool small_sd);
+        LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd);
         shared_ptr<Filter> filter_;
         shared_ptr<Journaller> journaller_;
         double s_phi;

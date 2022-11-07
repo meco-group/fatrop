@@ -65,6 +65,7 @@ int FatropAlg::Optimize()
 {
     Initialize();
     int no_conse_small_sd = false;
+    int no_no_full_steps = 0;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -73,6 +74,7 @@ int FatropAlg::Optimize()
     // optimization variables
     double mu = mu0;
     double delta_w_last = 0.0;
+    LineSearchInfo lsinfo;
     // initialization
 #ifdef ENABLE_MULTITHREADING // TODO control cores to which threads are assigned and take into account hyperthreading in this.
     // TODO check if it is more interesting to make worker a member variable, instead of a local variable in Optimize
@@ -105,6 +107,12 @@ int FatropAlg::Optimize()
     double deltac = 0.0;
     for (int i = 0; i < maxiter; i++)
     {
+        if (no_no_full_steps >= 4 && lsinfo.first_rejected_by_filter)
+        {
+            cout << "resetted filter " << endl;
+            filter_->Reset();
+            no_no_full_steps = 0;
+        }
         // cout << "iteration " << i << endl;
         // cout << "x_curr " << endl;
         // fatropdata_-> x_curr.print();
@@ -187,6 +195,7 @@ int FatropAlg::Optimize()
                 no_conse_small_sd = 0;
                 break;
             }
+            no_no_full_steps = 0;
         }
         // Hessian is necessary for calculating search direction
 #ifdef ENABLE_MULTITHREADING
@@ -236,11 +245,20 @@ int FatropAlg::Optimize()
         bool small_search_direction_curr = stepsize < 1e-6;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-        ls = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr);
+        lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr);
+        ls = lsinfo.ls;
         if (ls == 0)
         {
             cout << "error: restoration phase not implemented yet" << endl;
             return 1;
+        }
+        if (ls == 1)
+        {
+            no_no_full_steps = 0;
+        }
+        else
+        {
+            ++no_no_full_steps;
         }
         fatropdata_->AdaptDualBounds(mu);
         if (small_search_direction_curr)
