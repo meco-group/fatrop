@@ -9,21 +9,29 @@ int FatropOCP::EvalHess(
     const FatropVecBF &primal_vars,
     const FatropVecBF &lam) 
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = ocp_->evalHess(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
         lam);
+    hess_time += blasfeo_toc(&timer);
+    hess_count += 1;
     return res;
 };
 int FatropOCP::EvalJac(
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars) 
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = ocp_->evalJac(
         &ocpkktmemory_,
         primal_vars,
         slack_vars);
+    jac_time += blasfeo_toc(&timer);
+    jac_count += 1;
     return res;
 };
 int FatropOCP::ComputeSD(
@@ -80,11 +88,15 @@ int FatropOCP::EvalConstraintViolation(
     const FatropVecBF &slack_vars,
     FatropVecBF &constraint_violation) 
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = ocp_->EvalConstraintViolation(
         &ocpkktmemory_,
         primal_vars,
         slack_vars,
         constraint_violation);
+    cv_time += blasfeo_toc(&timer);
+    cv_count += 1;
     return res;
 };
 int FatropOCP::EvalGrad(
@@ -92,11 +104,15 @@ int FatropOCP::EvalGrad(
     const FatropVecBF &primal_vars,
     FatropVecBF &gradient) 
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = ocp_->EvalGrad(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
         gradient);
+    grad_time += blasfeo_toc(&timer);
+    grad_count += 1;
     return res;
 };
 int FatropOCP::EvalObj(
@@ -105,11 +121,15 @@ int FatropOCP::EvalObj(
     double &res) 
 {
 
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int resi = ocp_->EvalObj(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
         res);
+    obj_time += blasfeo_toc(&timer);
+    obj_count += 1;
     return resi;
 };
 int FatropOCP::EvalDuInf(
@@ -152,7 +172,25 @@ NLPDims FatropOCP::GetNLPDims() const
 };
 void FatropOCP::Finalize() 
 {
+    FE_time = hess_time + jac_time + cv_time + grad_time + obj_time;
+    cout << "hess time: " << hess_time << ", count: " << hess_count << endl;
+    cout << "jac time:  " << jac_time << ", count: " << jac_count << endl;
+    cout << "cv time:   " << cv_time << ", count: " << cv_count << endl;
+    cout << "grad time: " << grad_time << ", count: " << grad_count << endl;
+    cout << "obj time:  " << obj_time << ", count: " << obj_count << endl;
+    cout << "FE time:   " << FE_time << endl;
 }
 void FatropOCP::Reset() 
 {
+    FE_time = 0.0;
+    hess_time = 0.0;
+    jac_time = 0.0;
+    cv_time = 0.0;
+    grad_time = 0.0;
+    obj_time = 0.0;
+    hess_count = 0;
+    jac_count = 0;
+    cv_count = 0;
+    grad_count = 0;
+    obj_count = 0;
 }

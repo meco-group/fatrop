@@ -90,6 +90,17 @@ namespace fatrop
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;
+        double FE_time = 0.0;
+        double hess_time = 0.0;
+        double jac_time = 0.0;
+        double cv_time = 0.0;
+        double grad_time = 0.0;
+        double obj_time = 0.0;
+        int hess_count = 0;
+        int jac_count = 0;
+        int cv_count = 0;
+        int grad_count = 0;
+        int obj_count = 0;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED
