@@ -146,26 +146,34 @@ int OCPLSRiccati::computeSDDeg(
                 double loweri = VECEL(lower_p, offs_ineq_k + i);
                 double upperi = VECEL(upper_p, offs_ineq_k + i);
                 double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
-                if (!isinf(loweri))
+                bool lower_bounded = !isinf(loweri);
+                bool upper_bounded = !isinf(upperi);
+                if (lower_bounded)
                 {
                     double dist = si - loweri;
                     double dist_m1 = 1.0 / dist;
                     scaling_factor += zLi * dist_m1;
                     grad_barrier -= mu * dist_m1;
                 }
-                if (!isinf(upperi))
+                if (upper_bounded)
                 {
                     double dist = upperi - si;
                     double dist_m1 = 1.0 / dist;
                     scaling_factor += zUi * dist_m1;
                     grad_barrier += mu * dist_m1;
                 }
-                COLSC(nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                if (!(lower_bounded && upper_bounded))
+                {
+                    grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
+                }
+                COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                 MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
             }
             // add the penalty
-            SYRK_LN_MN(nu + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+            SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+            // TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
         }
+
         GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
         SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
         TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
@@ -190,6 +198,7 @@ int OCPLSRiccati::computeSDDeg(
             // RSQrqt + 1/d_c At@A
             DIARE(nu + nx, inertia_correction_w, RSQrqt_tilde_p + k, 0, 0);
             SYRK_LN_MN(nu + nx + 1, nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, Ggt_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+
             //// inequalities
             if (ng_ineq > 0)
             {
@@ -203,19 +212,25 @@ int OCPLSRiccati::computeSDDeg(
                     double loweri = VECEL(lower_p, offs_ineq_k + i);
                     double upperi = VECEL(upper_p, offs_ineq_k + i);
                     double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
-                    if (!isinf(loweri))
+                    bool lower_bounded = !isinf(loweri);
+                    bool upper_bounded = !isinf(upperi);
+                    if (lower_bounded)
                     {
                         double dist = si - loweri;
                         double dist_m1 = 1.0 / dist;
                         scaling_factor += zLi * dist_m1;
                         grad_barrier -= mu * dist_m1;
                     }
-                    if (!isinf(upperi))
+                    if (upper_bounded)
                     {
                         double dist = upperi - si;
                         double dist_m1 = 1.0 / dist;
                         scaling_factor += zUi * dist_m1;
                         grad_barrier += mu * dist_m1;
+                    }
+                    if (!(lower_bounded && upper_bounded))
+                    {
+                        grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
                     }
                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
@@ -302,6 +317,7 @@ int OCPLSRiccati::computeSDDeg(
         ROWEX(ng, delta_cmin1, Ggt_p + k, nu + nx, 0, lam_p, offs_g_k);
         GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
     }
+
     for (int k = 0; k < K; k++)
     {
         const int nx = nx_p[k];
@@ -328,7 +344,9 @@ int OCPLSRiccati::computeSDDeg(
             //     double upperi = VECEL(upper_p, offs_ineq_k + i);
             //     double grad_barrier_L = 0.0;
             //     double grad_barrier_U = 0.0;
-            //     if (!isinf(loweri))
+            //     bool lower_bounded = !isinf(loweri);
+            //     bool upper_bounded = !isinf(upperi);
+            //     if (lower_bounded)
             //     {
             //         double dist = si - loweri;
             //         double dist_m1 = 1.0 / dist;
@@ -336,7 +354,7 @@ int OCPLSRiccati::computeSDDeg(
             //         grad_barrier_L = -mu * dist_m1;
             //         VECEL(delta_zL_p, offs_ineq_k + i) = -grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
             //     }
-            //     if (!isinf(upperi))
+            //     if (upper_bounded)
             //     {
             //         double dist = upperi - si;
             //         double dist_m1 = 1.0 / dist;
@@ -344,8 +362,14 @@ int OCPLSRiccati::computeSDDeg(
             //         grad_barrier_U = mu * dist_m1;
             //         VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
             //     }
-            //     VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (inertia_correction_w + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
+            //     double grad_barrier = grad_barrier_L + grad_barrier_U;
+            //     if (!(lower_bounded && upper_bounded))
+            //     {
+            //         grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
+            //     }
+            //     VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
             // }
+
             // calculate lamineq
             for (int i = 0; i < ng_ineq; i++)
             {
@@ -371,7 +395,7 @@ int OCPLSRiccati::computeSDDeg(
                     double z = VECEL(zL_p, offs_ineq_k + i);
                     double dz = -grad_barrier_L - z - scaling_factor_L * ds;
                     VECEL(delta_zL_p, offs_ineq_k + i) = dz;
-                    lamIi += -z - dz;
+                    lamIi += grad_barrier_L + scaling_factor_L * ds;
                 }
                 if (upper_bounded)
                 {
@@ -382,7 +406,9 @@ int OCPLSRiccati::computeSDDeg(
                     double z = VECEL(zU_p, offs_ineq_k + i);
                     double dz = grad_barrier_U - z + scaling_factor_U * ds;
                     VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-                    lamIi += +z + dz;
+                    lamIi += grad_barrier_U + scaling_factor_U * ds;
+                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
+                    // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
                 }
                 // double grad_barrier = grad_barrier_L + grad_barrier_U;
                 if (!(lower_bounded && upper_bounded))
