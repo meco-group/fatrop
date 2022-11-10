@@ -59,7 +59,7 @@ int OCPLSRiccati::computeSD(
     }
     else
     {
-        return computeSDDeg(OCP, inertia_correction_w, 1e-8, mu, kappa_d, ux, lam, lam_curr, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
+        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, mu, kappa_d, ux, lam, lam_curr, s, zL, zU, delta_zL, delta_zU, lower, upper, delta_s);
     }
 }
 int OCPLSRiccati::computeSDDeg(
