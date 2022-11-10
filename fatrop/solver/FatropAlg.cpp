@@ -65,6 +65,7 @@ int FatropAlg::Optimize()
 {
     Initialize();
     int no_conse_small_sd = false;
+    int filter_reseted = 0;
     int no_no_full_steps = 0;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
@@ -110,6 +111,7 @@ int FatropAlg::Optimize()
         if (no_no_full_steps >= 4 && lsinfo.first_rejected_by_filter)
         {
             cout << "resetted filter " << endl;
+            filter_reseted++;
             filter_->Reset();
             no_no_full_steps = 0;
         }
@@ -188,6 +190,7 @@ int FatropAlg::Optimize()
         while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
+            filter_reseted = 0;
             filter_->Reset();
             if (no_conse_small_sd == 2)
             {
@@ -245,6 +248,14 @@ int FatropAlg::Optimize()
         bool small_search_direction_curr = stepsize < 1e-6;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
+        if (deltac > 0.0)
+        {
+            if (Linf(fatropdata_->lam_calc) > 1e3)
+            {
+                cout << "deg + large Lagrange multipliers -> set to zero" << endl;
+                fatropdata_->lam_calc.SetConstant(0.0);
+            }
+        }
         lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr);
         ls = lsinfo.ls;
         if (ls == 0)
