@@ -53,6 +53,7 @@ namespace fatrop
         double tol;
         int maxiter;
         double sd_time = 0.0;
+        double sd_time2 = 0.0;
         double init_time = 0.0;
         double total_time = 0.0;
         double hess_time = 0.0;

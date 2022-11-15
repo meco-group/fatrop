@@ -44,6 +44,7 @@ void FatropAlg::Reset()
     journaller_->Reset();
     fatropnlp_->Reset();
     sd_time = 0.0;
+    sd_time2 = 0.0;
     init_time = 0.0;
     total_time = 0.0;
     hess_time = 0.0;
@@ -115,6 +116,7 @@ int FatropAlg::Optimize()
             filter_->Reset();
             no_no_full_steps = 0;
         }
+        fatropdata_->RelaxBoundsVar(mu);
         // cout << "iteration " << i << endl;
         // cout << "x_curr " << endl;
         // fatropdata_-> x_curr.print();
@@ -137,7 +139,6 @@ int FatropAlg::Optimize()
             cout << "huge Lagrange multipliers -> set to zero" << endl;
             fatropdata_->lam_curr.SetConstant(0.0);
         }
-        fatropdata_->RelaxBoundsVar(mu);
         EvalJac();      // needed for dual inf
         EvalGradCurr(); // needed for dual inf
 #endif
@@ -165,6 +166,7 @@ int FatropAlg::Optimize()
             }
             cout << "found solution :) " << endl;
             cout << "riccati time: " << sd_time << endl;
+            cout << "riccati time succ/it: " << sd_time2 / i << endl;
             cout << "init time: " << init_time << endl;
             cout << "hess time " << hess_time << endl;
             // cout << "fe time nlp_f: "
@@ -248,14 +250,15 @@ int FatropAlg::Optimize()
         bool small_search_direction_curr = stepsize < 1e-6;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
-        if (deltac > 0.0)
-        {
-            if (Linf(fatropdata_->lam_calc) > 1e3)
-            {
-                cout << "deg + large Lagrange multipliers -> set to zero" << endl;
-                fatropdata_->lam_calc.SetConstant(0.0);
-            }
-        }
+        // if (deltac > 0.0)
+        // {
+        //     if (Linf(fatropdata_->lam_calc) > 1e3)
+        //     {
+        //         cout << "deg + large Lagrange multipliers -> set to zero" << endl;
+        //         // fatropdata_->lam_calc.SetConstant(0.0);
+        //         // fatropdata_->lam_curr.SetConstant(0.0);
+        //     }
+        // }
         lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr);
         ls = lsinfo.ls;
         if (ls == 0)
@@ -381,6 +384,9 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
         fatropdata_->s_lower,
         fatropdata_->s_upper,
         fatropdata_->delta_s);
-    sd_time += blasfeo_toc(&timer);
+    double el = blasfeo_toc(&timer);
+    sd_time += el;
+    if (res == 0)
+        sd_time2 += el;
     return res;
 }
