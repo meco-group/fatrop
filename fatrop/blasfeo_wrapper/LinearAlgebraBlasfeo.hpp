@@ -216,6 +216,7 @@ namespace fatrop
     void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc);
     double dot(const FatropVecBF &va, FatropVecBF &vb);
     double Linf(const FatropVecBF &va);
+    double LinfScaled(const FatropVecBF &va, const FatropVecBF &scales);
     double minabs(const FatropVecBF &va);
     double L1(const FatropVecBF &va);
 

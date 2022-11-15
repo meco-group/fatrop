@@ -156,6 +156,7 @@ int FatropAlg::Optimize()
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
         if (emu < tol || ((no_conse_small_sd == 2) && (mu <= mu_min)))
+        // if (emu < tol)
         {
             total_time = blasfeo_toc(&timer);
             journaller_->PrintIterations();
@@ -244,9 +245,10 @@ int FatropAlg::Optimize()
             }
             delta_w_last = deltaw;
         }
-        double stepsize = std::max(Linf(fatropdata_->delta_x), Linf(fatropdata_->delta_s));
+        double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
+        // double stepsize = std::max(Linf(fatropdata_->delta_x), Linf(fatropdata_->delta_s));
         // cout << "step size " <<stepsize  << endl;
-        bool small_search_direction_curr = stepsize < 1e-6;
+        bool small_search_direction_curr = stepsize < 1e-12;
         // cout << "regularization  " << (deltaw) << endl;
         // cout << "step size " << Linf(fatropdata_->delta_x) << endl;
         // if (deltac > 0.0)

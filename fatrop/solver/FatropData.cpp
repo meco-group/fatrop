@@ -455,7 +455,7 @@ void FatropData::RelaxBounds()
 }
 void FatropData::RelaxBoundsVar(double mu)
 {
-    double emach = 1e-14;
+    double emach = 1e-16;
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
     VEC *s_curr_p = (VEC *)s_curr;

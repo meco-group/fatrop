@@ -304,6 +304,19 @@ namespace fatrop
         }
         return res;
     };
+    double LinfScaled(const FatropVecBF &va, const FatropVecBF &scales)
+    {
+        VEC *va_p = (VEC *)va;
+        VEC *scales_p = (VEC *)scales;
+        int nels = va.nels();
+        int offset = va.offset();
+        double res = 0.0;
+        for (int i = offset; i < nels + offset; i++)
+        {
+            res = MAX(res, abs(VECEL(va_p, i)) / (1. + abs(VECEL(scales_p, i))));
+        }
+        return res;
+    };
     double minabs(const FatropVecBF &va)
     {
         VEC *va_p = (VEC *)va;
@@ -509,7 +522,7 @@ void FatropVecBF::copy(const FatropVecBF &fm)
     VEC *fm_p = (VEC *)fm;
     VECCP(nels(), fm_p, 0, vec_, 0);
 }
-void FatropVecBF::copyto(vector<double>& fm)
+void FatropVecBF::copyto(vector<double> &fm)
 {
     for (int ai = 0; ai < nels_; ai++)
     {
