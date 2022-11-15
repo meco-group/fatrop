@@ -116,7 +116,6 @@ int FatropAlg::Optimize()
             filter_->Reset();
             no_no_full_steps = 0;
         }
-        fatropdata_->RelaxBoundsVar(mu);
         // cout << "iteration " << i << endl;
         // cout << "x_curr " << endl;
         // fatropdata_-> x_curr.print();
@@ -260,6 +259,8 @@ int FatropAlg::Optimize()
         //     }
         // }
         lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr);
+        fatropdata_->RelaxBoundsVar(mu);
+        fatropdata_->AdaptDualBounds(mu);
         ls = lsinfo.ls;
         if (ls == 0)
         {
@@ -274,7 +275,6 @@ int FatropAlg::Optimize()
         {
             ++no_no_full_steps;
         }
-        // fatropdata_->AdaptDualBounds(mu);
         if (small_search_direction_curr)
         {
             no_conse_small_sd++;
