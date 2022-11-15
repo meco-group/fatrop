@@ -274,7 +274,7 @@ int FatropAlg::Optimize()
         {
             ++no_no_full_steps;
         }
-        fatropdata_->AdaptDualBounds(mu);
+        // fatropdata_->AdaptDualBounds(mu);
         if (small_search_direction_curr)
         {
             no_conse_small_sd++;
