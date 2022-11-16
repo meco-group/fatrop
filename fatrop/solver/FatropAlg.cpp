@@ -221,6 +221,7 @@ int FatropAlg::Optimize()
             {
                 // accept watchdog step -- continue
                 cout << "accepted watchdog step" << endl;
+                continue;
             }
             else
             {
@@ -228,6 +229,7 @@ int FatropAlg::Optimize()
                 cout << "rejected watchdog step" << endl;
                 it_curr.type = 'x';
                 fatropdata_->RestoreBackup();
+                continue;
             }
         }
         if(watch_dog_step)
