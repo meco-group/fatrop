@@ -3,37 +3,44 @@ using namespace fatrop;
 FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                          n_eqs(nlpdims.neqs),
                                                                                          n_ineqs(nlpdims.nineqs),
-                                                                                         memvars(nlpdims.nvars, 8),
-                                                                                         memeqs(nlpdims.neqs, 6),
-                                                                                         memineqs(nlpdims.nineqs, 14),
+                                                                                         memvars(nlpdims.nvars, 10),
+                                                                                         memeqs(nlpdims.neqs, 8),
+                                                                                         memineqs(nlpdims.nineqs, 17),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
-                                                                                         x_initial(memvars[2]),
-                                                                                         delta_x(memvars[3]),
-                                                                                         x_scales(memvars[4]),
+                                                                                         x_backup(memvars[2]),
+                                                                                         x_initial(memvars[3]),
+                                                                                         delta_x(memvars[4]),
+                                                                                         x_scales(memvars[5]),
                                                                                          lam_curr(memeqs[0]),
                                                                                          lam_next(memeqs[1]),
-                                                                                         lam_calc(memeqs[2]),
-                                                                                         lam_scales(memeqs[3]),
-                                                                                         g_curr(memeqs[4]),
-                                                                                         g_next(memeqs[5]),
-                                                                                         grad_curr(memvars[5]),
-                                                                                         grad_next(memvars[6]),
-                                                                                         du_inf_curr(memvars[7]),
+                                                                                         lam_backup(memeqs[2]),
+                                                                                         lam_calc(memeqs[3]),
+                                                                                         lam_scales(memeqs[4]),
+                                                                                         g_curr(memeqs[5]),
+                                                                                         g_next(memeqs[6]),
+                                                                                         g_backup(memeqs[7]),
+                                                                                         grad_curr(memvars[6]),
+                                                                                         grad_next(memvars[7]),
+                                                                                         grad_backup(memvars[8]),
+                                                                                         du_inf_curr(memvars[9]),
                                                                                          du_inf_curr_s(memineqs[0]),
                                                                                          s_curr(memineqs[1]),
                                                                                          s_next(memineqs[2]),
-                                                                                         delta_s(memineqs[3]),
-                                                                                         zL_curr(memineqs[4]),
-                                                                                         zL_next(memineqs[5]),
-                                                                                         zU_curr(memineqs[6]),
-                                                                                         zU_next(memineqs[7]),
-                                                                                         delta_zL(memineqs[8]),
-                                                                                         delta_zU(memineqs[9]),
-                                                                                         s_lower_orig(memineqs[10]),
-                                                                                         s_upper_orig(memineqs[11]),
-                                                                                         s_lower(memineqs[12]),
-                                                                                         s_upper(memineqs[13]),
+                                                                                         s_backup(memineqs[3]),
+                                                                                         delta_s(memineqs[4]),
+                                                                                         zL_curr(memineqs[5]),
+                                                                                         zL_next(memineqs[6]),
+                                                                                         zL_backup(memineqs[7]),
+                                                                                         zU_curr(memineqs[8]),
+                                                                                         zU_next(memineqs[9]),
+                                                                                         zU_backup(memineqs[10]),
+                                                                                         delta_zL(memineqs[11]),
+                                                                                         delta_zU(memineqs[12]),
+                                                                                         s_lower_orig(memineqs[13]),
+                                                                                         s_upper_orig(memineqs[14]),
+                                                                                         s_lower(memineqs[15]),
+                                                                                         s_upper(memineqs[16]),
                                                                                          params(params)
 {
     Initialize();
@@ -308,6 +315,29 @@ int FatropData::TakeStep()
     grad_curr.SwapWith(grad_next);
     g_curr.SwapWith(g_next);
     cache_curr = cache_next;
+    return 0;
+}
+int FatropData::BackupCurr()
+{
+    x_backup.copy(x_curr);
+    s_backup.copy(s_curr);
+    lam_backup.copy(lam_curr);
+    zL_backup.copy(zL_curr);
+    zU_backup.copy(zU_curr);
+    grad_backup.copy(grad_curr);
+    g_backup.copy(g_curr);
+    return 0;
+}
+int FatropData::RestoreBackup()
+{
+    x_curr.SwapWith(x_backup);
+    s_curr.SwapWith(s_backup);
+    lam_curr.SwapWith(lam_backup);
+    zL_curr.SwapWith(zL_backup);
+    zU_curr.SwapWith(zU_backup);
+    grad_backup.SwapWith(grad_curr);
+    g_backup.SwapWith(g_curr);
+    cache_curr = EvalCache();
     return 0;
 }
 double FatropData::CVLinfCurr()
