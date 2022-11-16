@@ -69,7 +69,6 @@ int FatropAlg::Optimize()
     int filter_reseted = 0;
     int no_no_full_steps = 0;
     double theta_max = 1e4;
-    bool filter_reject_mode = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -120,12 +119,21 @@ int FatropAlg::Optimize()
         it_curr.reg = deltaw;
         if (no_no_full_steps >= 4)
         {
-            // try watchdog
-            // backup x_k
-            fatropdata_->BackupCurr();
-            watch_dog_step = true;
-            no_no_full_steps = 0;
-            filter_reject_mode = lsinfo.first_rejected_by_filter;
+            if (lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max)
+            {
+                cout << "resetted filter " << endl;
+                filter_reseted++;
+                filter_->Reset();
+                no_no_full_steps = 0;
+                theta_max = 0.1 * theta_max;
+            }
+            else
+            {
+                // backup x_k
+                fatropdata_->BackupCurr();
+                watch_dog_step = true;
+                no_no_full_steps = 0;
+            }
         }
         journaller_->Push();
         journaller_->PrintIterations();
@@ -220,17 +228,9 @@ int FatropAlg::Optimize()
                 cout << "rejected watchdog step" << endl;
                 it_curr.type = 'x';
                 fatropdata_->RestoreBackup();
-                if (filter_reject_mode && it_curr.constraint_violation < 10 * theta_max)
-                {
-                    cout << "resetted filter " << endl;
-                    filter_reseted++;
-                    filter_->Reset();
-                    theta_max = 0.1 * theta_max;
-                }
-                no_no_full_steps = 0;
             }
         }
-        if (watch_dog_step)
+        if(watch_dog_step)
         {
             it_curr.type = 'w';
         }
