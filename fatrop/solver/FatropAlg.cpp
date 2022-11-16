@@ -221,7 +221,6 @@ int FatropAlg::Optimize()
             {
                 // accept watchdog step -- continue
                 cout << "accepted watchdog step" << endl;
-                continue;
             }
             else
             {
