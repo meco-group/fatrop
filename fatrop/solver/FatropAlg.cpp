@@ -118,7 +118,7 @@ int FatropAlg::Optimize()
         it_curr.du_inf = fatropdata_->DuInfLinfCurr();
         it_curr.ls = ls;
         it_curr.reg = deltaw;
-        if (!watch_dog_step && no_no_full_steps >= 4)
+        if (no_no_full_steps >= 4)
         {
             // try watchdog
             // backup x_k
