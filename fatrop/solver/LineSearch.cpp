@@ -132,12 +132,12 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         }
         else
         {
-            if(ll =1)
+            if(ll ==1)
             {
                 res.first_rejected_by_filter = true;
             }
         }
-        alpha_primal /= 2.0;
+        alpha_primal *= 0.50;
     }
     assert(false);
     res.ls = 0;
