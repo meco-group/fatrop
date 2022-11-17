@@ -3,15 +3,16 @@ using namespace fatrop;
 FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                          n_eqs(nlpdims.neqs),
                                                                                          n_ineqs(nlpdims.nineqs),
-                                                                                         memvars(nlpdims.nvars, 10),
+                                                                                         memvars(nlpdims.nvars, 11),
                                                                                          memeqs(nlpdims.neqs, 8),
-                                                                                         memineqs(nlpdims.nineqs, 17),
+                                                                                         memineqs(nlpdims.nineqs, 18),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
                                                                                          x_backup(memvars[2]),
                                                                                          x_initial(memvars[3]),
                                                                                          delta_x(memvars[4]),
-                                                                                         x_scales(memvars[5]),
+                                                                                         delta_x_backup(memvars[5]),
+                                                                                         x_scales(memvars[6]),
                                                                                          lam_curr(memeqs[0]),
                                                                                          lam_next(memeqs[1]),
                                                                                          lam_backup(memeqs[2]),
@@ -20,27 +21,28 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          g_curr(memeqs[5]),
                                                                                          g_next(memeqs[6]),
                                                                                          g_backup(memeqs[7]),
-                                                                                         grad_curr(memvars[6]),
-                                                                                         grad_next(memvars[7]),
-                                                                                         grad_backup(memvars[8]),
-                                                                                         du_inf_curr(memvars[9]),
+                                                                                         grad_curr(memvars[7]),
+                                                                                         grad_next(memvars[8]),
+                                                                                         grad_backup(memvars[9]),
+                                                                                         du_inf_curr(memvars[10]),
                                                                                          du_inf_curr_s(memineqs[0]),
                                                                                          s_curr(memineqs[1]),
                                                                                          s_next(memineqs[2]),
                                                                                          s_backup(memineqs[3]),
                                                                                          delta_s(memineqs[4]),
-                                                                                         zL_curr(memineqs[5]),
-                                                                                         zL_next(memineqs[6]),
-                                                                                         zL_backup(memineqs[7]),
-                                                                                         zU_curr(memineqs[8]),
-                                                                                         zU_next(memineqs[9]),
-                                                                                         zU_backup(memineqs[10]),
-                                                                                         delta_zL(memineqs[11]),
-                                                                                         delta_zU(memineqs[12]),
-                                                                                         s_lower_orig(memineqs[13]),
-                                                                                         s_upper_orig(memineqs[14]),
-                                                                                         s_lower(memineqs[15]),
-                                                                                         s_upper(memineqs[16]),
+                                                                                         delta_s_backup(memineqs[5]),
+                                                                                         zL_curr(memineqs[6]),
+                                                                                         zL_next(memineqs[7]),
+                                                                                         zL_backup(memineqs[8]),
+                                                                                         zU_curr(memineqs[9]),
+                                                                                         zU_next(memineqs[10]),
+                                                                                         zU_backup(memineqs[11]),
+                                                                                         delta_zL(memineqs[12]),
+                                                                                         delta_zU(memineqs[13]),
+                                                                                         s_lower_orig(memineqs[14]),
+                                                                                         s_upper_orig(memineqs[15]),
+                                                                                         s_lower(memineqs[16]),
+                                                                                         s_upper(memineqs[17]),
                                                                                          params(params)
 {
     Initialize();
@@ -183,16 +185,20 @@ double FatropData::EvalBarrierCurr(double mu)
 {
     return EvalBarrier(mu, (VEC *)s_curr);
 }
+double FatropData::EvalBarrierBackup(double mu)
+{
+    return EvalBarrier(mu, (VEC *)s_backup);
+}
 double FatropData::EvalBarrierNext(double mu)
 {
     return EvalBarrier(mu, (VEC *)s_next);
 }
-double FatropData::EvalBarrierLinDecr(double mu)
+double FatropData::EvalBarrierLinDecr(double mu, VEC* s_p, VEC* delta_s_p)
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
-    VEC *s_p = (VEC *)s_curr;
-    VEC *delta_s_p = (VEC *)delta_s;
+    // VEC *s_p = (VEC *)s_curr;
+    // VEC *delta_s_p = (VEC *)delta_s;
     double res = 0.0;
     for (int i = 0; i < s_curr.nels(); i++)
     {
@@ -219,6 +225,18 @@ double FatropData::EvalBarrierLinDecr(double mu)
         }
     }
     return res;
+}
+double FatropData::EvalBarrierLinDecrCurr(double mu)
+{
+    VEC *s_p = (VEC *)s_curr;
+    VEC *delta_s_p = (VEC *)delta_s;
+    return EvalBarrierLinDecr(mu, s_p, delta_s_p);
+}
+double FatropData::EvalBarrierLinDecrBackup(double mu)
+{
+    VEC *s_p = (VEC *)s_backup;
+    VEC *delta_s_p = (VEC *)delta_s_backup;
+    return EvalBarrierLinDecr(mu, s_p, delta_s_p);
 }
 int FatropData::BoundSlacks()
 {
@@ -326,6 +344,9 @@ int FatropData::BackupCurr()
     zU_backup.copy(zU_curr);
     grad_backup.copy(grad_curr);
     g_backup.copy(g_curr);
+    delta_x_backup.copy(delta_x);
+    delta_s_backup.copy(delta_s);
+    obj_backup = obj_curr;
     return 0;
 }
 int FatropData::RestoreBackup()
@@ -351,6 +372,10 @@ double FatropData::CVLinfNext()
 double FatropData::CVL1Curr()
 {
     return CACHEMACRO(cache_curr.cv_l1, L1(g_curr));
+}
+double FatropData::CVL1Backup()
+{
+    return L1(g_backup);
 }
 double FatropData::CVL1Next()
 {
@@ -421,6 +446,10 @@ double FatropData::DuInfLinfCurr()
 double FatropData::LinDecrCurr()
 {
     return dot(grad_curr, delta_x);
+}
+double FatropData::LinDecrBackup()
+{
+    return dot(grad_backup, delta_x_backup);
 }
 void FatropData::AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau)
 {

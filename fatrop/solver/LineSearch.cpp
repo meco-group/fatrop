@@ -47,19 +47,19 @@ void BackTrackingLineSearch::Initialize()
     eta_phi = fatrop_params_->eta_phi;
     gamma_alpha = fatrop_params_->gamma_alpha;
 }
-LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd)
+LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup)
 {
     LineSearchInfo res;
     double alpha_primal = 1.0;
     double alpha_dual = 1.0;
     fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
     TryStep(alpha_primal, alpha_dual);
-    double cv_curr = fatropdata_->CVL1Curr();
-    double obj_curr = fatropdata_->obj_curr;
-    double barrier_curr = fatropdata_->EvalBarrierCurr(mu);
+    double cv_curr = from_backup ? fatropdata_->CVL1Backup() : fatropdata_->CVL1Curr();
+    double obj_curr = from_backup ? fatropdata_->obj_backup : fatropdata_->obj_curr;
+    double barrier_curr = from_backup ? fatropdata_->EvalBarrierBackup(mu) : fatropdata_->EvalBarrierCurr(mu);
     obj_curr += barrier_curr;
-    double lin_decr_curr = fatropdata_->LinDecrCurr();
-    double barrier_decr_curr = fatropdata_->EvalBarrierLinDecr(mu);
+    double lin_decr_curr = from_backup ? fatropdata_->LinDecrBackup() : fatropdata_->LinDecrCurr();
+    double barrier_decr_curr = from_backup? fatropdata_->EvalBarrierLinDecrBackup(mu):  fatropdata_->EvalBarrierLinDecrCurr(mu);
     lin_decr_curr += barrier_decr_curr;
     double theta_min = fatropdata_->theta_min;
     // calculation of alpha_min
@@ -70,7 +70,9 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
                                                                     : -gamma_phi * cv_curr / lin_decr_curr));
 
     // cout << "alpha_min " << alpha_min << endl;
-    // cout << "lindecr " << lin_decr_curr << endl;
+    cout << "cv " << cv_curr << endl;
+    cout << "obj " << obj_curr << endl;
+    cout << "lindecr " << lin_decr_curr << endl;
     for (int ll = 1; ll < 50; ll++)
     {
         TryStep(alpha_primal, alpha_dual);
@@ -132,7 +134,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         }
         else
         {
-            if(ll ==1)
+            if (ll == 1)
             {
                 res.first_rejected_by_filter = true;
             }

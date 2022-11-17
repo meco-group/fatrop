@@ -211,10 +211,15 @@ int FatropAlg::Optimize()
         }
         double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = stepsize < 1e-12;
-        lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step);
+        lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step, prev_watch_dog_step);
         fatropdata_->RelaxBoundsVar(mu);
         fatropdata_->AdaptDualBounds(mu);
         ls = lsinfo.ls;
+        if(watch_dog_step)
+        {
+            fatropdata_->delta_s_backup.copy(fatropdata_->delta_s);
+            fatropdata_->delta_x_backup.copy(fatropdata_->delta_x);
+        }
         if (prev_watch_dog_step)
         {
             if (ls == 1)

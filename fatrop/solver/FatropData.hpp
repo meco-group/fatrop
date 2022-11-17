@@ -23,7 +23,10 @@ namespace fatrop
         double EvalBarrier(double mu, VEC *s_p);
         double EvalBarrierCurr(double mu);
         double EvalBarrierNext(double mu);
-        double EvalBarrierLinDecr(double mu);
+        double EvalBarrierBackup(double mu);
+        double EvalBarrierLinDecr(double mu, VEC* s_p, VEC* delta_s_p);
+        double EvalBarrierLinDecrCurr(double mu);
+        double EvalBarrierLinDecrBackup(double mu);
         int BoundSlacks();
         int AdaptDualBounds(double mu);
         int AcceptInitialization();
@@ -34,6 +37,7 @@ namespace fatrop
         double CVLinfCurr();
         double CVLinfNext();
         double CVL1Curr();
+        double CVL1Backup();
         double CVL1Next();
         double LamL1Curr();
         double LamLinfCurr();
@@ -43,6 +47,7 @@ namespace fatrop
         double LamLinfCalc();
         double DuInfLinfCurr();
         double LinDecrCurr();
+        double LinDecrBackup();
         void AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau);
         void SetBounds(const vector<double>& lowerin, const vector<double>& upperin);
         void RelaxBounds();
@@ -61,6 +66,7 @@ namespace fatrop
         FatropVecBF x_backup;
         FatropVecBF x_initial;
         FatropVecBF delta_x;
+        FatropVecBF delta_x_backup;
         FatropVecBF x_scales;
         FatropVecBF lam_curr;
         FatropVecBF lam_next;
@@ -80,6 +86,7 @@ namespace fatrop
         FatropVecBF s_next;
         FatropVecBF s_backup;
         FatropVecBF delta_s;
+        FatropVecBF delta_s_backup;
         FatropVecBF zL_curr;
         FatropVecBF zL_next;
         FatropVecBF zL_backup;
@@ -113,7 +120,8 @@ namespace fatrop
         };
         EvalCache cache_curr;
         EvalCache cache_next;
-        double obj_curr;
+        double obj_curr = 0.0;
+        double obj_backup = 0.0;
         double theta_min = 1e-4;
         const shared_ptr<FatropParams> params;
         // algorithm parameters
