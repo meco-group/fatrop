@@ -210,7 +210,7 @@ int FatropAlg::Optimize()
             delta_w_last = deltaw;
         }
         double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
-        bool small_search_direction_curr = stepsize < 1e-12;
+        bool small_search_direction_curr = stepsize < 1e-10;
         lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step, prev_watch_dog_step);
         fatropdata_->RelaxBoundsVar(mu);
         fatropdata_->AdaptDualBounds(mu);
