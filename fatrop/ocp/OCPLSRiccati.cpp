@@ -1080,7 +1080,7 @@ int OCPLSRiccati::computeSDnor(
                 TRSM_RLTN(nu - rank_k, nu - rank_k, 1.0, Llt_p + k, 0, 0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, 0, 0);
                 // ([S^T \\ r^T] L^-T) @ (L^-1 eta^T)
                 // (eta L^-T) @ ([S^T \\ r^T] L^-T)^T
-                GEMM_NT(nu - rank_k, nx + 1, nu - rank_k, 1.0, Ggt_stripe_p, 0, 0, Llt_p + k, nu - rank_k, 0, 1.0, Hh_p + k, 0, 0, Hh_p + k, 0, 0);
+                GEMM_NT(nu - rank_k, nx + 1, nu - rank_k, -1.0, Ggt_stripe_p, 0, 0, Llt_p + k, nu - rank_k, 0, 1.0, Hh_p + k, 0, 0, Hh_p + k, 0, 0);
             }
             else
             {
