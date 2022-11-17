@@ -22,7 +22,7 @@ namespace fatrop
             const shared_ptr<FatropParams> &fatropparams,
             const shared_ptr<FatropNLP> &nlp,
             const shared_ptr<FatropData> &fatropdata);
-        virtual LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd) = 0;
+        virtual LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup) = 0;
         inline int EvalCVNext();
         double EvalObjNext();
         virtual int TryStep(double alpha_pr, double alpha_du) const;
@@ -40,7 +40,7 @@ namespace fatrop
             const shared_ptr<Filter> &filter,
             const shared_ptr<Journaller> &journaller);
         void Initialize();
-        LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd);
+        LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup);
         shared_ptr<Filter> filter_;
         shared_ptr<Journaller> journaller_;
         double s_phi;
