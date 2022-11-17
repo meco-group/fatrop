@@ -820,6 +820,7 @@ int OCPLSRiccati::computeSDnor(
     const FatropVecBF &upper,
     const FatropVecBF &delta_s)
 {
+    bool increased_accuracy = true;
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
     // define compiler macros for notational convenience
@@ -1074,7 +1075,7 @@ int OCPLSRiccati::computeSDnor(
                 GECP(nx + 1, nx, RSQrq_hat_curr_p, nu - rank_k, nu - rank_k, Ppt_p + k, 0, 0);
                 SYRK_LN_MN(nx + 1, nx, nu - rank_k, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
                 // next steps are for better accuracy
-                if (true)
+                if (increased_accuracy)
                 {
                     // copy eta
                     GETR(nu - rank_k, gamma_k - rank_k, Ggt_stripe_p, rank_k, rank_k, Ggt_stripe_p, 0, 0);
@@ -1084,6 +1085,8 @@ int OCPLSRiccati::computeSDnor(
                     // ([S^T \\ r^T] L^-T) @ (L^-1 eta^T)
                     // (eta L^-T) @ ([S^T \\ r^T] L^-T)^T
                     GEMM_NT(gamma_k - rank_k, nx + 1, nu - rank_k, -1.0, Ggt_stripe_p, 0, 0, Llt_p + k, nu - rank_k, 0, 1.0, Hh_p + k, 0, 0, Hh_p + k, 0, 0);
+                    // keep (L^-1 eta^T) for forward recursion
+                    GETR(gamma_k - rank_k, nu - rank_k, Ggt_stripe_p, 0, 0, Ggt_tilde_p + k, 0, rank_k);
                 }
             }
             else
@@ -1185,6 +1188,10 @@ int OCPLSRiccati::computeSDnor(
             /// calculate ukb_tilde
             // -Lkxk - lk
             ROWEX(numrho_k, -1.0, Llt_p + k, numrho_k + nx, 0, ux_p, offs + rho_k);
+            if (increased_accuracy)
+            {
+                GEMV_N(nu - rho_k, gamma_k - rho_k, -1.0, Ggt_tilde_p + k, 0, rho_k, lam_p, offs_g_k, 1.0, ux_p, offs + rho_k, ux_p, offs + rho_k);
+            }
             // assume aliasing of last two eliments is allowed
             GEMV_T(nx, numrho_k, -1.0, Llt_p + k, numrho_k, 0, ux_p, offs + nu, 1.0, ux_p, offs + rho_k, ux_p, offs + rho_k);
             TRSV_LTN(numrho_k, Llt_p + k, 0, 0, ux_p, offs + rho_k, ux_p, offs + rho_k);
