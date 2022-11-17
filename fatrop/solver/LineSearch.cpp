@@ -70,9 +70,9 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
                                                                     : -gamma_phi * cv_curr / lin_decr_curr));
 
     // cout << "alpha_min " << alpha_min << endl;
-    cout << "cv " << cv_curr << endl;
-    cout << "obj " << obj_curr << endl;
-    cout << "lindecr " << lin_decr_curr << endl;
+    // cout << "cv " << cv_curr << endl;
+    // cout << "obj " << obj_curr << endl;
+    // cout << "lindecr " << lin_decr_curr << endl;
     for (int ll = 1; ll < 50; ll++)
     {
         TryStep(alpha_primal, alpha_dual);
