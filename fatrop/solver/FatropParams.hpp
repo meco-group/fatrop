@@ -9,8 +9,8 @@ namespace fatrop
         int maxiter = 500;
         double smax = 100.0;
         double lammax = 1e3;
-        double tol = 1e-6;
-        double mu0 = 1e2;
+        double tol = 1e-12;
+        double mu0 = 1e-1;
         // double mu0 = 1e5;
         // double mu0 = 1e;
         double kappa_eta = 10.0;
