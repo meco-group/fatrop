@@ -1073,6 +1073,18 @@ int OCPLSRiccati::computeSDnor(
                 // SYRK_LN_MN(nx + 1, nx, nu - rank_k, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, RSQrq_hat_curr_p, nu - rank_k, nu - rank_k, Ppt_p + k, 0, 0);
                 GECP(nx + 1, nx, RSQrq_hat_curr_p, nu - rank_k, nu - rank_k, Ppt_p + k, 0, 0);
                 SYRK_LN_MN(nx + 1, nx, nu - rank_k, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
+                // next steps are for better accuracy
+                if (true)
+                {
+                    // copy eta
+                    GETR(nu - rank_k, gamma_k - rank_k, Ggt_stripe_p, rank_k, rank_k, Ggt_stripe_p, 0, 0);
+                    // blasfeo_print_dmat(gamma_k-rank_k, nu-rank_k, Ggt_stripe_p, 0,0);
+                    // eta L^-T
+                    TRSM_RLTN(gamma_k - rank_k, nu - rank_k, 1.0, Llt_p + k, 0, 0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, 0, 0);
+                    // ([S^T \\ r^T] L^-T) @ (L^-1 eta^T)
+                    // (eta L^-T) @ ([S^T \\ r^T] L^-T)^T
+                    GEMM_NT(gamma_k - rank_k, nx + 1, nu - rank_k, -1.0, Ggt_stripe_p, 0, 0, Llt_p + k, nu - rank_k, 0, 1.0, Hh_p + k, 0, 0, Hh_p + k, 0, 0);
+                }
             }
             else
             {
