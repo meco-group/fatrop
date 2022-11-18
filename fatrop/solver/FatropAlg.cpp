@@ -65,6 +65,8 @@ void FatropAlg::GetSolution(vector<double> &sol)
 int FatropAlg::Optimize()
 {
     bool first_try_watchdog = true;
+    int no_watch_dog_steps_taken = 0;
+    int max_watch_dog_steps = 3;
     Initialize();
     int no_conse_small_sd = false;
     int filter_reseted = 0;
@@ -99,8 +101,6 @@ int FatropAlg::Optimize()
     bool watch_dog_step = false;
     for (int i = 0; i < maxiter; i++)
     {
-        bool prev_watch_dog_step = watch_dog_step;
-        watch_dog_step = false;
         fatropdata_->obj_curr = EvalObjCurr();
         if (fatropdata_->LamLinfCurr() > 1e12)
         {
@@ -129,8 +129,9 @@ int FatropAlg::Optimize()
                 no_no_full_steps = 0;
                 theta_max = 0.1 * theta_max;
             }
-            if(!reset_filter || first_try_watchdog)
+            if (!reset_filter || first_try_watchdog)
             {
+                // activate watchdog procedure
                 // backup x_k
                 fatropdata_->BackupCurr();
                 watch_dog_step = true;
@@ -213,34 +214,38 @@ int FatropAlg::Optimize()
         }
         double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = stepsize < 1e-10;
-        lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step, prev_watch_dog_step);
+        lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step, watch_dog_step);
         fatropdata_->RelaxBoundsVar(mu);
         fatropdata_->AdaptDualBounds(mu);
         ls = lsinfo.ls;
-        if(watch_dog_step)
+        if (watch_dog_step && no_watch_dog_steps_taken == 0)
         {
             fatropdata_->delta_s_backup.copy(fatropdata_->delta_s);
             fatropdata_->delta_x_backup.copy(fatropdata_->delta_x);
         }
-        if (prev_watch_dog_step)
+        if (watch_dog_step)
         {
             if (ls == 1)
             {
                 // accept watchdog step -- continue
                 cout << "accepted watchdog step" << endl;
+                watch_dog_step = false;
             }
             else
             {
-                // reject watchdog step -- go back to x_k
-                cout << "rejected watchdog step" << endl;
-                it_curr.type = 'x';
-                fatropdata_->RestoreBackup();
-                continue;
+                no_watch_dog_steps_taken++;
+                if (no_watch_dog_steps_taken >= max_watch_dog_steps)
+                {
+                    // reject watchdog step -- go back to x_k
+                    cout << "rejected watchdog step" << endl;
+                    it_curr.type = 'x';
+                    fatropdata_->RestoreBackup();
+                    no_watch_dog_steps_taken = 0;
+                    watch_dog_step = false;
+                    continue;
+                };
+                it_curr.type = 'w';
             }
-        }
-        if(watch_dog_step)
-        {
-            it_curr.type = 'w';
         }
 
         if (ls == 0)

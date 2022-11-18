@@ -86,16 +86,6 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         double obj_next = EvalObjNext();
         double barrier_next = fatropdata_->EvalBarrierNext(mu);
         obj_next += barrier_next;
-        // todo change iteration number from zero to real iteration number
-        if (small_sd)
-        {
-            (journaller_->it_curr).type = 's';
-            fatropdata_->TakeStep();
-            journaller_->it_curr.alpha_pr = alpha_primal;
-            journaller_->it_curr.alpha_du = alpha_dual;
-            res.ls = 1;
-            return res;
-        }
         if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
         {
             bool switch_cond = (lin_decr_curr < 0) && (alpha_primal * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
@@ -138,6 +128,16 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             {
                 res.first_rejected_by_filter = true;
             }
+        }
+        // todo change iteration number from zero to real iteration number
+        if (small_sd)
+        {
+            (journaller_->it_curr).type = 's';
+            fatropdata_->TakeStep();
+            journaller_->it_curr.alpha_pr = alpha_primal;
+            journaller_->it_curr.alpha_du = alpha_dual;
+            res.ls = -1;
+            return res;
         }
         alpha_primal *= 0.50;
     }
