@@ -131,7 +131,7 @@ cdef class OCP:
         nu = self.OCPspecs["nu"]
         retval = np.empty(nu)
         for ii in range(nu):
-           retval[ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(ii)
+           retval[ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(ii)
         return retval
 
     # Attribute access
@@ -144,7 +144,7 @@ cdef class OCP:
         retval = np.empty((nu,K-1))
         for ii in range(K-1):
             for jj in range(nu):               
-                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(jj+ii*(nx_plus_nu))
+                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+ii*(nx_plus_nu))
         return retval
 
     @property
@@ -157,9 +157,9 @@ cdef class OCP:
         retval = np.ones((nx,K))
         for ii in range(K-1):
             for jj in range(nx):               
-                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(nu+jj+ii*(nx_plus_nu))
+                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(nu+jj+ii*(nx_plus_nu))
         for jj in range(nx):
-            retval[jj,K-1] = self.myOCPBuilder.fatropdata.get().x_next.get_el(jj+(K-1)*(nx_plus_nu))
+            retval[jj,K-1] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+(K-1)*(nx_plus_nu))
         return retval
 
     # Attribute access
