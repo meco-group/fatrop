@@ -6,10 +6,10 @@ namespace fatrop
     class FatropParams
     {
     public:
-        int maxiter = 500;
+        int maxiter = 5000;
         double smax = 100.0;
         double lammax = 1e3;
-        double tol = 1e-8;
+        double tol = 1e-6;
         double mu0 = 1e2;
         // double mu0 = 1e5;
         // double mu0 = 1e;
