@@ -9,11 +9,11 @@ namespace fatrop
         int max_watchdog_steps = 5;
         // bool linear_solver_improved_accuracy = true;
         bool first_try_watchdog = true;
-        int maxiter = 500;
+        int maxiter = 1000;
         double smax = 100.0;
         double lammax = 1e3;
-        double tol = 1e-6;
-        double mu0 = 1e2;
+        double tol = 1e-8;
+        double mu0 = 1e5;
         // double mu0 = 1e5;
         // double mu0 = 1e;
         double kappa_eta = 10.0;
