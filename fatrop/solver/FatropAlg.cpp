@@ -64,6 +64,7 @@ void FatropAlg::GetSolution(vector<double> &sol)
 };
 int FatropAlg::Optimize()
 {
+    bool first_try_watchdog = true;
     Initialize();
     int no_conse_small_sd = false;
     int filter_reseted = 0;
@@ -119,7 +120,8 @@ int FatropAlg::Optimize()
         it_curr.reg = deltaw;
         if (no_no_full_steps >= 4)
         {
-            if (lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max)
+            bool reset_filter = lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
+            if (reset_filter)
             {
                 cout << "resetted filter " << endl;
                 filter_reseted++;
@@ -127,7 +129,7 @@ int FatropAlg::Optimize()
                 no_no_full_steps = 0;
                 theta_max = 0.1 * theta_max;
             }
-            else
+            if(!reset_filter || first_try_watchdog)
             {
                 // backup x_k
                 fatropdata_->BackupCurr();
