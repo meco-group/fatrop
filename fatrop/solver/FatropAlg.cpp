@@ -34,6 +34,7 @@ void FatropAlg::Initialize()
     delta_c_stripe = fatropparams_->delta_c_stripe;
     kappa_c = fatropparams_->kappa_c;
     kappa_d = fatropparams_->kappa_d;
+    max_watchdog_steps = fatropparams_->max_watchdog_steps;
     // todo avoid reallocation when maxiter doesn't change
     // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
 }
@@ -66,7 +67,7 @@ int FatropAlg::Optimize()
 {
     bool first_try_watchdog = true;
     int no_watch_dog_steps_taken = 0;
-    int max_watch_dog_steps = 5;
+    int max_watchdog_steps = this-> max_watchdog_steps;
     Initialize();
     int no_conse_small_sd = false;
     int filter_reseted = 0;
@@ -129,13 +130,14 @@ int FatropAlg::Optimize()
                 no_no_full_steps = 0;
                 theta_max = 0.1 * theta_max;
             }
-            if (!reset_filter || first_try_watchdog)
+            if (!watch_dog_step && (!reset_filter || first_try_watchdog))
             {
                 // activate watchdog procedure
                 // backup x_k
                 fatropdata_->BackupCurr();
                 watch_dog_step = true;
                 no_no_full_steps = 0;
+                no_watch_dog_steps_taken = 0;
             }
         }
         journaller_->Push();
@@ -234,13 +236,12 @@ int FatropAlg::Optimize()
             else
             {
                 no_watch_dog_steps_taken++;
-                if (no_watch_dog_steps_taken >= max_watch_dog_steps)
+                if (no_watch_dog_steps_taken >= max_watchdog_steps)
                 {
                     // reject watchdog step -- go back to x_k
                     cout << "rejected watchdog step" << endl;
                     it_curr.type = 'x';
                     fatropdata_->RestoreBackup();
-                    no_watch_dog_steps_taken = 0;
                     watch_dog_step = false;
                     continue;
                 };
@@ -253,7 +254,7 @@ int FatropAlg::Optimize()
             cout << "error: restoration phase not implemented yet" << endl;
             return 1;
         }
-        if (ls == 1)
+        if (watch_dog_step || ls == 1)
         {
             no_no_full_steps = 0;
         }

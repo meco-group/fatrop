@@ -72,6 +72,7 @@ namespace fatrop
         double delta_c_stripe;
         double kappa_c;
         double kappa_d;
+        int max_watchdog_steps;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

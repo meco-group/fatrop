@@ -6,7 +6,9 @@ namespace fatrop
     class FatropParams
     {
     public:
-        int maxiter = 5000;
+        int max_watchdog_steps = 5;
+        bool linear_solver_improved_accuracy = true;
+        int maxiter = 500;
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-6;
