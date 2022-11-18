@@ -131,7 +131,7 @@ int FatropAlg::Optimize()
                 no_no_full_steps = 0;
                 theta_max = 0.1 * theta_max;
             }
-            if (!watch_dog_step && (!reset_filter || first_try_watchdog))
+            if ((max_watchdog_steps>0) && !watch_dog_step && (!reset_filter || first_try_watchdog))
             {
                 // activate watchdog procedure
                 // backup x_k
