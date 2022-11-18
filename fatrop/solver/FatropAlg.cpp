@@ -66,7 +66,7 @@ int FatropAlg::Optimize()
 {
     bool first_try_watchdog = true;
     int no_watch_dog_steps_taken = 0;
-    int max_watch_dog_steps = 3;
+    int max_watch_dog_steps = 5;
     Initialize();
     int no_conse_small_sd = false;
     int filter_reseted = 0;
