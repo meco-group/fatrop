@@ -7,7 +7,8 @@ namespace fatrop
     {
     public:
         int max_watchdog_steps = 5;
-        bool linear_solver_improved_accuracy = true;
+        // bool linear_solver_improved_accuracy = true;
+        bool first_try_watchdog = true;
         int maxiter = 500;
         double smax = 100.0;
         double lammax = 1e3;

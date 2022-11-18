@@ -35,6 +35,7 @@ void FatropAlg::Initialize()
     kappa_c = fatropparams_->kappa_c;
     kappa_d = fatropparams_->kappa_d;
     max_watchdog_steps = fatropparams_->max_watchdog_steps;
+    first_try_watchdog = fatropparams_->first_try_watchdog;
     // todo avoid reallocation when maxiter doesn't change
     // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
 }
@@ -65,7 +66,7 @@ void FatropAlg::GetSolution(vector<double> &sol)
 };
 int FatropAlg::Optimize()
 {
-    bool first_try_watchdog = true;
+    bool first_try_watchdog = this->first_try_watchdog;
     int no_watch_dog_steps_taken = 0;
     int max_watchdog_steps = this-> max_watchdog_steps;
     Initialize();
