@@ -10,8 +10,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     buffer << t.rdbuf();
     json_spec = json::jobject::parse(buffer.str());
     K = json_spec["K"];
-    const int nx = json_spec["nx"];
-    const int nu = json_spec["nu"];
+    int nx = json_spec["nx"];
+    int nu = json_spec["nu"];
     const int ngI = json_spec["ngI"];
     const int ng = json_spec["ng"];
     const int ngF = json_spec["ngF"];

@@ -18,12 +18,62 @@
 #include <templates/FatropApplication.hpp>
 namespace fatrop
 {
+    class OCPSolutionSampler
+    {
+        public:
+        OCPSolutionSampler(int nu, int nx, int K, int control, const vector<int> &offsets_in, const vector<int> &offsets_out, const shared_ptr<FatropData> &fatropdata) : nu(nu),
+                                                                                                                                                                                nx(nx),
+                                                                                                                                                                                K(K),
+                                                                                                                                                                                control(control),
+                                                                                                                                                                                offsets_in(offsets_in),
+                                                                                                                                                                                offsets_out(offsets_out),
+                                                                                                                                                                                no_var(offsets_in.size()),
+                                                                                                                                                                                fatropdata_(fatropdata)
+        {
+        }
+        int Sample(vector<double> &sample)
+        {
+            if (control)
+            {
+                for (int k = 0; k < K - 1; k++)
+                {
+                    for (int i = 0; i < no_var; i++)
+                    {
+                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + offsets_in.at(i));
+                    }
+                }
+            }
+            else
+            {
+                for (int k = 0; k < K; k++)
+                {
+                    for (int i = 0; i < no_var; i++)
+                    {
+                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + nu + offsets_in.at(i));
+                    }
+                }
+            }
+            return 0;
+        }
+
+    private:
+        const int nu;
+        const int nx;
+        const int K;
+        bool control;
+        const vector<int> offsets_in;
+        const vector<int> offsets_out;
+        const int no_var;
+        shared_ptr<FatropData> fatropdata_;
+    };
     class OCPBuilder
     {
     public:
         OCPBuilder(const string &functions, const string &json_spec_file);
         shared_ptr<FatropApplication> Build();
         int K;
+        int nu;
+        int nx;
         const string functions;
         const string json_spec_file;
         json::jobject json_spec;
@@ -67,6 +117,20 @@ namespace fatrop
         int GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to);
+        OCPSolutionSampler GetSamplerState(const string &variable_name)
+        {
+            vector<int> in;
+            vector<int> out;
+            GetVariableMapStates(variable_name, in, out);
+            return OCPSolutionSampler(nu, nx, K, false, in, out, fatropdata);
+        }
+        OCPSolutionSampler GetSamplerControls(const string &variable_name)
+        {
+            vector<int> in;
+            vector<int> out;
+            GetVariableMapControls(variable_name, in, out);
+            return OCPSolutionSampler(nu, nx, K, true, in, out, fatropdata);
+        }
     };
 }
 #endif // OCPBUILDERINCLUDED
