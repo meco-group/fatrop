@@ -92,9 +92,13 @@ namespace fatrop
         {
             BFOCPAdapter::SetParams(stage_params_in, global_params_in);
         };
-        void SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
+        void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) override
         {
-            BFOCPAdapter::SetInitial(K, fatropdata, initial_u, initial_x);
+            BFOCPAdapter::SetInitial(fatropdata, initial_u, initial_x);
+        };
+        void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override
+        {
+            BFOCPAdapter::GetSolution(fatropdata, u, x);
         };
         int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin) override;
         int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU) override;
