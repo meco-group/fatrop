@@ -128,15 +128,16 @@ target_include_directories(RunFatrop
 # set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
 list(APPEND INCLUDEDIRSFATROP
 .
-aux
-blasfeo_wrapper
-debug
-function_evaluation
-json
-ocp
-solver
+# aux
+# blasfeo_wrapper
+# debug
+# function_evaluation
+# json
+# ocp
+# solver
 # sparse
-templates)
+# templates)
+)
 foreach(incl IN LISTS INCLUDEDIRSFATROP) 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
         DESTINATION "include/fatrop/${incl}" # target directory
