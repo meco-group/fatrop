@@ -21,45 +21,8 @@ namespace fatrop
     class OCPSolutionSampler
     {
     public:
-        OCPSolutionSampler(int nu, int nx, int K, int control, const vector<int> &offsets_in, const vector<int> &offsets_out, const shared_ptr<FatropData> &fatropdata) : nu(nu),
-                                                                                                                                                                          nx(nx),
-                                                                                                                                                                          K(K),
-                                                                                                                                                                          control(control),
-                                                                                                                                                                          offsets_in(offsets_in),
-                                                                                                                                                                          offsets_out(offsets_out),
-                                                                                                                                                                          no_var(offsets_in.size()),
-                                                                                                                                                                          fatropdata_(fatropdata)
-        {
-        }
-        int Sample(vector<double> &sample)
-        {
-            if (control)
-            {
-                for (int k = 0; k < K - 1; k++)
-                {
-                    for (int i = 0; i < no_var; i++)
-                    {
-                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + offsets_out.at(i));
-                    }
-                }
-            }
-            else
-            {
-                for (int k = 0; k < K - 1; k++)
-                {
-                    for (int i = 0; i < no_var; i++)
-                    {
-                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + nu + offsets_out.at(i));
-                    }
-                }
-                for (int i = 0; i < no_var; i++)
-                {
-                    sample.at((K-1) * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * (K-1) + offsets_out.at(i));
-                }
-            }
-            return 0;
-        }
-
+        OCPSolutionSampler(int nu, int nx, int K, int control, const vector<int> &offsets_in, const vector<int> &offsets_out, const shared_ptr<FatropData> &fatropdata);
+        int Sample(vector<double> &sample);
     private:
         const int nu;
         const int nx;
@@ -80,6 +43,7 @@ namespace fatrop
         int nx;
         const string functions;
         const string json_spec_file;
+        bool solver_built = false;
         json::jobject json_spec;
         bool GN = false;
         bool DDP = false;
@@ -111,30 +75,13 @@ namespace fatrop
     public:
         void SetBounds();
         void SetInitial();
-        int GetVariableMap(const string &variable_type, const string &variable_name, vector<int> &from, vector<int> &to)
-        {
-            from = json_spec[variable_type].as_object()[variable_name].as_object().array(0).get_number_array<int>("%d");
-            to = json_spec[variable_type].as_object()[variable_name].as_object().array(1).get_number_array<int>("%d");
-            return 0;
-        }
+        int GetVariableMap(const string &variable_type, const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to);
-        OCPSolutionSampler GetSamplerState(const string &variable_name)
-        {
-            vector<int> in;
-            vector<int> out;
-            GetVariableMapStates(variable_name, in, out);
-            return OCPSolutionSampler(nu, nx, K, false, in, out, fatropdata);
-        }
-        OCPSolutionSampler GetSamplerControls(const string &variable_name)
-        {
-            vector<int> in;
-            vector<int> out;
-            GetVariableMapControls(variable_name, in, out);
-            return OCPSolutionSampler(nu, nx, K, true, in, out, fatropdata);
-        }
+        OCPSolutionSampler GetSamplerState(const string &variable_name);
+        OCPSolutionSampler GetSamplerControls(const string &variable_name);
     };
 }
 #endif // OCPBUILDERINCLUDED
