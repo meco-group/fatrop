@@ -1,6 +1,6 @@
 #include "OCPBuilder.hpp"
 using namespace fatrop;
-OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file):functions(functions), json_spec_file(json_spec_file)
+OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file) : functions(functions), json_spec_file(json_spec_file)
 {
 }
 shared_ptr<FatropApplication> OCPBuilder::Build()
@@ -44,7 +44,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     EvalCasGen gineqf(handle, "gineq");
     EvalCasGen GgineqFtf(handle, "GgineqFt");
     EvalCasGen gineqFf(handle, "gineqF");
-    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ng,ngF, ng_ineqI,ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
+    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
                                                                  BAbtf,
                                                                  bkf,
                                                                  RSQrqtIf,
@@ -111,4 +111,20 @@ void OCPBuilder::SetBounds()
 void OCPBuilder::SetInitial()
 {
     ocptempladapter->SetInitial(fatropdata, initial_u, initial_x);
+}
+int OCPBuilder::GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to)
+{
+    return GetVariableMap("states_offset", variable_name, from, to);
+}
+int OCPBuilder::GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to)
+{
+    return GetVariableMap("controls_offset", variable_name, from, to);
+}
+int OCPBuilder::GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to)
+{
+    return GetVariableMap("control_params_offset", variable_name, from, to);
+}
+int OCPBuilder::GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to)
+{
+    return GetVariableMap("global_params_offset", variable_name, from, to);
 }

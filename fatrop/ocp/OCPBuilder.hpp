@@ -63,22 +63,10 @@ namespace fatrop
             to = json_spec[variable_type].as_object()[variable_name].as_object().array(1).get_number_array<int>("%d");
             return 0;
         }
-        int GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to)
-        {
-            return GetVariableMap("states_offset", variable_name, from, to);
-        }
-        int GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to)
-        {
-            return GetVariableMap("controls_offset", variable_name, from, to);
-        }
-        int GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to)
-        {
-            return GetVariableMap("control_params_offset", variable_name, from, to);
-        }
-        int GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to)
-        {
-            return GetVariableMap("global_params_offset", variable_name, from, to);
-        }
+        int GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to);
     };
 }
 #endif // OCPBUILDERINCLUDED
