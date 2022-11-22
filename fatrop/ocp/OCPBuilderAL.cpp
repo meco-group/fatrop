@@ -107,5 +107,5 @@ void OCPBuilderAL::SetBounds()
 }
 void OCPBuilderAL::SetInitial()
 {
-    ocptempladapterAL->SetInitial(K, fatropdata, initial_u, initial_x);
+    ocptempladapterAL->SetInitial(fatropdata, initial_u, initial_x);
 }

@@ -101,9 +101,9 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
 }
 void OCPBuilder::SetBounds()
 {
-    ocptempladapter->SetInitial(K, fatropdata, initial_u, initial_x);
+    fatropdata->SetBounds(lower, upper);
 }
 void OCPBuilder::SetInitial()
 {
-    fatropdata->SetBounds(lower, upper);
+    ocptempladapter->SetInitial(fatropdata, initial_u, initial_x);
 }

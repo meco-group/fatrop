@@ -75,7 +75,8 @@ namespace fatrop
         }
     public:
         void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override;
-        void SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x);
+        void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) override;
+        void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override;
 
     public:
         int K;

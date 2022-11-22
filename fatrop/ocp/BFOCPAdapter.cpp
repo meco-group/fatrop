@@ -303,10 +303,10 @@ int BFOCPAdapter::EvalDynamics(
     int offs_stageparams_k = offs_stageparams_p[k];
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
-    double * ukp = ((blasfeo_dvec*)uk)->pa + uk.offset();
-    double * xkp = ((blasfeo_dvec*)xk)->pa + xk.offset();
-    double * xkp1p = ((blasfeo_dvec*)xkp1)->pa + xkp1.offset();
-    double * x_dummy_p = x_dummy.data();
+    double *ukp = ((blasfeo_dvec *)uk)->pa + uk.offset();
+    double *xkp = ((blasfeo_dvec *)xk)->pa + xk.offset();
+    double *xkp1p = ((blasfeo_dvec *)xkp1)->pa + xkp1.offset();
+    double *x_dummy_p = x_dummy.data();
     ocptempl->eval_bk(
         x_dummy_p,
         ukp,
@@ -323,7 +323,7 @@ void BFOCPAdapter::SetParams(const vector<double> &stage_params_in, const vector
     globalparams = global_params_in;
     return;
 }
-void BFOCPAdapter::SetInitial(const int K, const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
+void BFOCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
 {
     // offsets
     VEC *ux_intial_p = (VEC *)fatropdata->x_initial;
@@ -336,8 +336,29 @@ void BFOCPAdapter::SetInitial(const int K, const shared_ptr<FatropData> &fatropd
     {
         int nu_k = ocptempl->get_nuk(k);
         int nx_k = ocptempl->get_nxk(k);
-        PACKVEC(nu_k, u_p + offs_nu, 1, ux_intial_p, offs_nux);
-        PACKVEC(nx_k, x_p + offs_nx, 1, ux_intial_p, offs_nux + nu_k);
+        PACKVEC(nu_k, u_p+ offs_nu, 1, ux_intial_p, offs_nux);
+        PACKVEC(nx_k, x_p+ offs_nx, 1, ux_intial_p, offs_nux + nu_k);
+        offs_nu += nu_k;
+        offs_nx += nx_k;
+        offs_nux += nu_k + nx_k;
+    }
+    return;
+}
+void BFOCPAdapter::GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x)
+{
+    // offsets
+    VEC *ux_sol = (VEC *)fatropdata->x_curr;
+    double *u_p = u.data();
+    double *x_p = x.data();
+    int offs_nu = 0;
+    int offs_nx = 0;
+    int offs_nux = 0;
+    for (int k = 0; k < K; k++)
+    {
+        int nu_k = ocptempl->get_nuk(k);
+        int nx_k = ocptempl->get_nxk(k);
+        UNPACKVEC(nu_k, ux_sol, offs_nux, u_p+ offs_nu, 1);
+        UNPACKVEC(nx_k, ux_sol, offs_nux + nu_k, x_p+ offs_nx, 1);
         offs_nu += nu_k;
         offs_nx += nx_k;
         offs_nux += nu_k + nx_k;
