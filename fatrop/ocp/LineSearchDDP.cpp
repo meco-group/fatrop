@@ -218,7 +218,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     // cout << "alpha dual " << alpha_dual << endl;
     // cout << "alpha prim " << alpha_max_pr << endl;
     // cout << "alpha dual " << alpha_max_du << endl;
-    // axpy(alpha_max_pr,fatropdata_-> delta_x,fatropdata_-> x_curr,fatropdata_-> x_next);
+    axpy(alpha_max_pr,fatropdata_-> delta_x,fatropdata_-> x_curr,fatropdata_-> x_next);
     axpy(alpha_max_pr,fatropdata_-> delta_s, fatropdata_->s_curr,fatropdata_-> s_next);
     axpy(alpha_dual,fatropdata_-> delta_zL,fatropdata_-> zL_curr,fatropdata_-> zL_next);
     axpy(alpha_dual,fatropdata_-> delta_zU,fatropdata_-> zU_curr,fatropdata_-> zU_next);
