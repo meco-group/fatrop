@@ -8,7 +8,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     std::ifstream t(json_spec_file);
     std::stringstream buffer;
     buffer << t.rdbuf();
-    json::jobject json_spec = json::jobject::parse(buffer.str());
+    json_spec = json::jobject::parse(buffer.str());
     K = json_spec["K"];
     const int nx = json_spec["nx"];
     const int nu = json_spec["nu"];
@@ -90,6 +90,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     upper.insert(upper.begin(), upperI.begin(), upperI.end());
     lower.insert(lower.end(), lowerF.begin(), lowerF.end());
     upper.insert(upper.end(), upperF.begin(), upperF.end());
+    // std::vector<int> test = json_spec["states_offset"].as_object()["x1"].as_object().array(0).get_number_array<int>("%d");
+    // auto test2 = json_spec["states_offset"][0];
     SetBounds();
     SetInitial();
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
@@ -97,6 +99,9 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     journaller = make_shared<Journaller>(params->maxiter + 1);
     linesearch = DDP ? make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter) : make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
+    // vector<int> from;
+    // vector<int> to;
+    // GetVariableMapStates("x1", from, to);
     return fatropalg;
 }
 void OCPBuilder::SetBounds()

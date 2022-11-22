@@ -26,6 +26,7 @@ namespace fatrop
         int K;
         const string functions;
         const string json_spec_file;
+        json::jobject json_spec;
         bool GN = false;
         bool DDP = false;
         shared_ptr<BFOCPAdapter> ocptempladapteror;
@@ -48,13 +49,36 @@ namespace fatrop
         shared_ptr<Journaller> journaller;
         shared_ptr<LineSearch> linesearch;
         shared_ptr<FatropAlg> fatropalg;
-        vector<double>& GlobalParams()
+        vector<double> &GlobalParams()
         {
             return ocptempladapteror->globalparams;
         }
+
     public:
         void SetBounds();
         void SetInitial();
+        int GetVariableMap(const string &variable_type, const string &variable_name, vector<int> &from, vector<int> &to)
+        {
+            from = json_spec[variable_type].as_object()[variable_name].as_object().array(0).get_number_array<int>("%d");
+            to = json_spec[variable_type].as_object()[variable_name].as_object().array(1).get_number_array<int>("%d");
+            return 0;
+        }
+        int GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to)
+        {
+            return GetVariableMap("states_offset", variable_name, from, to);
+        }
+        int GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to)
+        {
+            return GetVariableMap("controls_offset", variable_name, from, to);
+        }
+        int GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to)
+        {
+            return GetVariableMap("control_params_offset", variable_name, from, to);
+        }
+        int GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to)
+        {
+            return GetVariableMap("global_params_offset", variable_name, from, to);
+        }
     };
 }
 #endif // OCPBUILDERINCLUDED
