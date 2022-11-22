@@ -20,15 +20,15 @@ namespace fatrop
 {
     class OCPSolutionSampler
     {
-        public:
+    public:
         OCPSolutionSampler(int nu, int nx, int K, int control, const vector<int> &offsets_in, const vector<int> &offsets_out, const shared_ptr<FatropData> &fatropdata) : nu(nu),
-                                                                                                                                                                                nx(nx),
-                                                                                                                                                                                K(K),
-                                                                                                                                                                                control(control),
-                                                                                                                                                                                offsets_in(offsets_in),
-                                                                                                                                                                                offsets_out(offsets_out),
-                                                                                                                                                                                no_var(offsets_in.size()),
-                                                                                                                                                                                fatropdata_(fatropdata)
+                                                                                                                                                                          nx(nx),
+                                                                                                                                                                          K(K),
+                                                                                                                                                                          control(control),
+                                                                                                                                                                          offsets_in(offsets_in),
+                                                                                                                                                                          offsets_out(offsets_out),
+                                                                                                                                                                          no_var(offsets_in.size()),
+                                                                                                                                                                          fatropdata_(fatropdata)
         {
         }
         int Sample(vector<double> &sample)
@@ -39,18 +39,22 @@ namespace fatrop
                 {
                     for (int i = 0; i < no_var; i++)
                     {
-                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + offsets_in.at(i));
+                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + offsets_out.at(i));
                     }
                 }
             }
             else
             {
-                for (int k = 0; k < K; k++)
+                for (int k = 0; k < K - 1; k++)
                 {
                     for (int i = 0; i < no_var; i++)
                     {
-                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + nu + offsets_in.at(i));
+                        sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + nu + offsets_out.at(i));
                     }
+                }
+                for (int i = 0; i < no_var; i++)
+                {
+                    sample.at((K-1) * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * (K-1) + offsets_out.at(i));
                 }
             }
             return 0;
