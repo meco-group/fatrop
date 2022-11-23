@@ -25,9 +25,14 @@ namespace fatrop
         virtual LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup) = 0;
         inline int EvalCVNext();
         double EvalObjNext();
+        void Reset();
         virtual int TryStep(double alpha_pr, double alpha_du) const;
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
+        int eval_cv_count;
+        int eval_obj_count;
+        int eval_cv_time;
+        int eval_obj_time;
     };
 
     class BackTrackingLineSearch : public LineSearch

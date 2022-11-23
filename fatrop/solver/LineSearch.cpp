@@ -8,19 +8,35 @@ LineSearch::LineSearch(
                                                 fatropdata_(fatropdata){};
 inline int LineSearch::EvalCVNext()
 {
-    return fatropnlp_->EvalConstraintViolation(
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
+    int res =  fatropnlp_->EvalConstraintViolation(
         fatropdata_->x_next,
         fatropdata_->s_next,
         fatropdata_->g_next);
+    eval_cv_time += blasfeo_toc(&timer);
+    eval_cv_count ++;
+    return res;
 }
 double LineSearch::EvalObjNext()
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     double res = 0.0;
     fatropnlp_->EvalObj(
         fatropdata_->obj_scale,
         fatropdata_->x_next,
         res);
+    eval_obj_time += blasfeo_toc(&timer);
+    eval_obj_count ++;
     return res;
+}
+void LineSearch::Reset()
+{
+    eval_cv_count = 0;
+    eval_obj_count = 0;
+    eval_cv_time = 0.;
+    eval_obj_time = 0.;
 }
 int LineSearch::TryStep(double alpha_pr, double alpha_du) const
 {
@@ -59,7 +75,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     double barrier_curr = from_backup ? fatropdata_->EvalBarrierBackup(mu) : fatropdata_->EvalBarrierCurr(mu);
     obj_curr += barrier_curr;
     double lin_decr_curr = from_backup ? fatropdata_->LinDecrBackup() : fatropdata_->LinDecrCurr();
-    double barrier_decr_curr = from_backup? fatropdata_->EvalBarrierLinDecrBackup(mu):  fatropdata_->EvalBarrierLinDecrCurr(mu);
+    double barrier_decr_curr = from_backup ? fatropdata_->EvalBarrierLinDecrBackup(mu) : fatropdata_->EvalBarrierLinDecrCurr(mu);
     lin_decr_curr += barrier_decr_curr;
     double theta_min = fatropdata_->theta_min;
     // calculation of alpha_min

@@ -10,6 +10,7 @@
 #include "IterationData.hpp"
 #include "templates/FatropApplication.hpp"
 #include <memory>
+#include "FatropStats.hpp"
 using namespace std;
 // #include "AlgorithmQuantities.hpp"
 #ifdef ENABLE_MULTITHREADING
@@ -37,8 +38,10 @@ namespace fatrop
         inline int EvalHess();
         inline int EvalJac();
         inline int EvalCVCurr();
+        inline int EvalCVNext();
         inline int EvalGradCurr();
         double EvalObjCurr();
+        double EvalObjNext();
         int EvalDuInf();
         inline int Initialization();
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu);
@@ -52,11 +55,6 @@ namespace fatrop
     public:
         double tol;
         int maxiter;
-        double sd_time = 0.0;
-        double sd_time2 = 0.0;
-        double init_time = 0.0;
-        double total_time = 0.0;
-        double hess_time = 0.0;
 
     private:
         double lammax;
@@ -74,6 +72,7 @@ namespace fatrop
         double kappa_d;
         int max_watchdog_steps;
         bool first_try_watchdog;
+        FatropStats stats;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

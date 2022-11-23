@@ -45,11 +45,8 @@ void FatropAlg::Reset()
     fatropdata_->Reset();
     journaller_->Reset();
     fatropnlp_->Reset();
-    sd_time = 0.0;
-    sd_time2 = 0.0;
-    init_time = 0.0;
-    total_time = 0.0;
-    hess_time = 0.0;
+    linesearch_->Reset();
+    stats = FatropStats();
 }
 void FatropAlg::SetBounds(const vector<double> &lower, const vector<double> &upper)
 {
@@ -68,7 +65,7 @@ int FatropAlg::Optimize()
 {
     bool first_try_watchdog = this->first_try_watchdog;
     int no_watch_dog_steps_taken = 0;
-    int max_watchdog_steps = this-> max_watchdog_steps;
+    int max_watchdog_steps = this->max_watchdog_steps;
     Initialize();
     int no_conse_small_sd = false;
     int filter_reseted = 0;
@@ -131,7 +128,7 @@ int FatropAlg::Optimize()
                 no_no_full_steps = 0;
                 theta_max = 0.1 * theta_max;
             }
-            if ((max_watchdog_steps>0) && !watch_dog_step && (!reset_filter || first_try_watchdog))
+            if ((max_watchdog_steps > 0) && !watch_dog_step && (!reset_filter || first_try_watchdog))
             {
                 // activate watchdog procedure
                 // backup x_k
@@ -147,19 +144,25 @@ int FatropAlg::Optimize()
         if (emu < tol || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
         {
-            total_time = blasfeo_toc(&timer);
+            double total_time = blasfeo_toc(&timer);
             journaller_->PrintIterations();
             if (no_conse_small_sd == 2)
             {
                 cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
             cout << "found solution :) " << endl;
-            cout << "riccati time: " << sd_time << endl;
-            cout << "riccati time succ/it: " << sd_time2 / i << endl;
-            cout << "init time: " << init_time << endl;
-            cout << "hess time " << hess_time << endl;
+            stats.eval_cv_count += linesearch_->eval_cv_count;
+            stats.eval_obj_count += linesearch_->eval_obj_count;
+            stats.eval_cv_time += linesearch_->eval_cv_time;
+            stats.eval_obj_time += linesearch_->eval_obj_time;
+            stats.time_total = total_time;
+            stats.iterations_count = i;
+            stats.Print();
+            // cout << "riccati time: " << sd_time << endl;
+            // cout << "riccati time succ/it: " << sd_time2 / i << endl;
+            // cout << "init time: " << init_time << endl;
+            // cout << "hess time " << hess_time << endl;
             fatropnlp_->Finalize();
-            cout << "el time total: " << total_time << endl;
             return 0;
         }
         // update mu
@@ -291,49 +294,70 @@ inline int FatropAlg::EvalHess()
             fatropdata_->obj_scale,
             fatropdata_->x_curr,
             fatropdata_->lam_curr);
-    hess_time += blasfeo_toc(&timer);
+    stats.eval_hess_time += blasfeo_toc(&timer);
+    stats.eval_hess_count ++;
     return res;
 }
 inline int FatropAlg::EvalJac()
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = fatropnlp_->EvalJac(
         fatropdata_->x_curr,
         fatropdata_->s_curr);
+    stats.eval_jac_time += blasfeo_toc(&timer);
+    stats.eval_jac_count ++;
     return res;
 }
 inline int FatropAlg::EvalCVCurr()
 {
+
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = fatropnlp_->EvalConstraintViolation(
         fatropdata_->x_curr,
         fatropdata_->s_curr,
         fatropdata_->g_curr);
+    stats.eval_cv_time += blasfeo_toc(&timer);
+    stats.eval_cv_count ++;
     return res;
 }
 inline int FatropAlg::EvalGradCurr()
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     int res = fatropnlp_->EvalGrad(
         fatropdata_->obj_scale,
         fatropdata_->x_curr,
         fatropdata_->grad_curr);
+    stats.eval_grad_time += blasfeo_toc(&timer);
+    stats.eval_grad_count ++;
     return res;
 }
 double FatropAlg::EvalObjCurr()
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     double res = 0.0;
     fatropnlp_->EvalObj(
         fatropdata_->obj_scale,
         fatropdata_->x_curr,
         res);
+    stats.eval_obj_time += blasfeo_toc(&timer);
+    stats.eval_obj_count ++;
     return res;
 }
 int FatropAlg::EvalDuInf()
 {
+    blasfeo_timer timer;
+    blasfeo_tic(&timer);
     fatropnlp_->EvalDuInf(
         fatropdata_->obj_scale,
         fatropdata_->lam_curr,
         fatropdata_->grad_curr,
         fatropdata_->du_inf_curr);
     fatropdata_->EvalDuInfSlacksEqs();
+    stats.duinf_time += blasfeo_toc(&timer);
     return 0;
 }
 inline int FatropAlg::Initialization()
@@ -350,7 +374,7 @@ inline int FatropAlg::Initialization()
         fatropdata_->zU_curr,
         fatropdata_->s_lower,
         fatropdata_->s_upper);
-    init_time += blasfeo_toc(&timer);
+    stats.initialization_time += blasfeo_toc(&timer);
     return res;
 }
 int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu)
@@ -374,8 +398,6 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
         fatropdata_->s_upper,
         fatropdata_->delta_s);
     double el = blasfeo_toc(&timer);
-    sd_time += el;
-    if (res == 0)
-        sd_time2 += el;
+    stats.compute_sd_time += el;
     return res;
 }
