@@ -4,7 +4,8 @@ Fast Trajectory Optimizer (FATROP) is an efficient and reliable solver for nonli
 
 Installation instructions for Pilot Users can be found [here](./PILOT_USER_INSTRUCTIONS.md).
 
-Developer: Lander Vanroye (lander.vanroye@kuleuven.be)
+Contact
+Developer Lander Vanroye (lander.vanroye@kuleuven.be)
 
 Thanks to all contributors:
 - Wilm Decré for the cmake configuration, pip executable, pilot user instructions, fatropy python interface, ...
