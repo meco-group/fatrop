@@ -47,6 +47,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          sigma_U(memineqs[19]),
                                                                                          gradb_L(memineqs[20]),
                                                                                          gradb_U(memineqs[21]),
+                                                                                         gradb_plus(memineqs[22]),
                                                                                          params(params)
 {
     Initialize();

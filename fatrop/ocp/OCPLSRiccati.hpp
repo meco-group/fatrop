@@ -15,8 +15,6 @@ namespace fatrop
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
-            const double mu,
-            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_zL,
@@ -26,14 +24,12 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &lam_curr) override;
+            const FatropVecBF &gradb_plus) override;
         // solve a KKT system
         int computeSDDeg(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
-            const double mu,
-            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_zL,
@@ -43,7 +39,7 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &lam_curr);
+            const FatropVecBF &gradb_plus);
         // solve a KKT system
         int SolveInitialization(
             OCPKKTMemory *OCP,
@@ -59,8 +55,6 @@ namespace fatrop
         computeSDnor(
             OCPKKTMemory *OCP,
             const double inertia_correction,
-            const double mu,
-            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_zL,
@@ -70,7 +64,7 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &lam_curr);
+            const FatropVecBF &gradb_plus);
         FatropMemoryMatBF Ppt;
         FatropMemoryMatBF Hh;
         FatropMemoryMatBF AL;

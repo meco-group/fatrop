@@ -39,8 +39,6 @@ int OCPLSRiccati::computeSD(
     OCPKKTMemory *OCP,
     const double inertia_correction_w,
     const double inertia_correction_c,
-    const double mu,
-    const double kappa_d,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_zL,
@@ -50,23 +48,21 @@ int OCPLSRiccati::computeSD(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &lam_curr)
+    const FatropVecBF &gradb_plus)
 {
     if (inertia_correction_c == 0.0)
     {
-        return computeSDnor(OCP, inertia_correction_w, mu, kappa_d, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, lam_curr);
+        return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus);
     }
     else
     {
-        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c,mu, kappa_d, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, lam_curr);
+        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c,ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus);
     }
 }
 int OCPLSRiccati::computeSDDeg(
     OCPKKTMemory *OCP,
     const double inertia_correction_w,
     const double inertia_correction_c,
-    const double mu,
-    const double kappa_d,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_zL,
@@ -804,8 +800,6 @@ int OCPLSRiccati::SolveInitialization(
 int OCPLSRiccati::computeSDnor(
     OCPKKTMemory *OCP,
     const double inertia_correction,
-    const double mu,
-    const double kappa_d,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_zL,
@@ -815,7 +809,7 @@ int OCPLSRiccati::computeSDnor(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &lam_curr)
+    const FatropVecBF &gradb_plus)
 {
     bool increased_accuracy = true;
     // blasfeo_timer timer;
@@ -852,7 +846,7 @@ int OCPLSRiccati::computeSDnor(
     SOLVERMACRO(PMAT *, PrI, _p);
     SOLVERMACRO(VEC *, ux, _p);
     SOLVERMACRO(VEC *, lam, _p);
-    SOLVERMACRO(VEC *, lam_curr, _p);
+    SOLVERMACRO(VEC *, gradb_plus, _p);
     // SOLVERMACRO(VEC *, s, _p);
     // SOLVERMACRO(VEC *, zL, _p);
     // SOLVERMACRO(VEC *, zU, _p);
@@ -1288,32 +1282,9 @@ int OCPLSRiccati::computeSDnor(
         //     }
         // }
     }
-    // {
-    //     FatropMemoryVecBF test(100, 1);
-    //     VEC *test_p = (VEC *)test[0];
-    //     const int k = K - 1;
-    //     const int nx = nx_p[k];
-    //     const int ng = ng_p[k];
-    //     const int nxm1 = nx_p[k - 1];
-    //     const int nu = nu_p[k];
-    //     const int ng_ineq = ng_ineq_p[k];
-    //     const int offs = offs_ux[k];
-    //     const int offs_g_ineq_k = offs_g_ineq_p[k];
-    //     const int offs_ineq_k = offs_ineq_p[k];
-    //     const int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
-    //     const int offs_g_k = offs_g[k];
-    //     ROWEX(nx, 1.0, RSQrqt_p + k, nu + nx, nu, test_p, 0);
-    //     GEMV_N(nx, nx, 1.0, RSQrqt_p+k, nu, nu, ux_p, offs +nu,1.0, test_p, 0, test_p, 0);
-    //     AXPY(nx, -1.0, lam_p, offs_dyn_eq_km1, test_p, 0, test_p, 0);
-    //     GEMV_N(nx, ng, 1.0, Ggt_p+k, nu, nu, lam_p, offs_g_k,1.0, test_p, 0, test_p, 0);
-    //     GEMV_N(nx, ng_ineq, 1.0, Ggt_ineq_p+k, nu, nu, lam_p, offs_g_ineq_k,1.0, test_p, 0, test_p, 0);
-    //     cout << "Linf " << Linf(test[0]) << endl;
-    // }
     // double el = blasfeo_toc(&timer);
     // cout << "el time " << el << endl;
     lastused_.rankI = rankI;
     lastused_.inertia_correction = inertia_correction;
-    lastused_.kappa_d = kappa_d;
-    lastused_.mu = mu;
     return 0;
 }

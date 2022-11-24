@@ -380,8 +380,6 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
     int res = fatropnlp_->ComputeSD(
         inertia_correction_w,
         inertia_correction_c,
-        mu,
-        kappa_d,
         fatropdata_->delta_x,
         fatropdata_->lam_calc,
         fatropdata_->delta_zL,
@@ -391,7 +389,7 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
         fatropdata_->sigma_U,
         fatropdata_->gradb_L,
         fatropdata_->gradb_U,
-        fatropdata_->lam_curr);
+        fatropdata_->gradb_plus);
     double el = blasfeo_toc(&timer);
     stats.compute_sd_time += el;
     return res;

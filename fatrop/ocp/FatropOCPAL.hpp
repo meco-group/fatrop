@@ -36,8 +36,6 @@ namespace fatrop
         int ComputeSD(
             const double inertia_correction_w,
             const double inertia_correction_c,
-            const double mu,
-            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_zL,
@@ -47,13 +45,11 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &lam_curr) override
+            const FatropVecBF &gradb_plus) override
         {
             return FatropOCP::ComputeSD(
                 inertia_correction_w,
                 inertia_correction_c,
-                mu,
-                kappa_d,
                 ux,
                 lam,
                 delta_zL,
@@ -63,7 +59,7 @@ namespace fatrop
                 sigma_U,
                 gradb_L,
                 gradb_U,
-                lam_curr);
+                gradb_plus);
         }
         int ComputeScalings(
             double &obj_scale,

@@ -103,6 +103,7 @@ namespace fatrop
         FatropVecBF sigma_U;
         FatropVecBF gradb_L;
         FatropVecBF gradb_U;
+        FatropVecBF gradb_plus;
         // vector<bool> lower_bounded_v;
         // vector<bool> upper_bounded_v;
         struct EvalCache

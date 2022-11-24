@@ -29,8 +29,6 @@ int FatropOCP::EvalJac(
 int FatropOCP::ComputeSD(
     const double inertia_correction_w,
     const double inertia_correction_c,
-    const double mu,
-    const double kappa_d,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_zL,
@@ -40,15 +38,13 @@ int FatropOCP::ComputeSD(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &lam_curr)
+    const FatropVecBF &gradb_plus)
 {
     // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
     return ls_->computeSD(
         &ocpkktmemory_,
         inertia_correction_w,
         inertia_correction_c,
-        mu,
-        kappa_d,
         ux,
         lam,
         delta_zL,
@@ -58,7 +54,7 @@ int FatropOCP::ComputeSD(
         sigma_U,
         gradb_L,
         gradb_U,
-        lam_curr);
+        gradb_plus);
 };
 int FatropOCP::ComputeScalings(
     double &obj_scale,
