@@ -44,13 +44,13 @@ cdef class OCP:
     # def obj_time(self):
     #     return self.myOCPBuilder.fatropalg.get().obj_time
 
-    @property
-    def init_time(self):
-        return self.myOCPBuilder.fatropalg.get().init_time
+    # @property
+    # def init_time(self):
+    #     return self.myOCPBuilder.fatropalg.get().init_time
 
-    @property
-    def total_time(self):
-        return self.myOCPBuilder.fatropalg.get().total_time
+    # @property
+    # def total_time(self):
+    #     return self.myOCPBuilder.fatropalg.get().total_time
 
     def SetBounds(self):
         self.myOCPBuilder.SetBounds()
