@@ -52,6 +52,7 @@ namespace fatrop
         void SetBounds(const vector<double>& lowerin, const vector<double>& upperin);
         void RelaxBounds();
         void RelaxBoundsVar(double mu);
+        void ComputeBarrierQuantities(double mu);
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
@@ -99,7 +100,7 @@ namespace fatrop
         FatropVecBF s_upper_orig;
         FatropVecBF s_lower;
         FatropVecBF s_upper;
-        FatropVecBF simga_L;
+        FatropVecBF sigma_L;
         FatropVecBF sigma_U;
         FatropVecBF gradb_L;
         FatropVecBF gradb_U;

@@ -42,7 +42,9 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus) override;
+            const FatropVecBF &gradb_plus,
+            const FatropVecBF &zL_curr,
+            const FatropVecBF &zU_curr) override;
         int ComputeScalings(
             double &obj_scale,
             FatropVecBF &x_scales,

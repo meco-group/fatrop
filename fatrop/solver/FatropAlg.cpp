@@ -182,6 +182,7 @@ int FatropAlg::Optimize()
         double deltac_candidate = delta_c_stripe * pow(mu, kappa_c);
         deltaw = 0.0;
         deltac = 0.0;
+        fatropdata_->ComputeBarrierQuantities(mu);
         int regularity = ComputeSD(deltaw, deltac, mu);
         if (regularity < 0)
         {
@@ -385,11 +386,13 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
         fatropdata_->delta_zL,
         fatropdata_->delta_zU,
         fatropdata_->delta_s,
-        fatropdata_->simga_L,
+        fatropdata_->sigma_L,
         fatropdata_->sigma_U,
         fatropdata_->gradb_L,
         fatropdata_->gradb_U,
-        fatropdata_->gradb_plus);
+        fatropdata_->gradb_plus,
+        fatropdata_->zL_curr,
+        fatropdata_->zU_curr);
     double el = blasfeo_toc(&timer);
     stats.compute_sd_time += el;
     return res;

@@ -48,15 +48,17 @@ int OCPLSRiccati::computeSD(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus)
+    const FatropVecBF &gradb_plus,
+    const FatropVecBF &zL_curr,
+    const FatropVecBF &zU_curr)
 {
     if (inertia_correction_c == 0.0)
     {
-        return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus);
+        return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus, zL_curr, zU_curr);
     }
     else
     {
-        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c,ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus);
+        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus, zL_curr, zU_curr);
     }
 }
 int OCPLSRiccati::computeSDDeg(
@@ -72,7 +74,9 @@ int OCPLSRiccati::computeSDDeg(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &lam_curr)
+    const FatropVecBF &gradb_plus,
+    const FatropVecBF &zL,
+    const FatropVecBF &zU)
 {
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
@@ -96,15 +100,16 @@ int OCPLSRiccati::computeSDDeg(
     SOLVERMACRO(MAT *, Ggt_ineq_temp, _p);
     SOLVERMACRO(VEC *, ux, _p);
     SOLVERMACRO(VEC *, lam, _p);
-    SOLVERMACRO(VEC *, lam_curr, _p);
-    // SOLVERMACRO(VEC *, s, _p);
-    // SOLVERMACRO(VEC *, zL, _p);
-    // SOLVERMACRO(VEC *, zU, _p);
     SOLVERMACRO(VEC *, delta_zL, _p);
     SOLVERMACRO(VEC *, delta_zU, _p);
-    // SOLVERMACRO(VEC *, lower, _p);
-    // SOLVERMACRO(VEC *, upper, _p);
     SOLVERMACRO(VEC *, delta_s, _p);
+    SOLVERMACRO(VEC *, sigma_L, _p);
+    SOLVERMACRO(VEC *, sigma_U, _p);
+    SOLVERMACRO(VEC *, gradb_L, _p);
+    SOLVERMACRO(VEC *, gradb_U, _p);
+    SOLVERMACRO(VEC *, gradb_plus, _p);
+    SOLVERMACRO(VEC *, zL, _p);
+    SOLVERMACRO(VEC *, zU, _p);
     OCPMACRO(int *, nu, _p);
     OCPMACRO(int *, nx, _p);
     OCPMACRO(int *, ng, _p);
@@ -123,50 +128,25 @@ int OCPLSRiccati::computeSDDeg(
         const int ng = ng_p[K - 1];
         const int ng_ineq = ng_ineq_p[K - 1];
         const int offs_ineq_k = offs_ineq_p[K - 1];
-        const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
+        // const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
         // Pp_Km1 <- Qq_Km1
         GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
         DIARE(nx, inertia_correction_w, Ppt_p + K - 1, 0, 0);
         //// inequalities
-        // if (ng_ineq > 0)
-        // {
-        //     GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
-        //     for (int i = 0; i < ng_ineq; i++)
-        //     {
-        //         double scaling_factor = inertia_correction_w;
-        //         double zLi = VECEL(zL_p, offs_ineq_k + i);
-        //         double zUi = VECEL(zU_p, offs_ineq_k + i);
-        //         double si = VECEL(s_p, offs_ineq_k + i);
-        //         double loweri = VECEL(lower_p, offs_ineq_k + i);
-        //         double upperi = VECEL(upper_p, offs_ineq_k + i);
-        //         double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
-        //         bool lower_bounded = !isinf(loweri);
-        //         bool upper_bounded = !isinf(upperi);
-        //         if (lower_bounded)
-        //         {
-        //             double dist = si - loweri;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor += zLi * dist_m1;
-        //             grad_barrier -= mu * dist_m1;
-        //         }
-        //         if (upper_bounded)
-        //         {
-        //             double dist = upperi - si;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor += zUi * dist_m1;
-        //             grad_barrier += mu * dist_m1;
-        //         }
-        //         if (!(lower_bounded && upper_bounded))
-        //         {
-        //             grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-        //         }
-        //         COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-        //         MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
-        //     }
-        //     // add the penalty
-        //     SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        //     // TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        // }
+        if (ng_ineq > 0)
+        {
+            GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+            for (int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor = inertia_correction_w + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
+                double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
+            }
+            // add the penalty
+            SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+            // TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+        }
 
         GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
         SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
@@ -180,7 +160,7 @@ int OCPLSRiccati::computeSDDeg(
         const int ng = ng_p[k];
         const int ng_ineq = ng_ineq_p[k];
         const int offs_ineq_k = offs_ineq_p[k];
-        const int offs_g_ineq_k = offs_g_ineq_p[k];
+        // const int offs_g_ineq_k = offs_g_ineq_p[k];
         //////// SUBSDYN
         {
             // AL <- [BAb]^T_k P_kp1
@@ -194,44 +174,19 @@ int OCPLSRiccati::computeSDDeg(
             SYRK_LN_MN(nu + nx + 1, nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, Ggt_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
 
             //// inequalities
-            // if (ng_ineq > 0)
-            // {
-            //     GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
-            //     for (int i = 0; i < ng_ineq; i++)
-            //     {
-            //         double scaling_factor = inertia_correction_w;
-            //         double zLi = VECEL(zL_p, offs_ineq_k + i);
-            //         double zUi = VECEL(zU_p, offs_ineq_k + i);
-            //         double si = VECEL(s_p, offs_ineq_k + i);
-            //         double loweri = VECEL(lower_p, offs_ineq_k + i);
-            //         double upperi = VECEL(upper_p, offs_ineq_k + i);
-            //         double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
-            //         bool lower_bounded = !isinf(loweri);
-            //         bool upper_bounded = !isinf(upperi);
-            //         if (lower_bounded)
-            //         {
-            //             double dist = si - loweri;
-            //             double dist_m1 = 1.0 / dist;
-            //             scaling_factor += zLi * dist_m1;
-            //             grad_barrier -= mu * dist_m1;
-            //         }
-            //         if (upper_bounded)
-            //         {
-            //             double dist = upperi - si;
-            //             double dist_m1 = 1.0 / dist;
-            //             scaling_factor += zUi * dist_m1;
-            //             grad_barrier += mu * dist_m1;
-            //         }
-            //         if (!(lower_bounded && upper_bounded))
-            //         {
-            //             grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-            //         }
-            //         COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-            //         MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
-            //     }
-            //     // add the penalty
-            //     SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
-            // }
+            if (ng_ineq > 0)
+            {
+                GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                for (int i = 0; i < ng_ineq; i++)
+                {
+                    double scaling_factor = inertia_correction_w + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
+                    double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                    COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                    MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
+                }
+                // add the penalty
+                SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            }
         }
         //////// TRANSFORM_AND_SUBSEQ
         {
@@ -320,99 +275,38 @@ int OCPLSRiccati::computeSDDeg(
         const int offs = offs_ux[k];
         const int offs_g_ineq_k = offs_g_ineq_p[k];
         const int offs_ineq_k = offs_ineq_p[k];
-        // if (ng_ineq > 0)
-        // {
-        //     // calculate delta_s
-        //     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
-        //     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-        //     GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-        //     // calculate lamineq
-        //     // for (int i = 0; i < ng_ineq; i++)
-        //     // {
-        //     //     double scaling_factor_L = 0.0;
-        //     //     double scaling_factor_U = 0.0;
-        //     //     double zLi = VECEL(zL_p, offs_ineq_k + i);
-        //     //     double zUi = VECEL(zU_p, offs_ineq_k + i);
-        //     //     double si = VECEL(s_p, offs_ineq_k + i);
-        //     //     double loweri = VECEL(lower_p, offs_ineq_k + i);
-        //     //     double upperi = VECEL(upper_p, offs_ineq_k + i);
-        //     //     double grad_barrier_L = 0.0;
-        //     //     double grad_barrier_U = 0.0;
-        //     //     bool lower_bounded = !isinf(loweri);
-        //     //     bool upper_bounded = !isinf(upperi);
-        //     //     if (lower_bounded)
-        //     //     {
-        //     //         double dist = si - loweri;
-        //     //         double dist_m1 = 1.0 / dist;
-        //     //         scaling_factor_L = zLi * dist_m1;
-        //     //         grad_barrier_L = -mu * dist_m1;
-        //     //         VECEL(delta_zL_p, offs_ineq_k + i) = -grad_barrier_L - VECEL(zL_p, offs_ineq_k + i) - scaling_factor_L * VECEL(delta_s_p, offs_ineq_k + i);
-        //     //     }
-        //     //     if (upper_bounded)
-        //     //     {
-        //     //         double dist = upperi - si;
-        //     //         double dist_m1 = 1.0 / dist;
-        //     //         scaling_factor_U = zUi * dist_m1;
-        //     //         grad_barrier_U = mu * dist_m1;
-        //     //         VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
-        //     //     }
-        //     //     double grad_barrier = grad_barrier_L + grad_barrier_U;
-        //     //     if (!(lower_bounded && upper_bounded))
-        //     //     {
-        //     //         grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-        //     //     }
-        //     //     VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
-        //     // }
-
-        //     // calculate lamineq
-        //     for (int i = 0; i < ng_ineq; i++)
-        //     {
-        //         double scaling_factor_L = 0.0;
-        //         double scaling_factor_U = 0.0;
-        //         double zLi = VECEL(zL_p, offs_ineq_k + i);
-        //         double zUi = VECEL(zU_p, offs_ineq_k + i);
-        //         double si = VECEL(s_p, offs_ineq_k + i);
-        //         double loweri = VECEL(lower_p, offs_ineq_k + i);
-        //         double upperi = VECEL(upper_p, offs_ineq_k + i);
-        //         double grad_barrier_L = 0.0;
-        //         double grad_barrier_U = 0.0;
-        //         bool lower_bounded = !isinf(loweri);
-        //         bool upper_bounded = !isinf(upperi);
-        //         double ds = VECEL(delta_s_p, offs_ineq_k + i);
-        //         double lamIi = inertia_correction_w * ds;
-        //         if (lower_bounded)
-        //         {
-        //             double dist = si - loweri;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor_L = zLi * dist_m1;
-        //             grad_barrier_L = -mu * dist_m1;
-        //             double z = VECEL(zL_p, offs_ineq_k + i);
-        //             double dz = -grad_barrier_L - z - scaling_factor_L * ds;
-        //             VECEL(delta_zL_p, offs_ineq_k + i) = dz;
-        //             lamIi += grad_barrier_L + scaling_factor_L * ds;
-        //         }
-        //         if (upper_bounded)
-        //         {
-        //             double dist = upperi - si;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor_U = zUi * dist_m1;
-        //             grad_barrier_U = mu * dist_m1;
-        //             double z = VECEL(zU_p, offs_ineq_k + i);
-        //             double dz = grad_barrier_U - z + scaling_factor_U * ds;
-        //             VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-        //             lamIi += grad_barrier_U + scaling_factor_U * ds;
-        //             VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-        //             // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
-        //         }
-        //         // double grad_barrier = grad_barrier_L + grad_barrier_U;
-        //         if (!(lower_bounded && upper_bounded))
-        //         {
-        //             lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-        //         }
-        //         VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k + i);
-        //         // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
-        //     }
-        // }
+        if (ng_ineq > 0)
+        {
+            // calculate delta_s
+            ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
+            // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            // calculate lamineq
+            for (int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor_L = VECEL(sigma_L_p, offs_ineq_k + i);
+                double scaling_factor_U = VECEL(sigma_U_p, offs_ineq_k + i);
+                double grad_barrier_L = VECEL(gradb_L_p, offs_ineq_k + i);
+                double grad_barrier_U = VECEL(gradb_U_p, offs_ineq_k + i);
+                double grad_barrier_plus = VECEL(gradb_plus_p, offs_ineq_k + i);
+                double ds = VECEL(delta_s_p, offs_ineq_k + i);
+                {
+                    double z = VECEL(zL_p, offs_ineq_k + i);
+                    double dz = -grad_barrier_L - z - scaling_factor_L * ds;
+                    VECEL(delta_zL_p, offs_ineq_k + i) = dz;
+                }
+                {
+                    double z = VECEL(zU_p, offs_ineq_k + i);
+                    double dz = grad_barrier_U - z + scaling_factor_U * ds;
+                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
+                }
+                double lamIi = inertia_correction_w * ds;
+                lamIi += grad_barrier_L + scaling_factor_L * ds;
+                lamIi += grad_barrier_U + scaling_factor_U * ds;
+                lamIi += grad_barrier_plus;
+                VECEL(lam_p, offs_g_ineq_k + i) = lamIi;
+            }
+        }
     }
     // double el = blasfeo_toc(&timer);
     // cout << "el time " << el << endl;
@@ -809,7 +703,9 @@ int OCPLSRiccati::computeSDnor(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus)
+    const FatropVecBF &gradb_plus,
+    const FatropVecBF &zL,
+    const FatropVecBF &zU)
 {
     bool increased_accuracy = true;
     // blasfeo_timer timer;
@@ -846,15 +742,16 @@ int OCPLSRiccati::computeSDnor(
     SOLVERMACRO(PMAT *, PrI, _p);
     SOLVERMACRO(VEC *, ux, _p);
     SOLVERMACRO(VEC *, lam, _p);
+    SOLVERMACRO(VEC *, sigma_L, _p);
+    SOLVERMACRO(VEC *, sigma_U, _p);
+    SOLVERMACRO(VEC *, gradb_L, _p);
+    SOLVERMACRO(VEC *, gradb_U, _p);
     SOLVERMACRO(VEC *, gradb_plus, _p);
-    // SOLVERMACRO(VEC *, s, _p);
-    // SOLVERMACRO(VEC *, zL, _p);
-    // SOLVERMACRO(VEC *, zU, _p);
-    // SOLVERMACRO(VEC *, delta_zL, _p);
-    // SOLVERMACRO(VEC *, delta_zU, _p);
-    // SOLVERMACRO(VEC *, lower, _p);
-    // SOLVERMACRO(VEC *, upper, _p);
+    SOLVERMACRO(VEC *, zL, _p);
+    SOLVERMACRO(VEC *, zU, _p);
     SOLVERMACRO(VEC *, delta_s, _p);
+    SOLVERMACRO(VEC *, delta_zL, _p);
+    SOLVERMACRO(VEC *, delta_zU, _p);
     OCPMACRO(int *, nu, _p);
     OCPMACRO(int *, nx, _p);
     OCPMACRO(int *, ng, _p);
@@ -875,50 +772,25 @@ int OCPLSRiccati::computeSDnor(
         const int ng = ng_p[K - 1];
         const int ng_ineq = ng_ineq_p[K - 1];
         const int offs_ineq_k = offs_ineq_p[K - 1];
-        const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
+        // const int offs_g_ineq_k = offs_g_ineq_p[K - 1];
         // Pp_Km1 <- Qq_Km1
         GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
         DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
         //// inequalities
-        // if (ng_ineq > 0)
-        // {
-        //     GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
-        //     for (int i = 0; i < ng_ineq; i++)
-        //     {
-        //         double scaling_factor = inertia_correction;
-        //         double zLi = VECEL(zL_p, offs_ineq_k + i);
-        //         double zUi = VECEL(zU_p, offs_ineq_k + i);
-        //         double si = VECEL(s_p, offs_ineq_k + i);
-        //         double loweri = VECEL(lower_p, offs_ineq_k + i);
-        //         double upperi = VECEL(upper_p, offs_ineq_k + i);
-        //         double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
-        //         bool lower_bounded = !isinf(loweri);
-        //         bool upper_bounded = !isinf(upperi);
-        //         if (lower_bounded)
-        //         {
-        //             double dist = si - loweri;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor += zLi * dist_m1;
-        //             grad_barrier -= mu * dist_m1;
-        //         }
-        //         if (upper_bounded)
-        //         {
-        //             double dist = upperi - si;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor += zUi * dist_m1;
-        //             grad_barrier += mu * dist_m1;
-        //         }
-        //         if (!(lower_bounded && upper_bounded))
-        //         {
-        //             grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-        //         }
-        //         COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-        //         MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
-        //     }
-        //     // add the penalty
-        //     SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        //     TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        // }
+        if (ng_ineq > 0)
+        {
+            GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
+            for (int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor = inertia_correction + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
+                double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
+            }
+            // add the penalty
+            SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+            TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+        }
         // Hh_Km1 <- Gg_Km1
         GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
         gamma_p[K - 1] = ng;
@@ -933,7 +805,7 @@ int OCPLSRiccati::computeSDnor(
         const int ng_ineq = ng_ineq_p[k];
         // const int offs_g_k = offs_g_p[k];
         const int offs_ineq_k = offs_ineq_p[k];
-        const int offs_g_ineq_k = offs_g_ineq_p[k];
+        // const int offs_g_ineq_k = offs_g_ineq_p[k];
         // calculate the size of H_{k+1} matrix
         const int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
         if (Hp1_size + ng > nu + nx)
@@ -949,44 +821,19 @@ int OCPLSRiccati::computeSDnor(
             // RSQrqt_stripe <- AL[BA] + RSQrqt
             SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
             //// inequalities
-            // if (ng_ineq > 0)
-            // {
-            //     GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
-            //     for (int i = 0; i < ng_ineq; i++)
-            //     {
-            //         double scaling_factor = inertia_correction;
-            //         double zLi = VECEL(zL_p, offs_ineq_k + i);
-            //         double zUi = VECEL(zU_p, offs_ineq_k + i);
-            //         double si = VECEL(s_p, offs_ineq_k + i);
-            //         double loweri = VECEL(lower_p, offs_ineq_k + i);
-            //         double upperi = VECEL(upper_p, offs_ineq_k + i);
-            //         double grad_barrier = -VECEL(lam_curr_p, offs_g_ineq_k + i);
-            //         bool lower_bounded = !isinf(loweri);
-            //         bool upper_bounded = !isinf(upperi);
-            //         if (lower_bounded)
-            //         {
-            //             double dist = si - loweri;
-            //             double dist_m1 = 1.0 / dist;
-            //             scaling_factor += zLi * dist_m1;
-            //             grad_barrier -= mu * dist_m1;
-            //         }
-            //         if (upper_bounded)
-            //         {
-            //             double dist = upperi - si;
-            //             double dist_m1 = 1.0 / dist;
-            //             scaling_factor += zUi * dist_m1;
-            //             grad_barrier += mu * dist_m1;
-            //         }
-            //         if (!(lower_bounded && upper_bounded))
-            //         {
-            //             grad_barrier += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-            //         }
-            //         COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-            //         MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
-            //     }
-            //     // add the penalty
-            //     SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
-            // }
+            if (ng_ineq > 0)
+            {
+                GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                for (int i = 0; i < ng_ineq; i++)
+                {
+                    double scaling_factor = inertia_correction + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
+                    double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                    COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                    MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
+                }
+                // add the penalty
+                SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            }
             DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
             gamma_p[k] = gamma_k;
             // if ng[k]>0
@@ -1225,62 +1072,38 @@ int OCPLSRiccati::computeSDnor(
         const int offs = offs_ux[k];
         const int offs_g_ineq_k = offs_g_ineq_p[k];
         const int offs_ineq_k = offs_ineq_p[k];
-        // if (ng_ineq > 0)
-        // {
-        //     // calculate delta_s
-        //     ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
-        //     // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-        //     GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
-
-        //     // calculate lamineq
-        //     for (int i = 0; i < ng_ineq; i++)
-        //     {
-        //         double scaling_factor_L = 0.0;
-        //         double scaling_factor_U = 0.0;
-        //         double zLi = VECEL(zL_p, offs_ineq_k + i);
-        //         double zUi = VECEL(zU_p, offs_ineq_k + i);
-        //         double si = VECEL(s_p, offs_ineq_k + i);
-        //         double loweri = VECEL(lower_p, offs_ineq_k + i);
-        //         double upperi = VECEL(upper_p, offs_ineq_k + i);
-        //         double grad_barrier_L = 0.0;
-        //         double grad_barrier_U = 0.0;
-        //         bool lower_bounded = !isinf(loweri);
-        //         bool upper_bounded = !isinf(upperi);
-        //         double ds = VECEL(delta_s_p, offs_ineq_k + i);
-        //         double lamIi = inertia_correction * ds;
-        //         if (lower_bounded)
-        //         {
-        //             double dist = si - loweri;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor_L = zLi * dist_m1;
-        //             grad_barrier_L = -mu * dist_m1;
-        //             double z = VECEL(zL_p, offs_ineq_k + i);
-        //             double dz = -grad_barrier_L - z - scaling_factor_L * ds;
-        //             VECEL(delta_zL_p, offs_ineq_k + i) = dz;
-        //             lamIi += grad_barrier_L + scaling_factor_L * ds;
-        //         }
-        //         if (upper_bounded)
-        //         {
-        //             double dist = upperi - si;
-        //             double dist_m1 = 1.0 / dist;
-        //             scaling_factor_U = zUi * dist_m1;
-        //             grad_barrier_U = mu * dist_m1;
-        //             double z = VECEL(zU_p, offs_ineq_k + i);
-        //             double dz = grad_barrier_U - z + scaling_factor_U * ds;
-        //             VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-        //             lamIi += grad_barrier_U + scaling_factor_U * ds;
-        //             VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-        //             // VECEL(delta_zU_p, offs_ineq_k + i) = grad_barrier_U - VECEL(zU_p, offs_ineq_k + i) + scaling_factor_U * VECEL(delta_s_p, offs_ineq_k + i);
-        //         }
-        //         // double grad_barrier = grad_barrier_L + grad_barrier_U;
-        //         if (!(lower_bounded && upper_bounded))
-        //         {
-        //             lamIi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
-        //         }
-        //         VECEL(lam_p, offs_g_ineq_k + i) = lamIi - VECEL(lam_curr_p, offs_g_ineq_k + i);
-        //         // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier + (inertia_correction + scaling_factor_L + scaling_factor_U) * VECEL(delta_s_p, offs_ineq_k + i);
-        //     }
-        // }
+        if (ng_ineq > 0)
+        {
+            // calculate delta_s
+            ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
+            // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            // calculate lamineq
+            for (int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor_L = VECEL(sigma_L_p, offs_ineq_k + i);
+                double scaling_factor_U = VECEL(sigma_U_p, offs_ineq_k + i);
+                double grad_barrier_L = VECEL(gradb_L_p, offs_ineq_k + i);
+                double grad_barrier_U = VECEL(gradb_U_p, offs_ineq_k + i);
+                double grad_barrier_plus = VECEL(gradb_plus_p, offs_ineq_k + i);
+                double ds = VECEL(delta_s_p, offs_ineq_k + i);
+                {
+                    double z = VECEL(zL_p, offs_ineq_k + i);
+                    double dz = -grad_barrier_L - z - scaling_factor_L * ds;
+                    VECEL(delta_zL_p, offs_ineq_k + i) = dz;
+                }
+                {
+                    double z = VECEL(zU_p, offs_ineq_k + i);
+                    double dz = grad_barrier_U - z + scaling_factor_U * ds;
+                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
+                }
+                double lamIi = inertia_correction * ds;
+                lamIi += grad_barrier_L + scaling_factor_L * ds;
+                lamIi += grad_barrier_U + scaling_factor_U * ds;
+                lamIi += grad_barrier_plus;
+                VECEL(lam_p, offs_g_ineq_k + i) = lamIi;
+            }
+        }
     }
     // double el = blasfeo_toc(&timer);
     // cout << "el time " << el << endl;

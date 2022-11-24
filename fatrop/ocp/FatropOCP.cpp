@@ -38,7 +38,9 @@ int FatropOCP::ComputeSD(
     const FatropVecBF &sigma_U,
     const FatropVecBF &gradb_L,
     const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus)
+    const FatropVecBF &gradb_plus,
+    const FatropVecBF &zL_curr,
+    const FatropVecBF &zU_curr)
 {
     // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
     return ls_->computeSD(
@@ -54,7 +56,9 @@ int FatropOCP::ComputeSD(
         sigma_U,
         gradb_L,
         gradb_U,
-        gradb_plus);
+        gradb_plus,
+        zL_curr,
+        zU_curr);
 };
 int FatropOCP::ComputeScalings(
     double &obj_scale,

@@ -43,7 +43,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          s_upper_orig(memineqs[15]),
                                                                                          s_lower(memineqs[16]),
                                                                                          s_upper(memineqs[17]),
-                                                                                         simga_L(memineqs[18]),
+                                                                                         sigma_L(memineqs[18]),
                                                                                          sigma_U(memineqs[19]),
                                                                                          gradb_L(memineqs[20]),
                                                                                          gradb_U(memineqs[21]),
@@ -549,6 +549,60 @@ void FatropData::RelaxBoundsVar(double mu)
                 VECEL(s_upper_p, i) += 1e-12 * std::max(1.0, std::abs(upperi));
             }
         }
+    }
+}
+void FatropData::ComputeBarrierQuantities(double mu)
+{
+    VEC *s_lower_p = (VEC *)s_lower;
+    VEC *s_upper_p = (VEC *)s_upper;
+    VEC *s_curr_p = (VEC *)s_curr;
+    VEC *zL_curr_p = (VEC *)zL_curr;
+    VEC *zU_curr_p = (VEC *)zU_curr;
+    VEC *sigma_L_p = (VEC *)sigma_L;
+    VEC *sigma_U_p = (VEC *)sigma_U;
+    VEC *gradb_L_p = (VEC *)gradb_L;
+    VEC *gradb_U_p = (VEC *)gradb_U;
+    VEC *gradb_plus_p = (VEC *)gradb_plus;
+    VEC *lam_curr_p = (VEC *)lam_curr;
+    int eqs_offset = n_eqs - n_ineqs;
+    // compute simga_LU gradb_LU and gradbplus
+
+    for (int i = 0; i < n_ineqs; i++)
+    {
+        double loweri = VECEL(s_lower_p, i);
+        double upperi = VECEL(s_upper_p, i);
+        bool lower_bounded = !isinf(loweri);
+        bool upper_bounded = !isinf(upperi);
+        if (lower_bounded)
+        {
+            double s_curr_v = VECEL(s_curr_p, i);
+            double dist_lower = s_curr_v - loweri;
+            VECEL(sigma_L_p, i) = VECEL(zL_curr_p, i) / dist_lower;
+            VECEL(gradb_L_p, i) = -mu / dist_lower;
+        }
+        else
+        {
+            VECEL(sigma_L_p, i) = 0.0;
+            VECEL(gradb_L_p, i) = 0.0;
+        }
+        if (upper_bounded)
+        {
+            double s_curr_v = VECEL(s_curr_p, i);
+            double dist_upper = upperi - s_curr_v;
+            VECEL(sigma_U_p, i) = VECEL(zU_curr_p, i) / dist_upper;
+            VECEL(gradb_U_p, i) = mu / dist_upper;
+        }
+        else
+        {
+            VECEL(sigma_U_p, i) = 0.0;
+            VECEL(gradb_U_p, i) = 0.0;
+        }
+        double grad_barrier_plusi = -VECEL(lam_curr_p, eqs_offset + i);
+        if (!(lower_bounded && upper_bounded))
+        {
+            grad_barrier_plusi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
+        }
+        VECEL(gradb_plus_p, i) = grad_barrier_plusi;
     }
 }
 // void FatropData::B

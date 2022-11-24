@@ -24,7 +24,9 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus) override;
+            const FatropVecBF &gradb_plus,
+            const FatropVecBF &zL_curr,
+            const FatropVecBF &zU_curr) override;
         // solve a KKT system
         int computeSDDeg(
             OCPKKTMemory *OCP,
@@ -39,7 +41,9 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus);
+            const FatropVecBF &gradb_plus,
+            const FatropVecBF &zL_curr,
+            const FatropVecBF &zU_curr);
         // solve a KKT system
         int SolveInitialization(
             OCPKKTMemory *OCP,
@@ -64,7 +68,9 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus);
+            const FatropVecBF &gradb_plus,
+            const FatropVecBF &zL_curr,
+            const FatropVecBF &zU_curr);
         FatropMemoryMatBF Ppt;
         FatropMemoryMatBF Hh;
         FatropMemoryMatBF AL;

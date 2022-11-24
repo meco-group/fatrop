@@ -49,7 +49,9 @@ namespace fatrop
             const FatropVecBF &sigma_U,
             const FatropVecBF &gradb_L,
             const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus) = 0;
+            const FatropVecBF &gradb_plus,
+            const FatropVecBF &zL_curr,
+            const FatropVecBF &zU_curr) = 0;
         virtual NLPDims GetNLPDims() const = 0;
         virtual int ComputeScalings(
             double &obj_scale,
