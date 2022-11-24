@@ -5,7 +5,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          n_ineqs(nlpdims.nineqs),
                                                                                          memvars(nlpdims.nvars, 11),
                                                                                          memeqs(nlpdims.neqs, 8),
-                                                                                         memineqs(nlpdims.nineqs, 22),
+                                                                                         memineqs(nlpdims.nineqs, 23),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
                                                                                          x_backup(memvars[2]),
