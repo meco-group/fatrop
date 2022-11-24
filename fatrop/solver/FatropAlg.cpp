@@ -291,7 +291,7 @@ inline int FatropAlg::EvalHess()
             fatropdata_->x_curr,
             fatropdata_->lam_curr);
     stats.eval_hess_time += blasfeo_toc(&timer);
-    stats.eval_hess_count ++;
+    stats.eval_hess_count++;
     return res;
 }
 inline int FatropAlg::EvalJac()
@@ -302,7 +302,7 @@ inline int FatropAlg::EvalJac()
         fatropdata_->x_curr,
         fatropdata_->s_curr);
     stats.eval_jac_time += blasfeo_toc(&timer);
-    stats.eval_jac_count ++;
+    stats.eval_jac_count++;
     return res;
 }
 inline int FatropAlg::EvalCVCurr()
@@ -315,7 +315,7 @@ inline int FatropAlg::EvalCVCurr()
         fatropdata_->s_curr,
         fatropdata_->g_curr);
     stats.eval_cv_time += blasfeo_toc(&timer);
-    stats.eval_cv_count ++;
+    stats.eval_cv_count++;
     return res;
 }
 inline int FatropAlg::EvalGradCurr()
@@ -327,7 +327,7 @@ inline int FatropAlg::EvalGradCurr()
         fatropdata_->x_curr,
         fatropdata_->grad_curr);
     stats.eval_grad_time += blasfeo_toc(&timer);
-    stats.eval_grad_count ++;
+    stats.eval_grad_count++;
     return res;
 }
 double FatropAlg::EvalObjCurr()
@@ -340,7 +340,7 @@ double FatropAlg::EvalObjCurr()
         fatropdata_->x_curr,
         res);
     stats.eval_obj_time += blasfeo_toc(&timer);
-    stats.eval_obj_count ++;
+    stats.eval_obj_count++;
     return res;
 }
 int FatropAlg::EvalDuInf()
@@ -384,15 +384,14 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
         kappa_d,
         fatropdata_->delta_x,
         fatropdata_->lam_calc,
-        fatropdata_->lam_curr,
-        fatropdata_->s_curr,
-        fatropdata_->zL_curr,
-        fatropdata_->zU_curr,
         fatropdata_->delta_zL,
         fatropdata_->delta_zU,
-        fatropdata_->s_lower,
-        fatropdata_->s_upper,
-        fatropdata_->delta_s);
+        fatropdata_->delta_s,
+        fatropdata_->simga_L,
+        fatropdata_->sigma_U,
+        fatropdata_->gradb_L,
+        fatropdata_->gradb_U,
+        fatropdata_->lam_curr);
     double el = blasfeo_toc(&timer);
     stats.compute_sd_time += el;
     return res;

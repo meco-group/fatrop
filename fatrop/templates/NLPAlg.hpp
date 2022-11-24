@@ -10,7 +10,7 @@ namespace fatrop
         int neqs;
         int nineqs;
     };
-    class FatropNLP 
+    class FatropNLP
     {
     public:
         virtual int EvalHess(
@@ -38,21 +38,20 @@ namespace fatrop
             const FatropVecBF &grad,
             FatropVecBF &du_inf) = 0;
         virtual int ComputeSD(
-            const double intertia_correction_w,
-            const double intertia_correction_c,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
             const double mu,
             const double kappa_d,
-            const FatropVecBF &dprimal_vars,
-            const FatropVecBF &dlam,
-            const FatropVecBF &lam_curr,
-            const FatropVecBF &s,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam,
             const FatropVecBF &delta_zL,
-            const FatropVecBF &delta_ZU,
-            const FatropVecBF &lower_bound,
-            const FatropVecBF &upper_bound,
-            const FatropVecBF &delta_s) = 0;
+            const FatropVecBF &delta_zU,
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_L,
+            const FatropVecBF &sigma_U,
+            const FatropVecBF &gradb_L,
+            const FatropVecBF &gradb_U,
+            const FatropVecBF &lam_curr) = 0;
         virtual NLPDims GetNLPDims() const = 0;
         virtual int ComputeScalings(
             double &obj_scale,
@@ -69,8 +68,8 @@ namespace fatrop
             const FatropVecBF &zU,
             const FatropVecBF &lower,
             const FatropVecBF &upper) = 0;
-        virtual void Finalize() {};
-        virtual void Reset() {};
+        virtual void Finalize(){};
+        virtual void Reset(){};
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

@@ -8,7 +8,7 @@ namespace fatrop
 {
     class FatropOCPAL : public FatropOCP, public FatropNLPAL
     {
-        public:
+    public:
         FatropOCPAL(
             const shared_ptr<OCPAL> &ocp,
             const shared_ptr<OCPLinearSolver> &ls,
@@ -38,34 +38,32 @@ namespace fatrop
             const double inertia_correction_c,
             const double mu,
             const double kappa_d,
-            const FatropVecBF &dprimal_vars,
-            const FatropVecBF &dlam,
-            const FatropVecBF &lam_curr,
-            const FatropVecBF &s,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam,
             const FatropVecBF &delta_zL,
             const FatropVecBF &delta_zU,
-            const FatropVecBF &lower_bound,
-            const FatropVecBF &upper_bound,
-            const FatropVecBF &delta_s) override
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_L,
+            const FatropVecBF &sigma_U,
+            const FatropVecBF &gradb_L,
+            const FatropVecBF &gradb_U,
+            const FatropVecBF &lam_curr) override
         {
             return FatropOCP::ComputeSD(
                 inertia_correction_w,
                 inertia_correction_c,
                 mu,
                 kappa_d,
-                dprimal_vars,
-                dlam,
-                lam_curr,
-                s,
-                zL_curr,
-                zU_curr,
+                ux,
+                lam,
                 delta_zL,
                 delta_zU,
-                lower_bound,
-                upper_bound,
-                delta_s);
+                delta_s,
+                sigma_L,
+                sigma_U,
+                gradb_L,
+                gradb_U,
+                lam_curr);
         }
         int ComputeScalings(
             double &obj_scale,

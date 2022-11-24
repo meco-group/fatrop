@@ -5,7 +5,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          n_ineqs(nlpdims.nineqs),
                                                                                          memvars(nlpdims.nvars, 11),
                                                                                          memeqs(nlpdims.neqs, 8),
-                                                                                         memineqs(nlpdims.nineqs, 18),
+                                                                                         memineqs(nlpdims.nineqs, 22),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
                                                                                          x_backup(memvars[2]),
@@ -43,6 +43,10 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          s_upper_orig(memineqs[15]),
                                                                                          s_lower(memineqs[16]),
                                                                                          s_upper(memineqs[17]),
+                                                                                         simga_L(memineqs[18]),
+                                                                                         sigma_U(memineqs[19]),
+                                                                                         gradb_L(memineqs[20]),
+                                                                                         gradb_U(memineqs[21]),
                                                                                          params(params)
 {
     Initialize();
@@ -193,7 +197,7 @@ double FatropData::EvalBarrierNext(double mu)
 {
     return EvalBarrier(mu, (VEC *)s_next);
 }
-double FatropData::EvalBarrierLinDecr(double mu, VEC* s_p, VEC* delta_s_p)
+double FatropData::EvalBarrierLinDecr(double mu, VEC *s_p, VEC *delta_s_p)
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;

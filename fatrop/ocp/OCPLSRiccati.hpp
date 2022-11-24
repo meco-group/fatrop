@@ -19,36 +19,33 @@ namespace fatrop
             const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &lam_curr,
-            const FatropVecBF &s,
-            const FatropVecBF &zL,
-            const FatropVecBF &zU,
             const FatropVecBF &delta_zL,
             const FatropVecBF &delta_zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper,
-            const FatropVecBF &delta_s) override;
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_L,
+            const FatropVecBF &sigma_U,
+            const FatropVecBF &gradb_L,
+            const FatropVecBF &gradb_U,
+            const FatropVecBF &lam_curr) override;
         // solve a KKT system
         int computeSDDeg(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
-            double mu,
-            double kappa_d,
+            const double mu,
+            const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &lam_curr,
-            const FatropVecBF &s,
-            const FatropVecBF &zL,
-            const FatropVecBF &zU,
             const FatropVecBF &delta_zL,
             const FatropVecBF &delta_zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper,
-            const FatropVecBF &delta_s);
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_L,
+            const FatropVecBF &sigma_U,
+            const FatropVecBF &gradb_L,
+            const FatropVecBF &gradb_U,
+            const FatropVecBF &lam_curr);
         // solve a KKT system
-        int
-        SolveInitialization(
+        int SolveInitialization(
             OCPKKTMemory *OCP,
             const FatropVecBF &lam,
             const FatropVecBF &ux_dummy,
@@ -66,15 +63,14 @@ namespace fatrop
             const double kappa_d,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &lam_curr,
-            const FatropVecBF &s,
-            const FatropVecBF &zL,
-            const FatropVecBF &zU,
             const FatropVecBF &delta_zL,
             const FatropVecBF &delta_zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper,
-            const FatropVecBF &delta_s);
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_L,
+            const FatropVecBF &sigma_U,
+            const FatropVecBF &gradb_L,
+            const FatropVecBF &gradb_U,
+            const FatropVecBF &lam_curr);
         FatropMemoryMatBF Ppt;
         FatropMemoryMatBF Hh;
         FatropMemoryMatBF AL;
