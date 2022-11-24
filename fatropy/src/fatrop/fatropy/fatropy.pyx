@@ -20,9 +20,9 @@ cdef class OCP:
     def Optimize(self):
         return self.myFatropApplication.get().Optimize()
 
-    @property
-    def sd_time(self):
-        return self.myOCPBuilder.fatropalg.get().sd_time
+    # @property
+    # def sd_time(self):
+    #     return self.myOCPBuilder.fatropalg.get().sd_time
 
     # @property
     # def hess_time(self):
