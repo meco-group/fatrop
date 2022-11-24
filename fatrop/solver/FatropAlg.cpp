@@ -158,10 +158,6 @@ int FatropAlg::Optimize()
             stats.time_total = total_time;
             stats.iterations_count = i;
             stats.Print();
-            // cout << "riccati time: " << sd_time << endl;
-            // cout << "riccati time succ/it: " << sd_time2 / i << endl;
-            // cout << "init time: " << init_time << endl;
-            // cout << "hess time " << hess_time << endl;
             fatropnlp_->Finalize();
             return 0;
         }
