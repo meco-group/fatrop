@@ -167,8 +167,10 @@ int OCPLSRiccati::computeSDDeg(
             GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
             for (int i = 0; i < ng_ineq; i++)
             {
-                double scaling_factor = VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i) + inertia_correction_w;
-                double grad_barrier = VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i) + VECEL(gradb_plus_p, offs_ineq_k + i);
+                double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction_w};
+                double scaling_factor = SUMMATION_ALG<3>(numbers);
+                double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
+                double grad_barrier = SUMMATION_ALG<3>(numbers2);
                 COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                 MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
             }
@@ -208,10 +210,10 @@ int OCPLSRiccati::computeSDDeg(
                 GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
                 for (int i = 0; i < ng_ineq; i++)
                 {
-                    double scaling_factor = VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i) + inertia_correction_w;
-                    double grad_barrier = VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i) + VECEL(gradb_plus_p, offs_ineq_k + i);
-                    // double scaling_factor = inertia_correction_w + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
-                    // double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                    double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction_w};
+                    double scaling_factor = SUMMATION_ALG<3>(numbers);
+                    double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
+                    double grad_barrier = SUMMATION_ALG<3>(numbers2);
                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                 }
@@ -331,7 +333,9 @@ int OCPLSRiccati::computeSDDeg(
                     double dz = grad_barrier_U - z + scaling_factor_U * ds;
                     VECEL(delta_zU_p, offs_ineq_k + i) = dz;
                 }
-                VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (scaling_factor_L + scaling_factor_U) * ds + grad_barrier_plus + inertia_correction_w * ds;
+                // kahan sum
+                double numbers[] = {grad_barrier_L, grad_barrier_U, scaling_factor_L * ds, scaling_factor_U * ds, grad_barrier_plus, inertia_correction_w * ds};
+                VECEL(lam_p, offs_g_ineq_k + i) = SUMMATION_ALG<6>(numbers);
             }
         }
     }
