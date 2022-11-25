@@ -23,8 +23,9 @@ namespace fatrop
         for (int ii = 1; ii < size; ii++)
         {
             double y = numbers[ii] - c;
-            double t = sum + y;
-            c = (t - sum) - y;
+            volatile double t = sum + y;
+            volatile double z = t - sum;
+            c = z - y;
             sum = t;
         }
         return sum;
