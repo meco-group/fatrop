@@ -11,6 +11,20 @@ namespace fatrop
         }
         return true;
     }
+    template <int size>
+    double kahan_sum(const double *numbers)
+    {
+        double sum = 0.0;
+        double c = 0.0;
+        for (int ii = 0; ii < size; ii++)
+        {
+            double y = numbers[ii] - c;
+            double t = sum + y;
+            c = (t - sum) - y;
+            sum = t;
+        }
+        return sum;
+    }
 } // namespace fatrop
 using namespace fatrop;
 OCPLSRiccati::OCPLSRiccati(const OCPDims &dims) : Ppt(dims.nx + 1, dims.nx, dims.K),
@@ -780,32 +794,11 @@ int OCPLSRiccati::computeSDnor(
             GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
             for (int i = 0; i < ng_ineq; i++)
             {
-                    // kahan sum
-                    double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction};
-                    double scaling_factor = 0.0;
-                    double c = 0.0;
-                    for (int ii = 0; ii < 3; ii++)
-                    {
-                        double y = numbers[ii] - c;
-                        double t = scaling_factor + y;
-                        c = (t - scaling_factor) - y;
-                        scaling_factor = t;
-                    }
-                    // double grad_barrier = VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i) + VECEL(gradb_plus_p, offs_ineq_k + i);
-                    double grad_barrier = 0;
-                    c = 0.0;
-                    double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i) , VECEL(gradb_U_p, offs_ineq_k + i) , VECEL(gradb_plus_p, offs_ineq_k + i)};
-                    for (int ii = 0; ii < 3; ii++)
-                    {
-                        double y = numbers2[ii] - c;
-                        double t = grad_barrier + y;
-                        c = (t - grad_barrier) - y;
-                        grad_barrier = t;
-                    }
-                // double scaling_factor = VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i) + inertia_correction;
-                // double grad_barrier = VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i) + VECEL(gradb_plus_p, offs_ineq_k + i);
-                // double scaling_factor = inertia_correction + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
-                // double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                // kahan sum
+                double numbers[]={VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction};
+                double scaling_factor = kahan_sum<3>(numbers);
+                double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
+                double grad_barrier = kahan_sum<3>(numbers2);
                 COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                 MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
             }
@@ -851,28 +844,9 @@ int OCPLSRiccati::computeSDnor(
                     // double scaling_factor = VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i) + inertia_correction;
                     // kahan sum
                     double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction};
-                    double scaling_factor = 0.0;
-                    double c = 0.0;
-                    for (int ii = 0; ii < 3; ii++)
-                    {
-                        double y = numbers[ii] - c;
-                        double t = scaling_factor + y;
-                        c = (t - scaling_factor) - y;
-                        scaling_factor = t;
-                    }
-                    // double grad_barrier = VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i) + VECEL(gradb_plus_p, offs_ineq_k + i);
-                    double grad_barrier = 0;
-                    c = 0.0;
-                    double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i) , VECEL(gradb_U_p, offs_ineq_k + i) , VECEL(gradb_plus_p, offs_ineq_k + i)};
-                    for (int ii = 0; ii < 3; ii++)
-                    {
-                        double y = numbers2[ii] - c;
-                        double t = grad_barrier + y;
-                        c = (t - grad_barrier) - y;
-                        grad_barrier = t;
-                    }
-                    // double scaling_factor = inertia_correction + VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i);
-                    // double grad_barrier = VECEL(gradb_plus_p, offs_ineq_k + i) + VECEL(gradb_L_p, offs_ineq_k + i) + VECEL(gradb_U_p, offs_ineq_k + i);
+                    double scaling_factor = kahan_sum<3>(numbers);
+                    double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
+                    double grad_barrier = kahan_sum<3>(numbers2);
                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                 }
@@ -1144,35 +1118,7 @@ int OCPLSRiccati::computeSDnor(
                 }
                 // kahan sum
                 double numbers[] = {grad_barrier_L, grad_barrier_U, scaling_factor_L * ds, scaling_factor_U * ds, grad_barrier_plus, inertia_correction * ds};
-                double sum = 0.0;
-                double c = 0.0;
-                for (int ii = 0; ii < 6; ii++)
-                {
-                    double y = numbers[ii] - c;
-                    double t = sum + y;
-                    c = (t - sum) - y;
-                    sum = t;
-                }
-                // double res = 0.0;
-                // for (int ii = 0; ii < 6; ii++)
-                // {
-                //     double largest_val = 0.0;
-                //     int largest_jj = 0;
-                //     for (int jj = 0; jj < 6; jj++)
-                //     {
-                //         double curr = numbers[jj];
-                //         curr = curr < 0 ? -curr : curr;
-                //         if(curr>largest_val)
-                //         {
-                //             largest_jj = jj;
-                //             largest_val = curr;
-                //         }
-                //     }
-                //     res += numbers[largest_jj];
-                //     numbers[largest_jj] =0.0;
-                // }
-                VECEL(lam_p, offs_g_ineq_k + i) = sum;
-                // VECEL(lam_p, offs_g_ineq_k + i) = grad_barrier_L + grad_barrier_U + (scaling_factor_L + scaling_factor_U) * ds + grad_barrier_plus + inertia_correction * ds;
+                VECEL(lam_p, offs_g_ineq_k + i) = kahan_sum<6>(numbers);
             }
         }
     }
