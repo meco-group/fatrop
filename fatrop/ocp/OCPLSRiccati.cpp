@@ -31,6 +31,25 @@ namespace fatrop
         return sum;
     }
     template <int size>
+    double kahan_sum_ld(const double *numbers)
+    {
+        if (size == 0)
+        {
+            return 0.0;
+        }
+        long double sum = numbers[0];
+        long double c = 0.0;
+        for (int ii = 1; ii < size; ii++)
+        {
+            long double y = numbers[ii] - c;
+            volatile long double t = sum + y;
+            volatile long double z = t - sum;
+            c = z - y;
+            sum = t;
+        }
+        return sum;
+    }
+    template <int size>
     double normal_sum(const double *numbers)
     {
         double sum = 0.0;
