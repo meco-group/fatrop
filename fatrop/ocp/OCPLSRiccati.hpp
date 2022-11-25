@@ -3,6 +3,7 @@
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
 #include <cmath>
+#define SUMMATION_ALG kahan_sum
 namespace fatrop
 {
     bool check_reg(const int m, MAT *sA, const int ai, const int aj);
