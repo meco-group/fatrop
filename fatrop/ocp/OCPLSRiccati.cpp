@@ -1127,13 +1127,13 @@ int OCPLSRiccati::computeSDnor(
                 double ds = VECEL(delta_s_p, offs_ineq_k + i);
                 {
                     double z = VECEL(zL_p, offs_ineq_k + i);
-                    double dz = -grad_barrier_L - z - scaling_factor_L * ds;
-                    VECEL(delta_zL_p, offs_ineq_k + i) = dz;
+                    double numbers[] = {-grad_barrier_L, -z, -scaling_factor_L * ds};
+                    VECEL(delta_zL_p, offs_ineq_k + i) = SUMMATION_ALG<3>(numbers);
                 }
                 {
                     double z = VECEL(zU_p, offs_ineq_k + i);
-                    double dz = grad_barrier_U - z + scaling_factor_U * ds;
-                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
+                    double numbers[] = {grad_barrier_U, -z, scaling_factor_U * ds};
+                    VECEL(delta_zU_p, offs_ineq_k + i) = SUMMATION_ALG<3>(numbers);
                 }
                 // kahan sum
                 double numbers[] = {grad_barrier_L, grad_barrier_U, scaling_factor_L * ds, scaling_factor_U * ds, grad_barrier_plus, inertia_correction * ds};
