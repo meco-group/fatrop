@@ -101,11 +101,11 @@ int FatropAlg::Optimize()
     for (int i = 0; i < maxiter; i++)
     {
         fatropdata_->obj_curr = EvalObjCurr();
-        if (fatropdata_->LamLinfCurr() > 1e12)
-        {
-            cout << "huge Lagrange multipliers -> set to zero" << endl;
-            fatropdata_->lam_curr.SetConstant(0.0);
-        }
+        // if (fatropdata_->LamLinfCurr() > 1e12)
+        // {
+        //     cout << "huge Lagrange multipliers -> set to zero" << endl;
+        //     fatropdata_->lam_curr.SetConstant(0.0);
+        // }
         EvalJac();      // needed for dual inf
         EvalGradCurr(); // needed for dual inf
         EvalDuInf();
