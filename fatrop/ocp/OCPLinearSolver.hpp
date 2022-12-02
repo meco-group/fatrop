@@ -24,17 +24,6 @@ namespace fatrop
             const FatropVecBF &gradb_plus,
             const FatropVecBF &zL_curr,
             const FatropVecBF &zU_curr) = 0;
-
-        virtual int
-        SolveInitialization(
-            OCPKKTMemory *OCP,
-            const FatropVecBF &lam,
-            const FatropVecBF &ux_dummy,
-            const FatropVecBF &s_dummy,
-            const FatropVecBF &zL,
-            const FatropVecBF &zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper) = 0;
     };
 
 } // namespace fatrop

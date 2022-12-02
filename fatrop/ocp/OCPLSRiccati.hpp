@@ -46,16 +46,6 @@ namespace fatrop
             const FatropVecBF &zL_curr,
             const FatropVecBF &zU_curr);
         // solve a KKT system
-        int SolveInitialization(
-            OCPKKTMemory *OCP,
-            const FatropVecBF &lam,
-            const FatropVecBF &ux_dummy,
-            const FatropVecBF &s_dummy,
-            const FatropVecBF &zL,
-            const FatropVecBF &zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper) override;
-        // solve a KKT system
         int
         computeSDnor(
             OCPKKTMemory *OCP,

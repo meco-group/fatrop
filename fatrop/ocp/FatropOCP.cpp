@@ -136,7 +136,8 @@ int FatropOCP::Initialization(
 {
     // assume constraint jacobian evaluated
     OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad, s_curr);
-    return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy, s_dummy, zL, zU, lower, upper);
+    return 0;
+    // return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy, s_dummy, zL, zU, lower, upper);
 }
 NLPDims FatropOCP::GetNLPDims() const
 {
