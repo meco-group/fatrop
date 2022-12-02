@@ -70,13 +70,9 @@ namespace fatrop
         int Initialization(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
-            const FatropVecBF &ux_dummy,
-            const FatropVecBF &s_dummy,
             FatropVecBF &s_curr,
             const FatropVecBF &zL,
-            const FatropVecBF &zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper) override;
+            const FatropVecBF &zU) override;
 
         NLPDims GetNLPDims() const override;
         void Finalize() override;
@@ -89,6 +85,13 @@ namespace fatrop
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;
+        FatropMemoryVecBF s_memvec;
+        FatropMemoryVecBF ux_memvec;
+        FatropVecBF sigma;
+        FatropVecBF gradb;
+        FatropVecBF s_dummy;
+        FatropVecBF s_zero;
+        FatropVecBF ux_dummy;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED

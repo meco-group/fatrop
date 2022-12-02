@@ -122,24 +122,16 @@ namespace fatrop
         int Initialization(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
-            const FatropVecBF &ux_dummy,
-            const FatropVecBF &s_dummy,
             FatropVecBF &s_curr,
             const FatropVecBF &zL,
-            const FatropVecBF &zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper) override
+            const FatropVecBF &zU) override
         {
             return FatropOCP::Initialization(
                 grad,
                 dlam,
-                ux_dummy,
-                s_dummy,
                 s_curr,
                 zL,
-                zU,
-                lower,
-                upper);
+                zU);
         }
 
         NLPDims GetNLPDims() const override

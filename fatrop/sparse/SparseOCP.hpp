@@ -183,20 +183,6 @@ namespace fatrop
             }
             return 0;
         }
-        int
-        SolveInitialization(
-            OCPKKTMemory *OCP,
-            const FatropVecBF &lam,
-            const FatropVecBF &ux_dummy,
-            const FatropVecBF &s_dummy,
-            const FatropVecBF &zL,
-            const FatropVecBF &zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper) override
-        {
-            // feature not implemented
-            assert(false);
-        };
         SparseKKTMatrix KKT;
         OCPDims dims;
         vector<var_sp> u_vec;

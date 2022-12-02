@@ -61,13 +61,9 @@ namespace fatrop
         virtual int Initialization(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
-            const FatropVecBF &ux_dummy,
-            const FatropVecBF &s_dummy,
             FatropVecBF &s_curr,
             const FatropVecBF &zL,
-            const FatropVecBF &zU,
-            const FatropVecBF &lower,
-            const FatropVecBF &upper) = 0;
+            const FatropVecBF &zU) = 0;
         virtual void Finalize(){};
         virtual void Reset(){};
     };

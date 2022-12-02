@@ -66,8 +66,17 @@ void FatropData::Initialize()
 }
 int FatropData::Reset()
 {
-    VECSE(zL_curr.nels(), 1.0, (VEC *)zL_curr, 0);
-    VECSE(zU_curr.nels(), 1.0, (VEC *)zU_curr, 0);
+    VEC *lower_bound_p = (VEC *)s_lower;
+    VEC *upper_bound_p = (VEC *)s_upper;
+    VEC *zL_p = (VEC *)zL_curr;
+    VEC *zU_p = (VEC *)zU_curr;
+    for (int i = 0; i < n_ineqs; i++)
+    {
+        double loweri = VECEL(lower_bound_p, i);
+        double upperi = VECEL(upper_bound_p, i);
+        VECEL(zL_p, i) = !isinf(loweri) ? 1.0 : 0.0;
+        VECEL(zU_p, i) = !isinf(upperi) ? 1.0 : 0.0;
+    }
     VECSE(lam_curr.nels(), 0.0, (VEC *)lam_curr, 0);
     VECSE(s_curr.nels(), 0.0, (VEC *)s_curr, 0);
     x_curr.copy(x_initial);

@@ -3,7 +3,12 @@ using namespace fatrop;
 FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,
-    const shared_ptr<OCPScalingMethod> &scaler) : ocp_(ocp), ls_(ls), scaler_(scaler), ocpkktmemory_(ocp_->GetOCPDims()){};
+    const shared_ptr<OCPScalingMethod> &scaler) : ocp_(ocp), ls_(ls), scaler_(scaler), ocpkktmemory_(ocp_->GetOCPDims()), s_memvec(this->GetNLPDims().nineqs, 4), ux_memvec(this->GetNLPDims().nvars, 1),
+                                                  sigma(s_memvec[0]),
+                                                  gradb(s_memvec[1]),
+                                                  s_dummy(s_memvec[2]),
+                                                  s_zero(s_memvec[3]),
+                                                  ux_dummy(ux_memvec[0]){};
 int FatropOCP::EvalHess(
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -126,18 +131,35 @@ int FatropOCP::EvalDuInf(
 int FatropOCP::Initialization(
     const FatropVecBF &grad,
     FatropVecBF &dlam,
-    const FatropVecBF &ux_dummy,
-    const FatropVecBF &s_dummy,
     FatropVecBF &s_curr,
     const FatropVecBF &zL,
-    const FatropVecBF &zU,
-    const FatropVecBF &lower,
-    const FatropVecBF &upper)
+    const FatropVecBF &zU)
 {
     // assume constraint jacobian evaluated
     OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad, s_curr);
+    s_dummy.SetConstant(0.0);
+    s_zero.SetConstant(0.0);
+    ux_dummy.SetConstant(0.0);
+    sigma.SetConstant(1.0);
+    axpy(-1.0, zL, zU, gradb);
+
+    return ls_->computeSD(
+        &ocpkktmemory_,
+        0.0,
+        0.0,
+        ux_dummy,
+        dlam,
+        s_dummy,
+        s_dummy,
+        s_dummy,
+        sigma,
+        s_zero,
+        gradb,
+        s_zero,
+        s_zero,
+        zL,
+        zU);
     return 0;
-    // return ls_->SolveInitialization(&ocpkktmemory_, dlam, ux_dummy, s_dummy, zL, zU, lower, upper);
 }
 NLPDims FatropOCP::GetNLPDims() const
 {
