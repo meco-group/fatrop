@@ -8,9 +8,9 @@ aux/DynamicLib.hpp                          aux/DynamicLib.cpp
 aux/FatropVector.hpp                        aux/FatropVector.cpp
 aux/LinearAlgebra.hpp                       aux/LinearAlgebra.cpp
 aux/SmartPtr.hpp                            aux/SmartPtr.cpp
-debug/FatropDebugTools.hpp                  debug/FatropDebugTools.cpp
-debug/LinearAlgebraEigen.hpp                debug/LinearAlgebraEigen.cpp
-debug/RandomOCP.hpp                         debug/RandomOCP.cpp
+# debug/FatropDebugTools.hpp                  debug/FatropDebugTools.cpp
+# debug/LinearAlgebraEigen.hpp                debug/LinearAlgebraEigen.cpp
+# debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/BFOCP.hpp                               ocp/BFOCP.cpp
 ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
@@ -67,9 +67,9 @@ aux/DynamicLib.hpp
 aux/FatropVector.hpp
 aux/LinearAlgebra.hpp
 aux/SmartPtr.hpp
-debug/FatropDebugTools.hpp
-debug/LinearAlgebraEigen.hpp
-debug/RandomOCP.hpp
+# debug/FatropDebugTools.hpp
+# debug/LinearAlgebraEigen.hpp
+# debug/RandomOCP.hpp
 function_evaluation/FunctionEvaluation.hpp
 ocp/BFOCP.hpp
 ocp/BFOCPAdapter.hpp
