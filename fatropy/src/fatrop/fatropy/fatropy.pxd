@@ -47,11 +47,17 @@ cdef extern from "FatropApplication.hpp" namespace "fatrop":
         int Optimize()
 
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+    cdef cppclass OCP:
+        void SetParams(const vector[double] &stage_params_in, const vector[double] &global_params_in)
+        void SetInitial(const shared_ptr[FatropData] &fatropdata, vector[double] &initial_u, vector[double] &initial_x)
+    
+cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:
         OCPBuilder(const string &functions, const string &json_spec_file) except +
         shared_ptr[FatropAlg] fatropalg
         shared_ptr[FatropData] fatropdata
         shared_ptr[FatropParams] fatropparams
+        shared_ptr[OCP] ocptempladapter
         vector[double] initial_u
         vector[double] initial_x
         vector[double] lower

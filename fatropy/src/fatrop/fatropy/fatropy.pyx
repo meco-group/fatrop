@@ -55,8 +55,12 @@ cdef class OCP:
     def SetBounds(self):
         self.myOCPBuilder.SetBounds()
 
-    def SetInitial(self):
-        self.myOCPBuilder.SetInitial()
+    # def SetInitial(self):
+    #     self.myOCPBuilder.SetInitial()
+    def SetParams(self, stage_params_in, global_params_in):
+        self.myOCPBuilder.ocptempladapter.get().SetParams(stage_params_in, global_params_in)
+    def SetInitial(self, initial_u, initial_x):
+        self.myOCPBuilder.ocptempladapter.get().SetInitial(self.myOCPBuilder.fatropdata, initial_u, initial_x)
 
     # Attribute access
     @property
