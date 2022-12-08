@@ -26,7 +26,7 @@ namespace fatrop
                                                                                                 journaller),
                                                         almdata_(fatropnlpal->GetNOIneqs(), fatropnlpal->GetNLPDims().nvars)
         {
-             fatropdata->x_initial.copyto(almdata_.initial_x);
+            fatropdata->x_initial.copyto(almdata_.initial_x);
         }
         void Initialize() override{};
         void Reset() override{};
@@ -34,6 +34,10 @@ namespace fatrop
         void SetInitial(const vector<double> &initial) override;
         void GetSolution(vector<double> &sol) override;
         int Optimize() override;
+        void WarmStart() override
+        {
+            innersolver_.fatropdata_->x_curr.copyto(almdata_.initial_x);
+        }
         const shared_ptr<FatropNLPAL> fatropnlpal_;
         FatropAlg innersolver_;
         FatropALMData almdata_;

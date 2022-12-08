@@ -19,6 +19,8 @@ cdef class OCP:
 
     def Optimize(self):
         return self.myFatropApplication.get().Optimize()
+    def WarmStart(self):
+        return self.myFatropApplication.get().WarmStart()
 
     # @property
     # def sd_time(self):

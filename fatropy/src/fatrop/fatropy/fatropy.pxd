@@ -44,6 +44,7 @@ cdef extern from "FatropApplication.hpp" namespace "fatrop":
         void SetBounds(const vector[double]& lower, const vector[double]& upper)
         void SetInitial(const vector[double]& initial)
         void GetSolution(vector[double]& sol)
+        void WarmStart()
         int Optimize()
 
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":

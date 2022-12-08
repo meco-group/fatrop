@@ -45,6 +45,10 @@ namespace fatrop
         int EvalDuInf();
         inline int Initialization();
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu);
+        void WarmStart() override
+        {
+            fatropdata_->x_initial.copy(fatropdata_->x_curr);
+        };
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<FatropParams> fatropparams_;
