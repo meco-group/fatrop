@@ -1,42 +1,24 @@
 #include "OCPBuilder.hpp"
 using namespace fatrop;
 
-OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int K, int control, const vector<int> &offsets_in, const vector<int> &offsets_out, const shared_ptr<FatropData> &fatropdata) : nu(nu),
-                                                                                                                                                                                      nx(nx),
-                                                                                                                                                                                      K(K),
-                                                                                                                                                                                      control(control),
-                                                                                                                                                                                      offsets_in(offsets_in),
-                                                                                                                                                                                      offsets_out(offsets_out),
-                                                                                                                                                                                      no_var(offsets_in.size()),
-                                                                                                                                                                                      fatropdata_(fatropdata)
+OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata) : nu(nu),
+                                                                                                                                                                       nx(nx),
+                                                                                                                                                                       no_stage_params(no_stage_params),
+                                                                                                                                                                       K(K),
+                                                                                                                                                                       eval_(eval),
+                                                                                                                                                                       fatropdata_(fatropdata)
 {
 }
 int OCPSolutionSampler::Sample(vector<double> &sample)
 {
-    if (control)
+    double *sol_p = ((VEC *)fatropdata_->x_curr)->pa;
+    double *res_p = sample.data();
+    int size = eval_->Size();
+    for (int k = 0; k < K - 1; k++)
     {
-        for (int k = 0; k < K - 1; k++)
-        {
-            for (int i = 0; i < no_var; i++)
-            {
-                sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + offsets_out.at(i));
-            }
-        }
-    }
-    else
-    {
-        for (int k = 0; k < K - 1; k++)
-        {
-            for (int i = 0; i < no_var; i++)
-            {
-                sample.at(k * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * k + nu + offsets_out.at(i));
-            }
-        }
-        for (int i = 0; i < no_var; i++)
-        {
-            sample.at((K - 1) * no_var + offsets_in.at(i)) = fatropdata_->x_curr.at((nu + nx) * (K - 1) + offsets_out.at(i));
-        }
-    }
+        eval_->Eval(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, nullptr, nullptr, res_p + k * size);
+    };
+    eval_->Eval(sol_p + (K-2) * (nu + nx), sol_p + (K-1) * (nu + nx), nullptr, nullptr, res_p + (K-1) * size);
     return 0;
 }
 
@@ -45,6 +27,7 @@ OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file) : 
 }
 shared_ptr<FatropApplication> OCPBuilder::Build()
 {
+    handle = make_shared<DLHandler>(functions);
     std::ifstream t(json_spec_file);
     std::stringstream buffer;
     buffer << t.rdbuf();
@@ -60,7 +43,6 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     const int ng_ineqF = json_spec["ng_ineqF"];
     const int n_stage_params = json_spec["n_stage_params"];
     const int n_global_params = json_spec["n_global_params"];
-    shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
     EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
@@ -164,22 +146,22 @@ int OCPBuilder::GetVariableMap(const string &variable_type, const string &variab
     return 0;
 }
 
-int OCPBuilder::GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to)
+int OCPBuilder::GetVariableMapState(const string &variable_name, vector<int> &from, vector<int> &to)
 {
     assert(solver_built);
     return GetVariableMap("states_offset", variable_name, from, to);
 }
-int OCPBuilder::GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to)
+int OCPBuilder::GetVariableMapControl(const string &variable_name, vector<int> &from, vector<int> &to)
 {
     assert(solver_built);
     return GetVariableMap("controls_offset", variable_name, from, to);
 }
-int OCPBuilder::GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to)
+int OCPBuilder::GetVariableMapControlParam(const string &variable_name, vector<int> &from, vector<int> &to)
 {
     assert(solver_built);
     return GetVariableMap("control_params_offset", variable_name, from, to);
 }
-int OCPBuilder::GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to)
+int OCPBuilder::GetVariableMapGlobalParam(const string &variable_name, vector<int> &from, vector<int> &to)
 {
     assert(solver_built);
     return GetVariableMap("global_params_offset", variable_name, from, to);
@@ -190,14 +172,14 @@ OCPSolutionSampler OCPBuilder::GetSamplerState(const string &variable_name)
     assert(solver_built);
     vector<int> in;
     vector<int> out;
-    GetVariableMapStates(variable_name, in, out);
-    return OCPSolutionSampler(nu, nx, K, false, in, out, fatropdata);
+    GetVariableMapState(variable_name, in, out);
+    return OCPSolutionSampler(nu, nx, 0, K, make_shared<IndexEvaluator>(false, in, out), fatropdata);
 }
-OCPSolutionSampler OCPBuilder::GetSamplerControls(const string &variable_name)
+OCPSolutionSampler OCPBuilder::GetSamplerControl(const string &variable_name)
 {
     assert(solver_built);
     vector<int> in;
     vector<int> out;
-    GetVariableMapControls(variable_name, in, out);
-    return OCPSolutionSampler(nu, nx, K, true, in, out, fatropdata);
+    GetVariableMapControl(variable_name, in, out);
+    return OCPSolutionSampler(nu, nx, 0, K, make_shared<IndexEvaluator>(true, in, out), fatropdata);
 }

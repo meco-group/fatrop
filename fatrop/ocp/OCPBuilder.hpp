@@ -16,21 +16,89 @@
 #include "json/json.h"
 #include <sstream>
 #include <templates/FatropApplication.hpp>
+#include <map>
 namespace fatrop
 {
+    class StageEvaluator
+    {
+    public:
+        virtual void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) = 0;
+        virtual int Size() = 0;
+    };
+    class IndexEvaluator : public StageEvaluator
+    {
+    public:
+        IndexEvaluator(const bool control, const vector<int> offsets_in, const vector<int> offsets_out) : _no_var(offsets_in.size()),
+                                                                                                          _offsets_in(offsets_in),
+                                                                                                          _offsets_out(offsets_out),
+                                                                                                          _control(control)
+        {
+        }
+        void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) override
+        {
+            if (_control)
+            {
+                for (int i = 0; i < _no_var; i++)
+                {
+                    res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
+                }
+            }
+            else
+            {
+                for (int i = 0; i < _no_var; i++)
+                {
+                    res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
+                }
+            }
+        };
+        int Size() override
+        {
+            return _no_var;
+        }
+
+    private:
+        const int _no_var;
+        const vector<int> _offsets_in;
+        const vector<int> _offsets_out;
+        const bool _control;
+    };
+    class EvalBaseSE : public StageEvaluator
+    {
+    public:
+        EvalBaseSE(const shared_ptr<EvalBase> &evalbase) : evalbase_(evalbase), size_(evalbase->out_m * evalbase->out_n)
+        {
+        }
+        void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) override
+        {
+            const double *arg[] = {u, x, stage_params, global_params};
+            evalbase_->eval_array(arg, res);
+        }
+        int Size()
+        {
+            return size_;
+        }
+
+    private:
+        shared_ptr<EvalBase> evalbase_;
+        const int size_;
+    };
+
     class OCPSolutionSampler
     {
     public:
-        OCPSolutionSampler(int nu, int nx, int K, int control, const vector<int> &offsets_in, const vector<int> &offsets_out, const shared_ptr<FatropData> &fatropdata);
+        OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata);
         int Sample(vector<double> &sample);
+        int Size()
+        {
+            return K*eval_->Size();
+        }
+
     private:
         const int nu;
         const int nx;
+        const int no_stage_params;
         const int K;
-        bool control;
-        const vector<int> offsets_in;
-        const vector<int> offsets_out;
-        const int no_var;
+        shared_ptr<StageEvaluator> eval_;
         shared_ptr<FatropData> fatropdata_;
     };
     class OCPBuilder
@@ -71,17 +139,23 @@ namespace fatrop
         {
             return ocptempladapteror->globalparams;
         }
+        shared_ptr<DLHandler> handle;
 
     public:
         void SetBounds();
         void SetInitial();
         int GetVariableMap(const string &variable_type, const string &variable_name, vector<int> &from, vector<int> &to);
-        int GetVariableMapStates(const string &variable_name, vector<int> &from, vector<int> &to);
-        int GetVariableMapControls(const string &variable_name, vector<int> &from, vector<int> &to);
-        int GetVariableMapControlParams(const string &variable_name, vector<int> &from, vector<int> &to);
-        int GetVariableMapGlobalParams(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapState(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapControl(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapControlParam(const string &variable_name, vector<int> &from, vector<int> &to);
+        int GetVariableMapGlobalParam(const string &variable_name, vector<int> &from, vector<int> &to);
         OCPSolutionSampler GetSamplerState(const string &variable_name);
-        OCPSolutionSampler GetSamplerControls(const string &variable_name);
+        OCPSolutionSampler GetSamplerControl(const string &variable_name);
+        OCPSolutionSampler GetSamplerCustom(const string &sampler_name)
+        {
+            auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
+            return OCPSolutionSampler(nu, nx, 0, K, make_shared<EvalBaseSE>(eval), fatropdata);
+        };
     };
 }
 #endif // OCPBUILDERINCLUDED
