@@ -57,6 +57,8 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         OCPSolutionSampler(const OCPSolutionSampler& cp)
         int Sample(vector[double]& sample)
         int Size()
+        int n_rows()
+        int n_cols()
     
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:

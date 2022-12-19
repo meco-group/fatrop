@@ -26,13 +26,11 @@ cdef class OCP:
     def Sample(self, name):
         cdef OCPSolutionSampler * sampler 
         sampler = new OCPSolutionSampler(self.myOCPBuilder.GetSamplerCustom(name.encode('utf-8')))
-        retval = np.empty(sampler.Size())
         cdef vector[double] buffer
         buffer = vector[double](sampler.Size())
         sampler.Sample(buffer)
-        retval[:] = buffer[:]
         del sampler
-        return retval
+        return np.asarray(buffer)
 
     # @property
     # def sd_time(self):
