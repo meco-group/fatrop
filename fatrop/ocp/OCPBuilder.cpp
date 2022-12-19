@@ -1,13 +1,13 @@
 #include "OCPBuilder.hpp"
 using namespace fatrop;
 
-OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter>& ocp) : nu(nu),
-                                                                                                                                                                       nx(nx),
-                                                                                                                                                                       no_stage_params(no_stage_params),
-                                                                                                                                                                       K_(K),
-                                                                                                                                                                       eval_(eval),
-                                                                                                                                                                       fatropdata_(fatropdata),
-                                                                                                                                                                       ocp_(ocp)
+OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp) : nu(nu),
+                                                                                                                                                                                                            nx(nx),
+                                                                                                                                                                                                            no_stage_params(no_stage_params),
+                                                                                                                                                                                                            K_(K),
+                                                                                                                                                                                                            eval_(eval),
+                                                                                                                                                                                                            fatropdata_(fatropdata),
+                                                                                                                                                                                                            ocp_(ocp)
 {
 }
 int OCPSolutionSampler::Sample(vector<double> &sample)
@@ -19,9 +19,9 @@ int OCPSolutionSampler::Sample(vector<double> &sample)
     int size = eval_->Size();
     for (int k = 0; k < K_ - 1; k++)
     {
-        eval_->Eval(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, global_params_p, stage_params_p + k*no_stage_params, res_p + k * size);
+        eval_->Eval(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, global_params_p, stage_params_p + k * no_stage_params, res_p + k * size);
     };
-    eval_->Eval(sol_p + (K_-2) * (nu + nx), sol_p + (K_-1) * (nu + nx), global_params_p, stage_params_p + (K_-1)*no_stage_params, res_p + (K_-1) * size);
+    eval_->Eval(sol_p + (K_ - 2) * (nu + nx), sol_p + (K_ - 1) * (nu + nx), global_params_p, stage_params_p + (K_ - 1) * no_stage_params, res_p + (K_ - 1) * size);
     return 0;
 }
 
@@ -124,12 +124,21 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     journaller = make_shared<Journaller>(params->maxiter + 1);
     linesearch = DDP ? make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter) : make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
+    solver_built = true;
     vector<string> sampler_names = json_spec["samplers"];
-    for(auto sampler_name: sampler_names)
+    for (auto sampler_name : sampler_names)
     {
         sampler_map[sampler_name] = make_shared<OCPSolutionSampler>(GetSamplerCustom(sampler_name));
     }
-    solver_built = true;
+
+    for (auto param_name: json_spec["global_params_offset"].as_object().keys())
+    {
+        parameter_setter_map[param_name] = make_shared<ParameterSetter>(GetParameterSetterGlobal(param_name));
+    }
+    for (auto param_name: json_spec["control_params_offset"].as_object().keys())
+    {
+        parameter_setter_map[param_name] = make_shared<ParameterSetter>(GetParameterSetterControl(param_name));
+    }
     return fatropalg;
 }
 void OCPBuilder::SetBounds()

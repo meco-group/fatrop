@@ -129,38 +129,45 @@ namespace fatrop
         shared_ptr<BFOCPAdapter> ocp_;
     };
 
-    // class ParameterSetter
-    // {
-    //     void SetValue(double *value)
-    //     {
-    //         if (_global)
-    //         {
-    //             double *params = ocp_->globalparams();
-    //             for (int i = 0; i < _no_var; i++)
-    //             {
-    //                 // res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
-    //             }
-    //         }
-    //         else // stage paramter
-    //         {
-    //             double *params = ocp_->stageparams();
-    //             for (int k = 0; k < K; k++)
-    //             {
-    //                 for (int i = 0; i < _no_var; i++)
-    //                 {
-    //                     // res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     shared_ptr<BFOCPAdapter> ocp_;
-    //     const vector<int> _offsets_in;
-    //     const vector<int> _offsets_out;
-    //     const int no_gobal_parameters;
-    //     const int _no_var;
-    //     const int K;
-    //     const bool _global;
-    // };
+    class ParameterSetter
+    {
+    public:
+        ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
+        {
+        }
+        void SetValue(double *value)
+        {
+            if (_global)
+            {
+                double *params = ocp_->GetGlobalParams();
+                for (int i = 0; i < _no_var; i++)
+                {
+                    params[_offsets_in.at(i)] = value[_offsets_out.at(i)];
+                }
+            }
+            else // stage paramter
+            {
+                double *params = ocp_->GetStageParams();
+                for (int k = 0; k < K; k++)
+                {
+                    for (int i = 0; i < _no_var; i++)
+                    {
+                        params[_offsets_in.at(i) + k * no_stage_params] = value[_offsets_out.at(i)];
+                    }
+                }
+            }
+        }
+
+    private:
+        shared_ptr<BFOCPAdapter> ocp_;
+        const vector<int> _offsets_in;
+        const vector<int> _offsets_out;
+        const int no_stage_params;
+        const int _no_var;
+        const int K;
+        const bool _global;
+    };
+
     class OCPBuilder
     {
     public:
@@ -203,11 +210,16 @@ namespace fatrop
         }
         shared_ptr<DLHandler> handle;
         map<string, shared_ptr<OCPSolutionSampler>> sampler_map;
+        map<string, shared_ptr<ParameterSetter>> parameter_setter_map;
 
     public:
         shared_ptr<OCPSolutionSampler> GetSampler(const string &sampler_name)
         {
             return sampler_map[sampler_name];
+        }
+        shared_ptr<ParameterSetter> GetParameterSetter(const string &parameter_setter_name)
+        {
+            return parameter_setter_map[parameter_setter_name];
         }
 
     private:
@@ -218,6 +230,20 @@ namespace fatrop
         int GetVariableMapControl(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapControlParam(const string &variable_name, vector<int> &from, vector<int> &to);
         int GetVariableMapGlobalParam(const string &variable_name, vector<int> &from, vector<int> &to);
+        ParameterSetter GetParameterSetterGlobal(const string &parameter_name)
+        {
+            vector<int> in;
+            vector<int> out;
+            GetVariableMapGlobalParam(parameter_name, in, out);
+            return ParameterSetter(ocptempladapteror, in, out, no_stage_params, in.size(), K, true);
+        }
+        ParameterSetter GetParameterSetterControl(const string &parameter_name)
+        {
+            vector<int> in;
+            vector<int> out;
+            GetVariableMapControlParam(parameter_name, in, out);
+            return ParameterSetter(ocptempladapteror, in, out, no_stage_params, in.size(), K, false);
+        }
         OCPSolutionSampler GetSamplerState(const string &variable_name);
         OCPSolutionSampler GetSamplerControl(const string &variable_name);
         OCPSolutionSampler GetSamplerCustom(const string &sampler_name)
