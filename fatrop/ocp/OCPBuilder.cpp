@@ -24,6 +24,12 @@ int OCPSolutionSampler::Sample(vector<double> &sample)
     eval_->Eval(sol_p + (K_ - 2) * (nu + nx), sol_p + (K_ - 1) * (nu + nx), global_params_p, stage_params_p + (K_ - 1) * no_stage_params, res_p + (K_ - 1) * size);
     return 0;
 }
+vector<double> OCPSolutionSampler::Sample()
+{
+    vector<double> res(Size());
+    Sample(res);
+    return res;
+}
 
 OCPBuilder::OCPBuilder(const string &functions, const string &json_spec_file) : functions(functions), json_spec_file(json_spec_file)
 {

@@ -102,6 +102,7 @@ namespace fatrop
     public:
         OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp);
         int Sample(vector<double> &sample);
+        vector<double> Sample();
         int Size()
         {
             return K_ * eval_->Size();
@@ -135,14 +136,14 @@ namespace fatrop
         ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
         {
         }
-        void SetValue(double *value)
+        void SetValue(const double value[])
         {
             if (_global)
             {
                 double *params = ocp_->GetGlobalParams();
                 for (int i = 0; i < _no_var; i++)
                 {
-                    params[_offsets_in.at(i)] = value[_offsets_out.at(i)];
+                    params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
                 }
             }
             else // stage paramter
@@ -152,10 +153,15 @@ namespace fatrop
                 {
                     for (int i = 0; i < _no_var; i++)
                     {
-                        params[_offsets_in.at(i) + k * no_stage_params] = value[_offsets_out.at(i)];
+                        params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
                     }
                 }
             }
+        }
+        void SetValue(const initializer_list<double> il_)
+        {
+            assert(il_.size() == _no_var);
+            SetValue(il_.begin());
         }
 
     private:
