@@ -207,7 +207,7 @@ namespace json
 	 * \example jobject.cpp
 	 * This is a basic of example of using simpleson for manipulating JSON
 	 *
-	 * \example rootarray.cpp
+	 * \example rootarray.cppc
 	 * This is an example of how to handle JSON where the root object is an array
 	 *
 	 * \example objectarray.cpp
@@ -226,6 +226,15 @@ namespace json
 		bool array_flag;
 
 	public:
+		std::vector<std::string> keys()
+		{
+			std::vector<std::string> res(data.size());
+			for(size_t i=0; i<data.size(); i++)
+			{
+				res.at(i) = data.at(i).first;
+			}
+			return res;
+		}
 		/*! \brief Default constructor
 		 *
 		 * @param array If true, the instance is initialized as an array. If false, the instance is initalized as an object.

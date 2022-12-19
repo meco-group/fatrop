@@ -130,6 +130,14 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     {
         sampler_map[sampler_name] = make_shared<OCPSolutionSampler>(GetSamplerCustom(sampler_name));
     }
+    for (auto var_name: json_spec["states_offset"].as_object().keys())
+    {
+        sampler_map[string("state_") + var_name] = make_shared<OCPSolutionSampler>(GetSamplerState(var_name));
+    }
+    for (auto var_name: json_spec["controls_offset"].as_object().keys())
+    {
+        sampler_map[string("control_") + var_name] = make_shared<OCPSolutionSampler>(GetSamplerControl(var_name));
+    }
 
     for (auto param_name: json_spec["global_params_offset"].as_object().keys())
     {
