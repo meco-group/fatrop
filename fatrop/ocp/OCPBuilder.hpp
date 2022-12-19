@@ -100,7 +100,7 @@ namespace fatrop
     class OCPSolutionSampler
     {
     public:
-        OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata);
+        OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter>& ocp);
         int Sample(vector<double> &sample);
         int Size()
         {
@@ -126,6 +126,10 @@ namespace fatrop
         const int K_;
         shared_ptr<StageEvaluator> eval_;
         shared_ptr<FatropData> fatropdata_;
+        shared_ptr<BFOCPAdapter> ocp_;
+    };
+    class ParameterSetter
+    {
     };
     class OCPBuilder
     {
@@ -185,7 +189,7 @@ namespace fatrop
         OCPSolutionSampler GetSamplerCustom(const string &sampler_name)
         {
             auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-            return OCPSolutionSampler(nu, nx, 0, K, make_shared<EvalBaseSE>(eval), fatropdata);
+            return OCPSolutionSampler(nu, nx, 0, K, make_shared<EvalBaseSE>(eval), fatropdata, ocptempladapteror);
         };
     };
 }
