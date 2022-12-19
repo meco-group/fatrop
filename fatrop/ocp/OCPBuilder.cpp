@@ -19,7 +19,7 @@ int OCPSolutionSampler::Sample(vector<double> &sample)
     int size = eval_->Size();
     for (int k = 0; k < K_ - 1; k++)
     {
-        eval_->Eval(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, global_params_p, stage_params_p + no_stage_params*k, res_p + k * size);
+        eval_->Eval(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, global_params_p, stage_params_p + k*no_stage_params, res_p + k * size);
     };
     eval_->Eval(sol_p + (K_-2) * (nu + nx), sol_p + (K_-1) * (nu + nx), global_params_p, stage_params_p + (K_-1)*no_stage_params, res_p + (K_-1) * size);
     return 0;
@@ -44,8 +44,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     const int ng_ineqI = json_spec["ng_ineqI"];
     const int ng_ineq = json_spec["ng_ineq"];
     const int ng_ineqF = json_spec["ng_ineqF"];
-    int no_stage_params = json_spec["n_stage_params"];
-    int no_global_params = json_spec["n_global_params"];
+    no_stage_params = json_spec["n_stage_params"];
+    no_global_params = json_spec["n_global_params"];
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
     EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
