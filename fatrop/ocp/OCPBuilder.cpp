@@ -4,7 +4,7 @@ using namespace fatrop;
 OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata) : nu(nu),
                                                                                                                                                                        nx(nx),
                                                                                                                                                                        no_stage_params(no_stage_params),
-                                                                                                                                                                       K(K),
+                                                                                                                                                                       K_(K),
                                                                                                                                                                        eval_(eval),
                                                                                                                                                                        fatropdata_(fatropdata)
 {
@@ -14,11 +14,11 @@ int OCPSolutionSampler::Sample(vector<double> &sample)
     double *sol_p = ((VEC *)fatropdata_->x_curr)->pa;
     double *res_p = sample.data();
     int size = eval_->Size();
-    for (int k = 0; k < K - 1; k++)
+    for (int k = 0; k < K_ - 1; k++)
     {
         eval_->Eval(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, nullptr, nullptr, res_p + k * size);
     };
-    eval_->Eval(sol_p + (K-2) * (nu + nx), sol_p + (K-1) * (nu + nx), nullptr, nullptr, res_p + (K-1) * size);
+    eval_->Eval(sol_p + (K_-2) * (nu + nx), sol_p + (K_-1) * (nu + nx), nullptr, nullptr, res_p + (K_-1) * size);
     return 0;
 }
 

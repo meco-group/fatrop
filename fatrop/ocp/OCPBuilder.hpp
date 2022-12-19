@@ -16,14 +16,18 @@
 #include "json/json.h"
 #include <sstream>
 #include <templates/FatropApplication.hpp>
-#include <map>
 namespace fatrop
 {
     class StageEvaluator
     {
     public:
         virtual void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) = 0;
-        virtual int Size() = 0;
+        virtual int n_rows() = 0;
+        virtual int n_cols() = 0;
+        int Size()
+        {
+            return n_rows() * n_cols();
+        }
     };
     class IndexEvaluator : public StageEvaluator
     {
@@ -51,9 +55,13 @@ namespace fatrop
                 }
             }
         };
-        int Size() override
+        int n_rows() override
         {
             return _no_var;
+        }
+        int n_cols() override
+        {
+            return 1;
         }
 
     private:
@@ -65,7 +73,7 @@ namespace fatrop
     class EvalBaseSE : public StageEvaluator
     {
     public:
-        EvalBaseSE(const shared_ptr<EvalBase> &evalbase) : evalbase_(evalbase), size_(evalbase->out_m * evalbase->out_n)
+        EvalBaseSE(const shared_ptr<EvalBase> &evalbase) : evalbase_(evalbase), n_rows_(evalbase->out_m), n_cols_(evalbase->out_n)
         {
         }
         void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) override
@@ -73,14 +81,19 @@ namespace fatrop
             const double *arg[] = {u, x, stage_params, global_params};
             evalbase_->eval_array(arg, res);
         }
-        int Size()
+        int n_rows() override
         {
-            return size_;
+            return n_rows_;
+        }
+        int n_cols() override
+        {
+            return n_cols_;
         }
 
     private:
         shared_ptr<EvalBase> evalbase_;
-        const int size_;
+        const int n_rows_;
+        const int n_cols_;
     };
 
     class OCPSolutionSampler
@@ -90,14 +103,26 @@ namespace fatrop
         int Sample(vector<double> &sample);
         int Size()
         {
-            return K*eval_->Size();
+            return K_ * eval_->Size();
+        }
+        int n_rows()
+        {
+            return eval_->n_rows();
+        }
+        int n_cols()
+        {
+            return eval_->n_cols();
+        }
+        int K()
+        {
+            return K_;
         }
 
     private:
         const int nu;
         const int nx;
         const int no_stage_params;
-        const int K;
+        const int K_;
         shared_ptr<StageEvaluator> eval_;
         shared_ptr<FatropData> fatropdata_;
     };
