@@ -44,8 +44,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     const int ng_ineqI = json_spec["ng_ineqI"];
     const int ng_ineq = json_spec["ng_ineq"];
     const int ng_ineqF = json_spec["ng_ineqF"];
-    const int n_stage_params = json_spec["n_stage_params"];
-    const int n_global_params = json_spec["n_global_params"];
+    int no_stage_params = json_spec["n_stage_params"];
+    int no_global_params = json_spec["n_global_params"];
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
     EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
@@ -69,7 +69,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     EvalCasGen gineqf(handle, "gineq");
     EvalCasGen GgineqFtf(handle, "GgineqFt");
     EvalCasGen gineqFf(handle, "gineqF");
-    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, n_stage_params, n_global_params, K,
+    shared_ptr<BFOCP> ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
                                                                  BAbtf,
                                                                  bkf,
                                                                  RSQrqtIf,
@@ -178,7 +178,7 @@ OCPSolutionSampler OCPBuilder::GetSamplerState(const string &variable_name)
     vector<int> in;
     vector<int> out;
     GetVariableMapState(variable_name, in, out);
-    return OCPSolutionSampler(nu, nx, 0, K, make_shared<IndexEvaluator>(false, in, out), fatropdata, ocptempladapteror);
+    return OCPSolutionSampler(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(false, in, out), fatropdata, ocptempladapteror);
 }
 OCPSolutionSampler OCPBuilder::GetSamplerControl(const string &variable_name)
 {
@@ -186,5 +186,5 @@ OCPSolutionSampler OCPBuilder::GetSamplerControl(const string &variable_name)
     vector<int> in;
     vector<int> out;
     GetVariableMapControl(variable_name, in, out);
-    return OCPSolutionSampler(nu, nx, 0, K, make_shared<IndexEvaluator>(true, in, out), fatropdata, ocptempladapteror);
+    return OCPSolutionSampler(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(true, in, out), fatropdata, ocptempladapteror);
 }

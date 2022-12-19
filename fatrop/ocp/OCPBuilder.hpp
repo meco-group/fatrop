@@ -100,7 +100,7 @@ namespace fatrop
     class OCPSolutionSampler
     {
     public:
-        OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter>& ocp);
+        OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp);
         int Sample(vector<double> &sample);
         int Size()
         {
@@ -128,8 +128,38 @@ namespace fatrop
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<BFOCPAdapter> ocp_;
     };
+
     class ParameterSetter
     {
+        void SetValue(double *value)
+        {
+            if (_global)
+            {
+                double *params = ocp_->globalparams();
+                for (int i = 0; i < _no_var; i++)
+                {
+                    // res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
+                }
+            }
+            else // stage paramter
+            {
+                double *params = ocp_->stageparams();
+                for (int k = 0; k < K; k++)
+                {
+                    for (int i = 0; i < _no_var; i++)
+                    {
+                        // res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
+                    }
+                }
+            }
+        }
+        shared_ptr<BFOCPAdapter> ocp_;
+        const vector<int> _offsets_in;
+        const vector<int> _offsets_out;
+        const int no_gobal_parameters;
+        const int _no_var;
+        const int K;
+        const bool _global;
     };
     class OCPBuilder
     {
@@ -139,6 +169,8 @@ namespace fatrop
         int K;
         int nu;
         int nx;
+        int no_global_params;
+        int no_stage_params;
         const string functions;
         const string json_spec_file;
         bool solver_built = false;
@@ -171,11 +203,13 @@ namespace fatrop
         }
         shared_ptr<DLHandler> handle;
         map<string, shared_ptr<OCPSolutionSampler>> sampler_map;
+
     public:
         shared_ptr<OCPSolutionSampler> GetSampler(const string &sampler_name)
         {
             return sampler_map[sampler_name];
         }
+
     private:
         void SetBounds();
         void SetInitial();
@@ -189,7 +223,7 @@ namespace fatrop
         OCPSolutionSampler GetSamplerCustom(const string &sampler_name)
         {
             auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-            return OCPSolutionSampler(nu, nx, 0, K, make_shared<EvalBaseSE>(eval), fatropdata, ocptempladapteror);
+            return OCPSolutionSampler(nu, nx, no_stage_params, K, make_shared<EvalBaseSE>(eval), fatropdata, ocptempladapteror);
         };
     };
 }
