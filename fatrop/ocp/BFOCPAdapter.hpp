@@ -77,13 +77,15 @@ namespace fatrop
         void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override;
         void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) override;
         void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override;
-        double& GetGlobalParams()
+        double* GetGlobalParams()
         {
-            return globalparams.at(0);
+            if(globalparams.size()==0) return nullptr;
+            return &globalparams.at(0);
         }
-        double& GetStageParams()
+        double* GetStageParams()
         {
-            return stageparams.at(0);
+            if(stageparams.size()==0) return nullptr;
+            return &stageparams.at(0);
         }
 
     public:

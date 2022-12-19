@@ -14,8 +14,8 @@ int OCPSolutionSampler::Sample(vector<double> &sample)
 {
     double *sol_p = ((VEC *)fatropdata_->x_curr)->pa;
     double *res_p = sample.data();
-    double *global_params_p = &ocp_->GetGlobalParams();
-    double *stage_params_p = &ocp_->GetStageParams();
+    double *global_params_p = ocp_->GetGlobalParams();
+    double *stage_params_p = ocp_->GetStageParams();
     int size = eval_->Size();
     for (int k = 0; k < K_ - 1; k++)
     {
