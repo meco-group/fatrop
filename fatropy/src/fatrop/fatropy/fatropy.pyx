@@ -24,17 +24,16 @@ cdef class OCP:
     def WarmStart(self):
         return self.myFatropApplication.get().WarmStart()
     def Sample(self, name):
-        # allocate sampler
-        cdef OCPSolutionSampler * sampler = new OCPSolutionSampler(self.myOCPBuilder.GetSamplerCustom(name.encode('utf-8')))
+        # retrieve sampler
+        cdef shared_ptr[OCPSolutionSampler] sampler = self.myOCPBuilder.GetSampler(name.encode('utf-8'))
         # allocate buffer
-        cdef vector[double] buffer = vector[double](sampler.Size())
+        cdef vector[double] buffer = vector[double](sampler.get().Size())
         # use sampler
-        sampler.Sample(buffer)
-        n_rows = sampler.n_rows()
-        n_cols = sampler.n_cols()
-        K = sampler.K()
+        sampler.get().Sample(buffer)
+        n_rows = sampler.get().n_rows()
+        n_cols = sampler.get().n_cols()
+        K = sampler.get().K()
         # deallocate sampler
-        del sampler
         if n_cols == 1:
             return np.asarray(buffer).reshape((K, n_rows))
         else:
@@ -73,8 +72,8 @@ cdef class OCP:
     # def total_time(self):
     #     return self.myOCPBuilder.fatropalg.get().total_time
 
-    def SetBounds(self):
-        self.myOCPBuilder.SetBounds()
+    # def SetBounds(self):
+    #     self.myOCPBuilder.SetBounds()
 
     # def SetInitial(self):
     #     self.myOCPBuilder.SetInitial()

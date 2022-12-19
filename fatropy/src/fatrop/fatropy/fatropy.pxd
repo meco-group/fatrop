@@ -77,4 +77,4 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         void SetBounds()
         void SetInitial()
         shared_ptr[FatropApplication] Build()
-        OCPSolutionSampler GetSamplerCustom(const string &sampler_name)
+        shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)

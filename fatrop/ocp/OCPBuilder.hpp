@@ -16,6 +16,7 @@
 #include "json/json.h"
 #include <sstream>
 #include <templates/FatropApplication.hpp>
+#include <map>
 namespace fatrop
 {
     class StageEvaluator
@@ -165,8 +166,13 @@ namespace fatrop
             return ocptempladapteror->globalparams;
         }
         shared_ptr<DLHandler> handle;
-
+        map<string, shared_ptr<OCPSolutionSampler>> sampler_map;
     public:
+        shared_ptr<OCPSolutionSampler> GetSampler(const string &sampler_name)
+        {
+            return sampler_map[sampler_name];
+        }
+    private:
         void SetBounds();
         void SetInitial();
         int GetVariableMap(const string &variable_type, const string &variable_name, vector<int> &from, vector<int> &to);
