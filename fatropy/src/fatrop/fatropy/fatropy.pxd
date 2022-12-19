@@ -51,6 +51,12 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCP:
         void SetParams(const vector[double] &stage_params_in, const vector[double] &global_params_in)
         void SetInitial(const shared_ptr[FatropData] &fatropdata, vector[double] &initial_u, vector[double] &initial_x)
+
+cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+    cdef cppclass OCPSolutionSampler:
+        OCPSolutionSampler(const OCPSolutionSampler& cp)
+        int Sample(vector[double]& sample)
+        int Size()
     
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:
@@ -68,3 +74,4 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         void SetBounds()
         void SetInitial()
         shared_ptr[FatropApplication] Build()
+        OCPSolutionSampler GetSamplerCustom(const string &sampler_name)

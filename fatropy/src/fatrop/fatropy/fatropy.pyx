@@ -1,7 +1,9 @@
 from fatropy cimport OCPBuilder
 from fatropy cimport FatropAlg
 from fatropy cimport FatropApplication
+from fatropy cimport OCPSolutionSampler
 from libcpp.memory cimport shared_ptr 
+from libcpp.vector cimport vector
 import json
 import numpy as np
 
@@ -21,6 +23,16 @@ cdef class OCP:
         return self.myFatropApplication.get().Optimize()
     def WarmStart(self):
         return self.myFatropApplication.get().WarmStart()
+    def Sample(self, name):
+        cdef OCPSolutionSampler * sampler 
+        sampler = new OCPSolutionSampler(self.myOCPBuilder.GetSamplerCustom(name.encode('utf-8')))
+        retval = np.empty(sampler.Size())
+        cdef vector[double] buffer
+        buffer = vector[double](sampler.Size())
+        sampler.Sample(buffer)
+        retval[:] = buffer[:]
+        del sampler
+        return retval
 
     # @property
     # def sd_time(self):
