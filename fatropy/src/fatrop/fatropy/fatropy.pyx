@@ -24,13 +24,22 @@ cdef class OCP:
     def WarmStart(self):
         return self.myFatropApplication.get().WarmStart()
     def Sample(self, name):
-        cdef OCPSolutionSampler * sampler 
-        sampler = new OCPSolutionSampler(self.myOCPBuilder.GetSamplerCustom(name.encode('utf-8')))
-        cdef vector[double] buffer
-        buffer = vector[double](sampler.Size())
+        # allocate sampler
+        cdef OCPSolutionSampler * sampler = new OCPSolutionSampler(self.myOCPBuilder.GetSamplerCustom(name.encode('utf-8')))
+        # allocate buffer
+        cdef vector[double] buffer = vector[double](sampler.Size())
+        # use sampler
         sampler.Sample(buffer)
+        n_rows = sampler.n_rows()
+        n_cols = sampler.n_cols()
+        K = sampler.K()
+        # deallocate sampler
         del sampler
-        return np.asarray(buffer)
+        if n_cols == 1:
+            return np.asarray(buffer).reshape((K, n_rows))
+        else:
+            return np.asarray(buffer).reshape((K, n_rows, n_cols))
+
 
     # @property
     # def sd_time(self):

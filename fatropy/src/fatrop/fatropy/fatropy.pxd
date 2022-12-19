@@ -59,6 +59,7 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         int Size()
         int n_rows()
         int n_cols()
+        int K()
     
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:
