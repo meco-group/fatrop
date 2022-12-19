@@ -129,38 +129,38 @@ namespace fatrop
         shared_ptr<BFOCPAdapter> ocp_;
     };
 
-    class ParameterSetter
-    {
-        void SetValue(double *value)
-        {
-            if (_global)
-            {
-                double *params = ocp_->globalparams();
-                for (int i = 0; i < _no_var; i++)
-                {
-                    // res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
-                }
-            }
-            else // stage paramter
-            {
-                double *params = ocp_->stageparams();
-                for (int k = 0; k < K; k++)
-                {
-                    for (int i = 0; i < _no_var; i++)
-                    {
-                        // res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
-                    }
-                }
-            }
-        }
-        shared_ptr<BFOCPAdapter> ocp_;
-        const vector<int> _offsets_in;
-        const vector<int> _offsets_out;
-        const int no_gobal_parameters;
-        const int _no_var;
-        const int K;
-        const bool _global;
-    };
+    // class ParameterSetter
+    // {
+    //     void SetValue(double *value)
+    //     {
+    //         if (_global)
+    //         {
+    //             double *params = ocp_->globalparams();
+    //             for (int i = 0; i < _no_var; i++)
+    //             {
+    //                 // res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
+    //             }
+    //         }
+    //         else // stage paramter
+    //         {
+    //             double *params = ocp_->stageparams();
+    //             for (int k = 0; k < K; k++)
+    //             {
+    //                 for (int i = 0; i < _no_var; i++)
+    //                 {
+    //                     // res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     shared_ptr<BFOCPAdapter> ocp_;
+    //     const vector<int> _offsets_in;
+    //     const vector<int> _offsets_out;
+    //     const int no_gobal_parameters;
+    //     const int _no_var;
+    //     const int K;
+    //     const bool _global;
+    // };
     class OCPBuilder
     {
     public:
