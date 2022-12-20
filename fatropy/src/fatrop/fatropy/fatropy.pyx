@@ -39,7 +39,8 @@ cdef class OCP:
         if n_cols == 1:
             return np.asarray(buffer).reshape((K, n_rows))
         else:
-            return np.asarray(buffer).reshape((K, n_rows, n_cols))
+            res = np.asarray(buffer).reshape((n_rows, n_cols, K), order = 'F')
+            return np.moveaxis(res, [0,1,2], [1, 2, 0])
     def SetValue(self, name, double[::1] value):
         # retrieve parameter setter
         cdef shared_ptr[ParameterSetter] paramsetter = self.myOCPBuilder.GetParameterSetter(name.encode('utf-8'))
