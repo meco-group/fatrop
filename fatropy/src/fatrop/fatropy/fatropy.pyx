@@ -2,8 +2,10 @@ from fatropy cimport OCPBuilder
 from fatropy cimport FatropAlg
 from fatropy cimport FatropApplication
 from fatropy cimport OCPSolutionSampler
+from fatropy cimport ParameterSetter
 from libcpp.memory cimport shared_ptr 
 from libcpp.vector cimport vector
+from cpython cimport array
 import json
 import numpy as np
 
@@ -38,6 +40,11 @@ cdef class OCP:
             return np.asarray(buffer).reshape((K, n_rows))
         else:
             return np.asarray(buffer).reshape((K, n_rows, n_cols))
+    def SetValue(self, name, double[::1] value):
+        # retrieve parameter setter
+        cdef shared_ptr[ParameterSetter] paramsetter = self.myOCPBuilder.GetParameterSetter(name.encode('utf-8'))
+        paramsetter.get().SetValue(&value[0])
+        return
 
 
     # @property

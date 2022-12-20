@@ -60,7 +60,10 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         int n_rows()
         int n_cols()
         int K()
-    
+cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+    cdef cppclass ParameterSetter:
+        void SetValue(const double* value)
+
 cdef extern from "OCPBuilder.hpp" namespace "fatrop":
     cdef cppclass OCPBuilder:
         OCPBuilder(const string &functions, const string &json_spec_file) except +
@@ -78,3 +81,4 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         void SetInitial()
         shared_ptr[FatropApplication] Build()
         shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
+        shared_ptr[ParameterSetter] GetParameterSetter(const string &parameter_setter_name)
