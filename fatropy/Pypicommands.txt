@@ -5,7 +5,10 @@ pip install --upgrade setuptools
 sudo apt install twine
 
 commands
-python setup.py bdist_wheel
-auditwheel repair --plat manylinux_2_31_x86_64 fatrop-0.0.5-cp38-cp38-linux_x86_64.whl
-twine upload --repository testpypi fatrop-0.0.5-cp38-cp38-manylinux_2_31_x86_64.whl
+export VERSION=11
+python setup.py bdist_wheel &&
+cd dist &&
+auditwheel repair --plat manylinux_2_31_x86_64 fatrop-0.0.$VERSION-cp38-cp38-linux_x86_64.whl &&
+cd wheelhouse && 
+twine upload --repository testpypi fatrop-0.0.$VERSION-cp38-cp38-manylinux_2_31_x86_64.whl &&
 pip install -i https://test.pypi.org/simple/ fatrop
