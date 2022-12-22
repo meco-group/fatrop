@@ -24,6 +24,9 @@ int BFOCPAdapter::evalHess(
     double *primal_data = primal_vars_p->pa;
     double *lam_data = lam_p->pa;
 
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -77,6 +80,9 @@ int BFOCPAdapter::evalJac(
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
 
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K - 1; k++)
     {
         int nu_k = nu_p[k];
@@ -93,6 +99,9 @@ int BFOCPAdapter::evalJac(
             BAbt_p + k,
             k);
     }
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -111,6 +120,9 @@ int BFOCPAdapter::evalJac(
         }
     }
     VEC *slack_vars_bf = (VEC *)slack_vars;
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -177,6 +189,9 @@ int BFOCPAdapter::EvalConstraintViolation(
             cv_p + offs_dyn_eq_k,
             k);
     }
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K; k++)
     {
         int ng_k = ng_p[k];
@@ -197,6 +212,9 @@ int BFOCPAdapter::EvalConstraintViolation(
     }
     VEC *cv_bf = (VEC *)constraint_violation;
     VEC *slack_vars_bf = (VEC *)slack_vars;
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K; k++)
     {
         int ng_ineq_k = ng_ineq_p[k];
@@ -238,6 +256,9 @@ int BFOCPAdapter::EvalGrad(
     int *offs_stageparams_p = (int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
+    #ifdef ENABLE_MULTITHREADING
+    #pragma omp parallel for
+    #endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];

@@ -5,6 +5,11 @@
 #include <memory>
 #include "FunctionEvaluation.hpp"
 #include "aux/DynamicLib.hpp"
+
+#ifdef ENABLE_MULTITHREADING
+#include <omp.h>
+#endif
+
 /* Typedefs */
 typedef long long int casadi_int;
 typedef void (*signal_t)(void);
@@ -23,7 +28,11 @@ namespace fatrop
         /// constructor from file
         EvalCasGen(const shared_ptr<DLHandler> &handle, const std::string &function_name);
         /// pointer to result_buffer
-        double *output_buffer_p;
+        #ifndef ENABLE_MULTITHREADING
+            double *output_buffer_p;
+        #else  
+            std::vector<double*> output_buffer_p = std::vector<double*>(omp_get_max_threads());
+        #endif
         /// pointer to casadi codegen evalutation function
         eval_t eval; // !! multhithreading of this function not yet supported
         /// casadi int work vector
