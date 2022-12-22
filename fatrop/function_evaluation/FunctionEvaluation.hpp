@@ -3,6 +3,11 @@
 #include <vector>
 #include <cstring>
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+
+#ifdef ENABLE_MULTITHREADING
+#include <omp.h>
+#endif
+
 using namespace std;
 namespace fatrop
 {
@@ -21,7 +26,11 @@ namespace fatrop
         /// sparsity pattern of output matrix sparsity pattern [m,n|0,ncol0, ncol0:1 , ..., | nnz | row_el0, row_el1, ...]
         vector<int> sparsity_out;
         /// buffer to safe evaluation result, in a buffer we always save a matrix in CCS format with lda==out_m
+        #ifndef ENABLE_MULTITHREADING
         vector<double> buffer;
+        #else
+        vector<vector<double>> buffer = vector<vector<double>>(omp_get_max_threads());
+        #endif
         /// evaluate function and save res in "ccs format with lda==out_m"
         virtual int eval_buffer(const double **arg) = 0;
         /// evaluate function and save res in "blasfeo format"
