@@ -55,6 +55,10 @@ namespace fatrop
         shared_ptr<Filter> filter_;
         shared_ptr<LineSearch> linesearch_;
         shared_ptr<Journaller> journaller_;
+        FatropStats GetStats() 
+        {
+            return stats;
+        };
 
     public:
         double tol;

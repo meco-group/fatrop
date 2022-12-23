@@ -6,10 +6,28 @@ from libcpp.memory cimport shared_ptr
 #     cdef cppclass shared_ptr[T]:
 #         shared_ptr() except +
 #         T* GetRawPtr()
-
+cdef extern from "FatropStats.hpp" namespace "fatrop":
+    cdef cppclass FatropStats:
+        double compute_sd_time
+        double duinf_time
+        double eval_hess_time
+        double eval_jac_time
+        double eval_cv_time
+        double eval_grad_time
+        double eval_obj_time
+        double initialization_time
+        double time_total
+        int eval_hess_count
+        int eval_jac_count
+        int eval_cv_count
+        int eval_grad_count
+        int eval_obj_count
+        int iterations_count
+        void Print()
 cdef extern from "FatropAlg.hpp" namespace "fatrop":
     cdef cppclass FatropAlg:
         int Optimize()
+        FatropStats GetStats()
         # double sd_time
         # double hess_time
         # double jac_time
