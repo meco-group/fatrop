@@ -74,17 +74,33 @@ EvalCasGen::EvalCasGen(const shared_ptr<DLHandler> &handle_, const std::string &
     }
 
     // allocate output buffer
+    #ifndef ENABLE_MULTITHREADING
     buffer.resize(out_nnz, 0.0);
     output_buffer_p = buffer.data();
+    #else
+    for (int i = 0; i < omp_get_max_threads(); i++){
+        buffer[i].resize(out_nnz, 0.0);
+        output_buffer_p[i] = buffer[i].data();
+    }
+    #endif
 }
 
 int EvalCasGen::eval_buffer(const double **arg)
 {
     w = work_vector_d.data();
     iw = work_vector_i.data();
+    #ifndef ENABLE_MULTITHREADING
     output_buffer_p = buffer.data();
     if (eval(arg, &output_buffer_p, iw, w, mem))
         return 1;
+    #else
+    int tid = omp_get_thread_num();
+    output_buffer_p[tid] = buffer[tid].data();
+    // printf("using thread %d\n", tid);
+    if (eval(arg, &output_buffer_p[tid], iw, w, mem))
+        return 1;
+    #endif
+    
     return 0;
 }
 
