@@ -101,7 +101,7 @@ int BFOCPBasic::get_ng_ineq_k(const int k) const
     }
     return ng_ineq_;
 }
-int BFOCPBasic::get_n_global_parmas() const
+int BFOCPBasic::get_n_global_params() const
 {
     return n_global_params_;
 };

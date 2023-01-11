@@ -51,7 +51,7 @@ namespace fatrop
         int get_nuk(const int k) const override;
         int get_ngk(const int k) const override;
         int get_ng_ineq_k(const int k) const override;
-        int get_n_global_parmas() const;
+        int get_n_global_params() const;
         int get_n_stage_params_k(const int k) const override;
         int get_horizon_length() const;
         int eval_BAbtk(const double *states_kp1,

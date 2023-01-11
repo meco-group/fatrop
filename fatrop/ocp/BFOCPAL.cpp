@@ -20,9 +20,9 @@ int BFOCPAL::get_n_stage_params_k(const int k) const
     return ocp_->get_n_stage_params_k(k);
 }
 
-int BFOCPAL::get_n_global_parmas() const
+int BFOCPAL::get_n_global_params() const
 {
-    return ocp_->get_n_global_parmas();
+    return ocp_->get_n_global_params();
 }
 
 int BFOCPAL::get_ng_ineq_k(const int k) const

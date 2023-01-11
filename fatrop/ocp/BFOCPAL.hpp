@@ -34,7 +34,7 @@ namespace fatrop
         int get_nuk(const int k) const;
         int get_ngk(const int k) const;
         int get_n_stage_params_k(const int k) const;
-        int get_n_global_parmas() const;
+        int get_n_global_params() const;
         int get_ng_ineq_k(const int k) const;
         int get_ng_ineq_k_AL(const int k) const;
         int get_horizon_length() const;

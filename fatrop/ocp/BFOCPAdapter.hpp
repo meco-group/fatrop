@@ -35,7 +35,7 @@ namespace fatrop
                                                            ngineqexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
                                                                                           { return ocptempl_->get_ng_ineq_k(k); })),
                                                            nstageparamsexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
-                                                                                          { return ocptempl_->get_n_stage_params_k(k); })), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_parmas(), 0.0), ocptempl(ocptempl_)
+                                                                                          { return ocptempl_->get_n_stage_params_k(k); })), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
         {
             x_dummy = vector<double>(max(nxexpr), 0.0);
         }
