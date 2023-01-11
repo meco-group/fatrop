@@ -625,7 +625,7 @@ int OCPLSRiccati::computeSDnor(
         {
             GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
             // HhIt[0].print();
-            LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p,1e-12);
+            LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p, 1e-12);
             if (rankI < gamma_I)
                 return -2;
             // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
@@ -785,5 +785,145 @@ int OCPLSRiccati::computeSDnor(
     // cout << "el time " << el << endl;
     lastused_.rankI = rankI;
     lastused_.inertia_correction = inertia_correction;
+    FatropMemoryVecBF rhs_rq(sum(OCP->nu) + sum(OCP->nx),1);
+    FatropMemoryVecBF rhs_b(0,1);
+    FatropMemoryVecBF rhs_g(0,1);
+    FatropMemoryVecBF rhs_g_ineq(0,1);
+    FatropMemoryVecBF rhs_gradb(0,1);
+
+ComputeRHS(
+    OCP,
+    inertia_correction,
+    0.0,
+    ux,
+    lam,
+    delta_s,
+    sigma_L,
+    sigma_U,
+    rhs_rq[0],
+    rhs_b[0],
+    rhs_g[0],
+    rhs_g_ineq[0],
+    rhs_gradb[0]);
+    rhs_rq[0].block(0, OCP->nx.at(0) + OCP->nu.at(0)).print();
+    OCP->RSQrqt[0].print();
     return 0;
 }
+int OCPLSRiccati::ComputeRHS(
+    OCPKKTMemory *OCP,
+    const double inertia_correction_w,
+    const double inertia_correction_c,
+    const FatropVecBF &ux,
+    const FatropVecBF &lam,
+    const FatropVecBF &delta_s,
+    const FatropVecBF &sigma_L,
+    const FatropVecBF &sigma_U,
+    const FatropVecBF &rhs_rq,
+    const FatropVecBF &rhs_b,
+    const FatropVecBF &rhs_g,
+    const FatropVecBF &rhs_g_ineq,
+    const FatropVecBF &rhs_gradb)
+{
+    int K = OCP->K;
+    // make variables local for efficiency
+    OCPMACRO(MAT *, RSQrqt, _p);
+    OCPMACRO(MAT *, BAbt, _p);
+    OCPMACRO(MAT *, Ggt, _p);
+    OCPMACRO(MAT *, Ggt_ineq, _p);
+    SOLVERMACRO(VEC *, ux, _p);
+    SOLVERMACRO(VEC *, lam, _p);
+    SOLVERMACRO(VEC *, delta_s, _p);
+    SOLVERMACRO(VEC *, sigma_L, _p);
+    SOLVERMACRO(VEC *, sigma_U, _p);
+    SOLVERMACRO(VEC *, rhs_rq, _p);
+    SOLVERMACRO(VEC *, rhs_b, _p);
+    SOLVERMACRO(VEC *, rhs_g, _p);
+    SOLVERMACRO(VEC *, rhs_g_ineq, _p);
+    SOLVERMACRO(VEC *, rhs_gradb, _p);
+    OCPMACRO(int *, nu, _p);
+    OCPMACRO(int *, nx, _p);
+    OCPMACRO(int *, ng, _p);
+    OCPMACRO(int *, ng_ineq, _p);
+    //////////////////////////////
+    ////////////// rhs_rq
+    //////////////////////////////
+    int *offs_ux = (int *)OCP->aux.ux_offs.data();
+    int *offs_g = (int *)OCP->aux.g_offs.data();
+    int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
+    int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
+    // contribution of Hessian
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int offs = offs_ux[k];
+        GEMV_N(nu + nx, nu + nx, 1.0, RSQrqt_p + k, 0, 0, ux_p, offs, 0.0, rhs_rq_p, offs, rhs_rq_p, offs);
+    }
+    // contribution of dynamics constraints
+    for (int k = 0; k < K - 1; k++)
+    {
+        const int nu = nu_p[k];
+        const int nup1 = nu_p[k + 1];
+        const int nx = nx_p[k];
+        const int nxp1 = nx_p[k + 1];
+        const int offsp1 = offs_ux[k + 1];
+        const int offs = offs_ux[k];
+        const int offs_dyn_eq_k = offs_dyn_eq[k];
+        GEMV_N(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, lam_p, offs_dyn_eq_k, 1.0, rhs_rq_p, offs, rhs_rq_p, offs);
+        AXPY(nxp1, -1.0, lam_p, offs_dyn_eq_k, rhs_rq_p, offsp1 + nup1, rhs_rq_p, offsp1 + nup1);
+    }
+    // contribution of equality constraints
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng = ng_p[k];
+        const int offs = offs_ux[k];
+        const int offs_g_k = offs_g[k];
+        GEMV_N(nu + nx, ng, 1.0, Ggt_p + k, 0, 0, lam_p, offs_g_k, 1.0, rhs_rq_p, offs, rhs_rq_p, offs);
+    }
+    // constribution of inequality - slack constraints
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng_ineq = ng_ineq_p[k];
+        const int offs_g_ineq_k = offs_g_ineq[k];
+        const int offs = offs_ux[k];
+        GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, lam_p, offs_g_ineq_k, 1.0, rhs_rq_p, offs, rhs_rq_p, offs);
+    }
+    //////////////////////////////
+    ////////////// rhs_gradb
+    //////////////////////////////
+
+    //////////////////////////////
+    ////////////// rhs_b
+    //////////////////////////////
+
+    //////////////////////////////
+    ////////////// rhs_g
+    //////////////////////////////
+
+    //////////////////////////////
+    ////////////// rhs_g_ineq
+    //////////////////////////////
+
+    return 0;
+};
+int OCPLSRiccati::SolveRHS(
+    OCPKKTMemory *OCP,
+    const double inertia_correction_w,
+    const double inertia_correction_c,
+    const FatropVecBF &ux,
+    const FatropVecBF &lam,
+    const FatropVecBF &delta_s,
+    const FatropVecBF &sigma_L,
+    const FatropVecBF &sigma_U,
+    const FatropVecBF &rhs_rq,
+    const FatropVecBF &rhs_b,
+    const FatropVecBF &rhs_g,
+    const FatropVecBF &rhs_g_ineq,
+    const FatropVecBF &rhs_gradb)
+{
+    return 0;
+};
