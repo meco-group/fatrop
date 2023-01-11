@@ -124,6 +124,42 @@ namespace fatrop
             const double *global_params,
             double *res,
             const int k) override;
+        int get_initial_xk(double *xk, const int k) const override
+        {
+            const double* initial_x_p = initial_x.data();
+            for(int i =0; i< nx_ ; i++)
+            {
+                xk[i] = initial_x_p[i + k*nx_];
+            }
+            return 0;
+        };
+        int get_initial_uk(double *uk, const int k) const override
+        {
+            const double* initial_u_p = initial_u.data();
+            for(int i =0; i< nu_ ; i++)
+            {
+                uk[i] = initial_u_p[i + k*nu_];
+            }
+            return 0;
+        };
+        int set_initial_xk(double *xk, const int k) 
+        {
+            double* initial_x_p = initial_x.data();
+            for(int i =0; i< nx_ ; i++)
+            {
+                initial_x_p[i + k*nx_] = xk[i];
+            }
+            return 0;
+        };
+        int set_initial_uk(double *uk, const int k) 
+        {
+            double* initial_u_p = initial_u.data();
+            for(int i =0; i< nu_ ; i++)
+            {
+                initial_u_p[i + k*nu_] = uk[i];
+            }
+            return 0;
+        };
 
     private:
         const int nu_;
@@ -160,6 +196,8 @@ namespace fatrop
         EvalCasGen LkIf;
         EvalCasGen Lkf;
         EvalCasGen LFf;
+        vector<double> initial_x;
+        vector<double> initial_u;
     };
 }
 #endif // OCPTEMPLATEBASICINCLUDED

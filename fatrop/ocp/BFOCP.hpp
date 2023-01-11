@@ -10,10 +10,7 @@ namespace fatrop
     class BFOCP
     {
     public:
-        // virtual int get_horizon_lenght() const = 0;
         virtual int get_nxk(const int k) const = 0;
-        // virtual int get_initial_xk(double *xk, const int k) const = 0;
-        // virtual int get_initial_uk(double *uk, const int k) const = 0;
         virtual int get_nuk(const int k) const = 0;
         virtual int get_ngk(const int k) const = 0;
         virtual int get_n_stage_params_k(const int k) const = 0;
@@ -95,6 +92,8 @@ namespace fatrop
             const double *global_params_k,
             double *res,
             const int k) = 0;
+        virtual int get_initial_xk(double *xk, const int k) const = 0;
+        virtual int get_initial_uk(double *uk, const int k) const = 0;
     };
 };     // namespace fatrop
 #endif // OCPTEMPLATEINCLUDED

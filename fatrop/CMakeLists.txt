@@ -13,18 +13,18 @@ aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 # debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/BFOCP.hpp                               ocp/BFOCP.cpp
-ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
+# ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
-ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
+# ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
 ocp/BFOCPBasic.hpp                          ocp/BFOCPBasic.cpp
 ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
-ocp/OCPBuilderAL.hpp                        ocp/OCPBuilderAL.cpp
+# ocp/OCPBuilderAL.hpp                        ocp/OCPBuilderAL.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
-ocp/FatropOCPAL.hpp                         ocp/FatropOCPAL.cpp
+# ocp/FatropOCPAL.hpp                         ocp/FatropOCPAL.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp
 ocp/OCP.hpp                                 ocp/OCP.cpp
-ocp/OCPAL.hpp                               ocp/OCPAL.cpp
+# ocp/OCPAL.hpp                               ocp/OCPAL.cpp
 ocp/OCPDims.hpp                             ocp/OCPDims.cpp
 ocp/OCPInitializer.hpp                      ocp/OCPInitializer.cpp
 ocp/OCPKKT.hpp                              ocp/OCPKKT.cpp
@@ -45,8 +45,8 @@ solver/LineSearch.hpp                       solver/LineSearch.cpp
 solver/StepAcceptor.hpp                     solver/StepAcceptor.cpp
 solver/Timer.hpp                            solver/Timer.cpp
 solver/FatropStats.hpp                            
-alm_solver/FatropALMAlg.hpp                 alm_solver/FatropALMAlg.cpp
-alm_solver/FatropALMData.hpp                alm_solver/FatropALMData.cpp
+# alm_solver/FatropALMAlg.hpp                 alm_solver/FatropALMAlg.cpp
+# alm_solver/FatropALMData.hpp                alm_solver/FatropALMData.cpp
 # sparse/FatropSparse.hpp                     sparse/FatropSparse.cpp
 # sparse/Interface.hpp                        sparse/Interface.cpp
 # sparse/InterfaceMA57.hpp                    sparse/InterfaceMA57.cpp
@@ -54,7 +54,7 @@ alm_solver/FatropALMData.hpp                alm_solver/FatropALMData.cpp
 # sparse/InterfacePardiso.hpp                 sparse/InterfacePardiso.cpp
 # sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
-templates/FatropNLPAL.hpp                   templates/FatropNLPAL.cpp
+# templates/FatropNLPAL.hpp                   templates/FatropNLPAL.cpp
 templates/FatropApplication.hpp             templates/FatropApplication.cpp
 json/json.h json/json.cpp
 )
@@ -76,10 +76,10 @@ ocp/BFOCPAdapter.hpp
 ocp/BFOCPBasic.hpp
 ocp/DuInfEvaluator.hpp
 ocp/FatropOCP.hpp
-ocp/FatropOCPAL.hpp
+# ocp/FatropOCPAL.hpp
 ocp/FatropOCPBuilder.hpp
 ocp/OCP.hpp
-ocp/OCPAL.hpp
+# ocp/OCPAL.hpp
 ocp/OCPDims.hpp
 ocp/OCPInitializer.hpp
 ocp/OCPKKT.hpp

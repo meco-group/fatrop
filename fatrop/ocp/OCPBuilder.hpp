@@ -160,7 +160,7 @@ namespace fatrop
         }
         void SetValue(const initializer_list<double> il_)
         {
-            assert(il_.size() == _no_var);
+            assert((int) il_.size() == _no_var);
             SetValue(il_.begin());
         }
 
@@ -190,6 +190,7 @@ namespace fatrop
         json::jobject json_spec;
         bool GN = false;
         bool DDP = false;
+        shared_ptr<BFOCPBasic> ocptemplatebasic;
         shared_ptr<BFOCPAdapter> ocptempladapteror;
         shared_ptr<OCP> ocptempladapter;
         shared_ptr<OCPAL> ocptempladapterAL;

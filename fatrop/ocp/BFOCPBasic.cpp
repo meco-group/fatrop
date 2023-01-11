@@ -66,7 +66,9 @@ BFOCPBasic::BFOCPBasic(const int nu,
                                                 g_ineqFf(gineqFf),
                                                 LkIf(LkIf),
                                                 Lkf(Lkf),
-                                                LFf(LFf)
+                                                LFf(LFf),
+                                                initial_x(K * nx, 0.0),
+                                                initial_u((K - 1) * nu_, 0.0)
 {
 }
 int BFOCPBasic::get_nxk(const int k) const
