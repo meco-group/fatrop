@@ -99,7 +99,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
                                                                  LIf,
                                                                  Lkf,
                                                                  LFf);
-    ocptempladapteror = make_shared<BFOCPAdapter>(ocptemplatebasic);
+    ocptempladapteror = make_shared<BFOCPAdapter>(static_cast<shared_ptr<BFOCP>>(ocptemplatebasic));
     ocptempladapter = ocptempladapteror;
     ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
@@ -163,11 +163,11 @@ void OCPBuilder::SetBounds()
 void OCPBuilder::SetInitial()
 {
     // assert(solver_built);
-    for(int k =0; k<K; k++)
-    {
-        ocptemplatebasic->set_initial_uk(initial_u.data()+k*nu, k);
-        ocptemplatebasic->set_initial_xk(initial_x.data()+k*nx, k);
-    }
+    // for(int k =0; k<K; k++)
+    // {
+    //     ocptemplatebasic->set_initial_uk(initial_u.data()+k*nu, k);
+    //     ocptemplatebasic->set_initial_xk(initial_x.data()+k*nx, k);
+    // }
     ocptempladapter->SetInitial(fatropdata, initial_u, initial_x);
 }
 
