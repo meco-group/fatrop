@@ -785,28 +785,33 @@ int OCPLSRiccati::computeSDnor(
     // cout << "el time " << el << endl;
     lastused_.rankI = rankI;
     lastused_.inertia_correction = inertia_correction;
-    FatropMemoryVecBF rhs_rq(sum(OCP->nu) + sum(OCP->nx),1);
-    FatropMemoryVecBF rhs_b(0,1);
-    FatropMemoryVecBF rhs_g(0,1);
-    FatropMemoryVecBF rhs_g_ineq(0,1);
-    FatropMemoryVecBF rhs_gradb(0,1);
+    FatropMemoryVecBF rhs_rq(sum(OCP->nu) + sum(OCP->nx), 1);
+    FatropMemoryVecBF rhs_b(sum(OCP->nx) - OCP->nx.at(0), 1);
+    FatropMemoryVecBF rhs_g(sum(OCP->ng), 1);
+    FatropMemoryVecBF rhs_g_ineq(0, 1);
+    FatropMemoryVecBF rhs_gradb(0, 1);
 
-ComputeRHS(
-    OCP,
-    inertia_correction,
-    0.0,
-    ux,
-    lam,
-    delta_s,
-    sigma_L,
-    sigma_U,
-    rhs_rq[0],
-    rhs_b[0],
-    rhs_g[0],
-    rhs_g_ineq[0],
-    rhs_gradb[0]);
-    rhs_rq[0].block(0, OCP->nx.at(0) + OCP->nu.at(0)).print();
-    OCP->RSQrqt[0].print();
+    ComputeRHS(
+        OCP,
+        inertia_correction,
+        0.0,
+        ux,
+        lam,
+        delta_s,
+        sigma_L,
+        sigma_U,
+        rhs_rq[0],
+        rhs_b[0],
+        rhs_g[0],
+        rhs_g_ineq[0],
+        rhs_gradb[0]);
+    // rhs_rq[0].block(0, OCP->nx.at(0) + OCP->nu.at(0)).print();
+    // OCP->RSQrqt[0].print();
+    // for (int i = 0; i < K; i++)
+    // {
+    //     rhs_g[0].block(offs_g[i], OCP->ng.at(i)).print();
+    //     OCP->Ggt[i].block(OCP->nu.at(i) + OCP->nx.at(i), 0, 1, OCP->ng.at(i)).print();
+    // }
     return 0;
 }
 int OCPLSRiccati::ComputeRHS(
@@ -903,7 +908,16 @@ int OCPLSRiccati::ComputeRHS(
     //////////////////////////////
     ////////////// rhs_g
     //////////////////////////////
-
+    // contribution of equality constraints
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng = ng_p[k];
+        const int offs = offs_ux[k];
+        const int offs_g_k = offs_g[k];
+        GEMV_T(nu + nx, ng, 1.0, Ggt_p + k, 0, 0, ux_p, offs, 0.0, rhs_g_p, offs_g_k, rhs_g_p, offs_g_k);
+    }
     //////////////////////////////
     ////////////// rhs_g_ineq
     //////////////////////////////
