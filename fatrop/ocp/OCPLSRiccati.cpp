@@ -710,49 +710,49 @@ int OCPLSRiccati::computeSDnor(
     // cout << "el time " << el << endl;
     lastused_.rankI = rankI;
     lastused_.inertia_correction = inertia_correction;
-    FatropMemoryVecBF rhs_rq(sum(OCP->nu) + sum(OCP->nx), 1);
-    FatropMemoryVecBF rhs_b(sum(OCP->nx) - OCP->nx.at(0), 1);
-    FatropMemoryVecBF rhs_g(sum(OCP->ng), 1);
-    FatropMemoryVecBF rhs_g_ineq(OCP->aux.n_ineqs, 1);
-    FatropMemoryVecBF rhs_gradb(OCP->aux.n_ineqs, 1);
+    // FatropMemoryVecBF rhs_rq(sum(OCP->nu) + sum(OCP->nx), 1);
+    // FatropMemoryVecBF rhs_b(sum(OCP->nx) - OCP->nx.at(0), 1);
+    // FatropMemoryVecBF rhs_g(sum(OCP->ng), 1);
+    // FatropMemoryVecBF rhs_g_ineq(OCP->aux.n_ineqs, 1);
+    // FatropMemoryVecBF rhs_gradb(OCP->aux.n_ineqs, 1);
 
-    ComputeMVProd(
-        OCP,
-        inertia_correction,
-        0.0,
-        ux,
-        lam,
-        delta_s,
-        sigma_total,
-        rhs_rq[0], // ok
-        rhs_b[0],
-        rhs_g[0], // ok
-        rhs_g_ineq[0],
-        rhs_gradb[0]); // ok
-    FatropMemoryVecBF rhs_rq2(sum(OCP->nu) + sum(OCP->nx), 1);
-    FatropMemoryVecBF rhs_b2(sum(OCP->nx) - OCP->nx.at(0), 1);
-    FatropMemoryVecBF rhs_g2(sum(OCP->ng), 1);
-    FatropMemoryVecBF rhs_g_ineq2(OCP->aux.n_ineqs, 1);
-    FatropMemoryVecBF rhs_gradb2(OCP->aux.n_ineqs, 1);
-    GetRHS(
-        OCP,
-        gradb_total,
-        rhs_rq2[0],
-        rhs_b2[0],
-        rhs_g2[0],
-        rhs_g_ineq2[0],
-        rhs_gradb2[0]);
-    double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
-    axpby(-1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
-    cout << "residu rq " << Linf(rhs_rq[0]) / max_norm << endl;
-    axpby(-1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
-    cout << "residu b " << Linf(rhs_b[0]) / max_norm << endl;
-    axpby(-1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
-    cout << "residu g " << Linf(rhs_g[0]) / max_norm << endl;
-    axpby(-1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
-    cout << "residu g_ineq " << Linf(rhs_g_ineq[0]) / max_norm << endl;
-    axpby(-1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
-    cout << "residu gradb " << Linf(rhs_gradb[0]) / max_norm << endl;
+    // ComputeMVProd(
+    //     OCP,
+    //     inertia_correction,
+    //     0.0,
+    //     ux,
+    //     lam,
+    //     delta_s,
+    //     sigma_total,
+    //     rhs_rq[0], // ok
+    //     rhs_b[0],
+    //     rhs_g[0], // ok
+    //     rhs_g_ineq[0],
+    //     rhs_gradb[0]); // ok
+    // FatropMemoryVecBF rhs_rq2(sum(OCP->nu) + sum(OCP->nx), 1);
+    // FatropMemoryVecBF rhs_b2(sum(OCP->nx) - OCP->nx.at(0), 1);
+    // FatropMemoryVecBF rhs_g2(sum(OCP->ng), 1);
+    // FatropMemoryVecBF rhs_g_ineq2(OCP->aux.n_ineqs, 1);
+    // FatropMemoryVecBF rhs_gradb2(OCP->aux.n_ineqs, 1);
+    // GetRHS(
+    //     OCP,
+    //     gradb_total,
+    //     rhs_rq2[0],
+    //     rhs_b2[0],
+    //     rhs_g2[0],
+    //     rhs_g_ineq2[0],
+    //     rhs_gradb2[0]);
+    // double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
+    // axpby(-1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
+    // cout << "residu rq " << Linf(rhs_rq[0]) / max_norm << endl;
+    // axpby(-1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
+    // cout << "residu b " << Linf(rhs_b[0]) / max_norm << endl;
+    // axpby(-1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
+    // cout << "residu g " << Linf(rhs_g[0]) / max_norm << endl;
+    // axpby(-1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
+    // cout << "residu g_ineq " << Linf(rhs_g_ineq[0]) / max_norm << endl;
+    // axpby(-1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
+    // cout << "residu gradb " << Linf(rhs_gradb[0]) / max_norm << endl;
     return 0;
 }
 int OCPLSRiccati::GetRHS(
