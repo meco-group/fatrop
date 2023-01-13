@@ -801,8 +801,8 @@ int OCPLSRiccati::computeSDnor(
         sigma_L,
         sigma_U,
         rhs_rq[0], // ok
-        rhs_b[0], 
-        rhs_g[0], // ok 
+        rhs_b[0],
+        rhs_g[0], // ok
         rhs_g_ineq[0],
         rhs_gradb[0]); // ok
     FatropMemoryVecBF rhs_rq2(sum(OCP->nu) + sum(OCP->nx), 1);
@@ -820,13 +820,17 @@ int OCPLSRiccati::computeSDnor(
         rhs_g2[0],
         rhs_g_ineq2[0],
         rhs_gradb2[0]);
-    double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]),  std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
+    double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
     axpby(-1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
     cout << "residu rq " << Linf(rhs_rq[0]) / max_norm << endl;
+    axpby(-1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
+    cout << "residu b " << Linf(rhs_b[0]) / max_norm << endl;
     axpby(-1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
-    cout << "residu g " <<Linf(rhs_g[0])/ max_norm << endl;
+    cout << "residu g " << Linf(rhs_g[0]) / max_norm << endl;
+    axpby(-1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
+    cout << "residu g_ineq " << Linf(rhs_g_ineq[0]) / max_norm << endl;
     axpby(-1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
-    cout << "residu gradb " <<  Linf(rhs_gradb[0]) / max_norm << endl;
+    cout << "residu gradb " << Linf(rhs_gradb[0]) / max_norm << endl;
     return 0;
 }
 int OCPLSRiccati::GetRHS(
@@ -885,6 +889,19 @@ int OCPLSRiccati::GetRHS(
     //////////////////////////////
     ////////////// rhs_b
     //////////////////////////////
+    {
+        int offs_b = 0;
+        for (int k = 0; k < K - 1; k++)
+        {
+            const int nu = nu_p[k];
+            const int nup1 = nu_p[k + 1];
+            const int nx = nx_p[k];
+            const int nxp1 = nx_p[k + 1];
+            const int offs = offs_ux[k];
+            ROWEX(nxp1, -1.0, BAbt_p + k, nu + nx, 0, rhs_b_p, offs_b);
+            offs_b += nxp1;
+        }
+    }
     //////////////////////////////
     ////////////// rhs_g
     //////////////////////////////
@@ -899,6 +916,14 @@ int OCPLSRiccati::GetRHS(
     //////////////////////////////
     ////////////// rhs_g_ineq
     //////////////////////////////
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng_ineq = ng_ineq_p[k];
+        const int offs_ineq_k = offs_ineq[k];
+        ROWEX(ng_ineq, -1.0, Ggt_ineq_p + k, nu + nx, 0, rhs_g_ineq_p, offs_ineq_k);
+    }
     return 0;
 }
 int OCPLSRiccati::ComputeMVProd(
@@ -1001,6 +1026,21 @@ int OCPLSRiccati::ComputeMVProd(
     //////////////////////////////
     ////////////// rhs_b
     //////////////////////////////
+    {
+        int offs_b = 0;
+        for (int k = 0; k < K - 1; k++)
+        {
+            const int nu = nu_p[k];
+            const int nup1 = nu_p[k + 1];
+            const int nx = nx_p[k];
+            const int nxp1 = nx_p[k + 1];
+            const int offs = offs_ux[k];
+            const int offsp1 = offs_ux[k + 1];
+            VECCP(nxp1, ux_p, offsp1 + nup1, rhs_b_p, offs_b);
+            GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, -1.0, rhs_b_p, offs_b, rhs_b_p, offs_b);
+            offs_b += nxp1;
+        }
+    }
 
     //////////////////////////////
     ////////////// rhs_g
@@ -1018,6 +1058,16 @@ int OCPLSRiccati::ComputeMVProd(
     //////////////////////////////
     ////////////// rhs_g_ineq
     //////////////////////////////
+    for (int k = 0; k < K; k++)
+    {
+        const int nu = nu_p[k];
+        const int nx = nx_p[k];
+        const int ng_ineq = ng_ineq_p[k];
+        const int offs = offs_ux[k];
+        const int offs_ineq_k = offs_ineq[k];
+        VECCP(ng_ineq, delta_s_p, offs_ineq_k, rhs_g_ineq_p, offs_ineq_k);
+        GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, -1.0, rhs_g_ineq_p, offs_ineq_k, rhs_g_ineq_p, offs_ineq_k);
+    }
 
     return 0;
 };
@@ -1036,5 +1086,11 @@ int OCPLSRiccati::SolveRHS(
     const FatropVecBF &rhs_g_ineq,
     const FatropVecBF &rhs_gradb)
 {
+    // cache rhs
+    // MV product
+    // fill in mv product
+    // solve rhs
+    // take step
+    // fill in cached rhs
     return 0;
 };
