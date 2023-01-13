@@ -89,24 +89,17 @@ int OCPLSRiccati::computeSD(
     const double inertia_correction_c,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
-    const FatropVecBF &delta_zL,
-    const FatropVecBF &delta_zU,
     const FatropVecBF &delta_s,
-    const FatropVecBF &sigma_L,
-    const FatropVecBF &sigma_U,
-    const FatropVecBF &gradb_L,
-    const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus,
-    const FatropVecBF &zL_curr,
-    const FatropVecBF &zU_curr)
+    const FatropVecBF &sigma_total,
+    const FatropVecBF &gradb_total)
 {
     if (inertia_correction_c == 0.0)
     {
-        return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus, zL_curr, zU_curr);
+        return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
     }
     else
     {
-        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_zL, delta_zU, delta_s, sigma_L, sigma_U, gradb_L, gradb_U, gradb_plus, zL_curr, zU_curr);
+        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, gradb_total);
     }
 }
 int OCPLSRiccati::computeSDDeg(
@@ -115,16 +108,9 @@ int OCPLSRiccati::computeSDDeg(
     const double inertia_correction_c,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
-    const FatropVecBF &delta_zL,
-    const FatropVecBF &delta_zU,
     const FatropVecBF &delta_s,
-    const FatropVecBF &sigma_L,
-    const FatropVecBF &sigma_U,
-    const FatropVecBF &gradb_L,
-    const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus,
-    const FatropVecBF &zL,
-    const FatropVecBF &zU)
+    const FatropVecBF &sigma_total,
+    const FatropVecBF &gradb_total)
 {
     // blasfeo_timer timer;
     // blasfeo_tic(&timer);
@@ -148,16 +134,9 @@ int OCPLSRiccati::computeSDDeg(
     SOLVERMACRO(MAT *, Ggt_ineq_temp, _p);
     SOLVERMACRO(VEC *, ux, _p);
     SOLVERMACRO(VEC *, lam, _p);
-    SOLVERMACRO(VEC *, delta_zL, _p);
-    SOLVERMACRO(VEC *, delta_zU, _p);
     SOLVERMACRO(VEC *, delta_s, _p);
-    SOLVERMACRO(VEC *, sigma_L, _p);
-    SOLVERMACRO(VEC *, sigma_U, _p);
-    SOLVERMACRO(VEC *, gradb_L, _p);
-    SOLVERMACRO(VEC *, gradb_U, _p);
-    SOLVERMACRO(VEC *, gradb_plus, _p);
-    SOLVERMACRO(VEC *, zL, _p);
-    SOLVERMACRO(VEC *, zU, _p);
+    SOLVERMACRO(VEC *, sigma_total, _p);
+    SOLVERMACRO(VEC *, gradb_total, _p);
     OCPMACRO(int *, nu, _p);
     OCPMACRO(int *, nx, _p);
     OCPMACRO(int *, ng, _p);
@@ -186,10 +165,8 @@ int OCPLSRiccati::computeSDDeg(
             GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
             for (int i = 0; i < ng_ineq; i++)
             {
-                double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction_w};
-                double scaling_factor = SUMMATION_ALG<3>(numbers);
-                double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
-                double grad_barrier = SUMMATION_ALG<3>(numbers2);
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
                 COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                 MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
             }
@@ -229,10 +206,8 @@ int OCPLSRiccati::computeSDDeg(
                 GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
                 for (int i = 0; i < ng_ineq; i++)
                 {
-                    double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction_w};
-                    double scaling_factor = SUMMATION_ALG<3>(numbers);
-                    double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
-                    double grad_barrier = SUMMATION_ALG<3>(numbers2);
+                    double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                    double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                 }
@@ -336,25 +311,10 @@ int OCPLSRiccati::computeSDDeg(
             // calculate lamineq
             for (int i = 0; i < ng_ineq; i++)
             {
-                double scaling_factor_L = VECEL(sigma_L_p, offs_ineq_k + i);
-                double scaling_factor_U = VECEL(sigma_U_p, offs_ineq_k + i);
-                double grad_barrier_L = VECEL(gradb_L_p, offs_ineq_k + i);
-                double grad_barrier_U = VECEL(gradb_U_p, offs_ineq_k + i);
-                double grad_barrier_plus = VECEL(gradb_plus_p, offs_ineq_k + i);
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
                 double ds = VECEL(delta_s_p, offs_ineq_k + i);
-                {
-                    double z = VECEL(zL_p, offs_ineq_k + i);
-                    double dz = -grad_barrier_L - z - scaling_factor_L * ds;
-                    VECEL(delta_zL_p, offs_ineq_k + i) = dz;
-                }
-                {
-                    double z = VECEL(zU_p, offs_ineq_k + i);
-                    double dz = grad_barrier_U - z + scaling_factor_U * ds;
-                    VECEL(delta_zU_p, offs_ineq_k + i) = dz;
-                }
-                // kahan sum
-                double numbers[] = {grad_barrier_L, grad_barrier_U, scaling_factor_L * ds, scaling_factor_U * ds, grad_barrier_plus, inertia_correction_w * ds};
-                VECEL(lam_p, offs_g_ineq_k + i) = SUMMATION_ALG<6>(numbers);
+                VECEL(lam_p, offs_g_ineq_k + i) = scaling_factor * ds + grad_barrier;
             }
         }
     }
@@ -367,16 +327,9 @@ int OCPLSRiccati::computeSDnor(
     const double inertia_correction,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
-    const FatropVecBF &delta_zL,
-    const FatropVecBF &delta_zU,
     const FatropVecBF &delta_s,
-    const FatropVecBF &sigma_L,
-    const FatropVecBF &sigma_U,
-    const FatropVecBF &gradb_L,
-    const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus,
-    const FatropVecBF &zL,
-    const FatropVecBF &zU)
+    const FatropVecBF &sigma_total,
+    const FatropVecBF &gradb_total)
 {
     bool increased_accuracy = true;
     // blasfeo_timer timer;
@@ -413,16 +366,9 @@ int OCPLSRiccati::computeSDnor(
     SOLVERMACRO(PMAT *, PrI, _p);
     SOLVERMACRO(VEC *, ux, _p);
     SOLVERMACRO(VEC *, lam, _p);
-    SOLVERMACRO(VEC *, sigma_L, _p);
-    SOLVERMACRO(VEC *, sigma_U, _p);
-    SOLVERMACRO(VEC *, gradb_L, _p);
-    SOLVERMACRO(VEC *, gradb_U, _p);
-    SOLVERMACRO(VEC *, gradb_plus, _p);
-    SOLVERMACRO(VEC *, zL, _p);
-    SOLVERMACRO(VEC *, zU, _p);
+    SOLVERMACRO(VEC *, sigma_total, _p);
+    SOLVERMACRO(VEC *, gradb_total, _p);
     SOLVERMACRO(VEC *, delta_s, _p);
-    SOLVERMACRO(VEC *, delta_zL, _p);
-    SOLVERMACRO(VEC *, delta_zU, _p);
     OCPMACRO(int *, nu, _p);
     OCPMACRO(int *, nx, _p);
     OCPMACRO(int *, ng, _p);
@@ -454,10 +400,8 @@ int OCPLSRiccati::computeSDnor(
             for (int i = 0; i < ng_ineq; i++)
             {
                 // kahan sum
-                double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction};
-                double scaling_factor = SUMMATION_ALG<3>(numbers);
-                double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
-                double grad_barrier = SUMMATION_ALG<3>(numbers2);
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction;
+                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
                 COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                 MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
             }
@@ -500,12 +444,8 @@ int OCPLSRiccati::computeSDnor(
                 GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
                 for (int i = 0; i < ng_ineq; i++)
                 {
-                    // double scaling_factor = VECEL(sigma_L_p, offs_ineq_k + i) + VECEL(sigma_U_p, offs_ineq_k + i) + inertia_correction;
-                    // kahan sum
-                    double numbers[] = {VECEL(sigma_L_p, offs_ineq_k + i), VECEL(sigma_U_p, offs_ineq_k + i), inertia_correction};
-                    double scaling_factor = SUMMATION_ALG<3>(numbers);
-                    double numbers2[] = {VECEL(gradb_L_p, offs_ineq_k + i), VECEL(gradb_U_p, offs_ineq_k + i), VECEL(gradb_plus_p, offs_ineq_k + i)};
-                    double grad_barrier = SUMMATION_ALG<3>(numbers2);
+                    double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction;
+                    double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
                 }
@@ -759,25 +699,10 @@ int OCPLSRiccati::computeSDnor(
             // calculate lamineq
             for (int i = 0; i < ng_ineq; i++)
             {
-                double scaling_factor_L = VECEL(sigma_L_p, offs_ineq_k + i);
-                double scaling_factor_U = VECEL(sigma_U_p, offs_ineq_k + i);
-                double grad_barrier_L = VECEL(gradb_L_p, offs_ineq_k + i);
-                double grad_barrier_U = VECEL(gradb_U_p, offs_ineq_k + i);
-                double grad_barrier_plus = VECEL(gradb_plus_p, offs_ineq_k + i);
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction;
+                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
                 double ds = VECEL(delta_s_p, offs_ineq_k + i);
-                {
-                    double z = VECEL(zL_p, offs_ineq_k + i);
-                    double numbers[] = {-grad_barrier_L, -z, -scaling_factor_L * ds};
-                    VECEL(delta_zL_p, offs_ineq_k + i) = SUMMATION_ALG<3>(numbers);
-                }
-                {
-                    double z = VECEL(zU_p, offs_ineq_k + i);
-                    double numbers[] = {grad_barrier_U, -z, scaling_factor_U * ds};
-                    VECEL(delta_zU_p, offs_ineq_k + i) = SUMMATION_ALG<3>(numbers);
-                }
-                // kahan sum
-                double numbers[] = {grad_barrier_L, grad_barrier_U, scaling_factor_L * ds, scaling_factor_U * ds, grad_barrier_plus, inertia_correction * ds};
-                VECEL(lam_p, offs_g_ineq_k + i) = SUMMATION_ALG<6>(numbers);
+                VECEL(lam_p, offs_g_ineq_k + i) = scaling_factor * ds + grad_barrier;
             }
         }
     }
@@ -798,8 +723,7 @@ int OCPLSRiccati::computeSDnor(
         ux,
         lam,
         delta_s,
-        sigma_L,
-        sigma_U,
+        sigma_total,
         rhs_rq[0], // ok
         rhs_b[0],
         rhs_g[0], // ok
@@ -812,9 +736,7 @@ int OCPLSRiccati::computeSDnor(
     FatropMemoryVecBF rhs_gradb2(OCP->aux.n_ineqs, 1);
     GetRHS(
         OCP,
-        gradb_L,
-        gradb_U,
-        gradb_plus,
+        gradb_total,
         rhs_rq2[0],
         rhs_b2[0],
         rhs_g2[0],
@@ -835,9 +757,7 @@ int OCPLSRiccati::computeSDnor(
 }
 int OCPLSRiccati::GetRHS(
     OCPKKTMemory *OCP,
-    const FatropVecBF &gradb_L,
-    const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus,
+    const FatropVecBF &gradb_total,
     const FatropVecBF &rhs_rq,
     const FatropVecBF &rhs_b,
     const FatropVecBF &rhs_g,
@@ -850,9 +770,7 @@ int OCPLSRiccati::GetRHS(
     OCPMACRO(MAT *, BAbt, _p);
     OCPMACRO(MAT *, Ggt, _p);
     OCPMACRO(MAT *, Ggt_ineq, _p);
-    SOLVERMACRO(VEC *, gradb_L, _p);
-    SOLVERMACRO(VEC *, gradb_U, _p);
-    SOLVERMACRO(VEC *, gradb_plus, _p);
+    SOLVERMACRO(VEC *, gradb_total, _p);
     SOLVERMACRO(VEC *, rhs_rq, _p);
     SOLVERMACRO(VEC *, rhs_b, _p);
     SOLVERMACRO(VEC *, rhs_g, _p);
@@ -864,8 +782,6 @@ int OCPLSRiccati::GetRHS(
     OCPMACRO(int *, ng_ineq, _p);
     int *offs_ux = (int *)OCP->aux.ux_offs.data();
     int *offs_g = (int *)OCP->aux.g_offs.data();
-    int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-    int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
     int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
     const int no_ineqs = OCP->aux.n_ineqs;
     //////////////////////////////
@@ -882,9 +798,7 @@ int OCPLSRiccati::GetRHS(
     ////////////// rhs_gradb
     //////////////////////////////
     {
-        VECCP(no_ineqs, gradb_L_p, 0, rhs_gradb_p, 0);
-        AXPBY(no_ineqs, -1.0, gradb_U_p, 0, -1.0, rhs_gradb_p, 0, rhs_gradb_p, 0);
-        AXPY(no_ineqs, -1.0, gradb_plus_p, 0, rhs_gradb_p, 0, rhs_gradb_p, 0);
+        VECCPSC(no_ineqs, -1.0,  gradb_total_p, 0, rhs_gradb_p, 0);
     }
     //////////////////////////////
     ////////////// rhs_b
@@ -894,10 +808,8 @@ int OCPLSRiccati::GetRHS(
         for (int k = 0; k < K - 1; k++)
         {
             const int nu = nu_p[k];
-            const int nup1 = nu_p[k + 1];
             const int nx = nx_p[k];
             const int nxp1 = nx_p[k + 1];
-            const int offs = offs_ux[k];
             ROWEX(nxp1, -1.0, BAbt_p + k, nu + nx, 0, rhs_b_p, offs_b);
             offs_b += nxp1;
         }
@@ -933,8 +845,7 @@ int OCPLSRiccati::ComputeMVProd(
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_s,
-    const FatropVecBF &sigma_L,
-    const FatropVecBF &sigma_U,
+    const FatropVecBF &sigma_total,
     const FatropVecBF &rhs_rq,
     const FatropVecBF &rhs_b,
     const FatropVecBF &rhs_g,
@@ -950,8 +861,7 @@ int OCPLSRiccati::ComputeMVProd(
     SOLVERMACRO(VEC *, ux, _p);
     SOLVERMACRO(VEC *, lam, _p);
     SOLVERMACRO(VEC *, delta_s, _p);
-    SOLVERMACRO(VEC *, sigma_L, _p);
-    SOLVERMACRO(VEC *, sigma_U, _p);
+    SOLVERMACRO(VEC *, sigma_total, _p);
     SOLVERMACRO(VEC *, rhs_rq, _p);
     SOLVERMACRO(VEC *, rhs_b, _p);
     SOLVERMACRO(VEC *, rhs_g, _p);
@@ -1017,8 +927,7 @@ int OCPLSRiccati::ComputeMVProd(
     ////////////// rhs_gradb
     //////////////////////////////
     {
-        VECMUL(no_ineqs, sigma_L_p, 0, delta_s_p, 0, rhs_gradb_p, 0);
-        VECMULACC(no_ineqs, sigma_U_p, 0, delta_s_p, 0, rhs_gradb_p, 0);
+        VECMUL(no_ineqs, sigma_total_p, 0, delta_s_p, 0, rhs_gradb_p, 0);
         AXPY(no_ineqs, -1.0, lam_p, offs_g_ineq[0], rhs_gradb_p, 0, rhs_gradb_p, 0);
         AXPY(no_ineqs, inertia_correction_w, delta_s_p, 0, rhs_gradb_p, 0, rhs_gradb_p, 0);
     }
@@ -1078,8 +987,7 @@ int OCPLSRiccati::SolveRHS(
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_s,
-    const FatropVecBF &sigma_L,
-    const FatropVecBF &sigma_U,
+    const FatropVecBF &sigma_total,
     const FatropVecBF &rhs_rq,
     const FatropVecBF &rhs_b,
     const FatropVecBF &rhs_g,

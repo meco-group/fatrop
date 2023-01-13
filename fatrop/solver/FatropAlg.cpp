@@ -215,6 +215,7 @@ int FatropAlg::Optimize()
             }
             delta_w_last = deltaw;
         }
+        fatropdata_->ComputedZ();
         double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = stepsize < 1e-14;
         lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step, watch_dog_step);
@@ -379,16 +380,9 @@ int FatropAlg::ComputeSD(double inertia_correction_w, double inertia_correction_
         inertia_correction_c,
         fatropdata_->delta_x,
         fatropdata_->lam_calc,
-        fatropdata_->delta_zL,
-        fatropdata_->delta_zU,
         fatropdata_->delta_s,
-        fatropdata_->sigma_L,
-        fatropdata_->sigma_U,
-        fatropdata_->gradb_L,
-        fatropdata_->gradb_U,
-        fatropdata_->gradb_plus,
-        fatropdata_->zL_curr,
-        fatropdata_->zU_curr);
+        fatropdata_->sigma_total,
+        fatropdata_->gradb_total);
     double el = blasfeo_toc(&timer);
     stats.compute_sd_time += el;
     return res;

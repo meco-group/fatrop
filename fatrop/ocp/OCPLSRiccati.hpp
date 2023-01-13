@@ -18,16 +18,9 @@ namespace fatrop
             const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &delta_zL,
-            const FatropVecBF &delta_zU,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
-            const FatropVecBF &gradb_L,
-            const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr) override;
+            const FatropVecBF &sigma_total,
+            const FatropVecBF &gradb_total) override;
         // solve a KKT system
         int computeSDDeg(
             OCPKKTMemory *OCP,
@@ -35,16 +28,9 @@ namespace fatrop
             const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &delta_zL,
-            const FatropVecBF &delta_zU,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
-            const FatropVecBF &gradb_L,
-            const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr);
+            const FatropVecBF &sigma_total,
+            const FatropVecBF &gradb_total);
         // solve a KKT system
         int
         computeSDnor(
@@ -52,21 +38,12 @@ namespace fatrop
             const double inertia_correction,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &delta_zL,
-            const FatropVecBF &delta_zU,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
-            const FatropVecBF &gradb_L,
-            const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr);
+            const FatropVecBF &sigma_total,
+            const FatropVecBF &gradb_total);
         int GetRHS(
             OCPKKTMemory *OCP,
-            const FatropVecBF &gradb_L,
-            const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus,
+            const FatropVecBF &gradb_total,
             const FatropVecBF &rhs_rq,
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
@@ -79,8 +56,7 @@ namespace fatrop
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
+            const FatropVecBF &sigma_total,
             const FatropVecBF &rhs_rq,
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
@@ -93,8 +69,7 @@ namespace fatrop
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
+            const FatropVecBF &sigma_total,
             const FatropVecBF &rhs_rq,
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,

@@ -53,6 +53,7 @@ namespace fatrop
         void RelaxBounds();
         void RelaxBoundsVar(double mu);
         void ComputeBarrierQuantities(double mu);
+        void ComputedZ();
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
@@ -102,9 +103,11 @@ namespace fatrop
         FatropVecBF s_upper;
         FatropVecBF sigma_L;
         FatropVecBF sigma_U;
+        FatropVecBF sigma_total;
         FatropVecBF gradb_L;
         FatropVecBF gradb_U;
         FatropVecBF gradb_plus;
+        FatropVecBF gradb_total;
         // vector<bool> lower_bounded_v;
         // vector<bool> upper_bounded_v;
         struct EvalCache

@@ -36,16 +36,9 @@ int FatropOCP::ComputeSD(
     const double inertia_correction_c,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
-    const FatropVecBF &delta_zL,
-    const FatropVecBF &delta_zU,
     const FatropVecBF &delta_s,
-    const FatropVecBF &sigma_L,
-    const FatropVecBF &sigma_U,
-    const FatropVecBF &gradb_L,
-    const FatropVecBF &gradb_U,
-    const FatropVecBF &gradb_plus,
-    const FatropVecBF &zL_curr,
-    const FatropVecBF &zU_curr)
+    const FatropVecBF &sigma_total,
+    const FatropVecBF &gradb_total)
 {
     // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
     return ls_->computeSD(
@@ -54,16 +47,9 @@ int FatropOCP::ComputeSD(
         inertia_correction_c,
         ux,
         lam,
-        delta_zL,
-        delta_zU,
         delta_s,
-        sigma_L,
-        sigma_U,
-        gradb_L,
-        gradb_U,
-        gradb_plus,
-        zL_curr,
-        zU_curr);
+        sigma_total,
+        gradb_total);
 };
 int FatropOCP::ComputeScalings(
     double &obj_scale,
@@ -150,15 +136,8 @@ int FatropOCP::Initialization(
         ux_dummy,
         dlam,
         s_dummy,
-        s_dummy,
-        s_dummy,
         sigma,
-        s_zero,
-        gradb,
-        s_zero,
-        s_zero,
-        zL,
-        zU);
+        gradb);
     return 0;
 }
 NLPDims FatropOCP::GetNLPDims() const

@@ -5,7 +5,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          n_ineqs(nlpdims.nineqs),
                                                                                          memvars(nlpdims.nvars, 11),
                                                                                          memeqs(nlpdims.neqs, 8),
-                                                                                         memineqs(nlpdims.nineqs, 23),
+                                                                                         memineqs(nlpdims.nineqs, 25),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
                                                                                          x_backup(memvars[2]),
@@ -45,9 +45,11 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          s_upper(memineqs[17]),
                                                                                          sigma_L(memineqs[18]),
                                                                                          sigma_U(memineqs[19]),
-                                                                                         gradb_L(memineqs[20]),
-                                                                                         gradb_U(memineqs[21]),
-                                                                                         gradb_plus(memineqs[22]),
+                                                                                         sigma_total(memineqs[20]),
+                                                                                         gradb_L(memineqs[21]),
+                                                                                         gradb_U(memineqs[22]),
+                                                                                         gradb_plus(memineqs[23]),
+                                                                                         gradb_total(memineqs[24]),
                                                                                          params(params)
 {
     Initialize();
@@ -613,5 +615,22 @@ void FatropData::ComputeBarrierQuantities(double mu)
         }
         VECEL(gradb_plus_p, i) = grad_barrier_plusi;
     }
+    // total quantities
+    VECCP(n_ineqs, (VEC *)gradb_L, 0, (VEC *)gradb_total, 0);
+    AXPY(n_ineqs, 1.0, (VEC *)gradb_U, 0, (VEC *)gradb_total, 0, (VEC *)gradb_total, 0);
+    AXPY(n_ineqs, 1.0, (VEC *)gradb_plus, 0, (VEC *)gradb_total, 0, (VEC *)gradb_total, 0);
+    VECCP(n_ineqs, (VEC *)sigma_L, 0, (VEC *)sigma_total, 0);
+    AXPY(n_ineqs, 1.0, (VEC *)sigma_U, 0, (VEC *)sigma_total, 0, (VEC *)sigma_total, 0);
+}
+void FatropData::ComputedZ()
+{
+    // delta zL
+    VECMUL(n_ineqs, (VEC *)sigma_L, 0, (VEC *)delta_s, 0, (VEC *)delta_zL , 0);
+    AXPBY(n_ineqs, -1.0, (VEC *)zL_curr, 0, -1.0, (VEC *)delta_zL, 0, (VEC *)delta_zL, 0);
+    AXPY(n_ineqs, -1.0, (VEC *)gradb_L, 0, (VEC *)delta_zL, 0, (VEC *)delta_zL, 0);
+    // delta zU
+    VECMUL(n_ineqs, (VEC *)sigma_U, 0, (VEC *)delta_s, 0, (VEC *)delta_zU , 0);
+    AXPBY(n_ineqs, -1.0, (VEC *)zU_curr, 0, 1.0, (VEC *)delta_zU, 0, (VEC *)delta_zU, 0);
+    AXPY(n_ineqs, 1.0, (VEC *)gradb_U, 0, (VEC *)delta_zU, 0, (VEC *)delta_zU, 0);
 }
 // void FatropData::B

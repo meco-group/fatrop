@@ -14,16 +14,9 @@ namespace fatrop
             const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
-            const FatropVecBF &delta_zL,
-            const FatropVecBF &delta_zU,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
-            const FatropVecBF &gradb_L,
-            const FatropVecBF &gradb_U,
-            const FatropVecBF &gradb_plus,
-            const FatropVecBF &zL_curr,
-            const FatropVecBF &zU_curr) = 0;
+            const FatropVecBF &sigma_total,
+            const FatropVecBF &gradb_total) = 0;
         virtual int ComputeMVProd(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
@@ -31,13 +24,12 @@ namespace fatrop
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
+            const FatropVecBF &sigma_total,
             const FatropVecBF &rhs_rq,
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
-            const FatropVecBF &rhs_gradb) = 0;
+            const FatropVecBF &rhs_gradb_total) = 0;
         virtual int SolveRHS(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
@@ -45,13 +37,12 @@ namespace fatrop
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_L,
-            const FatropVecBF &sigma_U,
+            const FatropVecBF &sigma_total,
             const FatropVecBF &rhs_rq,
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
-            const FatropVecBF &rhs_gradb) = 0;
+            const FatropVecBF &rhs_gradb_total) = 0;
     };
 
 } // namespace fatrop
