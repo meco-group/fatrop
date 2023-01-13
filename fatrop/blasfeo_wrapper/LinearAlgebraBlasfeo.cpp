@@ -260,7 +260,7 @@ namespace fatrop
             MATEL(sA, ai, aj + i) += alpha * VECEL(sx, xi + i);
         }
     }
-    void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, FatropVecBF &vc)
+    void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, const FatropVecBF &vc)
     {
         DBGASSERT(va.nels() == vb.nels());
         DBGASSERT(va.nels() == vc.nels());
@@ -276,7 +276,7 @@ namespace fatrop
         VEC *vb_p = (VEC *)vb;
         VECCP(va.nels(), va_p, va.offset(), vb_p, vb.offset());
     };
-    void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc)
+    void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, const FatropVecBF &vc)
     {
         DBGASSERT(va.nels() == vb.nels());
         DBGASSERT(va.nels() == vc.nels());

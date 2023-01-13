@@ -62,7 +62,17 @@ namespace fatrop
             const FatropVecBF &gradb_plus,
             const FatropVecBF &zL_curr,
             const FatropVecBF &zU_curr);
-        int ComputeRHS(
+        int GetRHS(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &gradb_L,
+            const FatropVecBF &gradb_U,
+            const FatropVecBF &gradb_plus,
+            const FatropVecBF &rhs_rq,
+            const FatropVecBF &rhs_b,
+            const FatropVecBF &rhs_g,
+            const FatropVecBF &rhs_g_ineq,
+            const FatropVecBF &rhs_gradb);
+        int ComputeMVProd(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,

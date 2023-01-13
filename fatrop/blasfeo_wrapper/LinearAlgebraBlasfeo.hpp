@@ -54,6 +54,8 @@
 #define GESE blasfeo_dgese
 #define DIARE blasfeo_ddiare
 #define COLSC blasfeo_dcolsc
+#define VECMUL blasfeo_dvecmul
+#define VECMULACC blasfeo_dvecmulacc
 
 #define MAX(a, b)                   \
     (                               \
@@ -214,9 +216,9 @@ namespace fatrop
         const int nels_;
     };
 
-    void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, FatropVecBF &vc);
+    void axpy(const double alpha, const FatropVecBF &va, const FatropVecBF &vb, const FatropVecBF &vc);
     void copy(const FatropVecBF &va, const FatropVecBF &vb);
-    void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, FatropVecBF &vc);
+    void axpby(const double alpha, const FatropVecBF &va, const double beta, const FatropVecBF &vb, const FatropVecBF &vc);
     double dot(const FatropVecBF &va, FatropVecBF &vb);
     double Linf(const FatropVecBF &va);
     double LinfScaled(const FatropVecBF &va, const FatropVecBF &scales);
@@ -326,7 +328,7 @@ namespace fatrop
     /** \brief Function to calculate LU factorization result is saved in A, L is lower unitriangular */
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-8);
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
-    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-4);
+    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-3);
     void fatrop_dtrsv_unu(const int m, const int n, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi);
 } // namespace fatrop
 #endif // FATROP_BLASFEO_INCLUDED

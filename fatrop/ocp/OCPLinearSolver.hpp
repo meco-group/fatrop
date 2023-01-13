@@ -24,7 +24,7 @@ namespace fatrop
             const FatropVecBF &gradb_plus,
             const FatropVecBF &zL_curr,
             const FatropVecBF &zU_curr) = 0;
-        virtual int ComputeRHS(
+        virtual int ComputeMVProd(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
