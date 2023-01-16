@@ -58,9 +58,6 @@ class Translator:
             # get regex of pattern
             regex = pattern.get_regex()
             # create list of regex elements
-
-
-            
             res = re.sub(regex, pattern.translate_line, res)
         return res
 
@@ -115,7 +112,12 @@ if __name__ == "__main__":
     GEADTR(1, Hp1_size, 1.0, Hh_p + (k + 1), 0, nxp1, Ggt_stripe_p, nu + nx, ng);
     LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
     GETR(nx + 1, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p + k, 0, 0);
-    TRSM_RLNN(nu - rank_k + nx + 0, rank_k, -1.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);
+    TRSM_RLNN(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);
+    (Pr_p + k)->PM(rank_k, RSQrqt_tilde_p + k);
+    (Pr_p + k)->MPt(rank_k, RSQrqt_tilde_p + k);
+    GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
+    GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
+    SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
     """
 
     fr = "GEMM_NT( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, 0, 0, $beta$, $C$ , 0, $offsC$, $D$, 0, $offsD$);"
@@ -127,8 +129,8 @@ if __name__ == "__main__":
     fr = "MATEL($A$, $arg2$, $i$) = $c$ + $scaling_factor$*MATEL($B$, $arg3$, $arg4$);"
     to = "VECEL(v_$A$, $i$) = $c$ + $scaling_factor$*t_VECEL(v_$B$, $arg4$);" 
     transl.add_pattern(TranslationPattern(fr, to))
-    fr = "SYRK_LN_MN( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, 0, 0, $beta$, $C$ , 0, 0, $D$, 0, 0);"
-    to = "GEMV_T($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0,0, $beta$, v_$C$, 0, v_$D$, 0);"
+    fr = "SYRK_LN_MN( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, 0, 0, $beta$, $C$ , 0, $offs_C$, $D$, 0, 0);"
+    to = "GEMV_T($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0,0, $beta$, v_$C$, $offs_C$, v_$D$, 0);"
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "GECP($arg1$ + 1, $dim$, $A$, $arg2$, 0, $B$, 0, 0);"
     to = "VECCP($dim$, v_$A$, 0, v_$B$, 0);"
@@ -155,5 +157,14 @@ if __name__ == "__main__":
     fr = "GETR( $arg1$  + 1, $dim$, $A$, nu, rank_k, $B$, 0, 0);"
     to = "VECCP($dim$, v_$A$, rank_k, v_$B$, 0);"
     transl.add_pattern(TranslationPattern(fr, to))
-    fr = "TRSM_RLNN($arg1$ + 1, $dim$, $alpha$, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);"
+    fr = "TRSM_RLNN($arg1$ + 1, $dim$, $alpha$, $A$, 0, 0, $B$, $arg2$, 0, $C$, 0, 0);"
+    to = "VECSC($dim$, $alpha$, v_$B$,0); TRSV_LNN($dim$, $A$, 0, 0, v_$B$, 0, v_$C$, 0);"
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "$P$->PM($rank$, $A$);"
+    to = "$P$->PV($rank$, v_$A$);" 
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "$P$->MPt($rank$, $A$);"
+    to = "$P$->VPt($rank$, v_$A$);"
+    transl.add_pattern(TranslationPattern(fr, to))
+
     print(transl.translate(text))
