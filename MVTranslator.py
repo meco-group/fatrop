@@ -114,6 +114,8 @@ if __name__ == "__main__":
     GEMM_NT(nu + nx + 1, Hp1_size, nxp1, 1.0, BAbt_p + k, 0, 0, Hh_p + (k + 1), 0, 0, 0.0, Ggt_stripe_p, 0, ng, Ggt_stripe_p, 0, ng);
     GEADTR(1, Hp1_size, 1.0, Hh_p + (k + 1), 0, nxp1, Ggt_stripe_p, nu + nx, ng);
     LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
+    GETR(nx + 1, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p + k, 0, 0);
+    TRSM_RLNN(nu - rank_k + nx + 0, rank_k, -1.0, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);
     """
 
     fr = "GEMM_NT( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, 0, 0, $beta$, $C$ , 0, $offsC$, $D$, 0, $offsD$);"
@@ -150,4 +152,8 @@ if __name__ == "__main__":
     GEMV_T($arg3$ - $rank$ , $gamma$-$rank$, -1.0, $G$, 0, $rank$, v_$G$, 0, v_$G$, $rank$)
     """
     transl.add_pattern(TranslationPattern(fr, to))
+    fr = "GETR( $arg1$  + 1, $dim$, $A$, nu, rank_k, $B$, 0, 0);"
+    to = "VECCP($dim$, v_$A$, rank_k, v_$B$, 0);"
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "TRSM_RLNN($arg1$ + 1, $dim$, $alpha$, Ggt_stripe_p, 0, 0, Ggt_stripe_p, rank_k, 0, Ggt_tilde_p + k, 0, 0);"
     print(transl.translate(text))
