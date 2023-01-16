@@ -40,7 +40,6 @@ class TranslationPattern:
     def get_regex(self):
         # construct regex pattern from self.prototype
         pat =''.join([re.escape(proto) + r"(.*?)" for proto in self.prototype][:-1] + [re.escape(self.prototype[-1])])
-        print(pat)
         return pat
 
 class Translator:
@@ -118,7 +117,30 @@ if __name__ == "__main__":
     GECP(nu - rank_k + nx + 1, nu + nx, RSQrqt_tilde_p + k, rank_k, 0, GgLt_p, 0, 0);
     GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
     SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
-    """
+    POTRF_L_MN(nu - rank_k + nx + 1, nu - rank_k, RSQrq_hat_curr_p, 0, 0, Llt_p + k, 0, 0);
+    GECP(nx + 1, nu - rank_k, Llt_p + k, nu - rank_k, 0, Llt_shift_p, 0, 0); // needless operation because feature not implemented yet
+    GECP(nx + 1, nx, RSQrq_hat_curr_p, nu - rank_k, nu - rank_k, Ppt_p + k, 0, 0);
+    SYRK_LN_MN(nx + 1, nx, nu - rank_k, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
+    GEMM_NT(gamma_k - rank_k, nx + 1, nu - rank_k, -1.0, Ggt_stripe_p, 0, 0, Llt_p + k, nu - rank_k, 0, 1.0, Hh_p + k, 0, 0, Hh_p + k, 0, 0);
+    GECP(nx + 1, nx, RSQrq_hat_curr_p, 0, 0, Ppt_p + k, 0, 0);
+    LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
+    TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
+    GECP(nx - rankI + 1, nx, Ppt_p, rankI, 0, GgLIt_p, 0, 0);
+    GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, GgLIt_p, 0, 0, GgLIt_p, 0, 0);
+    SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
+    POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
+    POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
+    ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, nu);
+    ROWEX(nx - rankI, -1.0, LlIt_p, nx - rankI, 0, ux_p, nu + rankI);
+    ROWEX(rankI, 1.0, GgIt_tilde_p, nx - rankI, 0, ux_p, nu);
+    ROWEX(rankI, -1.0, Ppt_p, nx, 0, lam_p, 0);
+    ROWEX(numrho_k, -1.0, Llt_p + k, numrho_k + nx, 0, ux_p, offs + rho_k);
+    ROWEX(rho_k, 1.0, Ggt_tilde_p + k, numrho_k + nx, 0, ux_p, offs);
+    ROWEX(rho_k, -1.0, RSQrqt_tilde_p + k, nu + nx, 0, lam_p, offs_g_k);
+    ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+    ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+    ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
+"""
 
     fr = "GEMM_NT( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, 0, 0, $beta$, $C$ , 0, $offsC$, $D$, 0, $offsD$);"
     to = "GEMV_T($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0,0, $beta$, v_$C$, $offsC$, v_$D$, $offsD$);"
@@ -165,6 +187,18 @@ if __name__ == "__main__":
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "$P$->MPt($rank$, $A$);"
     to = "$P$->VPt($rank$, v_$A$);"
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "POTRF_L_MN($arg1$ + 1, $dim$, $A$, 0, 0, $B$, 0, 0);"
+    to = "TRSV_LNN($dim$, $A$, 0, 0, v_$B$, 0, 0, v_$B$, 0, 0);"
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "GEMM_NT($dim1$, $arg1$ + 1, $dim2$, $alpha$, $A$, 0, 0, $B$, $C$, 0, $beta$, $D$, 0, 0, $E$, 0, 0);"
+    to = "GEMV_N($dim1$, $dim2$, $alpha$, $A$, 0, 0, v_$B$, 0, 0, $beta$, v_$C$, 0, 0, v_$D$, 0, 0);"
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "GETR($dim$, $arg1$ + 1, $A$, 0, 0, $B$, 0, 0);"
+    to = "VECCP($dim$, $A$, 0, $B$, 0);"
+    transl.add_pattern(TranslationPattern(fr, to))
+    fr = "ROWEX($dim$, $alpha$, $A$, $arg1$, $offsA$, $b$, $offs_b$);"
+    to = "VECCP($dim$, $alpha$, $A$, $offsA$, v_$b$, $offs_b$);"
     transl.add_pattern(TranslationPattern(fr, to))
 
     print(transl.translate(text))
