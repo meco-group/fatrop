@@ -97,6 +97,7 @@ namespace fatrop
         MemoryPermMat PrI;
         FatropVector<int> gamma;
         FatropVector<int> rho;
+        int rankI = 0;
         struct LastUsed
         {
             int rankI = 0;

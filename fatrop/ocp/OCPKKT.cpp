@@ -13,6 +13,7 @@ OCPKKTMemory::OCPKKTMemory(const OCPDims &dims) : K(dims.K),
                                                   aux(dims){};
 OCPKKTMemory::OCPAux::OCPAux(const OCPDims &dims) : ux_offs(offsets(dims.nx + dims.nu)),
                                                     g_offs(offsets(dims.ng)),
+                                                    dyn_offs(offsets(rotate(dims.nx,1))),
                                                     dyn_eq_offs(offsets(rotate(dims.nx, 1)) + sum(dims.ng)),
                                                     g_ineq_offs(offsets(dims.ng_ineq) + (sum(dims.nx) - dims.nx.at(0) + sum(dims.ng))),
                                                     ineq_offs(offsets(dims.ng_ineq)),

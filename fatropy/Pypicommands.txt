@@ -5,7 +5,7 @@ pip install --upgrade setuptools
 sudo apt install twine
 
 commands
-export VERSION=11
+export VERSION=11 &&
 python setup.py bdist_wheel &&
 cd dist &&
 auditwheel repair --plat manylinux_2_31_x86_64 fatrop-0.0.$VERSION-cp38-cp38-linux_x86_64.whl &&

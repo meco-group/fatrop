@@ -34,6 +34,7 @@ namespace fatrop
             const FatropVector<int> ux_offs;
             /// offset arrays are used for efficiency
             const FatropVector<int> g_offs;
+            const FatropVector<int> dyn_offs;
             const FatropVector<int> dyn_eq_offs;
             const FatropVector<int> g_ineq_offs;
             const FatropVector<int> ineq_offs;

@@ -41,9 +41,11 @@
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
 #define TRSV_UNU fatrop_dtrsv_unu
+#define TRSV_UTN blasfeo_dtrsv_utn
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
 #define VECSE blasfeo_dvecse
+#define VECSC blasfeo_dvecsc
 #define PACKMAT blasfeo_pack_dmat
 #define UNPACKVEC blasfeo_unpack_dvec
 #define PACKVEC blasfeo_pack_dvec
