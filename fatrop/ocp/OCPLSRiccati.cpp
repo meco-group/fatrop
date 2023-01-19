@@ -90,6 +90,22 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims) : Ppt(dims.nx + 1, dims.nx, dims
                                                   ux_test(sum(dims.nu) + sum(dims.nx), 1),
                                                   lam_test(sum(dims.ng) + sum(dims.ng_ineq) + sum(dims.nx) - dims.nx.at(0), 1),
                                                   delta_s_test(sum(dims.ng_ineq), 1),
+                                                  v_Ppt(dims.nx, dims.K),
+                                                  v_Hh(dims.nx, dims.K),
+                                                  v_AL(vector<int>(1, max(dims.nx)), 1),
+                                                  v_RSQrqt_tilde(dims.nu + dims.nx, dims.K),
+                                                  v_Ggt_stripe(vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                                  v_Ggt_tilde(dims.nu + dims.nx, dims.K),
+                                                  v_GgLt(vector<int>(1, max(dims.nu + dims.nx)), 1),
+                                                  v_RSQrqt_hat(vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                                  v_Llt(dims.nu + dims.nx, dims.K),
+                                                  v_Llt_shift(vector<int>(1, max(dims.nu)), 1),
+                                                  v_GgIt_tilde(vector<int>(1, dims.nx.at(0)), 1),
+                                                  v_GgLIt(vector<int>(1, dims.nx.at(0)), 1),
+                                                  v_HhIt(vector<int>(1, dims.nx.at(0)), 1),
+                                                  v_PpIt_hat(vector<int>(1, dims.nx.at(0)), 1),
+                                                  v_LlIt(vector<int>(1, dims.nx.at(0)), 1),
+                                                  v_Ggt_ineq_temp(vector<int>(1, max(dims.ng_ineq)), 1),
                                                   Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
                                                   Pr(max(dims.nu), dims.K),
                                                   PlI(dims.nx.at(0), 1),
@@ -759,7 +775,7 @@ int OCPLSRiccati::computeSDnor(
                 rhs_b[0],
                 rhs_g[0],
                 rhs_g_ineq[0],
-                rhs_gradb[0]); 
+                rhs_gradb[0]);
             axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
             axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
             axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
@@ -771,33 +787,32 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-            double err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))))/ max_norm;
-            if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 0.9*error_prev))
+            double err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+            if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
             {
                 return 0;
             }
             SolveRHS(
-                          OCP,
-                          inertia_correction,
-                          0.0,
-                          ux_test[0],
-                          lam_test[0],
-                          delta_s_test[0],
-                          sigma_total,
-                          rhs_rq[0],
-                          rhs_b[0],
-                          rhs_g[0],
-                          rhs_g_ineq[0],
-                          rhs_gradb[0]);
+                OCP,
+                inertia_correction,
+                0.0,
+                ux_test[0],
+                lam_test[0],
+                delta_s_test[0],
+                sigma_total,
+                rhs_rq[0],
+                rhs_b[0],
+                rhs_g[0],
+                rhs_g_ineq[0],
+                rhs_gradb[0]);
             // el = blasfeo_toc(&timer);
             // cout << "el time solveRHS " << el << endl;
             axpby(1.0, ux_test[0], 1.0, ux, ux);
             axpby(1.0, lam_test[0], 1.0, lam, lam);
             axpby(1.0, delta_s_test[0], 1.0, delta_s, delta_s);
-            
+
             // prepare next iteration
             error_prev = err_curr;
-
         }
     }
     return 0;
@@ -1101,22 +1116,6 @@ int OCPLSRiccati::SolveRHS(
     int *offs_dyn = (int *)OCP->aux.dyn_offs.data();
 
     // todo make this member variables
-    FatropMemoryVecBF v_Ppt(OCP->nx, OCP->K);
-    FatropMemoryVecBF v_Hh(OCP->nx, OCP->K);
-    FatropMemoryVecBF v_AL(vector<int>(1, max(OCP->nx)), 1);
-    FatropMemoryVecBF v_RSQrqt_tilde(OCP->nu + OCP->nx, OCP->K);
-    FatropMemoryVecBF v_Ggt_stripe(vector<int>(1, max(OCP->nx + OCP->nu)), 1);
-    FatropMemoryVecBF v_Ggt_tilde(OCP->nu + OCP->nx, OCP->K);
-    FatropMemoryVecBF v_GgLt(vector<int>(1, max(OCP->nu + OCP->nx)), 1);
-    FatropMemoryVecBF v_RSQrqt_hat(vector<int>(1, max(OCP->nx + OCP->nu)), 1);
-    FatropMemoryVecBF v_Llt(OCP->nu + OCP->nx, OCP->K);
-    FatropMemoryVecBF v_Llt_shift(vector<int>(1, max(OCP->nu)), 1);
-    FatropMemoryVecBF v_GgIt_tilde(vector<int>(1, OCP->nx.at(0)), 1);
-    FatropMemoryVecBF v_GgLIt(vector<int>(1, OCP->nx.at(0)), 1);
-    FatropMemoryVecBF v_HhIt(vector<int>(1, OCP->nx.at(0)), 1);
-    FatropMemoryVecBF v_PpIt_hat(vector<int>(1, OCP->nx.at(0)), 1);
-    FatropMemoryVecBF v_LlIt(vector<int>(1, OCP->nx.at(0)), 1);
-    FatropMemoryVecBF v_Ggt_ineq_temp(vector<int>(1, max(OCP->ng_ineq)), 1);
 
     VEC *v_Ppt_p = (VEC *)v_Ppt[0];
     VEC *v_Hh_p = (VEC *)v_Hh[0];
