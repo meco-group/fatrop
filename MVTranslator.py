@@ -164,10 +164,44 @@ if __name__ == "__main__":
     POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
 
     POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
+
+
+
+    GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
+
+
+
+
+
+    GEMM_NT(nu - rank_k + nx + 1, nu + nx, rank_k, 1.0, Ggt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, 0, GgLt_p, 0, 0);
+    // RSQrqt_hat = GgLt[nu-rank_k + nx +1, :rank_k] * G[:rank_k, :nu+nx] + GgLt[rank_k:, :]  (with G[:rank_k,:nu+nx] = Gt[:nu+nx,:rank_k]^T)
+    SYRK_LN_MN(nu - rank_k + nx + 1, nu + nx - rank_k, rank_k, 1.0, GgLt_p, 0, 0, Ggt_tilde_p + k, 0, 0, 1.0, GgLt_p, 0, rank_k, RSQrqt_hat_p, 0, 0);
+
+
+
+
+
+
+
+    GECP(nx + 1, nu - rank_k, Llt_p + k, nu - rank_k, 0, Llt_shift_p, 0, 0); // needless operation because feature not implemented yet
+    // SYRK_LN_MN(nx + 1, nx, nu - rank_k, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, RSQrq_hat_curr_p, nu - rank_k, nu - rank_k, Ppt_p + k, 0, 0);
+    GECP(nx + 1, nx, RSQrq_hat_curr_p, nu - rank_k, nu - rank_k, Ppt_p + k, 0, 0);
+    SYRK_LN_MN(nx + 1, nx, nu - rank_k, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
+    
+
+    LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
+
+
+
+            TRSM_RLNN(nx - rankI + 1, rankI, -1.0, HhIt_p, 0, 0, HhIt_p, rankI, 0, GgIt_tilde_p, 0, 0);
+            GEMM_NT(nx - rankI + 1, nx, rankI, 1.0, GgIt_tilde_p, 0, 0, Ppt_p, 0, 0, 1.0, GgLIt_p, 0, 0, GgLIt_p, 0, 0);
+            SYRK_LN_MN(nx - rankI + 1, nx - rankI, rankI, 1.0, GgLIt_p, 0, 0, GgIt_tilde_p, 0, 0, 1.0, GgLIt_p, 0, rankI, PpIt_hat_p, 0, 0);
+            POTRF_L_MN(nx - rankI + 1, nx - rankI, PpIt_hat_p, 0, 0, LlIt_p, 0, 0);
+
 """
 
     fr = "GEMM_NT( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, 0, 0, $beta$, $C$ , 0, $offsC$, $D$, 0, $offsD$);"
-    to = "GEMV_T($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0, $beta$, v_$C$, $offsC$, v_$D$, $offsD$);"
+    to = "GEMV_N($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0, $beta$, v_$C$, $offsC$, v_$D$, $offsD$);"
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "COLSC($arg1$+ 1, $scaling_factor$, $A$, 0, $i$);"
     to = "VECEL(v_$A$, $i$) *= $scaling_factor$;"
@@ -176,7 +210,7 @@ if __name__ == "__main__":
     to = "VECEL(v_$A$, $i$) = $c$ + $scaling_factor$*t_VECEL(v_$B$, $arg4$);" 
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "SYRK_LN_MN( $arg1$ + 1, $dim1$,   $dim2$,   $alpha$,   $B$, 0, 0, $A$, $argx$, 0, $beta$, $C$ , 0, $offs_C$, $D$, 0, 0);"
-    to = "GEMV_T($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0,0, $beta$, v_$C$, $offs_C$, v_$D$, 0);"
+    to = "GEMV_N($dim1$, $dim2$, $alpha$, $A$, 0,0, v_$B$, 0,0, $beta$, v_$C$, $offs_C$, v_$D$, 0);"
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "GECP($arg1$ + 1, $dim$, $A$, $arg2$, $offsA$, $B$, 0, $offsB$);"
     to = "VECCP($dim$, v_$A$, $offsA$, v_$B$, $offsB$);"
@@ -188,17 +222,16 @@ if __name__ == "__main__":
     to = "AXPY($dim$, $alpha$, v_$A$, 0, v_$B$, 0, v_$B$, 0);"
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "GEADTR(1, $dim$, 1.0, $A$, 0, $offsA$, $B$, $arg1$, $offsB$);"
-    to = "AXPY($dim$, 1.0, v_$A$, $offsA$, v_$B$, $offsB$, v_$B$, $offsB$);"
+    to = "AXPY($dim$, 1.0, v_$A$, 0, v_$B$, $offsB$, v_$B$, $offsB$);"
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "LU_FACT_transposed($gamma$, $arg2$ + 1, $arg3$, $rank$ , $G$, $Pl$, $Pr$);"
     ### Ggt_stripe [U1_T \ L1T, L2T; U2T, etaT]
     to = """
     $Pl$ -> PV($rank$, v_$G$, 0);
     // L1^-1 g_stipe[:rho]
-    TRSV_UTN($rank$, $G$, 0,0, v_$G$, 0, v_$G$, 0);
+    TRSV_UTU($rank$, $G$, 0,0, v_$G$, 0, v_$G$, 0);
     // -L2 L1^-1 g_stripe[:rho] + g_stripe[rho:]
-    GEMV_T($arg3$ - $rank$ , $gamma$-$rank$, -1.0, $G$, 0, $rank$, v_$G$, 0, 1.0, v_$G$, $rank$, v_$G$, $rank$)
-    GECP(nx + 1, nx, RSQrq_hat_curr_p, 0, 0, Ppt_p + k, 0, 0);
+    GEMV_T($rank$ , $gamma$-$rank$, -1.0, $G$, 0, $rank$, v_$G$, 0, 1.0, v_$G$, $rank$, v_$G$, $rank$)
     """
     transl.add_pattern(TranslationPattern(fr, to))
     fr = "GETR( $arg1$  + 1, $dim$, $A$, nu, rank_k, $B$, 0, 0);"

@@ -248,6 +248,18 @@ namespace fatrop
             VECEL(sz, zi + i) = res;
         }
     }
+    void fatrop_dtrsv_utu(const int m, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi)
+    {
+        for (int i = 0; i < m; i++)
+        {
+            double res = VECEL(sx, xi + i);
+            for (int j = 0; j < i-1; j++)
+            {
+                res -= MATEL(sA, ai + j, aj + i) * VECEL(sz, zi + j);
+            }
+            VECEL(sz, zi + i) = res;
+        }
+    }
     void fatrop_identity(const int m, MAT *sA, const int ai, const int aj)
     {
         GESE(m, m, 0.0, sA, ai, aj);
