@@ -732,23 +732,9 @@ int OCPLSRiccati::computeSDnor(
     lastused_.inertia_correction = inertia_correction;
     if (it_ref)
     {
-        blasfeo_tic(&timer);
-        ComputeMVProd(
-            OCP,
-            inertia_correction,
-            0.0,
-            ux,
-            lam,
-            delta_s,
-            sigma_total,
-            rhs_rq[0], // ok
-            rhs_b[0],
-            rhs_g[0], // ok
-            rhs_g_ineq[0],
-            rhs_gradb[0]); // ok
-        // el = blasfeo_toc(&timer);
-        // cout << "el time MVprod " << el << endl;
-        // blasfeo_tic(&timer);
+        // copy(ux, ux_test[0]);
+        // copy(lam, lam_test[0]);
+        // copy(delta_s, delta_s_test[0]);
         GetRHS(
             OCP,
             gradb_total,
@@ -757,23 +743,41 @@ int OCPLSRiccati::computeSDnor(
             rhs_g2[0],
             rhs_g_ineq2[0],
             rhs_gradb2[0]);
-        // el = blasfeo_toc(&timer);
-        // cout << "el time getRHS " << el << endl;
-        double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
-        axpby(1.0, rhs_rq[0], -1.0, rhs_rq2[0], rhs_rq[0]);
-        // cout << "residu rq " << Linf(rhs_rq[0]) / max_norm << endl;
-        axpby(1.0, rhs_b[0], -1.0, rhs_b2[0], rhs_b[0]);
-        // cout << "residu b " << Linf(rhs_b[0]) / max_norm << endl;
-        axpby(1.0, rhs_g[0], -1.0, rhs_g2[0], rhs_g[0]);
-        // cout << "residu g " << Linf(rhs_g[0]) / max_norm << endl;
-        axpby(1.0, rhs_g_ineq[0], -1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
-        // cout << "residu g_ineq " << Linf(rhs_g_ineq[0]) / max_norm << endl;
-        axpby(1.0, rhs_gradb[0], -1.0, rhs_gradb2[0], rhs_gradb[0]);
-        // cout << "residu gradb " << Linf(rhs_gradb[0]) / max_norm << endl;
-        // blasfeo_tic(&timer);
-        for (int i = 0; i < 5; i++)
+        double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
+        double error_prev = -1.0;
+        for (int i = 0; i < 10; i++)
         {
-            DBGASSERT(SolveRHS(
+            ComputeMVProd(
+                OCP,
+                inertia_correction,
+                0.0,
+                ux,
+                lam,
+                delta_s,
+                sigma_total,
+                rhs_rq[0],
+                rhs_b[0],
+                rhs_g[0],
+                rhs_g_ineq[0],
+                rhs_gradb[0]); 
+            axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
+            axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
+            axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
+            axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
+            axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
+
+            // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
+            // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
+            // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
+            // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
+            // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
+            double err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))))/ max_norm;
+            // cout << "error: " << err_curr << endl;
+            if (err_curr < 1e-8 || (error_prev > 0.0 && err_curr > 0.9*error_prev))
+            {
+                break;
+            }
+            SolveRHS(
                           OCP,
                           inertia_correction,
                           0.0,
@@ -785,36 +789,16 @@ int OCPLSRiccati::computeSDnor(
                           rhs_b[0],
                           rhs_g[0],
                           rhs_g_ineq[0],
-                          rhs_gradb[0]) == 0);
+                          rhs_gradb[0]);
             // el = blasfeo_toc(&timer);
             // cout << "el time solveRHS " << el << endl;
             axpby(1.0, ux_test[0], 1.0, ux, ux);
             axpby(1.0, lam_test[0], 1.0, lam, lam);
             axpby(1.0, delta_s_test[0], 1.0, delta_s, delta_s);
-            ComputeMVProd(
-                OCP,
-                inertia_correction,
-                0.0,
-                ux,
-                lam,
-                delta_s,
-                sigma_total,
-                rhs_rq[0], // ok
-                rhs_b[0],
-                rhs_g[0], // ok
-                rhs_g_ineq[0],
-                rhs_gradb[0]); // ok
-            // cout << "max diff: " << Linf(ux_test[0]) << endl;
-            axpby(1.0, rhs_rq[0], -1.0, rhs_rq2[0], rhs_rq[0]);
-            // cout << "residu rq " << Linf(rhs_rq[0]) / max_norm << endl;
-            axpby(1.0, rhs_b[0], -1.0, rhs_b2[0], rhs_b[0]);
-            // cout << "residu b " << Linf(rhs_b[0]) / max_norm << endl;
-            axpby(1.0, rhs_g[0], -1.0, rhs_g2[0], rhs_g[0]);
-            // cout << "residu g " << Linf(rhs_g[0]) / max_norm << endl;
-            axpby(1.0, rhs_g_ineq[0], -1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
-            // cout << "residu g_ineq " << Linf(rhs_g_ineq[0]) / max_norm << endl;
-            axpby(1.0, rhs_gradb[0], -1.0, rhs_gradb2[0], rhs_gradb[0]);
-            // cout << "residu gradb " << Linf(rhs_gradb[0]) / max_norm << endl;
+            
+            // prepare next iteration
+            error_prev = err_curr;
+
         }
     }
     return 0;
@@ -856,13 +840,13 @@ int OCPLSRiccati::GetRHS(
         const int nu = nu_p[k];
         const int nx = nx_p[k];
         const int offs = offs_ux[k];
-        ROWEX(nu + nx, -1.0, RSQrqt_p + k, nu + nx, 0, rhs_rq_p, offs);
+        ROWEX(nu + nx, 1.0, RSQrqt_p + k, nu + nx, 0, rhs_rq_p, offs);
     }
     //////////////////////////////
     ////////////// rhs_gradb
     //////////////////////////////
     {
-        VECCPSC(no_ineqs, -1.0, gradb_total_p, 0, rhs_gradb_p, 0);
+        VECCPSC(no_ineqs, 1.0, gradb_total_p, 0, rhs_gradb_p, 0);
     }
     //////////////////////////////
     ////////////// rhs_b
@@ -874,7 +858,7 @@ int OCPLSRiccati::GetRHS(
             const int nu = nu_p[k];
             const int nx = nx_p[k];
             const int nxp1 = nx_p[k + 1];
-            ROWEX(nxp1, -1.0, BAbt_p + k, nu + nx, 0, rhs_b_p, offs_b);
+            ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, rhs_b_p, offs_b);
             offs_b += nxp1;
         }
     }
@@ -887,7 +871,7 @@ int OCPLSRiccati::GetRHS(
         const int nx = nx_p[k];
         const int ng = ng_p[k];
         const int offs_g_k = offs_g[k];
-        ROWEX(ng, -1.0, Ggt_p + k, nu + nx, 0, rhs_g_p, offs_g_k);
+        ROWEX(ng, 1.0, Ggt_p + k, nu + nx, 0, rhs_g_p, offs_g_k);
     }
     //////////////////////////////
     ////////////// rhs_g_ineq
@@ -898,7 +882,7 @@ int OCPLSRiccati::GetRHS(
         const int nx = nx_p[k];
         const int ng_ineq = ng_ineq_p[k];
         const int offs_ineq_k = offs_ineq[k];
-        ROWEX(ng_ineq, -1.0, Ggt_ineq_p + k, nu + nx, 0, rhs_g_ineq_p, offs_ineq_k);
+        ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, rhs_g_ineq_p, offs_ineq_k);
     }
     return 0;
 }
