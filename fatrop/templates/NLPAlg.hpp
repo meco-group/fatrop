@@ -45,6 +45,11 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total) = 0;
+        virtual int SolveSOC(
+            const FatropVecBF &ux,
+            const FatropVecBF &lam,
+            const FatropVecBF &delta_s,
+            const FatropVecBF & cosntraint_violation) =0;
         virtual NLPDims GetNLPDims() const = 0;
         virtual int ComputeScalings(
             double &obj_scale,

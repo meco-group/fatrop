@@ -10,12 +10,12 @@ inline int LineSearch::EvalCVNext()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res =  fatropnlp_->EvalConstraintViolation(
+    int res = fatropnlp_->EvalConstraintViolation(
         fatropdata_->x_next,
         fatropdata_->s_next,
         fatropdata_->g_next);
     eval_cv_time += blasfeo_toc(&timer);
-    eval_cv_count ++;
+    eval_cv_count++;
     return res;
 }
 double LineSearch::EvalObjNext()
@@ -28,7 +28,7 @@ double LineSearch::EvalObjNext()
         fatropdata_->x_next,
         res);
     eval_obj_time += blasfeo_toc(&timer);
-    eval_obj_count ++;
+    eval_obj_count++;
     return res;
 }
 void LineSearch::Reset()
@@ -42,6 +42,29 @@ int LineSearch::TryStep(double alpha_pr, double alpha_du) const
 {
     return fatropdata_->TryStep(alpha_pr, alpha_du);
 };
+int LineSearch::InitSoc() const
+{
+    // backup delta_x, delta_s and lam_calc
+    fatropdata_->lam_calc_backup_ls.copy(fatropdata_->lam_calc);
+    fatropdata_->delta_x_backup_ls.copy(fatropdata_->delta_x);
+    fatropdata_->delta_s_backup_ls.copy(fatropdata_->delta_s);
+    fatropdata_->g_soc.copy(fatropdata_->g_curr);
+    return 0;
+};
+int LineSearch::ExitSoc() const
+{
+    // restore delta_x, delta_s and lam_calc
+    fatropdata_->lam_calc.copy(fatropdata_->lam_calc_backup_ls);
+    fatropdata_->delta_x.copy(fatropdata_->delta_x_backup_ls);
+    fatropdata_->delta_s.copy(fatropdata_->delta_s_backup_ls);
+    return 0;
+};
+int LineSearch::CalcSoc(double alpha) const
+{
+    axpy(alpha, fatropdata_->g_soc, fatropdata_->g_next, fatropdata_->g_soc);
+    return fatropnlp_->SolveSOC(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
+};
+
 BackTrackingLineSearch::BackTrackingLineSearch(
     const shared_ptr<FatropParams> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,
@@ -68,6 +91,8 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     LineSearchInfo res;
     double alpha_primal = 1.0;
     double alpha_dual = 1.0;
+    double alpha_primal_backup = 1.0;
+    double alpha_dual_backup = 1.0;
     fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
     TryStep(alpha_primal, alpha_dual);
     double cv_curr = from_backup ? fatropdata_->CVL1Backup() : fatropdata_->CVL1Curr();
@@ -89,6 +114,11 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     // cout << "cv " << cv_curr << endl;
     // cout << "obj " << obj_curr << endl;
     // cout << "lindecr " << lin_decr_curr << endl;
+    const int p_max = 0;
+    bool soc_step = false;
+    double cv_soc_old = cv_curr;
+    int p = 0;
+    int no_alpha_trials = 1;
     for (int ll = 1; ll < 50; ll++)
     {
         TryStep(alpha_primal, alpha_dual);
@@ -102,20 +132,25 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         double obj_next = EvalObjNext();
         double barrier_next = fatropdata_->EvalBarrierNext(mu);
         obj_next += barrier_next;
+
+// cout << "cv_next: " << cv_next;
+// cout << "  obj_next: " << obj_next << endl;
+        double alpha_primal_accent = (soc_step ? alpha_primal_backup : alpha_primal);
         if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
         {
-            bool switch_cond = (lin_decr_curr < 0) && (alpha_primal * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
-            bool armijo = obj_next - obj_curr < eta_phi * alpha_primal * lin_decr_curr;
+            // cout << filter_->GetSize() << endl;
+            bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent* pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
+            bool armijo = obj_next - obj_curr < eta_phi *alpha_primal_accent * lin_decr_curr;
             if (switch_cond && (cv_curr <= theta_min))
             {
                 // f-step
                 if (armijo)
                 {
-                    (journaller_->it_curr).type = 'f';
+                    (journaller_->it_curr).type = soc_step? 'F':'f';
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
-                    res.ls = ll;
+                    res.ls = no_alpha_trials;
                     return res;
                 }
             }
@@ -129,11 +164,11 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
                     {
                         filter_->Augment(FilterData(0, obj_curr - gamma_phi * cv_curr, cv_curr * (1 - gamma_theta)));
                     }
-                    (journaller_->it_curr).type = 'h';
+                    (journaller_->it_curr).type = soc_step? 'H':'h';
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
-                    res.ls = ll;
+                    res.ls = no_alpha_trials;
                     return res;
                 }
             }
@@ -155,7 +190,47 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             res.ls = -1;
             return res;
         }
-        alpha_primal *= 0.50;
+        if(soc_step && (p>p_max || (ll>1 &&(cv_next > 0.99*cv_soc_old))))
+        {
+            // deactivate soc
+            soc_step = false;
+            alpha_primal = alpha_primal_backup;
+            alpha_dual = alpha_dual_backup;
+            ExitSoc();
+            // todo cache these variables
+            fatropdata_->ComputedZ();
+        }
+        if (!soc_step && (ll == 1 && p_max>0))
+        {
+            // activate soc
+            cout << "trying soc " << endl;
+            soc_step = true;
+            alpha_primal_backup = alpha_primal;
+            alpha_dual_backup = alpha_dual;
+            InitSoc();
+        }
+        if(soc_step)
+        {
+            if(ll>1)
+            {
+                cv_soc_old = cv_next;
+            }
+            CalcSoc(alpha_primal);
+            // cout << "size of soc x step " << L1(fatropdata_->delta_x) << endl;
+            fatropdata_->ComputedZ();
+            fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
+            // cout << "alpha_primal " << alpha_primal << endl;
+            // cout << "alpha_dual " << alpha_dual << endl;
+            // cout << "soc" << endl;
+            p = p + 1;
+        }
+        else
+        {
+            // cut back alpha_primal
+            no_alpha_trials++;
+            alpha_primal *= 0.50;
+        }
+
     }
     assert(false);
     res.ls = 0;

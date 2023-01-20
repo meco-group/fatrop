@@ -32,8 +32,6 @@ namespace fatrop
             const FatropVecBF &rhs_gradb_total) = 0;
         virtual int SolveRHS(
             OCPKKTMemory *OCP,
-            const double inertia_correction_w,
-            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
@@ -43,6 +41,14 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb_total) = 0;
+        virtual int GetRHS(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &gradb_total,
+            const FatropVecBF &rhs_rq,
+            const FatropVecBF &rhs_b,
+            const FatropVecBF &rhs_g,
+            const FatropVecBF &rhs_g_ineq,
+            const FatropVecBF &rhs_gradb) = 0;
     };
 
 } // namespace fatrop

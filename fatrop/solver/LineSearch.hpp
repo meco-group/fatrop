@@ -27,6 +27,9 @@ namespace fatrop
         double EvalObjNext();
         void Reset();
         virtual int TryStep(double alpha_pr, double alpha_du) const;
+        virtual int InitSoc() const;
+        virtual int ExitSoc() const;
+        virtual int CalcSoc(double alpha) const;
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
         int eval_cv_count;

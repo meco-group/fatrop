@@ -128,7 +128,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
     journaller = make_shared<Journaller>(params->maxiter + 1);
-    linesearch = DDP ? make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter) : make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    // linesearch = DDP ? make_shared<LineSearchDDP>(params, fatropocp, fatropdata, filter, journaller, ocplsriccati1, &(fatropocp1->ocpkktmemory_), ocptempladapter) : make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
+    linesearch = make_shared<BackTrackingLineSearch>(params, fatropocp, fatropdata, filter, journaller);
     fatropalg = make_shared<FatropAlg>(fatropocp, fatropdata, params, filter, linesearch, journaller);
     solver_built = true;
     vector<string> sampler_names = json_spec["samplers"];

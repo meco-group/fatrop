@@ -19,18 +19,27 @@ namespace fatrop
     struct OCPDims
     {
     public:
-        OCPDims(){};
-        OCPDims(const int K, const FatropVector<int>&nu,const FatropVector<int>& nx, const FatropVector<int>& ng, const FatropVector<int>& ng_ineq):K(K), nu(nu), nx(nx), ng(ng), ng_ineq(ng_ineq){};
+        OCPDims(const int K, const FatropVector<int> &nu, const FatropVector<int> &nx, const FatropVector<int> &ng, const FatropVector<int> &ng_ineq) : K(K), nu(nu), nx(nx), ng(ng), ng_ineq(ng_ineq),
+                                                                                                                                                        n_u_tot(sum(nu)),
+                                                                                                                                                        n_x_tot(sum(nx)),
+                                                                                                                                                        n_b_tot(n_x_tot - nx.at(0)),
+                                                                                                                                                        n_g_tot(sum(ng)),
+                                                                                                                                                        n_g_ineq_tot(sum(ng_ineq)){};
         /// horizon length
-        int K;
+        const int K;
         /// input vector size
-        FatropVector<int> nu;
+        const FatropVector<int> nu;
         /// state vector size
-        FatropVector<int> nx;
+        const FatropVector<int> nx;
         // number of stagewise equality constraints
-        FatropVector<int> ng;
+        const FatropVector<int> ng;
         // number of stagewise inequality constraints
-        FatropVector<int> ng_ineq;
+        const FatropVector<int> ng_ineq;
+        const int n_u_tot;
+        const int n_x_tot;
+        const int n_b_tot;
+        const int n_g_tot;
+        const int n_g_ineq_tot;
     };
 } // namespace fatrop
 #endif // FATROP_OCPDIMS_INCLUDED

@@ -245,6 +245,7 @@ int FatropAlg::Optimize()
                     it_curr.type = 'x';
                     fatropdata_->RestoreBackup();
                     watch_dog_step = false;
+                    // todo make use of delta_x_backup and delta_s_backup
                     continue;
                 };
                 it_curr.type = 'w';

@@ -48,7 +48,7 @@ namespace fatrop
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
-            const FatropVecBF &rhs_gradb);
+            const FatropVecBF &rhs_gradb) override;
         int ComputeMVProd(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
@@ -64,8 +64,6 @@ namespace fatrop
             const FatropVecBF &rhs_gradb);
         int SolveRHS(
             OCPKKTMemory *OCP,
-            const double inertia_correction_w,
-            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
@@ -74,7 +72,7 @@ namespace fatrop
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
-            const FatropVecBF &rhs_gradb);
+            const FatropVecBF &rhs_gradb) override;
         FatropMemoryMatBF Ppt;
         FatropMemoryMatBF Hh;
         FatropMemoryMatBF AL;
@@ -130,7 +128,8 @@ namespace fatrop
         struct LastUsed
         {
             int rankI = 0;
-            double inertia_correction = 0;
+            double inertia_correction_w = 0;
+            double inertia_correction_c = 0;
             double kappa_d = 0;
             double mu = 0;
         } lastused_;

@@ -331,7 +331,7 @@ namespace fatrop
     /** \brief Function to calculate LU factorization result is saved in A, L is lower unitriangular */
     void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-8);
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
-    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-6);
+    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-4);
     void fatrop_dtrsv_unu(const int m, const int n, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi);
     void fatrop_dtrsv_utu(const int m, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi);
 } // namespace fatrop

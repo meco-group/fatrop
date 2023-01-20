@@ -8,7 +8,7 @@
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"
-#include "ocp/LineSearchDDP.hpp"
+// #include "ocp/LineSearchDDP.hpp"
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
 #include <memory>
@@ -38,6 +38,11 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total) override;
+        int SolveSOC(
+            const FatropVecBF &ux,
+            const FatropVecBF &lam,
+            const FatropVecBF &delta_s,
+            const FatropVecBF &constraint_violation) override;
         int ComputeScalings(
             double &obj_scale,
             FatropVecBF &x_scales,
@@ -73,6 +78,8 @@ namespace fatrop
 
     public:
         shared_ptr<OCP> ocp_;
+        OCPDims dims_;
+        NLPDims nlpdims_;
         shared_ptr<OCPLinearSolver> ls_;
         shared_ptr<OCPScalingMethod> scaler_;
         DuInfEvaluator duinfevaluator_;
@@ -85,6 +92,13 @@ namespace fatrop
         FatropVecBF s_dummy;
         FatropVecBF s_zero;
         FatropVecBF ux_dummy;
+        FatropMemoryVecBF rhs_rq;
+        FatropMemoryVecBF rhs_b;
+        FatropMemoryVecBF rhs_g;
+        FatropMemoryVecBF rhs_g_ineq;
+        FatropMemoryVecBF rhs_gradb;
+        FatropMemoryVecBF gradb_total_cache;
+        FatropMemoryVecBF sigma_total_cache;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED

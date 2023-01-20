@@ -531,8 +531,9 @@ void FatropVecBF::operator=(const FatropVec &fm)
 }
 void FatropVecBF::copy(const FatropVecBF &fm)
 {
+    DBGASSERT(fm.nels() == nels());
     VEC *fm_p = (VEC *)fm;
-    VECCP(nels(), fm_p, 0, vec_, 0);
+    VECCP(nels(), fm_p, fm.offset(), vec_, offset());
 }
 void FatropVecBF::copyto(vector<double> &fm)
 {
@@ -554,6 +555,7 @@ void FatropVecBF::set_datap(VEC *vecbf)
 }
 FatropVecBF FatropVecBF::block(const int i, const int p) const
 {
+    DBGASSERT(i + p <= nels_);
     return FatropVecBF(p, offset_ + i, this->vec_);
 }
 void FatropVecBF::SwapWith(FatropVecBF &vb)

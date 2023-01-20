@@ -40,7 +40,7 @@ int LineSearchDDP::TryStep(double alpha_primal, double alpha_dual) const
     int *offs_ineq_p = (int *)OCP_->aux.ineq_offs.data();
     // int *offs_g_ineq_p = (int *)OCP_->aux.g_ineq_offs.data();
     int rankI = ocplsriccati_->lastused_.rankI;
-    double inertia_correction = ocplsriccati_->lastused_.inertia_correction;
+    double inertia_correction = ocplsriccati_->lastused_.inertia_correction_w;
     double kappa_d = ocplsriccati_->lastused_.kappa_d;
     double mu = ocplsriccati_->lastused_.mu;
     // perform a forward DDP pass

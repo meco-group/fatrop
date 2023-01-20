@@ -122,6 +122,8 @@ int OCPLSRiccati::computeSD(
     const FatropVecBF &sigma_total,
     const FatropVecBF &gradb_total)
 {
+    lastused_.inertia_correction_c = inertia_correction_c;
+    lastused_.inertia_correction_w = inertia_correction_w;
     if (inertia_correction_c == 0.0)
     {
         return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
@@ -745,7 +747,7 @@ int OCPLSRiccati::computeSDnor(
     // double el = blasfeo_toc(&timer);
     // cout << "el time fact solve" << el << endl;
     lastused_.rankI = rankI;
-    lastused_.inertia_correction = inertia_correction;
+    lastused_.inertia_correction_w = inertia_correction;
     if (it_ref)
     {
         // copy(ux, ux_test[0]);
@@ -788,14 +790,13 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             double err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+            // cout << "residu:  " << err_curr << endl;
             if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
             {
                 return 0;
             }
             SolveRHS(
                 OCP,
-                inertia_correction,
-                0.0,
                 ux_test[0],
                 lam_test[0],
                 delta_s_test[0],
@@ -1044,8 +1045,6 @@ int OCPLSRiccati::ComputeMVProd(
 };
 int OCPLSRiccati::SolveRHS(
     OCPKKTMemory *OCP,
-    const double inertia_correction_w,
-    const double inertia_correction_c,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_s,
@@ -1056,8 +1055,10 @@ int OCPLSRiccati::SolveRHS(
     const FatropVecBF &rhs_g_ineq,
     const FatropVecBF &rhs_gradb)
 {
+    double inertia_correction_w = lastused_.inertia_correction_w;
+    double inertia_correction_c = lastused_.inertia_correction_c;
     assert(inertia_correction_c == 0.0); // not implemented yet
-    bool increased_accuracy = true;
+    bool increased_accuracy = false;
     //     // blasfeo_timer timer;
     //     // blasfeo_tic(&timer);
     //     // define compiler macros for notational convenience

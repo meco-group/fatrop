@@ -69,15 +69,18 @@ namespace fatrop
         FatropVecBF x_initial;
         FatropVecBF delta_x;
         FatropVecBF delta_x_backup;
+        FatropVecBF delta_x_backup_ls;
         FatropVecBF x_scales;
         FatropVecBF lam_curr;
         FatropVecBF lam_next;
         FatropVecBF lam_backup;
         FatropVecBF lam_calc;
+        FatropVecBF lam_calc_backup_ls;
         FatropVecBF lam_scales;
         FatropVecBF g_curr;
         FatropVecBF g_next;
         FatropVecBF g_backup;
+        FatropVecBF g_soc;
         FatropVecBF grad_curr;
         FatropVecBF grad_next;
         FatropVecBF grad_backup;
@@ -89,6 +92,7 @@ namespace fatrop
         FatropVecBF s_backup;
         FatropVecBF delta_s;
         FatropVecBF delta_s_backup;
+        FatropVecBF delta_s_backup_ls;
         FatropVecBF zL_curr;
         FatropVecBF zL_next;
         FatropVecBF zL_backup;

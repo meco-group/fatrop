@@ -3,12 +3,20 @@ using namespace fatrop;
 FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,
-    const shared_ptr<OCPScalingMethod> &scaler) : ocp_(ocp), ls_(ls), scaler_(scaler), ocpkktmemory_(ocp_->GetOCPDims()), s_memvec(this->GetNLPDims().nineqs, 4), ux_memvec(this->GetNLPDims().nvars, 1),
+    const shared_ptr<OCPScalingMethod> &scaler) : ocp_(ocp), dims_(ocp_->GetOCPDims()),
+                                                  nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.at(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
                                                   sigma(s_memvec[0]),
                                                   gradb(s_memvec[1]),
                                                   s_dummy(s_memvec[2]),
                                                   s_zero(s_memvec[3]),
-                                                  ux_dummy(ux_memvec[0]){};
+                                                  ux_dummy(ux_memvec[0]),
+                                                  rhs_rq(nlpdims_.nvars, 1),
+                                                  rhs_b(dims_.n_b_tot, 1),
+                                                  rhs_g(dims_.n_g_tot, 1),
+                                                  rhs_g_ineq(dims_.n_g_ineq_tot, 1),
+                                                  rhs_gradb(dims_.n_g_ineq_tot, 1),
+                                                  gradb_total_cache(dims_.n_g_ineq_tot, 1),
+                                                  sigma_total_cache(dims_.n_g_ineq_tot, 1){};
 int FatropOCP::EvalHess(
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -41,6 +49,10 @@ int FatropOCP::ComputeSD(
     const FatropVecBF &gradb_total)
 {
     // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
+    // save gradb_total and sigma_total
+    gradb_total_cache[0].copy(gradb_total);
+    sigma_total_cache[0].copy(sigma_total);
+
     return ls_->computeSD(
         &ocpkktmemory_,
         inertia_correction_w,
@@ -50,6 +62,39 @@ int FatropOCP::ComputeSD(
         delta_s,
         sigma_total,
         gradb_total);
+};
+
+int FatropOCP::SolveSOC(
+    const FatropVecBF &ux,
+    const FatropVecBF &lam,
+    const FatropVecBF &delta_s,
+    const FatropVecBF &constraint_violation)
+{
+    /// todo avoid retrieving unnecessary rhs'es
+    ls_->GetRHS(
+        &ocpkktmemory_,
+        gradb_total_cache[0],
+        rhs_rq[0],
+        rhs_b[0],
+        rhs_g[0],
+        rhs_g_ineq[0],
+        rhs_gradb[0]);
+    // prepare rhs_b, rhs_g and rhg_g_ineq
+    rhs_b[0].copy(constraint_violation.block(0, dims_.n_b_tot));
+    rhs_g[0].copy(constraint_violation.block(dims_.n_b_tot, dims_.n_g_tot));
+    rhs_g_ineq[0].copy(constraint_violation.block(dims_.n_b_tot + dims_.n_g_tot, dims_.n_g_ineq_tot));
+
+    return ls_->SolveRHS(
+        &ocpkktmemory_,
+        ux,
+        lam,
+        delta_s,
+        sigma_total_cache[0],
+        rhs_rq[0],
+        rhs_b[0],
+        rhs_g[0],
+        rhs_g_ineq[0],
+        rhs_gradb[0]);
 };
 int FatropOCP::ComputeScalings(
     double &obj_scale,
@@ -142,13 +187,7 @@ int FatropOCP::Initialization(
 }
 NLPDims FatropOCP::GetNLPDims() const
 {
-    NLPDims res;
-    // states + inputs
-    res.nvars = sum(ocpkktmemory_.nu) + sum(ocpkktmemory_.nx);
-    // stagewise equality contraints + dynamics constraints + slack constraints
-    res.neqs = sum(ocpkktmemory_.ng) + sum(ocpkktmemory_.nx) - ocpkktmemory_.nx.at(0) + sum(ocpkktmemory_.ng_ineq);
-    res.nineqs = sum(ocpkktmemory_.ng_ineq);
-    return res;
+    return nlpdims_;
 };
 void FatropOCP::Finalize()
 {

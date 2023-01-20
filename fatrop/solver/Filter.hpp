@@ -24,6 +24,10 @@ namespace fatrop
         inline bool IsDominated(const FilterData &fdin0, const FilterData &fdin1) const;
         bool IsAcceptable(const FilterData &fdin) const;
         void Reset();
+        int GetSize() const
+        {
+            return filterdata_.size();
+        }
 
     private:
         vector<FilterData> filterdata_;
