@@ -1058,7 +1058,7 @@ int OCPLSRiccati::SolveRHS(
     double inertia_correction_w = lastused_.inertia_correction_w;
     double inertia_correction_c = lastused_.inertia_correction_c;
     assert(inertia_correction_c == 0.0); // not implemented yet
-    bool increased_accuracy = false;
+    bool increased_accuracy = true;
     //     // blasfeo_timer timer;
     //     // blasfeo_tic(&timer);
     //     // define compiler macros for notational convenience

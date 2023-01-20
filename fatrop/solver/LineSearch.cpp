@@ -175,6 +175,11 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         }
         else
         {
+            if(soc_step)
+            {
+                // abort soc
+                p = p_max;
+            }
             if (ll == 1)
             {
                 res.first_rejected_by_filter = true;
