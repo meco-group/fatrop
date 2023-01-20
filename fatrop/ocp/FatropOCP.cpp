@@ -80,8 +80,8 @@ int FatropOCP::SolveSOC(
         rhs_g_ineq[0],
         rhs_gradb[0]);
     // prepare rhs_b, rhs_g and rhg_g_ineq
-    rhs_b[0].copy(constraint_violation.block(0, dims_.n_b_tot));
-    rhs_g[0].copy(constraint_violation.block(dims_.n_b_tot, dims_.n_g_tot));
+    rhs_g[0].copy(constraint_violation.block(0, dims_.n_g_tot));
+    rhs_b[0].copy(constraint_violation.block(dims_.n_g_tot, dims_.n_b_tot));
     rhs_g_ineq[0].copy(constraint_violation.block(dims_.n_b_tot + dims_.n_g_tot, dims_.n_g_ineq_tot));
 
     return ls_->SolveRHS(
