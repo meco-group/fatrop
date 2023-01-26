@@ -114,7 +114,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     // cout << "cv " << cv_curr << endl;
     // cout << "obj " << obj_curr << endl;
     // cout << "lindecr " << lin_decr_curr << endl;
-    const int p_max = 2;
+    const int p_max = 0;
     bool soc_step = false;
     double cv_soc_old = cv_curr;
     int p = 0;

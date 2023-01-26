@@ -13,7 +13,7 @@ namespace fatrop
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-8;
-        double mu0 = 1e2;
+        double mu0 = 1e5;
         // double mu0 = 2e5;
         // double mu0 = 1e;
         double kappa_eta = 10.0;
@@ -39,7 +39,7 @@ namespace fatrop
         double kappa_c = 0.25;
         double kappa1 = 1e-2;
         double kappa2 = 1e-2;
-        double kappa_d = 1e-4;
+        double kappa_d = 1e-5;
         double bound_relax_factor = 1e-8;
         double constr_viol_tol = 1e-4; // currently only used to relax bounds
     };
