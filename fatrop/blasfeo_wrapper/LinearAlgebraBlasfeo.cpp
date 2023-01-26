@@ -253,7 +253,7 @@ namespace fatrop
         for (int i = 0; i < m; i++)
         {
             double res = VECEL(sx, xi + i);
-            for (int j = 0; j < i-1; j++)
+            for (int j = 0; j < i; j++)
             {
                 res -= MATEL(sA, ai + j, aj + i) * VECEL(sz, zi + j);
             }
@@ -566,7 +566,7 @@ void FatropVecBF::SwapWith(FatropVecBF &vb)
     vec_ = vb.vec_;
     vb.vec_ = tmp;
 }
-void FatropVecBF::SetConstant(double constant)
+void FatropVecBF::SetConstant(double constant) const
 {
     VECSE(nels_, constant, vec_, offset_);
 }
