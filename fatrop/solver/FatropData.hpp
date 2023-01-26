@@ -54,6 +54,7 @@ namespace fatrop
         void RelaxBoundsVar(double mu);
         void ComputeBarrierQuantities(double mu);
         void ComputedZ();
+        void ComputePDResidu();
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;

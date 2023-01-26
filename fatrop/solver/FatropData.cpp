@@ -1,5 +1,54 @@
 #include "solver/FatropData.hpp"
 using namespace fatrop;
+template <int size>
+#define SUMMATION_ALG kahan_sum
+double kahan_sum(const double *numbers)
+{
+    if (size == 0)
+    {
+        return 0.0;
+    }
+    double sum = numbers[0];
+    double c = 0.0;
+    for (int ii = 1; ii < size; ii++)
+    {
+        double y = numbers[ii] - c;
+        volatile double t = sum + y;
+        volatile double z = t - sum;
+        c = z - y;
+        sum = t;
+    }
+    return sum;
+}
+template <int size>
+double kahan_sum_ld(const double *numbers)
+{
+    if (size == 0)
+    {
+        return 0.0;
+    }
+    long double sum = numbers[0];
+    long double c = 0.0;
+    for (int ii = 1; ii < size; ii++)
+    {
+        long double y = numbers[ii] - c;
+        volatile long double t = sum + y;
+        volatile long double z = t - sum;
+        c = z - y;
+        sum = t;
+    }
+    return sum;
+}
+template <int size>
+double normal_sum(const double *numbers)
+{
+    double sum = 0.0;
+    for (int ii = 0; ii < size; ii++)
+    {
+        sum += numbers[ii];
+    }
+    return sum;
+}
 FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) : nlpdims(nlpdims),
                                                                                          n_eqs(nlpdims.neqs),
                                                                                          n_ineqs(nlpdims.nineqs),
@@ -18,7 +67,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          lam_next(memeqs[1]),
                                                                                          lam_backup(memeqs[2]),
                                                                                          lam_calc(memeqs[3]),
-                                                                                         lam_calc_backup_ls(      memeqs[4]),
+                                                                                         lam_calc_backup_ls(memeqs[4]),
                                                                                          lam_scales(memeqs[5]),
                                                                                          g_curr(memeqs[6]),
                                                                                          g_next(memeqs[7]),
@@ -620,21 +669,34 @@ void FatropData::ComputeBarrierQuantities(double mu)
         VECEL(gradb_plus_p, i) = grad_barrier_plusi;
     }
     // total quantities
-    VECCP(n_ineqs, (VEC *)gradb_L, 0, (VEC *)gradb_total, 0);
-    AXPY(n_ineqs, 1.0, (VEC *)gradb_U, 0, (VEC *)gradb_total, 0, (VEC *)gradb_total, 0);
-    AXPY(n_ineqs, 1.0, (VEC *)gradb_plus, 0, (VEC *)gradb_total, 0, (VEC *)gradb_total, 0);
+    // VECCP(n_ineqs, (VEC *)gradb_L, 0, (VEC *)gradb_total, 0);
+    // AXPY(n_ineqs, 1.0, (VEC *)gradb_U, 0, (VEC *)gradb_total, 0, (VEC *)gradb_total, 0);
+    // AXPY(n_ineqs, 1.0, (VEC *)gradb_plus, 0, (VEC *)gradb_total, 0, (VEC *)gradb_total, 0);
+    double *gradb_total_dp = ((VEC *)gradb_total)->pa;
+    double *gradb_L_dp = ((VEC *)gradb_L)->pa;
+    double *gradb_U_dp = ((VEC *)gradb_U)->pa;
+    double *gradb_plus_dp = ((VEC *)gradb_plus)->pa;
+    for (int i = 0; i < n_ineqs; i++)
+    {
+        double terms[] = {gradb_L_dp[i], gradb_U_dp[i], gradb_plus_dp[i]};
+        gradb_total_dp[i] = SUMMATION_ALG<3>(terms);
+    }
     VECCP(n_ineqs, (VEC *)sigma_L, 0, (VEC *)sigma_total, 0);
     AXPY(n_ineqs, 1.0, (VEC *)sigma_U, 0, (VEC *)sigma_total, 0, (VEC *)sigma_total, 0);
 }
 void FatropData::ComputedZ()
 {
     // delta zL
-    VECMUL(n_ineqs, (VEC *)sigma_L, 0, (VEC *)delta_s, 0, (VEC *)delta_zL , 0);
+    VECMUL(n_ineqs, (VEC *)sigma_L, 0, (VEC *)delta_s, 0, (VEC *)delta_zL, 0);
     AXPBY(n_ineqs, -1.0, (VEC *)zL_curr, 0, -1.0, (VEC *)delta_zL, 0, (VEC *)delta_zL, 0);
     AXPY(n_ineqs, -1.0, (VEC *)gradb_L, 0, (VEC *)delta_zL, 0, (VEC *)delta_zL, 0);
     // delta zU
-    VECMUL(n_ineqs, (VEC *)sigma_U, 0, (VEC *)delta_s, 0, (VEC *)delta_zU , 0);
+    VECMUL(n_ineqs, (VEC *)sigma_U, 0, (VEC *)delta_s, 0, (VEC *)delta_zU, 0);
     AXPBY(n_ineqs, -1.0, (VEC *)zU_curr, 0, 1.0, (VEC *)delta_zU, 0, (VEC *)delta_zU, 0);
     AXPY(n_ineqs, 1.0, (VEC *)gradb_U, 0, (VEC *)delta_zU, 0, (VEC *)delta_zU, 0);
+}
+
+void FatropData::ComputePDResidu()
+{
 }
 // void FatropData::B

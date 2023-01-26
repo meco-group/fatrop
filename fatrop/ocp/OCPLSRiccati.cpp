@@ -11,54 +11,6 @@ namespace fatrop
         }
         return true;
     }
-    template <int size>
-    double kahan_sum(const double *numbers)
-    {
-        if (size == 0)
-        {
-            return 0.0;
-        }
-        double sum = numbers[0];
-        double c = 0.0;
-        for (int ii = 1; ii < size; ii++)
-        {
-            double y = numbers[ii] - c;
-            volatile double t = sum + y;
-            volatile double z = t - sum;
-            c = z - y;
-            sum = t;
-        }
-        return sum;
-    }
-    template <int size>
-    double kahan_sum_ld(const double *numbers)
-    {
-        if (size == 0)
-        {
-            return 0.0;
-        }
-        long double sum = numbers[0];
-        long double c = 0.0;
-        for (int ii = 1; ii < size; ii++)
-        {
-            long double y = numbers[ii] - c;
-            volatile long double t = sum + y;
-            volatile long double z = t - sum;
-            c = z - y;
-            sum = t;
-        }
-        return sum;
-    }
-    template <int size>
-    double normal_sum(const double *numbers)
-    {
-        double sum = 0.0;
-        for (int ii = 0; ii < size; ii++)
-        {
-            sum += numbers[ii];
-        }
-        return sum;
-    }
 } // namespace fatrop
 using namespace fatrop;
 OCPLSRiccati::OCPLSRiccati(const OCPDims &dims) : Ppt(dims.nx + 1, dims.nx, dims.K),
@@ -363,7 +315,7 @@ int OCPLSRiccati::computeSDnor(
     const FatropVecBF &gradb_total)
 {
     bool increased_accuracy = true;
-    bool it_ref = true;
+    bool it_ref = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     // define compiler macros for notational convenience
@@ -791,7 +743,7 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             double err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
-            if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
+            if (err_curr < 1e-12 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
             {
                 return 0;
             }
