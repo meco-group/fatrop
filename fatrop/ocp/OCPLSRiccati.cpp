@@ -315,7 +315,7 @@ int OCPLSRiccati::computeSDnor(
     const FatropVecBF &gradb_total)
 {
     bool increased_accuracy = true;
-    bool it_ref = false;
+    bool it_ref = true;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     // define compiler macros for notational convenience
@@ -702,6 +702,7 @@ int OCPLSRiccati::computeSDnor(
     lastused_.inertia_correction_w = inertia_correction;
     if (it_ref)
     {
+        double err_curr = 0.0;
         // copy(ux, ux_test[0]);
         // copy(lam, lam_test[0]);
         // copy(delta_s, delta_s_test[0]);
@@ -741,10 +742,14 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-            double err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+            err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
-            if (err_curr < 1e-12 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
+            if (err_curr < 1e-8 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
             {
+                if(err_curr > 1e-12)
+                {
+                    // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                }
                 return 0;
             }
             SolveRHS(
@@ -767,6 +772,7 @@ int OCPLSRiccati::computeSDnor(
             // prepare next iteration
             error_prev = err_curr;
         }
+        cout << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     }
     return 0;
 }
