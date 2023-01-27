@@ -114,7 +114,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     // cout << "cv " << cv_curr << endl;
     // cout << "obj " << obj_curr << endl;
     // cout << "lindecr " << lin_decr_curr << endl;
-    const int p_max = 0;
+    const int p_max = 5;
     bool soc_step = false;
     double cv_soc_old = cv_curr;
     int p = 0;
@@ -208,7 +208,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         if (!soc_step && (ll == 1 && p_max>0))
         {
             // activate soc
-            cout << "trying soc " << endl;
+            // cout << "trying soc " << endl;
             soc_step = true;
             alpha_primal_backup = alpha_primal;
             alpha_dual_backup = alpha_dual;
