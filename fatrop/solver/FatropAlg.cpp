@@ -175,6 +175,8 @@ int FatropAlg::Optimize()
                 break;
             }
             no_no_full_steps = 0;
+            // the following break statement prohibits 'fast' mu updates, at leat one iteration per mu update
+            break;
         }
         // Hessian is necessary for calculating search direction
         EvalHess();
