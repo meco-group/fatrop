@@ -15,8 +15,18 @@ FatropOCP::FatropOCP(
                                                   rhs_g(dims_.n_g_tot, 1),
                                                   rhs_g_ineq(dims_.n_g_ineq_tot, 1),
                                                   rhs_gradb(dims_.n_g_ineq_tot, 1),
+                                                  rhs_rq2(nlpdims_.nvars, 1),
+                                                  rhs_b2(dims_.n_b_tot, 1),
+                                                  rhs_g2(dims_.n_g_tot, 1),
+                                                  rhs_g_ineq2(dims_.n_g_ineq_tot, 1),
+                                                  rhs_gradb2(dims_.n_g_ineq_tot, 1),
                                                   gradb_total_cache(dims_.n_g_ineq_tot, 1),
-                                                  sigma_total_cache(dims_.n_g_ineq_tot, 1){};
+                                                  sigma_total_cache(dims_.n_g_ineq_tot, 1),
+                                                  ux_test(nlpdims_.nvars, 1),
+                                                  lam_test(nlpdims_.neqs, 1),
+                                                  delta_s_test(nlpdims_.nineqs, 1)
+{
+}
 int FatropOCP::EvalHess(
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -52,6 +62,8 @@ int FatropOCP::ComputeSD(
     // save gradb_total and sigma_total
     gradb_total_cache[0].copy(gradb_total);
     sigma_total_cache[0].copy(sigma_total);
+    inertia_correction_w_cache = inertia_correction_w;
+    inertia_correction_c_cache = inertia_correction_c;
 
     return ls_->computeSD(
         &ocpkktmemory_,
@@ -70,6 +82,7 @@ int FatropOCP::SolveSOC(
     const FatropVecBF &delta_s,
     const FatropVecBF &constraint_violation)
 {
+    bool it_ref = true;
     /// todo avoid retrieving unnecessary rhs'es
     ls_->GetRHS(
         &ocpkktmemory_,
@@ -84,7 +97,7 @@ int FatropOCP::SolveSOC(
     rhs_b[0].copy(constraint_violation.block(dims_.n_g_tot, dims_.n_b_tot));
     rhs_g_ineq[0].copy(constraint_violation.block(dims_.n_b_tot + dims_.n_g_tot, dims_.n_g_ineq_tot));
 
-    return ls_->SolveRHS(
+    ls_->SolveRHS(
         &ocpkktmemory_,
         ux,
         lam,
@@ -95,7 +108,82 @@ int FatropOCP::SolveSOC(
         rhs_g[0],
         rhs_g_ineq[0],
         rhs_gradb[0]);
-};
+    if (it_ref)
+    {
+        double err_curr = 0.0;
+        // copy(ux, ux_test[0]);
+        // copy(lam, lam_test[0]);
+        // copy(delta_s, delta_s_test[0]);
+        // GetRHS(
+        //     OCP,
+        //     gradb_total,
+        //     rhs_rq2[0],
+        //     rhs_b2[0],
+        //     rhs_g2[0],
+        //     rhs_g_ineq2[0],
+        //     rhs_gradb2[0]);
+        double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
+        double error_prev = -1.0;
+        for (int i = 0; i < 5; i++)
+        {
+            ls_->ComputeMVProd(
+                &ocpkktmemory_,
+                inertia_correction_w_cache,
+                0.0,
+                ux,
+                lam,
+                delta_s,
+                sigma_total_cache[0],
+                rhs_rq2[0],
+                rhs_b2[0],
+                rhs_g2[0],
+                rhs_g_ineq2[0],
+                rhs_gradb2[0]);
+            axpby(1.0, rhs_rq2[0], 1.0, rhs_rq[0], rhs_rq2[0]);
+            axpby(1.0, rhs_b2[0], 1.0, rhs_b[0], rhs_b2[0]);
+            axpby(1.0, rhs_g2[0], 1.0, rhs_g[0], rhs_g2[0]);
+            axpby(1.0, rhs_g_ineq2[0], 1.0, rhs_g_ineq[0], rhs_g_ineq2[0]);
+            axpby(1.0, rhs_gradb2[0], 1.0, rhs_gradb[0], rhs_gradb2[0]);
+
+            // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
+            // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
+            // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
+            // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
+            // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
+            err_curr = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0]))))) / max_norm;
+            // cout << "residu:  " << err_curr << endl;
+            if (err_curr < 1e-8 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
+            {
+                if (err_curr > 1e-12)
+                {
+                    // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                }
+                return 0;
+            }
+            ls_->SolveRHS(
+                &ocpkktmemory_,
+                ux_test[0],
+                lam_test[0],
+                delta_s_test[0],
+                sigma_total_cache[0],
+                rhs_rq2[0],
+                rhs_b2[0],
+                rhs_g2[0],
+                rhs_g_ineq2[0],
+                rhs_gradb2[0]);
+            // el = blasfeo_toc(&timer);
+            // cout << "el time solveRHS " << el << endl;
+            axpby(1.0, ux_test[0], 1.0, ux, ux);
+            axpby(1.0, lam_test[0], 1.0, lam, lam);
+            axpby(1.0, delta_s_test[0], 1.0, delta_s, delta_s);
+
+            // prepare next iteration
+            error_prev = err_curr;
+        }
+        cout << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
+    };
+    return 0;
+}
 int FatropOCP::ComputeScalings(
     double &obj_scale,
     FatropVecBF &x_scales,

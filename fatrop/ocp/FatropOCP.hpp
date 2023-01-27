@@ -97,8 +97,18 @@ namespace fatrop
         FatropMemoryVecBF rhs_g;
         FatropMemoryVecBF rhs_g_ineq;
         FatropMemoryVecBF rhs_gradb;
+        FatropMemoryVecBF rhs_rq2;
+        FatropMemoryVecBF rhs_b2;
+        FatropMemoryVecBF rhs_g2;
+        FatropMemoryVecBF rhs_g_ineq2;
+        FatropMemoryVecBF rhs_gradb2;
         FatropMemoryVecBF gradb_total_cache;
         FatropMemoryVecBF sigma_total_cache;
+        FatropMemoryVecBF ux_test;
+        FatropMemoryVecBF lam_test;
+        FatropMemoryVecBF delta_s_test;
+        double inertia_correction_w_cache;
+        double inertia_correction_c_cache;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED
