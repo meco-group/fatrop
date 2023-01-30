@@ -62,7 +62,12 @@ int LineSearch::ExitSoc() const
 int LineSearch::CalcSoc(double alpha) const
 {
     axpy(alpha, fatropdata_->g_soc, fatropdata_->g_next, fatropdata_->g_soc);
-    return fatropnlp_->SolveSOC(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
+    int res = fatropnlp_->SolveSOC(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
+    if (res != 0)
+    {
+        cout << "SolveSOC failed" << endl;
+    }
+    return res;
 };
 
 BackTrackingLineSearch::BackTrackingLineSearch(
@@ -114,12 +119,12 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     // cout << "cv " << cv_curr << endl;
     // cout << "obj " << obj_curr << endl;
     // cout << "lindecr " << lin_decr_curr << endl;
-    const int p_max = 5;
+    const int p_max = 2;
     bool soc_step = false;
     double cv_soc_old = cv_curr;
     int p = 0;
     int no_alpha_trials = 1;
-    for (int ll = 1; ll < 50; ll++)
+    for (int ll = 1; ll < 500; ll++)
     {
         TryStep(alpha_primal, alpha_dual);
         if (alpha_primal < alpha_min)
@@ -133,20 +138,20 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         double barrier_next = fatropdata_->EvalBarrierNext(mu);
         obj_next += barrier_next;
 
-// cout << "cv_next: " << cv_next;
-// cout << "  obj_next: " << obj_next << endl;
+        // cout << "cv_next: " << cv_next;
+        // cout << "  obj_next: " << obj_next << endl;
         double alpha_primal_accent = (soc_step ? alpha_primal_backup : alpha_primal);
         if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
         {
             // cout << filter_->GetSize() << endl;
-            bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent* pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
-            bool armijo = obj_next - obj_curr < eta_phi *alpha_primal_accent * lin_decr_curr;
+            bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
+            bool armijo = obj_next - obj_curr < eta_phi * alpha_primal_accent * lin_decr_curr;
             if (switch_cond && (cv_curr <= theta_min))
             {
                 // f-step
                 if (armijo)
                 {
-                    (journaller_->it_curr).type = soc_step? 'F':'f';
+                    (journaller_->it_curr).type = soc_step ? 'F' : 'f';
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
@@ -164,7 +169,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
                     {
                         filter_->Augment(FilterData(0, obj_curr - gamma_phi * cv_curr, cv_curr * (1 - gamma_theta)));
                     }
-                    (journaller_->it_curr).type = soc_step? 'H':'h';
+                    (journaller_->it_curr).type = soc_step ? 'H' : 'h';
                     fatropdata_->TakeStep();
                     journaller_->it_curr.alpha_pr = alpha_primal;
                     journaller_->it_curr.alpha_du = alpha_dual;
@@ -175,7 +180,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         }
         else
         {
-            if(soc_step)
+            if (soc_step)
             {
                 // abort soc
                 p = p_max;
@@ -195,7 +200,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             res.ls = -1;
             return res;
         }
-        if(soc_step && (p>p_max || (ll>1 &&(cv_next > 0.99*cv_soc_old))))
+        if (soc_step && (p > p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old))))
         {
             // deactivate soc
             soc_step = false;
@@ -205,7 +210,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             // todo cache these variables
             fatropdata_->ComputedZ();
         }
-        if (!soc_step && (ll == 1 && p_max>0))
+        if (!soc_step && (ll == 1 && p_max > 0) && cv_next > cv_curr)
         {
             // activate soc
             // cout << "trying soc " << endl;
@@ -214,20 +219,32 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             alpha_dual_backup = alpha_dual;
             InitSoc();
         }
-        if(soc_step)
+        if (soc_step)
         {
-            if(ll>1)
+            if (ll > 1)
             {
                 cv_soc_old = cv_next;
             }
-            CalcSoc(alpha_primal);
-            // cout << "size of soc x step " << L1(fatropdata_->delta_x) << endl;
-            fatropdata_->ComputedZ();
-            fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
-            // cout << "alpha_primal " << alpha_primal << endl;
-            // cout << "alpha_dual " << alpha_dual << endl;
-            // cout << "soc" << endl;
-            p = p + 1;
+            int res = CalcSoc(alpha_primal);
+            if (res == 0)
+            {
+                // cout << "size of soc x step " << L1(fatropdata_->delta_x) << endl;
+                fatropdata_->ComputedZ();
+                fatropdata_->AlphaMax(alpha_primal, alpha_dual, MAX(1 - mu, 0.99));
+                // cout << "alpha_primal " << alpha_primal << endl;
+                // cout << "alpha_dual " << alpha_dual << endl;
+                // cout << "soc" << endl;
+                p = p + 1;
+            }
+            else
+            {
+                soc_step = false;
+                alpha_primal = alpha_primal_backup;
+                alpha_dual = alpha_dual_backup;
+                ExitSoc();
+                // todo cache these variables
+                fatropdata_->ComputedZ();
+            }
         }
         else
         {
@@ -235,7 +252,6 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             no_alpha_trials++;
             alpha_primal *= 0.50;
         }
-
     }
     assert(false);
     res.ls = 0;

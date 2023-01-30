@@ -8,15 +8,15 @@ namespace fatrop
     public:
         int max_watchdog_steps = 5;
         // bool linear_solver_improved_accuracy = true;
-        bool first_try_watchdog = true;
+        bool first_try_watchdog = false;
         int maxiter = 1000;
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-8;
-        double mu0 = 1e5;
+        double mu0 = 1e2;
         // double mu0 = 2e5;
         // double mu0 = 1e;
-        double kappa_eta = 10.0;
+        double kappa_eta = 10;
         double kappa_mu = 0.2;
         double theta_mu = 1.5;
         double delta_w0 = 1e-4;

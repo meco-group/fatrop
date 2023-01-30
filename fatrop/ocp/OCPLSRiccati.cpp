@@ -6,7 +6,7 @@ namespace fatrop
     {
         for (int i = 0; i < m; i++)
         {
-            if (MATEL(sA, ai + i, aj + i) < 1e-6)
+            if (MATEL(sA, ai + i, aj + i) ==0.0)
                 return false;
         }
         return true;
@@ -316,8 +316,8 @@ int OCPLSRiccati::computeSDnor(
 {
     bool increased_accuracy = true;
     bool it_ref = true;
-    blasfeo_timer timer;
-    blasfeo_tic(&timer);
+    // blasfeo_timer timer;
+    // blasfeo_tic(&timer);
     // define compiler macros for notational convenience
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
@@ -697,7 +697,7 @@ int OCPLSRiccati::computeSDnor(
         }
     }
     // double el = blasfeo_toc(&timer);
-    // cout << "el time fact solve" << el << endl;
+    // cout << "el time fact solve" << el << endl; //
     lastused_.rankI = rankI;
     lastused_.inertia_correction_w = inertia_correction;
     if (it_ref)
@@ -706,6 +706,7 @@ int OCPLSRiccati::computeSDnor(
         // copy(ux, ux_test[0]);
         // copy(lam, lam_test[0]);
         // copy(delta_s, delta_s_test[0]);
+        // blasfeo_tic(&timer);
         GetRHS(
             OCP,
             gradb_total,
@@ -714,10 +715,13 @@ int OCPLSRiccati::computeSDnor(
             rhs_g2[0],
             rhs_g_ineq2[0],
             rhs_gradb2[0]);
+        // el = blasfeo_toc(&timer);
+        // cout << "el time get rhs" << el << endl; //
         double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
         double error_prev = -1.0;
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 10; i++)
         {
+            // blasfeo_tic(&timer);
             ComputeMVProd(
                 OCP,
                 inertia_correction,
@@ -731,6 +735,8 @@ int OCPLSRiccati::computeSDnor(
                 rhs_g[0],
                 rhs_g_ineq[0],
                 rhs_gradb[0]);
+            // el = blasfeo_toc(&timer);
+            // cout << "el time compute mv prod" << el << endl; //
             axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
             axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
             axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
@@ -743,15 +749,16 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-            // cout << "residu:  " << err_curr << endl;
-            if (err_curr < 1e-8 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
+            cout << "residu:  " << err_curr << endl;
+            if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
             {
-                if(err_curr > 1e-12)
+                if(err_curr > 1e-10)
                 {
-                    // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
                 }
                 return 0;
             }
+            // blasfeo_tic(&timer);
             SolveRHS(
                 OCP,
                 ux_test[0],
@@ -763,6 +770,8 @@ int OCPLSRiccati::computeSDnor(
                 rhs_g[0],
                 rhs_g_ineq[0],
                 rhs_gradb[0]);
+            // el = blasfeo_toc(&timer);
+            // cout << "el time solveRHS " << el << endl; //
             // el = blasfeo_toc(&timer);
             // cout << "el time solveRHS " << el << endl;
             axpby(1.0, ux_test[0], 1.0, ux, ux);

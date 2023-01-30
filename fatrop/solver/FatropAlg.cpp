@@ -117,7 +117,7 @@ int FatropAlg::Optimize()
         it_curr.du_inf = fatropdata_->DuInfLinfCurr();
         it_curr.ls = ls;
         it_curr.reg = deltaw;
-        if (no_no_full_steps >= 4)
+        if (no_no_full_steps >= 5)
         {
             bool reset_filter = lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
             if (reset_filter)
@@ -176,7 +176,7 @@ int FatropAlg::Optimize()
             }
             no_no_full_steps = 0;
             // the following break statement prohibits 'fast' mu updates, at leat one iteration per mu update
-            break;
+            // break;
         }
         // Hessian is necessary for calculating search direction
         EvalHess();

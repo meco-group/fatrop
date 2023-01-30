@@ -82,6 +82,7 @@ int FatropOCP::SolveSOC(
     const FatropVecBF &delta_s,
     const FatropVecBF &constraint_violation)
 {
+    if(inertia_correction_c_cache != 0.0) return -1;
     bool it_ref = true;
     /// todo avoid retrieving unnecessary rhs'es
     ls_->GetRHS(
