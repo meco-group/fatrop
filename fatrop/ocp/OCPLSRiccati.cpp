@@ -749,7 +749,7 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-            cout << "residu:  " << err_curr << endl;
+            // cout << "residu:  " << err_curr << endl;
             if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
             {
                 if(err_curr > 1e-10)
