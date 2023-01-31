@@ -99,7 +99,6 @@ int FatropAlg::Optimize()
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
-    int no_filter_resets = 0;
     for (int i = 0; i < maxiter; i++)
     {
         fatropdata_->obj_curr = EvalObjCurr();
@@ -121,7 +120,7 @@ int FatropAlg::Optimize()
         it_curr.reg = deltaw;
         if (no_no_full_steps >= 5)
         {
-            bool reset_filter = lsinfo.first_rejected_by_filter && (no_filter_resets <= 5);
+            bool reset_filter = lsinfo.first_rejected_by_filter && (filter_reseted <= 5);
             if (reset_filter)
             {
                 cout << "resetted filter " << endl;
