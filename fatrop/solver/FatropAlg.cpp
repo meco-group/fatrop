@@ -35,7 +35,7 @@ void FatropAlg::Initialize()
     kappa_c = fatropparams_->kappa_c;
     kappa_d = fatropparams_->kappa_d;
     max_watchdog_steps = fatropparams_->max_watchdog_steps;
-    first_try_watchdog = fatropparams_->first_try_watchdog;
+    // first_try_watchdog = fatropparams_->first_try_watchdog;
     // todo avoid reallocation when maxiter doesn't change
     // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
 }
@@ -63,15 +63,13 @@ void FatropAlg::GetSolution(vector<double> &sol)
 };
 int FatropAlg::Optimize()
 {
-    bool first_try_watchdog = this->first_try_watchdog;
+    // bool first_try_watchdog = this->first_try_watchdog;
     int no_watch_dog_steps_taken = 0;
     int max_watchdog_steps = this->max_watchdog_steps;
     Initialize();
     int no_conse_small_sd = false;
     int filter_reseted = 0;
     int no_no_full_steps = 0;
-    double theta_max = 1e4;
-    filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -95,10 +93,13 @@ int FatropAlg::Optimize()
     }
     EvalCVCurr();
     fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
+    double theta_max = 1e4 * fatropdata_->CVL1Curr();
+    filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
     int ls = 0;
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
+    int no_filter_resets = 0;
     for (int i = 0; i < maxiter; i++)
     {
         fatropdata_->obj_curr = EvalObjCurr();
@@ -120,23 +121,24 @@ int FatropAlg::Optimize()
         it_curr.reg = deltaw;
         if (no_no_full_steps >= 5)
         {
-            bool reset_filter = lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
+            bool reset_filter = lsinfo.first_rejected_by_filter && (no_filter_resets <= 5);
             if (reset_filter)
             {
                 cout << "resetted filter " << endl;
                 filter_reseted++;
                 filter_->Reset();
-                no_no_full_steps = 0;
-                theta_max = 0.1 * theta_max;
                 filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
             }
-            if (((max_watchdog_steps > 0) && !watch_dog_step && (!reset_filter || first_try_watchdog)))
+        }
+        if (no_no_full_steps >= 10)
+        {
+            if (((max_watchdog_steps > 0) && !watch_dog_step))
             {
                 // activate watchdog procedure
                 // backup x_k
                 fatropdata_->BackupCurr();
                 watch_dog_step = true;
-                no_no_full_steps = 0;
+                // no_no_full_steps = 0;
                 no_watch_dog_steps_taken = 0;
             }
         }
@@ -165,7 +167,7 @@ int FatropAlg::Optimize()
         }
         // update mu
         // todo make a seperate class
-        while (mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
+        while (!watch_dog_step && mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_reseted = 0;
