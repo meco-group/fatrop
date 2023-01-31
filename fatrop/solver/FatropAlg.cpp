@@ -119,7 +119,7 @@ int FatropAlg::Optimize()
         it_curr.reg = deltaw;
         if (no_no_full_steps >= 5)
         {
-            bool reset_filter = lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
+            bool reset_filter = lsinfo.last_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
             if (reset_filter)
             {
                 cout << "resetted filter " << endl;

@@ -14,6 +14,7 @@ namespace fatrop
     {
         int ls = 0;
         bool first_rejected_by_filter = false;
+        bool last_rejected_by_filter = false;
     };
     class LineSearch : public AlgStrategy
     {

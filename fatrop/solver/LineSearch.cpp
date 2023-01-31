@@ -143,6 +143,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         double alpha_primal_accent = (soc_step ? alpha_primal_backup : alpha_primal);
         if (filter_->IsAcceptable(FilterData(0, obj_next, cv_next)))
         {
+            res.last_rejected_by_filter = false;
             // cout << filter_->GetSize() << endl;
             bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
             bool armijo = obj_next - obj_curr < eta_phi * alpha_primal_accent * lin_decr_curr;
@@ -180,6 +181,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
         }
         else
         {
+            res.last_rejected_by_filter = true;
             if (soc_step)
             {
                 // abort soc
