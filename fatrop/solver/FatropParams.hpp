@@ -13,7 +13,7 @@ namespace fatrop
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-8;
-        double mu0 = 1e2;
+        double mu0 = 1e-1;
         // double mu0 = 2e5;
         // double mu0 = 1e;
         double kappa_eta = 10;
@@ -35,7 +35,8 @@ namespace fatrop
         double gamma_phi = 1e-8;
         double gamma_alpha = 0.05;
         double eta_phi = 1e-4;
-        double delta_c_stripe = 1e-8;
+        // double delta_c_stripe = 1e-8;
+        double delta_c_stripe = 1e-2;
         double kappa_c = 0.25;
         double kappa1 = 1e-2;
         double kappa2 = 1e-2;
