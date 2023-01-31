@@ -11,6 +11,7 @@
 #include "templates/FatropApplication.hpp"
 #include <memory>
 #include "FatropStats.hpp"
+#include <limits>
 using namespace std;
 // #include "AlgorithmQuantities.hpp"
 #ifdef ENABLE_MULTITHREADING

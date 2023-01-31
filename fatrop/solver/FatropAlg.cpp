@@ -71,6 +71,7 @@ int FatropAlg::Optimize()
     int filter_reseted = 0;
     int no_no_full_steps = 0;
     double theta_max = 1e4;
+    filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -119,7 +120,7 @@ int FatropAlg::Optimize()
         it_curr.reg = deltaw;
         if (no_no_full_steps >= 5)
         {
-            bool reset_filter = lsinfo.last_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
+            bool reset_filter = lsinfo.first_rejected_by_filter && it_curr.constraint_violation < 10 * theta_max;
             if (reset_filter)
             {
                 cout << "resetted filter " << endl;
@@ -127,6 +128,7 @@ int FatropAlg::Optimize()
                 filter_->Reset();
                 no_no_full_steps = 0;
                 theta_max = 0.1 * theta_max;
+                filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
             }
             if (((max_watchdog_steps > 0) && !watch_dog_step && (!reset_filter || first_try_watchdog)))
             {
@@ -168,6 +170,7 @@ int FatropAlg::Optimize()
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_reseted = 0;
             filter_->Reset();
+            filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
             if (no_conse_small_sd == 2)
             {
                 // cout << "small search direction" << endl;
