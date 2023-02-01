@@ -301,53 +301,53 @@ int OCPLSRiccati::computeSDDeg(
             }
         }
     }
-    double err_curr = 0.0;
-    // copy(ux, ux_test[0]);
-    // copy(lam, lam_test[0]);
-    // copy(delta_s, delta_s_test[0]);
-    // blasfeo_tic(&timer);
-    GetRHS(
-        OCP,
-        gradb_total,
-        rhs_rq2[0],
-        rhs_b2[0],
-        rhs_g2[0],
-        rhs_g_ineq2[0],
-        rhs_gradb2[0]);
-    // el = blasfeo_toc(&timer);
-    // cout << "el time get rhs" << el << endl; //
-    double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
-    // blasfeo_tic(&timer);
-    ComputeMVProd(
-        OCP,
-        inertia_correction_w,
-        inertia_correction_c,
-        ux,
-        lam,
-        delta_s,
-        sigma_total,
-        rhs_rq[0],
-        rhs_b[0],
-        rhs_g[0],
-        rhs_g_ineq[0],
-        rhs_gradb[0]);
-    // el = blasfeo_toc(&timer);
-    // cout << "el time compute mv prod" << el << endl; //
-    axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
-    axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
-    axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
-    axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
-    axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
+    // double err_curr = 0.0;
+    // // copy(ux, ux_test[0]);
+    // // copy(lam, lam_test[0]);
+    // // copy(delta_s, delta_s_test[0]);
+    // // blasfeo_tic(&timer);
+    // GetRHS(
+    //     OCP,
+    //     gradb_total,
+    //     rhs_rq2[0],
+    //     rhs_b2[0],
+    //     rhs_g2[0],
+    //     rhs_g_ineq2[0],
+    //     rhs_gradb2[0]);
+    // // el = blasfeo_toc(&timer);
+    // // cout << "el time get rhs" << el << endl; //
+    // double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
+    // // blasfeo_tic(&timer);
+    // ComputeMVProd(
+    //     OCP,
+    //     inertia_correction_w,
+    //     inertia_correction_c,
+    //     ux,
+    //     lam,
+    //     delta_s,
+    //     sigma_total,
+    //     rhs_rq[0],
+    //     rhs_b[0],
+    //     rhs_g[0],
+    //     rhs_g_ineq[0],
+    //     rhs_gradb[0]);
+    // // el = blasfeo_toc(&timer);
+    // // cout << "el time compute mv prod" << el << endl; //
+    // axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
+    // axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
+    // axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
+    // axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
+    // axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
 
-    // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
-    // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
-    // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
-    // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
-    // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-    err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-    cout << "residu:  " << err_curr << endl; 
-    // double el = blasfeo_toc(&timer);
-    // cout << "el time " << el << endl;
+    // // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
+    // // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
+    // // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
+    // // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
+    // // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
+    // err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+    // cout << "residu:  " << err_curr << endl; 
+    // // double el = blasfeo_toc(&timer);
+    // // cout << "el time " << el << endl;
     return 0;
 }
 int OCPLSRiccati::computeSDnor(
