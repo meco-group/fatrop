@@ -6,7 +6,7 @@ namespace fatrop
     {
         for (int i = 0; i < m; i++)
         {
-            if (MATEL(sA, ai + i, aj + i) ==0.0)
+            if (MATEL(sA, ai + i, aj + i) == 0.0)
                 return false;
         }
         return true;
@@ -301,6 +301,51 @@ int OCPLSRiccati::computeSDDeg(
             }
         }
     }
+    double err_curr = 0.0;
+    // copy(ux, ux_test[0]);
+    // copy(lam, lam_test[0]);
+    // copy(delta_s, delta_s_test[0]);
+    // blasfeo_tic(&timer);
+    GetRHS(
+        OCP,
+        gradb_total,
+        rhs_rq2[0],
+        rhs_b2[0],
+        rhs_g2[0],
+        rhs_g_ineq2[0],
+        rhs_gradb2[0]);
+    // el = blasfeo_toc(&timer);
+    // cout << "el time get rhs" << el << endl; //
+    double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
+    // blasfeo_tic(&timer);
+    ComputeMVProd(
+        OCP,
+        inertia_correction_w,
+        inertia_correction_c,
+        ux,
+        lam,
+        delta_s,
+        sigma_total,
+        rhs_rq[0],
+        rhs_b[0],
+        rhs_g[0],
+        rhs_g_ineq[0],
+        rhs_gradb[0]);
+    // el = blasfeo_toc(&timer);
+    // cout << "el time compute mv prod" << el << endl; //
+    axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
+    axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
+    axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
+    axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
+    axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
+
+    // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
+    // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
+    // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
+    // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
+    // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
+    err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+    cout << "residu:  " << err_curr << endl; 
     // double el = blasfeo_toc(&timer);
     // cout << "el time " << el << endl;
     return 0;
@@ -752,7 +797,7 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu:  " << err_curr << endl;
             if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
             {
-                if(err_curr > 1e-10)
+                if (err_curr > 1e-10)
                 {
                     cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
                 }
@@ -1007,7 +1052,10 @@ int OCPLSRiccati::ComputeMVProd(
         VECCP(ng_ineq, delta_s_p, offs_ineq_k, rhs_g_ineq_p, offs_ineq_k);
         GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, -1.0, rhs_g_ineq_p, offs_ineq_k, rhs_g_ineq_p, offs_ineq_k);
     }
-
+    if (inertia_correction_c != 0.0)
+    {
+        axpy(-inertia_correction_c, lam.block(offs_g[0], rhs_g.nels()), rhs_g, rhs_g);
+    }
     return 0;
 };
 int OCPLSRiccati::SolveRHS(
