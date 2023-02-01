@@ -209,10 +209,10 @@ int FatropAlg::Optimize()
                 {
                     deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
                 }
-                delta_w_last = deltaw;
                 increase_counter++;
             }
         }
+        delta_w_last = deltaw;
         fatropdata_->ComputedZ();
         // cout << "norm dzL " << Linf(fatropdata_->delta_zL) << endl;
         // cout << "norm dzU " << Linf(fatropdata_->delta_zU) << endl;
