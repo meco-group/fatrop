@@ -194,7 +194,7 @@ int FatropAlg::Optimize()
         while (regularity != 0)
         {
             regularity = ComputeSD(deltaw, deltac, mu);
-            if (regularity < 0)
+            if (deltac == 0 && regularity < 0)
             {
                 cout << "degenerate Jacobian" << endl;
                 deltac = deltac_candidate;
@@ -212,7 +212,7 @@ int FatropAlg::Optimize()
                 increase_counter++;
             }
         }
-        delta_w_last = deltaw;
+        if(deltaw>0.)delta_w_last = deltaw;
         fatropdata_->ComputedZ();
         // cout << "norm dzL " << Linf(fatropdata_->delta_zL) << endl;
         // cout << "norm dzU " << Linf(fatropdata_->delta_zU) << endl;
