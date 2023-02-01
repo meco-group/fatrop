@@ -196,6 +196,7 @@ int FatropAlg::Optimize()
             regularity = ComputeSD(deltaw, deltac, mu);
             if (regularity < 0)
             {
+                cout << "degenerate Jacobian" << endl;
                 deltac = deltac_candidate;
             }
             if (regularity > 0) // regularization is necessary
