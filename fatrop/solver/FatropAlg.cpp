@@ -189,39 +189,35 @@ int FatropAlg::Optimize()
         deltaw = 0.0;
         deltac = 0.0;
         fatropdata_->ComputeBarrierQuantities(mu);
-        int regularity = ComputeSD(deltaw, deltac, mu);
-        if (regularity < 0)
-        {
-            deltac = deltac_candidate;
-            regularity = ComputeSD(deltaw, deltac, mu);
-            cout << "Jac degenerate" << endl;
-        }
+        int regularity = -1;
         int increase_counter = 0;
-        if (regularity > 0) // regularization is necessary
+        while (regularity != 0)
         {
-            deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
             regularity = ComputeSD(deltaw, deltac, mu);
-            if ((deltac == 0.0) && (regularity < 0))
+            if (regularity < 0)
             {
                 deltac = deltac_candidate;
-                regularity = ComputeSD(deltaw, deltac, mu);
-                cout << "Jac degenerate" << endl;
             }
-            while (regularity > 0)
+            if (regularity > 0) // regularization is necessary
             {
-                increase_counter++;
-                deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
-                regularity = ComputeSD(deltaw, deltac, mu);
-                if ((deltac == 0.0) && (regularity < 0))
+                if (increase_counter == 0)
                 {
-                    deltac = deltac_candidate;
-                    regularity = ComputeSD(deltaw, deltac, mu);
-                    cout << "Jac degenerate" << endl;
+                    deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
                 }
+                else
+                {
+                    deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
+                }
+                delta_w_last = deltaw;
+                increase_counter++;
             }
-            delta_w_last = deltaw;
         }
         fatropdata_->ComputedZ();
+        // cout << "norm dzL " << Linf(fatropdata_->delta_zL) << endl;
+        // cout << "norm dzU " << Linf(fatropdata_->delta_zU) << endl;
+        // cout << "norm delta_s " << Linf(fatropdata_->delta_s) << endl;
+        // cout << "norm delta_x " << Linf(fatropdata_->delta_x) << endl;
+        // cout << "norm delta_lam " << Linf(fatropdata_->lam_calc) << endl;
         double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = stepsize < 1e-14;
         lsinfo = linesearch_->FindAcceptableTrialPoint(mu, small_search_direction_curr || watch_dog_step, watch_dog_step);
