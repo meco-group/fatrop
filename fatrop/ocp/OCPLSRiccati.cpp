@@ -764,7 +764,7 @@ int OCPLSRiccati::computeSDnor(
         // cout << "el time get rhs" << el << endl; //
         double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
         double error_prev = -1.0;
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
             // blasfeo_tic(&timer);
             ComputeMVProd(
@@ -795,11 +795,11 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
-            if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
+            if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
             {
                 if (err_curr > 1e-10)
                 {
-                    cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
                 }
                 return 0;
             }
