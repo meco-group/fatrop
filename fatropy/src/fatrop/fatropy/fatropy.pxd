@@ -100,3 +100,4 @@ cdef extern from "OCPBuilder.hpp" namespace "fatrop":
         shared_ptr[FatropApplication] Build()
         shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
         shared_ptr[ParameterSetter] GetParameterSetter(const string &parameter_setter_name)
+        int SampleMaxEnt(double alpha)

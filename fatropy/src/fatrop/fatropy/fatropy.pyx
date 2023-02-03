@@ -143,6 +143,9 @@ cdef class OCP:
 
     def Optimize(self):
         return self.myFatropApplication.get().Optimize()
+
+    def SampleMaxEnt(self, alpha):
+        return self.myOCPBuilder.SampleMaxEnt(alpha)
     def WarmStart(self):
         return self.myFatropApplication.get().WarmStart()
     def Sample(self, name):
@@ -317,6 +320,7 @@ cdef class OCP:
         for jj in range(nx):
             retval[jj,K-1] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+(K-1)*(nx_plus_nu))
         return retval
+    
 
     # Attribute access
     @property

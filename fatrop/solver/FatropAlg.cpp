@@ -287,7 +287,7 @@ int FatropAlg::Optimize()
     journaller_->PrintIterations();
     return 0;
 }
-inline int FatropAlg::EvalHess()
+int FatropAlg::EvalHess()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);

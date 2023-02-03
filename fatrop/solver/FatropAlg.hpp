@@ -36,7 +36,7 @@ namespace fatrop
         void SetInitial(const vector<double> &initial) override;
         void GetSolution(vector<double> &sol) override;
         int Optimize() override;
-        inline int EvalHess();
+        int EvalHess();
         inline int EvalJac();
         inline int EvalCVCurr();
         inline int EvalCVNext();
