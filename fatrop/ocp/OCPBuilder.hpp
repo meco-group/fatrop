@@ -279,8 +279,8 @@ namespace fatrop
             maxentsampler->Sample(
                 &fatropocp1->ocpkktmemory_,
                 fatropdata->delta_x,
-                fatropdata->delta_s,
                 fatropdata->lam_calc,
+                fatropdata->delta_s,
                 fatropdata->sigma_total,
                 ocplsriccati1->rhs_rq2[0],
                 ocplsriccati1->rhs_b2[0],
