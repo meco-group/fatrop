@@ -265,8 +265,8 @@ namespace fatrop
         public:
         int SampleMaxEnt(double alpha)
         {
-            fatropalg->EvalHess();
-            cout << "hello" << endl;
+            // fatropalg->EvalHess();
+            // cout << "hello" << endl;
             ocplsriccati1->GetRHS(
                 &fatropocp1->ocpkktmemory_,
                 fatropdata->gradb_total,
@@ -275,7 +275,7 @@ namespace fatrop
                 ocplsriccati1->rhs_g2[0],
                 ocplsriccati1->rhs_g_ineq2[0],
                 ocplsriccati1->rhs_gradb2[0]);
-            cout << "hello" << endl;
+            // cout << "hello" << endl;
             maxentsampler->Sample(
                 &fatropocp1->ocpkktmemory_,
                 fatropdata->delta_x,
@@ -288,7 +288,7 @@ namespace fatrop
                 ocplsriccati1->rhs_g_ineq2[0],
                 ocplsriccati1->rhs_gradb2[0],
                 alpha);
-            cout << "hello" << endl;
+            // cout << "hello" << endl;
             axpy(1.0, fatropdata->delta_x, fatropdata->x_curr, fatropdata->x_curr);
             return 0;
         }

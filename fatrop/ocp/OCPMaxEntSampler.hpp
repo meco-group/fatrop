@@ -2,8 +2,6 @@
 #define OCPMAXENTSAMPLERINCLUDED
 #include "OCPLSRiccati.hpp"
 #include <random>
-static std::default_random_engine generator;
-static std::normal_distribution<double> distribution(0.0, 1.0);
 namespace fatrop
 {
     class OCPMaxEntSampler : public OCPLSRiccati
@@ -11,6 +9,8 @@ namespace fatrop
         using OCPLSRiccati::OCPLSRiccati;
 
     public:
+        std::default_random_engine generator;
+        std::normal_distribution<double> distribution = std::normal_distribution<double>(0.0, 1.0);
         int Sample(
             OCPKKTMemory *OCP,
             const FatropVecBF &ux,
