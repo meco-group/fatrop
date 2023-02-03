@@ -265,7 +265,9 @@ namespace fatrop
         public:
         int SampleMaxEnt(double alpha)
         {
-            // fatropalg->EvalHess();
+            fatropalg->EvalHess();
+            fatropalg->EvalJac();
+            assert(fatropalg->ComputeSD(0.0, 0.0, 0.0)==0);
             // cout << "hello" << endl;
             ocplsriccati1->GetRHS(
                 &fatropocp1->ocpkktmemory_,

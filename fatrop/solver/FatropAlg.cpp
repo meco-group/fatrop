@@ -300,7 +300,7 @@ int FatropAlg::EvalHess()
     stats.eval_hess_count++;
     return res;
 }
-inline int FatropAlg::EvalJac()
+int FatropAlg::EvalJac()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);

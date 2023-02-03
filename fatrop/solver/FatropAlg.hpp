@@ -37,7 +37,7 @@ namespace fatrop
         void GetSolution(vector<double> &sol) override;
         int Optimize() override;
         int EvalHess();
-        inline int EvalJac();
+        int EvalJac();
         inline int EvalCVCurr();
         inline int EvalCVNext();
         inline int EvalGradCurr();
