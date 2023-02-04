@@ -124,6 +124,7 @@ int FatropOCP::SolveSOC(
         //     rhs_g_ineq2[0],
         //     rhs_gradb2[0]);
         double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
+        max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
         for (int i = 0; i < 5; i++)
         {
