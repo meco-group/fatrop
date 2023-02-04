@@ -10,19 +10,19 @@ from cpython cimport array
 import json
 import numpy as np
 from casadi import Callback
-class FatropCasFun(Callback):
-    def __init__(self, myocp, name, params, res):
-        Callback.__init__(self)
-        self.name = name
-        self.n_in = len(params)
-        self.n_out = len(res)
-        self.paramstetters
-        self.construct(name, self.n_in, self.n_out)
-        self.myocp = myocp
-    def get_n_in(self): return self.n_in
-    def get_n_out(self): return self.n_out
-    def eval(self, arg):
-        return self.fun(arg)
+# class FatropCasFun(Callback):
+#     def __init__(self, myocp, name, params, res):
+#         Callback.__init__(self)
+#         self.name = name
+#         self.n_in = len(params)
+#         self.n_out = len(res)
+#         self.paramstetters
+#         self.construct(name, self.n_in, self.n_out)
+#         self.myocp = myocp
+#     def get_n_in(self): return self.n_in
+#     def get_n_out(self): return self.n_out
+#     def eval(self, arg):
+#         return self.fun(arg)
 
 # interface the FatropStats struct to python
 cdef class PyFatropStats:
