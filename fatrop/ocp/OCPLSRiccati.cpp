@@ -763,6 +763,7 @@ int OCPLSRiccati::computeSDnor(
         // el = blasfeo_toc(&timer);
         // cout << "el time get rhs" << el << endl; //
         double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
+        max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
         for (int i = 0; i < 5; i++)
         {
