@@ -13,6 +13,8 @@ namespace fatrop
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-8;
+        double acceptable_tol = 1e-6;
+        double acceptable_iter = 15;
         double mu0 = 1e2;
         // double mu0 = 2e5;
         // double mu0 = 1e;

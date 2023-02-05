@@ -63,6 +63,8 @@ namespace fatrop
 
     public:
         double tol;
+        double acceptable_tol;
+        double acceptable_iter;
         int maxiter;
 
     private:
