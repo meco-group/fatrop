@@ -35,6 +35,8 @@ void FatropAlg::Initialize()
     kappa_c = fatropparams_->kappa_c;
     kappa_d = fatropparams_->kappa_d;
     max_watchdog_steps = fatropparams_->max_watchdog_steps;
+    acceptable_tol = fatropparams_->acceptable_tol;
+    acceptable_iter = fatropparams_->acceptable_iter;
     // first_try_watchdog = fatropparams_->first_try_watchdog;
     // todo avoid reallocation when maxiter doesn't change
     // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
@@ -70,6 +72,7 @@ int FatropAlg::Optimize()
     int no_conse_small_sd = false;
     int filter_reseted = 0;
     int no_no_full_steps = 0;
+    int no_acceptable_steps = 0;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -144,7 +147,16 @@ int FatropAlg::Optimize()
         journaller_->Push();
         journaller_->PrintIterations();
         double emu = fatropdata_->EMuCurr(0.0);
-        if (emu < tol || ((no_conse_small_sd == 2) && (mu <= mu_min)))
+        if (emu < acceptable_tol)
+        {
+            no_acceptable_steps++;
+        }
+        else
+        {
+            no_acceptable_steps = 0;
+        }
+        
+        if (emu < tol || (no_acceptable_steps>=acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
         {
             double total_time = blasfeo_toc(&timer);
@@ -153,6 +165,10 @@ int FatropAlg::Optimize()
             {
                 cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
+            if(emu>tol && no_acceptable_steps>=acceptable_iter)
+            {
+                cout << "WARNING fatrop returned acceptable tolerance" << endl;
+            } 
             cout << "found solution :) " << endl;
             stats.eval_cv_count += linesearch_->eval_cv_count;
             stats.eval_obj_count += linesearch_->eval_obj_count;
@@ -164,24 +180,24 @@ int FatropAlg::Optimize()
             fatropnlp_->Finalize();
             return 0;
         }
-        // update mu
-        // todo make a seperate class
-        while (!watch_dog_step && mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
-        {
-            mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
-            filter_reseted = 0;
-            filter_->Reset();
-            filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
-            if (no_conse_small_sd == 2)
+            // update mu
+            // todo make a seperate class
+            while (!watch_dog_step && mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
             {
-                // cout << "small search direction" << endl;
-                no_conse_small_sd = 0;
-                break;
+                mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
+                filter_reseted = 0;
+                filter_->Reset();
+                filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
+                if (no_conse_small_sd == 2)
+                {
+                    // cout << "small search direction" << endl;
+                    no_conse_small_sd = 0;
+                    break;
+                }
+                no_no_full_steps = 0;
+                // the following break statement prohibits 'fast' mu updates, at leat one iteration per mu update
+                // break;
             }
-            no_no_full_steps = 0;
-            // the following break statement prohibits 'fast' mu updates, at leat one iteration per mu update
-            // break;
-        }
         // Hessian is necessary for calculating search direction
         EvalHess();
         // todo make an update class for regularization
@@ -212,7 +228,8 @@ int FatropAlg::Optimize()
                 increase_counter++;
             }
         }
-        if(deltaw>0.)delta_w_last = deltaw;
+        if (deltaw > 0.)
+            delta_w_last = deltaw;
         fatropdata_->ComputedZ();
         // cout << "norm dzL " << Linf(fatropdata_->delta_zL) << endl;
         // cout << "norm dzU " << Linf(fatropdata_->delta_zU) << endl;
