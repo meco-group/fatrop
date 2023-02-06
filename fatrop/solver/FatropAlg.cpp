@@ -276,6 +276,7 @@ int FatropAlg::Optimize()
                     watch_dog_step = false;
                     // todo make use of delta_x_backup and delta_s_backup
                     restore_watchdog_step = true;
+                    i --;
                     continue;
                 };
                 it_curr.type = 'w';
