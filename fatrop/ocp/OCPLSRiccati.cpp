@@ -345,7 +345,7 @@ int OCPLSRiccati::computeSDDeg(
     // // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
     // // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
     // err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-    // cout << "residu:  " << err_curr << endl; 
+    // cout << "residu:  " << err_curr << endl;
     // // double el = blasfeo_toc(&timer);
     // // cout << "el time " << el << endl;
     return 0;
@@ -747,6 +747,7 @@ int OCPLSRiccati::computeSDnor(
     lastused_.inertia_correction_w = inertia_correction;
     if (it_ref)
     {
+        const int min_it_ref = 0;
         double err_curr = 0.0;
         // copy(ux, ux_test[0]);
         // copy(lam, lam_test[0]);
@@ -796,13 +797,16 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
-            if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
+            if (i >= min_it_ref)
             {
-                if (err_curr > 1e-10)
+                if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
                 {
-                    // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    if (err_curr > 1e-8)
+                    {
+                        // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    }
+                    return 0;
                 }
-                return 0;
             }
             // blasfeo_tic(&timer);
             SolveRHS(
