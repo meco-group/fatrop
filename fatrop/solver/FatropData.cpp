@@ -53,7 +53,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          n_eqs(nlpdims.neqs),
                                                                                          n_ineqs(nlpdims.nineqs),
                                                                                          memvars(nlpdims.nvars, 12),
-                                                                                         memeqs(nlpdims.neqs, 11),
+                                                                                         memeqs(nlpdims.neqs, 10),
                                                                                          memineqs(nlpdims.nineqs, 26),
                                                                                          x_curr(memvars[0]),
                                                                                          x_next(memvars[1]),
@@ -67,13 +67,12 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &p
                                                                                          lam_next(memeqs[1]),
                                                                                          lam_backup(memeqs[2]),
                                                                                          lam_calc(memeqs[3]),
-                                                                                         lam_calc_backup(memeqs[4]),
-                                                                                         lam_calc_backup_ls(memeqs[5]),
-                                                                                         lam_scales(memeqs[6]),
-                                                                                         g_curr(memeqs[7]),
-                                                                                         g_next(memeqs[8]),
-                                                                                         g_backup(memeqs[9]),
-                                                                                         g_soc(memeqs[10]),
+                                                                                         lam_calc_backup_ls(memeqs[4]),
+                                                                                         lam_scales(memeqs[5]),
+                                                                                         g_curr(memeqs[6]),
+                                                                                         g_next(memeqs[7]),
+                                                                                         g_backup(memeqs[8]),
+                                                                                         g_soc(memeqs[9]),
                                                                                          grad_curr(memvars[8]),
                                                                                          grad_next(memvars[9]),
                                                                                          grad_backup(memvars[10]),
@@ -414,14 +413,9 @@ int FatropData::BackupCurr()
     zU_backup.copy(zU_curr);
     grad_backup.copy(grad_curr);
     g_backup.copy(g_curr);
-    obj_backup = obj_curr;
-    return 0;
-}
-int FatropData::BackupDelta()
-{
     delta_x_backup.copy(delta_x);
     delta_s_backup.copy(delta_s);
-    lam_calc_backup.copy(lam_calc);
+    obj_backup = obj_curr;
     return 0;
 }
 int FatropData::RestoreBackup()
@@ -433,9 +427,6 @@ int FatropData::RestoreBackup()
     zU_curr.SwapWith(zU_backup);
     grad_backup.SwapWith(grad_curr);
     g_backup.SwapWith(g_curr);
-    delta_x_backup.SwapWith(delta_x);
-    delta_s_backup.SwapWith(delta_s);
-    lam_calc.SwapWith(lam_calc_backup);
     cache_curr = EvalCache();
     return 0;
 }

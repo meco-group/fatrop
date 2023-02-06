@@ -72,10 +72,7 @@ int FatropAlg::Optimize()
     int no_conse_small_sd = false;
     int filter_reseted = 0;
     int no_no_full_steps = 0;
-    int no_no_full_steps_bc_filter = 0;
     int no_acceptable_steps = 0;
-    double delta_w_last_backup = 0.;
-    bool restore_watchdog_step = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     Reset();
@@ -124,9 +121,9 @@ int FatropAlg::Optimize()
         it_curr.du_inf = fatropdata_->DuInfLinfCurr();
         it_curr.ls = ls;
         it_curr.reg = deltaw;
-        if (no_no_full_steps_bc_filter >= 5)
+        if (no_no_full_steps >= 5)
         {
-            bool reset_filter = (filter_reseted <= 5);
+            bool reset_filter = lsinfo.first_rejected_by_filter && (filter_reseted <= 5);
             if (reset_filter)
             {
                 cout << "resetted filter " << endl;
@@ -142,7 +139,6 @@ int FatropAlg::Optimize()
                 // activate watchdog procedure
                 // backup x_k
                 fatropdata_->BackupCurr();
-                delta_w_last_backup = delta_w_last;
                 watch_dog_step = true;
                 // no_no_full_steps = 0;
                 no_watch_dog_steps_taken = 0;
@@ -159,8 +155,8 @@ int FatropAlg::Optimize()
         {
             no_acceptable_steps = 0;
         }
-
-        if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
+        
+        if (emu < tol || (no_acceptable_steps>=acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
         {
             double total_time = blasfeo_toc(&timer);
@@ -169,10 +165,10 @@ int FatropAlg::Optimize()
             {
                 cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
-            if (emu > tol && no_acceptable_steps >= acceptable_iter)
+            if(emu>tol && no_acceptable_steps>=acceptable_iter)
             {
                 cout << "WARNING fatrop returned acceptable tolerance" << endl;
-            }
+            } 
             cout << "found solution :) " << endl;
             stats.eval_cv_count += linesearch_->eval_cv_count;
             stats.eval_obj_count += linesearch_->eval_obj_count;
@@ -184,24 +180,24 @@ int FatropAlg::Optimize()
             fatropnlp_->Finalize();
             return 0;
         }
-        // update mu
-        // todo make a seperate class
-        while (!watch_dog_step && mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
-        {
-            mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
-            filter_reseted = 0;
-            filter_->Reset();
-            filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
-            if (no_conse_small_sd == 2)
+            // update mu
+            // todo make a seperate class
+            while (!watch_dog_step && mu > mu_min && (fatropdata_->EMuCurr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
             {
-                // cout << "small search direction" << endl;
-                no_conse_small_sd = 0;
-                break;
+                mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
+                filter_reseted = 0;
+                filter_->Reset();
+                filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
+                if (no_conse_small_sd == 2)
+                {
+                    // cout << "small search direction" << endl;
+                    no_conse_small_sd = 0;
+                    break;
+                }
+                no_no_full_steps = 0;
+                // the following break statement prohibits 'fast' mu updates, at leat one iteration per mu update
+                // break;
             }
-            no_no_full_steps = 0;
-            // the following break statement prohibits 'fast' mu updates, at leat one iteration per mu update
-            // break;
-        }
         // Hessian is necessary for calculating search direction
         EvalHess();
         // todo make an update class for regularization
@@ -211,32 +207,29 @@ int FatropAlg::Optimize()
         fatropdata_->ComputeBarrierQuantities(mu);
         int regularity = -1;
         int increase_counter = 0;
-        if (!restore_watchdog_step)
+        while (regularity != 0)
         {
-            while (regularity != 0)
+            regularity = ComputeSD(deltaw, deltac, mu);
+            if (deltac == 0 && regularity < 0)
             {
-                regularity = ComputeSD(deltaw, deltac, mu);
-                if (deltac == 0 && regularity < 0)
-                {
-                    cout << "degenerate Jacobian" << endl;
-                    deltac = deltac_candidate;
-                }
-                if (regularity > 0) // regularization is necessary
-                {
-                    if (increase_counter == 0)
-                    {
-                        deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
-                    }
-                    else
-                    {
-                        deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
-                    }
-                    increase_counter++;
-                }
+                cout << "degenerate Jacobian" << endl;
+                deltac = deltac_candidate;
             }
-            if (deltaw > 0.)
-                delta_w_last = deltaw;
+            if (regularity > 0) // regularization is necessary
+            {
+                if (increase_counter == 0)
+                {
+                    deltaw = (delta_w_last == 0.0) ? delta_w0 : MAX(delta_wmin, kappa_wmin * delta_w_last);
+                }
+                else
+                {
+                    deltaw = (delta_w_last == 0.0) ? kappa_wplusem * deltaw : kappa_wplus * deltaw;
+                }
+                increase_counter++;
+            }
         }
+        if (deltaw > 0.)
+            delta_w_last = deltaw;
         fatropdata_->ComputedZ();
         // cout << "norm dzL " << Linf(fatropdata_->delta_zL) << endl;
         // cout << "norm dzU " << Linf(fatropdata_->delta_zU) << endl;
@@ -251,7 +244,8 @@ int FatropAlg::Optimize()
         ls = lsinfo.ls;
         if (watch_dog_step && no_watch_dog_steps_taken == 0)
         {
-            fatropdata_->BackupDelta();
+            fatropdata_->delta_s_backup.copy(fatropdata_->delta_s);
+            fatropdata_->delta_x_backup.copy(fatropdata_->delta_x);
         }
         if (watch_dog_step)
         {
@@ -270,10 +264,8 @@ int FatropAlg::Optimize()
                     cout << "rejected watchdog step" << endl;
                     it_curr.type = 'x';
                     fatropdata_->RestoreBackup();
-                    // delta_w_last = delta_w_last_backup;
                     watch_dog_step = false;
                     // todo make use of delta_x_backup and delta_s_backup
-                    restore_watchdog_step = true;
                     continue;
                 };
                 it_curr.type = 'w';
@@ -288,19 +280,10 @@ int FatropAlg::Optimize()
         if (watch_dog_step || ls == 1)
         {
             no_no_full_steps = 0;
-            no_no_full_steps_bc_filter = 0;
         }
         else
         {
             ++no_no_full_steps;
-            if (lsinfo.last_rejected_by_filter)
-            {
-                ++no_no_full_steps_bc_filter;
-            }
-            else
-            {
-                no_no_full_steps_bc_filter = 0;
-            }
         }
         if (small_search_direction_curr)
         {
@@ -316,7 +299,6 @@ int FatropAlg::Optimize()
         {
             no_conse_small_sd = 0;
         }
-        restore_watchdog_step = false;
         // if linesearch unsuccessful -> resto phase
     }
     journaller_->PrintIterations();

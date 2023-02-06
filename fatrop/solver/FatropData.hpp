@@ -33,7 +33,6 @@ namespace fatrop
         int TryStep(double alpha_primal, double alpha_dual);
         int TakeStep();
         int BackupCurr();
-        int BackupDelta();
         int RestoreBackup();
         double CVLinfCurr();
         double CVLinfNext();
@@ -77,7 +76,6 @@ namespace fatrop
         FatropVecBF lam_next;
         FatropVecBF lam_backup;
         FatropVecBF lam_calc;
-        FatropVecBF lam_calc_backup;
         FatropVecBF lam_calc_backup_ls;
         FatropVecBF lam_scales;
         FatropVecBF g_curr;
