@@ -132,6 +132,7 @@ int FatropAlg::Optimize()
                 cout << "resetted filter " << endl;
                 filter_reseted++;
                 filter_->Reset();
+                no_no_full_steps_bc_filter = 0;
                 filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
             }
         }
@@ -191,6 +192,7 @@ int FatropAlg::Optimize()
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_reseted = 0;
             filter_->Reset();
+            no_no_full_steps_bc_filter = 0;
             filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
             if (no_conse_small_sd == 2)
             {
