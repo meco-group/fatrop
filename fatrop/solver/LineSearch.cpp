@@ -202,7 +202,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             res.ls = -1;
             return res;
         }
-        if (soc_step && (p >= p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old))))
+        if (soc_step && (p >= p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old) && p>1)))
         {
             // deactivate soc
             soc_step = false;
