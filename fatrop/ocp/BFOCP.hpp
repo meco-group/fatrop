@@ -92,6 +92,7 @@ namespace fatrop
             const double *global_params_k,
             double *res,
             const int k) = 0;
+        virtual int get_boundsk(double *lower, double* upper, const int k) const =0;
         virtual int get_initial_xk(double *xk, const int k) const = 0;
         virtual int get_initial_uk(double *uk, const int k) const = 0;
     };

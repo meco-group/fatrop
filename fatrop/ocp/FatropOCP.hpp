@@ -72,6 +72,12 @@ namespace fatrop
             const FatropVecBF &zL,
             const FatropVecBF &zU) override;
 
+        int GetBounds(
+            FatropVecBF &lower,
+            FatropVecBF &upper) const override 
+            {
+               return ocp_->GetBounds(lower, upper);
+            };
         NLPDims GetNLPDims() const override;
         void Finalize() override;
         void Reset() override;

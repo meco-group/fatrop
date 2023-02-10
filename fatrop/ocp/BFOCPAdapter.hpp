@@ -35,7 +35,8 @@ namespace fatrop
                                                            ngineqexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
                                                                                           { return ocptempl_->get_ng_ineq_k(k); })),
                                                            nstageparamsexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
-                                                                                          { return ocptempl_->get_n_stage_params_k(k); })), offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
+                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
+                                                           offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
         {
             x_dummy = vector<double>(max(nxexpr), 0.0);
         }
@@ -73,20 +74,37 @@ namespace fatrop
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr);
         }
+
     public:
         void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override;
         void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) override;
         void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override;
-        double* GetGlobalParams()
+        double *GetGlobalParams()
         {
-            if(globalparams.size()==0) return nullptr;
+            if (globalparams.size() == 0)
+                return nullptr;
             return &globalparams.at(0);
         }
-        double* GetStageParams()
+        double *GetStageParams()
         {
-            if(stageparams.size()==0) return nullptr;
+            if (stageparams.size() == 0)
+                return nullptr;
             return &stageparams.at(0);
         }
+        int GetBounds(
+            FatropVecBF &lower,
+            FatropVecBF &upper) const override
+        {
+            int offs = 0;
+            double* lower_p = ((VEC*) lower)->pa;
+            double* upper_p = ((VEC*) upper)->pa;
+            for (int k = 0; k < K; k++)
+            {
+                ocptempl->get_boundsk(lower_p + offs, upper_p + offs, k);
+                offs += ocptempl->get_ng_ineq_k(k);
+            }
+            return 0;
+        };
 
     public:
         int K;
@@ -99,6 +117,7 @@ namespace fatrop
         vector<double> stageparams;
         vector<double> globalparams;
         vector<double> x_dummy;
+
     private:
         shared_ptr<BFOCP> ocptempl;
     };

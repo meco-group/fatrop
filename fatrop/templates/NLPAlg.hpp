@@ -49,7 +49,7 @@ namespace fatrop
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
-            const FatropVecBF & cosntraint_violation) =0;
+            const FatropVecBF &cosntraint_violation) = 0;
         virtual NLPDims GetNLPDims() const = 0;
         virtual int ComputeScalings(
             double &obj_scale,
@@ -62,6 +62,9 @@ namespace fatrop
             FatropVecBF &s_curr,
             const FatropVecBF &zL,
             const FatropVecBF &zU) = 0;
+        virtual int GetBounds(
+            FatropVecBF &lower,
+            FatropVecBF &upper) const = 0;
         virtual void Finalize(){};
         virtual void Reset(){};
     };

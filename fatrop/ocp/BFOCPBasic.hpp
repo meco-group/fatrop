@@ -46,7 +46,9 @@ namespace fatrop
                    const EvalCasGen &gineqFf,
                    const EvalCasGen &LkIf,
                    const EvalCasGen &Lkf,
-                   const EvalCasGen &LFf);
+                   const EvalCasGen &LFf,
+                   const vector<double> &bounds_L,
+                   const vector<double> &bounds_U);
         int get_nxk(const int k) const override;
         int get_nuk(const int k) const override;
         int get_ngk(const int k) const override;
@@ -126,37 +128,67 @@ namespace fatrop
             const int k) override;
         int get_initial_xk(double *xk, const int k) const override
         {
-            const double* initial_x_p = initial_x.data();
-            for(int i =0; i< nx_ ; i++)
+            const double *initial_x_p = initial_x.data();
+            for (int i = 0; i < nx_; i++)
             {
-                xk[i] = initial_x_p[i + k*nx_];
+                xk[i] = initial_x_p[i + k * nx_];
             }
             return 0;
         };
         int get_initial_uk(double *uk, const int k) const override
         {
-            const double* initial_u_p = initial_u.data();
-            for(int i =0; i< nu_ ; i++)
+            const double *initial_u_p = initial_u.data();
+            for (int i = 0; i < nu_; i++)
             {
-                uk[i] = initial_u_p[i + k*nu_];
+                uk[i] = initial_u_p[i + k * nu_];
             }
             return 0;
         };
-        int set_initial_xk(double *xk, const int k) 
+        int set_initial_xk(double *xk, const int k)
         {
-            double* initial_x_p = initial_x.data();
-            for(int i =0; i< nx_ ; i++)
+            double *initial_x_p = initial_x.data();
+            for (int i = 0; i < nx_; i++)
             {
-                initial_x_p[i + k*nx_] = xk[i];
+                initial_x_p[i + k * nx_] = xk[i];
             }
             return 0;
         };
-        int set_initial_uk(double *uk, const int k) 
+        int set_initial_uk(double *uk, const int k)
         {
-            double* initial_u_p = initial_u.data();
-            for(int i =0; i< nu_ ; i++)
+            double *initial_u_p = initial_u.data();
+            for (int i = 0; i < nu_; i++)
             {
-                initial_u_p[i + k*nu_] = uk[i];
+                initial_u_p[i + k * nu_] = uk[i];
+            }
+            return 0;
+        };
+        int get_boundsk(double *lower, double *upper, const int k) const override
+        {
+            const double *bounds_L_p = bounds_L.data();
+            const double *bounds_U_p = bounds_U.data();
+            int offs = 0;
+            int ngineq = ng_ineq_;
+            if (k == 0)
+            {
+                offs = 0;
+            }
+            else
+            {
+                offs = ng_ineqI_ + (k - 1) * ng_ineq_;
+            }
+            if (k == 0)
+            {
+                ngineq = ng_ineqI_;
+            }
+            else if (k == K_ - 1)
+            {
+                ngineq = ng_ineqF_;
+            }
+
+            for (int i = 0; i < ngineq; i++)
+            {
+                lower[i] = bounds_L_p[i + offs];
+                upper[i] = bounds_U_p[i + offs];
             }
             return 0;
         };
@@ -198,6 +230,8 @@ namespace fatrop
         EvalCasGen LFf;
         vector<double> initial_x;
         vector<double> initial_u;
+        vector<double> bounds_L;
+        vector<double> bounds_U;
     };
 }
 #endif // OCPTEMPLATEBASICINCLUDED

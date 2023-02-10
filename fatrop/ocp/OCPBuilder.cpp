@@ -52,6 +52,16 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     const int ng_ineqF = json_spec["ng_ineqF"];
     no_stage_params = json_spec["n_stage_params"];
     no_global_params = json_spec["n_global_params"];
+    lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
+    upperI = json_spec["upperI"].get_number_array<double>("%lf");
+    lower = json_spec["lower"].get_number_array<double>("%lf");
+    upper = json_spec["upper"].get_number_array<double>("%lf");
+    lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
+    upperF = json_spec["upperF"].get_number_array<double>("%lf");
+    lower.insert(lower.begin(), lowerI.begin(), lowerI.end());
+    upper.insert(upper.begin(), upperI.begin(), upperI.end());
+    lower.insert(lower.end(), lowerF.begin(), lowerF.end());
+    upper.insert(upper.end(), upperF.begin(), upperF.end());
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
     EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
@@ -98,7 +108,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
                                                                  gineqFf,
                                                                  LIf,
                                                                  Lkf,
-                                                                 LFf);
+                                                                 LFf, lower, upper);
     ocptempladapteror = make_shared<BFOCPAdapter>(static_cast<shared_ptr<BFOCP>>(ocptemplatebasic));
     ocptempladapter = ocptempladapteror;
     ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
@@ -112,19 +122,9 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     fatropdata = make_shared<FatropData>(fatropocp->GetNLPDims(), params);
     initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
     initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
-    lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
-    upperI = json_spec["upperI"].get_number_array<double>("%lf");
-    lower = json_spec["lower"].get_number_array<double>("%lf");
-    upper = json_spec["upper"].get_number_array<double>("%lf");
-    lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
-    upperF = json_spec["upperF"].get_number_array<double>("%lf");
-    lower.insert(lower.begin(), lowerI.begin(), lowerI.end());
-    upper.insert(upper.begin(), upperI.begin(), upperI.end());
-    lower.insert(lower.end(), lowerF.begin(), lowerF.end());
-    upper.insert(upper.end(), upperF.begin(), upperF.end());
     // std::vector<int> test = json_spec["states_offset"].as_object()["x1"].as_object().array(0).get_number_array<int>("%d");
     // auto test2 = json_spec["states_offset"][0];
-    SetBounds();
+    // SetBounds();
     SetInitial();
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
@@ -160,7 +160,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
 void OCPBuilder::SetBounds()
 {
     // assert(solver_built);
-    fatropdata->SetBounds(lower, upper);
+    // fatropdata->SetBounds(lower, upper);
 }
 void OCPBuilder::SetInitial()
 {
