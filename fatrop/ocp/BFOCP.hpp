@@ -14,9 +14,9 @@ namespace fatrop
         virtual int get_nuk(const int k) const = 0;
         virtual int get_ngk(const int k) const = 0;
         virtual int get_n_stage_params_k(const int k) const = 0;
-        // virtual int get_default_stage_paramsk(double *stage_params, const int k) const = 0;
         virtual int get_n_global_params() const = 0;
-        // virtual int get_default_global_params(double *global_params, const int k) const = 0;
+        virtual int get_default_stage_paramsk(double *stage_params, const int k) const = 0;
+        virtual int get_default_global_params(double *global_params) const = 0;
         virtual int get_ng_ineq_k(const int k) const = 0;
         // virtual int get_lower_boundsk(double *lower_bounds, const int k) const = 0;
         // virtual int get_upper_boundsk(double *upper_bounds, const int k) const = 0;

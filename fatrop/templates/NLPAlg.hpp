@@ -65,6 +65,10 @@ namespace fatrop
         virtual int GetBounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const = 0;
+        virtual int GetInitialGuess(
+            FatropVecBF &initial) const = 0;
+        // virtual int GetDefaultParams(
+        //     FatropParams &params) const = 0;
         virtual void Finalize(){};
         virtual void Reset(){};
     };

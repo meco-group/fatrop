@@ -38,6 +38,14 @@ namespace fatrop
                                                                                                 { return ocptempl_->get_n_stage_params_k(k); })),
                                                            offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
         {
+            // initialize the default parameters
+            ocptempl_->get_default_global_params(globalparams.data());
+            int offs = 0;
+            for (int k = 0; k < K; k++)
+            {
+                ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
+                offs += ocptempl_->get_n_stage_params_k(k);
+            }
             x_dummy = vector<double>(max(nxexpr), 0.0);
         }
         int evalHess(
@@ -96,8 +104,8 @@ namespace fatrop
             FatropVecBF &upper) const override
         {
             int offs = 0;
-            double* lower_p = ((VEC*) lower)->pa;
-            double* upper_p = ((VEC*) upper)->pa;
+            double *lower_p = ((VEC *)lower)->pa;
+            double *upper_p = ((VEC *)upper)->pa;
             for (int k = 0; k < K; k++)
             {
                 ocptempl->get_boundsk(lower_p + offs, upper_p + offs, k);
@@ -105,6 +113,24 @@ namespace fatrop
             }
             return 0;
         };
+        int GetInitialGuess(
+            FatropVecBF &initial) const override
+        {
+            int offs = 0;
+            for (int k = 0; k < K-1; k++)
+            {
+                ocptempl->get_initial_uk(((VEC *)initial)->pa + offs, k);
+                offs += ocptempl->get_nuk(k);
+                ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, k);
+                offs += ocptempl->get_nxk(k);
+            }
+            ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, K-1);
+            return 0;
+        }
+        // virtual int GetDefaultParams(
+        //     FatropParams &params)
+        // {
+        // };
 
     public:
         int K;

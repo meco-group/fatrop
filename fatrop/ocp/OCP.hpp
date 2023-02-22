@@ -47,6 +47,10 @@ namespace fatrop
         virtual int GetBounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const = 0;
+        virtual int GetInitialGuess(
+            FatropVecBF &initial) const = 0;
+        // virtual int GetDefaultParams(
+        //     FatropParams &params) const = 0;
         virtual void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) = 0;
         virtual void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) = 0;
         virtual void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) = 0;

@@ -48,13 +48,34 @@ namespace fatrop
                    const EvalCasGen &Lkf,
                    const EvalCasGen &LFf,
                    const vector<double> &bounds_L,
-                   const vector<double> &bounds_U);
+                   const vector<double> &bounds_U, 
+                   const vector<double> &stage_params,
+                   const vector<double> &global_params);
         int get_nxk(const int k) const override;
         int get_nuk(const int k) const override;
         int get_ngk(const int k) const override;
         int get_ng_ineq_k(const int k) const override;
         int get_n_global_params() const;
         int get_n_stage_params_k(const int k) const override;
+        int get_default_stage_paramsk(double *stage_params_res, const int k) const override
+        {
+            int offs = k * n_stage_params_;
+            const double *stage_params_p = stage_params.data();
+            for (int i = 0; i < n_stage_params_; i++)
+            {
+                stage_params_res[i] = stage_params_p[offs + i];
+            }
+            return 0;
+        }
+        int get_default_global_params(double *global_params_res) const override
+        {
+            const double *global_params_p = global_params.data();
+            for (int i = 0; i < n_global_params_; i++)
+            {
+                global_params_res[i] = global_params_p[i];
+            }
+            return 0;
+        }
         int get_horizon_length() const;
         int eval_BAbtk(const double *states_kp1,
                        const double *inputs_k,
@@ -232,6 +253,8 @@ namespace fatrop
         vector<double> initial_u;
         vector<double> bounds_L;
         vector<double> bounds_U;
+        vector<double> stage_params;
+        vector<double> global_params;
     };
 }
 #endif // OCPTEMPLATEBASICINCLUDED

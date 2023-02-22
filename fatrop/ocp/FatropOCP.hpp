@@ -78,6 +78,16 @@ namespace fatrop
             {
                return ocp_->GetBounds(lower, upper);
             };
+        int GetInitialGuess(
+            FatropVecBF &initial) const override
+            {
+               return ocp_->GetInitialGuess(initial);
+            };
+        // int GetDefaultParams(
+        //     FatropParams &params) const override
+        //     {
+        //        return ocp_->GetDefaultParams(params);
+        //     };
         NLPDims GetNLPDims() const override;
         void Finalize() override;
         void Reset() override;
