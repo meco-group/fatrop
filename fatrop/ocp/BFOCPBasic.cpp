@@ -37,7 +37,9 @@ BFOCPBasic::BFOCPBasic(const int nu,
                        const vector<double> &bounds_L,
                        const vector<double> &bounds_U,
                        const vector<double> &stage_params,
-                       const vector<double> &global_params) : nu_(nu),
+                       const vector<double> &global_params,
+                       const vector<double> &initial_u,
+                       const vector<double> &initial_x) : nu_(nu),
                                                               nx_(nx),
                                                               ngI_(ngI),
                                                               ng_(ng),
@@ -71,12 +73,12 @@ BFOCPBasic::BFOCPBasic(const int nu,
                                                               LkIf(LkIf),
                                                               Lkf(Lkf),
                                                               LFf(LFf),
-                                                              initial_x(K * nx, 0.0),
-                                                              initial_u((K - 1) * nu_, 0.0),
+                                                              initial_x(initial_x),
+                                                              initial_u(initial_u),
                                                               bounds_L(bounds_L),
                                                               bounds_U(bounds_U),
                                                               stage_params(stage_params),
-                                                              global_params(global_params)
+                                                              global_params(global_params) 
 {
 }
 int BFOCPBasic::get_nxk(const int k) const

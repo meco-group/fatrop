@@ -62,6 +62,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     upper.insert(upper.begin(), upperI.begin(), upperI.end());
     lower.insert(lower.end(), lowerF.begin(), lowerF.end());
     upper.insert(upper.end(), upperF.begin(), upperF.end());
+    initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
+    initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
     EvalCasGen BAbtf(handle, "BAbt");
     EvalCasGen bkf(handle, "bk");
     EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
@@ -86,30 +88,32 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     EvalCasGen GgineqFtf(handle, "GgineqFt");
     EvalCasGen gineqFf(handle, "gineqF");
     ocptemplatebasic = make_shared<BFOCPBasic>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
-                                                                 BAbtf,
-                                                                 bkf,
-                                                                 RSQrqtIf,
-                                                                 rqIf,
-                                                                 RSQrqtf,
-                                                                 rqf,
-                                                                 RSQrqtFf,
-                                                                 rqFf,
-                                                                 GgtIf,
-                                                                 gIf,
-                                                                 Ggtf,
-                                                                 gf,
-                                                                 GgtFf,
-                                                                 gFf,
-                                                                 GgineqItf,
-                                                                 gineqIf,
-                                                                 Ggineqtf,
-                                                                 gineqf,
-                                                                 GgineqFtf,
-                                                                 gineqFf,
-                                                                 LIf,
-                                                                 Lkf,
-                                                                 LFf, lower, upper, 
-json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
+                                               BAbtf,
+                                               bkf,
+                                               RSQrqtIf,
+                                               rqIf,
+                                               RSQrqtf,
+                                               rqf,
+                                               RSQrqtFf,
+                                               rqFf,
+                                               GgtIf,
+                                               gIf,
+                                               Ggtf,
+                                               gf,
+                                               GgtFf,
+                                               gFf,
+                                               GgineqItf,
+                                               gineqIf,
+                                               Ggineqtf,
+                                               gineqf,
+                                               GgineqFtf,
+                                               gineqFf,
+                                               LIf,
+                                               Lkf,
+                                               LFf, lower, upper,
+                                               json_spec["stage_params"].get_number_array<double>("%lf"), 
+                                               json_spec["global_params"].get_number_array<double>("%lf"), 
+                                               initial_u, initial_x);
     ocptempladapteror = make_shared<BFOCPAdapter>(static_cast<shared_ptr<BFOCP>>(ocptemplatebasic));
     ocptempladapter = ocptempladapteror;
     // ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
@@ -121,12 +125,10 @@ json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_par
     fatropocp1 = make_shared<FatropOCP>(ocptempladapter, ocplsriccati, ocpscaler);
     fatropocp = fatropocp1;
     fatropdata = make_shared<FatropData>(fatropocp->GetNLPDims(), params);
-    initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
-    initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
     // std::vector<int> test = json_spec["states_offset"].as_object()["x1"].as_object().array(0).get_number_array<int>("%d");
     // auto test2 = json_spec["states_offset"][0];
     // SetBounds();
-    SetInitial();
+    // SetInitial();
     // vector<double> upper = vector<double>(lower.size(), INFINITY);
     filter = make_shared<Filter>(params->maxiter + 1);
     journaller = make_shared<Journaller>(params->maxiter + 1);
@@ -139,20 +141,20 @@ json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_par
     {
         sampler_map[sampler_name] = make_shared<OCPSolutionSampler>(GetSamplerCustom(sampler_name));
     }
-    for (auto var_name: json_spec["states_offset"].as_object().keys())
+    for (auto var_name : json_spec["states_offset"].as_object().keys())
     {
         sampler_map[string("state_") + var_name] = make_shared<OCPSolutionSampler>(GetSamplerState(var_name));
     }
-    for (auto var_name: json_spec["controls_offset"].as_object().keys())
+    for (auto var_name : json_spec["controls_offset"].as_object().keys())
     {
         sampler_map[string("control_") + var_name] = make_shared<OCPSolutionSampler>(GetSamplerControl(var_name));
     }
 
-    for (auto param_name: json_spec["global_params_offset"].as_object().keys())
+    for (auto param_name : json_spec["global_params_offset"].as_object().keys())
     {
         parameter_setter_map[param_name] = make_shared<ParameterSetter>(GetParameterSetterGlobal(param_name));
     }
-    for (auto param_name: json_spec["control_params_offset"].as_object().keys())
+    for (auto param_name : json_spec["control_params_offset"].as_object().keys())
     {
         parameter_setter_map[param_name] = make_shared<ParameterSetter>(GetParameterSetterControl(param_name));
     }

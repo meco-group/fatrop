@@ -50,7 +50,9 @@ namespace fatrop
                    const vector<double> &bounds_L,
                    const vector<double> &bounds_U, 
                    const vector<double> &stage_params,
-                   const vector<double> &global_params);
+                   const vector<double> &global_params,
+                   const vector<double> &initial_u,
+                   const vector<double> &initial_x);
         int get_nxk(const int k) const override;
         int get_nuk(const int k) const override;
         int get_ngk(const int k) const override;

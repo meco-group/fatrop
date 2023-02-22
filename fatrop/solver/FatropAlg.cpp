@@ -16,6 +16,7 @@ FatropAlg::FatropAlg(
       journaller_(journaller)
 {
     Initialize();
+    fatropnlp_->GetInitialGuess(fatropdata_->x_initial);
     fatropnlp->GetBounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
     fatropdata->RelaxBounds();
 }
