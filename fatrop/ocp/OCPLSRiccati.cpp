@@ -799,7 +799,7 @@ int OCPLSRiccati::computeSDnor(
             // cout << "residu:  " << err_curr << endl;
             if (i >= min_it_ref)
             {
-                if (err_curr < 1e-10 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
+                if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
                 {
                     if (err_curr > 1e-8)
                     {
