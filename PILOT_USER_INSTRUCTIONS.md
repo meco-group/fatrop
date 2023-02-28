@@ -43,9 +43,6 @@ You can now jump to [Get and run the Fatrop examples](#header-get-and-run-the-fa
 * build blasfeo: `make -j4` (you can change 4 (allowed number of jobs) depending on your CPU)
 * install blasfeo: `sudo make install`
 
-### Eigen
-
-* install eigen: `sudo apt install libeigen3-dev`
 
 ### Python packages and tools (for fatropy, will however be automatically installed with fatropy as well)
 
