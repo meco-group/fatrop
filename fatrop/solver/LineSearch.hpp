@@ -5,6 +5,7 @@
 #include "templates/NLPAlg.hpp"
 #include "solver/FatropData.hpp"
 #include "solver/Filter.hpp"
+#include "solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
 using namespace std;

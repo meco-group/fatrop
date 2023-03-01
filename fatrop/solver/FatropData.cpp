@@ -608,7 +608,7 @@ void FatropData::RelaxBoundsVar(double mu)
             double dist_lower = s_curr_v - loweri;
             if (dist_lower < mu * emach)
             {
-                cout << "slacks too small " << endl;
+                cout << PRIORITY1  << "slacks too small " << endl;
                 VECEL(s_lower_p, i) -= 1e-12 * std::max(1.0, std::abs(loweri));
             }
         }
@@ -618,7 +618,7 @@ void FatropData::RelaxBoundsVar(double mu)
             double dist_upper = upperi - s_curr_v;
             if (dist_upper < mu * emach)
             {
-                cout << "slacks too small " << endl;
+                cout << PRIORITY1 << "slacks too small " << endl;
                 VECEL(s_upper_p, i) += 1e-12 * std::max(1.0, std::abs(upperi));
             }
         }

@@ -12,6 +12,7 @@
 #include <memory>
 #include "FatropStats.hpp"
 #include <limits>
+#include <solver/FatropPrinter.hpp>
 using namespace std;
 // #include "AlgorithmQuantities.hpp"
 #ifdef ENABLE_MULTITHREADING
