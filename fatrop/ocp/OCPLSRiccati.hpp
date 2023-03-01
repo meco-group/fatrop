@@ -2,6 +2,7 @@
 #define OCPLSRICCATIINCLUDED
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
+#include "solver/FatropPrinter.hpp"
 #include <cmath>
 #define SUMMATION_ALG kahan_sum
 namespace fatrop

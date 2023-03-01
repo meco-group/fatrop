@@ -831,7 +831,7 @@ int OCPLSRiccati::computeSDnor(
             // prepare next iteration
             error_prev = err_curr;
         }
-        cout << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
+        cout <<PRIORITY1<< "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     }
     return 0;
 }

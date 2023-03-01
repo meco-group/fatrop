@@ -171,13 +171,13 @@ int FatropAlg::Optimize()
             journaller_->PrintIterations();
             if (no_conse_small_sd == 2)
             {
-                cout << PRIORITY1 << "WARNING fatrop returned bc of very small search direction" << endl;
+                cout << "WARNING fatrop returned bc of very small search direction" << endl;
             }
             if (emu > tol && no_acceptable_steps >= acceptable_iter)
             {
-                cout << PRIORITY1 << "WARNING fatrop returned acceptable tolerance" << endl;
+                cout << "WARNING fatrop returned acceptable tolerance" << endl;
             }
-            cout << PRIORITY1 << "found solution :) " << endl;
+            cout << "found solution :) " << endl;
             stats.eval_cv_count += linesearch_->eval_cv_count;
             stats.eval_obj_count += linesearch_->eval_obj_count;
             stats.eval_cv_time += linesearch_->eval_cv_time;

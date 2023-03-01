@@ -15,7 +15,7 @@ namespace fatrop
     template<int priority>
     std::ostream &operator<<(std::ostream &os, const PrintPriority<priority> &p)
     {
-        if (p.priority >= 5)
+        if (p.priority >= -1)
             return os;
         return nullstream;
     }
