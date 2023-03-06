@@ -1,7 +1,7 @@
 #ifndef OCPEVALUATORINCLUDED
 #define OCPEVALUATORINCLUDED
 #include "OCPKKT.hpp"
-#include "BFOCP.hpp"
+#include "OCPAbstract.hpp"
 #include "solver/FatropData.hpp"
 #include "aux/SmartPtr.hpp"
 #include "OCP.hpp"
@@ -25,7 +25,7 @@ namespace fatrop
     class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const shared_ptr<BFOCP> &ocptempl_) : K(ocptempl_->get_horizon_length()),
+        BFOCPAdapter(const shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
                                                            nuexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
                                                                                       { return ocptempl_->get_nuk(k); })),
                                                            nxexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
@@ -145,7 +145,7 @@ namespace fatrop
         vector<double> x_dummy;
 
     private:
-        shared_ptr<BFOCP> ocptempl;
+        shared_ptr<OCPAbstract> ocptempl;
     };
 } // namespace fatrop
 

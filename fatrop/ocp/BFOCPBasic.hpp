@@ -1,7 +1,7 @@
 // Basic OCP template: initial and terminal constraints eq constraints, Function evaluation provided by Casadi CodeGen
 #ifndef OCPTEMPLATEBASICINCLUDED
 #define OCPTEMPLATEBASICINCLUDED
-#include "BFOCP.hpp"
+#include "OCPAbstract.hpp"
 #include <string>
 #include <iostream>
 #include <aux/DynamicLib.hpp>
@@ -10,7 +10,7 @@
 using namespace std;
 namespace fatrop
 {
-    class BFOCPBasic : public BFOCP
+    class BFOCPBasic : public OCPAbstract
     {
     public:
         BFOCPBasic(const int nu,

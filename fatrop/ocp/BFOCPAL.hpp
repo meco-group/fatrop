@@ -3,16 +3,16 @@
 
 #ifndef BFOCPALINCLUDED
 #define BFOCPALINCLUDED
-#include "BFOCP.hpp"
+#include "OCPAbstract.hpp"
 #include <memory>
 #include <algorithm>
 #include <cmath>
 namespace fatrop
 {
-    class BFOCPAL : public BFOCP
+    class BFOCPAL : public OCPAbstract
     {
     public:
-        BFOCPAL(shared_ptr<BFOCP> &ocp, double penalty) : ocp_(ocp), K(ocp_->get_horizon_length()),
+        BFOCPAL(shared_ptr<OCPAbstract> &ocp, double penalty) : ocp_(ocp), K(ocp_->get_horizon_length()),
                                                           no_ineqs(TransformRange<int>(0, K, [&ocp](int k)
                                                                                        { return ocp->get_ng_ineq_k(k); })),
                                                           no_ineqs_total(sum(no_ineqs)),
@@ -127,7 +127,7 @@ namespace fatrop
         {
             return no_ineqs_total;
         }
-        shared_ptr<BFOCP> ocp_;
+        shared_ptr<OCPAbstract> ocp_;
         const int K;
         // vector with number of ineqs each stage
         FatropVector<int> no_ineqs;
