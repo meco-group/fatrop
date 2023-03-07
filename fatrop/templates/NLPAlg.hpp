@@ -69,6 +69,7 @@ namespace fatrop
             FatropVecBF &initial) const = 0;
         // virtual int GetDefaultParams(
         //     FatropParams &params) const = 0;
+        virtual int Callback(FatropVecBF& primal_vars){return 0;};
         virtual void Finalize(){};
         virtual void Reset(){};
     };
