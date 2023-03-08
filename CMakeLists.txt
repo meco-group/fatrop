@@ -51,7 +51,7 @@ if(${ENABLE_MULTITHREADING})
 endif()
 set(BLASFEO_TARGET "X64_AUTOMATIC" CACHE STRING "BLASFEO Target architecture")
 set(BLASFEO_SRC_DIR ${PROJECT_SOURCE_DIR}/external/blasfeo)
-message(STATUS "Target: BLASFEO is ${BLASFEO_TARGET}, HPIPM is ${HPIPM_TARGET}")
+message(STATUS "Target: BLASFEO is ${BLASFEO_TARGET}")
 add_subdirectory(external)
 
 # include(FindMUMPS.cmake)
