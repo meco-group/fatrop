@@ -20,7 +20,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # minimum cmake version to find numpy header
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE "Debug" CACHE
+  set(CMAKE_BUILD_TYPE "Release" CACHE
       STRING "Choose the type of build." FORCE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
@@ -49,13 +49,18 @@ if(${ENABLE_MULTITHREADING})
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=gnu++20 -fopenmp")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 endif()
+set(BLASFEO_TARGET "X64_AUTOMATIC" CACHE STRING "BLASFEO Target architecture")
+set(BLASFEO_SRC_DIR ${PROJECT_SOURCE_DIR}/external/blasfeo)
+message(STATUS "Target: BLASFEO is ${BLASFEO_TARGET}, HPIPM is ${HPIPM_TARGET}")
+add_subdirectory(external)
 
 # include(FindMUMPS.cmake)
 # find_package(MUMPS)
-find_package(blasfeo)
+# find_package(blasfeo)
 add_subdirectory(fatrop)
 # add_subdirectory(SWIG)
 # add_subdirectory(test)
+
 
 if(BUILD_DOCS MATCHES ON)
   add_subdirectory(docs)

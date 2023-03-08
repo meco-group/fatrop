@@ -92,12 +92,12 @@ int FatropAlg::Optimize()
     fatropdata_->BoundSlacks();
     if (initialization_res == 0 && fatropdata_->LamLinfCalc() < lammax)
     {
-        cout << "accepted lam " << endl;
+        cout << PRIORITY1 << "accepted lam " << endl;
         fatropdata_->AcceptInitialization();
     }
     else
     {
-        cout << "rejected lam " << endl;
+        cout << PRIORITY1 << "rejected lam " << endl;
         fatropdata_->lam_curr.SetConstant(0.0);
     }
     EvalCVCurr();
@@ -132,7 +132,7 @@ int FatropAlg::Optimize()
             bool reset_filter = (filter_reseted <= 5);
             if (reset_filter)
             {
-                cout << "resetted filter " << endl;
+                cout << PRIORITY1 << "resetted filter " << endl;
                 filter_reseted++;
                 filter_->Reset();
                 no_no_full_steps_bc_filter = 0;
@@ -223,7 +223,7 @@ int FatropAlg::Optimize()
                 regularity = ComputeSD(deltaw, deltac, mu);
                 if (deltac == 0 && regularity < 0)
                 {
-                    cout << "degenerate Jacobian" << endl;
+                    cout << PRIORITY1 << "degenerate Jacobian" << endl;
                     deltac = deltac_candidate;
                 }
                 if (regularity > 0) // regularization is necessary
@@ -263,7 +263,7 @@ int FatropAlg::Optimize()
             if (ls == 1)
             {
                 // accept watchdog step -- continue
-                cout << "accepted watchdog step" << endl;
+                cout << PRIORITY1 << "accepted watchdog step" << endl;
                 watch_dog_step = false;
             }
             else
@@ -272,7 +272,7 @@ int FatropAlg::Optimize()
                 if (no_watch_dog_steps_taken >= max_watchdog_steps)
                 {
                     // reject watchdog step -- go back to x_k
-                    cout << "rejected watchdog step" << endl;
+                    cout << PRIORITY1 <<  "rejected watchdog step" << endl;
                     it_curr.type = 'x';
                     fatropdata_->RestoreBackup();
                     // delta_w_last = delta_w_last_backup;

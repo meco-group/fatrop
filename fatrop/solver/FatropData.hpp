@@ -5,6 +5,7 @@
 #include "templates/NLPAlg.hpp"
 #include "aux/Common.hpp"
 #include "FatropParams.hpp"
+#include "solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
 using namespace std;

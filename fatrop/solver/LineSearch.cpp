@@ -65,7 +65,7 @@ int LineSearch::CalcSoc(double alpha) const
     int res = fatropnlp_->SolveSOC(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
     if (res != 0)
     {
-        cout << "SolveSOC failed" << endl;
+        cout << PRIORITY1 << "SolveSOC failed" << endl;
     }
     return res;
 };

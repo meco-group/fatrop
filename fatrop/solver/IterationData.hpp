@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <solver/FatropPrinter.hpp>
 using namespace std;
 namespace fatrop
 {
