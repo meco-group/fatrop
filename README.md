@@ -44,6 +44,13 @@ also install the rockit-fatrop interface
     cd <rockit_source_dir>/rockit/external
     git submodule add git@gitlab.kuleuven.be:u0110259/rockit_fatrop_plugin.git fatrop
 
+## examples 
+
+https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo
+
+https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_benchmarks
+
+
 
 Contact
 Developer Lander Vanroye (lander.vanroye@kuleuven.be)
