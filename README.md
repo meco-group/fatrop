@@ -6,7 +6,7 @@ Fast Trajectory Optimizer (FATROP) is an efficient and reliable solver for nonli
 At this moment fatrop is only tested on linux machines.
 clone the fatrop repository 
 
-    git@gitlab.kuleuven.be:robotgenskill/fatrop/fatrop.git
+    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git
     cd fatrop
 
 load the blasfeo submodule
@@ -35,7 +35,7 @@ We had to make a few modifications for the acados interface such that problems a
 We are currently cleaning up the code and creating a pull request to the orignal acados repository so that this repository can be used to the in the future to run this benchmark.
 For now, please use our custom rockit version:
 
-    git clone git@gitlab.kuleuven.be:robotgenskill/fatrop/rockit.git
+    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/rockit.git
     cd rockit
     pip install -e .
 
