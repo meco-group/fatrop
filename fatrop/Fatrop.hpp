@@ -3,7 +3,7 @@
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "ocp/OCPKKT.hpp"
 #include "ocp/BFOCPAdapter.hpp"
-#include "ocp/BFOCP.hpp"
+#include "ocp/OCPAbstact.hpp"
 #include "aux/FatropVector.hpp"
 #include "solver/FatropAlg.hpp"
 #include "solver/FatropData.hpp"

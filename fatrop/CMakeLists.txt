@@ -12,7 +12,7 @@ aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 # debug/LinearAlgebraEigen.hpp                debug/LinearAlgebraEigen.cpp
 # debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
-ocp/BFOCP.hpp                               ocp/BFOCP.cpp
+ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
 # ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
 # ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
@@ -72,7 +72,7 @@ aux/SmartPtr.hpp
 # debug/LinearAlgebraEigen.hpp
 # debug/RandomOCP.hpp
 function_evaluation/FunctionEvaluation.hpp
-ocp/BFOCP.hpp
+ocp/OCPAbstract.hpp
 ocp/BFOCPAdapter.hpp
 ocp/BFOCPBasic.hpp
 ocp/DuInfEvaluator.hpp

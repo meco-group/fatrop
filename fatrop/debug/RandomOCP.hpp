@@ -1,6 +1,6 @@
 #ifndef RANDOMOCPINCLUDED
 #define RANDOMOCPINCLUDED
-#include "ocp/BFOCP.hpp"
+#include "ocp/OCPAbstract.hpp"
 #include "debug/FatropDebugTools.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include <vector>
