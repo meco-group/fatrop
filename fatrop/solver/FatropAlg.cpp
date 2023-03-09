@@ -40,6 +40,9 @@ void FatropAlg::Initialize()
     max_watchdog_steps = fatropparams_->max_watchdog_steps;
     acceptable_tol = fatropparams_->acceptable_tol;
     acceptable_iter = fatropparams_->acceptable_iter;
+    warm_start_dual = fatropparams_->warm_start_dual;
+    fatropdata_->Initialize();
+    linesearch_->Initialize();
     // first_try_watchdog = fatropparams_->first_try_watchdog;
     // todo avoid reallocation when maxiter doesn't change
     // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
@@ -88,17 +91,20 @@ int FatropAlg::Optimize()
     LineSearchInfo lsinfo;
     EvalJac(); // todo twice evaluation
     EvalGradCurr();
-    int initialization_res = Initialization();
     fatropdata_->BoundSlacks();
-    if (initialization_res == 0 && fatropdata_->LamLinfCalc() < lammax)
+    if (!warm_start_dual)
     {
-        cout << PRIORITY1 << "accepted lam " << endl;
-        fatropdata_->AcceptInitialization();
-    }
-    else
-    {
-        cout << PRIORITY1 << "rejected lam " << endl;
-        fatropdata_->lam_curr.SetConstant(0.0);
+        int initialization_res = Initialization();
+        if (initialization_res == 0 && fatropdata_->LamLinfCalc() < lammax)
+        {
+            cout << PRIORITY1 << "accepted lam " << endl;
+            fatropdata_->AcceptInitialization();
+        }
+        else
+        {
+            cout << PRIORITY1 << "rejected lam " << endl;
+            fatropdata_->lam_curr.SetConstant(0.0);
+        }
     }
     EvalCVCurr();
     fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
@@ -272,14 +278,14 @@ int FatropAlg::Optimize()
                 if (no_watch_dog_steps_taken >= max_watchdog_steps)
                 {
                     // reject watchdog step -- go back to x_k
-                    cout << PRIORITY1 <<  "rejected watchdog step" << endl;
+                    cout << PRIORITY1 << "rejected watchdog step" << endl;
                     it_curr.type = 'x';
                     fatropdata_->RestoreBackup();
                     // delta_w_last = delta_w_last_backup;
                     watch_dog_step = false;
                     // todo make use of delta_x_backup and delta_s_backup
                     restore_watchdog_step = true;
-                    i --;
+                    i--;
                     continue;
                 };
                 it_curr.type = 'w';

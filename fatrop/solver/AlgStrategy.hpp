@@ -11,6 +11,7 @@ namespace fatrop
     public:
         AlgStrategy(const shared_ptr<FatropParams> &fatrop_params) : fatrop_params_(fatrop_params){};
         shared_ptr<FatropParams> fatrop_params_;
+        void Initialize() {};
     };
 };
 #endif // !ALGSTRATEGYINCLUDED

@@ -1,12 +1,15 @@
 #ifndef FATROPPARAMSINCLUDED
 #define FATROPPARAMSINCLUDED
 #include "aux/SmartPtr.hpp"
+#include <string>
+#include <map>
 namespace fatrop
 {
     class FatropParams
     {
     public:
         int max_watchdog_steps = 4;
+        bool warm_start_dual = false;
         // bool linear_solver_improved_accuracy = true;
         // bool first_try_watchdog = true;
         int maxiter = 1000;

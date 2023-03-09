@@ -83,6 +83,7 @@ namespace fatrop
         double kappa_c;
         double kappa_d;
         int max_watchdog_steps;
+        bool warm_start_dual;
         // bool first_try_watchdog;
         FatropStats stats;
     };
