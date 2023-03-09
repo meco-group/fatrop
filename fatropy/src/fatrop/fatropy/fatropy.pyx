@@ -144,8 +144,8 @@ cdef class OCP:
     def Optimize(self):
         return self.myFatropApplication.get().Optimize()
 
-    def SampleMaxEnt(self, alpha):
-        return self.myOCPBuilder.SampleMaxEnt(alpha)
+    # def SampleMaxEnt(self, alpha):
+    #     return self.myOCPBuilder.SampleMaxEnt(alpha)
     def WarmStart(self):
         return self.myFatropApplication.get().WarmStart()
     def Sample(self, name):
