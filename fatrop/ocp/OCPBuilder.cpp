@@ -10,6 +10,104 @@ OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int no_stage_params, int 
                                                                                                                                                                                                             ocp_(ocp)
 {
 }
+int StageEvaluator::Size()
+{
+    return n_rows() * n_cols();
+}
+IndexEvaluator::IndexEvaluator(const bool control, const vector<int> offsets_in, const vector<int> offsets_out) : _no_var(offsets_in.size()),
+                                                                                                                  _offsets_in(offsets_in),
+                                                                                                                  _offsets_out(offsets_out),
+                                                                                                                  _control(control)
+{
+}
+void IndexEvaluator::Eval(double *u, double *x, double *global_params, double *stage_params, double *res) 
+{
+    if (_control)
+    {
+        for (int i = 0; i < _no_var; i++)
+        {
+            res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
+        }
+    }
+    else
+    {
+        for (int i = 0; i < _no_var; i++)
+        {
+            res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
+        }
+    }
+};
+int IndexEvaluator::n_rows()
+{
+    return _no_var;
+}
+int IndexEvaluator::n_cols()
+{
+    return 1;
+}
+EvalBaseSE::EvalBaseSE(const shared_ptr<EvalBase> &evalbase) : evalbase_(evalbase), n_rows_(evalbase->out_m), n_cols_(evalbase->out_n)
+{
+}
+void EvalBaseSE::Eval(double *u, double *x, double *global_params, double *stage_params, double *res)
+{
+    const double *arg[] = {u, x, stage_params, global_params};
+    evalbase_->eval_array(arg, res);
+}
+int EvalBaseSE::n_rows()
+{
+    return n_rows_;
+}
+int EvalBaseSE::n_cols()
+{
+    return n_cols_;
+}
+int OCPSolutionSampler::Size()
+{
+    return K_ * eval_->Size();
+}
+int OCPSolutionSampler::n_rows()
+{
+    return eval_->n_rows();
+}
+int OCPSolutionSampler::n_cols()
+{
+    return eval_->n_cols();
+}
+int OCPSolutionSampler::K()
+{
+    return K_;
+}
+
+ParameterSetter::ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
+{
+}
+void ParameterSetter::SetValue(const double value[])
+{
+    if (_global)
+    {
+        double *params = ocp_->GetGlobalParams();
+        for (int i = 0; i < _no_var; i++)
+        {
+            params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
+        }
+    }
+    else // stage paramter
+    {
+        double *params = ocp_->GetStageParams();
+        for (int k = 0; k < K; k++)
+        {
+            for (int i = 0; i < _no_var; i++)
+            {
+                params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
+            }
+        }
+    }
+}
+void ParameterSetter::SetValue(const initializer_list<double> il_)
+{
+    assert((int)il_.size() == _no_var);
+    SetValue(il_.begin());
+}
 int OCPSolutionSampler::Sample(vector<double> &sample)
 {
     double *sol_p = ((VEC *)fatropdata_->x_curr)->pa;
@@ -111,14 +209,14 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
                                                LIf,
                                                Lkf,
                                                LFf, lower, upper,
-                                               json_spec["stage_params"].get_number_array<double>("%lf"), 
-                                               json_spec["global_params"].get_number_array<double>("%lf"), 
+                                               json_spec["stage_params"].get_number_array<double>("%lf"),
+                                               json_spec["global_params"].get_number_array<double>("%lf"),
                                                initial_u, initial_x);
     ocptempladapteror = make_shared<BFOCPAdapter>(static_cast<shared_ptr<OCPAbstract>>(ocptemplatebasic));
     ocptempladapter = ocptempladapteror;
     // ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     // ocplsriccati1 = static_cast<shared_ptr<OCPLSRiccati>>(maxentsampler);
-    ocplsriccati1 =make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
+    ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
     ocplsriccati = ocplsriccati1;
     params = make_shared<FatropParams>();
     ocpscaler = make_shared<OCPNoScaling>(params);

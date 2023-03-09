@@ -25,45 +25,15 @@ namespace fatrop
         virtual void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) = 0;
         virtual int n_rows() = 0;
         virtual int n_cols() = 0;
-        int Size()
-        {
-            return n_rows() * n_cols();
-        }
+        int Size();
     };
     class IndexEvaluator : public StageEvaluator
     {
     public:
-        IndexEvaluator(const bool control, const vector<int> offsets_in, const vector<int> offsets_out) : _no_var(offsets_in.size()),
-                                                                                                          _offsets_in(offsets_in),
-                                                                                                          _offsets_out(offsets_out),
-                                                                                                          _control(control)
-        {
-        }
-        void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) override
-        {
-            if (_control)
-            {
-                for (int i = 0; i < _no_var; i++)
-                {
-                    res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
-                }
-            }
-            else
-            {
-                for (int i = 0; i < _no_var; i++)
-                {
-                    res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
-                }
-            }
-        };
-        int n_rows() override
-        {
-            return _no_var;
-        }
-        int n_cols() override
-        {
-            return 1;
-        }
+        IndexEvaluator(const bool control, const vector<int> offsets_in, const vector<int> offsets_out);
+        void Eval(double *u, double *x, double *global_params, double *stage_params, double *res)override;
+        int n_rows() override;
+        int n_cols() override;
 
     private:
         const int _no_var;
@@ -74,22 +44,10 @@ namespace fatrop
     class EvalBaseSE : public StageEvaluator
     {
     public:
-        EvalBaseSE(const shared_ptr<EvalBase> &evalbase) : evalbase_(evalbase), n_rows_(evalbase->out_m), n_cols_(evalbase->out_n)
-        {
-        }
-        void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) override
-        {
-            const double *arg[] = {u, x, stage_params, global_params};
-            evalbase_->eval_array(arg, res);
-        }
-        int n_rows() override
-        {
-            return n_rows_;
-        }
-        int n_cols() override
-        {
-            return n_cols_;
-        }
+        EvalBaseSE(const shared_ptr<EvalBase> &evalbase);
+        void Eval(double *u, double *x, double *global_params, double *stage_params, double *res) override;
+        int n_rows() override;
+        int n_cols() override;
 
     private:
         shared_ptr<EvalBase> evalbase_;
@@ -103,22 +61,10 @@ namespace fatrop
         OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp);
         int Sample(vector<double> &sample);
         vector<double> Sample();
-        int Size()
-        {
-            return K_ * eval_->Size();
-        }
-        int n_rows()
-        {
-            return eval_->n_rows();
-        }
-        int n_cols()
-        {
-            return eval_->n_cols();
-        }
-        int K()
-        {
-            return K_;
-        }
+        int Size();
+        int n_rows();
+        int n_cols();
+        int K();
 
     private:
         const int nu;
@@ -133,36 +79,9 @@ namespace fatrop
     class ParameterSetter
     {
     public:
-        ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
-        {
-        }
-        void SetValue(const double value[])
-        {
-            if (_global)
-            {
-                double *params = ocp_->GetGlobalParams();
-                for (int i = 0; i < _no_var; i++)
-                {
-                    params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
-                }
-            }
-            else // stage paramter
-            {
-                double *params = ocp_->GetStageParams();
-                for (int k = 0; k < K; k++)
-                {
-                    for (int i = 0; i < _no_var; i++)
-                    {
-                        params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
-                    }
-                }
-            }
-        }
-        void SetValue(const initializer_list<double> il_)
-        {
-            assert((int)il_.size() == _no_var);
-            SetValue(il_.begin());
-        }
+        ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
+        void SetValue(const double value[]);
+        void SetValue(const initializer_list<double> il_);
 
     private:
         shared_ptr<BFOCPAdapter> ocp_;
