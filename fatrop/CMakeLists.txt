@@ -32,7 +32,6 @@ ocp/OCPLinearSolver.hpp                     ocp/OCPLinearSolver.cpp
 ocp/OCPLSRiccati.hpp                        ocp/OCPLSRiccati.cpp
 ocp/OCPNoScaling.hpp                        ocp/OCPNoScaling.cpp
 ocp/OCPScalingMethod.hpp                    ocp/OCPScalingMethod.cpp
-ocp/OCPMaxEntSampler.hpp                    ocp/OCPMaxEntSampler.cpp
 # ocp/LineSearchDDP.hpp                       ocp/LineSearchDDP.cpp
 solver/AlgorithmQuantities.hpp              solver/AlgorithmQuantities.cpp
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp

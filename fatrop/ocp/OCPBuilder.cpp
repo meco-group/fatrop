@@ -117,8 +117,8 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     ocptempladapteror = make_shared<BFOCPAdapter>(static_cast<shared_ptr<OCPAbstract>>(ocptemplatebasic));
     ocptempladapter = ocptempladapteror;
     // ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
-    maxentsampler = make_shared<OCPMaxEntSampler>(ocptempladapter->GetOCPDims());
-    ocplsriccati1 = static_cast<shared_ptr<OCPLSRiccati>>(maxentsampler);
+    // ocplsriccati1 = static_cast<shared_ptr<OCPLSRiccati>>(maxentsampler);
+    ocplsriccati1 =make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
     ocplsriccati = ocplsriccati1;
     params = make_shared<FatropParams>();
     ocpscaler = make_shared<OCPNoScaling>(params);

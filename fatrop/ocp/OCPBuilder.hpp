@@ -17,7 +17,6 @@
 #include <sstream>
 #include <templates/FatropApplication.hpp>
 #include <map>
-#include "ocp/OCPMaxEntSampler.hpp"
 namespace fatrop
 {
     class StageEvaluator
@@ -195,7 +194,6 @@ namespace fatrop
         shared_ptr<BFOCPAdapter> ocptempladapteror;
         shared_ptr<OCP> ocptempladapter;
         shared_ptr<OCPAL> ocptempladapterAL;
-        shared_ptr<OCPMaxEntSampler> maxentsampler;
         shared_ptr<OCPLSRiccati> ocplsriccati1;
         shared_ptr<OCPLinearSolver> ocplsriccati;
         shared_ptr<FatropParams> params;
@@ -262,38 +260,6 @@ namespace fatrop
             auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
             return OCPSolutionSampler(nu, nx, no_stage_params, K, make_shared<EvalBaseSE>(eval), fatropdata, ocptempladapteror);
         };
-        public:
-        int SampleMaxEnt(double alpha)
-        {
-            fatropalg->EvalHess();
-            fatropalg->EvalJac();
-            assert(fatropalg->ComputeSD(0.0, 0.0, 0.0)==0);
-            // cout << "hello" << endl;
-            ocplsriccati1->GetRHS(
-                &fatropocp1->ocpkktmemory_,
-                fatropdata->gradb_total,
-                ocplsriccati1->rhs_rq2[0],
-                ocplsriccati1->rhs_b2[0],
-                ocplsriccati1->rhs_g2[0],
-                ocplsriccati1->rhs_g_ineq2[0],
-                ocplsriccati1->rhs_gradb2[0]);
-            // cout << "hello" << endl;
-            maxentsampler->Sample(
-                &fatropocp1->ocpkktmemory_,
-                fatropdata->delta_x,
-                fatropdata->lam_calc,
-                fatropdata->delta_s,
-                fatropdata->sigma_total,
-                ocplsriccati1->rhs_rq2[0],
-                ocplsriccati1->rhs_b2[0],
-                ocplsriccati1->rhs_g2[0],
-                ocplsriccati1->rhs_g_ineq2[0],
-                ocplsriccati1->rhs_gradb2[0],
-                alpha);
-            // cout << "hello" << endl;
-            axpy(1.0, fatropdata->delta_x, fatropdata->x_curr, fatropdata->x_curr);
-            return 0;
-        }
     };
 }
 #endif // OCPBUILDERINCLUDED

@@ -13,7 +13,6 @@ int main(int argc, char **argv)
         // usage of parameter setter
         // ocpbuilder.GetParameterSetter("target_pos")->SetValue({1., 1., 1.});
         solver->Optimize();
-        ocpbuilder.SampleMaxEnt(100.0);
         // usage of parameter sampler
         // auto res = ocpbuilder.GetSampler("state_pos") -> Sample();
     // }
