@@ -27,6 +27,11 @@ invariants/trans_FS/f.c
 *.fls
 *.fdb_latexmk
 *.egg
+*.whl
+fatropy.cpp
+casadi_codegen*
+*.tar.gz
+output.txt
 
 *egg-info/
 
