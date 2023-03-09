@@ -70,13 +70,6 @@ https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo
 https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_benchmarks
 
 
-## examples 
-
-https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo
-
-https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_benchmarks
-
-
 
 Contact
 Developer Lander Vanroye (lander.vanroye@kuleuven.be)
