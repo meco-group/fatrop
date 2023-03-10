@@ -8,6 +8,7 @@
 #include "ocp/OCPLSRiccati.hpp"
 #include "ocp/OCPNoScaling.hpp"
 #include "ocp/FatropOCPBuilder.hpp"
+#include "ocp/OCPAbstract.hpp"
 #include <map>
 #include "json/json.h"
 #include <fstream>
@@ -16,44 +17,67 @@
 
 namespace fatrop
 {
-    class BasicOCPApplication
+    // TODO move this class to a separate file
+    class NLPApplication
     {
     public:
-        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : ocp_(ocp)
+        NLPApplication() : fatropparams_(make_shared<FatropParams>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1))
         {
         }
-        void Build()
+        void Build(const shared_ptr<FatropNLP> &nlp)
         {
-            fatropparams_ = make_shared<FatropParams>();
-            shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropparams_).Build());
             AlgBuilder algbuilder;
             algbuilder.BuildFatropAlgObjects(nlp, fatropparams_, fatropdata_, journaller_);
             fatropalg_ = algbuilder.BuildAlgorithm();
-            //    algbuilder.BuildFatropAlgObjects(nlp, fatropdata, fatropparams, filter, linesearch, journaller);
             dirty = false;
         }
         int Optimize()
         {
-            cout << "in optimize " << endl;
             assert(!dirty);
-            cout << "dirty = " << dirty << endl;
             return fatropalg_->Optimize();
         }
-
         FatropVecBF &LastSolution()
         {
             assert(!dirty);
             return fatropdata_->x_curr;
         }
+        bool dirty = true;
+        const shared_ptr<OCPAbstract> ocp_;
+        shared_ptr<FatropParams> fatropparams_;
+        shared_ptr<Journaller> journaller_;
+        shared_ptr<FatropData> fatropdata_;
+        shared_ptr<FatropAlg> fatropalg_;
+    };
+
+    // TODO move this class to a separate file
+    class OCPApplication : public NLPApplication
+    {
+    public:
+        OCPApplication(const shared_ptr<OCPAbstract> &ocp) : ocp_(ocp)
+        {
+        }
+        void Build()
+        {
+            shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropparams_).Build());
+            NLPApplication::Build(nlp);
+            dirty = false;
+        }
+        int Optimize()
+        {
+            assert(!dirty);
+            return NLPApplication::Optimize();
+        }
+
 
     private:
         bool dirty = true;
-        const shared_ptr<BasicOCP> ocp_;
-        shared_ptr<FatropData> fatropdata_;
-        shared_ptr<Journaller> journaller_;
-        shared_ptr<FatropAlg> fatropalg_;
-        shared_ptr<FatropParams> fatropparams_;
-        // map with all available samplers
+        const shared_ptr<OCPAbstract> ocp_;
+    };
+
+    class BasicOCPApplication : public OCPApplication
+    {
+    public:
+        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp){};
     };
 
     class BasicOCPApplicationBuilder

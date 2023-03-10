@@ -21,6 +21,7 @@ using namespace std;
 
 namespace fatrop
 {
+    // TODO: get rid of FatropApplication
     class FatropAlg : public FatropApplication
     {
     public:
