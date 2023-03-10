@@ -99,6 +99,14 @@ namespace fatrop
                 return nullptr;
             return &stageparams.at(0);
         }
+        vector<double> & GetGlobalParamsVec()
+        {
+            return globalparams;
+        }
+        vector<double> & GetStageParamsVec()
+        {
+            return stageparams;
+        }
         int GetBounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const override

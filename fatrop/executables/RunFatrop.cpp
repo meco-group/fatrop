@@ -16,8 +16,8 @@ int main(int argc, char **argv)
         // shared_ptr<FatropApplication> solver = ocpbuilder.Build();
         // usage of parameter setter
         // ocpbuilder.GetParameterSetter("target_pos")->SetValue({1., 1., 1.});
-        cout << "Calling the solver " << endl;
-        app-> Optimize();
+        // cout << "Calling the solver " << endl;
+        // app-> Optimize();
         // usage of parameter sampler
         // auto res = ocpbuilder.GetSampler("state_pos") -> Sample();
     // }

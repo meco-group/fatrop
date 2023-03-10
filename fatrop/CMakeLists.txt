@@ -22,6 +22,7 @@ ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
 # ocp/OCPBuilderAL.hpp                        ocp/OCPBuilderAL.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
+ocp/BasicOCPSamplers.hpp                    ocp/BasicOCPSamplers.cpp
 # ocp/FatropOCPAL.hpp                         ocp/FatropOCPAL.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp
 ocp/OCP.hpp                                 ocp/OCP.cpp
@@ -81,6 +82,7 @@ ocp/DuInfEvaluator.hpp
 ocp/FatropOCP.hpp
 # ocp/FatropOCPAL.hpp
 ocp/FatropOCPBuilder.hpp
+ocp/BasicOCPSamplers.hpp
 ocp/OCP.hpp
 # ocp/OCPAL.hpp
 ocp/OCPDims.hpp

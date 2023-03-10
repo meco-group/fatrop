@@ -9,6 +9,7 @@
 #include "ocp/OCPNoScaling.hpp"
 #include "ocp/FatropOCPBuilder.hpp"
 #include "ocp/OCPAbstract.hpp"
+#include "ocp/BasicOCPSamplers.hpp"
 #include <map>
 #include "json/json.h"
 #include <fstream>
@@ -58,7 +59,9 @@ namespace fatrop
         }
         void Build()
         {
-            shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropparams_).Build());
+            // keep the adapter around for accessing the parameters for samplers and parameter setters
+            adapter = make_shared<BFOCPAdapter>(ocp_);
+            shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropparams_).Build(adapter));
             NLPApplication::Build(nlp);
             dirty = false;
         }
@@ -67,17 +70,28 @@ namespace fatrop
             assert(!dirty);
             return NLPApplication::Optimize();
         }
-
+        vector<double> &GlobalParameters()
+        {
+            assert(!dirty);
+            return adapter->GetGlobalParamsVec();
+        }
+        vector<double> &StageParameters()
+        {
+            assert(!dirty);
+            return adapter->GetStageParamsVec();
+        }
 
     private:
         bool dirty = true;
         const shared_ptr<OCPAbstract> ocp_;
+        shared_ptr<BFOCPAdapter> adapter;
     };
 
     class BasicOCPApplication : public OCPApplication
     {
     public:
         BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp){};
+        map<string, shared_ptr<OCPSolutionSampler>> samplers;
     };
 
     class BasicOCPApplicationBuilder
@@ -94,6 +108,17 @@ namespace fatrop
             // instantiate the BasicOCPApplication
             auto result = make_shared<BasicOCPApplication>(ocptemplatebasic);
             // add all samplers
+            vector<string> sampler_names = json_spec["samplers"];
+            cout << "Found " << sampler_names.size() << " samplers" << endl;
+            for (auto sampler_name : sampler_names)
+            {
+                cout << sampler_name << endl;
+                // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
+                // result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
+            }
+            // string sampler_name = "x";
+            // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
+            // result -> samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
             // add all parameter setters
             return result;
         }
