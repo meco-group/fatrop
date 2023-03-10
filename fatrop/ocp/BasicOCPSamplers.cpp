@@ -10,7 +10,7 @@ IndexEvaluator::IndexEvaluator(const bool control, const vector<int> offsets_in,
                                                                                                                   _control(control)
 {
 }
-void IndexEvaluator::Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) 
+void IndexEvaluator::Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res)
 {
     if (_control)
     {
@@ -51,6 +51,13 @@ int EvalBaseSE::n_cols()
 {
     return n_cols_;
 }
+OCPSolutionSampler::OCPSolutionSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval) : nu(nu),
+                                                                                                                             nx(nx),
+                                                                                                                             no_stage_params(no_stage_params),
+                                                                                                                             K_(K),
+                                                                                                                             eval_(eval)
+{
+}
 
 int OCPSolutionSampler::Size()
 {
@@ -69,9 +76,7 @@ int OCPSolutionSampler::K()
     return K_;
 }
 
-
-
-int OCPSolutionSampler::Sample(const FatropVecBF& solution, const vector<double>& global_params, const vector<double>& stage_params, vector<double> &sample)
+int OCPSolutionSampler::Sample(const FatropVecBF &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample)
 {
     double *sol_p = ((VEC *)solution)->pa;
     double *res_p = sample.data();
@@ -85,7 +90,7 @@ int OCPSolutionSampler::Sample(const FatropVecBF& solution, const vector<double>
     eval_->Eval(sol_p + (K_ - 2) * (nu + nx), sol_p + (K_ - 1) * (nu + nx), global_params_p, stage_params_p + (K_ - 1) * no_stage_params, res_p + (K_ - 1) * size);
     return 0;
 }
-vector<double> OCPSolutionSampler::Sample(const FatropVecBF& solution, const vector<double>& global_params, const vector<double>& stage_params)
+vector<double> OCPSolutionSampler::Sample(const FatropVecBF &solution, const vector<double> &global_params, const vector<double> &stage_params)
 {
     vector<double> res(Size());
     Sample(solution, global_params, stage_params, res);

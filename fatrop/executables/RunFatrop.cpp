@@ -17,9 +17,9 @@ int main(int argc, char **argv)
         // usage of parameter setter
         // ocpbuilder.GetParameterSetter("target_pos")->SetValue({1., 1., 1.});
         // cout << "Calling the solver " << endl;
-        // app-> Optimize();
+        app-> Optimize();
         // usage of parameter sampler
-        // auto res = ocpbuilder.GetSampler("state_pos") -> Sample();
+        // auto res = app-> GetSampler("Frame") -> Sample(app-> LastSolution(), app->GlobalParameters(), app->StageParameters());
     // }
     // else
     // {

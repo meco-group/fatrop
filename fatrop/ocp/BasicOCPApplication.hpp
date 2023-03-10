@@ -91,11 +91,16 @@ namespace fatrop
     {
     public:
         BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp){};
+        shared_ptr<OCPSolutionSampler> GetSampler(const string &sampler_name)
+        {
+            return samplers[sampler_name];
+        }
         map<string, shared_ptr<OCPSolutionSampler>> samplers;
     };
 
     class BasicOCPApplicationBuilder
-    {
+    {                // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
+                // result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
     public:
         static shared_ptr<BasicOCPApplication> FromRockitInterface(const string &functions, const string &json_spec_file)
         {
@@ -110,11 +115,15 @@ namespace fatrop
             // add all samplers
             vector<string> sampler_names = json_spec["samplers"];
             cout << "Found " << sampler_names.size() << " samplers" << endl;
+            const int nu = ocptemplatebasic -> nu_;
+            const int nx = ocptemplatebasic -> nx_;
+            const int no_stage_params = ocptemplatebasic -> n_stage_params_;
+            const int K = ocptemplatebasic->K_;
             for (auto sampler_name : sampler_names)
             {
                 cout << sampler_name << endl;
-                // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-                // result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
+                auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
+                result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<EvalBaseSE>(eval))));
             }
             // string sampler_name = "x";
             // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
