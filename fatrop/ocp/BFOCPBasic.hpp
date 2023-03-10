@@ -14,6 +14,10 @@
 using namespace std;
 namespace fatrop
 {
+    /// BasicOCP is a OCPAbstract implementation that is built on top of CasAdi Codegenerated functions 
+    /// it seperates the initial and terminal stages and the intermediate stages, each of these can have different constraints and running objective
+    /// the dynamics is the same for all stages
+    /// this problem structure corresponds to a single-stage rockit problem, which it is intented to be used for
     class BasicOCP : public OCPAbstract
     {
     public:
