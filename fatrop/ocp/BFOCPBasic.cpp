@@ -1,6 +1,6 @@
 #include "ocp/BFOCPBasic.hpp"
 using namespace fatrop;
-BFOCPBasic::BFOCPBasic(const int nu,
+BasicOCP::BasicOCP(const int nu,
                        const int nx,
                        const int ngI,
                        const int ng,
@@ -81,17 +81,17 @@ BFOCPBasic::BFOCPBasic(const int nu,
                                                               global_params(global_params) 
 {
 }
-int BFOCPBasic::get_nxk(const int k) const
+int BasicOCP::get_nxk(const int k) const
 {
     return nx_;
 }
-int BFOCPBasic::get_nuk(const int k) const
+int BasicOCP::get_nuk(const int k) const
 {
     if (k == K_ - 1)
         return 0;
     return nu_;
 }
-int BFOCPBasic::get_ngk(const int k) const
+int BasicOCP::get_ngk(const int k) const
 {
     if (k == 0)
         return ngI_;
@@ -99,7 +99,7 @@ int BFOCPBasic::get_ngk(const int k) const
         return ngF_;
     return ng_;
 }
-int BFOCPBasic::get_ng_ineq_k(const int k) const
+int BasicOCP::get_ng_ineq_k(const int k) const
 {
     if (k == 0)
     {
@@ -111,19 +111,19 @@ int BFOCPBasic::get_ng_ineq_k(const int k) const
     }
     return ng_ineq_;
 }
-int BFOCPBasic::get_n_global_params() const
+int BasicOCP::get_n_global_params() const
 {
     return n_global_params_;
 };
-int BFOCPBasic::get_n_stage_params_k(const int k) const
+int BasicOCP::get_n_stage_params_k(const int k) const
 {
     return n_stage_params_;
 };
-int BFOCPBasic::get_horizon_length() const
+int BasicOCP::get_horizon_length() const
 {
     return K_;
 };
-int BFOCPBasic::eval_BAbtk(const double *states_kp1,
+int BasicOCP::eval_BAbtk(const double *states_kp1,
                            const double *inputs_k,
                            const double *states_k,
                            const double *stage_params_k,
@@ -139,7 +139,7 @@ int BFOCPBasic::eval_BAbtk(const double *states_kp1,
     args[4] = global_params;
     return BAbtf.eval_bf(args, res);
 }
-int BFOCPBasic::eval_RSQrqtk(const double *objective_scale,
+int BasicOCP::eval_RSQrqtk(const double *objective_scale,
                              const double *inputs_k,
                              const double *states_k,
                              const double *lam_dyn_k,
@@ -165,7 +165,7 @@ int BFOCPBasic::eval_RSQrqtk(const double *objective_scale,
         return RSQrqtFf.eval_bf(args, res);
     return RSQrqtf.eval_bf(args, res);
 };
-int BFOCPBasic::eval_Ggtk(
+int BasicOCP::eval_Ggtk(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -184,7 +184,7 @@ int BFOCPBasic::eval_Ggtk(
         return GgtIf.eval_bf(args, res);
     return Ggtf.eval_bf(args, res);
 };
-int BFOCPBasic::eval_Ggt_ineqk(
+int BasicOCP::eval_Ggt_ineqk(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -209,7 +209,7 @@ int BFOCPBasic::eval_Ggt_ineqk(
         return Ggt_ineqIf.eval_bf(args, res);
     return Ggt_ineqf.eval_bf(args, res);
 };
-int BFOCPBasic::eval_bk(
+int BasicOCP::eval_bk(
     const double *states_kp1,
     const double *inputs_k,
     const double *states_k,
@@ -226,7 +226,7 @@ int BFOCPBasic::eval_bk(
     args[4] = global_params;
     return bkf.eval_array(args, constraint_violation_k);
 };
-int BFOCPBasic::eval_gk(
+int BasicOCP::eval_gk(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -245,7 +245,7 @@ int BFOCPBasic::eval_gk(
         return gIf.eval_array(args, res);
     return gf.eval_array(args, res);
 }
-int BFOCPBasic::eval_gineqk(
+int BasicOCP::eval_gineqk(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -270,7 +270,7 @@ int BFOCPBasic::eval_gineqk(
         return g_ineqIf.eval_array(args, res);
     return g_ineqf.eval_array(args, res);
 }
-int BFOCPBasic::eval_rqk(
+int BasicOCP::eval_rqk(
     const double *objective_scale,
     const double *inputs_k,
     const double *states_k,
@@ -291,7 +291,7 @@ int BFOCPBasic::eval_rqk(
         return rqIf.eval_array(args, res);
     return rqf.eval_array(args, res);
 };
-int BFOCPBasic::eval_Lk(
+int BasicOCP::eval_Lk(
     const double *objective_scale,
     const double *inputs_k,
     const double *states_k,

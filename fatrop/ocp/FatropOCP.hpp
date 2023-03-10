@@ -20,6 +20,7 @@ namespace fatrop
     class FatropOCP : public FatropNLP
     {
     public:
+        // FatropOCP();
         FatropOCP(
             const shared_ptr<OCP> &ocp,
             const shared_ptr<OCPLinearSolver> &ls,

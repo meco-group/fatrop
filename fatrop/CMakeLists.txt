@@ -13,6 +13,7 @@ aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 # debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
+ocp/BasicOCPApplication.hpp
 # ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
 # ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
@@ -33,6 +34,7 @@ ocp/OCPLSRiccati.hpp                        ocp/OCPLSRiccati.cpp
 ocp/OCPNoScaling.hpp                        ocp/OCPNoScaling.cpp
 ocp/OCPScalingMethod.hpp                    ocp/OCPScalingMethod.cpp
 # ocp/LineSearchDDP.hpp                       ocp/LineSearchDDP.cpp
+solver/AlgBuilder.hpp              #solver/AlgorithmQuantities.cpp
 solver/AlgorithmQuantities.hpp              solver/AlgorithmQuantities.cpp
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp
 solver/FatropAlg.hpp                        solver/FatropAlg.cpp
@@ -71,6 +73,7 @@ aux/SmartPtr.hpp
 # debug/LinearAlgebraEigen.hpp
 # debug/RandomOCP.hpp
 function_evaluation/FunctionEvaluation.hpp
+ocp/BasicOCPApplication.hpp
 ocp/OCPAbstract.hpp
 ocp/BFOCPAdapter.hpp
 ocp/BFOCPBasic.hpp
@@ -89,6 +92,7 @@ ocp/OCPNoScaling.hpp
 ocp/OCPScalingMethod.hpp
 # ocp/LineSearchDDP.hpp
 solver/AlgorithmQuantities.hpp
+solver/AlgBuilder.hpp
 solver/AlgStrategy.hpp
 solver/FatropAlg.hpp
 solver/FatropData.hpp

@@ -12,6 +12,9 @@
 #include "solver/AlgStrategy.hpp"
 #include "solver/FatropParams.hpp"
 #include "function_evaluation/CasadiCodegen.hpp"
+#include "solver/AlgBuilder.hpp"
+#include "ocp/BasicOCPApplication.hpp"
+#include "ocp/FatropOCPBuilder.hpp"
 
 // #include "SparseSolvers/InterfaceMUMPS.hpp"
 #endif //FATROP_INCLUDED

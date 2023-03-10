@@ -12,7 +12,7 @@ namespace fatrop
         bool warm_start_dual = false;
         // bool linear_solver_improved_accuracy = true;
         // bool first_try_watchdog = true;
-        int maxiter = 1000;
+        const int maxiter = 1000;
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-8;

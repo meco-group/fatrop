@@ -17,6 +17,7 @@
 #include <sstream>
 #include <templates/FatropApplication.hpp>
 #include <map>
+// #include <solver/AlgBuilder.hpp>
 namespace fatrop
 {
     class StageEvaluator
@@ -109,7 +110,7 @@ namespace fatrop
         json::jobject json_spec;
         bool GN = false;
         bool DDP = false;
-        shared_ptr<BFOCPBasic> ocptemplatebasic;
+        shared_ptr<BasicOCP> ocptemplatebasic;
         shared_ptr<BFOCPAdapter> ocptempladapteror;
         shared_ptr<OCP> ocptempladapter;
         shared_ptr<OCPAL> ocptempladapterAL;
