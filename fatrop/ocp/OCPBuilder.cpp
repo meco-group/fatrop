@@ -27,36 +27,36 @@ int OCPSolutionSampler_old::K()
     return K_;
 }
 
-ParameterSetter_old::ParameterSetter_old(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
-{
-}
-void ParameterSetter_old::SetValue(const double value[])
-{
-    if (_global)
-    {
-        double *params = ocp_->GetGlobalParams();
-        for (int i = 0; i < _no_var; i++)
-        {
-            params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
-        }
-    }
-    else // stage paramter
-    {
-        double *params = ocp_->GetStageParams();
-        for (int k = 0; k < K; k++)
-        {
-            for (int i = 0; i < _no_var; i++)
-            {
-                params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
-            }
-        }
-    }
-}
-void ParameterSetter_old::SetValue(const initializer_list<double> il_)
-{
-    assert((int)il_.size() == _no_var);
-    SetValue(il_.begin());
-}
+// ParameterSetter::ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
+// {
+// }
+// void ParameterSetter::SetValue(const double value[])
+// {
+//     if (_global)
+//     {
+//         double *params = ocp_->GetGlobalParams();
+//         for (int i = 0; i < _no_var; i++)
+//         {
+//             params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
+//         }
+//     }
+//     else // stage paramter
+//     {
+//         double *params = ocp_->GetStageParams();
+//         for (int k = 0; k < K; k++)
+//         {
+//             for (int i = 0; i < _no_var; i++)
+//             {
+//                 params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
+//             }
+//         }
+//     }
+// }
+// void ParameterSetter::SetValue(const initializer_list<double> il_)
+// {
+//     assert((int)il_.size() == _no_var);
+//     SetValue(il_.begin());
+// }
 int OCPSolutionSampler_old::Sample(vector<double> &sample)
 {
     double *sol_p = ((VEC *)fatropdata_->x_curr)->pa;
@@ -199,11 +199,11 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
 
     for (auto param_name : json_spec["global_params_offset"].as_object().keys())
     {
-        parameter_setter_map[param_name] = make_shared<ParameterSetter_old>(GetParameterSetterGlobal(param_name));
+        parameter_setter_map[param_name] = make_shared<ParameterSetter>(GetParameterSetterGlobal(param_name));
     }
     for (auto param_name : json_spec["control_params_offset"].as_object().keys())
     {
-        parameter_setter_map[param_name] = make_shared<ParameterSetter_old>(GetParameterSetterControl(param_name));
+        parameter_setter_map[param_name] = make_shared<ParameterSetter>(GetParameterSetterControl(param_name));
     }
     return fatropalg;
 }

@@ -84,9 +84,12 @@ namespace fatrop
     private:
         bool dirty = true;
         const shared_ptr<OCPAbstract> ocp_;
+
+    protected:
         shared_ptr<BFOCPAdapter> adapter;
     };
 
+    /// adds sampling and parameter setting functionality
     class BasicOCPApplication : public OCPApplication
     {
     public:
@@ -96,11 +99,13 @@ namespace fatrop
             return samplers[sampler_name];
         }
         map<string, shared_ptr<OCPSolutionSampler>> samplers;
+        map<string, shared_ptr<ParameterSetter>> param_setters;
+        friend class BasicOCPApplicationBuilder;
     };
 
     class BasicOCPApplicationBuilder
-    {                // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-                // result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
+    { // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
+      // result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
     public:
         static shared_ptr<BasicOCPApplication> FromRockitInterface(const string &functions, const string &json_spec_file)
         {
@@ -114,21 +119,50 @@ namespace fatrop
             auto result = make_shared<BasicOCPApplication>(ocptemplatebasic);
             // add all samplers
             vector<string> sampler_names = json_spec["samplers"];
-            cout << "Found " << sampler_names.size() << " samplers" << endl;
-            const int nu = ocptemplatebasic -> nu_;
-            const int nx = ocptemplatebasic -> nx_;
-            const int no_stage_params = ocptemplatebasic -> n_stage_params_;
+            const int nu = ocptemplatebasic->nu_;
+            const int nx = ocptemplatebasic->nx_;
+            const int no_stage_params = ocptemplatebasic->n_stage_params_;
             const int K = ocptemplatebasic->K_;
             for (auto sampler_name : sampler_names)
             {
-                cout << sampler_name << endl;
                 auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-                result->samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<EvalBaseSE>(eval))));
+                result->samplers[sampler_name] = make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<EvalBaseSE>(eval));
             }
-            // string sampler_name = "x";
-            // auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-            // result -> samplers.insert(make_pair(sampler_name, make_shared<OCPSolutionSampler>(eval)));
+            // add state samplers
+            json::jobject states_offset = json_spec["states_offset"];
+            vector<string> state_names = states_offset.keys();
+            for (auto state_name : state_names)
+            {
+                vector<int> in = states_offset[state_name].as_object().array(0).get_number_array<int>("%d");
+                vector<int> out = states_offset[state_name].as_object().array(1).get_number_array<int>("%d");
+                result->samplers[string("state_") + state_name] = make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(false, in, out));
+            }
+            // add control samplers
+            json::jobject controls_offset = json_spec["controls_offset"];
+            vector<string> control_names = controls_offset.keys();
+            for (auto control_name : control_names)
+            {
+                vector<int> in = controls_offset[control_name].as_object().array(0).get_number_array<int>("%d");
+                vector<int> out = controls_offset[control_name].as_object().array(1).get_number_array<int>("%d");
+                result->samplers[string("control_") + control_name] = make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(true, in, out));
+            }
             // add all parameter setters
+            json::jobject control_params_offset = json_spec["control_params_offset"];
+            vector<string> control_params_names = control_params_offset.keys();
+            for (auto control_params_name : control_params_names)
+            {
+                vector<int> in = control_params_offset[control_params_name].as_object().array(0).get_number_array<int>("%d");
+                vector<int> out = control_params_offset[control_params_name].as_object().array(1).get_number_array<int>("%d");
+                    result->param_setters[string("control_") + control_params_name] = make_shared<ParameterSetter>(result->adapter, in, out, no_stage_params, in.size(), K, false);
+            }
+            json::jobject global_params_offset = json_spec["global_params_offset"];
+            vector<string> global_params_names = global_params_offset.keys();
+            for (auto global_params_name : global_params_names)
+            {
+                vector<int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<int>("%d");
+                vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
+                    result->param_setters[string("global_") + global_params_name] = make_shared<ParameterSetter>(result->adapter, in, out, no_stage_params, in.size(), K, true);
+            }
             return result;
         }
     };
