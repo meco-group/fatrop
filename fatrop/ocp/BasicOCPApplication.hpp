@@ -26,6 +26,7 @@ namespace fatrop
         NLPApplication() : fatropparams_(make_shared<FatropParams>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1))
         {
         }
+        protected:
         void Build(const shared_ptr<FatropNLP> &nlp)
         {
             AlgBuilder algbuilder;
@@ -33,6 +34,7 @@ namespace fatrop
             fatropalg_ = algbuilder.BuildAlgorithm();
             dirty = false;
         }
+        public:
         int Optimize()
         {
             assert(!dirty);
@@ -53,9 +55,11 @@ namespace fatrop
             return fatropalg_->GetStats();
         }
         bool dirty = true;
+
     protected:
         shared_ptr<FatropParams> fatropparams_;
         shared_ptr<FatropData> fatropdata_;
+
     private:
         const shared_ptr<OCPAbstract> ocp_;
         shared_ptr<Journaller> journaller_;
@@ -69,6 +73,8 @@ namespace fatrop
         OCPApplication(const shared_ptr<OCPAbstract> &ocp) : ocp_(ocp)
         {
         }
+
+    protected:
         void Build()
         {
             // keep the adapter around for accessing the parameters for samplers and parameter setters
@@ -77,6 +83,8 @@ namespace fatrop
             NLPApplication::Build(nlp);
             dirty = false;
         }
+
+    public:
         int Optimize()
         {
             assert(!dirty);
@@ -92,12 +100,11 @@ namespace fatrop
             assert(!dirty);
             return adapter->GetStageParamsVec();
         }
-        void SetInitial(vector<double> &initial_u, vector<double> &initial_x) 
+        void SetInitial(vector<double> &initial_u, vector<double> &initial_x)
         {
             assert(!dirty);
             adapter->SetInitial(fatropdata_, initial_u, initial_x);
         }
-
 
     private:
         bool dirty = true;
@@ -193,7 +200,7 @@ namespace fatrop
                 vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
                 result->param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
             }
-            result -> Build();
+            result->Build();
             return result;
         }
     };
