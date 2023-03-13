@@ -1,8 +1,11 @@
-from fatropy cimport OCPBuilder
-from fatropy cimport FatropAlg
-from fatropy cimport FatropApplication
+# from fatropy cimport OCPBuilder
+# from fatropy cimport FatropAlg
+# from fatropy cimport FatropApplication
 from fatropy cimport OCPSolutionSampler
 from fatropy cimport ParameterSetter
+from fatropy cimport FatropVecBF
+from fatropy cimport BasicOCPApplication
+from fatropy cimport BasicOCPApplicationBuilder
 from fatropy cimport FatropStats
 from libcpp.memory cimport shared_ptr 
 from libcpp.vector cimport vector
@@ -125,36 +128,50 @@ cdef class PyFatropStats:
         return self.stats.iterations_count
     def Print(self):
         self.stats.Print()
-    
 
-
-    
 cdef class OCP:
-    cdef OCPBuilder *myOCPBuilder  # Hold a C++ instance which we are wrapping
-    cdef public dict OCPspecs # Public dict attribute to contain specs as defined in json file
-    cdef shared_ptr[FatropApplication] myFatropApplication
-    
+    cdef shared_ptr[BasicOCPApplication] myFatropApplication
+    cdef int nx_
+    cdef int nu_
+    cdef int K_
     def __cinit__(self, functions, specfile):
-        self.myOCPBuilder = new OCPBuilder(functions.encode('utf-8'),specfile.encode('utf-8'))
-        specfile_object = open(specfile.encode('utf-8'),"r")
-        self.OCPspecs = json.load(specfile_object)
-        specfile_object.close()
-        self.myFatropApplication = self.myOCPBuilder.Build()
+        self.myFatropApplication = BasicOCPApplicationBuilder.FromRockitInterface(functions.encode('utf-8'),specfile.encode('utf-8'))
+        self.myFatropApplication.get().Build()
+        self.nx_ = self.myFatropApplication.get().nx_
+        self.nu_ = self.myFatropApplication.get().nu_
+        self.K_ = self.myFatropApplication.get().K_
 
     def Optimize(self):
-        return self.myFatropApplication.get().Optimize()
+        self.myFatropApplication.get().Optimize()
+    # Attribute access
+    @property
+    # TODO make this more efficient
+    def u_sol(self):
+        retval = np.empty((self.nu_,self.K_-1))
+        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolution()
+        for ii in range(self.K_-1):
+            for jj in range(self.nu_):               
+                retval[jj,ii] = lastsol.get_el(jj+ii*(self.nx_+ self.nu_))
+        return retval
 
-    # def SampleMaxEnt(self, alpha):
-    #     return self.myOCPBuilder.SampleMaxEnt(alpha)
-    def WarmStart(self):
-        return self.myFatropApplication.get().WarmStart()
+    @property
+    # TODO make this more efficient
+    def x_sol(self):
+        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolution()
+        retval = np.ones((self.nx_, self.K_))
+        for ii in range(self.K_-1):
+            for jj in range(self.nx_):               
+                retval[jj,ii] = lastsol.get_el(self.nu_+jj+ii*(self.nx_+ self.nu_))
+        for jj in range(self.nx_):
+            retval[jj,self.K_-1] = lastsol.get_el(jj+(self.K_-1)*(self.nx_ + self.nu_))
+        return retval
     def Sample(self, name):
         # retrieve sampler
-        cdef shared_ptr[OCPSolutionSampler] sampler = self.myOCPBuilder.GetSampler(name.encode('utf-8'))
+        cdef shared_ptr[OCPSolutionSampler] sampler = self.myFatropApplication.get().GetSampler(name.encode('utf-8'))
         # allocate buffer
         cdef vector[double] buffer = vector[double](sampler.get().Size())
         # use sampler
-        sampler.get().Sample(buffer)
+        sampler.get().Sample(self.myFatropApplication.get().LastSolution(), self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), buffer)
         n_rows = sampler.get().n_rows()
         n_cols = sampler.get().n_cols()
         K = sampler.get().K()
@@ -166,171 +183,231 @@ cdef class OCP:
             return np.moveaxis(res, [0,1,2], [1, 2, 0])
     def SetValue(self, name, double[::1] value):
         # retrieve parameter setter
-        cdef shared_ptr[ParameterSetter] paramsetter = self.myOCPBuilder.GetParameterSetter(name.encode('utf-8'))
-        paramsetter.get().SetValue(&value[0])
-        return
-    def to_function(self, params, samplers):
-        pass
+        print("trying to retrieve ", name, " setter")
+        cdef shared_ptr[ParameterSetter] paramsetter = self.myFatropApplication.get().GetParameterSetter(name.encode('utf-8'))
+        print("retrieved ", name, " setter")
+        paramsetter.get().SetValue(self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), &value[0])
+        print("set ", name, " value")
+        return None
     def GetStats(self):
         res = PyFatropStats()
-        res.stats = self.myOCPBuilder.fatropalg.get().GetStats()
+        res.stats = self.myFatropApplication.get().GetStats()
         return res 
-    # @property
-    # def sd_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().sd_time
-
-    # @property
-    # def hess_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().hess_time
-
-    # @property
-    # def jac_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().jac_time
-
-    # @property
-    # def cv_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().cv_time
-
-    # @property
-    # def grad_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().grad_time
-
-    # @property
-    # def obj_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().obj_time
-
-    # @property
-    # def init_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().init_time
-
-    # @property
-    # def total_time(self):
-    #     return self.myOCPBuilder.fatropalg.get().total_time
-
-    # def SetBounds(self):
-    #     self.myOCPBuilder.SetBounds()
-
-    # def SetInitial(self):
-    #     self.myOCPBuilder.SetInitial()
     def SetParams(self, stage_params_in, global_params_in):
-        self.myOCPBuilder.ocptempladapter.get().SetParams(stage_params_in, global_params_in)
+        cdef vector[double] stageparams =  self.myFatropApplication.get().StageParameters() 
+        stageparams = stage_params_in
+        cdef vector[double] globalparams = self.myFatropApplication.get().GlobalParameters() 
+        globalparams = global_params_in
+
     def SetInitial(self, initial_u, initial_x):
-        self.myOCPBuilder.ocptempladapter.get().SetInitial(self.myOCPBuilder.fatropdata, initial_u, initial_x)
-
-    # Attribute access
-    @property
-    def initial_u(self):
-        return self.myOCPBuilder.initial_u
-    @initial_u.setter
-    def initial_u(self, initial_u):
-        self.myOCPBuilder.initial_u = initial_u
-
-    # Attribute access
-    @property
-    def initial_x(self):
-        return self.myOCPBuilder.initial_x
-    @initial_x.setter
-    def initial_x(self, initial_x):
-        self.myOCPBuilder.initial_x = initial_x
-    
-    # Attribute access
-    @property
-    def lower(self):
-        return self.myOCPBuilder.lower
-    @lower.setter
-    def lower(self, lower):
-        self.myOCPBuilder.lower = lower
-
-    # Attribute access
-    @property
-    def upper(self):
-        return self.myOCPBuilder.upper
-    @upper.setter
-    def upper(self, upper):
-        self.myOCPBuilder.upper = upper
-
-    # Attribute access
-    @property
-    def lowerF(self):
-        return self.myOCPBuilder.lowerF
-    @lowerF.setter
-    def lowerF(self, lowerF):
-        self.myOCPBuilder.lowerF = lowerF
-
-    # Attribute access
-    @property
-    def upperF(self):
-        return self.myOCPBuilder.upperF
-    @upperF.setter
-    def upperF(self, upperF):
-        self.myOCPBuilder.upperF = upperF
-
-    # Attribute access
-    @property
-    def x_curr(self):
-        nels = self.myOCPBuilder.fatropdata.get().x_curr.nels()
-        retval = np.empty(nels)
-        for ii in range(nels):
-           retval[ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(ii)
-        return retval
-    
-    # Attribute access
-    @property
-    def x_next(self):
-        nels = self.myOCPBuilder.fatropdata.get().x_next.nels()
-        retval = np.empty(nels)
-        for ii in range(nels):
-           retval[ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(ii)
-        return retval
-
-    # Attribute access
-    @property
-    # TODO make this more efficient
-    def u0_sol(self):
-        nu = self.OCPspecs["nu"]
-        retval = np.empty(nu)
-        for ii in range(nu):
-           retval[ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(ii)
-        return retval
-
-    # Attribute access
-    @property
-    # TODO make this more efficient
-    def u_sol(self):
-        nu = self.OCPspecs["nu"]
-        nx_plus_nu = self.OCPspecs["nx"]+nu
-        K = self.OCPspecs["K"]
-        retval = np.empty((nu,K-1))
-        for ii in range(K-1):
-            for jj in range(nu):               
-                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+ii*(nx_plus_nu))
-        return retval
-
-    @property
-    # TODO make this more efficient
-    def x_sol(self):
-        nx = self.OCPspecs["nx"]
-        nu = self.OCPspecs["nu"]
-        nx_plus_nu = nx+nu
-        K = self.OCPspecs["K"]
-        retval = np.ones((nx,K))
-        for ii in range(K-1):
-            for jj in range(nx):               
-                retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(nu+jj+ii*(nx_plus_nu))
-        for jj in range(nx):
-            retval[jj,K-1] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+(K-1)*(nx_plus_nu))
-        return retval
+        self.myFatropApplication.get().SetInitial(initial_u, initial_x)
     
 
-    # Attribute access
-    @property
-    def n_eqs(self):
-        return self.myOCPBuilder.fatropdata.get().n_eqs
 
-    # Attribute access
-    @property
-    def n_ineqs(self):
-        return self.myOCPBuilder.fatropdata.get().n_ineqs
 
-    def __dealloc__(self):
-        del self.myOCPBuilder
+    
+# cdef class OCP:
+#     cdef OCPBuilder *myOCPBuilder  # Hold a C++ instance which we are wrapping
+#     cdef public dict OCPspecs # Public dict attribute to contain specs as defined in json file
+#     cdef shared_ptr[FatropApplication] myFatropApplication
+    
+#     def __cinit__(self, functions, specfile):
+#         self.myOCPBuilder = new OCPBuilder(functions.encode('utf-8'),specfile.encode('utf-8'))
+#         specfile_object = open(specfile.encode('utf-8'),"r")
+#         self.OCPspecs = json.load(specfile_object)
+#         specfile_object.close()
+#         self.myFatropApplication = self.myOCPBuilder.Build()
+
+#     def Optimize(self):
+#         return self.myFatropApplication.get().Optimize()
+
+#     # def SampleMaxEnt(self, alpha):
+#     #     return self.myOCPBuilder.SampleMaxEnt(alpha)
+#     def WarmStart(self):
+#         return self.myFatropApplication.get().WarmStart()
+#     def Sample(self, name):
+#         # retrieve sampler
+#         cdef shared_ptr[OCPSolutionSampler] sampler = self.myOCPBuilder.GetSampler(name.encode('utf-8'))
+#         # allocate buffer
+#         cdef vector[double] buffer = vector[double](sampler.get().Size())
+#         # use sampler
+#         sampler.get().Sample(buffer)
+#         n_rows = sampler.get().n_rows()
+#         n_cols = sampler.get().n_cols()
+#         K = sampler.get().K()
+#         # deallocate sampler
+#         if n_cols == 1:
+#             return np.asarray(buffer).reshape((K, n_rows))
+#         else:
+#             res = np.asarray(buffer).reshape((n_rows, n_cols, K), order = 'F')
+#             return np.moveaxis(res, [0,1,2], [1, 2, 0])
+#     def SetValue(self, name, double[::1] value):
+#         # retrieve parameter setter
+#         cdef shared_ptr[ParameterSetter] paramsetter = self.myOCPBuilder.GetParameterSetter(name.encode('utf-8'))
+#         paramsetter.get().SetValue(&value[0])
+#         return
+#     def to_function(self, params, samplers):
+#         pass
+#     def GetStats(self):
+#         res = PyFatropStats()
+#         res.stats = self.myOCPBuilder.fatropalg.get().GetStats()
+#         return res 
+#     # @property
+#     # def sd_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().sd_time
+
+#     # @property
+#     # def hess_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().hess_time
+
+#     # @property
+#     # def jac_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().jac_time
+
+#     # @property
+#     # def cv_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().cv_time
+
+#     # @property
+#     # def grad_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().grad_time
+
+#     # @property
+#     # def obj_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().obj_time
+
+#     # @property
+#     # def init_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().init_time
+
+#     # @property
+#     # def total_time(self):
+#     #     return self.myOCPBuilder.fatropalg.get().total_time
+
+#     # def SetBounds(self):
+#     #     self.myOCPBuilder.SetBounds()
+
+#     # def SetInitial(self):
+#     #     self.myOCPBuilder.SetInitial()
+#     def SetParams(self, stage_params_in, global_params_in):
+#         self.myOCPBuilder.ocptempladapter.get().SetParams(stage_params_in, global_params_in)
+#     def SetInitial(self, initial_u, initial_x):
+#         self.myOCPBuilder.ocptempladapter.get().SetInitial(self.myOCPBuilder.fatropdata, initial_u, initial_x)
+
+#     # Attribute access
+#     @property
+#     def initial_u(self):
+#         return self.myOCPBuilder.initial_u
+#     @initial_u.setter
+#     def initial_u(self, initial_u):
+#         self.myOCPBuilder.initial_u = initial_u
+
+#     # Attribute access
+#     @property
+#     def initial_x(self):
+#         return self.myOCPBuilder.initial_x
+#     @initial_x.setter
+#     def initial_x(self, initial_x):
+#         self.myOCPBuilder.initial_x = initial_x
+    
+#     # Attribute access
+#     @property
+#     def lower(self):
+#         return self.myOCPBuilder.lower
+#     @lower.setter
+#     def lower(self, lower):
+#         self.myOCPBuilder.lower = lower
+
+#     # Attribute access
+#     @property
+#     def upper(self):
+#         return self.myOCPBuilder.upper
+#     @upper.setter
+#     def upper(self, upper):
+#         self.myOCPBuilder.upper = upper
+
+#     # Attribute access
+#     @property
+#     def lowerF(self):
+#         return self.myOCPBuilder.lowerF
+#     @lowerF.setter
+#     def lowerF(self, lowerF):
+#         self.myOCPBuilder.lowerF = lowerF
+
+#     # Attribute access
+#     @property
+#     def upperF(self):
+#         return self.myOCPBuilder.upperF
+#     @upperF.setter
+#     def upperF(self, upperF):
+#         self.myOCPBuilder.upperF = upperF
+
+#     # Attribute access
+#     @property
+#     def x_curr(self):
+#         nels = self.myOCPBuilder.fatropdata.get().x_curr.nels()
+#         retval = np.empty(nels)
+#         for ii in range(nels):
+#            retval[ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(ii)
+#         return retval
+    
+#     # Attribute access
+#     @property
+#     def x_next(self):
+#         nels = self.myOCPBuilder.fatropdata.get().x_next.nels()
+#         retval = np.empty(nels)
+#         for ii in range(nels):
+#            retval[ii] = self.myOCPBuilder.fatropdata.get().x_next.get_el(ii)
+#         return retval
+
+#     # Attribute access
+#     @property
+#     # TODO make this more efficient
+#     def u0_sol(self):
+#         nu = self.OCPspecs["nu"]
+#         retval = np.empty(nu)
+#         for ii in range(nu):
+#            retval[ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(ii)
+#         return retval
+
+#     # Attribute access
+#     @property
+#     # TODO make this more efficient
+#     def u_sol(self):
+#         nu = self.OCPspecs["nu"]
+#         nx_plus_nu = self.OCPspecs["nx"]+nu
+#         K = self.OCPspecs["K"]
+#         retval = np.empty((nu,K-1))
+#         for ii in range(K-1):
+#             for jj in range(nu):               
+#                 retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+ii*(nx_plus_nu))
+#         return retval
+
+#     @property
+#     # TODO make this more efficient
+#     def x_sol(self):
+#         nx = self.OCPspecs["nx"]
+#         nu = self.OCPspecs["nu"]
+#         nx_plus_nu = nx+nu
+#         K = self.OCPspecs["K"]
+#         retval = np.ones((nx,K))
+#         for ii in range(K-1):
+#             for jj in range(nx):               
+#                 retval[jj,ii] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(nu+jj+ii*(nx_plus_nu))
+#         for jj in range(nx):
+#             retval[jj,K-1] = self.myOCPBuilder.fatropdata.get().x_curr.get_el(jj+(K-1)*(nx_plus_nu))
+#         return retval
+    
+
+#     # Attribute access
+#     @property
+#     def n_eqs(self):
+#         return self.myOCPBuilder.fatropdata.get().n_eqs
+
+#     # Attribute access
+#     @property
+#     def n_ineqs(self):
+#         return self.myOCPBuilder.fatropdata.get().n_ineqs
+
+#     def __dealloc__(self):
+#         del self.myOCPBuilder

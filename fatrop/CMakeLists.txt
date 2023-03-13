@@ -18,7 +18,7 @@ ocp/BasicOCPApplication.hpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
 # ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
 ocp/BFOCPBasic.hpp                          ocp/BFOCPBasic.cpp
-ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
+# ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
 # ocp/OCPBuilderAL.hpp                        ocp/OCPBuilderAL.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp

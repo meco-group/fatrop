@@ -6,6 +6,11 @@ from libcpp.memory cimport shared_ptr
 #     cdef cppclass shared_ptr[T]:
 #         shared_ptr() except +
 #         T* GetRawPtr()
+cdef extern from "LinearAlgebraBlasfeo.hpp" namespace "fatrop":
+    cdef cppclass FatropVecBF:
+        int offset()
+        int nels()
+        double get_el(const int ai)
 cdef extern from "FatropStats.hpp" namespace "fatrop":
     cdef cppclass FatropStats:
         double compute_sd_time
@@ -24,80 +29,107 @@ cdef extern from "FatropStats.hpp" namespace "fatrop":
         int eval_obj_count
         int iterations_count
         void Print()
-cdef extern from "FatropAlg.hpp" namespace "fatrop":
-    cdef cppclass FatropAlg:
-        int Optimize()
-        FatropStats GetStats()
-        # double sd_time
-        # double hess_time
-        # double jac_time
-        # double cv_time
-        # double grad_time
-        # double obj_time
-        # double init_time
-        # double total_time
-
-cdef extern from "LinearAlgebraBlasfeo.hpp" namespace "fatrop":
-    cdef cppclass FatropVecBF:
-        int offset()
-        int nels()
-        double get_el(const int ai)
-
-cdef extern from "FatropData.hpp" namespace "fatrop":
-    cdef cppclass FatropData:
-        FatropVecBF x_curr
-        FatropVecBF x_next
-        int n_eqs
-        int n_ineqs      
-
-cdef extern from "FatropParams.hpp" namespace "fatrop":
-    cdef cppclass FatropParams:
-        int max_iter
-        int tol
-
-cdef extern from "FatropApplication.hpp" namespace "fatrop":
-    cdef cppclass FatropApplication:
-        void Initialize()
-        void Reset()
-        void SetBounds(const vector[double]& lower, const vector[double]& upper)
-        void SetInitial(const vector[double]& initial)
-        void GetSolution(vector[double]& sol)
-        void WarmStart()
-        int Optimize()
-
-cdef extern from "OCPBuilder.hpp" namespace "fatrop":
-    cdef cppclass OCP:
-        void SetParams(const vector[double] &stage_params_in, const vector[double] &global_params_in)
-        void SetInitial(const shared_ptr[FatropData] &fatropdata, vector[double] &initial_u, vector[double] &initial_x)
-
-cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
     cdef cppclass OCPSolutionSampler:
-        OCPSolutionSampler(const OCPSolutionSampler& cp)
-        int Sample(vector[double]& sample)
-        int Size()
+        int Sample(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
         int n_rows()
         int n_cols()
         int K()
-cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+        int Size()
+cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
     cdef cppclass ParameterSetter:
-        void SetValue(const double* value)
+        void SetValue(vector[double]& global_params, vector[double]& stage_params, const double* value)
 
-cdef extern from "OCPBuilder.hpp" namespace "fatrop":
-    cdef cppclass OCPBuilder:
-        OCPBuilder(const string &functions, const string &json_spec_file) except +
-        shared_ptr[FatropAlg] fatropalg
-        shared_ptr[FatropData] fatropdata
-        shared_ptr[FatropParams] fatropparams
-        shared_ptr[OCP] ocptempladapter
-        vector[double] initial_u
-        vector[double] initial_x
-        vector[double] lower
-        vector[double] upper
-        vector[double] lowerF
-        vector[double] upperF
-        void SetBounds()
-        void SetInitial()
-        shared_ptr[FatropApplication] Build()
+cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass BasicOCPApplication:
+        int Optimize()
+        void Build()
+        FatropVecBF& LastSolution()
+        vector[double] &GlobalParameters()
+        vector[double] &StageParameters()
+        # vector[double] &InitialGuessPrimal()
+        void SetInitial(vector[double] &initial_u, vector[double]& initial_x)
         shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
-        shared_ptr[ParameterSetter] GetParameterSetter(const string &parameter_setter_name)
-        # int SampleMaxEnt(double alpha)
+        shared_ptr[ParameterSetter] GetParameterSetter(const string &sampler_name)
+        FatropStats GetStats()
+        const int nx_
+        const int nu_
+        const int K_
+
+cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass BasicOCPApplicationBuilder:
+        @staticmethod
+        shared_ptr[BasicOCPApplication] FromRockitInterface(const string &functions, const string &json_spec_file) # except +
+
+# cdef extern from "FatropAlg.hpp" namespace "fatrop":
+#     cdef cppclass FatropAlg:
+#         int Optimize()
+#         FatropStats GetStats()
+#         # double sd_time
+#         # double hess_time
+#         # double jac_time
+#         # double cv_time
+#         # double grad_time
+#         # double obj_time
+#         # double init_time
+#         # double total_time
+
+
+# cdef extern from "FatropData.hpp" namespace "fatrop":
+#     cdef cppclass FatropData:
+#         FatropVecBF x_curr
+#         FatropVecBF x_next
+#         int n_eqs
+#         int n_ineqs      
+
+# cdef extern from "FatropParams.hpp" namespace "fatrop":
+#     cdef cppclass FatropParams:
+#         int max_iter
+#         int tol
+
+# cdef extern from "FatropApplication.hpp" namespace "fatrop":
+#     cdef cppclass FatropApplication:
+#         void Initialize()
+#         void Reset()
+#         void SetBounds(const vector[double]& lower, const vector[double]& upper)
+#         void SetInitial(const vector[double]& initial)
+#         void GetSolution(vector[double]& sol)
+#         void WarmStart()
+#         int Optimize()
+
+# cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+#     cdef cppclass OCP:
+#         void SetParams(const vector[double] &stage_params_in, const vector[double] &global_params_in)
+#         void SetInitial(const shared_ptr[FatropData] &fatropdata, vector[double] &initial_u, vector[double] &initial_x)
+
+# cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+#     cdef cppclass OCPSolutionSampler:
+#         OCPSolutionSampler(const OCPSolutionSampler& cp)
+#         int Sample(vector[double]& sample)
+#         int Size()
+#         int n_rows()
+#         int n_cols()
+#         int K()
+# cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+#     cdef cppclass ParameterSetter:
+#         void SetValue(const double* value)
+
+# cdef extern from "OCPBuilder.hpp" namespace "fatrop":
+#     cdef cppclass OCPBuilder:
+#         OCPBuilder(const string &functions, const string &json_spec_file) except +
+#         shared_ptr[FatropAlg] fatropalg
+#         shared_ptr[FatropData] fatropdata
+#         shared_ptr[FatropParams] fatropparams
+#         shared_ptr[OCP] ocptempladapter
+#         vector[double] initial_u
+#         vector[double] initial_x
+#         vector[double] lower
+#         vector[double] upper
+#         vector[double] lowerF
+#         vector[double] upperF
+#         void SetBounds()
+#         void SetInitial()
+#         shared_ptr[FatropApplication] Build()
+#         shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
+#         shared_ptr[ParameterSetter] GetParameterSetter(const string &parameter_setter_name)
+#         # int SampleMaxEnt(double alpha)

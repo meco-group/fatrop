@@ -89,15 +89,16 @@ namespace fatrop
         void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override;
         double *GetGlobalParams()
         {
+            cout << "globalparams.size() = " << globalparams.size() << endl;
             if (globalparams.size() == 0)
                 return nullptr;
-            return &globalparams.at(0);
+            return globalparams.data();
         }
         double *GetStageParams()
         {
             if (stageparams.size() == 0)
                 return nullptr;
-            return &stageparams.at(0);
+            return stageparams.data();
         }
         vector<double> & GetGlobalParamsVec()
         {

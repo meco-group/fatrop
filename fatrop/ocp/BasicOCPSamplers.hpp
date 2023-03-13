@@ -60,12 +60,11 @@ namespace fatrop
     class ParameterSetter
     {
     public:
-        ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
-        void SetValue(const double value[]);
-        void SetValue(const initializer_list<double> il_);
+        ParameterSetter(const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
+        void SetValue(vector<double>& global_params, vector<double>& stage_params, const double value[]);
+        void SetValue(vector<double>& global_params, vector<double>& stage_params, const initializer_list<double> il_);
 
     private:
-        shared_ptr<BFOCPAdapter> ocp_;
         const vector<int> _offsets_in;
         const vector<int> _offsets_out;
         const int no_stage_params;

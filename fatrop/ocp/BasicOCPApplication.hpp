@@ -10,6 +10,7 @@
 #include "ocp/FatropOCPBuilder.hpp"
 #include "ocp/OCPAbstract.hpp"
 #include "ocp/BasicOCPSamplers.hpp"
+#include "solver/FatropStats.hpp"
 #include <map>
 #include "json/json.h"
 #include <fstream>
@@ -42,11 +43,22 @@ namespace fatrop
             assert(!dirty);
             return fatropdata_->x_curr;
         }
+        FatropVecBF &InitialGuessPrimal()
+        {
+            assert(!dirty);
+            return fatropdata_->x_initial;
+        }
+        FatropStats GetStats()
+        {
+            return fatropalg_->GetStats();
+        }
         bool dirty = true;
-        const shared_ptr<OCPAbstract> ocp_;
+    protected:
         shared_ptr<FatropParams> fatropparams_;
-        shared_ptr<Journaller> journaller_;
         shared_ptr<FatropData> fatropdata_;
+    private:
+        const shared_ptr<OCPAbstract> ocp_;
+        shared_ptr<Journaller> journaller_;
         shared_ptr<FatropAlg> fatropalg_;
     };
 
@@ -80,6 +92,12 @@ namespace fatrop
             assert(!dirty);
             return adapter->GetStageParamsVec();
         }
+        void SetInitial(vector<double> &initial_u, vector<double> &initial_x) 
+        {
+            assert(!dirty);
+            adapter->SetInitial(fatropdata_, initial_u, initial_x);
+        }
+
 
     private:
         bool dirty = true;
@@ -93,11 +111,22 @@ namespace fatrop
     class BasicOCPApplication : public OCPApplication
     {
     public:
-        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp){};
+        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), K_(ocp->K_){};
         shared_ptr<OCPSolutionSampler> GetSampler(const string &sampler_name)
         {
             return samplers[sampler_name];
         }
+        shared_ptr<ParameterSetter> GetParameterSetter(const string &setter_name)
+        {
+            return param_setters[setter_name];
+        }
+
+    public:
+        const int nx_;
+        const int nu_;
+        const int K_;
+
+    protected:
         map<string, shared_ptr<OCPSolutionSampler>> samplers;
         map<string, shared_ptr<ParameterSetter>> param_setters;
         friend class BasicOCPApplicationBuilder;
@@ -153,15 +182,16 @@ namespace fatrop
             {
                 vector<int> in = control_params_offset[control_params_name].as_object().array(0).get_number_array<int>("%d");
                 vector<int> out = control_params_offset[control_params_name].as_object().array(1).get_number_array<int>("%d");
-                    result->param_setters[string("control_") + control_params_name] = make_shared<ParameterSetter>(result->adapter, in, out, no_stage_params, in.size(), K, false);
+                result->param_setters[control_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, false);
             }
             json::jobject global_params_offset = json_spec["global_params_offset"];
             vector<string> global_params_names = global_params_offset.keys();
             for (auto global_params_name : global_params_names)
             {
+                cout << "adding global param setter " << global_params_name << endl;
                 vector<int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<int>("%d");
                 vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
-                    result->param_setters[string("global_") + global_params_name] = make_shared<ParameterSetter>(result->adapter, in, out, no_stage_params, in.size(), K, true);
+                result->param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
             }
             return result;
         }

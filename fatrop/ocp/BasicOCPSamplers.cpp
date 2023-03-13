@@ -97,14 +97,14 @@ vector<double> OCPSolutionSampler::Sample(const FatropVecBF &solution, const vec
     return res;
 }
 
-ParameterSetter::ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
+ParameterSetter::ParameterSetter(const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
 {
 }
-void ParameterSetter::SetValue(const double value[])
+void ParameterSetter::SetValue(vector<double>& global_params, vector<double>& stage_params, const double value[])
 {
     if (_global)
     {
-        double *params = ocp_->GetGlobalParams();
+        double *params = global_params.data();
         for (int i = 0; i < _no_var; i++)
         {
             params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
@@ -112,7 +112,7 @@ void ParameterSetter::SetValue(const double value[])
     }
     else // stage paramter
     {
-        double *params = ocp_->GetStageParams();
+        double *params = stage_params.data(); 
         for (int k = 0; k < K; k++)
         {
             for (int i = 0; i < _no_var; i++)
@@ -122,8 +122,8 @@ void ParameterSetter::SetValue(const double value[])
         }
     }
 }
-void ParameterSetter::SetValue(const initializer_list<double> il_)
+void ParameterSetter::SetValue(vector<double>& global_params, vector<double>& stage_params, const initializer_list<double> il_)
 {
     assert((int)il_.size() == _no_var);
-    SetValue(il_.begin());
+    SetValue(global_params, stage_params, il_.begin());
 }
