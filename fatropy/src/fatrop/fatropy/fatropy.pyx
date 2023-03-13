@@ -136,7 +136,7 @@ cdef class OCP:
     cdef int K_
     def __cinit__(self, functions, specfile):
         self.myFatropApplication = BasicOCPApplicationBuilder.FromRockitInterface(functions.encode('utf-8'),specfile.encode('utf-8'))
-        self.myFatropApplication.get().Build()
+        # self.myFatropApplication.get().Build()
         self.nx_ = self.myFatropApplication.get().nx_
         self.nu_ = self.myFatropApplication.get().nu_
         self.K_ = self.myFatropApplication.get().K_

@@ -193,6 +193,7 @@ namespace fatrop
                 vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
                 result->param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
             }
+            result -> Build();
             return result;
         }
     };

@@ -9,7 +9,6 @@ int main(int argc, char **argv)
     if (argc == 3)
     {
         shared_ptr<BasicOCPApplication> app = BasicOCPApplicationBuilder::FromRockitInterface(argv[1], argv[2]);
-        app -> Build();
         app -> Optimize();
     }
     else
