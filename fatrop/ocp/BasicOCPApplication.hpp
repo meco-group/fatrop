@@ -5,8 +5,6 @@
 #include "ocp/BFOCPAdapter.hpp"
 #include "solver/FatropAlg.hpp"
 #include "ocp/FatropOCP.hpp"
-#include "ocp/OCPLSRiccati.hpp"
-#include "ocp/OCPNoScaling.hpp"
 #include "ocp/FatropOCPBuilder.hpp"
 #include "ocp/OCPAbstract.hpp"
 #include "ocp/BasicOCPSamplers.hpp"
