@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-// #include "ocp/OCPBuilder.hpp"
 #include <string>
 #include <ocp/BasicOCPApplication.hpp>
 using namespace fatrop;
