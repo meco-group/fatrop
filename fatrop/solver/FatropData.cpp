@@ -49,7 +49,7 @@ double normal_sum(const double *numbers)
     }
     return sum;
 }
-FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) : nlpdims(nlpdims),
+FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &params) : nlpdims(nlpdims),
                                                                                          n_eqs(nlpdims.neqs),
                                                                                          n_ineqs(nlpdims.nineqs),
                                                                                          memvars(nlpdims.nvars, 12),

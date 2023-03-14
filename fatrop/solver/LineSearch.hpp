@@ -21,7 +21,7 @@ namespace fatrop
     {
     public:
         LineSearch(
-            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<FatropOptions> &fatropparams,
             const shared_ptr<FatropNLP> &nlp,
             const shared_ptr<FatropData> &fatropdata);
         virtual LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup) = 0;
@@ -44,7 +44,7 @@ namespace fatrop
     {
     public:
         BackTrackingLineSearch(
-            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<FatropOptions> &fatropparams,
             const shared_ptr<FatropNLP> &nlp,
             const shared_ptr<FatropData> &fatropdata,
             const shared_ptr<Filter> &filter,

@@ -28,7 +28,7 @@ namespace fatrop
         FatropAlg(
             const shared_ptr<FatropNLP> &fatropnlp,
             const shared_ptr<FatropData> &fatropdata,
-            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<FatropOptions> &fatropparams,
             const shared_ptr<Filter> &filter,
             const shared_ptr<LineSearch> &linesearch,
             const shared_ptr<Journaller> &journaller);
@@ -54,7 +54,7 @@ namespace fatrop
         };
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
-        shared_ptr<FatropParams> fatropparams_;
+        shared_ptr<FatropOptions> fatropparams_;
         shared_ptr<Filter> filter_;
         shared_ptr<LineSearch> linesearch_;
         shared_ptr<Journaller> journaller_;

@@ -3,16 +3,37 @@
 #include "aux/SmartPtr.hpp"
 #include <string>
 #include <map>
+#include <string>
+using namespace std;
 namespace fatrop
 {
-    class FatropParams
+    struct NumericOption
     {
     public:
+        // NumericOption operator=(const NumericOption &other) = default;
+        string name_;
+        string description_;
+        double *value = NULL;
+        double default_value_;
+        bool lower_bound_inclusive_;
+        double lower_bound_;
+        bool upper_bound_inclusive_;
+        double upper_bound_;
+    };
+
+    class FatropOptions
+    {
+    public:
+        FatropOptions()
+        {
+            // register tolerance option
+            // NumericOption tol_option("tol", "tolerance", &tol, 1e-8, true, 0.0, false, 0.0);
+
+        };
+
         int max_watchdog_steps = 4;
         bool warm_start_dual = false;
-        // bool linear_solver_improved_accuracy = true;
-        // bool first_try_watchdog = true;
-        const int maxiter = 1000;
+        int maxiter = 1000; // TODO unsafe to change maxiter because it it used at building!!
         double smax = 100.0;
         double lammax = 1e3;
         double tol = 1e-8;
@@ -48,6 +69,12 @@ namespace fatrop
         double kappa_d = 1e-5;
         double bound_relax_factor = 1e-8;
         double constr_viol_tol = 1e-4; // currently only used to relax bounds
+    private:
+        void RegisterNumericOption(const NumericOption &option)
+        {
+            numeric_options[option.name_] = option;
+        }
+        map<string, NumericOption> numeric_options;
     };
 
 } // namespace fatrop

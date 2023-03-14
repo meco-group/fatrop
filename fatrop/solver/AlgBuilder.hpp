@@ -8,7 +8,7 @@ namespace fatrop
     {
     public:
         void BuildFatropAlgObjects(const shared_ptr<FatropNLP> &nlp,
-                                    const shared_ptr<FatropParams> &fatropparams,
+                                    const shared_ptr<FatropOptions> &fatropparams,
                                    shared_ptr<FatropData> &fatropdata,
                                    shared_ptr<Journaller> &journaller)
         {
@@ -28,7 +28,7 @@ namespace fatrop
         }
     private:
         shared_ptr<FatropNLP> nlp_;
-        shared_ptr<FatropParams> fatropparams_;
+        shared_ptr<FatropOptions> fatropparams_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<Journaller> journaller_;
     };

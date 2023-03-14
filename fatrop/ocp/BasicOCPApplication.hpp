@@ -36,7 +36,7 @@ namespace fatrop
         NLPDims GetNLPDims();
 
     protected:
-        shared_ptr<FatropParams> fatropparams_;
+        shared_ptr<FatropOptions> fatropparams_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<FatropNLP> nlp_;
         bool dirty = true;

@@ -13,7 +13,7 @@ namespace fatrop
         StepAcceptor(
             const shared_ptr<FatropData> &fatropdata,
             const shared_ptr<Filter> &filter,
-            const shared_ptr<FatropParams> &fatropparams);
+            const shared_ptr<FatropOptions> &fatropparams);
 
     public:
         void Initialize();
@@ -22,7 +22,7 @@ namespace fatrop
     private:
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<Filter> filter_;
-        shared_ptr<FatropParams> fatropparams_;
+        shared_ptr<FatropOptions> fatropparams_;
     };
 } // namespace fatrop
 

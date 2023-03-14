@@ -1,7 +1,7 @@
 #include "solver/LineSearch.hpp"
 using namespace fatrop;
 LineSearch::LineSearch(
-    const shared_ptr<FatropParams> &fatropparams,
+    const shared_ptr<FatropOptions> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,
     const shared_ptr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
                                                 fatropnlp_(nlp),
@@ -71,7 +71,7 @@ int LineSearch::CalcSoc(double alpha) const
 };
 
 BackTrackingLineSearch::BackTrackingLineSearch(
-    const shared_ptr<FatropParams> &fatropparams,
+    const shared_ptr<FatropOptions> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,
     const shared_ptr<FatropData> &fatropdata,
     const shared_ptr<Filter> &filter,

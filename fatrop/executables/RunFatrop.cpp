@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     {
         shared_ptr<BasicOCPApplication> app = BasicOCPApplicationBuilder::FromRockitInterface(argv[1], argv[2]);
         app->Optimize();
-        vector<double> result = (app->LastBasicOCPSolution()).Eval(app->GetEvaluator("state_x1")->at_control());
+        vector<double> result = (app->LastBasicOCPSolution()).Eval(app->GetEvaluator("control_u")->at_t0());
     }
     else
     {

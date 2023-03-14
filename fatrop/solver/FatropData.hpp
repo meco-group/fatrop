@@ -14,7 +14,7 @@ namespace fatrop
 #define CACHEMACRO(instance, val) instance.evaluated ? instance.value : instance.SetValue(val)
     struct FatropData  
     {
-        FatropData(const NLPDims &nlpdims, const shared_ptr<FatropParams> &params) ;
+        FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &params) ;
         void Initialize();
         int Reset();
         int ResetCaches();
@@ -142,7 +142,7 @@ namespace fatrop
         double obj_curr = 0.0;
         double obj_backup = 0.0;
         double theta_min = 1e-4;
-        const shared_ptr<FatropParams> params;
+        const shared_ptr<FatropOptions> params;
         // algorithm parameters
         double smax;
         double kappa1;

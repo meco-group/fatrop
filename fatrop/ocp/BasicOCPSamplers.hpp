@@ -75,12 +75,59 @@ namespace fatrop
     private:
         shared_ptr<StageEvaluator> eval_;
     };
+
+    class OCPTimeStepSampler : public BasicOCPEvaluatorBase
+    {
+    public:
+        OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const shared_ptr<StageEvaluator> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
+        {
+        }
+        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result)
+        {
+            eval_->Eval(solution.data() + k_ * (nu + nx), solution.data() + ((k_ < K_ - 1) ? k_ : K_ - 2) * (nu + nx) + nu, global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
+            return 0;
+        }
+        int Size()
+        {
+            return eval_->Size();
+        }
+        int n_rows()
+        {
+            return eval_->n_rows();
+        }
+        int n_cols()
+        {
+            return eval_->n_cols();
+        }
+        const int nu;
+        const int nx;
+        const int no_stage_params;
+        const int K_;
+        const int k_;
+
+    private:
+        shared_ptr<StageEvaluator> eval_;
+    };
     class BasicOCPEvaluatorFactory
     {
     public:
         BasicOCPEvaluatorFactory(const shared_ptr<StageEvaluator> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
         // at_t0()
+        shared_ptr<OCPTimeStepSampler> at_t0()
+        {
+            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params, K, 0, eval_);
+        }
         // at_tf()
+        shared_ptr<OCPTimeStepSampler> at_tf()
+        {
+            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params,K, K-1, eval_);
+        }
+        // at_tk(int k)
+        shared_ptr<OCPTimeStepSampler> at_tk(int k)
+        {
+            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params, K, k, eval_);
+        }
+        // evaluate at control grid
         shared_ptr<OCPControlSampler> at_control()
         {
             return make_shared<OCPControlSampler>(nu, nx, no_stage_params, K, eval_);

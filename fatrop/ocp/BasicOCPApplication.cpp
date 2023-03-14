@@ -1,6 +1,6 @@
-#include "BasicOCPApplication.hpp"
+#include "ocp/BasicOCPApplication.hpp"
 using namespace fatrop;
-NLPApplication::NLPApplication() : fatropparams_(make_shared<FatropParams>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1)){};
+NLPApplication::NLPApplication() : fatropparams_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1)){};
 
 void NLPApplication::Build(const shared_ptr<FatropNLP> &nlp)
 {
