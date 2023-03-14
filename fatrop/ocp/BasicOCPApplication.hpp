@@ -34,6 +34,10 @@ namespace fatrop
         FatropVecBF &InitialGuessPrimal();
         FatropStats GetStats();
         NLPDims GetNLPDims();
+        void SetNumericOption(const string& option_name, double value)
+        {
+            fatropparams_->SetNumericOption(option_name, value);
+        }
 
     protected:
         shared_ptr<FatropOptions> fatropparams_;

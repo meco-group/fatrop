@@ -11,6 +11,27 @@ namespace fatrop
     {
     public:
         // NumericOption operator=(const NumericOption &other) = default;
+        NumericOption(){};
+        NumericOption(const string &name, const string &description, double *value, double default_value, bool lower_bound_inclusive, double lower_bound, bool upper_bound_inclusive, double upper_bound):
+            name_(name), description_(description), value(value), default_value_(default_value), lower_bound_inclusive_(lower_bound_inclusive), lower_bound_(lower_bound), upper_bound_inclusive_(upper_bound_inclusive), upper_bound_(upper_bound)
+        {
+        };
+        static NumericOption LowerBounded(const string &name, const string &description, double *value, double default_value, double lower_bound)
+        {
+            return NumericOption(name, description, value, default_value, true, lower_bound, false, 0.0);
+        };
+        static NumericOption UpperBounded(const string &name, const string &description, double *value, double default_value, double upper_bound)
+        {
+            return NumericOption(name, description, value, default_value, false, 0.0, true, upper_bound);
+        };
+        static NumericOption UnBounded(const string &name, const string &description, double *value, double default_value)
+        {
+            return NumericOption(name, description, value, default_value, false, 0.0, false, 0.0);
+        };
+        static NumericOption BoxBounded(const string &name, const string &description, double *value, double default_value, double lower_bound, double upper_bound)
+        {
+            return NumericOption(name, description, value, default_value, true, lower_bound, true, upper_bound);
+        };
         string name_;
         string description_;
         double *value = NULL;
@@ -27,8 +48,8 @@ namespace fatrop
         FatropOptions()
         {
             // register tolerance option
-            // NumericOption tol_option("tol", "tolerance", &tol, 1e-8, true, 0.0, false, 0.0);
-
+            RegisterNumericOption(NumericOption::LowerBounded("tol", "tolerance", &tol, 1e-8, 0.0));
+            RegisterNumericOption(NumericOption::LowerBounded("acceptable_tol", "acceptable tolerance", &acceptable_tol, 1e-6, 0.0));
         };
 
         int max_watchdog_steps = 4;
@@ -69,6 +90,26 @@ namespace fatrop
         double kappa_d = 1e-5;
         double bound_relax_factor = 1e-8;
         double constr_viol_tol = 1e-4; // currently only used to relax bounds
+        void SetNumericOption(const string& option_name, double value)
+        {
+            // check if option exists
+            if (numeric_options.find(option_name) == numeric_options.end())
+            {
+                throw runtime_error("Option " + option_name + " does not exist.");
+            }
+            // check if value is in bounds
+            NumericOption& option = numeric_options[option_name];
+            if (option.lower_bound_inclusive_ && value < option.lower_bound_)
+            {
+                throw runtime_error("Option " + option_name + " must be greater than or equal to " + to_string(option.lower_bound_));
+            }
+            if (option.upper_bound_inclusive_ && value > option.upper_bound_)
+            {
+                throw runtime_error("Option " + option_name + " must be less than or equal to " + to_string(option.upper_bound_));
+            }
+            // set value
+            *option.value = value;
+        }
     private:
         void RegisterNumericOption(const NumericOption &option)
         {
