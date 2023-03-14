@@ -80,7 +80,7 @@ namespace fatrop
             FatropVecBF &xkp1);
         OCPDims GetOCPDims() const override
         {
-            return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr);
+            return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr, nstageparamsexpr, ocptempl->get_n_global_params());
         }
 
     public:
@@ -89,7 +89,6 @@ namespace fatrop
         void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override;
         double *GetGlobalParams()
         {
-            cout << "globalparams.size() = " << globalparams.size() << endl;
             if (globalparams.size() == 0)
                 return nullptr;
             return globalparams.data();

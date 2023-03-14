@@ -204,7 +204,7 @@ namespace fatrop
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm);
         void copy(const FatropVecBF &fm);
-        void copyto(vector<double>& dest);
+        void copyto(vector<double>& dest) const;
         void operator=(const vector<double> &fm);
         /** \brief set data pointer*/
         void set_datap(VEC *vecbf);

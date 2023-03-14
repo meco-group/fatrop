@@ -535,7 +535,7 @@ void FatropVecBF::copy(const FatropVecBF &fm)
     VEC *fm_p = (VEC *)fm;
     VECCP(nels(), fm_p, fm.offset(), vec_, offset());
 }
-void FatropVecBF::copyto(vector<double> &fm)
+void FatropVecBF::copyto(vector<double> &fm) const
 {
     for (int ai = 0; ai < nels_; ai++)
     {

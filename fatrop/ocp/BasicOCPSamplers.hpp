@@ -3,6 +3,7 @@
 #include "function_evaluation/FunctionEvaluation.hpp"
 #include "ocp/BFOCPAdapter.hpp"
 #include <memory>
+// todo change the name of this file to evaluators
 namespace fatrop
 {
     class StageEvaluator
@@ -40,29 +41,62 @@ namespace fatrop
         const int n_rows_;
         const int n_cols_;
     };
-    class OCPSolutionSampler
+    class BasicOCPEvaluatorBase
     {
     public:
-        OCPSolutionSampler(int nu, int nx, int no_stage_params, int K,const shared_ptr<StageEvaluator> &eval);
-        int Sample(const FatropVecBF& solution, const vector<double>& global_params, const vector<double>& stage_params, vector<double> &sample);
-        vector<double> Sample(const FatropVecBF& solution, const vector<double>& global_params, const vector<double>& stage_params);
+        virtual int Size() = 0;
+        virtual int n_rows() = 0;
+        virtual int n_cols() = 0;
+        virtual int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) = 0;
+        vector<double> Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params)
+        {
+            vector<double> res(Size());
+            Evaluate(solution, global_params, stage_params, res);
+            return res;
+        };
+
+    protected:
+        // virtual int Evaluate()
+    };
+    class OCPControlSampler : public BasicOCPEvaluatorBase
+    {
+    public:
+        OCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval);
+        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result);
         int Size();
         int n_rows();
         int n_cols();
         int K();
-    private:
         const int nu;
         const int nx;
         const int no_stage_params;
         const int K_;
+
+    private:
+        shared_ptr<StageEvaluator> eval_;
+    };
+    class BasicOCPEvaluatorFactory
+    {
+    public:
+        BasicOCPEvaluatorFactory(const shared_ptr<StageEvaluator> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
+        // at_t0()
+        // at_tf()
+        shared_ptr<OCPControlSampler> at_control()
+        {
+            return make_shared<OCPControlSampler>(nu, nx, no_stage_params, K, eval_);
+        }
+        const int nu;
+        const int nx;
+        const int no_stage_params;
+        const int K;
         shared_ptr<StageEvaluator> eval_;
     };
     class ParameterSetter
     {
     public:
         ParameterSetter(const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
-        void SetValue(vector<double>& global_params, vector<double>& stage_params, const double value[]);
-        void SetValue(vector<double>& global_params, vector<double>& stage_params, const initializer_list<double> il_);
+        void SetValue(vector<double> &global_params, vector<double> &stage_params, const double value[]);
+        void SetValue(vector<double> &global_params, vector<double> &stage_params, const initializer_list<double> il_);
 
     private:
         const vector<int> _offsets_in;
@@ -72,7 +106,6 @@ namespace fatrop
         const int K;
         const bool _global;
     };
-
 
 } // namespace fatrop
 

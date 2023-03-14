@@ -14,6 +14,7 @@ aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
 ocp/BasicOCPApplication.hpp
+ocp/OCPSolution.hpp
 # ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
 # ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp

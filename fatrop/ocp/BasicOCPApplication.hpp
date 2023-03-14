@@ -9,6 +9,7 @@
 #include "ocp/OCPAbstract.hpp"
 #include "ocp/BasicOCPSamplers.hpp"
 #include "solver/FatropStats.hpp"
+#include "ocp/OCPSolution.hpp"
 #include <map>
 #include "json/json.h"
 #include <fstream>
@@ -24,20 +25,26 @@ namespace fatrop
         NLPApplication() : fatropparams_(make_shared<FatropParams>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1))
         {
         }
-        protected:
+
+    protected:
         void Build(const shared_ptr<FatropNLP> &nlp)
         {
+            // keep nlp around for getting nlpdims
+            nlp_ = nlp;
             AlgBuilder algbuilder;
             algbuilder.BuildFatropAlgObjects(nlp, fatropparams_, fatropdata_, journaller_);
             fatropalg_ = algbuilder.BuildAlgorithm();
             dirty = false;
         }
-        public:
+
+    public:
         int Optimize()
         {
             assert(!dirty);
-            return fatropalg_->Optimize();
+            int ret = fatropalg_->Optimize();
+            return ret;
         }
+        // TODO: make this protected and use last_solution instead and choose other name
         FatropVecBF &LastSolution()
         {
             assert(!dirty);
@@ -52,11 +59,16 @@ namespace fatrop
         {
             return fatropalg_->GetStats();
         }
-        bool dirty = true;
+        NLPDims GetNLPDims()
+        {
+            return nlp_->GetNLPDims();
+        }
 
     protected:
         shared_ptr<FatropParams> fatropparams_;
         shared_ptr<FatropData> fatropdata_;
+        shared_ptr<FatropNLP> nlp_;
+        bool dirty = true;
 
     private:
         const shared_ptr<OCPAbstract> ocp_;
@@ -83,11 +95,6 @@ namespace fatrop
         }
 
     public:
-        int Optimize()
-        {
-            assert(!dirty);
-            return NLPApplication::Optimize();
-        }
         vector<double> &GlobalParameters()
         {
             assert(!dirty);
@@ -103,27 +110,153 @@ namespace fatrop
             assert(!dirty);
             adapter->SetInitial(fatropdata_, initial_u, initial_x);
         }
+        OCPDims GetOCPDims()
+        {
+            return adapter->GetOCPDims();
+        }
 
     private:
-        bool dirty = true;
         const shared_ptr<OCPAbstract> ocp_;
 
     protected:
         shared_ptr<BFOCPAdapter> adapter;
     };
 
-    /// adds sampling and parameter setting functionality
-    class BasicOCPApplication : public OCPApplication
+    class FatropSolution
     {
     public:
-        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), K_(ocp->K_){};
-        shared_ptr<OCPSolutionSampler> GetSampler(const string &sampler_name)
+        void GetPrimalSolution(vector<double> &result)
         {
-            return samplers[sampler_name];
+            result = sol_primal;
         }
-        shared_ptr<ParameterSetter> GetParameterSetter(const string &setter_name)
+        // defautl copy constructor
+        FatropSolution(const FatropSolution &other) = default;
+
+    protected:
+        FatropSolution(){};
+        void SetDims(const NLPDims &dims)
         {
-            return param_setters[setter_name];
+            sol_primal.resize(dims.nvars);
+        };
+        void SetPrimalSolution(const FatropVecBF &sol)
+        {
+            sol.copyto(sol_primal);
+        }
+
+    protected:
+        vector<double> sol_primal;
+    };
+    struct BasicOCPApplicationAbstract : public OCPApplication
+    {
+        BasicOCPApplicationAbstract(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp)
+        {
+        }
+    };
+
+    struct BasicOCPSolution : public FatropSolution
+    {
+    public:
+        BasicOCPSolution(const shared_ptr<BasicOCPApplicationAbstract> &app)
+        {
+            SetDims(app->GetOCPDims());
+        }
+        // void GetStates(vector<double> &result)
+        // void GetControl(vector<double> &result)
+    protected:
+        BasicOCPSolution(){};
+        int nx;
+        int nu;
+        int n_stage_params;
+        int n_global_params;
+        int K;
+        void SetDims(const OCPDims &dims)
+        {
+            FatropSolution::SetDims(dims);
+            nx = dims.nx.at(0);
+            nu = dims.nu.at(0);
+            n_stage_params = dims.n_stage_params.at(0);
+            n_global_params = dims.n_global_params;
+            K = dims.K;
+            global_params.resize(n_global_params);
+            stage_params.resize(n_stage_params);
+        }
+        void Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
+        {
+            FatropSolution::SetPrimalSolution(sol);
+            this->global_params = global_params;
+            this->stage_params = stage_params;
+        }
+
+    public:
+        // todo make this deprecated, only use Eval
+        void Sample(const shared_ptr<OCPControlSampler> &sampler, vector<double> &result)
+        {
+            sampler->Evaluate(sol_primal, global_params, stage_params, result);
+        }
+        vector<double> Eval(const shared_ptr<BasicOCPEvaluatorBase> &evaluator) const
+        {
+            return evaluator->Evaluate(sol_primal, global_params, stage_params);
+        }
+        void Eval(const shared_ptr<BasicOCPEvaluatorBase> &evaluator, vector<double> &result) const
+        {
+            evaluator->Evaluate(sol_primal, global_params, stage_params, result);
+        }
+
+    protected:
+        vector<double> global_params;
+        vector<double> stage_params;
+        friend class BasicOCPApplication;
+    };
+
+    class BasicOCPApplication : public BasicOCPApplicationAbstract
+    {
+    public:
+        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : BasicOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), K_(ocp->K_){};
+
+    public:
+        class AppParameterSetter : public ParameterSetter
+        {
+        public:
+            AppParameterSetter(const shared_ptr<BFOCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
+
+        public:
+            void SetValue(const double value[])
+            {
+                ParameterSetter::SetValue(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
+            };
+
+        private:
+            const shared_ptr<BFOCPAdapter> adapter_;
+        };
+
+    public:
+        shared_ptr<BasicOCPEvaluatorFactory> GetEvaluator(const string &sampler_name)
+        {
+            return eval_factories[sampler_name];
+        }
+        shared_ptr<AppParameterSetter> GetParameterSetter(const string &setter_name)
+        {
+            return make_shared<AppParameterSetter>(adapter, param_setters[setter_name]);
+        }
+        void Build()
+        {
+            OCPApplication::Build();
+            // allocate the last solution
+            last_solution.SetDims(GetOCPDims());
+            dirty = false;
+        }
+        int Optimize()
+        {
+            int ret = NLPApplication::Optimize();
+            if (ret == 0)
+            {
+                last_solution.SetPrimalSolution(LastSolution());
+            }
+            return ret;
+        }
+        const BasicOCPSolution &LastBasicOCPSolution()
+        {
+            return last_solution;
         }
 
     public:
@@ -131,8 +264,11 @@ namespace fatrop
         const int nu_;
         const int K_;
 
+    private:
+        BasicOCPSolution last_solution;
+
     protected:
-        map<string, shared_ptr<OCPSolutionSampler>> samplers;
+        map<string, shared_ptr<BasicOCPEvaluatorFactory>> eval_factories;
         map<string, shared_ptr<ParameterSetter>> param_setters;
         friend class BasicOCPApplicationBuilder;
     };
@@ -160,7 +296,7 @@ namespace fatrop
             for (auto sampler_name : sampler_names)
             {
                 auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-                result->samplers[sampler_name] = make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<EvalBaseSE>(eval));
+                result->eval_factories[sampler_name] = make_shared<BasicOCPEvaluatorFactory>(make_shared<EvalBaseSE>(eval), nu, nx, no_stage_params, K);
             }
             // add state samplers
             json::jobject states_offset = json_spec["states_offset"];
@@ -169,7 +305,7 @@ namespace fatrop
             {
                 vector<int> in = states_offset[state_name].as_object().array(0).get_number_array<int>("%d");
                 vector<int> out = states_offset[state_name].as_object().array(1).get_number_array<int>("%d");
-                result->samplers[string("state_") + state_name] = make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(false, in, out));
+                result->eval_factories[string("state_") + state_name] = make_shared<BasicOCPEvaluatorFactory>(make_shared<IndexEvaluator>(false, in, out), nu, nx, no_stage_params, K);
             }
             // add control samplers
             json::jobject controls_offset = json_spec["controls_offset"];
@@ -178,7 +314,7 @@ namespace fatrop
             {
                 vector<int> in = controls_offset[control_name].as_object().array(0).get_number_array<int>("%d");
                 vector<int> out = controls_offset[control_name].as_object().array(1).get_number_array<int>("%d");
-                result->samplers[string("control_") + control_name] = make_shared<OCPSolutionSampler>(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(true, in, out));
+                result->eval_factories[string("control_") + control_name] = make_shared<BasicOCPEvaluatorFactory>(make_shared<IndexEvaluator>(true, in, out), nu, nx, no_stage_params, K);
             }
             // add all parameter setters
             json::jobject control_params_offset = json_spec["control_params_offset"];
@@ -193,7 +329,6 @@ namespace fatrop
             vector<string> global_params_names = global_params_offset.keys();
             for (auto global_params_name : global_params_names)
             {
-                cout << "adding global param setter " << global_params_name << endl;
                 vector<int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<int>("%d");
                 vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
                 result->param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);

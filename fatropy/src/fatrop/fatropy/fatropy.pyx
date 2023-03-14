@@ -1,12 +1,17 @@
 # from fatropy cimport OCPBuilder
 # from fatropy cimport FatropAlg
 # from fatropy cimport FatropApplication
-from fatropy cimport OCPSolutionSampler
-from fatropy cimport ParameterSetter
+# from fatropy cimport OCPSolutionSampler
+from fatropy cimport AppParameterSetter
+from fatropy cimport BasicOCPSolution
+from fatropy cimport BasicOCPEvaluatorFactory
+from fatropy cimport BasicOCPEvaluatorBase
+from fatropy cimport OCPControlSampler
 from fatropy cimport FatropVecBF
 from fatropy cimport BasicOCPApplication
 from fatropy cimport BasicOCPApplicationBuilder
 from fatropy cimport FatropStats
+from fatropy cimport assign_shared_ptr
 from libcpp.memory cimport shared_ptr 
 from libcpp.vector cimport vector
 from cpython cimport array
@@ -167,11 +172,13 @@ cdef class OCP:
         return retval
     def Sample(self, name):
         # retrieve sampler
-        cdef shared_ptr[OCPSolutionSampler] sampler = self.myFatropApplication.get().GetSampler(name.encode('utf-8'))
+        cdef shared_ptr[OCPControlSampler] sampler = self.myFatropApplication.get().GetEvaluator(name.encode('utf-8')).get().at_control()
         # allocate buffer
-        cdef vector[double] buffer = vector[double](sampler.get().Size())
+        cdef shared_ptr[BasicOCPEvaluatorBase] sampler_b 
+        assign_shared_ptr(sampler_b, sampler)
+        cdef vector[double] buffer = self.myFatropApplication.get().LastBasicOCPSolution().Eval(sampler_b)
         # use sampler
-        sampler.get().Sample(self.myFatropApplication.get().LastSolution(), self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), buffer)
+        # sampler.get().Sample(self.myFatropApplication.get().LastSolution(), self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), buffer)
         n_rows = sampler.get().n_rows()
         n_cols = sampler.get().n_cols()
         K = sampler.get().K()
@@ -183,11 +190,8 @@ cdef class OCP:
             return np.moveaxis(res, [0,1,2], [1, 2, 0])
     def SetValue(self, name, double[::1] value):
         # retrieve parameter setter
-        print("trying to retrieve ", name, " setter")
-        cdef shared_ptr[ParameterSetter] paramsetter = self.myFatropApplication.get().GetParameterSetter(name.encode('utf-8'))
-        print("retrieved ", name, " setter")
-        paramsetter.get().SetValue(self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), &value[0])
-        print("set ", name, " value")
+        cdef shared_ptr[AppParameterSetter] paramsetter = self.myFatropApplication.get().GetParameterSetter(name.encode('utf-8'))
+        paramsetter.get().SetValue(&value[0])
         return None
     def GetStats(self):
         res = PyFatropStats()

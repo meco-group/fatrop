@@ -6,6 +6,9 @@ from libcpp.memory cimport shared_ptr
 #     cdef cppclass shared_ptr[T]:
 #         shared_ptr() except +
 #         T* GetRawPtr()
+cdef extern from "assign_ptr.hpp":
+    cdef void assign_shared_ptr[T1, T2](shared_ptr[T1]& lhs, shared_ptr[T2]& rhs)
+
 cdef extern from "LinearAlgebraBlasfeo.hpp" namespace "fatrop":
     cdef cppclass FatropVecBF:
         int offset()
@@ -29,16 +32,35 @@ cdef extern from "FatropStats.hpp" namespace "fatrop":
         int eval_obj_count
         int iterations_count
         void Print()
+    
+
 cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass OCPSolutionSampler:
-        int Sample(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
+    cdef cppclass BasicOCPEvaluatorBase:
         int n_rows()
         int n_cols()
-        int K()
+        # int K()
         int Size()
+        # vector[double] Eval(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params)
+cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass BasicOCPSolution:
+        vector[double] Eval(const shared_ptr[BasicOCPEvaluatorBase] &evaluator) const
+
 cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass ParameterSetter:
-        void SetValue(vector[double]& global_params, vector[double]& stage_params, const double* value)
+    cdef cppclass OCPControlSampler(BasicOCPEvaluatorBase):
+        # int Evaluate(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
+        # int n_rows()
+        # int n_cols()
+        int K()
+        # int Size()
+cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
+    cdef cppclass BasicOCPEvaluatorFactory:
+        shared_ptr[OCPControlSampler] at_control()
+# cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
+#     cdef cppclass ParameterSetter:
+#         void SetValue(vector[double]& global_params, vector[double]& stage_params, const double* value)
+cdef extern from "BasicOCPApplication.hpp" namespace "fatrop::BasicOCPApplication":
+    cdef cppclass AppParameterSetter:
+        void SetValue(const double* value)
 
 cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
     cdef cppclass BasicOCPApplication:
@@ -49,12 +71,15 @@ cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
         vector[double] &StageParameters()
         # vector[double] &InitialGuessPrimal()
         void SetInitial(vector[double] &initial_u, vector[double]& initial_x)
-        shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
-        shared_ptr[ParameterSetter] GetParameterSetter(const string &sampler_name)
+        # shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
+        shared_ptr[AppParameterSetter] GetParameterSetter(const string &sampler_name)
+        vector[double] Sample(const string &sampler_name)
         FatropStats GetStats()
         const int nx_
         const int nu_
         const int K_
+        shared_ptr[BasicOCPEvaluatorFactory] GetEvaluator(const string &sampler_name)
+        const BasicOCPSolution &LastBasicOCPSolution()
 
 cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
     cdef cppclass BasicOCPApplicationBuilder:
