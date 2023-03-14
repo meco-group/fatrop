@@ -115,8 +115,8 @@ namespace fatrop
     public:
         // todo make this deprecated, only use Eval
         void Sample(const shared_ptr<OCPControlSampler> &sampler, vector<double> &result);
-        vector<double> Eval(const shared_ptr<BasicOCPEvaluatorBase> &evaluator) const;
-        void Eval(const shared_ptr<BasicOCPEvaluatorBase> &evaluator, vector<double> &result) const;
+        vector<double> Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator) const;
+        void Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator, vector<double> &result) const;
 
     protected:
         vector<double> global_params;
@@ -143,7 +143,11 @@ namespace fatrop
         };
 
     public:
-        shared_ptr<BasicOCPEvaluatorFactory> GetEvaluator(const string &sampler_name);
+        shared_ptr<BasicOCPExprEvaluatorFactory> GetExprEvaluator(const string &sampler_name);
+        shared_ptr<BasicOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression>& expr)
+        {
+            return make_shared<BasicOCPExprEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
+        }
         shared_ptr<AppParameterSetter> GetParameterSetter(const string &setter_name);
         void Build();
         int Optimize();
@@ -152,13 +156,14 @@ namespace fatrop
     public:
         const int nx_;
         const int nu_;
+        const int n_stage_params_;
         const int K_;
 
     private:
         BasicOCPSolution last_solution;
 
     protected:
-        map<string, shared_ptr<BasicOCPEvaluatorFactory>> eval_factories;
+        map<string, shared_ptr<StageExpression>> stage_expressions;
         map<string, shared_ptr<ParameterSetter>> param_setters;
         friend class BasicOCPApplicationBuilder;
     };

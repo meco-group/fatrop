@@ -33,7 +33,7 @@ namespace fatrop
     class OCPSolutionSampler_old
     {
     public:
-        OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp);
+        OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp);
         int Sample(vector<double> &sample);
         vector<double> Sample();
         int Size();
@@ -46,7 +46,7 @@ namespace fatrop
         const int nx;
         const int no_stage_params;
         const int K_;
-        shared_ptr<StageEvaluator> eval_;
+        shared_ptr<StageExpression> eval_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<BFOCPAdapter> ocp_;
     };

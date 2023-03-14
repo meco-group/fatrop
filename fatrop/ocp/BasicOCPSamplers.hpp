@@ -6,7 +6,7 @@
 // todo change the name of this file to evaluators
 namespace fatrop
 {
-    class StageEvaluator
+    class StageExpression
     {
     public:
         virtual void Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) = 0;
@@ -14,10 +14,10 @@ namespace fatrop
         virtual int n_cols() = 0;
         int Size();
     };
-    class IndexEvaluator : public StageEvaluator
+    class IndexEpression : public StageExpression
     {
     public:
-        IndexEvaluator(const bool control, const vector<int> offsets_in, const vector<int> offsets_out);
+        IndexEpression(const bool control, const vector<int> offsets_in, const vector<int> offsets_out);
         void Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
         int n_rows() override;
         int n_cols() override;
@@ -28,7 +28,7 @@ namespace fatrop
         const vector<int> _offsets_out;
         const bool _control;
     };
-    class EvalBaseSE : public StageEvaluator
+    class EvalBaseSE : public StageExpression
     {
     public:
         EvalBaseSE(const shared_ptr<EvalBase> &evalbase);
@@ -41,7 +41,7 @@ namespace fatrop
         const int n_rows_;
         const int n_cols_;
     };
-    class BasicOCPEvaluatorBase
+    class BasicOCPExprEvaluatorBase
     {
     public:
         virtual int Size() = 0;
@@ -58,10 +58,10 @@ namespace fatrop
     protected:
         // virtual int Evaluate()
     };
-    class OCPControlSampler : public BasicOCPEvaluatorBase
+    class OCPControlSampler : public BasicOCPExprEvaluatorBase
     {
     public:
-        OCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval);
+        OCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval);
         int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result);
         int Size();
         int n_rows();
@@ -73,13 +73,13 @@ namespace fatrop
         const int K_;
 
     private:
-        shared_ptr<StageEvaluator> eval_;
+        shared_ptr<StageExpression> eval_;
     };
 
-    class OCPTimeStepSampler : public BasicOCPEvaluatorBase
+    class OCPTimeStepSampler : public BasicOCPExprEvaluatorBase
     {
     public:
-        OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const shared_ptr<StageEvaluator> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
+        OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const shared_ptr<StageExpression> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
         {
         }
         int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result)
@@ -106,12 +106,12 @@ namespace fatrop
         const int k_;
 
     private:
-        shared_ptr<StageEvaluator> eval_;
+        shared_ptr<StageExpression> eval_;
     };
-    class BasicOCPEvaluatorFactory
+    class BasicOCPExprEvaluatorFactory
     {
     public:
-        BasicOCPEvaluatorFactory(const shared_ptr<StageEvaluator> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
+        BasicOCPExprEvaluatorFactory(const shared_ptr<StageExpression> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
         // at_t0()
         shared_ptr<OCPTimeStepSampler> at_t0()
         {
@@ -136,7 +136,7 @@ namespace fatrop
         const int nx;
         const int no_stage_params;
         const int K;
-        shared_ptr<StageEvaluator> eval_;
+        shared_ptr<StageExpression> eval_;
     };
     class ParameterSetter
     {

@@ -1,7 +1,7 @@
 #include "OCPBuilder.hpp"
 using namespace fatrop;
 
-OCPSolutionSampler_old::OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp) : nu(nu),
+OCPSolutionSampler_old::OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp) : nu(nu),
                                                                                                                                                                                                             nx(nx),
                                                                                                                                                                                                             no_stage_params(no_stage_params),
                                                                                                                                                                                                             K_(K),
@@ -258,7 +258,7 @@ OCPSolutionSampler_old OCPBuilder::GetSamplerState(const string &variable_name)
     vector<int> in;
     vector<int> out;
     GetVariableMapState(variable_name, in, out);
-    return OCPSolutionSampler_old(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(false, in, out), fatropdata, ocptempladapteror);
+    return OCPSolutionSampler_old(nu, nx, no_stage_params, K, make_shared<IndexEpression>(false, in, out), fatropdata, ocptempladapteror);
 }
 OCPSolutionSampler_old OCPBuilder::GetSamplerControl(const string &variable_name)
 {
@@ -266,5 +266,5 @@ OCPSolutionSampler_old OCPBuilder::GetSamplerControl(const string &variable_name
     vector<int> in;
     vector<int> out;
     GetVariableMapControl(variable_name, in, out);
-    return OCPSolutionSampler_old(nu, nx, no_stage_params, K, make_shared<IndexEvaluator>(true, in, out), fatropdata, ocptempladapteror);
+    return OCPSolutionSampler_old(nu, nx, no_stage_params, K, make_shared<IndexEpression>(true, in, out), fatropdata, ocptempladapteror);
 }

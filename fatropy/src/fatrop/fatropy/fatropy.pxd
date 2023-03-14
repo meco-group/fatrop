@@ -35,7 +35,7 @@ cdef extern from "FatropStats.hpp" namespace "fatrop":
     
 
 cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPEvaluatorBase:
+    cdef cppclass BasicOCPExprEvaluatorBase:
         int n_rows()
         int n_cols()
         # int K()
@@ -43,17 +43,17 @@ cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
         # vector[double] Eval(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params)
 cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
     cdef cppclass BasicOCPSolution:
-        vector[double] Eval(const shared_ptr[BasicOCPEvaluatorBase] &evaluator) const
+        vector[double] Eval(const shared_ptr[BasicOCPExprEvaluatorBase] &evaluator) const
 
 cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass OCPControlSampler(BasicOCPEvaluatorBase):
+    cdef cppclass OCPControlSampler(BasicOCPExprEvaluatorBase):
         # int Evaluate(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
         # int n_rows()
         # int n_cols()
         int K()
         # int Size()
 cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPEvaluatorFactory:
+    cdef cppclass BasicOCPExprEvaluatorFactory:
         shared_ptr[OCPControlSampler] at_control()
 # cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
 #     cdef cppclass ParameterSetter:
@@ -78,7 +78,7 @@ cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
         const int nx_
         const int nu_
         const int K_
-        shared_ptr[BasicOCPEvaluatorFactory] GetEvaluator(const string &sampler_name)
+        shared_ptr[BasicOCPExprEvaluatorFactory] GetExprEvaluator(const string &sampler_name)
         const BasicOCPSolution &LastBasicOCPSolution()
 
 cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":

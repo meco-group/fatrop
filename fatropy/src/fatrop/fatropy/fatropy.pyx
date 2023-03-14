@@ -4,8 +4,8 @@
 # from fatropy cimport OCPSolutionSampler
 from fatropy cimport AppParameterSetter
 from fatropy cimport BasicOCPSolution
-from fatropy cimport BasicOCPEvaluatorFactory
-from fatropy cimport BasicOCPEvaluatorBase
+from fatropy cimport BasicOCPExprEvaluatorFactory
+from fatropy cimport BasicOCPExprEvaluatorBase
 from fatropy cimport OCPControlSampler
 from fatropy cimport FatropVecBF
 from fatropy cimport BasicOCPApplication
@@ -172,9 +172,9 @@ cdef class OCP:
         return retval
     def Sample(self, name):
         # retrieve sampler
-        cdef shared_ptr[OCPControlSampler] sampler = self.myFatropApplication.get().GetEvaluator(name.encode('utf-8')).get().at_control()
+        cdef shared_ptr[OCPControlSampler] sampler = self.myFatropApplication.get().GetExprEvaluator(name.encode('utf-8')).get().at_control()
         # allocate buffer
-        cdef shared_ptr[BasicOCPEvaluatorBase] sampler_b 
+        cdef shared_ptr[BasicOCPExprEvaluatorBase] sampler_b 
         assign_shared_ptr(sampler_b, sampler)
         cdef vector[double] buffer = self.myFatropApplication.get().LastBasicOCPSolution().Eval(sampler_b)
         # use sampler

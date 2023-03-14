@@ -11,7 +11,7 @@ int main(int argc, char **argv)
         shared_ptr<BasicOCPApplication> app = BasicOCPApplicationBuilder::FromRockitInterface(argv[1], argv[2]);
         app -> SetNumericOption("tol", 1e-6);
         app -> Optimize();
-        vector<double> result = (app->LastBasicOCPSolution()).Eval(app->GetEvaluator("control_u")->at_t0());
+        vector<double> result = (app->LastBasicOCPSolution()).Eval(app->GetExprEvaluator("control_u")->at_t0());
     }
     else
     {

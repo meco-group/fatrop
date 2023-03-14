@@ -112,15 +112,15 @@ OCPDims OCPApplication::GetOCPDims()
     {
         sampler->Evaluate(sol_primal, global_params, stage_params, result);
     }
-    vector<double> BasicOCPSolution::Eval(const shared_ptr<BasicOCPEvaluatorBase> &evaluator) const
+    vector<double> BasicOCPSolution::Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator) const
     {
         return evaluator->Evaluate(sol_primal, global_params, stage_params);
     }
-    void BasicOCPSolution::Eval(const shared_ptr<BasicOCPEvaluatorBase> &evaluator, vector<double> &result) const
+    void BasicOCPSolution::Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
     {
         evaluator->Evaluate(sol_primal, global_params, stage_params, result);
     }
-    BasicOCPApplication::BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : BasicOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), K_(ocp->K_){};
+    BasicOCPApplication::BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : BasicOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
     BasicOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<BFOCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
     void BasicOCPApplication::AppParameterSetter::SetValue(const double value[])
@@ -128,9 +128,9 @@ OCPDims OCPApplication::GetOCPDims()
         ParameterSetter::SetValue(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
     };
 
-    shared_ptr<BasicOCPEvaluatorFactory> BasicOCPApplication::GetEvaluator(const string &sampler_name)
+    shared_ptr<BasicOCPExprEvaluatorFactory> BasicOCPApplication::GetExprEvaluator(const string &sampler_name)
     {
-        return eval_factories[sampler_name];
+        return GetExprEvaluator(stage_expressions[sampler_name]);
     }
     shared_ptr<BasicOCPApplication::AppParameterSetter> BasicOCPApplication::GetParameterSetter(const string &setter_name)
     {
@@ -169,14 +169,14 @@ OCPDims OCPApplication::GetOCPDims()
         auto result = make_shared<BasicOCPApplication>(ocptemplatebasic);
         // add all samplers
         vector<string> sampler_names = json_spec["samplers"];
-        const int nu = ocptemplatebasic->nu_;
-        const int nx = ocptemplatebasic->nx_;
+        // const int nu = ocptemplatebasic->nu_;
+        // const int nx = ocptemplatebasic->nx_;
         const int no_stage_params = ocptemplatebasic->n_stage_params_;
         const int K = ocptemplatebasic->K_;
         for (auto sampler_name : sampler_names)
         {
             auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-            result->eval_factories[sampler_name] = make_shared<BasicOCPEvaluatorFactory>(make_shared<EvalBaseSE>(eval), nu, nx, no_stage_params, K);
+            result->stage_expressions[sampler_name] = make_shared<EvalBaseSE>(eval);
         }
         // add state samplers
         json::jobject states_offset = json_spec["states_offset"];
@@ -185,7 +185,7 @@ OCPDims OCPApplication::GetOCPDims()
         {
             vector<int> in = states_offset[state_name].as_object().array(0).get_number_array<int>("%d");
             vector<int> out = states_offset[state_name].as_object().array(1).get_number_array<int>("%d");
-            result->eval_factories[string("state_") + state_name] = make_shared<BasicOCPEvaluatorFactory>(make_shared<IndexEvaluator>(false, in, out), nu, nx, no_stage_params, K);
+            result->stage_expressions[string("state_") + state_name] = make_shared<IndexEpression>(false, in, out);
         }
         // add control samplers
         json::jobject controls_offset = json_spec["controls_offset"];
@@ -194,7 +194,7 @@ OCPDims OCPApplication::GetOCPDims()
         {
             vector<int> in = controls_offset[control_name].as_object().array(0).get_number_array<int>("%d");
             vector<int> out = controls_offset[control_name].as_object().array(1).get_number_array<int>("%d");
-            result->eval_factories[string("control_") + control_name] = make_shared<BasicOCPEvaluatorFactory>(make_shared<IndexEvaluator>(true, in, out), nu, nx, no_stage_params, K);
+            result->stage_expressions[string("control_") + control_name] = make_shared<IndexEpression>(true, in, out);
         }
         // add all parameter setters
         json::jobject control_params_offset = json_spec["control_params_offset"];

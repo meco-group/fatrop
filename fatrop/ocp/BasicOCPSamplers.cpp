@@ -1,16 +1,16 @@
 #include "BasicOCPSamplers.hpp"
 using namespace fatrop;
-int StageEvaluator::Size()
+int StageExpression::Size()
 {
     return n_rows() * n_cols();
 }
-IndexEvaluator::IndexEvaluator(const bool control, const vector<int> offsets_in, const vector<int> offsets_out) : _no_var(offsets_in.size()),
+IndexEpression::IndexEpression(const bool control, const vector<int> offsets_in, const vector<int> offsets_out) : _no_var(offsets_in.size()),
                                                                                                                   _offsets_in(offsets_in),
                                                                                                                   _offsets_out(offsets_out),
                                                                                                                   _control(control)
 {
 }
-void IndexEvaluator::Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res)
+void IndexEpression::Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res)
 {
     if (_control)
     {
@@ -27,11 +27,11 @@ void IndexEvaluator::Eval(const double *u, const double *x, const double *global
         }
     }
 };
-int IndexEvaluator::n_rows()
+int IndexEpression::n_rows()
 {
     return _no_var;
 }
-int IndexEvaluator::n_cols()
+int IndexEpression::n_cols()
 {
     return 1;
 }
@@ -51,7 +51,7 @@ int EvalBaseSE::n_cols()
 {
     return n_cols_;
 }
-OCPControlSampler::OCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageEvaluator> &eval) : nu(nu),
+OCPControlSampler::OCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval) : nu(nu),
                                                                                                                              nx(nx),
                                                                                                                              no_stage_params(no_stage_params),
                                                                                                                              K_(K),
