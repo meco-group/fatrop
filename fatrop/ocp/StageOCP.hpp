@@ -277,7 +277,7 @@ namespace fatrop
         vector<double> global_params;
     };
 
-    class BasicOCPBuilder
+    class StageOCPBuilder
     {
     public:
         static shared_ptr<StageOCP> FromRockitInterface(const shared_ptr<DLHandler> &handle, const json::jobject& json_spec)

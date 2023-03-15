@@ -164,7 +164,7 @@ OCPDims OCPApplication::GetOCPDims()
         std::stringstream buffer;
         buffer << t.rdbuf();
         json::jobject json_spec = json::jobject::parse(buffer.str());
-        auto ocptemplatebasic = BasicOCPBuilder::FromRockitInterface(handle, json_spec);
+        auto ocptemplatebasic = StageOCPBuilder::FromRockitInterface(handle, json_spec);
         // instantiate the BasicOCPApplication
         auto result = make_shared<StageOCPApplication>(ocptemplatebasic);
         // add all samplers
