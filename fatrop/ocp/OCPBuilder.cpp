@@ -1,7 +1,7 @@
 #include "OCPBuilder.hpp"
 using namespace fatrop;
 
-OCPSolutionSampler_old::OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp) : nu(nu),
+OCPSolutionSampler_old::OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<OCPAdapter> &ocp) : nu(nu),
                                                                                                                                                                                                             nx(nx),
                                                                                                                                                                                                             no_stage_params(no_stage_params),
                                                                                                                                                                                                             K_(K),
@@ -27,7 +27,7 @@ int OCPSolutionSampler_old::K()
     return K_;
 }
 
-// ParameterSetter::ParameterSetter(const shared_ptr<BFOCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
+// ParameterSetter::ParameterSetter(const shared_ptr<OCPAdapter> &ocp, const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : ocp_(ocp), _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
 // {
 // }
 // void ParameterSetter::SetValue(const double value[])
@@ -161,7 +161,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
                                                json_spec["stage_params"].get_number_array<double>("%lf"),
                                                json_spec["global_params"].get_number_array<double>("%lf"),
                                                initial_u, initial_x);
-    ocptempladapteror = make_shared<BFOCPAdapter>(static_cast<shared_ptr<OCPAbstract>>(ocptemplatebasic));
+    ocptempladapteror = make_shared<OCPAdapter>(static_cast<shared_ptr<OCPAbstract>>(ocptemplatebasic));
     ocptempladapter = ocptempladapteror;
     // ocptempladapter->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     // ocplsriccati1 = static_cast<shared_ptr<OCPLSRiccati>>(maxentsampler);

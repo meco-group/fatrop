@@ -3,7 +3,7 @@
 #include "ocp/OCP.hpp"
 #include "ocp/FatropOCP.hpp"
 #include "ocp/OCPAbstract.hpp"
-#include "ocp/BFOCPAdapter.hpp"
+#include "ocp/OCPAdapter.hpp"
 #include "ocp/OCPLSRiccati.hpp"
 #include "ocp/OCPNoScaling.hpp"
 namespace fatrop
@@ -16,11 +16,11 @@ namespace fatrop
         }
         shared_ptr<FatropOCP> Build()
         {
-            shared_ptr<BFOCPAdapter> adapter = make_shared<BFOCPAdapter>(ocp_);
+            shared_ptr<OCPAdapter> adapter = make_shared<OCPAdapter>(ocp_);
             return Build(adapter);
         }
 
-        shared_ptr<FatropOCP> Build(shared_ptr<BFOCPAdapter> &adapter)
+        shared_ptr<FatropOCP> Build(shared_ptr<OCPAdapter> &adapter)
         {
             return make_shared<FatropOCP>(adapter, make_shared<OCPLSRiccati>(adapter->GetOCPDims()), make_shared<OCPNoScaling>(fatropparams_));
         }

@@ -1,4 +1,4 @@
-#include "BasicOCPSamplers.hpp"
+#include "StageOCPExpressions.hpp"
 using namespace fatrop;
 int StageExpression::Size()
 {
@@ -51,7 +51,7 @@ int EvalBaseSE::n_cols()
 {
     return n_cols_;
 }
-OCPControlSampler::OCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval) : nu(nu),
+StageOCPControlSampler::StageOCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval) : nu(nu),
                                                                                                                              nx(nx),
                                                                                                                              no_stage_params(no_stage_params),
                                                                                                                              K_(K),
@@ -59,24 +59,24 @@ OCPControlSampler::OCPControlSampler(int nu, int nx, int no_stage_params, int K,
 {
 }
 
-int OCPControlSampler::Size()
+int StageOCPControlSampler::Size()
 {
     return K_ * eval_->Size();
 }
-int OCPControlSampler::n_rows()
+int StageOCPControlSampler::n_rows()
 {
     return eval_->n_rows();
 }
-int OCPControlSampler::n_cols()
+int StageOCPControlSampler::n_cols()
 {
     return eval_->n_cols();
 }
-int OCPControlSampler::K()
+int StageOCPControlSampler::K()
 {
     return K_;
 }
 
-int OCPControlSampler::Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample)
+int StageOCPControlSampler::Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample)
 {
     const double *sol_p = solution.data();
     double *res_p = sample.data();

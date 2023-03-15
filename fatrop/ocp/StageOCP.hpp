@@ -18,10 +18,10 @@ namespace fatrop
     /// it seperates the initial and terminal stages and the intermediate stages, each of these can have different constraints and running objective
     /// the dynamics is the same for all stages
     /// this problem structure corresponds to a single-stage rockit problem, which it is intented to be used for
-    class BasicOCP : public OCPAbstract
+    class StageOCP : public OCPAbstract
     {
     public:
-        BasicOCP(const int nu,
+        StageOCP(const int nu,
                  const int nx,
                  const int ngI,
                  const int ng,
@@ -272,7 +272,7 @@ namespace fatrop
     class BasicOCPBuilder
     {
     public:
-        static shared_ptr<BasicOCP> FromRockitInterface(const shared_ptr<DLHandler> &handle, const json::jobject& json_spec)
+        static shared_ptr<StageOCP> FromRockitInterface(const shared_ptr<DLHandler> &handle, const json::jobject& json_spec)
         {
 
             // set up ocp
@@ -328,7 +328,7 @@ namespace fatrop
             EvalCasGen gineqf(handle, "gineq");
             EvalCasGen GgineqFtf(handle, "GgineqFt");
             EvalCasGen gineqFf(handle, "gineqF");
-            shared_ptr<BasicOCP> basicocp = make_shared<BasicOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
+            shared_ptr<StageOCP> basicocp = make_shared<StageOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
                                                                   BAbtf,
                                                                   bkf,
                                                                   RSQrqtIf,

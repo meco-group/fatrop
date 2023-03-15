@@ -1,13 +1,13 @@
 #ifndef BASICOCPAPPLICATIONINCLUDED
 #define BASICOCPAPPLICATIONINCLUDED
-#include "ocp/BFOCPBasic.hpp"
+#include "ocp/StageOCP.hpp"
 #include "solver/AlgBuilder.hpp"
-#include "ocp/BFOCPAdapter.hpp"
+#include "ocp/OCPAdapter.hpp"
 #include "solver/FatropAlg.hpp"
 #include "ocp/FatropOCP.hpp"
 #include "ocp/FatropOCPBuilder.hpp"
 #include "ocp/OCPAbstract.hpp"
-#include "ocp/BasicOCPSamplers.hpp"
+#include "ocp/StageOCPExpressions.hpp"
 #include "solver/FatropStats.hpp"
 #include "ocp/OCPSolution.hpp"
 #include <map>
@@ -70,7 +70,7 @@ namespace fatrop
         const shared_ptr<OCPAbstract> ocp_;
 
     protected:
-        shared_ptr<BFOCPAdapter> adapter;
+        shared_ptr<OCPAdapter> adapter;
     };
     class FatropSolution
     {
@@ -92,18 +92,18 @@ namespace fatrop
         result = sol_primal;
     }
 
-    struct BasicOCPApplicationAbstract : public OCPApplication
+    struct StageOCPApplicationAbstract : public OCPApplication
     {
-        BasicOCPApplicationAbstract(const shared_ptr<BasicOCP> &ocp);
+        StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp);
     };
 
-    struct BasicOCPSolution : public FatropSolution
+    struct SingleStageOCPSolution : public FatropSolution
     {
     public:
-        BasicOCPSolution(const shared_ptr<BasicOCPApplicationAbstract> &app);
+        SingleStageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app);
 
     protected:
-        BasicOCPSolution();
+        SingleStageOCPSolution();
         void SetDims(const OCPDims &dims);
         void Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params);
         int nx;
@@ -114,44 +114,44 @@ namespace fatrop
 
     public:
         // todo make this deprecated, only use Eval
-        void Sample(const shared_ptr<OCPControlSampler> &sampler, vector<double> &result);
-        vector<double> Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator) const;
-        void Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator, vector<double> &result) const;
+        void Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result);
+        vector<double> Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const;
+        void Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const;
 
     protected:
         vector<double> global_params;
         vector<double> stage_params;
-        friend class BasicOCPApplication;
+        friend class StageOCPApplication;
     };
 
-    class BasicOCPApplication : public BasicOCPApplicationAbstract
+    class StageOCPApplication : public StageOCPApplicationAbstract
     {
     public:
-        BasicOCPApplication(const shared_ptr<BasicOCP> &ocp);
+        StageOCPApplication(const shared_ptr<StageOCP> &ocp);
 
     public:
         class AppParameterSetter : public ParameterSetter
         {
         public:
-            AppParameterSetter(const shared_ptr<BFOCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps);
+            AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps);
 
         public:
             void SetValue(const double value[]);
 
         private:
-            const shared_ptr<BFOCPAdapter> adapter_;
+            const shared_ptr<OCPAdapter> adapter_;
         };
 
     public:
-        shared_ptr<BasicOCPExprEvaluatorFactory> GetExprEvaluator(const string &sampler_name);
-        shared_ptr<BasicOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression>& expr)
+        shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const string &sampler_name);
+        shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression>& expr)
         {
-            return make_shared<BasicOCPExprEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
+            return make_shared<StageOCPExprEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
         }
         shared_ptr<AppParameterSetter> GetParameterSetter(const string &setter_name);
         void Build();
         int Optimize();
-        const BasicOCPSolution &LastBasicOCPSolution();
+        const SingleStageOCPSolution &LastStageOCPSolution();
 
     public:
         const int nx_;
@@ -160,17 +160,17 @@ namespace fatrop
         const int K_;
 
     private:
-        BasicOCPSolution last_solution;
+        SingleStageOCPSolution last_solution;
 
     protected:
         map<string, shared_ptr<StageExpression>> stage_expressions;
         map<string, shared_ptr<ParameterSetter>> param_setters;
-        friend class BasicOCPApplicationBuilder;
+        friend class StageOCPApplicationBuilder;
     };
-    class BasicOCPApplicationBuilder
+    class StageOCPApplicationBuilder
     {
     public:
-        static shared_ptr<BasicOCPApplication> FromRockitInterface(const string &functions, const string &json_spec_file);
+        static shared_ptr<StageOCPApplication> FromRockitInterface(const string &functions, const string &json_spec_file);
     };
 }
 #endif // BASICOCPAPPLICATIONINCLUDED

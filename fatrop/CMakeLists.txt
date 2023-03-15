@@ -13,17 +13,17 @@ aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 # debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
-ocp/BasicOCPApplication.hpp                 ocp/BasicOCPApplication.cpp
+ocp/StageOCPApplication.hpp                 ocp/StageOCPApplication.cpp
 ocp/OCPSolution.hpp
 # ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
-ocp/BFOCPAdapter.hpp                        ocp/BFOCPAdapter.cpp
+ocp/OCPAdapter.hpp                    ocp/OCPAdapter.cpp
 # ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
-ocp/BFOCPBasic.hpp                          ocp/BFOCPBasic.cpp
+ocp/StageOCP.hpp                          ocp/StageOCP.cpp
 # ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
 # ocp/OCPBuilderAL.hpp                        ocp/OCPBuilderAL.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
-ocp/BasicOCPSamplers.hpp                    ocp/BasicOCPSamplers.cpp
+ocp/StageOCPExpressions.hpp                    ocp/StageOCPExpressions.cpp
 # ocp/FatropOCPAL.hpp                         ocp/FatropOCPAL.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp
 ocp/OCP.hpp                                 ocp/OCP.cpp
@@ -75,15 +75,15 @@ aux/SmartPtr.hpp
 # debug/LinearAlgebraEigen.hpp
 # debug/RandomOCP.hpp
 function_evaluation/FunctionEvaluation.hpp
-ocp/BasicOCPApplication.hpp
+ocp/StageOCPApplication.hpp
 ocp/OCPAbstract.hpp
-ocp/BFOCPAdapter.hpp
-ocp/BFOCPBasic.hpp
+ocp/OCPAdapter.hpp
+ocp/Stage.hpp
 ocp/DuInfEvaluator.hpp
 ocp/FatropOCP.hpp
 # ocp/FatropOCPAL.hpp
 ocp/FatropOCPBuilder.hpp
-ocp/BasicOCPSamplers.hpp
+ocp/StageOCPExpressions.hpp
 ocp/OCP.hpp
 # ocp/OCPAL.hpp
 ocp/OCPDims.hpp

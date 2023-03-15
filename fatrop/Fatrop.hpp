@@ -2,7 +2,7 @@
 #define FATROP_INCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "ocp/OCPKKT.hpp"
-#include "ocp/BFOCPAdapter.hpp"
+#include "ocp/OCPAdapter.hpp"
 #include "ocp/OCPAbstact.hpp"
 #include "aux/FatropVector.hpp"
 #include "solver/FatropAlg.hpp"
@@ -13,7 +13,7 @@
 #include "solver/FatropParams.hpp"
 #include "function_evaluation/CasadiCodegen.hpp"
 #include "solver/AlgBuilder.hpp"
-#include "ocp/BasicOCPApplication.hpp"
+#include "ocp/StageOCPApplication.hpp"
 #include "ocp/FatropOCPBuilder.hpp"
 
 // #include "SparseSolvers/InterfaceMUMPS.hpp"

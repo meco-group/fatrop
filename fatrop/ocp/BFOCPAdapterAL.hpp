@@ -6,10 +6,10 @@
 // but contains methods to set parameters specifically to inner problem (bounds, lagrangemultipliers, ...)
 namespace fatrop
 {
-    class BFOCPAdapterAL : public OCPAL, public BFOCPAdapter
+    class BFOCPAdapterAL : public OCPAL, public OCPAdapter
     {
     public:
-        BFOCPAdapterAL(const shared_ptr<BFOCPAL> &ocptempl) : BFOCPAdapter(ocptempl), ocptempl_(ocptempl)
+        BFOCPAdapterAL(const shared_ptr<BFOCPAL> &ocptempl) : OCPAdapter(ocptempl), ocptempl_(ocptempl)
         {
         }
         int evalHess(
@@ -18,7 +18,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam)
         {
-            return BFOCPAdapter::evalHess(
+            return OCPAdapter::evalHess(
                 OCP,
                 obj_scale,
                 primal_vars,
@@ -29,7 +29,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars)
         {
-            return BFOCPAdapter::evalJac(
+            return OCPAdapter::evalJac(
                 OCP,
                 primal_vars,
                 slack_vars);
@@ -40,7 +40,7 @@ namespace fatrop
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation)
         {
-            return BFOCPAdapter::EvalConstraintViolation(
+            return OCPAdapter::EvalConstraintViolation(
                 OCP,
                 primal_vars,
                 slack_vars,
@@ -52,7 +52,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient)
         {
-            return BFOCPAdapter::EvalGrad(
+            return OCPAdapter::EvalGrad(
                 OCP,
                 obj_scale,
                 primal_vars,
@@ -64,7 +64,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             double &res)
         {
-            return BFOCPAdapter::EvalObj(
+            return OCPAdapter::EvalObj(
                 OCP,
                 obj_scale,
                 primal_vars,
@@ -77,7 +77,7 @@ namespace fatrop
             const FatropVecBF &xk,
             FatropVecBF &xkp1)
         {
-            return BFOCPAdapter::EvalDynamics(
+            return OCPAdapter::EvalDynamics(
                 OCP,
                 k,
                 uk,
@@ -86,19 +86,19 @@ namespace fatrop
         };
         OCPDims GetOCPDims() const override
         {
-            return BFOCPAdapter::GetOCPDims();
+            return OCPAdapter::GetOCPDims();
         }
         void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override
         {
-            BFOCPAdapter::SetParams(stage_params_in, global_params_in);
+            OCPAdapter::SetParams(stage_params_in, global_params_in);
         };
         void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) override
         {
-            BFOCPAdapter::SetInitial(fatropdata, initial_u, initial_x);
+            OCPAdapter::SetInitial(fatropdata, initial_u, initial_x);
         };
         void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override
         {
-            BFOCPAdapter::GetSolution(fatropdata, u, x);
+            OCPAdapter::GetSolution(fatropdata, u, x);
         };
         int SetIneqsBounds(const vector<double> &lower_boundsin, const vector<double> &upper_boundsin) override;
         int SetIneqLagrMult(const FatropVecBF &ineqlagrmultL, const FatropVecBF &ineqlagrmultU) override;

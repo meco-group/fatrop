@@ -1,4 +1,4 @@
-#include "ocp/BasicOCPApplication.hpp"
+#include "ocp/StageOCPApplication.hpp"
 using namespace fatrop;
 NLPApplication::NLPApplication() : fatropparams_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1)){};
 
@@ -46,7 +46,7 @@ OCPApplication::OCPApplication(const shared_ptr<OCPAbstract> &ocp) : ocp_(ocp)
 void OCPApplication::Build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
-    adapter = make_shared<BFOCPAdapter>(ocp_);
+    adapter = make_shared<OCPAdapter>(ocp_);
     shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropparams_).Build(adapter));
     NLPApplication::Build(nlp);
     dirty = false;
@@ -82,15 +82,15 @@ OCPDims OCPApplication::GetOCPDims()
     {
         sol.copyto(sol_primal);
     }
-    BasicOCPApplicationAbstract::BasicOCPApplicationAbstract(const shared_ptr<BasicOCP> &ocp) : OCPApplication(ocp)
+    StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
     {
     }
-    BasicOCPSolution::BasicOCPSolution(const shared_ptr<BasicOCPApplicationAbstract> &app)
+    SingleStageOCPSolution::SingleStageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app)
     {
         SetDims(app->GetOCPDims());
     }
-    BasicOCPSolution::BasicOCPSolution(){};
-    void BasicOCPSolution::SetDims(const OCPDims &dims)
+    SingleStageOCPSolution::SingleStageOCPSolution(){};
+    void SingleStageOCPSolution::SetDims(const OCPDims &dims)
     {
         FatropSolution::SetDims(dims);
         nx = dims.nx.at(0);
@@ -101,49 +101,49 @@ OCPDims OCPApplication::GetOCPDims()
         global_params.resize(n_global_params);
         stage_params.resize(n_stage_params);
     }
-    void BasicOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
+    void SingleStageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
     {
         FatropSolution::SetPrimalSolution(sol);
         this->global_params = global_params;
         this->stage_params = stage_params;
     }
 
-    void BasicOCPSolution::Sample(const shared_ptr<OCPControlSampler> &sampler, vector<double> &result)
+    void SingleStageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
     {
         sampler->Evaluate(sol_primal, global_params, stage_params, result);
     }
-    vector<double> BasicOCPSolution::Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator) const
+    vector<double> SingleStageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
     {
         return evaluator->Evaluate(sol_primal, global_params, stage_params);
     }
-    void BasicOCPSolution::Eval(const shared_ptr<BasicOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
+    void SingleStageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
     {
         evaluator->Evaluate(sol_primal, global_params, stage_params, result);
     }
-    BasicOCPApplication::BasicOCPApplication(const shared_ptr<BasicOCP> &ocp) : BasicOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
+    StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : StageOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
-    BasicOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<BFOCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
-    void BasicOCPApplication::AppParameterSetter::SetValue(const double value[])
+    StageOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
+    void StageOCPApplication::AppParameterSetter::SetValue(const double value[])
     {
         ParameterSetter::SetValue(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
     };
 
-    shared_ptr<BasicOCPExprEvaluatorFactory> BasicOCPApplication::GetExprEvaluator(const string &sampler_name)
+    shared_ptr<StageOCPExprEvaluatorFactory> StageOCPApplication::GetExprEvaluator(const string &sampler_name)
     {
         return GetExprEvaluator(stage_expressions[sampler_name]);
     }
-    shared_ptr<BasicOCPApplication::AppParameterSetter> BasicOCPApplication::GetParameterSetter(const string &setter_name)
+    shared_ptr<StageOCPApplication::AppParameterSetter> StageOCPApplication::GetParameterSetter(const string &setter_name)
     {
         return make_shared<AppParameterSetter>(adapter, param_setters[setter_name]);
     }
-    void BasicOCPApplication::Build()
+    void StageOCPApplication::Build()
     {
         OCPApplication::Build();
         // allocate the last solution
         last_solution.SetDims(GetOCPDims());
         dirty = false;
     }
-    int BasicOCPApplication::Optimize()
+    int StageOCPApplication::Optimize()
     {
         int ret = NLPApplication::Optimize();
         if (ret == 0)
@@ -152,12 +152,12 @@ OCPDims OCPApplication::GetOCPDims()
         }
         return ret;
     }
-    const BasicOCPSolution &BasicOCPApplication::LastBasicOCPSolution()
+    const SingleStageOCPSolution &StageOCPApplication::LastStageOCPSolution()
     {
         return last_solution;
     }
 
-    shared_ptr<BasicOCPApplication> BasicOCPApplicationBuilder::FromRockitInterface(const string &functions, const string &json_spec_file)
+    shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(const string &functions, const string &json_spec_file)
     {
         shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
         std::ifstream t(json_spec_file);
@@ -166,7 +166,7 @@ OCPDims OCPApplication::GetOCPDims()
         json::jobject json_spec = json::jobject::parse(buffer.str());
         auto ocptemplatebasic = BasicOCPBuilder::FromRockitInterface(handle, json_spec);
         // instantiate the BasicOCPApplication
-        auto result = make_shared<BasicOCPApplication>(ocptemplatebasic);
+        auto result = make_shared<StageOCPApplication>(ocptemplatebasic);
         // add all samplers
         vector<string> sampler_names = json_spec["samplers"];
         // const int nu = ocptemplatebasic->nu_;

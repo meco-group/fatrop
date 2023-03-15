@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ocp/BasicOCPApplication.hpp>
+#include <ocp/StageOCPApplication.hpp>
 using namespace fatrop;
 int main(int argc, char **argv)
 {
@@ -26,12 +26,12 @@ int main(int argc, char **argv)
 
     if (argc == 3)
     {
-        shared_ptr<BasicOCPApplication> app = BasicOCPApplicationBuilder::FromRockitInterface(argv[1], argv[2]);
+        shared_ptr<StageOCPApplication> app = StageOCPApplicationBuilder::FromRockitInterface(argv[1], argv[2]);
         auto custom_evaluator = app->GetExprEvaluator(make_shared<CustoMExpression>())->at_control();
         app->SetNumericOption("tol", 1e-6);
         app->Optimize();
-        vector<double> result = (app->LastBasicOCPSolution()).Eval(app->GetExprEvaluator("control_u")->at_t0());
-        vector<double> result_custom = (app->LastBasicOCPSolution()).Eval(custom_evaluator);
+        vector<double> result = (app->LastStageOCPSolution()).Eval(app->GetExprEvaluator("control_u")->at_t0());
+        vector<double> result_custom = (app->LastStageOCPSolution()).Eval(custom_evaluator);
     }
     else
     {

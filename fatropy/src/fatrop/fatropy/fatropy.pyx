@@ -3,13 +3,13 @@
 # from fatropy cimport FatropApplication
 # from fatropy cimport OCPSolutionSampler
 from fatropy cimport AppParameterSetter
-from fatropy cimport BasicOCPSolution
-from fatropy cimport BasicOCPExprEvaluatorFactory
-from fatropy cimport BasicOCPExprEvaluatorBase
-from fatropy cimport OCPControlSampler
+from fatropy cimport StageOCPSolution
+from fatropy cimport StageOCPExprEvaluatorFactory
+from fatropy cimport StageOCPExprEvaluatorBase
+from fatropy cimport StageOCPControlSampler
 from fatropy cimport FatropVecBF
-from fatropy cimport BasicOCPApplication
-from fatropy cimport BasicOCPApplicationBuilder
+from fatropy cimport StageOCPApplication
+from fatropy cimport StageOCPApplicationBuilder
 from fatropy cimport FatropStats
 from fatropy cimport assign_shared_ptr
 from libcpp.memory cimport shared_ptr 
@@ -135,12 +135,12 @@ cdef class PyFatropStats:
         self.stats.Print()
 
 cdef class OCP:
-    cdef shared_ptr[BasicOCPApplication] myFatropApplication
+    cdef shared_ptr[StageOCPApplication] myFatropApplication
     cdef int nx_
     cdef int nu_
     cdef int K_
     def __cinit__(self, functions, specfile):
-        self.myFatropApplication = BasicOCPApplicationBuilder.FromRockitInterface(functions.encode('utf-8'),specfile.encode('utf-8'))
+        self.myFatropApplication = StageOCPApplicationBuilder.FromRockitInterface(functions.encode('utf-8'),specfile.encode('utf-8'))
         # self.myFatropApplication.get().Build()
         self.nx_ = self.myFatropApplication.get().nx_
         self.nu_ = self.myFatropApplication.get().nu_
@@ -172,11 +172,11 @@ cdef class OCP:
         return retval
     def Sample(self, name):
         # retrieve sampler
-        cdef shared_ptr[OCPControlSampler] sampler = self.myFatropApplication.get().GetExprEvaluator(name.encode('utf-8')).get().at_control()
+        cdef shared_ptr[StageOCPControlSampler] sampler = self.myFatropApplication.get().GetExprEvaluator(name.encode('utf-8')).get().at_control()
         # allocate buffer
-        cdef shared_ptr[BasicOCPExprEvaluatorBase] sampler_b 
+        cdef shared_ptr[StageOCPExprEvaluatorBase] sampler_b 
         assign_shared_ptr(sampler_b, sampler)
-        cdef vector[double] buffer = self.myFatropApplication.get().LastBasicOCPSolution().Eval(sampler_b)
+        cdef vector[double] buffer = self.myFatropApplication.get().LastStageOCPSolution().Eval(sampler_b)
         # use sampler
         # sampler.get().Sample(self.myFatropApplication.get().LastSolution(), self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), buffer)
         n_rows = sampler.get().n_rows()

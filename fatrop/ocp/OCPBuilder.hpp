@@ -1,9 +1,7 @@
 #ifndef OCPBUILDERINCLUDED
 #define OCPBUILDERINCLUDED
-#include "ocp/BFOCPBasic.hpp"
-#include "ocp/BFOCPAL.hpp"
-#include "ocp/BFOCPAdapter.hpp"
-#include "ocp/BFOCPAdapterAL.hpp"
+#include "ocp/StageOCP.hpp"
+#include "ocp/OCPAdapter.hpp"
 #include "ocp/OCPLSRiccati.hpp"
 #include "ocp/OCPNoScaling.hpp"
 #include "solver/FatropParams.hpp"
@@ -17,7 +15,7 @@
 #include <sstream>
 // #include <templates/FatropApplication.hpp>
 #include <map>
-#include "BasicOCPSamplers.hpp"
+#include "StageOCPSamplers.hpp"
 // #include <solver/AlgBuilder.hpp>
 /*
 
@@ -33,7 +31,7 @@ namespace fatrop
     class OCPSolutionSampler_old
     {
     public:
-        OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<BFOCPAdapter> &ocp);
+        OCPSolutionSampler_old(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval, const shared_ptr<FatropData> &fatropdata, const shared_ptr<OCPAdapter> &ocp);
         int Sample(vector<double> &sample);
         vector<double> Sample();
         int Size();
@@ -48,7 +46,7 @@ namespace fatrop
         const int K_;
         shared_ptr<StageExpression> eval_;
         shared_ptr<FatropData> fatropdata_;
-        shared_ptr<BFOCPAdapter> ocp_;
+        shared_ptr<OCPAdapter> ocp_;
     };
 
     class OCPBuilder
@@ -68,7 +66,7 @@ namespace fatrop
         bool GN = false;
         bool DDP = false;
         shared_ptr<BasicOCP> ocptemplatebasic;
-        shared_ptr<BFOCPAdapter> ocptempladapteror;
+        shared_ptr<OCPAdapter> ocptempladapteror;
         shared_ptr<OCP> ocptempladapter;
         shared_ptr<OCPAL> ocptempladapterAL;
         shared_ptr<OCPLSRiccati> ocplsriccati1;

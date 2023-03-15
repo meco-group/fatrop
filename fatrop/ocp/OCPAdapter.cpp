@@ -1,6 +1,6 @@
-#include "ocp/BFOCPAdapter.hpp"
+#include "ocp/OCPAdapter.hpp"
 using namespace fatrop;
-int BFOCPAdapter::evalHess(
+int OCPAdapter::evalHess(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -57,7 +57,7 @@ int BFOCPAdapter::evalHess(
     }
     return 0;
 }
-int BFOCPAdapter::evalJac(
+int OCPAdapter::evalJac(
     OCPKKTMemory *OCP,
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars)
@@ -146,7 +146,7 @@ int BFOCPAdapter::evalJac(
     }
     return 0;
 }
-int BFOCPAdapter::EvalConstraintViolation(
+int OCPAdapter::EvalConstraintViolation(
     OCPKKTMemory *OCP,
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars,
@@ -239,7 +239,7 @@ int BFOCPAdapter::EvalConstraintViolation(
     }
     return 0;
 }
-int BFOCPAdapter::EvalGrad(
+int OCPAdapter::EvalGrad(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -275,7 +275,7 @@ int BFOCPAdapter::EvalGrad(
     }
     return 0;
 };
-int BFOCPAdapter::EvalObj(
+int OCPAdapter::EvalObj(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -312,7 +312,7 @@ int BFOCPAdapter::EvalObj(
     return 0;
 };
 
-int BFOCPAdapter::EvalDynamics(
+int OCPAdapter::EvalDynamics(
     OCPKKTMemory *OCP,
     const int k,
     const FatropVecBF &uk,
@@ -338,13 +338,13 @@ int BFOCPAdapter::EvalDynamics(
         k);
     return 0;
 };
-void BFOCPAdapter::SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in)
+void OCPAdapter::SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in)
 {
     stageparams = stage_params_in;
     globalparams = global_params_in;
     return;
 }
-void BFOCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
+void OCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
 {
     // offsets
     VEC *ux_intial_p = (VEC *)fatropdata->x_initial;
@@ -365,7 +365,7 @@ void BFOCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<d
     }
     return;
 }
-void BFOCPAdapter::GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x)
+void OCPAdapter::GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x)
 {
     // offsets
     VEC *ux_sol = (VEC *)fatropdata->x_curr;

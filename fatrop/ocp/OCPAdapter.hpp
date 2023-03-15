@@ -22,10 +22,10 @@
 namespace fatrop
 {
     using namespace std;
-    class BFOCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
+    class OCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        BFOCPAdapter(const shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
+        OCPAdapter(const shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
                                                            nuexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
                                                                                       { return ocptempl_->get_nuk(k); })),
                                                            nxexpr(TransformRange<int>(0, K, [&ocptempl_](int k)

@@ -34,36 +34,36 @@ cdef extern from "FatropStats.hpp" namespace "fatrop":
         void Print()
     
 
-cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPExprEvaluatorBase:
+cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
+    cdef cppclass StageOCPExprEvaluatorBase:
         int n_rows()
         int n_cols()
         # int K()
         int Size()
         # vector[double] Eval(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params)
-cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPSolution:
-        vector[double] Eval(const shared_ptr[BasicOCPExprEvaluatorBase] &evaluator) const
+cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass StageOCPSolution:
+        vector[double] Eval(const shared_ptr[StageOCPExprEvaluatorBase] &evaluator) const
 
-cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass OCPControlSampler(BasicOCPExprEvaluatorBase):
+cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
+    cdef cppclass StageOCPControlSampler(StageOCPExprEvaluatorBase):
         # int Evaluate(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
         # int n_rows()
         # int n_cols()
         int K()
         # int Size()
-cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPExprEvaluatorFactory:
-        shared_ptr[OCPControlSampler] at_control()
+cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
+    cdef cppclass StageOCPExprEvaluatorFactory:
+        shared_ptr[StageOCPControlSampler] at_control()
 # cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
 #     cdef cppclass ParameterSetter:
 #         void SetValue(vector[double]& global_params, vector[double]& stage_params, const double* value)
-cdef extern from "BasicOCPApplication.hpp" namespace "fatrop::BasicOCPApplication":
+cdef extern from "StageOCPApplication.hpp" namespace "fatrop::StageOCPApplication":
     cdef cppclass AppParameterSetter:
         void SetValue(const double* value)
 
-cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPApplication:
+cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass StageOCPApplication:
         int Optimize()
         void Build()
         FatropVecBF& LastSolution()
@@ -78,13 +78,13 @@ cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
         const int nx_
         const int nu_
         const int K_
-        shared_ptr[BasicOCPExprEvaluatorFactory] GetExprEvaluator(const string &sampler_name)
-        const BasicOCPSolution &LastBasicOCPSolution()
+        shared_ptr[StageOCPExprEvaluatorFactory] GetExprEvaluator(const string &sampler_name)
+        const StageOCPSolution &LastStageOCPSolution()
 
-cdef extern from "BasicOCPApplication.hpp" namespace "fatrop":
-    cdef cppclass BasicOCPApplicationBuilder:
+cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass StageOCPApplicationBuilder:
         @staticmethod
-        shared_ptr[BasicOCPApplication] FromRockitInterface(const string &functions, const string &json_spec_file) # except +
+        shared_ptr[StageOCPApplication] FromRockitInterface(const string &functions, const string &json_spec_file) # except +
 
 # cdef extern from "FatropAlg.hpp" namespace "fatrop":
 #     cdef cppclass FatropAlg:
