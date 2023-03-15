@@ -16,7 +16,10 @@ namespace fatrop
 {
     /* TODO: at this point the StageOCP's implementation implements function evaluation through Casadi Codegen 
     *  it should become an interface that can be implemented by user defined function evaluation methods 
-    *  the casadi implementation should then become a derived class of this interface
+    *  the StageOCP is then characterised by its structure that is a bit less general than the OCPAbstract interface
+    *  more in particular it seperates initial, intermediate and terminal stages, where it has different constraints and objectives
+    * 
+    *  the casadi implementation should become a derived class of this interface
     */ 
 
     /// BasicOCP is a OCPAbstract implementation that is built on top of CasAdi Codegenerated functions 
