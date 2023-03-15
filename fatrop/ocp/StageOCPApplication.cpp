@@ -85,12 +85,12 @@ OCPDims OCPApplication::GetOCPDims()
     StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
     {
     }
-    SingleStageOCPSolution::SingleStageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app)
+    StageOCPSolution::StageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app)
     {
         SetDims(app->GetOCPDims());
     }
-    SingleStageOCPSolution::SingleStageOCPSolution(){};
-    void SingleStageOCPSolution::SetDims(const OCPDims &dims)
+    StageOCPSolution::StageOCPSolution(){};
+    void StageOCPSolution::SetDims(const OCPDims &dims)
     {
         FatropSolution::SetDims(dims);
         nx = dims.nx.at(0);
@@ -101,22 +101,22 @@ OCPDims OCPApplication::GetOCPDims()
         global_params.resize(n_global_params);
         stage_params.resize(n_stage_params);
     }
-    void SingleStageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
+    void StageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
     {
         FatropSolution::SetPrimalSolution(sol);
         this->global_params = global_params;
         this->stage_params = stage_params;
     }
 
-    void SingleStageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
+    void StageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
     {
         sampler->Evaluate(sol_primal, global_params, stage_params, result);
     }
-    vector<double> SingleStageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
+    vector<double> StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
     {
         return evaluator->Evaluate(sol_primal, global_params, stage_params);
     }
-    void SingleStageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
+    void StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
     {
         evaluator->Evaluate(sol_primal, global_params, stage_params, result);
     }
@@ -152,7 +152,7 @@ OCPDims OCPApplication::GetOCPDims()
         }
         return ret;
     }
-    const SingleStageOCPSolution &StageOCPApplication::LastStageOCPSolution()
+    const StageOCPSolution &StageOCPApplication::LastStageOCPSolution()
     {
         return last_solution;
     }

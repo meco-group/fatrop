@@ -97,13 +97,13 @@ namespace fatrop
         StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp);
     };
 
-    struct SingleStageOCPSolution : public FatropSolution
+    struct StageOCPSolution : public FatropSolution
     {
     public:
-        SingleStageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app);
+        StageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app);
 
     protected:
-        SingleStageOCPSolution();
+        StageOCPSolution();
         void SetDims(const OCPDims &dims);
         void Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params);
         int nx;
@@ -151,7 +151,7 @@ namespace fatrop
         shared_ptr<AppParameterSetter> GetParameterSetter(const string &setter_name);
         void Build();
         int Optimize();
-        const SingleStageOCPSolution &LastStageOCPSolution();
+        const StageOCPSolution &LastStageOCPSolution();
 
     public:
         const int nx_;
@@ -160,7 +160,7 @@ namespace fatrop
         const int K_;
 
     private:
-        SingleStageOCPSolution last_solution;
+        StageOCPSolution last_solution;
 
     protected:
         map<string, shared_ptr<StageExpression>> stage_expressions;
