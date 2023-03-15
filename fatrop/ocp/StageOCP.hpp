@@ -336,7 +336,7 @@ namespace fatrop
             EvalCasGen gineqf(handle, "gineq");
             EvalCasGen GgineqFtf(handle, "GgineqFt");
             EvalCasGen gineqFf(handle, "gineqF");
-            shared_ptr<StageOCP> basicocp = make_shared<StageOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
+            shared_ptr<StageOCP> stageocp = make_shared<StageOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
                                                                   BAbtf,
                                                                   bkf,
                                                                   RSQrqtIf,
@@ -363,7 +363,7 @@ namespace fatrop
                                                                   json_spec["stage_params"].get_number_array<double>("%lf"),
                                                                   json_spec["global_params"].get_number_array<double>("%lf"),
                                                                   initial_u, initial_x);
-            return basicocp;
+            return stageocp;
         }
     };
 }

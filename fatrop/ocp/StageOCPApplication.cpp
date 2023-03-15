@@ -164,15 +164,15 @@ OCPDims OCPApplication::GetOCPDims()
         std::stringstream buffer;
         buffer << t.rdbuf();
         json::jobject json_spec = json::jobject::parse(buffer.str());
-        auto ocptemplatebasic = StageOCPBuilder::FromRockitInterface(handle, json_spec);
+        auto stageocp = StageOCPBuilder::FromRockitInterface(handle, json_spec);
         // instantiate the BasicOCPApplication
-        auto result = make_shared<StageOCPApplication>(ocptemplatebasic);
+        auto result = make_shared<StageOCPApplication>(stageocp);
         // add all samplers
         vector<string> sampler_names = json_spec["samplers"];
-        // const int nu = ocptemplatebasic->nu_;
-        // const int nx = ocptemplatebasic->nx_;
-        const int no_stage_params = ocptemplatebasic->n_stage_params_;
-        const int K = ocptemplatebasic->K_;
+        // const int nu = stageocp->nu_;
+        // const int nx = stageocp->nx_;
+        const int no_stage_params = stageocp->n_stage_params_;
+        const int K = stageocp->K_;
         for (auto sampler_name : sampler_names)
         {
             auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
