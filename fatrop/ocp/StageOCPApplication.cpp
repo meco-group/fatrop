@@ -19,7 +19,7 @@ int NLPApplication::Optimize()
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
-FatropVecBF &NLPApplication::LastSolution()
+FatropVecBF &NLPApplication::LastSolutionPrimal()
 {
     assert(!dirty);
     return fatropdata_->x_curr;
@@ -76,11 +76,11 @@ OCPDims OCPApplication::GetOCPDims()
     FatropSolution::FatropSolution(){};
     void FatropSolution::SetDims(const NLPDims &dims)
     {
-        sol_primal.resize(dims.nvars);
+        sol_primal_.resize(dims.nvars);
     };
     void FatropSolution::SetPrimalSolution(const FatropVecBF &sol)
     {
-        sol.copyto(sol_primal);
+        sol.copyto(sol_primal_);
     }
     StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
     {
@@ -110,15 +110,15 @@ OCPDims OCPApplication::GetOCPDims()
 
     void StageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
     {
-        sampler->Evaluate(sol_primal, global_params, stage_params, result);
+        sampler->Evaluate(sol_primal_, global_params, stage_params, result);
     }
     vector<double> StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
     {
-        return evaluator->Evaluate(sol_primal, global_params, stage_params);
+        return evaluator->Evaluate(sol_primal_, global_params, stage_params);
     }
     void StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
     {
-        evaluator->Evaluate(sol_primal, global_params, stage_params, result);
+        evaluator->Evaluate(sol_primal_, global_params, stage_params, result);
     }
     StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : StageOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
@@ -148,7 +148,7 @@ OCPDims OCPApplication::GetOCPDims()
         int ret = NLPApplication::Optimize();
         if (ret == 0)
         {
-            last_solution.SetPrimalSolution(LastSolution());
+            last_solution.SetPrimalSolution(LastSolutionPrimal());
         }
         return ret;
     }

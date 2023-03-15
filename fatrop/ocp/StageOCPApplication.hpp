@@ -30,13 +30,44 @@ namespace fatrop
     public:
         int Optimize();
         // TODO: make this protected and use last_solution instead and choose other name
-        FatropVecBF &LastSolution();
+        FatropVecBF &LastSolutionPrimal();
+        FatropVecBF &LastSolutionDual()
+        {
+            return fatropdata_->lam_curr;
+        }
+        FatropVecBF &LastSolutionZL()
+        {
+            return fatropdata_->zL_curr;
+        }
+        FatropVecBF& LastSolutionZU()
+        {
+            return fatropdata_->zU_curr;
+        }
         FatropVecBF &InitialGuessPrimal();
+        FatropVecBF& InitialGuessDual()
+        {
+            return fatropdata_->lam_init;
+        }
+        FatropVecBF& InitialGuessZL()
+        {
+            return fatropdata_->zL_init;
+        }
+        FatropVecBF& InitialGuessZU()
+        {
+            return fatropdata_->zU_init;
+        }
         FatropStats GetStats();
         NLPDims GetNLPDims();
         void SetNumericOption(const string& option_name, double value)
         {
             fatropparams_->SetNumericOption(option_name, value);
+        }
+        void SetInitial(const FatropSolution& initial_guess)
+        {
+            InitialGuessPrimal() = initial_guess.sol_primal_;
+            InitialGuessDual() = initial_guess.sol_dual_;
+            InitialGuessZL() = initial_guess.sol_zL_;
+            InitialGuessZU() = initial_guess.sol_zU_; 
         }
 
     protected:
@@ -83,13 +114,24 @@ namespace fatrop
         FatropSolution();
         void SetDims(const NLPDims &dims);
         void SetPrimalSolution(const FatropVecBF &sol);
+        void SetSolution(const FatropVecBF &sol_primal, const FatropVecBF& sol_dual, const FatropVecBF& sol_zL, const FatropVecBF& sol_zU)
+        {
+            sol_primal.copyto(sol_primal_);
+            sol_dual.copyto(sol_dual_);
+            sol_zL.copyto(sol_zL_);
+            sol_zU.copyto(sol_zU_);
+        };
 
     protected:
-        vector<double> sol_primal;
+        vector<double> sol_primal_;
+        vector<double> sol_dual_;
+        vector<double> sol_zL_;
+        vector<double> sol_zU_;
+        friend class NLPApplication;
     };
     void FatropSolution::GetPrimalSolution(vector<double> &result)
     {
-        result = sol_primal;
+        result = sol_primal_;
     }
 
     struct StageOCPApplicationAbstract : public OCPApplication
