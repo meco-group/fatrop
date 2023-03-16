@@ -417,14 +417,14 @@ inline int FatropAlg::Initialization()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->Initialization_dual(
+    int res = fatropnlp_->Initialization_s(
+        fatropdata_->s_curr);
+    res = res && fatropnlp_->Initialization_dual(
         fatropdata_->grad_curr,
         fatropdata_->lam_calc,
         // fatropdata_->s_curr,
         fatropdata_->zL_curr,
         fatropdata_->zU_curr);
-    res = fatropnlp_->Initialization_s(
-        fatropdata_->s_curr);
     stats.initialization_time += blasfeo_toc(&timer);
     return res;
 }

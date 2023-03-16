@@ -278,8 +278,7 @@ int FatropOCP::Initialization_dual(
 }
 int FatropOCP::Initialization_s(FatropVecBF &s_curr)
 {
-    OCPInitializer_.CalcSlacks(&ocpkktmemory_, s_curr);
-    return 0;
+    return OCPInitializer_.CalcSlacks(&ocpkktmemory_, s_curr);
 }
 NLPDims FatropOCP::GetNLPDims() const
 {

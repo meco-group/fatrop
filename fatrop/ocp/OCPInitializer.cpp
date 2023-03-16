@@ -43,6 +43,18 @@ int OCPInitializer::AdaptKKTInitial(
             GESE(1, ng_k, 0.0, Ggt_p + k, nu_k + nx_k, 0);
         }
     }
+    OCPMACRO(MAT *, Ggt_ineq, _p);
+    OCPMACRO(int *, ng_ineq, _p);
+    for (int k = 0; k < K; k++)
+    {
+        int nu_k = nu_p[k];
+        int nx_k = nx_p[k];
+        int ng_ineq_k = ng_ineq_p[k];
+        if (ng_ineq_k > 0)
+        {
+            GESE(1, ng_ineq_k, 0.0, Ggt_ineq_p + k, nu_k + nx_k, 0);
+        }
+    }
     return 0;
 }
 int OCPInitializer::CalcSlacks(
@@ -67,7 +79,7 @@ int OCPInitializer::CalcSlacks(
         if (ng_ineq_k > 0)
         {
             ROWEX(ng_ineq_k, 1.0, Ggt_ineq_p + k, nu_k + nx_k, 0, s_p, offs_ineq_k);
-            GESE(1, ng_ineq_k, 0.0, Ggt_ineq_p + k, nu_k + nx_k, 0);
+            // GESE(1, ng_ineq_k, 0.0, Ggt_ineq_p + k, nu_k + nx_k, 0);
         }
     }
     return 0;
