@@ -21,9 +21,10 @@ namespace fatrop
     class FatropSolution
     {
     public:
-        void GetPrimalSolution(vector<double> &result);
+        // void GetPrimalSolution(vector<double> &result);
         // defautl copy constructor
         FatropSolution(const FatropSolution &other) = default;
+        const vector<double>& PrimalSolution(){return sol_primal_;};
 
     protected:
         FatropSolution();
@@ -136,10 +137,10 @@ namespace fatrop
     protected:
         shared_ptr<OCPAdapter> adapter;
     };
-    void FatropSolution::GetPrimalSolution(vector<double> &result)
-    {
-        result = sol_primal_;
-    }
+    // void FatropSolution::GetPrimalSolution(vector<double> &result)
+    // {
+    //     result = sol_primal_;
+    // }
 
     struct StageOCPApplicationAbstract : public OCPApplication
     {
