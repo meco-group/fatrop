@@ -79,18 +79,17 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller)
 {
     Initialize();
-    fatrop_params_->RegisterOption(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step ,false));
+    fatrop_params_->RegisterOption(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step, false));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("delta", "delta", &delta, 1.0, 0.0));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-12, 0.0));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
+    fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
 };
 void BackTrackingLineSearch::Initialize()
 {
-    // todo avoid reallocation when maxiter doesn't change
-    s_phi = fatrop_params_->s_phi;
-    delta = fatrop_params_->delta;
-    s_theta = fatrop_params_->s_theta;
-    gamma_theta = fatrop_params_->gamma_theta;
-    gamma_phi = fatrop_params_->gamma_phi;
-    eta_phi = fatrop_params_->eta_phi;
-    gamma_alpha = fatrop_params_->gamma_alpha;
 }
 LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup)
 {
@@ -212,7 +211,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             res.ls = 1;
             return res;
         }
-        if (soc_step && (p >= p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old) && p>1)))
+        if (soc_step && (p >= p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old) && p > 1)))
         {
             // deactivate soc
             soc_step = false;

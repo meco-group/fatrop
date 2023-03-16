@@ -15,6 +15,25 @@ FatropAlg::FatropAlg(
       linesearch_(linesearch),
       journaller_(journaller)
 {
+
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("tol", "tolerance", &tol, 1e-8, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("acceptable_tol", "acceptable tolerance", &acceptable_tol, 1e-6, 0.0));
+    fatropparams_->RegisterOption(IntegerOption::LowerBounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
+    fatropparams_->RegisterOption(IntegerOption::LowerBounded("acceptable_iter", "acceptable iter", &acceptable_iter, 15, 0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("lammax", "lammax", &lammax, 1e3, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("mu_init", "mu_init", &mu0, 1e2, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("delta_w0", "delta_w0", &delta_w0, 1e-4, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("delta_wmin", "delta_wmin", &delta_wmin, 1e-20, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("kappa_wmin", "kappa_wmin", &kappa_wmin, 1.0 / 3.0, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("kappa_wplus", "kappa_wplus", &kappa_wplus, 8.0, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("kappa_wplusem", "kappa_wplusem", &kappa_wplusem, 100.0, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-2, 0.0));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
+    fatropparams_->RegisterOption(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
+    fatropparams_->RegisterOption(NumericOption::LowerBounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
     Initialize();
     fatropnlp_->GetInitialGuess(fatropdata_->x_initial);
     fatropnlp->GetBounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
@@ -22,30 +41,10 @@ FatropAlg::FatropAlg(
 }
 void FatropAlg::Initialize()
 {
-    lammax = fatropparams_->lammax;
     maxiter = fatropparams_->maxiter;
-    tol = fatropparams_->tol;
-    mu0 = fatropparams_->mu0;
-    kappa_eta = fatropparams_->kappa_eta;
-    kappa_mu = fatropparams_->kappa_mu;
-    theta_mu = fatropparams_->theta_mu;
-    delta_w0 = fatropparams_->delta_w0;
-    delta_wmin = fatropparams_->delta_wmin;
-    kappa_wmin = fatropparams_->kappa_wmin;
-    kappa_wplus = fatropparams_->kappa_wplus;
-    kappa_wplusem = fatropparams_->kappa_wplusem;
-    delta_c_stripe = fatropparams_->delta_c_stripe;
-    kappa_c = fatropparams_->kappa_c;
     kappa_d = fatropparams_->kappa_d;
-    max_watchdog_steps = fatropparams_->max_watchdog_steps;
-    acceptable_tol = fatropparams_->acceptable_tol;
-    acceptable_iter = fatropparams_->acceptable_iter;
-    warm_start_init_point = fatropparams_->warm_start_init_point;
     fatropdata_->Initialize();
     linesearch_->Initialize();
-    // first_try_watchdog = fatropparams_->first_try_watchdog;
-    // todo avoid reallocation when maxiter doesn't change
-    // filter_ = RefCountPtr<Filter>(new Filter(maxiter + 1));
 }
 void FatropAlg::Reset()
 {
@@ -80,7 +79,7 @@ int FatropAlg::Optimize()
     int no_no_full_steps = 0;
     int no_no_full_steps_bc_filter = 0;
     int no_acceptable_steps = 0;
-    double delta_w_last_backup = 0.;
+    // double delta_w_last_backup = 0.;
     bool restore_watchdog_step = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
@@ -93,6 +92,8 @@ int FatropAlg::Optimize()
     EvalGradCurr();
     if (warm_start_init_point)
     {
+        fatropnlp_->Initialization_s(
+            fatropdata_->s_curr);
         fatropdata_->WarmStartDual();
         fatropdata_->BoundZ();
     }
@@ -112,7 +113,7 @@ int FatropAlg::Optimize()
     }
     fatropdata_->BoundSlacks();
     EvalCVCurr();
-    fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
+    fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->CVL1Curr());
     double theta_max = 1e4 * fatropdata_->CVL1Curr();
     filter_->Augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
     int ls = 0;
@@ -157,7 +158,7 @@ int FatropAlg::Optimize()
                 // activate watchdog procedure
                 // backup x_k
                 fatropdata_->BackupCurr();
-                delta_w_last_backup = delta_w_last;
+                // delta_w_last_backup = delta_w_last;
                 watch_dog_step = true;
                 // no_no_full_steps = 0;
                 no_watch_dog_steps_taken = 0;

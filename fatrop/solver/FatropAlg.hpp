@@ -66,7 +66,7 @@ namespace fatrop
     public:
         double tol;
         double acceptable_tol;
-        double acceptable_iter;
+        int acceptable_iter;
         int maxiter;
 
     private:
@@ -83,6 +83,7 @@ namespace fatrop
         double delta_c_stripe;
         double kappa_c;
         double kappa_d;
+        double theta_min;
         int max_watchdog_steps;
         bool warm_start_init_point;
         // bool first_try_watchdog;
