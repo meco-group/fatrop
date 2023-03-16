@@ -77,6 +77,9 @@ OCPDims OCPApplication::GetOCPDims()
     void FatropSolution::SetDims(const NLPDims &dims)
     {
         sol_primal_.resize(dims.nvars);
+        sol_dual_.resize(dims.neqs);
+        sol_zL_.resize(dims.nineqs);
+        sol_zU_.resize(dims.nineqs);
     };
     void FatropSolution::SetPrimalSolution(const FatropVecBF &sol)
     {

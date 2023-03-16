@@ -40,7 +40,7 @@ void FatropAlg::Initialize()
     max_watchdog_steps = fatropparams_->max_watchdog_steps;
     acceptable_tol = fatropparams_->acceptable_tol;
     acceptable_iter = fatropparams_->acceptable_iter;
-    warm_start_dual = fatropparams_->warm_start_dual;
+    warm_start_dual = fatropparams_->warm_start_init_point;
     fatropdata_->Initialize();
     linesearch_->Initialize();
     // first_try_watchdog = fatropparams_->first_try_watchdog;

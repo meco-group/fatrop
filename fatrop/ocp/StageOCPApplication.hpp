@@ -18,6 +18,32 @@
 
 namespace fatrop
 {
+    class FatropSolution
+    {
+    public:
+        void GetPrimalSolution(vector<double> &result);
+        // defautl copy constructor
+        FatropSolution(const FatropSolution &other) = default;
+
+    protected:
+        FatropSolution();
+        void SetDims(const NLPDims &dims);
+        void SetPrimalSolution(const FatropVecBF &sol);
+        void SetSolution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU)
+        {
+            sol_primal.copyto(sol_primal_);
+            sol_dual.copyto(sol_dual_);
+            sol_zL.copyto(sol_zL_);
+            sol_zU.copyto(sol_zU_);
+        };
+
+    protected:
+        vector<double> sol_primal_;
+        vector<double> sol_dual_;
+        vector<double> sol_zL_;
+        vector<double> sol_zU_;
+        friend class NLPApplication;
+    };
     // TODO move this class to a separate file
     class NLPApplication
     {
@@ -39,35 +65,38 @@ namespace fatrop
         {
             return fatropdata_->zL_curr;
         }
-        FatropVecBF& LastSolutionZU()
+        FatropVecBF &LastSolutionZU()
         {
             return fatropdata_->zU_curr;
         }
         FatropVecBF &InitialGuessPrimal();
-        FatropVecBF& InitialGuessDual()
+        FatropVecBF &InitialGuessDual()
         {
             return fatropdata_->lam_init;
         }
-        FatropVecBF& InitialGuessZL()
+        FatropVecBF &InitialGuessZL()
         {
             return fatropdata_->zL_init;
         }
-        FatropVecBF& InitialGuessZU()
+        FatropVecBF &InitialGuessZU()
         {
             return fatropdata_->zU_init;
         }
         FatropStats GetStats();
         NLPDims GetNLPDims();
-        void SetNumericOption(const string& option_name, double value)
+        template <typename T>
+        void SetOption(const string &option_name, T value)
         {
-            fatropparams_->SetNumericOption(option_name, value);
+            fatropparams_->SetOption(option_name, value);
         }
-        void SetInitial(const FatropSolution& initial_guess)
+
+    public:
+        void SetInitial(const FatropSolution &initial_guess)
         {
             InitialGuessPrimal() = initial_guess.sol_primal_;
             InitialGuessDual() = initial_guess.sol_dual_;
             InitialGuessZL() = initial_guess.sol_zL_;
-            InitialGuessZU() = initial_guess.sol_zU_; 
+            InitialGuessZU() = initial_guess.sol_zU_;
         }
 
     protected:
@@ -81,6 +110,9 @@ namespace fatrop
         shared_ptr<Journaller> journaller_;
         shared_ptr<FatropAlg> fatropalg_;
     };
+    template void NLPApplication::SetOption(const string &option_name, double value);
+    template void NLPApplication::SetOption(const string &option_name, int value);
+    template void NLPApplication::SetOption(const string &option_name, bool value);
 
     // TODO move this class to a separate file
     class OCPApplication : public NLPApplication
@@ -94,6 +126,7 @@ namespace fatrop
     public:
         vector<double> &GlobalParameters();
         vector<double> &StageParameters();
+        using NLPApplication::SetInitial;
         void SetInitial(vector<double> &initial_u, vector<double> &initial_x);
         OCPDims GetOCPDims();
 
@@ -102,32 +135,6 @@ namespace fatrop
 
     protected:
         shared_ptr<OCPAdapter> adapter;
-    };
-    class FatropSolution
-    {
-    public:
-        void GetPrimalSolution(vector<double> &result);
-        // defautl copy constructor
-        FatropSolution(const FatropSolution &other) = default;
-
-    protected:
-        FatropSolution();
-        void SetDims(const NLPDims &dims);
-        void SetPrimalSolution(const FatropVecBF &sol);
-        void SetSolution(const FatropVecBF &sol_primal, const FatropVecBF& sol_dual, const FatropVecBF& sol_zL, const FatropVecBF& sol_zU)
-        {
-            sol_primal.copyto(sol_primal_);
-            sol_dual.copyto(sol_dual_);
-            sol_zL.copyto(sol_zL_);
-            sol_zU.copyto(sol_zU_);
-        };
-
-    protected:
-        vector<double> sol_primal_;
-        vector<double> sol_dual_;
-        vector<double> sol_zL_;
-        vector<double> sol_zU_;
-        friend class NLPApplication;
     };
     void FatropSolution::GetPrimalSolution(vector<double> &result)
     {
@@ -186,7 +193,7 @@ namespace fatrop
 
     public:
         shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const string &sampler_name);
-        shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression>& expr)
+        shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression> &expr)
         {
             return make_shared<StageOCPExprEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
         }
