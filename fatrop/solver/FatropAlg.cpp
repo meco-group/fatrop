@@ -91,7 +91,6 @@ int FatropAlg::Optimize()
     LineSearchInfo lsinfo;
     EvalJac(); // todo twice evaluation
     EvalGradCurr();
-    fatropdata_->BoundSlacks();
     if (!warm_start_dual)
     {
         int initialization_res = Initialization();
@@ -106,6 +105,7 @@ int FatropAlg::Optimize()
             fatropdata_->lam_curr.SetConstant(0.0);
         }
     }
+    fatropdata_->BoundSlacks();
     EvalCVCurr();
     fatropdata_->theta_min = fatropparams_->theta_min * MAX(1.0, fatropdata_->CVL1Curr());
     double theta_max = 1e4 * fatropdata_->CVL1Curr();
