@@ -3,24 +3,20 @@ using namespace fatrop;
 
 int OCPInitializer::AdaptKKTInitial(
     OCPKKTMemory *OCP,
-    const FatropVecBF &grad,
-    FatropVecBF &s)
+    const FatropVecBF &grad)
 {
     // horizon length
     int K = OCP->K;
     // offsets
     int *offs_ux = (int *)OCP->aux.ux_offs.data();
-    int *offs_ineq_p = (int *)OCP->aux.ineq_offs.data();
     OCPMACRO(MAT *, BAbt, _p);
     OCPMACRO(MAT *, Ggt, _p);
-    OCPMACRO(MAT *, Ggt_ineq, _p);
     OCPMACRO(MAT *, RSQrqt, _p);
     OCPMACRO(int *, nu, _p);
     OCPMACRO(int *, nx, _p);
     OCPMACRO(int *, ng, _p);
-    OCPMACRO(int *, ng_ineq, _p);
     SOLVERMACRO(VEC *, grad, _p);
-    SOLVERMACRO(VEC *, s, _p);
+    // SOLVERMACRO(VEC *, s, _p);
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -47,6 +43,21 @@ int OCPInitializer::AdaptKKTInitial(
             GESE(1, ng_k, 0.0, Ggt_p + k, nu_k + nx_k, 0);
         }
     }
+    return 0;
+}
+int OCPInitializer::CalcSlacks(
+    OCPKKTMemory *OCP,
+    FatropVecBF &s)
+{
+    // horizon length
+    int K = OCP->K;
+    // offsets
+    int *offs_ineq_p = (int *)OCP->aux.ineq_offs.data();
+    OCPMACRO(MAT *, Ggt_ineq, _p);
+    OCPMACRO(int *, nu, _p);
+    OCPMACRO(int *, nx, _p);
+    OCPMACRO(int *, ng_ineq, _p);
+    SOLVERMACRO(VEC *, s, _p);
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];

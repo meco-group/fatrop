@@ -56,10 +56,11 @@ namespace fatrop
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr) = 0;
-        virtual int Initialization(
+        virtual int Initialization_s(
+            FatropVecBF &s_curr) = 0;
+        virtual int Initialization_dual(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
-            FatropVecBF &s_curr,
             const FatropVecBF &zL,
             const FatropVecBF &zU) = 0;
         virtual int GetBounds(

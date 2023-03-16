@@ -67,24 +67,25 @@ namespace fatrop
             const FatropVecBF &lam,
             const FatropVecBF &grad,
             FatropVecBF &du_inf) override;
-        int Initialization(
+        int Initialization_s(
+            FatropVecBF &s_curr) override;
+        int Initialization_dual(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
-            FatropVecBF &s_curr,
             const FatropVecBF &zL,
             const FatropVecBF &zU) override;
 
         int GetBounds(
             FatropVecBF &lower,
-            FatropVecBF &upper) const override 
-            {
-               return ocp_->GetBounds(lower, upper);
-            };
+            FatropVecBF &upper) const override
+        {
+            return ocp_->GetBounds(lower, upper);
+        };
         int GetInitialGuess(
             FatropVecBF &initial) const override
-            {
-               return ocp_->GetInitialGuess(initial);
-            };
+        {
+            return ocp_->GetInitialGuess(initial);
+        };
         // int GetDefaultParams(
         //     FatropParams &params) const override
         //     {
