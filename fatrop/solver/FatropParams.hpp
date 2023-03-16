@@ -218,7 +218,7 @@ namespace fatrop
             }
         }
 
-    private:
+    public:
         void RegisterOption(const NumericOption &option)
         {
             numeric_options[option.name_] = option;
