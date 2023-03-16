@@ -151,7 +151,7 @@ OCPDims OCPApplication::GetOCPDims()
         int ret = NLPApplication::Optimize();
         if (ret == 0)
         {
-            last_solution.SetPrimalSolution(LastSolutionPrimal());
+            last_solution.SetSolution(LastSolutionPrimal(), LastSolutionDual(), LastSolutionZL(), LastSolutionZU());
         }
         return ret;
     }

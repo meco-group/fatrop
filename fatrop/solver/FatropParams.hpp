@@ -121,8 +121,8 @@ namespace fatrop
             RegisterOption(NumericOption::LowerBounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
             RegisterOption(NumericOption::LowerBounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-2, 0.0));
             RegisterOption(NumericOption::LowerBounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa1", "kappa1", &kappa1, 1e-2, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa2", "kappa2", &kappa2, 1e-2, 0.0));
+            RegisterOption(NumericOption::LowerBounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
+            RegisterOption(NumericOption::LowerBounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
             RegisterOption(NumericOption::LowerBounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
             RegisterOption(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
             RegisterOption(NumericOption::LowerBounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));

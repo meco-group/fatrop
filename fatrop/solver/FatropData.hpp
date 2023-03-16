@@ -29,6 +29,8 @@ namespace fatrop
         double EvalBarrierLinDecrCurr(double mu);
         double EvalBarrierLinDecrBackup(double mu);
         int BoundSlacks();
+        int BoundZ();
+        int WarmStartDual();
         int AdaptDualBounds(double mu);
         int AcceptInitialization();
         int TryStep(double alpha_primal, double alpha_dual);
@@ -154,6 +156,7 @@ namespace fatrop
         double kappa_sigma;
         double bound_relax_factor;
         double constr_viol_tol;
+        double warm_start_mult_bound_push;
     };
 }
 #endif // FATROPDATAINCLUDED

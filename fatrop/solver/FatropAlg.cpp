@@ -93,7 +93,8 @@ int FatropAlg::Optimize()
     EvalGradCurr();
     if (warm_start_init_point)
     {
-        // fatropdata_->Warm
+        fatropdata_->WarmStartDual();
+        fatropdata_->BoundZ();
     }
     else
     {
