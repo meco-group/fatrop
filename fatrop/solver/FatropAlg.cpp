@@ -79,7 +79,7 @@ int FatropAlg::Optimize()
     int no_no_full_steps = 0;
     int no_no_full_steps_bc_filter = 0;
     int no_acceptable_steps = 0;
-    // double delta_w_last_backup = 0.; 
+    // double delta_w_last_backup = 0.;
     bool restore_watchdog_step = false;
     blasfeo_timer timer;
     blasfeo_tic(&timer);
@@ -92,6 +92,8 @@ int FatropAlg::Optimize()
     EvalGradCurr();
     if (warm_start_init_point)
     {
+        fatropnlp_->Initialization_s(
+            fatropdata_->s_curr);
         fatropdata_->WarmStartDual();
         fatropdata_->BoundZ();
     }
