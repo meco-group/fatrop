@@ -84,7 +84,7 @@ namespace fatrop
         }
         int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result)
         {
-            eval_->Eval(solution.data() + k_ * (nu + nx), solution.data() + ((k_ < K_ - 1) ? k_ : K_ - 2) * (nu + nx) + nu, global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
+            eval_->Eval(solution.data() +  (k_ < K_ -1? k_ * (nu + nx): (K_-2)* (nu+nx)), solution.data() +  (k_ < K_ -1? k_ * (nu + nx) + nu: (K_-1)* (nu+nx)), global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
             return 0;
         }
         int Size()
@@ -120,7 +120,7 @@ namespace fatrop
         // at_tf()
         shared_ptr<OCPTimeStepSampler> at_tf()
         {
-            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params,K, K-1, eval_);
+            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params, K, K - 1, eval_);
         }
         // at_tk(int k)
         shared_ptr<OCPTimeStepSampler> at_tk(int k)
@@ -149,6 +149,8 @@ namespace fatrop
         const vector<int> _offsets_in;
         const vector<int> _offsets_out;
         const int no_stage_params;
+
+    protected:
         const int _no_var;
         const int K;
         const bool _global;

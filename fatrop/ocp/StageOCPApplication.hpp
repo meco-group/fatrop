@@ -24,7 +24,7 @@ namespace fatrop
         // void GetPrimalSolution(vector<double> &result);
         // defautl copy constructor
         FatropSolution(const FatropSolution &other) = default;
-        const vector<double>& PrimalSolution(){return sol_primal_;};
+        const vector<double> &PrimalSolution() { return sol_primal_; };
 
     protected:
         FatropSolution();
@@ -99,7 +99,7 @@ namespace fatrop
             InitialGuessZL() = initial_guess.sol_zL_;
             InitialGuessZU() = initial_guess.sol_zU_;
         }
-        const FatropOptions& GetOptions() const
+        const FatropOptions &GetOptions() const
         {
             return *fatropparams_;
         }
@@ -191,6 +191,11 @@ namespace fatrop
 
         public:
             void SetValue(const double value[]);
+            void SetValue(const initializer_list<double> il_)
+            {
+                assert((int)il_.size() == _no_var);
+                SetValue(il_.begin());
+            }
 
         private:
             const shared_ptr<OCPAdapter> adapter_;
