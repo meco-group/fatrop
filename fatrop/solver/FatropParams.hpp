@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <type_traits>
+#include <iostream>
 using namespace std;
 namespace fatrop
 {
@@ -72,7 +73,7 @@ namespace fatrop
     {
         Option<bool>(){};
         Option<bool>(const string &name, const string &description, bool *value, bool default_value) : name_(name), description_(description), value(value), default_value_(default_value){};
-        void Set(const bool& new_value)
+        void Set(const bool &new_value)
         {
             *value = new_value;
         }
@@ -169,6 +170,31 @@ namespace fatrop
         {
             boolean_options[option.name_] = option;
             option.SetDefault();
+        }
+        friend auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
+        {
+            os << "Numeric options :" << std::endl;
+            {
+                for (auto const &x : m.numeric_options)
+                {
+                    os << "   " << x.first << " : " << *x.second.value << std::endl;
+                }
+            }
+            os << "Integer options :" << std::endl;
+            {
+                for (auto const &x : m.integer_options)
+                {
+                    os << "   " << x.first << " : " << *x.second.value << std::endl;
+                }
+            }
+            os << "Boolean options :" << std::endl;
+            {
+                for (auto const &x : m.boolean_options)
+                {
+                    os << "   " << x.first << " : " << *x.second.value << std::endl;
+                }
+            }
+            return os;
         }
         map<string, NumericOption> numeric_options;
         map<string, IntegerOption> integer_options;

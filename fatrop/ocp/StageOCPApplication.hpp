@@ -99,6 +99,10 @@ namespace fatrop
             InitialGuessZL() = initial_guess.sol_zL_;
             InitialGuessZU() = initial_guess.sol_zU_;
         }
+        const FatropOptions& GetOptions() const
+        {
+            return *fatropparams_;
+        }
 
     protected:
         shared_ptr<FatropOptions> fatropparams_;
