@@ -66,7 +66,7 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
     cdef cppclass StageOCPApplication:
         int Optimize()
         void Build()
-        FatropVecBF& LastSolution()
+        FatropVecBF& LastSolutionPrimal()
         vector[double] &GlobalParameters()
         vector[double] &StageParameters()
         # vector[double] &InitialGuessPrimal()
