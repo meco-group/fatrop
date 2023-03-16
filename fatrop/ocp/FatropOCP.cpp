@@ -250,15 +250,15 @@ int FatropOCP::EvalDuInf(
         grad,
         du_inf);
 }
-int FatropOCP::Initialization(
+int FatropOCP::Initialization_dual(
     const FatropVecBF &grad,
     FatropVecBF &dlam,
-    FatropVecBF &s_curr,
+    // FatropVecBF &s_curr,
     const FatropVecBF &zL,
     const FatropVecBF &zU)
 {
     // assume constraint jacobian evaluated
-    OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad, s_curr);
+    OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
     s_dummy.SetConstant(0.0);
     s_zero.SetConstant(0.0);
     ux_dummy.SetConstant(0.0);
@@ -275,6 +275,10 @@ int FatropOCP::Initialization(
         sigma,
         gradb);
     return 0;
+}
+int FatropOCP::Initialization_s(FatropVecBF &s_curr)
+{
+    return OCPInitializer_.CalcSlacks(&ocpkktmemory_, s_curr);
 }
 NLPDims FatropOCP::GetNLPDims() const
 {

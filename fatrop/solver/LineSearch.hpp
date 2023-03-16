@@ -60,6 +60,7 @@ namespace fatrop
         double gamma_phi;
         double eta_phi;
         double gamma_alpha;
+        bool accept_every_trial_step = false;
     };
 } // namespace fatrop
 #endif // LINESEARCHINCLUDED

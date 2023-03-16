@@ -18,6 +18,7 @@ namespace fatrop
     *  it should become an interface that can be implemented by user defined function evaluation methods 
     *  the StageOCP is then characterised by its structure that is a bit less general than the OCPAbstract interface
     *  more in particular it seperates initial, intermediate and terminal stages, where it has different constraints and objectives
+    *  see the commented class at the end of this file
     * 
     *  the casadi implementation should become a derived class of this interface
     */ 
@@ -368,3 +369,188 @@ namespace fatrop
     };
 }
 #endif // OCPTEMPLATEBASICINCLUDED
+
+    // class SingleStageOCPAbstract
+    // {
+    // public:
+    //     // problem dimensions
+    //     virtual int get_ng_initial() { return 0; };
+    //     virtual int get_ng_intermediate() { return 0; };
+    //     virtual int get_ng_terminal() { return 0; };
+    //     virtual int get_ng_ineq_initial() { return 0; };
+    //     virtual int get_ng_ineq_intermediate() { return 0; };
+    //     virtual int get_ng_ineq_terminal() { return 0; }
+    //     virtual int get_nxk(const int k) const = 0;
+    //     virtual int get_nuk(const int k) const = 0;
+    //     virtual int get_n_global_params() const = 0;
+    //     virtual int get_n_stage_params_k(const int k) const = 0;
+    //     // functions related to dynamics
+    //     virtual int eval_BAbt(const double *states_kp1,
+    //                           const double *inputs_k,
+    //                           const double *states_k,
+    //                           const double *stage_params_k,
+    //                           const double *global_params,
+    //                           MAT *res) = 0;
+    //     virtual int eval_RSQrqt_initial(const double *objective_scale,
+    //                                     const double *inputs_k,
+    //                                     const double *states_k,
+    //                                     const double *lam_dyn_k,
+    //                                     const double *lam_eq_k,
+    //                                     const double *lam_ineq_k,
+    //                                     const double *stage_params_k,
+    //                                     const double *global_params,
+    //                                     MAT *res) = 0;
+    //     virtual int eval_RSQrqt_intermediate(const double *objective_scale,
+    //                                          const double *inputs_k,
+    //                                          const double *states_k,
+    //                                          const double *lam_dyn_k,
+    //                                          const double *lam_eq_k,
+    //                                          const double *lam_ineq_k,
+    //                                          const double *stage_params_k,
+    //                                          const double *global_params,
+    //                                          MAT *res) = 0;
+    //     virtual int eval_RSQrqt_terminal(const double *objective_scale,
+    //                                      const double *inputs_k,
+    //                                      const double *states_k,
+    //                                      const double *lam_dyn_k,
+    //                                      const double *lam_eq_k,
+    //                                      const double *lam_ineq_k,
+    //                                      const double *stage_params_k,
+    //                                      const double *global_params,
+    //                                      MAT *res) = 0;
+    //     virtual int eval_Ggtk_initial(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         MAT *res) { return 0; };
+    //     virtual int eval_Ggtk_intermediate(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         MAT *res) { return 0; };
+    //     virtual int eval_Ggtk_terminal(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         MAT *res) { return 0; };
+    //     virtual int eval_Ggt_ineq_initial(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         MAT *res) { return 0; };
+    //     virtual int eval_Ggt_ineq_intermediate(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         MAT *res) { return 0; };
+    //     virtual int eval_Ggt_ineq_terminal(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         MAT *res) { return 0; };
+    //     virtual int eval_b_initial(
+    //         const double *states_kp1,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *constraint_violation_k) = 0;
+    //     virtual int eval_b_intermediate(
+    //         const double *states_kp1,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *constraint_violation_k) = 0;
+    //     virtual int eval_b_terminal(
+    //         const double *states_kp1,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *constraint_violation_k) = 0;
+    //     virtual int eval_g_initial(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) { return 0; };
+    //     virtual int eval_g_intermediate(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) { return 0; };
+    //     virtual int eval_g_terminal(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) { return 0; };
+    //     virtual int eval_gineq_initial(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) { return 0; };
+    //     virtual int eval_gineq_intermediate(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) { return 0; };
+    //     virtual int eval_gineq_terminal(
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) { return 0; };
+    //     virtual int eval_rq_initial(
+    //         const double *objective_scale,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) = 0;
+    //     virtual int eval_rq_intermediate(
+    //         const double *objective_scale,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) = 0;
+    //     virtual int eval_rq_terminal(
+    //         const double *objective_scale,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) = 0;
+    //     virtual int eval_L_initial(
+    //         const double *objective_scale,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) = 0;
+    //     virtual int eval_L_intermediate(
+    //         const double *objective_scale,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) = 0;
+    //     virtual int eval_L_terminal(
+    //         const double *objective_scale,
+    //         const double *inputs_k,
+    //         const double *states_k,
+    //         const double *stage_params_k,
+    //         const double *global_params,
+    //         double *res) = 0;
+    // };

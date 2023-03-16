@@ -22,7 +22,7 @@ namespace fatrop
 
         shared_ptr<FatropOCP> Build(shared_ptr<OCPAdapter> &adapter)
         {
-            return make_shared<FatropOCP>(adapter, make_shared<OCPLSRiccati>(adapter->GetOCPDims()), make_shared<OCPNoScaling>(fatropparams_));
+            return make_shared<FatropOCP>(adapter, make_shared<OCPLSRiccati>(adapter->GetOCPDims(), fatropparams_), make_shared<OCPNoScaling>(fatropparams_));
         }
 
     private:

@@ -4,6 +4,8 @@
 #include "OCPLinearSolver.hpp"
 #include "solver/FatropPrinter.hpp"
 #include <cmath>
+#include <memory>
+#include "solver/FatropParams.hpp"
 #define SUMMATION_ALG kahan_sum
 namespace fatrop
 {
@@ -11,7 +13,7 @@ namespace fatrop
     class OCPLSRiccati : public OCPLinearSolver
     {
     public:
-        OCPLSRiccati(const OCPDims &dims);
+        OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions>& options);
         // solve a KKT system
         int computeSD(
             OCPKKTMemory *OCP,
@@ -134,6 +136,8 @@ namespace fatrop
             double kappa_d = 0;
             double mu = 0;
         } lastused_;
+        shared_ptr<FatropOptions> options_;
+        bool it_ref = true;
     };
 };     // namespace
 #endif // OCPLSRICCATIINCLUDED

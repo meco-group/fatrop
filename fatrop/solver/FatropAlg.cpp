@@ -40,7 +40,7 @@ void FatropAlg::Initialize()
     max_watchdog_steps = fatropparams_->max_watchdog_steps;
     acceptable_tol = fatropparams_->acceptable_tol;
     acceptable_iter = fatropparams_->acceptable_iter;
-    warm_start_dual = fatropparams_->warm_start_dual;
+    warm_start_init_point = fatropparams_->warm_start_init_point;
     fatropdata_->Initialize();
     linesearch_->Initialize();
     // first_try_watchdog = fatropparams_->first_try_watchdog;
@@ -91,7 +91,12 @@ int FatropAlg::Optimize()
     LineSearchInfo lsinfo;
     EvalJac(); // todo twice evaluation
     EvalGradCurr();
-    if (!warm_start_dual)
+    if (warm_start_init_point)
+    {
+        fatropdata_->WarmStartDual();
+        fatropdata_->BoundZ();
+    }
+    else
     {
         int initialization_res = Initialization();
         if (initialization_res == 0 && fatropdata_->LamLinfCalc() < lammax)
@@ -413,10 +418,12 @@ inline int FatropAlg::Initialization()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->Initialization(
+    int res = fatropnlp_->Initialization_s(
+        fatropdata_->s_curr);
+    res = fatropnlp_->Initialization_dual(
         fatropdata_->grad_curr,
         fatropdata_->lam_calc,
-        fatropdata_->s_curr,
+        // fatropdata_->s_curr,
         fatropdata_->zL_curr,
         fatropdata_->zU_curr);
     stats.initialization_time += blasfeo_toc(&timer);

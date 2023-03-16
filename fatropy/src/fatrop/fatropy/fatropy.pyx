@@ -153,7 +153,7 @@ cdef class OCP:
     # TODO make this more efficient
     def u_sol(self):
         retval = np.empty((self.nu_,self.K_-1))
-        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolution()
+        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolutionPrimal()
         for ii in range(self.K_-1):
             for jj in range(self.nu_):               
                 retval[jj,ii] = lastsol.get_el(jj+ii*(self.nx_+ self.nu_))
@@ -162,7 +162,7 @@ cdef class OCP:
     @property
     # TODO make this more efficient
     def x_sol(self):
-        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolution()
+        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolutionPrimal()
         retval = np.ones((self.nx_, self.K_))
         for ii in range(self.K_-1):
             for jj in range(self.nx_):               

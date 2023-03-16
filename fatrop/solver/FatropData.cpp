@@ -50,63 +50,67 @@ double normal_sum(const double *numbers)
     return sum;
 }
 FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &params) : nlpdims(nlpdims),
-                                                                                         n_eqs(nlpdims.neqs),
-                                                                                         n_ineqs(nlpdims.nineqs),
-                                                                                         memvars(nlpdims.nvars, 12),
-                                                                                         memeqs(nlpdims.neqs, 11),
-                                                                                         memineqs(nlpdims.nineqs, 26),
-                                                                                         x_curr(memvars[0]),
-                                                                                         x_next(memvars[1]),
-                                                                                         x_backup(memvars[2]),
-                                                                                         x_initial(memvars[3]),
-                                                                                         delta_x(memvars[4]),
-                                                                                         delta_x_backup(memvars[5]),
-                                                                                         delta_x_backup_ls(memvars[6]),
-                                                                                         x_scales(memvars[7]),
-                                                                                         lam_curr(memeqs[0]),
-                                                                                         lam_next(memeqs[1]),
-                                                                                         lam_backup(memeqs[2]),
-                                                                                         lam_calc(memeqs[3]),
-                                                                                         lam_calc_backup(memeqs[4]),
-                                                                                         lam_calc_backup_ls(memeqs[5]),
-                                                                                         lam_scales(memeqs[6]),
-                                                                                         g_curr(memeqs[7]),
-                                                                                         g_next(memeqs[8]),
-                                                                                         g_backup(memeqs[9]),
-                                                                                         g_soc(memeqs[10]),
-                                                                                         grad_curr(memvars[8]),
-                                                                                         grad_next(memvars[9]),
-                                                                                         grad_backup(memvars[10]),
-                                                                                         du_inf_curr(memvars[11]),
-                                                                                         du_inf_curr_s(memineqs[0]),
-                                                                                         s_curr(memineqs[1]),
-                                                                                         s_next(memineqs[2]),
-                                                                                         s_backup(memineqs[3]),
-                                                                                         delta_s(memineqs[4]),
-                                                                                         delta_s_backup(memineqs[5]),
-                                                                                         delta_s_backup_ls(memineqs[6]),
-                                                                                         zL_curr(memineqs[7]),
-                                                                                         zL_next(memineqs[8]),
-                                                                                         zL_backup(memineqs[9]),
-                                                                                         zU_curr(memineqs[10]),
-                                                                                         zU_next(memineqs[11]),
-                                                                                         zU_backup(memineqs[12]),
-                                                                                         delta_zL(memineqs[13]),
-                                                                                         delta_zU(memineqs[14]),
-                                                                                         s_lower_orig(memineqs[15]),
-                                                                                         s_upper_orig(memineqs[16]),
-                                                                                         s_lower(memineqs[17]),
-                                                                                         s_upper(memineqs[18]),
-                                                                                         sigma_L(memineqs[19]),
-                                                                                         sigma_U(memineqs[20]),
-                                                                                         sigma_total(memineqs[21]),
-                                                                                         gradb_L(memineqs[22]),
-                                                                                         gradb_U(memineqs[23]),
-                                                                                         gradb_plus(memineqs[24]),
-                                                                                         gradb_total(memineqs[25]),
-                                                                                         params(params)
+                                                                                          n_eqs(nlpdims.neqs),
+                                                                                          n_ineqs(nlpdims.nineqs),
+                                                                                          memvars(nlpdims.nvars, 12),
+                                                                                          memeqs(nlpdims.neqs, 12),
+                                                                                          memineqs(nlpdims.nineqs, 28),
+                                                                                          x_curr(memvars[0]),
+                                                                                          x_next(memvars[1]),
+                                                                                          x_backup(memvars[2]),
+                                                                                          x_initial(memvars[3]),
+                                                                                          delta_x(memvars[4]),
+                                                                                          delta_x_backup(memvars[5]),
+                                                                                          delta_x_backup_ls(memvars[6]),
+                                                                                          x_scales(memvars[7]),
+                                                                                          lam_curr(memeqs[0]),
+                                                                                          lam_next(memeqs[1]),
+                                                                                          lam_backup(memeqs[2]),
+                                                                                          lam_calc(memeqs[3]),
+                                                                                          lam_calc_backup(memeqs[4]),
+                                                                                          lam_calc_backup_ls(memeqs[5]),
+                                                                                          lam_scales(memeqs[6]),
+                                                                                          lam_init(memeqs[7]),
+                                                                                          g_curr(memeqs[8]),
+                                                                                          g_next(memeqs[9]),
+                                                                                          g_backup(memeqs[10]),
+                                                                                          g_soc(memeqs[11]),
+                                                                                          grad_curr(memvars[8]),
+                                                                                          grad_next(memvars[9]),
+                                                                                          grad_backup(memvars[10]),
+                                                                                          du_inf_curr(memvars[11]),
+                                                                                          du_inf_curr_s(memineqs[0]),
+                                                                                          s_curr(memineqs[1]),
+                                                                                          s_next(memineqs[2]),
+                                                                                          s_backup(memineqs[3]),
+                                                                                          delta_s(memineqs[4]),
+                                                                                          delta_s_backup(memineqs[5]),
+                                                                                          delta_s_backup_ls(memineqs[6]),
+                                                                                          zL_curr(memineqs[7]),
+                                                                                          zL_next(memineqs[8]),
+                                                                                          zL_backup(memineqs[9]),
+                                                                                          zL_init(memineqs[10]),
+                                                                                          zU_curr(memineqs[11]),
+                                                                                          zU_next(memineqs[12]),
+                                                                                          zU_backup(memineqs[13]),
+                                                                                          zU_init(memineqs[14]),
+                                                                                          delta_zL(memineqs[15]),
+                                                                                          delta_zU(memineqs[16]),
+                                                                                          s_lower_orig(memineqs[17]),
+                                                                                          s_upper_orig(memineqs[18]),
+                                                                                          s_lower(memineqs[19]),
+                                                                                          s_upper(memineqs[20]),
+                                                                                          sigma_L(memineqs[21]),
+                                                                                          sigma_U(memineqs[22]),
+                                                                                          sigma_total(memineqs[23]),
+                                                                                          gradb_L(memineqs[24]),
+                                                                                          gradb_U(memineqs[25]),
+                                                                                          gradb_plus(memineqs[26]),
+                                                                                          gradb_total(memineqs[27]),
+                                                                                          params(params)
 {
     Initialize();
+    params->RegisterOption(NumericOption::LowerBounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
 }
 void FatropData::Initialize()
 {
@@ -337,6 +341,24 @@ int FatropData::BoundSlacks()
             VECEL(s_curr_p, i) = MIN(VECEL(s_curr_p, i), upperi - kappa1 * MAX(1.0, abs(upperi)));
         }
     }
+    return 0;
+}
+int FatropData::BoundZ()
+{
+    VEC *zL_curr_p = (VEC *)zL_curr;
+    VEC *zU_curr_p = (VEC *)zU_curr;
+    for (int i = 0; i < n_ineqs; i++)
+    {
+        VECEL(zL_curr_p, i) = MAX(VECEL(zL_curr_p, i), warm_start_mult_bound_push);
+        VECEL(zU_curr_p, i) = MAX(VECEL(zU_curr_p, i), warm_start_mult_bound_push);
+    }
+    return 0;
+}
+int FatropData::WarmStartDual()
+{
+    zL_curr.copy(zL_init);
+    zU_curr.copy(zU_init);
+    lam_curr.copy(lam_init);
     return 0;
 }
 int FatropData::AdaptDualBounds(double mu)
@@ -608,7 +630,7 @@ void FatropData::RelaxBoundsVar(double mu)
             double dist_lower = s_curr_v - loweri;
             if (dist_lower < mu * emach)
             {
-                cout << PRIORITY1  << "slacks too small " << endl;
+                cout << PRIORITY1 << "slacks too small " << endl;
                 VECEL(s_lower_p, i) -= 1e-12 * std::max(1.0, std::abs(loweri));
             }
         }

@@ -13,7 +13,9 @@ namespace fatrop
         /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !! */
         int AdaptKKTInitial(
             OCPKKTMemory *OCP,
-            const FatropVecBF &grad,
+            const FatropVecBF &grad);
+        int CalcSlacks(
+            OCPKKTMemory *OCP,
             FatropVecBF &s);
     };
 } // namespace fatrop

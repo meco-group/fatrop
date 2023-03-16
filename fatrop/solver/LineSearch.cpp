@@ -79,6 +79,7 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller)
 {
     Initialize();
+    fatrop_params_->RegisterOption(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step ,false));
 };
 void BackTrackingLineSearch::Initialize()
 {
@@ -200,6 +201,15 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             journaller_->it_curr.alpha_pr = alpha_primal;
             journaller_->it_curr.alpha_du = alpha_dual;
             res.ls = -1;
+            return res;
+        }
+        if (accept_every_trial_step)
+        {
+            (journaller_->it_curr).type = 'a';
+            fatropdata_->TakeStep();
+            journaller_->it_curr.alpha_pr = alpha_primal;
+            journaller_->it_curr.alpha_du = alpha_dual;
+            res.ls = 1;
             return res;
         }
         if (soc_step && (p >= p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old) && p>1)))

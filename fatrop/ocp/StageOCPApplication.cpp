@@ -19,7 +19,7 @@ int NLPApplication::Optimize()
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
-FatropVecBF &NLPApplication::LastSolution()
+FatropVecBF &NLPApplication::LastSolutionPrimal()
 {
     assert(!dirty);
     return fatropdata_->x_curr;
@@ -76,21 +76,24 @@ OCPDims OCPApplication::GetOCPDims()
     FatropSolution::FatropSolution(){};
     void FatropSolution::SetDims(const NLPDims &dims)
     {
-        sol_primal.resize(dims.nvars);
+        sol_primal_.resize(dims.nvars);
+        sol_dual_.resize(dims.neqs);
+        sol_zL_.resize(dims.nineqs);
+        sol_zU_.resize(dims.nineqs);
     };
     void FatropSolution::SetPrimalSolution(const FatropVecBF &sol)
     {
-        sol.copyto(sol_primal);
+        sol.copyto(sol_primal_);
     }
     StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
     {
     }
-    SingleStageOCPSolution::SingleStageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app)
+    StageOCPSolution::StageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app)
     {
         SetDims(app->GetOCPDims());
     }
-    SingleStageOCPSolution::SingleStageOCPSolution(){};
-    void SingleStageOCPSolution::SetDims(const OCPDims &dims)
+    StageOCPSolution::StageOCPSolution(){};
+    void StageOCPSolution::SetDims(const OCPDims &dims)
     {
         FatropSolution::SetDims(dims);
         nx = dims.nx.at(0);
@@ -101,24 +104,24 @@ OCPDims OCPApplication::GetOCPDims()
         global_params.resize(n_global_params);
         stage_params.resize(n_stage_params);
     }
-    void SingleStageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
+    void StageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
     {
         FatropSolution::SetPrimalSolution(sol);
         this->global_params = global_params;
         this->stage_params = stage_params;
     }
 
-    void SingleStageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
+    void StageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
     {
-        sampler->Evaluate(sol_primal, global_params, stage_params, result);
+        sampler->Evaluate(sol_primal_, global_params, stage_params, result);
     }
-    vector<double> SingleStageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
+    vector<double> StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
     {
-        return evaluator->Evaluate(sol_primal, global_params, stage_params);
+        return evaluator->Evaluate(sol_primal_, global_params, stage_params);
     }
-    void SingleStageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
+    void StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
     {
-        evaluator->Evaluate(sol_primal, global_params, stage_params, result);
+        evaluator->Evaluate(sol_primal_, global_params, stage_params, result);
     }
     StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : StageOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
@@ -148,11 +151,11 @@ OCPDims OCPApplication::GetOCPDims()
         int ret = NLPApplication::Optimize();
         if (ret == 0)
         {
-            last_solution.SetPrimalSolution(LastSolution());
+            last_solution.SetSolution(LastSolutionPrimal(), LastSolutionDual(), LastSolutionZL(), LastSolutionZU());
         }
         return ret;
     }
-    const SingleStageOCPSolution &StageOCPApplication::LastStageOCPSolution()
+    const StageOCPSolution &StageOCPApplication::LastStageOCPSolution()
     {
         return last_solution;
     }
