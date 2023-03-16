@@ -12,7 +12,7 @@ int main(int argc, char **argv)
         app->Optimize();
         vector<double> result = (app->LastStageOCPSolution()).Eval(app->GetExprEvaluator("control_u")->at_t0());
         app->SetInitial(app->LastStageOCPSolution());
-        // app -> SetOption("warm_start_init_point", true);
+        app -> SetOption("warm_start_init_point", true);
         app -> Optimize();
     }
     else
