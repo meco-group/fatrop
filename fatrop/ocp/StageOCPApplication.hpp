@@ -30,13 +30,7 @@ namespace fatrop
         FatropSolution();
         void SetDims(const NLPDims &dims);
         void SetPrimalSolution(const FatropVecBF &sol);
-        void SetSolution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU)
-        {
-            sol_primal.copyto(sol_primal_);
-            sol_dual.copyto(sol_dual_);
-            sol_zL.copyto(sol_zL_);
-            sol_zU.copyto(sol_zU_);
-        };
+        void SetSolution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU);
 
     protected:
         vector<double> sol_primal_;
@@ -58,51 +52,21 @@ namespace fatrop
         int Optimize();
         // TODO: make this protected and use last_solution instead and choose other name
         FatropVecBF &LastSolutionPrimal();
-        FatropVecBF &LastSolutionDual()
-        {
-            return fatropdata_->lam_curr;
-        }
-        FatropVecBF &LastSolutionZL()
-        {
-            return fatropdata_->zL_curr;
-        }
-        FatropVecBF &LastSolutionZU()
-        {
-            return fatropdata_->zU_curr;
-        }
+        FatropVecBF &LastSolutionDual();
+        FatropVecBF &LastSolutionZL();
+        FatropVecBF &LastSolutionZU();
         FatropVecBF &InitialGuessPrimal();
-        FatropVecBF &InitialGuessDual()
-        {
-            return fatropdata_->lam_init;
-        }
-        FatropVecBF &InitialGuessZL()
-        {
-            return fatropdata_->zL_init;
-        }
-        FatropVecBF &InitialGuessZU()
-        {
-            return fatropdata_->zU_init;
-        }
+        FatropVecBF &InitialGuessDual();
+        FatropVecBF &InitialGuessZL();
+        FatropVecBF &InitialGuessZU();
         FatropStats GetStats();
         NLPDims GetNLPDims();
         template <typename T>
-        void SetOption(const string &option_name, T value)
-        {
-            fatropparams_->SetOption(option_name, value);
-        }
+        void SetOption(const string &option_name, T value);
 
     public:
-        void SetInitial(const FatropSolution &initial_guess)
-        {
-            InitialGuessPrimal() = initial_guess.sol_primal_;
-            InitialGuessDual() = initial_guess.sol_dual_;
-            InitialGuessZL() = initial_guess.sol_zL_;
-            InitialGuessZU() = initial_guess.sol_zU_;
-        }
-        const FatropOptions &GetOptions() const
-        {
-            return *fatropparams_;
-        }
+        void SetInitial(const FatropSolution &initial_guess);
+        const FatropOptions &GetOptions() const;
 
     protected:
         shared_ptr<FatropOptions> fatropparams_;
@@ -115,9 +79,6 @@ namespace fatrop
         shared_ptr<Journaller> journaller_;
         shared_ptr<FatropAlg> fatropalg_;
     };
-    template void NLPApplication::SetOption(const string &option_name, double value);
-    template void NLPApplication::SetOption(const string &option_name, int value);
-    template void NLPApplication::SetOption(const string &option_name, bool value);
 
     // TODO move this class to a separate file
     class OCPApplication : public NLPApplication
@@ -141,10 +102,6 @@ namespace fatrop
     protected:
         shared_ptr<OCPAdapter> adapter;
     };
-    // void FatropSolution::GetPrimalSolution(vector<double> &result)
-    // {
-    //     result = sol_primal_;
-    // }
 
     struct StageOCPApplicationAbstract : public OCPApplication
     {
@@ -191,11 +148,7 @@ namespace fatrop
 
         public:
             void SetValue(const double value[]);
-            void SetValue(const initializer_list<double> il_)
-            {
-                assert((int)il_.size() == _no_var);
-                SetValue(il_.begin());
-            }
+            void SetValue(const initializer_list<double> il_);
 
         private:
             const shared_ptr<OCPAdapter> adapter_;
@@ -203,10 +156,7 @@ namespace fatrop
 
     public:
         shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const string &sampler_name);
-        shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression> &expr)
-        {
-            return make_shared<StageOCPExprEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
-        }
+        shared_ptr<StageOCPExprEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression> &expr);
         shared_ptr<AppParameterSetter> GetParameterSetter(const string &setter_name);
         void Build();
         int Optimize();
