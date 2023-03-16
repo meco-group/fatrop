@@ -31,7 +31,7 @@ namespace fatrop
         {
             return Option<T>(name, description, value, default_value, true, lower_bound, true, upper_bound);
         };
-        void SetDefault()
+        void SetDefault() const
         {
             *value = default_value_;
         };
@@ -76,6 +76,10 @@ namespace fatrop
         {
             *value = new_value;
         }
+        void SetDefault() const
+        {
+            *value = default_value_;
+        }
         string name_;
         string description_;
         bool *value = NULL;
@@ -92,83 +96,11 @@ namespace fatrop
     public:
         FatropOptions()
         {
-            // register integer options
             RegisterOption(IntegerOption::BoxBounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
-            RegisterOption(IntegerOption::LowerBounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
-            // RegisterIntegerOption(IntegerOption::LowerBounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
-            // register tolerance option
-            RegisterOption(NumericOption::LowerBounded("tol", "tolerance", &tol, 1e-8, 0.0));
-            RegisterOption(NumericOption::LowerBounded("acceptable_tol", "acceptable tolerance", &acceptable_tol, 1e-6, 0.0));
-            RegisterOption(NumericOption::LowerBounded("smax", "smax", &smax, 100.0, 0.0));
-            RegisterOption(NumericOption::LowerBounded("lammax", "lammax", &lammax, 1e3, 0.0));
-            RegisterOption(NumericOption::LowerBounded("mu_init", "mu_init", &mu0, 1e2, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
-            RegisterOption(NumericOption::LowerBounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
-            RegisterOption(NumericOption::LowerBounded("delta_w0", "delta_w0", &delta_w0, 1e-4, 0.0));
-            RegisterOption(NumericOption::LowerBounded("delta_wmin", "delta_wmin", &delta_wmin, 1e-20, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_wmin", "kappa_wmin", &kappa_wmin, 1.0 / 3.0, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_wplus", "kappa_wplus", &kappa_wplus, 8.0, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_wplusem", "kappa_wplusem", &kappa_wplusem, 100.0, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
-            RegisterOption(NumericOption::LowerBounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
-            RegisterOption(NumericOption::LowerBounded("delta", "delta", &delta, 1.0, 0.0));
-            RegisterOption(NumericOption::LowerBounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
-            RegisterOption(NumericOption::LowerBounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
-            RegisterOption(NumericOption::LowerBounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-12, 0.0));
-            RegisterOption(NumericOption::LowerBounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
-            RegisterOption(NumericOption::LowerBounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
-            RegisterOption(NumericOption::LowerBounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
-            RegisterOption(NumericOption::LowerBounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-2, 0.0));
-            RegisterOption(NumericOption::LowerBounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
-            RegisterOption(NumericOption::LowerBounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
-            RegisterOption(NumericOption::LowerBounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
-            RegisterOption(NumericOption::LowerBounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
             RegisterOption(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
-            RegisterOption(NumericOption::LowerBounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
-            RegisterOption(NumericOption::LowerBounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
-            RegisterOption(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
         };
-
-        int max_watchdog_steps = 4;
-        bool warm_start_init_point = false;
         int maxiter = 1000; // TODO this value cannot be changed to a value larger than the one used for building the solver
-        double tol = 1e-8;
-        double acceptable_tol = 1e-6;
-        double smax = 100.0;
-        double lammax = 1e3;
-        double acceptable_iter = 15;
-        double mu0 = 1e2;
-        // double mu0 = 2e5;
-        // double mu0 = 1e;
-        double kappa_eta = 10;
-        double kappa_mu = 0.2;
-        double theta_mu = 1.5;
-        double delta_w0 = 1e-4;
-        double delta_wmin = 1e-20;
-        double kappa_wmin = 1.0 / 3.0;
-        double kappa_wplus = 8;
-        double kappa_wplusem = 100;
-        double kappa_sigma = 1e10;
-        double s_phi = 2.3;
-        double delta = 1.0;
-        double s_theta = 1.1;
-        double theta_min = 1e-4;
-        // double gamma_theta = 1e-8;
-        double gamma_theta = 1e-12;
-        // double gamma_theta = 1e-5; // todo check!!
-        double gamma_phi = 1e-8;
-        double gamma_alpha = 0.05;
-        double eta_phi = 1e-8;
-        // double delta_c_stripe = 1e-8;
-        double delta_c_stripe = 1e-2;
-        double kappa_c = 0.25;
-        double kappa1 = 1e-2;
-        double kappa2 = 1e-2;
-        double warm_start_mult_bound_push = 1e-2;
         double kappa_d = 1e-5;
-        double bound_relax_factor = 1e-8;
-        double constr_viol_tol = 1e-4; // currently only used to relax bounds
         template <typename T>
         void SetOption(const string &option_name, T value)
         {
@@ -222,10 +154,12 @@ namespace fatrop
         void RegisterOption(const NumericOption &option)
         {
             numeric_options[option.name_] = option;
+            option.SetDefault();
         }
         void RegisterOption(const IntegerOption &option)
         {
             integer_options[option.name_] = option;
+            option.SetDefault();
         }
         // void RegisterStringOption(const StringOption &option)
         // {
@@ -234,6 +168,7 @@ namespace fatrop
         void RegisterOption(const BooleanOption &option)
         {
             boolean_options[option.name_] = option;
+            option.SetDefault();
         }
         map<string, NumericOption> numeric_options;
         map<string, IntegerOption> integer_options;

@@ -111,16 +111,16 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
 {
     Initialize();
     params->RegisterOption(NumericOption::LowerBounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
+    params->RegisterOption(NumericOption::LowerBounded("smax", "smax", &smax, 100.0, 0.0));
+    params->RegisterOption(NumericOption::LowerBounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
+    params->RegisterOption(NumericOption::LowerBounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
+    params->RegisterOption(NumericOption::LowerBounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
+    params->RegisterOption(NumericOption::LowerBounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
+    params->RegisterOption(NumericOption::LowerBounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
 }
 void FatropData::Initialize()
 {
-    smax = params->smax;
-    kappa1 = params->kappa1;
-    kappa2 = params->kappa2;
     kappa_d = params->kappa_d;
-    kappa_sigma = params->kappa_sigma;
-    bound_relax_factor = params->bound_relax_factor;
-    constr_viol_tol = params->constr_viol_tol;
     n_ineqs_r = nIneqsR();
     RelaxBounds();
 }
