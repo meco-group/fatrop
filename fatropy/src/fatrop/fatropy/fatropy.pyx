@@ -198,10 +198,10 @@ cdef class OCP:
         res.stats = self.myFatropApplication.get().GetStats()
         return res 
     def SetParams(self, stage_params_in, global_params_in):
-        cdef vector[double] stageparams =  self.myFatropApplication.get().StageParameters() 
-        stageparams = stage_params_in
-        cdef vector[double] globalparams = self.myFatropApplication.get().GlobalParameters() 
-        globalparams = global_params_in
+        cdef vector[double]* stageparams = & self.myFatropApplication.get().StageParameters() 
+        stageparams[0]= stage_params_in
+        cdef vector[double]* globalparams =& self.myFatropApplication.get().GlobalParameters() 
+        globalparams[0] = global_params_in
 
     def SetInitial(self, initial_u, initial_x):
         self.myFatropApplication.get().SetInitial(initial_u, initial_x)
