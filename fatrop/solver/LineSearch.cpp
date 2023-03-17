@@ -87,6 +87,7 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
     fatrop_params_->RegisterOption(NumericOption::LowerBounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
     fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
+    fatrop_params_->RegisterOption(IntegerOption::LowerBounded("max_soc", "max_soc", &max_soc, 2, 0));
 };
 void BackTrackingLineSearch::Initialize()
 {
@@ -119,7 +120,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
     // cout << "cv " << cv_curr << endl;
     // cout << "obj " << obj_curr << endl;
     // cout << "lindecr " << lin_decr_curr << endl;
-    const int p_max = 2;
+    // const int max_soc = 2;
     bool soc_step = false;
     double cv_soc_old = cv_curr;
     int p = 0;
@@ -185,7 +186,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             if (soc_step)
             {
                 // abort soc
-                p = p_max;
+                p = max_soc;
             }
             if (ll == 1)
             {
@@ -211,7 +212,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             res.ls = 1;
             return res;
         }
-        if (soc_step && (p >= p_max || (ll > 1 && (cv_next > 0.99 * cv_soc_old) && p > 1)))
+        if (soc_step && (p >= max_soc || (ll > 1 && (cv_next > 0.99 * cv_soc_old) && p > 1)))
         {
             // deactivate soc
             soc_step = false;
@@ -221,7 +222,7 @@ LineSearchInfo BackTrackingLineSearch::FindAcceptableTrialPoint(double mu, bool 
             // todo cache these variables
             fatropdata_->ComputedZ();
         }
-        if (!soc_step && (ll == 1 && p_max > 0) && cv_next > cv_curr)
+        if (!soc_step && (ll == 1 && max_soc > 0) && cv_next > cv_curr)
         {
             // activate soc
             // cout << "trying soc " << endl;

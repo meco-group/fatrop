@@ -24,7 +24,7 @@ namespace fatrop
         FatropOCP(
             const shared_ptr<OCP> &ocp,
             const shared_ptr<OCPLinearSolver> &ls,
-            const shared_ptr<OCPScalingMethod> &scaler);
+            const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> &options);
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -101,6 +101,7 @@ namespace fatrop
         NLPDims nlpdims_;
         shared_ptr<OCPLinearSolver> ls_;
         shared_ptr<OCPScalingMethod> scaler_;
+        shared_ptr<FatropOptions> options_;
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;
@@ -128,6 +129,7 @@ namespace fatrop
         FatropMemoryVecBF delta_s_test;
         double inertia_correction_w_cache;
         double inertia_correction_c_cache;
+        bool it_ref;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED

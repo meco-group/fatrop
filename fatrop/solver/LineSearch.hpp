@@ -61,6 +61,7 @@ namespace fatrop
         double eta_phi;
         double gamma_alpha;
         bool accept_every_trial_step = false;
+        int max_soc;
     };
 } // namespace fatrop
 #endif // LINESEARCHINCLUDED
