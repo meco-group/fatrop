@@ -58,7 +58,7 @@ namespace fatrop
         int maxiter = 1000; // TODO this value cannot be changed to a value larger than the one used for building the solver
         double kappa_d = 1e-5;
         template <typename T>
-        void SetOption(const string &option_name, T value);
+        void Set(const string &option_name, T value);
 
     public:
         void RegisterOption(const NumericOption &option);

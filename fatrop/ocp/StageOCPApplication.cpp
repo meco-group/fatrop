@@ -64,7 +64,7 @@ FatropVecBF &NLPApplication::InitialGuessZU()
 template <typename T>
 void NLPApplication::SetOption(const string &option_name, T value)
 {
-    fatropoptions_->SetOption(option_name, value);
+    fatropoptions_->Set(option_name, value);
 }
 template void NLPApplication::SetOption<int>(const string&, int);
 template void NLPApplication::SetOption<double>(const string&, double);
