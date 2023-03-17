@@ -162,15 +162,15 @@ void StageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_
     this->stage_params = stage_params;
 }
 
-void StageOCPSolution::Sample(const shared_ptr<StageOCPControlSampler> &sampler, vector<double> &result)
+void StageOCPSolution::Sample(const shared_ptr<StageControlGridSampler> &sampler, vector<double> &result)
 {
     sampler->Evaluate(sol_primal_, global_params, stage_params, result);
 }
-vector<double> StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator) const
+vector<double> StageOCPSolution::Eval(const shared_ptr<StageExpressionEvaluatorBase> &evaluator) const
 {
     return evaluator->Evaluate(sol_primal_, global_params, stage_params);
 }
-void StageOCPSolution::Eval(const shared_ptr<StageOCPExprEvaluatorBase> &evaluator, vector<double> &result) const
+void StageOCPSolution::Eval(const shared_ptr<StageExpressionEvaluatorBase> &evaluator, vector<double> &result) const
 {
     evaluator->Evaluate(sol_primal_, global_params, stage_params, result);
 }
@@ -182,7 +182,7 @@ void StageOCPApplication::AppParameterSetter::SetValue(const double value[])
     ParameterSetter::SetValue(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
 };
 
-shared_ptr<StageOCPExprEvaluatorFactory> StageOCPApplication::GetExprEvaluator(const string &sampler_name)
+shared_ptr<StageExpressionEvaluatorFactory> StageOCPApplication::GetExpression(const string &sampler_name)
 {
     return GetExprEvaluator(stage_expressions[sampler_name]);
 }
@@ -275,7 +275,7 @@ void StageOCPApplication::AppParameterSetter::SetValue(const initializer_list<do
     assert((int)il_.size() == _no_var);
     SetValue(il_.begin());
 }
-shared_ptr<StageOCPExprEvaluatorFactory> StageOCPApplication::GetExprEvaluator(const shared_ptr<StageExpression> &expr)
+shared_ptr<StageExpressionEvaluatorFactory> StageOCPApplication::GetExprEvaluator(const shared_ptr<StageExpression> &expr)
 {
-    return make_shared<StageOCPExprEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
+    return make_shared<StageExpressionEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
 }

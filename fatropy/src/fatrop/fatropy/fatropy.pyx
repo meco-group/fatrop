@@ -4,9 +4,9 @@
 # from fatropy cimport OCPSolutionSampler
 from fatropy cimport AppParameterSetter
 from fatropy cimport StageOCPSolution
-from fatropy cimport StageOCPExprEvaluatorFactory
-from fatropy cimport StageOCPExprEvaluatorBase
-from fatropy cimport StageOCPControlSampler
+from fatropy cimport StageExpressionEvaluatorFactory
+from fatropy cimport StageExpressionEvaluatorBase
+from fatropy cimport StageControlGridSampler
 from fatropy cimport FatropVecBF
 from fatropy cimport StageOCPApplication
 from fatropy cimport StageOCPApplicationBuilder
@@ -174,9 +174,9 @@ cdef class OCP:
         return retval
     def Sample(self, name):
         # retrieve sampler
-        cdef shared_ptr[StageOCPControlSampler] sampler = self.myFatropApplication.get().GetExprEvaluator(name.encode('utf-8')).get().at_control()
+        cdef shared_ptr[StageControlGridSampler] sampler = self.myFatropApplication.get().GetExpression(name.encode('utf-8')).get().at_control()
         # allocate buffer
-        cdef shared_ptr[StageOCPExprEvaluatorBase] sampler_b 
+        cdef shared_ptr[StageExpressionEvaluatorBase] sampler_b 
         assign_shared_ptr(sampler_b, sampler)
         cdef vector[double] buffer = self.myFatropApplication.get().LastStageOCPSolution().Eval(sampler_b)
         # use sampler

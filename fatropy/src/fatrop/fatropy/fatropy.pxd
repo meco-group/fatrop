@@ -35,7 +35,7 @@ cdef extern from "FatropStats.hpp" namespace "fatrop":
     
 
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
-    cdef cppclass StageOCPExprEvaluatorBase:
+    cdef cppclass StageExpressionEvaluatorBase:
         int n_rows()
         int n_cols()
         # int K()
@@ -43,18 +43,18 @@ cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
         # vector[double] Eval(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params)
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
     cdef cppclass StageOCPSolution:
-        vector[double] Eval(const shared_ptr[StageOCPExprEvaluatorBase] &evaluator) const
+        vector[double] Eval(const shared_ptr[StageExpressionEvaluatorBase] &evaluator) const
 
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
-    cdef cppclass StageOCPControlSampler(StageOCPExprEvaluatorBase):
+    cdef cppclass StageControlGridSampler(StageExpressionEvaluatorBase):
         # int Evaluate(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
         # int n_rows()
         # int n_cols()
         int K()
         # int Size()
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
-    cdef cppclass StageOCPExprEvaluatorFactory:
-        shared_ptr[StageOCPControlSampler] at_control()
+    cdef cppclass StageExpressionEvaluatorFactory:
+        shared_ptr[StageControlGridSampler] at_control()
 # cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
 #     cdef cppclass ParameterSetter:
 #         void SetValue(vector[double]& global_params, vector[double]& stage_params, const double* value)
@@ -78,7 +78,7 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
         const int nx_
         const int nu_
         const int K_
-        shared_ptr[StageOCPExprEvaluatorFactory] GetExprEvaluator(const string &sampler_name)
+        shared_ptr[StageExpressionEvaluatorFactory] GetExpression(const string &sampler_name)
         const StageOCPSolution &LastStageOCPSolution()
         void SetOption[T](const string &option_name, T value)
 

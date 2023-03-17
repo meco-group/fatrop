@@ -58,7 +58,7 @@ FatropOptions::FatropOptions()
     RegisterOption(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
 template <typename T>
-void FatropOptions::SetOption(const string &option_name, T value)
+void FatropOptions::Set(const string &option_name, T value)
 {
     if (numeric_options.find(option_name) != numeric_options.end())
     {
@@ -167,6 +167,6 @@ auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
 }
 template class Option<int>;
 template class Option<double>;
-template void FatropOptions::SetOption<double>(const string &, double);
-template void FatropOptions::SetOption<int>(const string &, int);
-template void FatropOptions::SetOption<bool>(const string &, bool);
+template void FatropOptions::Set<double>(const string &, double);
+template void FatropOptions::Set<int>(const string &, int);
+template void FatropOptions::Set<bool>(const string &, bool);

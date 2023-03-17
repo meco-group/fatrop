@@ -51,7 +51,7 @@ int EvalBaseSE::n_cols()
 {
     return n_cols_;
 }
-StageOCPControlSampler::StageOCPControlSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval) : nu(nu),
+StageControlGridSampler::StageControlGridSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval) : nu(nu),
                                                                                                                              nx(nx),
                                                                                                                              no_stage_params(no_stage_params),
                                                                                                                              K_(K),
@@ -59,24 +59,24 @@ StageOCPControlSampler::StageOCPControlSampler(int nu, int nx, int no_stage_para
 {
 }
 
-int StageOCPControlSampler::Size()
+int StageControlGridSampler::Size()
 {
     return K_ * eval_->Size();
 }
-int StageOCPControlSampler::n_rows()
+int StageControlGridSampler::n_rows()
 {
     return eval_->n_rows();
 }
-int StageOCPControlSampler::n_cols()
+int StageControlGridSampler::n_cols()
 {
     return eval_->n_cols();
 }
-int StageOCPControlSampler::K()
+int StageControlGridSampler::K()
 {
     return K_;
 }
 
-int StageOCPControlSampler::Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample)
+int StageControlGridSampler::Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample)
 {
     const double *sol_p = solution.data();
     double *res_p = sample.data();
