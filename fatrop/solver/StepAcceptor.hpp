@@ -22,7 +22,7 @@ namespace fatrop
     private:
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<Filter> filter_;
-        shared_ptr<FatropOptions> fatropparams_;
+        shared_ptr<FatropOptions> fatropoptions_;
     };
 } // namespace fatrop
 

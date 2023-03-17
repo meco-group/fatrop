@@ -69,7 +69,7 @@ namespace fatrop
         const FatropOptions &GetOptions() const;
 
     protected:
-        shared_ptr<FatropOptions> fatropparams_;
+        shared_ptr<FatropOptions> fatropoptions_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<FatropNLP> nlp_;
         bool dirty = true;

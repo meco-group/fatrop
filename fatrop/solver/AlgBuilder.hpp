@@ -17,18 +17,18 @@ namespace fatrop
             fatropdata_ = fatropdata; // keep this around for building the algorithm
             journaller_ = journaller;
             nlp_ = nlp;
-            fatropparams_ = fatropparams;
+            fatropoptions_ = fatropparams;
         }
         shared_ptr<FatropAlg> BuildAlgorithm()
         {
             // TODO unsafe if maxiter is changed during application
-            shared_ptr<Filter> filter = make_shared<Filter>(fatropparams_->maxiter + 1);
-            shared_ptr<LineSearch> linesearch = make_shared<BackTrackingLineSearch>(fatropparams_, nlp_, fatropdata_, filter, journaller_);
-            return make_shared<FatropAlg>(nlp_, fatropdata_, fatropparams_, filter, linesearch, journaller_);
+            shared_ptr<Filter> filter = make_shared<Filter>(fatropoptions_->maxiter + 1);
+            shared_ptr<LineSearch> linesearch = make_shared<BackTrackingLineSearch>(fatropoptions_, nlp_, fatropdata_, filter, journaller_);
+            return make_shared<FatropAlg>(nlp_, fatropdata_, fatropoptions_, filter, linesearch, journaller_);
         }
     private:
         shared_ptr<FatropNLP> nlp_;
-        shared_ptr<FatropOptions> fatropparams_;
+        shared_ptr<FatropOptions> fatropoptions_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<Journaller> journaller_;
     };

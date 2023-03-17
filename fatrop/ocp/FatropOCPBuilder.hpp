@@ -11,7 +11,7 @@ namespace fatrop
     class FatropOCPBuilder
     {
     public:
-        FatropOCPBuilder(const shared_ptr<OCPAbstract> &ocp, const shared_ptr<FatropOptions> &fatropparams) : ocp_(ocp), fatropparams_(fatropparams)
+        FatropOCPBuilder(const shared_ptr<OCPAbstract> &ocp, const shared_ptr<FatropOptions> &fatropparams) : ocp_(ocp), fatropoptions_(fatropparams)
         {
         }
         shared_ptr<FatropOCP> Build()
@@ -22,12 +22,12 @@ namespace fatrop
 
         shared_ptr<FatropOCP> Build(shared_ptr<OCPAdapter> &adapter)
         {
-            return make_shared<FatropOCP>(adapter, make_shared<OCPLSRiccati>(adapter->GetOCPDims(), fatropparams_), make_shared<OCPNoScaling>(fatropparams_));
+            return make_shared<FatropOCP>(adapter, make_shared<OCPLSRiccati>(adapter->GetOCPDims(), fatropoptions_), make_shared<OCPNoScaling>(fatropoptions_));
         }
 
     private:
         const shared_ptr<OCPAbstract> ocp_;
-        const shared_ptr<FatropOptions> fatropparams_;
+        const shared_ptr<FatropOptions> fatropoptions_;
     };
 }
 

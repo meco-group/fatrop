@@ -1,13 +1,13 @@
 #include "ocp/StageOCPApplication.hpp"
 using namespace fatrop;
-NLPApplication::NLPApplication() : fatropparams_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropparams_->maxiter + 1)){};
+NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropoptions_->maxiter + 1)){};
 
 void NLPApplication::Build(const shared_ptr<FatropNLP> &nlp)
 {
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
     AlgBuilder algbuilder;
-    algbuilder.BuildFatropAlgObjects(nlp, fatropparams_, fatropdata_, journaller_);
+    algbuilder.BuildFatropAlgObjects(nlp, fatropoptions_, fatropdata_, journaller_);
     fatropalg_ = algbuilder.BuildAlgorithm();
     dirty = false;
 }
@@ -64,7 +64,7 @@ FatropVecBF &NLPApplication::InitialGuessZU()
 template <typename T>
 void NLPApplication::SetOption(const string &option_name, T value)
 {
-    fatropparams_->SetOption(option_name, value);
+    fatropoptions_->SetOption(option_name, value);
 }
 template void NLPApplication::SetOption<int>(const string&, int);
 template void NLPApplication::SetOption<double>(const string&, double);
@@ -80,7 +80,7 @@ void NLPApplication::SetInitial(const FatropSolution &initial_guess)
 }
 const FatropOptions &NLPApplication::GetOptions() const
 {
-    return *fatropparams_;
+    return *fatropoptions_;
 }
 
 // TODO move this class to a separate file
@@ -92,7 +92,7 @@ void OCPApplication::Build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
     adapter = make_shared<OCPAdapter>(ocp_);
-    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropparams_).Build(adapter));
+    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_).Build(adapter));
     NLPApplication::Build(nlp);
     dirty = false;
 }

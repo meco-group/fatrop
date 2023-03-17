@@ -3,7 +3,7 @@ using namespace fatrop;
 StepAcceptor::StepAcceptor(
     const shared_ptr<FatropData> &fatropdata,
     const shared_ptr<Filter> &filter,
-    const shared_ptr<FatropOptions> &fatropparams) : fatropdata_(fatropdata), filter_(filter), fatropparams_(fatropparams)
+    const shared_ptr<FatropOptions> &fatropparams) : fatropdata_(fatropdata), filter_(filter), fatropoptions_(fatropparams)
 {
     Initialize();
 };

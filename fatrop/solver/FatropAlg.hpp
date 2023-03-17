@@ -54,7 +54,7 @@ namespace fatrop
         };
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
-        shared_ptr<FatropOptions> fatropparams_;
+        shared_ptr<FatropOptions> fatropoptions_;
         shared_ptr<Filter> filter_;
         shared_ptr<LineSearch> linesearch_;
         shared_ptr<Journaller> journaller_;
