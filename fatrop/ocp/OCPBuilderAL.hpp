@@ -6,7 +6,7 @@
 #include "ocp/BFOCPAdapterAL.hpp"
 #include "ocp/OCPLSRiccati.hpp"
 #include "ocp/OCPNoScaling.hpp"
-#include "solver/FatropParams.hpp"
+#include "solver/FatropOptions.hpp"
 #include "solver/Filter.hpp"
 #include "ocp/FatropOCP.hpp"
 #include "ocp/FatropOCPAL.hpp"
@@ -35,7 +35,7 @@ namespace fatrop
         shared_ptr<BFOCPAdapterAL> ocptempladapterALor;
         shared_ptr<OCPAL> ocptempladapterAL;
         shared_ptr<OCPLinearSolver> ocplsriccati;
-        shared_ptr<FatropParams> params;
+        shared_ptr<FatropOptions> params;
         shared_ptr<OCPScalingMethod> ocpscaler;
         shared_ptr<FatropNLPAL> fatropocpal;
         shared_ptr<FatropData> fatropdata;

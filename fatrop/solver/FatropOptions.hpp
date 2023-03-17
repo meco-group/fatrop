@@ -54,6 +54,7 @@ namespace fatrop
     {
     public:
         FatropOptions();
+        // the following options are shared between different algorithm components:
         int maxiter = 1000; // TODO this value cannot be changed to a value larger than the one used for building the solver
         double kappa_d = 1e-5;
         template <typename T>
@@ -71,4 +72,4 @@ namespace fatrop
     };
 
 } // namespace fatrop
-#endif // FatropParams
+#endif // FatropOptions

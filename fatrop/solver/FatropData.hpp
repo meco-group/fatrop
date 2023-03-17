@@ -4,7 +4,7 @@
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "templates/NLPAlg.hpp"
 #include "aux/Common.hpp"
-#include "FatropParams.hpp"
+#include "FatropOptions.hpp"
 #include "solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>

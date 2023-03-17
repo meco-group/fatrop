@@ -1,4 +1,4 @@
-#include "solver/FatropParams.hpp"
+#include "solver/FatropOptions.hpp"
 using namespace fatrop;
 
 Option<bool>::Option(const string &name, const string &description, bool *value, bool default_value) : name_(name), description_(description), value(value), default_value_(default_value){};

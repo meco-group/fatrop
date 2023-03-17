@@ -5,7 +5,7 @@
 #include "solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
-#include "solver/FatropParams.hpp"
+#include "solver/FatropOptions.hpp"
 #define SUMMATION_ALG kahan_sum
 namespace fatrop
 {

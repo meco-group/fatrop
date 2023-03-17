@@ -87,7 +87,7 @@ namespace fatrop
             return ocp_->GetInitialGuess(initial);
         };
         // int GetDefaultParams(
-        //     FatropParams &params) const override
+        //     FatropOptions &params) const override
         //     {
         //        return ocp_->GetDefaultParams(params);
         //     };

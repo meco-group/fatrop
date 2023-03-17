@@ -2,7 +2,7 @@
 #define STEPACCEPTORINCLUDED
 #include "aux/SmartPtr.hpp"
 #include "FatropData.hpp"
-#include "FatropParams.hpp"
+#include "FatropOptions.hpp"
 #include "Filter.hpp"
 #include <memory>
 using namespace std;

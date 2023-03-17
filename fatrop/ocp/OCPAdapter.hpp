@@ -136,7 +136,7 @@ namespace fatrop
             return 0;
         }
         // virtual int GetDefaultParams(
-        //     FatropParams &params)
+        //     FatropOptions &params)
         // {
         // };
 

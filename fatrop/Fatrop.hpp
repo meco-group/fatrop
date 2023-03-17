@@ -10,7 +10,7 @@
 #include "ocp/OCPScalingMethod.hpp"
 #include "ocp/OCPNoScaling.hpp"
 #include "solver/AlgStrategy.hpp"
-#include "solver/FatropParams.hpp"
+#include "solver/FatropOptions.hpp"
 #include "function_evaluation/CasadiCodegen.hpp"
 #include "solver/AlgBuilder.hpp"
 #include "ocp/StageOCPApplication.hpp"

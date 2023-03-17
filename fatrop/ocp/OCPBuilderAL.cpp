@@ -75,7 +75,7 @@ shared_ptr<FatropApplication> OCPBuilderAL::Build()
     ocptempladapterAL->SetParams(json_spec["stage_params"].get_number_array<double>("%lf"), json_spec["global_params"].get_number_array<double>("%lf"));
     shared_ptr<OCPLSRiccati> ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapterAL->GetOCPDims());
     ocplsriccati = ocplsriccati1;
-    params = make_shared<FatropParams>();
+    params = make_shared<FatropOptions>();
     ocpscaler = make_shared<OCPNoScaling>(params);
     shared_ptr<FatropOCPAL> fatropocp1 = make_shared<FatropOCPAL>(ocptempladapterAL, ocplsriccati, ocpscaler);
     fatropocpal = static_cast<shared_ptr<FatropNLPAL>>(fatropocp1);

@@ -10,7 +10,7 @@ namespace fatrop
     {
     public:
         LineSearchDDP(
-            const shared_ptr<FatropParams> &fatropparams,
+            const shared_ptr<FatropOptions> &fatropparams,
             const shared_ptr<FatropNLP> &nlp,
             const shared_ptr<FatropData> &fatropdata,
             const shared_ptr<Filter> &filter,

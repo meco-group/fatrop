@@ -41,7 +41,7 @@ solver/AlgorithmQuantities.hpp              solver/AlgorithmQuantities.cpp
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp
 solver/FatropAlg.hpp                        solver/FatropAlg.cpp
 solver/FatropData.hpp                       solver/FatropData.cpp
-solver/FatropParams.hpp                     solver/FatropParams.cpp
+solver/FatropOptions.hpp                     solver/FatropOptions.cpp
 solver/FatropPrinter.hpp                    solver/FatropPrinter.cpp
 solver/Filter.hpp                           solver/Filter.cpp
 solver/IterationData.hpp                    solver/IterationData.cpp
@@ -99,7 +99,7 @@ solver/AlgBuilder.hpp
 solver/AlgStrategy.hpp
 solver/FatropAlg.hpp
 solver/FatropData.hpp
-solver/FatropParams.hpp
+solver/FatropOptions.hpp
 solver/FatropPrinter.hpp
 solver/Filter.hpp
 solver/IterationData.hpp

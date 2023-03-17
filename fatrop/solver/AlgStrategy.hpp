@@ -1,7 +1,7 @@
 #ifndef ALGSTRATEGYINCLUDED
 #define ALGSTRATEGYINCLUDED
 #include "aux/SmartPtr.hpp"
-#include "FatropParams.hpp"
+#include "FatropOptions.hpp"
 #include <memory>
 using namespace std;
 namespace fatrop

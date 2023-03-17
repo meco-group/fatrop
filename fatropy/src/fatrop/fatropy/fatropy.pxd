@@ -107,8 +107,8 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
 #         int n_eqs
 #         int n_ineqs      
 
-# cdef extern from "FatropParams.hpp" namespace "fatrop":
-#     cdef cppclass FatropParams:
+# cdef extern from "FatropOptions.hpp" namespace "fatrop":
+#     cdef cppclass FatropOptions:
 #         int max_iter
 #         int tol
 
@@ -144,7 +144,7 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
 #         OCPBuilder(const string &functions, const string &json_spec_file) except +
 #         shared_ptr[FatropAlg] fatropalg
 #         shared_ptr[FatropData] fatropdata
-#         shared_ptr[FatropParams] fatropparams
+#         shared_ptr[FatropOptions] fatropparams
 #         shared_ptr[OCP] ocptempladapter
 #         vector[double] initial_u
 #         vector[double] initial_x

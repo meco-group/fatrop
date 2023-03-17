@@ -167,7 +167,7 @@ shared_ptr<FatropApplication> OCPBuilder::Build()
     // ocplsriccati1 = static_cast<shared_ptr<OCPLSRiccati>>(maxentsampler);
     ocplsriccati1 = make_shared<OCPLSRiccati>(ocptempladapter->GetOCPDims());
     ocplsriccati = ocplsriccati1;
-    params = make_shared<FatropParams>();
+    params = make_shared<FatropOptions>();
     ocpscaler = make_shared<OCPNoScaling>(params);
     fatropocp1 = make_shared<FatropOCP>(ocptempladapter, ocplsriccati, ocpscaler);
     fatropocp = fatropocp1;
