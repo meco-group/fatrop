@@ -68,7 +68,7 @@ void FatropOptions::SetOption(const string &option_name, T value)
         }
         else
         {
-            throw std::runtime_error("Option " + option_name + " not of type double");
+            throw std::runtime_error("Option " + option_name + " of type double");
         }
     }
     else if (integer_options.find(option_name) != integer_options.end())
@@ -77,9 +77,20 @@ void FatropOptions::SetOption(const string &option_name, T value)
         {
             integer_options[option_name].Set(value);
         }
+        else if constexpr (std::is_floating_point<T>::value)
+        {
+            if ((int)value == value)
+            {
+                integer_options[option_name].Set((int)value);
+            }
+            else
+            {
+                throw std::runtime_error("Option " + option_name + " of type int");
+            }
+        }
         else
         {
-            throw std::runtime_error("Option " + option_name + " not of type int");
+            throw std::runtime_error("Option " + option_name + " of type int");
         }
     }
     else if (boolean_options.find(option_name) != boolean_options.end())
@@ -87,6 +98,25 @@ void FatropOptions::SetOption(const string &option_name, T value)
         if constexpr (std::is_same<T, bool>::value)
         {
             boolean_options[option_name].Set(value);
+        }
+        else if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
+        {
+            if (value == 0)
+            {
+                boolean_options[option_name].Set(false);
+            }
+            else if (value == 1)
+            {
+                boolean_options[option_name].Set(true);
+            }
+            else
+            {
+                throw std::runtime_error("Option " + option_name + " of type bool can only convert integer value 0 or 1 to bool, got " + to_string(value));
+            }
+        }
+        else
+        {
+            throw std::runtime_error("Option " + option_name + " of type bool");
         }
     }
     else
@@ -137,6 +167,6 @@ auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
 }
 template class Option<int>;
 template class Option<double>;
-template void FatropOptions::SetOption<double>(const string&, double);
-template void FatropOptions::SetOption<int>(const string&, int);
-template void FatropOptions::SetOption<bool>(const string&, bool);
+template void FatropOptions::SetOption<double>(const string &, double);
+template void FatropOptions::SetOption<int>(const string &, int);
+template void FatropOptions::SetOption<bool>(const string &, bool);

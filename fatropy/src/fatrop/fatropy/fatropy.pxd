@@ -80,11 +80,13 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
         const int K_
         shared_ptr[StageOCPExprEvaluatorFactory] GetExprEvaluator(const string &sampler_name)
         const StageOCPSolution &LastStageOCPSolution()
+        void SetOption[T](const string &option_name, T value)
 
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
     cdef cppclass StageOCPApplicationBuilder:
         @staticmethod
         shared_ptr[StageOCPApplication] FromRockitInterface(const string &functions, const string &json_spec_file) # except +
+
 
 # cdef extern from "FatropAlg.hpp" namespace "fatrop":
 #     cdef cppclass FatropAlg:

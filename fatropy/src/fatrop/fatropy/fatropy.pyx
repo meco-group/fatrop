@@ -18,6 +18,8 @@ from cpython cimport array
 import json
 import numpy as np
 from casadi import Callback
+import cython
+# from libcpp import bool
 # class FatropCasFun(Callback):
 #     def __init__(self, myocp, name, params, res):
 #         Callback.__init__(self)
@@ -206,6 +208,13 @@ cdef class OCP:
     def SetInitial(self, initial_u, initial_x):
         self.myFatropApplication.get().SetInitial(initial_u, initial_x)
     
+    # def SetOption(self, option_name, cython.int value):
+    #     self.myFatropApplication.get().SetOption(option_name.encode('utf-8'), value)
+    def SetOption(self, option_name, cython.double value):
+        self.myFatropApplication.get().SetOption(option_name.encode('utf-8'), value)
+    # def SetOption(self, option_name, cython.bint value):
+    #     self.myFatropApplication.get().SetOption(option_name.encode('utf-8'), value)
+
 
 
 
