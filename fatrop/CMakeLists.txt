@@ -179,29 +179,29 @@ INSTALL(TARGETS fatrop blasfeo RunFatrop
   RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
   )
 
-include(CMakePackageConfigHelpers)
-set(ConfigFileInstallDir cmake/fatrop)
+# include(CMakePackageConfigHelpers)
+# set(ConfigFileInstallDir cmake)
 # to do: make the install dirs not-hard coded
 # set(INCLUDE_INSTALL_DIR ${INCLUDE_INSTALL_DIR} CACHE PATH "install path for include files")
 # set(LIBRARY_INSTALL_DIR ${LIBRARY_INSTALL_DIR} CACHE PATH "install path for libraries")
 # set(RUNTIME_INSTALL_DIR ${RUNTIME_INSTALL_DIR} CACHE PATH "install path for runtimes")
-configure_package_config_file(fatropConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
-  INSTALL_DESTINATION "${ConfigFileInstallDir}"
-  PATH_VARS INCLUDE_INSTALL_DIR LIBRARY_INSTALL_DIR
-  )
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
-  VERSION "${VERSION}"
-  COMPATIBILITY SameMajorVersion)
+# configure_package_config_file(fatropConfig.cmake.in
+#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
+#   INSTALL_DESTINATION "${ConfigFileInstallDir}"
+#   PATH_VARS INCLUDE_INSTALL_DIR LIBRARY_INSTALL_DIR
+#   )
+# write_basic_package_version_file(
+#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
+#   VERSION "${VERSION}"
+#   COMPATIBILITY SameMajorVersion)
 
-EXPORT(EXPORT fatropTargets
-  FILE fatropTargets.cmake)
+# EXPORT(EXPORT fatropTargets
+#   FILE fatropTargets.cmake)
 
-INSTALL(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/fatropTargets.cmake"
-  DESTINATION "${ConfigFileInstallDir}")
+# INSTALL(FILES
+#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
+#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
+#   "${CMAKE_CURRENT_BINARY_DIR}/fatropTargets.cmake"
+#   DESTINATION "${ConfigFileInstallDir}")
 
-include(CPack)
+# include(CPack)
