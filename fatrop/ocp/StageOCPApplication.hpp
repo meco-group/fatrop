@@ -116,7 +116,7 @@ namespace fatrop
     protected:
         StageOCPSolution();
         void SetDims(const OCPDims &dims);
-        void Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params);
+        void SetParams(const vector<double> &global_params, const vector<double> &stage_params);
         int nx;
         int nu;
         int n_stage_params;

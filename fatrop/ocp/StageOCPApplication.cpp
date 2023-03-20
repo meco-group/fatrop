@@ -155,9 +155,8 @@ void StageOCPSolution::SetDims(const OCPDims &dims)
     global_params.resize(n_global_params);
     stage_params.resize(n_stage_params);
 }
-void StageOCPSolution::Set(const FatropVecBF &sol, const vector<double> &global_params, const vector<double> &stage_params)
+void StageOCPSolution::SetParams(const vector<double> &global_params, const vector<double> &stage_params)
 {
-    FatropSolution::SetPrimalSolution(sol);
     this->global_params = global_params;
     this->stage_params = stage_params;
 }
@@ -200,6 +199,7 @@ void StageOCPApplication::Build()
 int StageOCPApplication::Optimize()
 {
     int ret = NLPApplication::Optimize();
+    last_solution.SetParams(GlobalParameters(), StageParameters());
     if (ret == 0)
     {
         last_solution.SetSolution(LastSolutionPrimal(), LastSolutionDual(), LastSolutionZL(), LastSolutionZU());
