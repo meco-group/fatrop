@@ -16,7 +16,7 @@ int main(int argc, char **argv)
         // ///  retrieve solution
         app->LastStageOCPSolution().Eval(eval_expression, u0_result);
         ///  initialize next solver run 
-        app->SetInitial(app->LastStageOCPSolution());
+        app->SetInitial(app->LastSolution());
         ///  change solver options
         app->SetOption("tol", 1e-6);
         app->SetOption("mu_init", 1e-5);

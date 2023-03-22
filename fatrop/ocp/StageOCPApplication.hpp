@@ -103,15 +103,11 @@ namespace fatrop
         shared_ptr<OCPAdapter> adapter;
     };
 
-    struct StageOCPApplicationAbstract : public OCPApplication
-    {
-        StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp);
-    };
 
     struct StageOCPSolution : public FatropSolution
     {
     public:
-        StageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app);
+        StageOCPSolution(const shared_ptr<OCP> &app);
 
     protected:
         StageOCPSolution();
@@ -135,7 +131,11 @@ namespace fatrop
         friend class StageOCPApplication;
     };
 
-    class StageOCPApplication : public StageOCPApplicationAbstract
+    // struct StageOCPApplicationAbstract : public OCPApplication
+    // {
+    //     StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp);
+    // };
+    class StageOCPApplication : public OCPApplication
     {
     public:
         StageOCPApplication(const shared_ptr<StageOCP> &ocp);
@@ -161,6 +161,7 @@ namespace fatrop
         void Build();
         int Optimize();
         const StageOCPSolution &LastStageOCPSolution();
+        const FatropSolution &LastSolution(){return LastStageOCPSolution();};
 
     public:
         const int nx_;

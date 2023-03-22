@@ -136,10 +136,10 @@ void FatropSolution::SetPrimalSolution(const FatropVecBF &sol)
 {
     sol.copyto(sol_primal_);
 }
-StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
-{
-}
-StageOCPSolution::StageOCPSolution(const shared_ptr<StageOCPApplicationAbstract> &app)
+// StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
+// {
+// }
+StageOCPSolution::StageOCPSolution(const shared_ptr<OCP> &app)
 {
     SetDims(app->GetOCPDims());
 }
@@ -173,7 +173,7 @@ void StageOCPSolution::Eval(const shared_ptr<StageExpressionEvaluatorBase> &eval
 {
     evaluator->Evaluate(sol_primal_, global_params, stage_params, result);
 }
-StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : StageOCPApplicationAbstract(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
+StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
 StageOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
 void StageOCPApplication::AppParameterSetter::SetValue(const double value[])
