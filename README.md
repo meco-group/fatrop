@@ -2,12 +2,12 @@
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
 
 The main features of the solver are:
-- High numerical robustness by implementing advanced numerical optimization techniques, inspired by IPOPT.
-- Path equality and inequality constraints are handled in an effective way, without relying on penalty methods.
-- Fast by exploiting the optimal control problem structure through a specialized linear solver based on the Riccati recursion.
-- Multiple shooting formulation, which naturally makes it able to intitialize from any, possibly infeaisble, solution estimate. 
-- Ability to use Exact Lagrangian Hessian information.
-- The software is interfaced to rockit, which is a high-level optimal control problem specification framework, built on top of CasADi.
+- high numerical robustness by implementation of advanced numerical optimization techniques, inspired by IPOPT
+- fast by exploiting the optimal control problem structure through a specialized linear solver, based on the Riccati recursion
+- effecitve handling of path equality and inequality constraints, without relying on penalty methods
+- ability to incorporate exact Lagrangian Hessian information
+- ability to be initialized from any, possibly infeasible, solution estimate
+- interfaced to rockit, which is a high-level optimal control problem specification framework, built on top of CasADi
 
 # Installation instructions
 ## build and install fatrop
