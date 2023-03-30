@@ -7,14 +7,6 @@ project(FATROP VERSION "${VERSION}" LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# include(FetchContent)
-# FetchContent_Declare(
-#   googletest
-#   URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-# )
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# FetchContent_MakeAvailable(googletest)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -29,13 +21,10 @@ execute_process(COMMAND "getconf" "LEVEL1_DCACHE_LINESIZE" OUTPUT_VARIABLE L1_CA
 set(CACHE_LINE_SIZE "${L1_CACHE_LINE_SIZE}" CACHE STRING "cache line size used for cache aligning")
 math(EXPR L1_CACHE_LINE_SIZE "${CACHE_LINE_SIZE}")
 
-# set(CMAKE_CXX_FLAGS_DEBUG "-pg -fprofile-arcs -ftest-coverage -g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
 set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
-# set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
-# set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fno-split-loops -fno-loop-unroll-and-jam -fno-tree-loop-vectorize -fno-split-loops -fno-align-loops -fno-loop-interchange -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
 option(BUILD_DOCS "Build documentation" OFF)
 
 # TODO write this is a more modern way
@@ -53,13 +42,7 @@ set(BLASFEO_TARGET "X64_AUTOMATIC" CACHE STRING "BLASFEO Target architecture")
 set(BLASFEO_SRC_DIR ${PROJECT_SOURCE_DIR}/external/blasfeo)
 message(STATUS "Target: BLASFEO is ${BLASFEO_TARGET}")
 add_subdirectory(external)
-
-# include(FindMUMPS.cmake)
-# find_package(MUMPS)
-# find_package(blasfeo)
 add_subdirectory(fatrop)
-# add_subdirectory(SWIG)
-# add_subdirectory(test)
 
 
 if(BUILD_DOCS MATCHES ON)

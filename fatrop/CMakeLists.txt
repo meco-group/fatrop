@@ -1,4 +1,3 @@
-# add_library(fatrop SHARED FatropMemory.cpp LinearAlgebraBlasfeo.cpp InterfaceMUMPS.cpp)
 set(FATROP_INTERNAL
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp    blasfeo_wrapper/LinearAlgebraBlasfeo.cpp
 function_evaluation/CasadiCodegen.hpp       function_evaluation/CasadiCodegen.cpp
@@ -11,11 +10,11 @@ aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
 ocp/StageOCPApplication.hpp                 ocp/StageOCPApplication.cpp
-ocp/OCPAdapter.hpp                    ocp/OCPAdapter.cpp
-ocp/StageOCP.hpp                          ocp/StageOCP.cpp
+ocp/OCPAdapter.hpp                          ocp/OCPAdapter.cpp
+ocp/StageOCP.hpp                            ocp/StageOCP.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
-ocp/StageOCPExpressions.hpp                    ocp/StageOCPExpressions.cpp
+ocp/StageOCPExpressions.hpp                 ocp/StageOCPExpressions.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp
 ocp/OCP.hpp                                 ocp/OCP.cpp
 ocp/OCPDims.hpp                             ocp/OCPDims.cpp
@@ -83,9 +82,6 @@ templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
 
-# find_package(MUMPS)
-# target_link_libraries(fatrop MUMPS::MPISEQ)
-# target_link_libraries(fatrop MUMPS::DMUMPS)
 target_include_directories(fatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
@@ -98,19 +94,8 @@ target_include_directories(RunFatrop
         ${PROJECT_SOURCE_DIR}/fatrop
 )
 
-# set_target_properties(fatrop PROPERTIES PUBLIC_HEADER ${FATROPHEADERS})
-# set_target_properties(fatrop PROPERTIES PUBLIC_HEADER "${FATROPHEADERS}")
 list(APPEND INCLUDEDIRSFATROP
 .
-# aux
-# blasfeo_wrapper
-# debug
-# function_evaluation
-# json
-# ocp
-# solver
-# sparse
-# templates)
 )
 foreach(incl IN LISTS INCLUDEDIRSFATROP) 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
@@ -120,8 +105,6 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
         PATTERN "*.h" # select C header files
 )
 endforeach()
-#install(TARGETS fatrop
-#PUBLIC_HEADER DESTINATION fatrop)
 
 set(INCLUDE_INSTALL_DIR "include/fatrop")
 set(LIBRARY_INSTALL_DIR "lib")
@@ -145,31 +128,3 @@ INSTALL(TARGETS fatrop blasfeo
   )
 
 INSTALL(EXPORT fatropConfig DESTINATION cmake)
-
-
-# include(CMakePackageConfigHelpers)
-# set(ConfigFileInstallDir cmake)
-# to do: make the install dirs not-hard coded
-# set(INCLUDE_INSTALL_DIR ${INCLUDE_INSTALL_DIR} CACHE PATH "install path for include files")
-# set(LIBRARY_INSTALL_DIR ${LIBRARY_INSTALL_DIR} CACHE PATH "install path for libraries")
-# set(RUNTIME_INSTALL_DIR ${RUNTIME_INSTALL_DIR} CACHE PATH "install path for runtimes")
-# configure_package_config_file(fatropConfig.cmake.in
-#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
-#   INSTALL_DESTINATION "${ConfigFileInstallDir}"
-#   PATH_VARS INCLUDE_INSTALL_DIR LIBRARY_INSTALL_DIR
-#   )
-# write_basic_package_version_file(
-#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
-#   VERSION "${VERSION}"
-#   COMPATIBILITY SameMajorVersion)
-
-# EXPORT(EXPORT fatropTargets
-#   FILE fatropTargets.cmake)
-
-# INSTALL(FILES
-#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
-#   "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
-#   "${CMAKE_CURRENT_BINARY_DIR}/fatropTargets.cmake"
-#   DESTINATION "${ConfigFileInstallDir}")
-
-# include(CPack)
