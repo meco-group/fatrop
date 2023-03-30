@@ -113,22 +113,22 @@ namespace fatrop
     public:
         StageExpressionEvaluatorFactory(const shared_ptr<StageExpression> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
         // at_t0()
-        OCPTimeStepSampler at_t0()
+        OCPTimeStepSampler at_t0() const
         {
             return OCPTimeStepSampler(nu, nx, no_stage_params, K, 0, eval_);
         }
         // at_tf()
-        OCPTimeStepSampler at_tf()
+        OCPTimeStepSampler at_tf() const
         {
             return OCPTimeStepSampler(nu, nx, no_stage_params, K, K - 1, eval_);
         }
         // at_tk(int k)
-        OCPTimeStepSampler at_tk(int k)
+        OCPTimeStepSampler at_tk(const int k) const
         {
             return OCPTimeStepSampler(nu, nx, no_stage_params, K, k, eval_);
         }
         // evaluate at control grid
-        StageControlGridSampler at_control()
+        StageControlGridSampler at_control() const
         {
             return StageControlGridSampler(nu, nx, no_stage_params, K, eval_);
         }
