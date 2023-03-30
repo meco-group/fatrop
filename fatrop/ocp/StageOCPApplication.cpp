@@ -19,7 +19,7 @@ int NLPApplication::Optimize()
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
-FatropVecBF &NLPApplication::last_solution_primal()
+const FatropVecBF &NLPApplication::last_solution_primal()
 {
     assert(!dirty);
     return fatropdata_->x_curr;
@@ -37,15 +37,15 @@ NLPDims NLPApplication::get_nlp_dims()
 {
     return nlp_->GetNLPDims();
 }
-FatropVecBF &NLPApplication::last_solution_dual()
+const FatropVecBF &NLPApplication::last_solution_dual()
 {
     return fatropdata_->lam_curr;
 }
-FatropVecBF &NLPApplication::last_solution_zL()
+const FatropVecBF &NLPApplication::last_solution_zL()
 {
     return fatropdata_->zL_curr;
 }
-FatropVecBF &NLPApplication::last_solution_zU()
+const FatropVecBF &NLPApplication::last_solution_zU()
 {
     return fatropdata_->zU_curr;
 }

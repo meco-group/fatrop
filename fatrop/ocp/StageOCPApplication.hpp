@@ -51,10 +51,10 @@ namespace fatrop
     public:
         int Optimize();
         // TODO: make this protected and use last_solution instead and choose other name
-        FatropVecBF &last_solution_primal();
-        FatropVecBF &last_solution_dual();
-        FatropVecBF &last_solution_zL();
-        FatropVecBF &last_solution_zU();
+        const FatropVecBF &last_solution_primal();
+        const FatropVecBF &last_solution_dual();
+        const FatropVecBF &last_solution_zL();
+        const FatropVecBF &last_solution_zU();
         FatropVecBF &initial_guess_primal();
         FatropVecBF &initial_guess_dual();
         FatropVecBF &initial_guess_zL();
