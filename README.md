@@ -56,20 +56,11 @@ build and install in your python environment
 
     pip install -e .
 
-## install custom rockit version
-Rockit is the framework that is used for specifying optimal control problems in python. 
-We had to make a few modifications for the acados interface such that problems are transcribed in the same way for fatrop and acados.
-We are currently cleaning up the code and creating a pull request to the orignal acados repository so that this repository can be used to the in the future to run this benchmark.
-For now, please use our custom rockit version:
+## install rockit with fatropy interface 
 
-    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/rockit.git
+    git clone --recurse-submodules https://gitlab.kuleuven.be/meco-software/rockit.git 
     cd rockit
     pip install -e .
-
-also install the rockit-fatrop interface
-
-    cd <rockit_source_dir>/rockit/external
-    git submodule add https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git fatrop
 
 ## examples 
 
