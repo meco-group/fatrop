@@ -5,10 +5,8 @@
 #include "FatropData.hpp"
 #include "Filter.hpp"
 #include "LineSearch.hpp"
-#include "StepAcceptor.hpp"
 #include <cmath>
 #include "IterationData.hpp"
-#include "templates/FatropApplication.hpp"
 #include <memory>
 #include "FatropStats.hpp"
 #include <limits>
@@ -22,7 +20,7 @@ using namespace std;
 namespace fatrop
 {
     // TODO: get rid of FatropApplication
-    class FatropAlg : public FatropApplication
+    class FatropAlg 
     {
     public:
         FatropAlg(
@@ -32,12 +30,12 @@ namespace fatrop
             const shared_ptr<Filter> &filter,
             const shared_ptr<LineSearch> &linesearch,
             const shared_ptr<Journaller> &journaller);
-        void Initialize() override;
-        void Reset() override;
-        void SetBounds(const vector<double> &lower, const vector<double> &upper) override;
-        void SetInitial(const vector<double> &initial) override;
-        void GetSolution(vector<double> &sol) override;
-        int Optimize() override;
+        void Initialize() ;
+        void Reset() ;
+        void SetBounds(const vector<double> &lower, const vector<double> &upper) ;
+        void SetInitial(const vector<double> &initial) ;
+        void GetSolution(vector<double> &sol) ;
+        int Optimize() ;
         int EvalHess();
         int EvalJac();
         inline int EvalCVCurr();
@@ -48,10 +46,6 @@ namespace fatrop
         int EvalDuInf();
         inline int Initialization();
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu);
-        void WarmStart() override
-        {
-            fatropdata_->x_initial.copy(fatropdata_->x_curr);
-        };
         shared_ptr<FatropNLP> fatropnlp_;
         shared_ptr<FatropData> fatropdata_;
         shared_ptr<FatropOptions> fatropoptions_;

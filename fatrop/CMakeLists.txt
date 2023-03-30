@@ -8,26 +8,16 @@ aux/DynamicLib.hpp                          aux/DynamicLib.cpp
 aux/FatropVector.hpp                        aux/FatropVector.cpp
 aux/LinearAlgebra.hpp                       aux/LinearAlgebra.cpp
 aux/SmartPtr.hpp                            aux/SmartPtr.cpp
-# debug/FatropDebugTools.hpp                  debug/FatropDebugTools.cpp
-# debug/LinearAlgebraEigen.hpp                debug/LinearAlgebraEigen.cpp
-# debug/RandomOCP.hpp                         debug/RandomOCP.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
 ocp/StageOCPApplication.hpp                 ocp/StageOCPApplication.cpp
-ocp/OCPSolution.hpp
-# ocp/BFOCPAL.hpp                             ocp/BFOCPAL.cpp
 ocp/OCPAdapter.hpp                    ocp/OCPAdapter.cpp
-# ocp/BFOCPAdapterAL.hpp                      ocp/BFOCPAdapterAL.cpp
 ocp/StageOCP.hpp                          ocp/StageOCP.cpp
-# ocp/OCPBuilder.hpp                          ocp/OCPBuilder.cpp
-# ocp/OCPBuilderAL.hpp                        ocp/OCPBuilderAL.cpp
 ocp/DuInfEvaluator.hpp                      ocp/DuInfEvaluator.cpp
 ocp/FatropOCP.hpp                           ocp/FatropOCP.cpp
 ocp/StageOCPExpressions.hpp                    ocp/StageOCPExpressions.cpp
-# ocp/FatropOCPAL.hpp                         ocp/FatropOCPAL.cpp
 ocp/FatropOCPBuilder.hpp                    ocp/FatropOCPBuilder.cpp
 ocp/OCP.hpp                                 ocp/OCP.cpp
-# ocp/OCPAL.hpp                               ocp/OCPAL.cpp
 ocp/OCPDims.hpp                             ocp/OCPDims.cpp
 ocp/OCPInitializer.hpp                      ocp/OCPInitializer.cpp
 ocp/OCPKKT.hpp                              ocp/OCPKKT.cpp
@@ -35,9 +25,7 @@ ocp/OCPLinearSolver.hpp                     ocp/OCPLinearSolver.cpp
 ocp/OCPLSRiccati.hpp                        ocp/OCPLSRiccati.cpp
 ocp/OCPNoScaling.hpp                        ocp/OCPNoScaling.cpp
 ocp/OCPScalingMethod.hpp                    ocp/OCPScalingMethod.cpp
-# ocp/LineSearchDDP.hpp                       ocp/LineSearchDDP.cpp
-solver/AlgBuilder.hpp              #solver/AlgorithmQuantities.cpp
-solver/AlgorithmQuantities.hpp              solver/AlgorithmQuantities.cpp
+solver/AlgBuilder.hpp              
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp
 solver/FatropAlg.hpp                        solver/FatropAlg.cpp
 solver/FatropData.hpp                       solver/FatropData.cpp
@@ -46,20 +34,9 @@ solver/FatropPrinter.hpp                    solver/FatropPrinter.cpp
 solver/Filter.hpp                           solver/Filter.cpp
 solver/IterationData.hpp                    solver/IterationData.cpp
 solver/LineSearch.hpp                       solver/LineSearch.cpp
-solver/StepAcceptor.hpp                     solver/StepAcceptor.cpp
 solver/Timer.hpp                            solver/Timer.cpp
 solver/FatropStats.hpp                            
-# alm_solver/FatropALMAlg.hpp                 alm_solver/FatropALMAlg.cpp
-# alm_solver/FatropALMData.hpp                alm_solver/FatropALMData.cpp
-# sparse/FatropSparse.hpp                     sparse/FatropSparse.cpp
-# sparse/Interface.hpp                        sparse/Interface.cpp
-# sparse/InterfaceMA57.hpp                    sparse/InterfaceMA57.cpp
-# sparse/InterfaceMUMPS.hpp                   sparse/InterfaceMUMPS.cpp
-# sparse/InterfacePardiso.hpp                 sparse/InterfacePardiso.cpp
-# sparse/SparseOCP.hpp                        sparse/SparseOCP.cpp
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
-# templates/FatropNLPAL.hpp                   templates/FatropNLPAL.cpp
-templates/FatropApplication.hpp             templates/FatropApplication.cpp
 json/json.h json/json.cpp
 )
 set(FATROPHEADERS
@@ -71,9 +48,6 @@ aux/DynamicLib.hpp
 aux/FatropVector.hpp
 aux/LinearAlgebra.hpp
 aux/SmartPtr.hpp
-# debug/FatropDebugTools.hpp
-# debug/LinearAlgebraEigen.hpp
-# debug/RandomOCP.hpp
 function_evaluation/FunctionEvaluation.hpp
 ocp/StageOCPApplication.hpp
 ocp/OCPAbstract.hpp
@@ -81,11 +55,9 @@ ocp/OCPAdapter.hpp
 ocp/Stage.hpp
 ocp/DuInfEvaluator.hpp
 ocp/FatropOCP.hpp
-# ocp/FatropOCPAL.hpp
 ocp/FatropOCPBuilder.hpp
 ocp/StageOCPExpressions.hpp
 ocp/OCP.hpp
-# ocp/OCPAL.hpp
 ocp/OCPDims.hpp
 ocp/OCPInitializer.hpp
 ocp/OCPKKT.hpp
@@ -93,7 +65,6 @@ ocp/OCPLinearSolver.hpp
 ocp/OCPLSRiccati.hpp
 ocp/OCPNoScaling.hpp
 ocp/OCPScalingMethod.hpp
-# ocp/LineSearchDDP.hpp
 solver/AlgorithmQuantities.hpp
 solver/AlgBuilder.hpp
 solver/AlgStrategy.hpp
@@ -107,12 +78,6 @@ solver/LineSearch.hpp
 solver/StepAcceptor.hpp
 solver/Timer.hpp
 solver/FatropStats.hpp                            
-# sparse/FatropSparse.hpp
-# sparse/Interface.hpp
-# sparse/InterfaceMA57.hpp
-# sparse/InterfaceMUMPS.hpp
-# sparse/InterfacePardiso.hpp
-# sparse/SparseOCP.hpp
 templates/FatropApplication.hpp
 templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})

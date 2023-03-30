@@ -9,7 +9,6 @@
 #include "ocp/OCPAbstract.hpp"
 #include "ocp/StageOCPExpressions.hpp"
 #include "solver/FatropStats.hpp"
-#include "ocp/OCPSolution.hpp"
 #include <map>
 #include "json/json.h"
 #include <fstream>
