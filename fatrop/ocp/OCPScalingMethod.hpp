@@ -2,7 +2,6 @@
 #define SCALINGMETHODINCLUDED
 #include "solver/FatropData.hpp"
 #include "templates/NLPAlg.hpp"
-#include "aux/SmartPtr.hpp"
 #include "solver/AlgStrategy.hpp"
 #include "ocp/OCPKKT.hpp"
 #include <memory>

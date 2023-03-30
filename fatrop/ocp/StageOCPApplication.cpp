@@ -148,9 +148,9 @@ StageOCPSolution::StageOCPSolution(){};
 void StageOCPSolution::set_dims(const OCPDims &dims)
 {
     FatropSolution::set_dims(dims);
-    nx = dims.nx.at(0);
-    nu = dims.nu.at(0);
-    n_stage_params = dims.n_stage_params.at(0);
+    nx = dims.nx.get(0);
+    nu = dims.nu.get(0);
+    n_stage_params = dims.n_stage_params.get(0);
     n_global_params = dims.n_global_params;
     K = dims.K;
     global_params.resize(n_global_params);

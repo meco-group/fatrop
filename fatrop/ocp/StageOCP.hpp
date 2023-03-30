@@ -5,7 +5,6 @@
 #include <string>
 #include <iostream>
 #include <aux/DynamicLib.hpp>
-#include <aux/SmartPtr.hpp>
 #include "function_evaluation/CasadiCodegen.hpp"
 #include "json/json.h"
 #include <fstream>

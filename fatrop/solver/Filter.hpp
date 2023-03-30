@@ -1,7 +1,6 @@
 #ifndef FILTERINCLUDED
 #define FILTERINCLUDED
 #include "vector"
-#include "aux/SmartPtr.hpp"
 namespace fatrop
 {
     struct FilterData

@@ -1,6 +1,5 @@
 #ifndef FATROPITERATIONDATAINCLUDED
 #define FATROPITERATIONDATAINCLUDED
-#include "aux/SmartPtr.hpp"
 #include <cmath>
 #include <vector>
 #include <iostream>

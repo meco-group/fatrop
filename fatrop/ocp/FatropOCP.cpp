@@ -5,7 +5,7 @@ FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,
     const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> & options) : ocp_(ocp), dims_(ocp_->GetOCPDims()),
-                                                  nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.at(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
+                                                  nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.get(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
                                                   sigma(s_memvec[0]),
                                                   gradb(s_memvec[1]),
                                                   s_dummy(s_memvec[2]),

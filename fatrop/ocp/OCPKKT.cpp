@@ -15,7 +15,7 @@ OCPKKTMemory::OCPAux::OCPAux(const OCPDims &dims) : ux_offs(offsets(dims.nx + di
                                                     g_offs(offsets(dims.ng)),
                                                     dyn_offs(offsets(rotate(dims.nx,1))),
                                                     dyn_eq_offs(offsets(rotate(dims.nx, 1)) + sum(dims.ng)),
-                                                    g_ineq_offs(offsets(dims.ng_ineq) + (sum(dims.nx) - dims.nx.at(0) + sum(dims.ng))),
+                                                    g_ineq_offs(offsets(dims.ng_ineq) + (sum(dims.nx) - dims.nx.get(0) + sum(dims.ng))),
                                                     ineq_offs(offsets(dims.ng_ineq)),
                                                     max_nu(max(dims.nu)), max_nx(max(dims.nx)),
                                                     max_ng(max(dims.ng)),

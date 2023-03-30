@@ -2,7 +2,6 @@
 #define OCPINCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
-#include "aux/SmartPtr.hpp"
 #include "ocp/OCPKKT.hpp"
 #include "solver/FatropData.hpp"
 #include <memory>

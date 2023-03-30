@@ -2,7 +2,6 @@
 #define NOSCALINGMETHODINCLUDED
 #include "solver/FatropData.hpp"
 #include "templates/NLPAlg.hpp"
-#include "aux/SmartPtr.hpp"
 #include "solver/AlgStrategy.hpp"
 #include "OCPScalingMethod.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"

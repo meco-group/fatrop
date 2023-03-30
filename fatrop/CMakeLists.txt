@@ -6,7 +6,6 @@ aux/Common.hpp                              aux/Common.cpp
 aux/DynamicLib.hpp                          aux/DynamicLib.cpp
 aux/FatropVector.hpp                        aux/FatropVector.cpp
 aux/LinearAlgebra.hpp                       aux/LinearAlgebra.cpp
-aux/SmartPtr.hpp                            aux/SmartPtr.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
 ocp/StageOCPApplication.hpp                 ocp/StageOCPApplication.cpp
@@ -46,7 +45,6 @@ aux/Common.hpp
 aux/DynamicLib.hpp
 aux/FatropVector.hpp
 aux/LinearAlgebra.hpp
-aux/SmartPtr.hpp
 function_evaluation/FunctionEvaluation.hpp
 ocp/StageOCPApplication.hpp
 ocp/OCPAbstract.hpp

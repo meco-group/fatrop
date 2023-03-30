@@ -19,11 +19,11 @@ namespace fatrop
     struct OCPDims : public NLPDims
     {
     public:
-        OCPDims(const int K, const FatropVector<int> &nu, const FatropVector<int> &nx, const FatropVector<int> &ng, const FatropVector<int> &ng_ineq, const FatropVector<int> &n_stage_params, const int n_global_parameters) : NLPDims({sum(nx + nu), sum(ng + ng_ineq + nx) - nx.at(0), sum(ng_ineq)}),
+        OCPDims(const int K, const FatropVector<int> &nu, const FatropVector<int> &nx, const FatropVector<int> &ng, const FatropVector<int> &ng_ineq, const FatropVector<int> &n_stage_params, const int n_global_parameters) : NLPDims({sum(nx + nu), sum(ng + ng_ineq + nx) - nx.get(0), sum(ng_ineq)}),
                                                                                                                                                         K(K), nu(nu), nx(nx), ng(ng), ng_ineq(ng_ineq), n_stage_params(n_stage_params), n_global_params(n_global_parameters),
                                                                                                                                                         n_u_tot(sum(nu)),
                                                                                                                                                         n_x_tot(sum(nx)),
-                                                                                                                                                        n_b_tot(n_x_tot - nx.at(0)),
+                                                                                                                                                        n_b_tot(n_x_tot - nx.get(0)),
                                                                                                                                                         n_g_tot(sum(ng)),
                                                                                                                                                         n_g_ineq_tot(sum(ng_ineq)){};
         /// horizon length

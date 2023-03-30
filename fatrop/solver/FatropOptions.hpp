@@ -1,6 +1,5 @@
 #ifndef FATROPPARAMSINCLUDED
 #define FATROPPARAMSINCLUDED
-#include "aux/SmartPtr.hpp"
 #include <string>
 #include <map>
 #include <type_traits>

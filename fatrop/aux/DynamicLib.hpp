@@ -2,7 +2,6 @@
 #define DYNAMICLIBINCLUDED
 #include <dlfcn.h>
 #include <string>
-#include "SmartPtr.hpp"
 namespace fatrop
 {
     class DLHandler 

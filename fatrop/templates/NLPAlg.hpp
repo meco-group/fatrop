@@ -1,7 +1,6 @@
 #ifndef NLPINCLUDED
 #define NLPINCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "aux/SmartPtr.hpp"
 namespace fatrop
 {
     struct NLPDims

@@ -2,7 +2,6 @@
 #define OCPALGINCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "templates/NLPAlg.hpp"
-#include "aux/SmartPtr.hpp"
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
 #include "OCPScalingMethod.hpp"

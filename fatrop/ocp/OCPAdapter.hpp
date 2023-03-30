@@ -3,7 +3,6 @@
 #include "OCPKKT.hpp"
 #include "OCPAbstract.hpp"
 #include "solver/FatropData.hpp"
-#include "aux/SmartPtr.hpp"
 #include "OCP.hpp"
 #include <memory>
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)

@@ -13,7 +13,7 @@ namespace fatrop
         res.at(0) = 0;
         for (int i = 1; i < size_a; i++)
         {
-            res.at(i) = a.getEl(i - 1) + res.getEl(i - 1);
+            res.at(i) = a.get(i - 1) + res.get(i - 1);
         }
         return res;
     }
@@ -26,7 +26,7 @@ namespace fatrop
         int res = 0;
         for (int i = 0; i < size_a; i++)
         {
-            int ai = a.getEl(i);
+            int ai = a.get(i);
             res = ai > res ? ai : res;
         }
         return res;

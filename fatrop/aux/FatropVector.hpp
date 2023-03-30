@@ -21,7 +21,7 @@ namespace fatrop
     class VecExpr
     {
     public:
-        T getEl(const int ai) const { return static_cast<E const &>(*this).getEl(ai); };
+        T get(const int ai) const { return static_cast<E const &>(*this).get(ai); };
         int size() const { return static_cast<E const &>(*this).size(); };
     };
 
@@ -33,7 +33,7 @@ namespace fatrop
         {
             assert(expr1.size() == expr2.size());
         };
-        T getEl(const int ai) const { return expr1_.getEl(ai) + expr2_.getEl(ai); };
+        T get(const int ai) const { return expr1_.get(ai) + expr2_.get(ai); };
         int size() const { return expr1_.size(); };
 
     private:
@@ -45,7 +45,7 @@ namespace fatrop
     {
     public:
         VecScalarSum(const VecExpr<E1, T> &expr, const int scalar) : expr_(expr), scalar_(scalar){};
-        T getEl(const int ai) const { return expr_.getEl(ai) + scalar_; };
+        T get(const int ai) const { return expr_.get(ai) + scalar_; };
         int size() const { return expr_.size(); };
 
     public:
@@ -57,7 +57,7 @@ namespace fatrop
     {
     public:
         VecRotate(const VecExpr<E1, T> &expr, const int shift) : expr_(expr), shift_(shift){};
-        T getEl(const int ai) const { return expr_.getEl((ai + shift_ + (((ai + shift_) / size() + 1) * size())) % size()); };
+        T get(const int ai) const { return expr_.get((ai + shift_ + (((ai + shift_) / size() + 1) * size())) % size()); };
         int size() const { return expr_.size(); };
 
     public:
@@ -77,12 +77,12 @@ namespace fatrop
             // todo: vector is first initialized, initialize with iterator
             for (int i = 0; i < vecexpr.size(); i++)
             {
-               std:: vector<T>::at(i) = vecexpr.getEl(i);
+               std:: vector<T>::at(i) = vecexpr.get(i);
             }
         }
         FatropVector(const std::vector<T> &vec) : std::vector<T>(vec){};
         FatropVector(std::vector<T> &&vec) : std::vector<T>(move(vec)){};
-        T getEl(const int ai) const { return std::vector<T>::at(ai); };
+        T get(const int ai) const { return std::vector<T>::at(ai); };
         int size() const { return std::vector<T>::size(); };
         operator T *() { return this->data(); };
     };
@@ -109,7 +109,7 @@ namespace fatrop
         T res = 0;
         for (int i = 0; i < expr.size(); i++)
         {
-            res += expr.getEl(i);
+            res += expr.get(i);
         }
         return res;
     }

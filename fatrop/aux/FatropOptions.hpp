@@ -16,7 +16,7 @@ namespace fatrop
     {
     public:
         NumericOption(const std::string &name, const std::string &descr, double default_value) : FatropOption(name, descr), value_(default_value), default_value_(default_value) {}
-        virtual void SetValue(double value)
+        virtual void set_value(double value)
         {
             value_ = value;
         }
@@ -34,11 +34,11 @@ namespace fatrop
         // decorator for NumericOption that also checks bounds
     public:
         NumericOptionBounded(const std::string &name, const std::string &descr, double default_value, double lower_bound, double upper_bound) : NumericOption(name, descr, default_value), lower_bound_(lower_bound), upper_bound_(upper_bound){};
-        virtual void SetValue(double value)
+        virtual void set_value(double value)
         {
             if ((value > lower_bound_) && (value < upper_bound_))
             {
-                NumericOption::SetValue(value);
+                NumericOption::set_value(value);
             }
         }
 

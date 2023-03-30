@@ -399,7 +399,7 @@ int FatropMemoryMatBF::memory_size() const
     for (int i = 0; i < N_; i++)
     {
         // result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
-        result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
+        result += MEMSIZE_MAT(nrows_.get(i), ncols_.get(i));
     }
     return result;
 };
@@ -418,8 +418,8 @@ void FatropMemoryMatBF::set_up()
     double *d_ptr_begin = (double *)data_p;
     for (int i = 0; i < N_; i++)
     {
-        CREATE_MAT(nrows_.at(i), ncols_.at(i), mat + i, data_p);
-        data_p += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
+        CREATE_MAT(nrows_.get(i), ncols_.get(i), mat + i, data_p);
+        data_p += MEMSIZE_MAT(nrows_.get(i), ncols_.get(i));
         // data_p += (mat + i)->memsize;
     }
     double *d_ptr_end = (double *)data_p;
@@ -463,7 +463,7 @@ int FatropMemoryVecBF::memory_size() const
     // size to store date
     for (int i = 0; i < N_; i++)
     {
-        result += MEMSIZE_VEC(nels_.at(i));
+        result += MEMSIZE_VEC(nels_.get(i));
     }
     return result;
 };
@@ -482,8 +482,8 @@ void FatropMemoryVecBF::set_up()
     double *d_ptr_begin = (double *)data_p;
     for (int i = 0; i < N_; i++)
     {
-        CREATE_VEC(nels_.at(i), vec + i, data_p);
-        data_p += MEMSIZE_VEC(nels_.at(i));
+        CREATE_VEC(nels_.get(i), vec + i, data_p);
+        data_p += MEMSIZE_VEC(nels_.get(i));
     }
     double *d_ptr_end = (double *)data_p;
     for (double *d_ptr = d_ptr_begin; d_ptr < d_ptr_end; d_ptr++)
