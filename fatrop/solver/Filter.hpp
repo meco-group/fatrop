@@ -2,7 +2,6 @@
 #define FILTERINCLUDED
 #include "vector"
 #include "aux/SmartPtr.hpp"
-using namespace std;
 namespace fatrop
 {
     struct FilterData
@@ -30,7 +29,7 @@ namespace fatrop
         }
 
     private:
-        vector<FilterData> filterdata_;
+        std::vector<FilterData> filterdata_;
     };
 } // namespace fatrop
 

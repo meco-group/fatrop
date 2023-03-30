@@ -1,5 +1,7 @@
 #include "function_evaluation/FunctionEvaluation.hpp"
 using namespace fatrop;
+using namespace std;
+
 int EvalBase::eval_bf(const double **arg, MAT *bf_mat)
 {
 #if DEBUG

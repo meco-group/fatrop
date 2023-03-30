@@ -1,5 +1,6 @@
 #include "solver/FatropData.hpp"
 using namespace fatrop;
+using namespace std;
 template <int size>
 #define SUMMATION_ALG kahan_sum
 double kahan_sum(const double *numbers)

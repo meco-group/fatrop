@@ -3,13 +3,12 @@
 #include <dlfcn.h>
 #include <string>
 #include "SmartPtr.hpp"
-using namespace std;
 namespace fatrop
 {
     class DLHandler 
     {
     public:
-        DLHandler(const string &filename);
+        DLHandler(const std::string &filename);
         ~DLHandler();
         void *handle;
     };

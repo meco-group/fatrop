@@ -1,5 +1,6 @@
 #include "solver/FatropAlg.hpp"
 using namespace fatrop;
+using namespace std;
 
 FatropAlg::FatropAlg(
     const shared_ptr<FatropNLP> &fatropnlp,

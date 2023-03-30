@@ -1,5 +1,7 @@
 #include "ocp/OCPAdapter.hpp"
+
 using namespace fatrop;
+using namespace std;
 int OCPAdapter::evalHess(
     OCPKKTMemory *OCP,
     double obj_scale,
@@ -24,9 +26,9 @@ int OCPAdapter::evalHess(
     double *primal_data = primal_vars_p->pa;
     double *lam_data = lam_p->pa;
 
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -80,9 +82,9 @@ int OCPAdapter::evalJac(
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
 
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K - 1; k++)
     {
         int nu_k = nu_p[k];
@@ -99,9 +101,9 @@ int OCPAdapter::evalJac(
             BAbt_p + k,
             k);
     }
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -120,9 +122,9 @@ int OCPAdapter::evalJac(
         }
     }
     VEC *slack_vars_bf = (VEC *)slack_vars;
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -189,9 +191,9 @@ int OCPAdapter::EvalConstraintViolation(
             cv_p + offs_dyn_eq_k,
             k);
     }
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K; k++)
     {
         int ng_k = ng_p[k];
@@ -212,9 +214,9 @@ int OCPAdapter::EvalConstraintViolation(
     }
     VEC *cv_bf = (VEC *)constraint_violation;
     VEC *slack_vars_bf = (VEC *)slack_vars;
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K; k++)
     {
         int ng_ineq_k = ng_ineq_p[k];
@@ -256,9 +258,9 @@ int OCPAdapter::EvalGrad(
     int *offs_stageparams_p = (int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
-    #ifdef ENABLE_MULTITHREADING
-    #pragma omp parallel for
-    #endif
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
     for (int k = 0; k < K; k++)
     {
         int nu_k = nu_p[k];
@@ -357,8 +359,8 @@ void OCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<dou
     {
         int nu_k = ocptempl->get_nuk(k);
         int nx_k = ocptempl->get_nxk(k);
-        PACKVEC(nu_k, u_p+ offs_nu, 1, ux_intial_p, offs_nux);
-        PACKVEC(nx_k, x_p+ offs_nx, 1, ux_intial_p, offs_nux + nu_k);
+        PACKVEC(nu_k, u_p + offs_nu, 1, ux_intial_p, offs_nux);
+        PACKVEC(nx_k, x_p + offs_nx, 1, ux_intial_p, offs_nux + nu_k);
         offs_nu += nu_k;
         offs_nx += nx_k;
         offs_nux += nu_k + nx_k;
@@ -378,8 +380,8 @@ void OCPAdapter::GetSolution(const shared_ptr<FatropData> &fatropdata, vector<do
     {
         int nu_k = ocptempl->get_nuk(k);
         int nx_k = ocptempl->get_nxk(k);
-        UNPACKVEC(nu_k, ux_sol, offs_nux, u_p+ offs_nu, 1);
-        UNPACKVEC(nx_k, ux_sol, offs_nux + nu_k, x_p+ offs_nx, 1);
+        UNPACKVEC(nu_k, ux_sol, offs_nux, u_p + offs_nu, 1);
+        UNPACKVEC(nx_k, ux_sol, offs_nux + nu_k, x_p + offs_nx, 1);
         offs_nu += nu_k;
         offs_nx += nx_k;
         offs_nux += nu_k + nx_k;

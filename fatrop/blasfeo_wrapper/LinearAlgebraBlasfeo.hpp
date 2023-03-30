@@ -85,7 +85,6 @@ extern "C"
 #if DEBUG
 #include <assert.h>
 #endif
-using namespace std;
 namespace fatrop
 {
     void fatrop_dcolsc(int kmax, double alpha, struct blasfeo_dmat *sA, int ai, int aj);
@@ -204,8 +203,8 @@ namespace fatrop
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm);
         void copy(const FatropVecBF &fm);
-        void copyto(vector<double>& dest) const;
-        void operator=(const vector<double> &fm);
+        void copyto(std::vector<double>& dest) const;
+        void operator=(const std::vector<double> &fm);
         /** \brief set data pointer*/
         void set_datap(VEC *vecbf);
         /** \brief take a block of size (p), starting at (i)*/

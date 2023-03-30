@@ -1,5 +1,6 @@
 #include "solver/LineSearch.hpp"
 using namespace fatrop;
+using namespace std;
 LineSearch::LineSearch(
     const shared_ptr<FatropOptions> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,

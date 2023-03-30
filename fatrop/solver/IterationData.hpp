@@ -5,7 +5,6 @@
 #include <vector>
 #include <iostream>
 #include <solver/FatropPrinter.hpp>
-using namespace std;
 namespace fatrop
 {
     struct IterationData
@@ -29,7 +28,7 @@ namespace fatrop
         void Push();
         void Reset();
         int print_count = 0;
-        vector<IterationData> iterationdata;
+        std::vector<IterationData> iterationdata;
         IterationData it_curr;
     };
 } // namespace fatrop

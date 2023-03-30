@@ -2,7 +2,6 @@
 #ifndef FATROPPRINTERINCLUDED
 #define FATROPPRINTERINCLUDED
 #include <iostream>
-using namespace std;
 namespace fatrop
 {
     static std::ostream nullstream(nullptr);

@@ -13,7 +13,6 @@
 #include "aux/FatropVector.hpp"
 #include "templates/NLPAlg.hpp"
 #include <vector>
-using namespace std;
 namespace fatrop
 {
     /** \brief  this class contains the problem dimensions of a standard ocp*/

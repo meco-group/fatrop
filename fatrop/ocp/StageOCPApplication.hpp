@@ -23,7 +23,7 @@ namespace fatrop
         // void GetPrimalSolution(vector<double> &result);
         // defautl copy constructor
         FatropSolution(const FatropSolution &other) = default;
-        const vector<double> &primal_solution() { return sol_primal_; };
+        const std::vector<double> &primal_solution() { return sol_primal_; };
 
     protected:
         FatropSolution();
@@ -32,10 +32,10 @@ namespace fatrop
         void set_solution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU);
 
     protected:
-        vector<double> sol_primal_;
-        vector<double> sol_dual_;
-        vector<double> sol_zL_;
-        vector<double> sol_zU_;
+        std::vector<double> sol_primal_;
+        std::vector<double> sol_dual_;
+        std::vector<double> sol_zL_;
+        std::vector<double> sol_zU_;
         friend class NLPApplication;
     };
     // TODO move this class to a separate file
@@ -45,7 +45,7 @@ namespace fatrop
         NLPApplication();
 
     protected:
-        void build(const shared_ptr<FatropNLP> &nlp);
+        void build(const std::shared_ptr<FatropNLP> &nlp);
 
     public:
         int optimize();
@@ -61,60 +61,60 @@ namespace fatrop
         FatropStats get_stats() const;
         NLPDims get_nlp_dims();
         template <typename T>
-        void set_option(const string &option_name, T value);
+        void set_option(const std::string &option_name, T value);
 
     public:
         void set_initial(const FatropSolution &initial_guess);
         const FatropOptions &get_options() const;
 
     protected:
-        shared_ptr<FatropOptions> fatropoptions_;
-        shared_ptr<FatropData> fatropdata_;
-        shared_ptr<FatropNLP> nlp_;
+        std::shared_ptr<FatropOptions> fatropoptions_;
+        std::shared_ptr<FatropData> fatropdata_;
+        std::shared_ptr<FatropNLP> nlp_;
         bool dirty = true;
 
     private:
-        const shared_ptr<OCPAbstract> ocp_;
-        shared_ptr<Journaller> journaller_;
-        shared_ptr<FatropAlg> fatropalg_;
+        const std::shared_ptr<OCPAbstract> ocp_;
+        std::shared_ptr<Journaller> journaller_;
+        std::shared_ptr<FatropAlg> fatropalg_;
     };
 
     // TODO move this class to a separate file
     class OCPApplication : public NLPApplication
     {
     public:
-        OCPApplication(const shared_ptr<OCPAbstract> &ocp);
+        OCPApplication(const std::shared_ptr<OCPAbstract> &ocp);
 
     protected:
         void build();
 
     public:
         using NLPApplication::set_initial;
-        void set_initial(vector<double> &initial_u, vector<double> &initial_x);
+        void set_initial(std::vector<double> &initial_u, std::vector<double> &initial_x);
         OCPDims get_ocp_dims();
-        void set_params(const vector<double> &global_params, const vector<double> &stage_params)
+        void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
         {
             adapter->SetParams(global_params, stage_params);
         }
 
     private:
-        const shared_ptr<OCPAbstract> ocp_;
+        const std::shared_ptr<OCPAbstract> ocp_;
 
     protected:
-        vector<double> &global_parameters();
-        vector<double> &stage_parameters();
-        shared_ptr<OCPAdapter> adapter;
+        std::vector<double> &global_parameters();
+        std::vector<double> &stage_parameters();
+        std::shared_ptr<OCPAdapter> adapter;
     };
 
     struct StageOCPSolution : public FatropSolution
     {
     public:
-        StageOCPSolution(const shared_ptr<OCP> &app);
+        StageOCPSolution(const std::shared_ptr<OCP> &app);
 
     protected:
         StageOCPSolution();
         void set_dims(const OCPDims &dims);
-        void set_parameters(const vector<double> &global_params, const vector<double> &stage_params);
+        void set_parameters(const std::vector<double> &global_params, const std::vector<double> &stage_params);
         int nx;
         int nu;
         int n_stage_params;
@@ -123,13 +123,13 @@ namespace fatrop
 
     public:
         // todo make this deprecated, only use Eval
-        void sample(const StageControlGridSampler &sampler, vector<double> &result) const;
-        vector<double> evaluate(const StageExpressionEvaluatorBase &evaluator) const;
-        void evaluate(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const;
+        void sample(const StageControlGridSampler &sampler, std::vector<double> &result) const;
+        std::vector<double> evaluate(const StageExpressionEvaluatorBase &evaluator) const;
+        void evaluate(const StageExpressionEvaluatorBase &evaluator, std::vector<double> &result) const;
 
     protected:
-        vector<double> global_params;
-        vector<double> stage_params;
+        std::vector<double> global_params;
+        std::vector<double> stage_params;
         friend class StageOCPApplication;
     };
 
@@ -140,26 +140,25 @@ namespace fatrop
     class StageOCPApplication : public OCPApplication
     {
     public:
-        StageOCPApplication(const shared_ptr<StageOCP> &ocp);
+        StageOCPApplication(const std::shared_ptr<StageOCP> &ocp);
 
     public:
         class AppParameterSetter : public ParameterSetter
         {
         public:
-            AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps);
+            AppParameterSetter(const std::shared_ptr<OCPAdapter> &adapter, const std::shared_ptr<ParameterSetter> &ps);
 
         public:
             void set_value(const double value[]);
-            void set_value(const initializer_list<double> il_);
-
+            void set_value(const std::initializer_list<double> il_);
         private:
-            const shared_ptr<OCPAdapter> adapter_;
+            const std::shared_ptr<OCPAdapter> adapter_;
         };
 
     public:
-        StageExpressionEvaluatorFactory get_expression(const string &sampler_name);
-        StageExpressionEvaluatorFactory get_expression_evaluator(const shared_ptr<StageExpression> &expr);
-        AppParameterSetter get_parameter_setter(const string &setter_name);
+        StageExpressionEvaluatorFactory get_expression(const std::string &sampler_name);
+        StageExpressionEvaluatorFactory get_expression_evaluator(const std::shared_ptr<StageExpression> &expr);
+        AppParameterSetter get_parameter_setter(const std::string &setter_name);
         void build();
         int optimize();
         const StageOCPSolution &last_stageocp_solution() const;
@@ -175,14 +174,14 @@ namespace fatrop
         StageOCPSolution last_solution_;
 
     protected:
-        map<string, shared_ptr<StageExpression>> stage_expressions;
-        map<string, shared_ptr<ParameterSetter>> param_setters;
+        std::map<std::string, std::shared_ptr<StageExpression>> stage_expressions;
+        std::map<std::string, std::shared_ptr<ParameterSetter>> param_setters;
         friend class StageOCPApplicationBuilder;
     };
     class StageOCPApplicationBuilder
     {
     public:
-        static StageOCPApplication from_rockit_interface(const string &functions, const string &json_spec_file);
+        static StageOCPApplication from_rockit_interface(const std::string &functions, const std::string &json_spec_file);
     };
 }
 #endif // BASICOCPAPPLICATIONINCLUDED

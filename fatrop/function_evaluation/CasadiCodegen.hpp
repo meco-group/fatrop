@@ -26,7 +26,7 @@ namespace fatrop
     public:
         EvalCasGen();
         /// constructor from file
-        EvalCasGen(const shared_ptr<DLHandler> &handle, const std::string &function_name);
+        EvalCasGen(const std::shared_ptr<DLHandler> &handle, const std::string &function_name);
         /// pointer to result_buffer
         #ifndef ENABLE_MULTITHREADING
             double *output_buffer_p;
@@ -50,13 +50,13 @@ namespace fatrop
         /// thread local mem id
         int mem;
         /// double work vector
-        vector<double> work_vector_d;
+        std::vector<double> work_vector_d;
         /// int work vector
-        vector<casadi_int> work_vector_i;
+        std::vector<casadi_int> work_vector_i;
         /// evaluate function and save res in "ccs format with lda==out_m"
         int eval_buffer(const double **arg);
         /// for reference counting of handle pointer
-        shared_ptr<DLHandler> handle;
+        std::shared_ptr<DLHandler> handle;
         ~EvalCasGen();
     };
 } // fatrop

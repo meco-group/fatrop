@@ -1,4 +1,5 @@
 #include "aux/DynamicLib.hpp"
+using namespace std;
 namespace fatrop
 {
     DLHandler::DLHandler(const string &filename)

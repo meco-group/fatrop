@@ -1,5 +1,6 @@
 #include "ocp/StageOCPApplication.hpp"
 using namespace fatrop;
+using namespace std;
 NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropoptions_->maxiter + 1)){};
 
 void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)

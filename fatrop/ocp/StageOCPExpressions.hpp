@@ -17,27 +17,27 @@ namespace fatrop
     class IndexEpression : public StageExpression
     {
     public:
-        IndexEpression(const bool control, const vector<int> offsets_in, const vector<int> offsets_out);
+        IndexEpression(const bool control, const std::vector<int> offsets_in, const std::vector<int> offsets_out);
         void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const override;
         int n_rows() const override;
         int n_cols() const override;
 
     private:
         const int _no_var;
-        const vector<int> _offsets_in;
-        const vector<int> _offsets_out;
+        const std::vector<int> _offsets_in;
+        const std::vector<int> _offsets_out;
         const bool _control;
     };
     class EvalBaseSE : public StageExpression
     {
     public:
-        EvalBaseSE(const shared_ptr<EvalBase> &evalbase);
+        EvalBaseSE(const std::shared_ptr<EvalBase> &evalbase);
         void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const override;
         int n_rows() const override;
         int n_cols() const override;
 
     private:
-        shared_ptr<EvalBase> evalbase_;
+        std::shared_ptr<EvalBase> evalbase_;
         const int n_rows_;
         const int n_cols_;
     };
@@ -47,10 +47,10 @@ namespace fatrop
         virtual int size() const = 0;
         virtual int n_rows() const= 0;
         virtual int n_cols() const = 0;
-        virtual int evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const = 0;
-        vector<double> evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params) const
+        virtual int evaluate(const std::vector<double> &solution, const std::vector<double> &global_params, const std::vector<double> &stage_params, std::vector<double> &result) const = 0;
+        std::vector<double> evaluate(const std::vector<double> &solution, const std::vector<double> &global_params, const std::vector<double> &stage_params) const
         {
-            vector<double> res(size());
+            std::vector<double> res(size());
             evaluate(solution, global_params, stage_params, res);
             return res;
         };
@@ -61,8 +61,8 @@ namespace fatrop
     class StageControlGridSampler : public StageExpressionEvaluatorBase
     {
     public:
-        StageControlGridSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval);
-        int evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const;
+        StageControlGridSampler(int nu, int nx, int no_stage_params, int K, const std::shared_ptr<StageExpression> &eval);
+        int evaluate(const std::vector<double> &solution, const std::vector<double> &global_params, const std::vector<double> &stage_params, std::vector<double> &result) const;
         int size() const;
         int n_rows() const;
         int n_cols() const;
@@ -73,16 +73,16 @@ namespace fatrop
         const int K_;
 
     private:
-        shared_ptr<StageExpression> eval_;
+        std::shared_ptr<StageExpression> eval_;
     };
 
     class OCPTimeStepSampler : public StageExpressionEvaluatorBase
     {
     public:
-        OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const shared_ptr<StageExpression> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
+        OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const std::shared_ptr<StageExpression> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
         {
         }
-        int evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const
+        int evaluate(const std::vector<double> &solution, const std::vector<double> &global_params, const std::vector<double> &stage_params, std::vector<double> &result) const
         {
             eval_->evaluate(solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) : (K_ - 2) * (nu + nx)), solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) + nu : (K_ - 1) * (nu + nx)), global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
             return 0;
@@ -106,12 +106,12 @@ namespace fatrop
         const int k_;
 
     private:
-        shared_ptr<StageExpression> eval_;
+        std::shared_ptr<StageExpression> eval_;
     };
     class StageExpressionEvaluatorFactory
     {
     public:
-        StageExpressionEvaluatorFactory(const shared_ptr<StageExpression> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
+        StageExpressionEvaluatorFactory(const std::shared_ptr<StageExpression> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
         // at_t0()
         OCPTimeStepSampler at_t0() const
         {
@@ -136,19 +136,19 @@ namespace fatrop
         const int nx;
         const int no_stage_params;
         const int K;
-        shared_ptr<StageExpression> eval_;
+        std::shared_ptr<StageExpression> eval_;
     };
 
     class ParameterSetter
     {
     public:
-        ParameterSetter(const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
-        void set_value(vector<double> &global_params, vector<double> &stage_params, const double value[]);
-        void set_value(vector<double> &global_params, vector<double> &stage_params, const initializer_list<double> il_);
+        ParameterSetter(const std::vector<int> &offsets_in, const std::vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
+        void set_value(std::vector<double> &global_params, std::vector<double> &stage_params, const double value[]);
+        void set_value(std::vector<double> &global_params, std::vector<double> &stage_params, const std::initializer_list<double> il_);
 
     private:
-        const vector<int> _offsets_in;
-        const vector<int> _offsets_out;
+        const std::vector<int> _offsets_in;
+        const std::vector<int> _offsets_out;
         const int no_stage_params;
 
     protected:

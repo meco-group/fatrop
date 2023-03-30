@@ -21,11 +21,10 @@
 
 namespace fatrop
 {
-    using namespace std;
     class OCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        OCPAdapter(const shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
+        OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
                                                            nuexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
                                                                                       { return ocptempl_->get_nuk(k); })),
                                                            nxexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
@@ -46,7 +45,7 @@ namespace fatrop
                 ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
-            x_dummy = vector<double>(max(nxexpr), 0.0);
+            x_dummy = std::vector<double>(max(nxexpr), 0.0);
         }
         int evalHess(
             OCPKKTMemory *OCP,
@@ -84,9 +83,9 @@ namespace fatrop
         }
 
     public:
-        void SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in) override;
-        void SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x) override;
-        void GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x) override;
+        void SetParams(const std::vector<double> &stage_params_in, const std::vector<double> &global_params_in) override;
+        void SetInitial(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &initial_u, std::vector<double> &initial_x) override;
+        void GetSolution(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &u, std::vector<double> &x) override;
         double *GetGlobalParams()
         {
             if (globalparams.size() == 0)
@@ -99,11 +98,11 @@ namespace fatrop
                 return nullptr;
             return stageparams.data();
         }
-        vector<double> & GetGlobalParamsVec()
+        std::vector<double> & GetGlobalParamsVec()
         {
             return globalparams;
         }
-        vector<double> & GetStageParamsVec()
+        std::vector<double> & GetStageParamsVec()
         {
             return stageparams;
         }
@@ -148,12 +147,12 @@ namespace fatrop
         FatropVector<int> ngineqexpr;
         FatropVector<int> nstageparamsexpr;
         FatropVector<int> offs_stageparams;
-        vector<double> stageparams;
-        vector<double> globalparams;
-        vector<double> x_dummy;
+        std::vector<double> stageparams;
+        std::vector<double> globalparams;
+        std::vector<double> x_dummy;
 
     private:
-        shared_ptr<OCPAbstract> ocptempl;
+        std::shared_ptr<OCPAbstract> ocptempl;
     };
 } // namespace fatrop
 

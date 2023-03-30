@@ -1,5 +1,6 @@
 #include "ocp/StageOCP.hpp"
 using namespace fatrop;
+using namespace std;
 StageOCP::StageOCP(const int nu,
                        const int nx,
                        const int ngI,

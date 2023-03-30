@@ -1,5 +1,6 @@
 #include "ocp/OCPNoScaling.hpp"
 using namespace fatrop;
+using namespace std;
 OCPNoScaling::OCPNoScaling(const shared_ptr<FatropOptions> &fatrop_params) : OCPScalingMethod(fatrop_params){};
 
 

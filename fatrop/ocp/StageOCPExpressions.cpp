@@ -1,5 +1,6 @@
 #include "StageOCPExpressions.hpp"
 using namespace fatrop;
+using namespace std;
 int StageExpression::size() const
 {
     return n_rows() * n_cols();

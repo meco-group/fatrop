@@ -1,6 +1,5 @@
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "aux/LinearAlgebra.hpp"
-
+#include "LinearAlgebraBlasfeo.hpp"
+using namespace std;
 namespace fatrop
 {
     void fatrop_dcolsc(int kmax, double alpha, struct blasfeo_dmat *sA, int ai, int aj)

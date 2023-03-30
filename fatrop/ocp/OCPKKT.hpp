@@ -4,7 +4,6 @@
 #include "OCPDims.hpp"
 #include "aux/Aux.hpp"
 #include "aux/FatropVector.hpp"
-using namespace std;
 namespace fatrop
 {
     /** \brief this class contains all information to represent the KKT system of an equality constrained OCP */

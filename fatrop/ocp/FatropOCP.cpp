@@ -1,5 +1,6 @@
 #include "ocp/FatropOCP.hpp"
 using namespace fatrop;
+using namespace std;
 FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,

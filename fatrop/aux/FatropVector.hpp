@@ -14,7 +14,6 @@
 #include <assert.h>
 #include <utility>
 #include <functional>
-using namespace std;
 namespace fatrop
 {
     // static polymorphism using CRTP
@@ -67,24 +66,24 @@ namespace fatrop
     };
 
     template <typename T>
-    class FatropVector : public vector<T>, public VecExpr<FatropVector<T>, T>
+    class FatropVector : public std::vector<T>, public VecExpr<FatropVector<T>, T>
     {
     public:
-        FatropVector() : vector<T>(){};
-        FatropVector(const int size) : vector<T>(size){};
+        FatropVector() : std::vector<T>(){};
+        FatropVector(const int size) : std::vector<T>(size){};
         template <typename E>
-        FatropVector(const VecExpr<E, T> &vecexpr) : vector<T>(vecexpr.size())
+        FatropVector(const VecExpr<E, T> &vecexpr) : std::vector<T>(vecexpr.size())
         {
             // todo: vector is first initialized, initialize with iterator
             for (int i = 0; i < vecexpr.size(); i++)
             {
-                vector<T>::at(i) = vecexpr.getEl(i);
+               std:: vector<T>::at(i) = vecexpr.getEl(i);
             }
         }
-        FatropVector(const vector<T> &vec) : vector<T>(vec){};
-        FatropVector(vector<T> &&vec) : vector<T>(move(vec)){};
-        T getEl(const int ai) const { return vector<T>::at(ai); };
-        int size() const { return vector<T>::size(); };
+        FatropVector(const std::vector<T> &vec) : std::vector<T>(vec){};
+        FatropVector(std::vector<T> &&vec) : std::vector<T>(move(vec)){};
+        T getEl(const int ai) const { return std::vector<T>::at(ai); };
+        int size() const { return std::vector<T>::size(); };
         operator T *() { return this->data(); };
     };
     template <typename T, typename E1, typename E2>
@@ -120,10 +119,10 @@ namespace fatrop
         return VecRotate<T, E1>(expr, shift);
     };
     template <typename T>
-    vector<T> TransformRange(const int begin, const int end, const function<T(int)>& func)
+    std::vector<T> TransformRange(const int begin, const int end, const std::function<T(int)>& func)
     {
         int size = end - begin;
-        vector<T> res(size);
+        std::vector<T> res(size);
         for (int i = 0; i < size; i++)
         {
             res.at(i) = func(begin + i);

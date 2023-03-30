@@ -8,13 +8,12 @@
 #include "solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
-using namespace std;
 namespace fatrop
 {
 #define CACHEMACRO(instance, val) instance.evaluated ? instance.value : instance.SetValue(val)
     struct FatropData  
     {
-        FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &params) ;
+        FatropData(const NLPDims &nlpdims, const std::shared_ptr<FatropOptions> &params) ;
         void Initialize();
         int Reset();
         int ResetCaches();
@@ -53,7 +52,7 @@ namespace fatrop
         double LinDecrCurr();
         double LinDecrBackup();
         void AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau);
-        void SetBounds(const vector<double>& lowerin, const vector<double>& upperin);
+        void SetBounds(const std::vector<double>& lowerin, const std::vector<double>& upperin);
         void RelaxBounds();
         void RelaxBoundsVar(double mu);
         void ComputeBarrierQuantities(double mu);
@@ -147,7 +146,7 @@ namespace fatrop
         double obj_curr = 0.0;
         double obj_backup = 0.0;
         double theta_min = 1e-4;
-        const shared_ptr<FatropOptions> params;
+        const std::shared_ptr<FatropOptions> params;
         // algorithm parameters
         double smax;
         double kappa1;

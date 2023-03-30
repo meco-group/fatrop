@@ -8,7 +8,6 @@
 #include <omp.h>
 #endif
 
-using namespace std;
 namespace fatrop
 {
     /// Class used to evaluate a numerical functions. Functions can be implemented by hand or casadi codegen API or by plain casadi.
@@ -24,10 +23,10 @@ namespace fatrop
         /// number of nonzeros in output matrix
         int out_nnz;
         /// sparsity pattern of output matrix sparsity pattern [m,n|0,ncol0, ncol0:1 , ..., | nnz | row_el0, row_el1, ...]
-        vector<int> sparsity_out;
+        std::vector<int> sparsity_out;
         /// buffer to safe evaluation result, in a buffer we always save a matrix in CCS format with lda==out_m
         #ifndef ENABLE_MULTITHREADING
-        vector<double> buffer;
+        std::vector<double> buffer;
         #else
         vector<vector<double>> buffer = vector<vector<double>>(omp_get_max_threads());
         #endif

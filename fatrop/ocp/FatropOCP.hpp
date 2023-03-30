@@ -13,7 +13,6 @@
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
 #include <memory>
-using namespace std;
 // #include <unistd.h>
 namespace fatrop
 {
@@ -22,9 +21,9 @@ namespace fatrop
     public:
         // FatropOCP();
         FatropOCP(
-            const shared_ptr<OCP> &ocp,
-            const shared_ptr<OCPLinearSolver> &ls,
-            const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> &options);
+            const std::shared_ptr<OCP> &ocp,
+            const std::shared_ptr<OCPLinearSolver> &ls,
+            const std::shared_ptr<OCPScalingMethod> &scaler, const std::shared_ptr<FatropOptions> &options);
         int EvalHess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -96,12 +95,12 @@ namespace fatrop
         void Reset() override;
 
     public:
-        shared_ptr<OCP> ocp_;
+        std::shared_ptr<OCP> ocp_;
         OCPDims dims_;
         NLPDims nlpdims_;
-        shared_ptr<OCPLinearSolver> ls_;
-        shared_ptr<OCPScalingMethod> scaler_;
-        shared_ptr<FatropOptions> options_;
+        std::shared_ptr<OCPLinearSolver> ls_;
+        std::shared_ptr<OCPScalingMethod> scaler_;
+        std::shared_ptr<FatropOptions> options_;
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;

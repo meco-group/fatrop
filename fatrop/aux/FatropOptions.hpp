@@ -1,22 +1,21 @@
 #ifndef FATROPOPTIONSINCLUDED
 #define FATROPOPTIONSINCLUDED
 #include <string>
-using namespace std;
 namespace fatrop
 {
     class FatropOption
     {
     public:
-        FatropOption(const string &name, const string &descr) :name_(name), description_(descr){
+        FatropOption(const std::string &name, const std::string &descr) :name_(name), description_(descr){
 
                                             };
-        string name_;
-        string description_;
+        std::string name_;
+        std::string description_;
     };
     class NumericOption : public FatropOption
     {
     public:
-        NumericOption(const string &name, const string &descr, double default_value) : FatropOption(name, descr), value_(default_value), default_value_(default_value) {}
+        NumericOption(const std::string &name, const std::string &descr, double default_value) : FatropOption(name, descr), value_(default_value), default_value_(default_value) {}
         virtual void SetValue(double value)
         {
             value_ = value;
@@ -34,7 +33,7 @@ namespace fatrop
     {
         // decorator for NumericOption that also checks bounds
     public:
-        NumericOptionBounded(const string &name, const string &descr, double default_value, double lower_bound, double upper_bound) : NumericOption(name, descr, default_value), lower_bound_(lower_bound), upper_bound_(upper_bound){};
+        NumericOptionBounded(const std::string &name, const std::string &descr, double default_value, double lower_bound, double upper_bound) : NumericOption(name, descr, default_value), lower_bound_(lower_bound), upper_bound_(upper_bound){};
         virtual void SetValue(double value)
         {
             if ((value > lower_bound_) && (value < upper_bound_))

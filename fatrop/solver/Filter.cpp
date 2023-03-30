@@ -1,5 +1,6 @@
 #include "solver/Filter.hpp"
 using namespace fatrop;
+using namespace std;
 Filter::Filter(const int size)
 {
     filterdata_.reserve(size + 1);

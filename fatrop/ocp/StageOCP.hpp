@@ -11,7 +11,6 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
 namespace fatrop
 {
     /* TODO: at this point the StageOCP's implementation implements function evaluation through Casadi Codegen 
@@ -64,12 +63,12 @@ namespace fatrop
                  const EvalCasGen &LkIf,
                  const EvalCasGen &Lkf,
                  const EvalCasGen &LFf,
-                 const vector<double> &bounds_L,
-                 const vector<double> &bounds_U,
-                 const vector<double> &stage_params,
-                 const vector<double> &global_params,
-                 const vector<double> &initial_u,
-                 const vector<double> &initial_x);
+                 const std::vector<double> &bounds_L,
+                 const std::vector<double> &bounds_U,
+                 const std::vector<double> &stage_params,
+                 const std::vector<double> &global_params,
+                 const std::vector<double> &initial_u,
+                 const std::vector<double> &initial_x);
         int get_nxk(const int k) const override;
         int get_nuk(const int k) const override;
         int get_ngk(const int k) const override;
@@ -270,18 +269,18 @@ namespace fatrop
         EvalCasGen LkIf;
         EvalCasGen Lkf;
         EvalCasGen LFf;
-        vector<double> initial_x;
-        vector<double> initial_u;
-        vector<double> bounds_L;
-        vector<double> bounds_U;
-        vector<double> stage_params;
-        vector<double> global_params;
+        std::vector<double> initial_x;
+        std::vector<double> initial_u;
+        std::vector<double> bounds_L;
+        std::vector<double> bounds_U;
+        std::vector<double> stage_params;
+        std::vector<double> global_params;
     };
 
     class StageOCPBuilder
     {
     public:
-        static shared_ptr<StageOCP> FromRockitInterface(const shared_ptr<DLHandler> &handle, const json::jobject& json_spec)
+        static std::shared_ptr<StageOCP> FromRockitInterface(const std::shared_ptr<DLHandler> &handle, const json::jobject& json_spec)
         {
 
             // set up ocp
@@ -302,18 +301,18 @@ namespace fatrop
             const int ng_ineqF = json_spec["ng_ineqF"];
             const int no_stage_params = json_spec["n_stage_params"];
             const int no_global_params = json_spec["n_global_params"];
-            vector<double> lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
-            vector<double> upperI = json_spec["upperI"].get_number_array<double>("%lf");
-            vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
-            vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
-            vector<double> lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
-            vector<double> upperF = json_spec["upperF"].get_number_array<double>("%lf");
+            std::vector<double> lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
+            std::vector<double> upperI = json_spec["upperI"].get_number_array<double>("%lf");
+            std::vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
+            std::vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
+            std::vector<double> lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
+            std::vector<double> upperF = json_spec["upperF"].get_number_array<double>("%lf");
             lower.insert(lower.begin(), lowerI.begin(), lowerI.end());
             upper.insert(upper.begin(), upperI.begin(), upperI.end());
             lower.insert(lower.end(), lowerF.begin(), lowerF.end());
             upper.insert(upper.end(), upperF.begin(), upperF.end());
-            vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
-            vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
+            std::vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
+            std::vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
             EvalCasGen BAbtf(handle, "BAbt");
             EvalCasGen bkf(handle, "bk");
             EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
@@ -337,7 +336,7 @@ namespace fatrop
             EvalCasGen gineqf(handle, "gineq");
             EvalCasGen GgineqFtf(handle, "GgineqFt");
             EvalCasGen gineqFf(handle, "gineqF");
-            shared_ptr<StageOCP> stageocp = make_shared<StageOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
+            std::shared_ptr<StageOCP> stageocp = std::make_shared<StageOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
                                                                   BAbtf,
                                                                   bkf,
                                                                   RSQrqtIf,

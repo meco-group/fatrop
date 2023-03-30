@@ -11,7 +11,6 @@
 #include "FatropStats.hpp"
 #include <limits>
 #include <solver/FatropPrinter.hpp>
-using namespace std;
 // #include "AlgorithmQuantities.hpp"
 #ifdef ENABLE_MULTITHREADING
 #include "aux/Worker.hpp"
@@ -24,17 +23,17 @@ namespace fatrop
     {
     public:
         FatropAlg(
-            const shared_ptr<FatropNLP> &fatropnlp,
-            const shared_ptr<FatropData> &fatropdata,
-            const shared_ptr<FatropOptions> &fatropparams,
-            const shared_ptr<Filter> &filter,
-            const shared_ptr<LineSearch> &linesearch,
-            const shared_ptr<Journaller> &journaller);
+            const std::shared_ptr<FatropNLP> &fatropnlp,
+            const std::shared_ptr<FatropData> &fatropdata,
+            const std::shared_ptr<FatropOptions> &fatropparams,
+            const std::shared_ptr<Filter> &filter,
+            const std::shared_ptr<LineSearch> &linesearch,
+            const std::shared_ptr<Journaller> &journaller);
         void Initialize() ;
         void Reset() ;
-        void SetBounds(const vector<double> &lower, const vector<double> &upper) ;
-        void SetInitial(const vector<double> &initial) ;
-        void GetSolution(vector<double> &sol) ;
+        void SetBounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
+        void SetInitial(const std::vector<double> &initial) ;
+        void GetSolution(std::vector<double> &sol) ;
         int Optimize() ;
         int EvalHess();
         int EvalJac();
@@ -46,12 +45,12 @@ namespace fatrop
         int EvalDuInf();
         inline int Initialization();
         int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu);
-        shared_ptr<FatropNLP> fatropnlp_;
-        shared_ptr<FatropData> fatropdata_;
-        shared_ptr<FatropOptions> fatropoptions_;
-        shared_ptr<Filter> filter_;
-        shared_ptr<LineSearch> linesearch_;
-        shared_ptr<Journaller> journaller_;
+        std::shared_ptr<FatropNLP> fatropnlp_;
+        std::shared_ptr<FatropData> fatropdata_;
+        std::shared_ptr<FatropOptions> fatropoptions_;
+        std::shared_ptr<Filter> filter_;
+        std::shared_ptr<LineSearch> linesearch_;
+        std::shared_ptr<Journaller> journaller_;
         FatropStats GetStats() 
         {
             return stats;

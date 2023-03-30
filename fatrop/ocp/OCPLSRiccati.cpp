@@ -1,5 +1,5 @@
 #include "ocp/OCPLSRiccati.hpp"
-
+using namespace std;
 namespace fatrop
 {
     bool check_reg(const int m, MAT *sA, const int ai, const int aj)

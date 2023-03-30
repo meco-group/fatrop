@@ -8,7 +8,6 @@
 #include "solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
-using namespace std;
 namespace fatrop
 {
     struct LineSearchInfo
@@ -21,9 +20,9 @@ namespace fatrop
     {
     public:
         LineSearch(
-            const shared_ptr<FatropOptions> &fatropparams,
-            const shared_ptr<FatropNLP> &nlp,
-            const shared_ptr<FatropData> &fatropdata);
+            const std::shared_ptr<FatropOptions> &fatropparams,
+            const std::shared_ptr<FatropNLP> &nlp,
+            const std::shared_ptr<FatropData> &fatropdata);
         virtual LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup) = 0;
         inline int EvalCVNext();
         double EvalObjNext();
@@ -32,8 +31,8 @@ namespace fatrop
         virtual int InitSoc() const;
         virtual int ExitSoc() const;
         virtual int CalcSoc(double alpha) const;
-        shared_ptr<FatropNLP> fatropnlp_;
-        shared_ptr<FatropData> fatropdata_;
+        std::shared_ptr<FatropNLP> fatropnlp_;
+        std::shared_ptr<FatropData> fatropdata_;
         int eval_cv_count;
         int eval_obj_count;
         int eval_cv_time;
@@ -44,15 +43,15 @@ namespace fatrop
     {
     public:
         BackTrackingLineSearch(
-            const shared_ptr<FatropOptions> &fatropparams,
-            const shared_ptr<FatropNLP> &nlp,
-            const shared_ptr<FatropData> &fatropdata,
-            const shared_ptr<Filter> &filter,
-            const shared_ptr<Journaller> &journaller);
+            const std::shared_ptr<FatropOptions> &fatropparams,
+            const std::shared_ptr<FatropNLP> &nlp,
+            const std::shared_ptr<FatropData> &fatropdata,
+            const std::shared_ptr<Filter> &filter,
+            const std::shared_ptr<Journaller> &journaller);
         void Initialize();
         LineSearchInfo FindAcceptableTrialPoint(double mu, bool small_sd, bool from_backup);
-        shared_ptr<Filter> filter_;
-        shared_ptr<Journaller> journaller_;
+        std::shared_ptr<Filter> filter_;
+        std::shared_ptr<Journaller> journaller_;
         double s_phi;
         double delta;
         double s_theta;

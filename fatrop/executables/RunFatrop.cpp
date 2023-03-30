@@ -3,6 +3,7 @@
 #include <string>
 #include <ocp/StageOCPApplication.hpp>
 using namespace fatrop;
+using namespace std;
 int main(int argc, char **argv)
 {
     if (argc == 3)
