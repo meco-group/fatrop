@@ -161,17 +161,17 @@ void StageOCPSolution::SetParams(const vector<double> &global_params, const vect
     this->stage_params = stage_params;
 }
 
-void StageOCPSolution::Sample(const shared_ptr<StageControlGridSampler> &sampler, vector<double> &result)
+void StageOCPSolution::Sample(const StageControlGridSampler &sampler, vector<double> &result)
 {
-    sampler->Evaluate(sol_primal_, global_params, stage_params, result);
+    sampler.Evaluate(sol_primal_, global_params, stage_params, result);
 }
-vector<double> StageOCPSolution::Eval(const shared_ptr<StageExpressionEvaluatorBase> &evaluator) const
+vector<double> StageOCPSolution::Eval(const StageExpressionEvaluatorBase &evaluator) const
 {
-    return evaluator->Evaluate(sol_primal_, global_params, stage_params);
+    return evaluator.Evaluate(sol_primal_, global_params, stage_params);
 }
-void StageOCPSolution::Eval(const shared_ptr<StageExpressionEvaluatorBase> &evaluator, vector<double> &result) const
+void StageOCPSolution::Eval(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const
 {
-    evaluator->Evaluate(sol_primal_, global_params, stage_params, result);
+    evaluator.Evaluate(sol_primal_, global_params, stage_params, result);
 }
 StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
@@ -181,13 +181,13 @@ void StageOCPApplication::AppParameterSetter::SetValue(const double value[])
     ParameterSetter::SetValue(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
 };
 
-shared_ptr<StageExpressionEvaluatorFactory> StageOCPApplication::GetExpression(const string &sampler_name)
+StageExpressionEvaluatorFactory StageOCPApplication::GetExpression(const string &sampler_name)
 {
     return GetExprEvaluator(stage_expressions[sampler_name]);
 }
-shared_ptr<StageOCPApplication::AppParameterSetter> StageOCPApplication::GetParameterSetter(const string &setter_name)
+StageOCPApplication::AppParameterSetter StageOCPApplication::GetParameterSetter(const string &setter_name)
 {
-    return make_shared<AppParameterSetter>(adapter, param_setters[setter_name]);
+    return AppParameterSetter(adapter, param_setters[setter_name]);
 }
 void StageOCPApplication::Build()
 {
@@ -275,7 +275,7 @@ void StageOCPApplication::AppParameterSetter::SetValue(const initializer_list<do
     assert((int)il_.size() == _no_var);
     SetValue(il_.begin());
 }
-shared_ptr<StageExpressionEvaluatorFactory> StageOCPApplication::GetExprEvaluator(const shared_ptr<StageExpression> &expr)
+StageExpressionEvaluatorFactory StageOCPApplication::GetExprEvaluator(const shared_ptr<StageExpression> &expr)
 {
-    return make_shared<StageExpressionEvaluatorFactory>(expr, nu_, nx_, n_stage_params_, K_);
+    return StageExpressionEvaluatorFactory(expr, nu_, nx_, n_stage_params_, K_);
 }

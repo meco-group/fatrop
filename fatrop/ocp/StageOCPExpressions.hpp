@@ -44,11 +44,11 @@ namespace fatrop
     class StageExpressionEvaluatorBase
     {
     public:
-        virtual int Size() = 0;
-        virtual int n_rows() = 0;
-        virtual int n_cols() = 0;
-        virtual int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) = 0;
-        vector<double> Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params)
+        virtual int Size() const = 0;
+        virtual int n_rows() const= 0;
+        virtual int n_cols() const = 0;
+        virtual int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const = 0;
+        vector<double> Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params) const
         {
             vector<double> res(Size());
             Evaluate(solution, global_params, stage_params, res);
@@ -62,11 +62,11 @@ namespace fatrop
     {
     public:
         StageControlGridSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval);
-        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result);
-        int Size();
-        int n_rows();
-        int n_cols();
-        int K();
+        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const;
+        int Size() const;
+        int n_rows() const;
+        int n_cols() const;
+        int K() const;
         const int nu;
         const int nx;
         const int no_stage_params;
@@ -82,20 +82,20 @@ namespace fatrop
         OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const shared_ptr<StageExpression> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
         {
         }
-        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result)
+        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const
         {
-            eval_->Eval(solution.data() +  (k_ < K_ -1? k_ * (nu + nx): (K_-2)* (nu+nx)), solution.data() +  (k_ < K_ -1? k_ * (nu + nx) + nu: (K_-1)* (nu+nx)), global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
+            eval_->Eval(solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) : (K_ - 2) * (nu + nx)), solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) + nu : (K_ - 1) * (nu + nx)), global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
             return 0;
         }
-        int Size()
+        int Size() const
         {
             return eval_->Size();
         }
-        int n_rows()
+        int n_rows() const
         {
             return eval_->n_rows();
         }
-        int n_cols()
+        int n_cols() const
         {
             return eval_->n_cols();
         }
@@ -113,24 +113,24 @@ namespace fatrop
     public:
         StageExpressionEvaluatorFactory(const shared_ptr<StageExpression> &eval, int nu, int nx, int no_stage_params, int K) : nu(nu), nx(nx), no_stage_params(no_stage_params), K(K), eval_(eval){};
         // at_t0()
-        shared_ptr<OCPTimeStepSampler> at_t0()
+        OCPTimeStepSampler at_t0()
         {
-            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params, K, 0, eval_);
+            return OCPTimeStepSampler(nu, nx, no_stage_params, K, 0, eval_);
         }
         // at_tf()
-        shared_ptr<OCPTimeStepSampler> at_tf()
+        OCPTimeStepSampler at_tf()
         {
-            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params, K, K - 1, eval_);
+            return OCPTimeStepSampler(nu, nx, no_stage_params, K, K - 1, eval_);
         }
         // at_tk(int k)
-        shared_ptr<OCPTimeStepSampler> at_tk(int k)
+        OCPTimeStepSampler at_tk(int k)
         {
-            return make_shared<OCPTimeStepSampler>(nu, nx, no_stage_params, K, k, eval_);
+            return OCPTimeStepSampler(nu, nx, no_stage_params, K, k, eval_);
         }
         // evaluate at control grid
-        shared_ptr<StageControlGridSampler> at_control()
+        StageControlGridSampler at_control()
         {
-            return make_shared<StageControlGridSampler>(nu, nx, no_stage_params, K, eval_);
+            return StageControlGridSampler(nu, nx, no_stage_params, K, eval_);
         }
         const int nu;
         const int nx;

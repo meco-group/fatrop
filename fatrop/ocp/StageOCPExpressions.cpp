@@ -59,24 +59,24 @@ StageControlGridSampler::StageControlGridSampler(int nu, int nx, int no_stage_pa
 {
 }
 
-int StageControlGridSampler::Size()
+int StageControlGridSampler::Size() const
 {
     return K_ * eval_->Size();
 }
-int StageControlGridSampler::n_rows()
+int StageControlGridSampler::n_rows() const
 {
     return eval_->n_rows();
 }
-int StageControlGridSampler::n_cols()
+int StageControlGridSampler::n_cols() const
 {
     return eval_->n_cols();
 }
-int StageControlGridSampler::K()
+int StageControlGridSampler::K() const
 {
     return K_;
 }
 
-int StageControlGridSampler::Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample)
+int StageControlGridSampler::Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample) const
 {
     const double *sol_p = solution.data();
     double *res_p = sample.data();

@@ -9,8 +9,8 @@ int main(int argc, char **argv)
     {
         //// dynamic memory allocation  
         shared_ptr<StageOCPApplication> app = StageOCPApplicationBuilder::FromRockitInterface(argv[1], argv[2]);
-        auto eval_expression = app->GetExpression("control_u")->at_t0();
-        vector<double> u0_result(eval_expression -> Size());
+        auto eval_expression = app->GetExpression("control_u").at_t0();
+        vector<double> u0_result(eval_expression.Size());
         ///  no dynamic memory allocation
         app->Optimize();
         // ///  retrieve solution

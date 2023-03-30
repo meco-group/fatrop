@@ -121,9 +121,9 @@ namespace fatrop
 
     public:
         // todo make this deprecated, only use Eval
-        void Sample(const shared_ptr<StageControlGridSampler> &sampler, vector<double> &result);
-        vector<double> Eval(const shared_ptr<StageExpressionEvaluatorBase> &evaluator) const;
-        void Eval(const shared_ptr<StageExpressionEvaluatorBase> &evaluator, vector<double> &result) const;
+        void Sample(const StageControlGridSampler &sampler, vector<double> &result);
+        vector<double> Eval(const StageExpressionEvaluatorBase &evaluator) const;
+        void Eval(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const;
 
     protected:
         vector<double> global_params;
@@ -155,9 +155,9 @@ namespace fatrop
         };
 
     public:
-        shared_ptr<StageExpressionEvaluatorFactory> GetExpression(const string &sampler_name);
-        shared_ptr<StageExpressionEvaluatorFactory> GetExprEvaluator(const shared_ptr<StageExpression> &expr);
-        shared_ptr<AppParameterSetter> GetParameterSetter(const string &setter_name);
+        StageExpressionEvaluatorFactory GetExpression(const string &sampler_name);
+        StageExpressionEvaluatorFactory GetExprEvaluator(const shared_ptr<StageExpression> &expr);
+        AppParameterSetter GetParameterSetter(const string &setter_name);
         void Build();
         int Optimize();
         const StageOCPSolution &LastStageOCPSolution();
