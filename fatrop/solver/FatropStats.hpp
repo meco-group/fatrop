@@ -21,7 +21,7 @@ namespace fatrop
         int eval_grad_count = 0;
         int eval_obj_count = 0;
         int iterations_count = 0;
-        void Print()
+        void print()
         {
             cout << "---- stats ----" << endl;
             cout << "compute_sd:     " << compute_sd_time << " s"<< endl;

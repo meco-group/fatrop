@@ -2,7 +2,7 @@
 using namespace fatrop;
 
 Option<bool>::Option(const string &name, const string &description, bool *value, bool default_value) : name_(name), description_(description), value(value), default_value_(default_value){};
-void Option<bool>::Set(const bool &new_value)
+void Option<bool>::set(const bool &new_value)
 {
     *value = new_value;
 }
@@ -39,7 +39,7 @@ void Option<T>::SetDefault() const
     *value = default_value_;
 };
 template <typename T>
-void Option<T>::Set(const T &new_value)
+void Option<T>::set(const T &new_value)
 {
     // check if new value is in bounds
     if (lower_bound_inclusive_ && new_value < lower_bound_)
@@ -58,13 +58,13 @@ FatropOptions::FatropOptions()
     RegisterOption(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
 template <typename T>
-void FatropOptions::Set(const string &option_name, T value)
+void FatropOptions::set(const string &option_name, T value)
 {
     if (numeric_options.find(option_name) != numeric_options.end())
     {
         if constexpr (std::is_floating_point<T>::value)
         {
-            numeric_options[option_name].Set(value);
+            numeric_options[option_name].set(value);
         }
         else
         {
@@ -75,13 +75,13 @@ void FatropOptions::Set(const string &option_name, T value)
     {
         if constexpr (std::is_integral<T>::value)
         {
-            integer_options[option_name].Set(value);
+            integer_options[option_name].set(value);
         }
         else if constexpr (std::is_floating_point<T>::value)
         {
             if ((int)value == value)
             {
-                integer_options[option_name].Set((int)value);
+                integer_options[option_name].set((int)value);
             }
             else
             {
@@ -97,17 +97,17 @@ void FatropOptions::Set(const string &option_name, T value)
     {
         if constexpr (std::is_same<T, bool>::value)
         {
-            boolean_options[option_name].Set(value);
+            boolean_options[option_name].set(value);
         }
         else if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
         {
             if (value == 0)
             {
-                boolean_options[option_name].Set(false);
+                boolean_options[option_name].set(false);
             }
             else if (value == 1)
             {
-                boolean_options[option_name].Set(true);
+                boolean_options[option_name].set(true);
             }
             else
             {
@@ -167,6 +167,6 @@ auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
 }
 template class Option<int>;
 template class Option<double>;
-template void FatropOptions::Set<double>(const string &, double);
-template void FatropOptions::Set<int>(const string &, int);
-template void FatropOptions::Set<bool>(const string &, bool);
+template void FatropOptions::set<double>(const string &, double);
+template void FatropOptions::set<int>(const string &, int);
+template void FatropOptions::set<bool>(const string &, bool);

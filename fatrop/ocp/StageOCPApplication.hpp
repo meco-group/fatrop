@@ -49,7 +49,7 @@ namespace fatrop
         void Build(const shared_ptr<FatropNLP> &nlp);
 
     public:
-        int Optimize();
+        int optimize();
         // TODO: make this protected and use last_solution instead and choose other name
         const FatropVecBF &last_solution_primal() const;
         const FatropVecBF &last_solution_dual() const;

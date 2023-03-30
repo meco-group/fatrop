@@ -21,7 +21,7 @@ namespace fatrop
         static Option<T> UnBounded(const string &name, const string &description, T *value, T default_value);
         static Option<T> BoxBounded(const string &name, const string &description, T *value, T default_value, T lower_bound, T upper_bound);
         void SetDefault() const;
-        void Set(const T &new_value);
+        void set(const T &new_value);
         string name_;
         string description_;
         T *value = NULL;
@@ -36,7 +36,7 @@ namespace fatrop
     {
         Option(){};
         Option(const string &name, const string &description, bool *value, bool default_value);
-        void Set(const bool &new_value);
+        void set(const bool &new_value);
         void SetDefault() const;
         string name_;
         string description_;
@@ -58,7 +58,7 @@ namespace fatrop
         int maxiter = 1000; // TODO this value cannot be changed to a value larger than the one used for building the solver
         double kappa_d = 1e-5;
         template <typename T>
-        void Set(const string &option_name, T value);
+        void set(const string &option_name, T value);
 
     public:
         void RegisterOption(const NumericOption &option);

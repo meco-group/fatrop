@@ -12,7 +12,7 @@ void NLPApplication::Build(const shared_ptr<FatropNLP> &nlp)
     dirty = false;
 }
 
-int NLPApplication::Optimize()
+int NLPApplication::optimize()
 {
     assert(!dirty);
     int ret = fatropalg_->Optimize();
@@ -64,7 +64,7 @@ FatropVecBF &NLPApplication::initial_guess_zU() const
 template <typename T>
 void NLPApplication::set_option(const string &option_name, T value)
 {
-    fatropoptions_->Set(option_name, value);
+    fatropoptions_->set(option_name, value);
 }
 template void NLPApplication::set_option<int>(const string&, int);
 template void NLPApplication::set_option<double>(const string&, double);
@@ -198,7 +198,7 @@ void StageOCPApplication::build()
 }
 int StageOCPApplication::optimize()
 {
-    int ret = NLPApplication::Optimize();
+    int ret = NLPApplication::optimize();
     last_solution_.set_parameters(global_parameters(), stage_parameters()); 
     if (ret == 0)
     {

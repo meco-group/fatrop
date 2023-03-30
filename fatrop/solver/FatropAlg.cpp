@@ -196,7 +196,7 @@ int FatropAlg::Optimize()
             stats.eval_obj_time += linesearch_->eval_obj_time;
             stats.time_total = total_time;
             stats.iterations_count = i;
-            stats.Print();
+            stats.print();
             fatropnlp_->Finalize();
             return 0;
         }
