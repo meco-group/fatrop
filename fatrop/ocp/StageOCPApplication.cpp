@@ -211,7 +211,7 @@ const StageOCPSolution &StageOCPApplication::LastStageOCPSolution()
     return last_solution;
 }
 
-shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(const string &functions, const string &json_spec_file)
+StageOCPApplication StageOCPApplicationBuilder::FromRockitInterface(const string &functions, const string &json_spec_file)
 {
     shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
     std::ifstream t(json_spec_file);
@@ -220,7 +220,7 @@ shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(
     json::jobject json_spec = json::jobject::parse(buffer.str());
     auto stageocp = StageOCPBuilder::FromRockitInterface(handle, json_spec);
     // instantiate the BasicOCPApplication
-    auto result = make_shared<StageOCPApplication>(stageocp);
+    auto result = StageOCPApplication(stageocp);
     // add all samplers
     vector<string> sampler_names = json_spec["samplers"];
     // const int nu = stageocp->nu_;
@@ -230,7 +230,7 @@ shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(
     for (auto sampler_name : sampler_names)
     {
         auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-        result->stage_expressions[sampler_name] = make_shared<EvalBaseSE>(eval);
+        result.stage_expressions[sampler_name] = make_shared<EvalBaseSE>(eval);
     }
     // add state samplers
     json::jobject states_offset = json_spec["states_offset"];
@@ -239,7 +239,7 @@ shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(
     {
         vector<int> in = states_offset[state_name].as_object().array(0).get_number_array<int>("%d");
         vector<int> out = states_offset[state_name].as_object().array(1).get_number_array<int>("%d");
-        result->stage_expressions[string("state_") + state_name] = make_shared<IndexEpression>(false, in, out);
+        result.stage_expressions[string("state_") + state_name] = make_shared<IndexEpression>(false, in, out);
     }
     // add control samplers
     json::jobject controls_offset = json_spec["controls_offset"];
@@ -248,7 +248,7 @@ shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(
     {
         vector<int> in = controls_offset[control_name].as_object().array(0).get_number_array<int>("%d");
         vector<int> out = controls_offset[control_name].as_object().array(1).get_number_array<int>("%d");
-        result->stage_expressions[string("control_") + control_name] = make_shared<IndexEpression>(true, in, out);
+        result.stage_expressions[string("control_") + control_name] = make_shared<IndexEpression>(true, in, out);
     }
     // add all parameter setters
     json::jobject control_params_offset = json_spec["control_params_offset"];
@@ -257,7 +257,7 @@ shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(
     {
         vector<int> in = control_params_offset[control_params_name].as_object().array(0).get_number_array<int>("%d");
         vector<int> out = control_params_offset[control_params_name].as_object().array(1).get_number_array<int>("%d");
-        result->param_setters[control_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, false);
+        result.param_setters[control_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, false);
     }
     json::jobject global_params_offset = json_spec["global_params_offset"];
     vector<string> global_params_names = global_params_offset.keys();
@@ -265,9 +265,9 @@ shared_ptr<StageOCPApplication> StageOCPApplicationBuilder::FromRockitInterface(
     {
         vector<int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<int>("%d");
         vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
-        result->param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
+        result.param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
     }
-    result->Build();
+    result.Build();
     return result;
 }
 void StageOCPApplication::AppParameterSetter::SetValue(const initializer_list<double> il_)

@@ -180,7 +180,7 @@ namespace fatrop
     class StageOCPApplicationBuilder
     {
     public:
-        static shared_ptr<StageOCPApplication> FromRockitInterface(const string &functions, const string &json_spec_file);
+        static StageOCPApplication FromRockitInterface(const string &functions, const string &json_spec_file);
     };
 }
 #endif // BASICOCPAPPLICATIONINCLUDED
