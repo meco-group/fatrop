@@ -32,7 +32,6 @@ solver/FatropPrinter.hpp                    solver/FatropPrinter.cpp
 solver/Filter.hpp                           solver/Filter.cpp
 solver/IterationData.hpp                    solver/IterationData.cpp
 solver/LineSearch.hpp                       solver/LineSearch.cpp
-solver/Timer.hpp                            solver/Timer.cpp
 solver/FatropStats.hpp                            
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
 json/json.h json/json.cpp
