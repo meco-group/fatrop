@@ -46,7 +46,7 @@ namespace fatrop
         NLPApplication();
 
     protected:
-        void Build(const shared_ptr<FatropNLP> &nlp);
+        void build(const shared_ptr<FatropNLP> &nlp);
 
     public:
         int optimize();

@@ -2,7 +2,7 @@
 using namespace fatrop;
 NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropoptions_->maxiter + 1)){};
 
-void NLPApplication::Build(const shared_ptr<FatropNLP> &nlp)
+void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
 {
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
@@ -93,7 +93,7 @@ void OCPApplication::build()
     // keep the adapter around for accessing the parameters for samplers and parameter setters
     adapter = make_shared<OCPAdapter>(ocp_);
     shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_).Build(adapter));
-    NLPApplication::Build(nlp);
+    NLPApplication::build(nlp);
     dirty = false;
 }
 
