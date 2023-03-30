@@ -24,13 +24,13 @@ namespace fatrop
         // void GetPrimalSolution(vector<double> &result);
         // defautl copy constructor
         FatropSolution(const FatropSolution &other) = default;
-        const vector<double> &PrimalSolution() { return sol_primal_; };
+        const vector<double> &primal_solution() { return sol_primal_; };
 
     protected:
         FatropSolution();
-        void SetDims(const NLPDims &dims);
-        void SetPrimalSolution(const FatropVecBF &sol);
-        void SetSolution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU);
+        void set_dims(const NLPDims &dims);
+        void set_primal_solution(const FatropVecBF &sol);
+        void set_solution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU);
 
     protected:
         vector<double> sol_primal_;
@@ -51,22 +51,22 @@ namespace fatrop
     public:
         int Optimize();
         // TODO: make this protected and use last_solution instead and choose other name
-        FatropVecBF &LastSolutionPrimal();
-        FatropVecBF &LastSolutionDual();
-        FatropVecBF &LastSolutionZL();
-        FatropVecBF &LastSolutionZU();
-        FatropVecBF &InitialGuessPrimal();
-        FatropVecBF &InitialGuessDual();
-        FatropVecBF &InitialGuessZL();
-        FatropVecBF &InitialGuessZU();
-        FatropStats GetStats();
-        NLPDims GetNLPDims();
+        FatropVecBF &last_solution_primal();
+        FatropVecBF &last_solution_dual();
+        FatropVecBF &last_solution_zL();
+        FatropVecBF &last_solution_zU();
+        FatropVecBF &initial_guess_primal();
+        FatropVecBF &initial_guess_dual();
+        FatropVecBF &initial_guess_zL();
+        FatropVecBF &initial_guess_zU();
+        FatropStats get_stats();
+        NLPDims get_nlp_dims();
         template <typename T>
-        void SetOption(const string &option_name, T value);
+        void set_option(const string &option_name, T value);
 
     public:
-        void SetInitial(const FatropSolution &initial_guess);
-        const FatropOptions &GetOptions() const;
+        void set_initial(const FatropSolution &initial_guess);
+        const FatropOptions &get_options() const;
 
     protected:
         shared_ptr<FatropOptions> fatropoptions_;
@@ -87,14 +87,14 @@ namespace fatrop
         OCPApplication(const shared_ptr<OCPAbstract> &ocp);
 
     protected:
-        void Build();
+        void build();
 
     public:
-        vector<double> &GlobalParameters();
-        vector<double> &StageParameters();
-        using NLPApplication::SetInitial;
-        void SetInitial(vector<double> &initial_u, vector<double> &initial_x);
-        OCPDims GetOCPDims();
+        vector<double> &global_parameters();
+        vector<double> &stage_parameters();
+        using NLPApplication::set_initial;
+        void set_initial(vector<double> &initial_u, vector<double> &initial_x);
+        OCPDims get_ocp_dims();
 
     private:
         const shared_ptr<OCPAbstract> ocp_;
@@ -111,8 +111,8 @@ namespace fatrop
 
     protected:
         StageOCPSolution();
-        void SetDims(const OCPDims &dims);
-        void SetParams(const vector<double> &global_params, const vector<double> &stage_params);
+        void set_dims(const OCPDims &dims);
+        void set_parameters(const vector<double> &global_params, const vector<double> &stage_params);
         int nx;
         int nu;
         int n_stage_params;
@@ -121,9 +121,9 @@ namespace fatrop
 
     public:
         // todo make this deprecated, only use Eval
-        void Sample(const StageControlGridSampler &sampler, vector<double> &result);
-        vector<double> Eval(const StageExpressionEvaluatorBase &evaluator) const;
-        void Eval(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const;
+        void sample(const StageControlGridSampler &sampler, vector<double> &result);
+        vector<double> evaluate(const StageExpressionEvaluatorBase &evaluator) const;
+        void evaluate(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const;
 
     protected:
         vector<double> global_params;
@@ -147,21 +147,21 @@ namespace fatrop
             AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps);
 
         public:
-            void SetValue(const double value[]);
-            void SetValue(const initializer_list<double> il_);
+            void set_value(const double value[]);
+            void set_value(const initializer_list<double> il_);
 
         private:
             const shared_ptr<OCPAdapter> adapter_;
         };
 
     public:
-        StageExpressionEvaluatorFactory GetExpression(const string &sampler_name);
-        StageExpressionEvaluatorFactory GetExprEvaluator(const shared_ptr<StageExpression> &expr);
-        AppParameterSetter GetParameterSetter(const string &setter_name);
-        void Build();
-        int Optimize();
-        const StageOCPSolution &LastStageOCPSolution();
-        const FatropSolution &LastSolution(){return LastStageOCPSolution();};
+        StageExpressionEvaluatorFactory get_expression(const string &sampler_name);
+        StageExpressionEvaluatorFactory get_expression_evaluator(const shared_ptr<StageExpression> &expr);
+        AppParameterSetter get_parameter_setter(const string &setter_name);
+        void build();
+        int optimize();
+        const StageOCPSolution &last_stageocp_solution();
+        const FatropSolution &last_solution(){return last_stageocp_solution();};
 
     public:
         const int nx_;
@@ -170,7 +170,7 @@ namespace fatrop
         const int K_;
 
     private:
-        StageOCPSolution last_solution;
+        StageOCPSolution last_solution_;
 
     protected:
         map<string, shared_ptr<StageExpression>> stage_expressions;
@@ -180,7 +180,7 @@ namespace fatrop
     class StageOCPApplicationBuilder
     {
     public:
-        static StageOCPApplication FromRockitInterface(const string &functions, const string &json_spec_file);
+        static StageOCPApplication from_rockit_interface(const string &functions, const string &json_spec_file);
     };
 }
 #endif // BASICOCPAPPLICATIONINCLUDED

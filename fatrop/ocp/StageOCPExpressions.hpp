@@ -9,16 +9,16 @@ namespace fatrop
     class StageExpression
     {
     public:
-        virtual void Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) = 0;
+        virtual void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) = 0;
         virtual int n_rows() = 0;
         virtual int n_cols() = 0;
-        int Size();
+        int size();
     };
     class IndexEpression : public StageExpression
     {
     public:
         IndexEpression(const bool control, const vector<int> offsets_in, const vector<int> offsets_out);
-        void Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
+        void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
         int n_rows() override;
         int n_cols() override;
 
@@ -32,7 +32,7 @@ namespace fatrop
     {
     public:
         EvalBaseSE(const shared_ptr<EvalBase> &evalbase);
-        void Eval(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
+        void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
         int n_rows() override;
         int n_cols() override;
 
@@ -44,14 +44,14 @@ namespace fatrop
     class StageExpressionEvaluatorBase
     {
     public:
-        virtual int Size() const = 0;
+        virtual int size() const = 0;
         virtual int n_rows() const= 0;
         virtual int n_cols() const = 0;
-        virtual int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const = 0;
-        vector<double> Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params) const
+        virtual int evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const = 0;
+        vector<double> evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params) const
         {
-            vector<double> res(Size());
-            Evaluate(solution, global_params, stage_params, res);
+            vector<double> res(size());
+            evaluate(solution, global_params, stage_params, res);
             return res;
         };
 
@@ -62,8 +62,8 @@ namespace fatrop
     {
     public:
         StageControlGridSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval);
-        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const;
-        int Size() const;
+        int evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const;
+        int size() const;
         int n_rows() const;
         int n_cols() const;
         int K() const;
@@ -82,14 +82,14 @@ namespace fatrop
         OCPTimeStepSampler(int nu, int nx, int no_stage_params, int K, int k, const shared_ptr<StageExpression> &eval) : nu(nu), nx(nx), no_stage_params(no_stage_params), K_(K), k_(k), eval_(eval)
         {
         }
-        int Evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const
+        int evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &result) const
         {
-            eval_->Eval(solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) : (K_ - 2) * (nu + nx)), solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) + nu : (K_ - 1) * (nu + nx)), global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
+            eval_->evaluate(solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) : (K_ - 2) * (nu + nx)), solution.data() + (k_ < K_ - 1 ? k_ * (nu + nx) + nu : (K_ - 1) * (nu + nx)), global_params.data(), stage_params.data() + k_ * no_stage_params, result.data());
             return 0;
         }
-        int Size() const
+        int size() const
         {
-            return eval_->Size();
+            return eval_->size();
         }
         int n_rows() const
         {
@@ -143,8 +143,8 @@ namespace fatrop
     {
     public:
         ParameterSetter(const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global);
-        void SetValue(vector<double> &global_params, vector<double> &stage_params, const double value[]);
-        void SetValue(vector<double> &global_params, vector<double> &stage_params, const initializer_list<double> il_);
+        void set_value(vector<double> &global_params, vector<double> &stage_params, const double value[]);
+        void set_value(vector<double> &global_params, vector<double> &stage_params, const initializer_list<double> il_);
 
     private:
         const vector<int> _offsets_in;

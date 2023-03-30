@@ -19,66 +19,66 @@ int NLPApplication::Optimize()
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
-FatropVecBF &NLPApplication::LastSolutionPrimal()
+FatropVecBF &NLPApplication::last_solution_primal()
 {
     assert(!dirty);
     return fatropdata_->x_curr;
 }
-FatropVecBF &NLPApplication::InitialGuessPrimal()
+FatropVecBF &NLPApplication::initial_guess_primal()
 {
     assert(!dirty);
     return fatropdata_->x_initial;
 }
-FatropStats NLPApplication::GetStats()
+FatropStats NLPApplication::get_stats()
 {
     return fatropalg_->GetStats();
 }
-NLPDims NLPApplication::GetNLPDims()
+NLPDims NLPApplication::get_nlp_dims()
 {
     return nlp_->GetNLPDims();
 }
-FatropVecBF &NLPApplication::LastSolutionDual()
+FatropVecBF &NLPApplication::last_solution_dual()
 {
     return fatropdata_->lam_curr;
 }
-FatropVecBF &NLPApplication::LastSolutionZL()
+FatropVecBF &NLPApplication::last_solution_zL()
 {
     return fatropdata_->zL_curr;
 }
-FatropVecBF &NLPApplication::LastSolutionZU()
+FatropVecBF &NLPApplication::last_solution_zU()
 {
     return fatropdata_->zU_curr;
 }
-FatropVecBF &NLPApplication::InitialGuessDual()
+FatropVecBF &NLPApplication::initial_guess_dual()
 {
     return fatropdata_->lam_init;
 }
-FatropVecBF &NLPApplication::InitialGuessZL()
+FatropVecBF &NLPApplication::initial_guess_zL()
 {
     return fatropdata_->zL_init;
 }
-FatropVecBF &NLPApplication::InitialGuessZU()
+FatropVecBF &NLPApplication::initial_guess_zU()
 {
     return fatropdata_->zU_init;
 }
 template <typename T>
-void NLPApplication::SetOption(const string &option_name, T value)
+void NLPApplication::set_option(const string &option_name, T value)
 {
     fatropoptions_->Set(option_name, value);
 }
-template void NLPApplication::SetOption<int>(const string&, int);
-template void NLPApplication::SetOption<double>(const string&, double);
-template void NLPApplication::SetOption<bool>(const string&, bool);
+template void NLPApplication::set_option<int>(const string&, int);
+template void NLPApplication::set_option<double>(const string&, double);
+template void NLPApplication::set_option<bool>(const string&, bool);
 
 
-void NLPApplication::SetInitial(const FatropSolution &initial_guess)
+void NLPApplication::set_initial(const FatropSolution &initial_guess)
 {
-    InitialGuessPrimal() = initial_guess.sol_primal_;
-    InitialGuessDual() = initial_guess.sol_dual_;
-    InitialGuessZL() = initial_guess.sol_zL_;
-    InitialGuessZU() = initial_guess.sol_zU_;
+    initial_guess_primal() = initial_guess.sol_primal_;
+    initial_guess_dual() = initial_guess.sol_dual_;
+    initial_guess_zL() = initial_guess.sol_zL_;
+    initial_guess_zU() = initial_guess.sol_zU_;
 }
-const FatropOptions &NLPApplication::GetOptions() const
+const FatropOptions &NLPApplication::get_options() const
 {
     return *fatropoptions_;
 }
@@ -88,7 +88,7 @@ OCPApplication::OCPApplication(const shared_ptr<OCPAbstract> &ocp) : ocp_(ocp)
 {
 }
 
-void OCPApplication::Build()
+void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
     adapter = make_shared<OCPAdapter>(ocp_);
@@ -97,42 +97,42 @@ void OCPApplication::Build()
     dirty = false;
 }
 
-vector<double> &OCPApplication::GlobalParameters()
+vector<double> &OCPApplication::global_parameters()
 {
     assert(!dirty);
     return adapter->GetGlobalParamsVec();
 }
-vector<double> &OCPApplication::StageParameters()
+vector<double> &OCPApplication::stage_parameters()
 {
     assert(!dirty);
     return adapter->GetStageParamsVec();
 }
-void OCPApplication::SetInitial(vector<double> &initial_u, vector<double> &initial_x)
+void OCPApplication::set_initial(vector<double> &initial_u, vector<double> &initial_x)
 {
     assert(!dirty);
     adapter->SetInitial(fatropdata_, initial_u, initial_x);
 }
-OCPDims OCPApplication::GetOCPDims()
+OCPDims OCPApplication::get_ocp_dims()
 {
     return adapter->GetOCPDims();
 }
 
 FatropSolution::FatropSolution(){};
-void FatropSolution::SetDims(const NLPDims &dims)
+void FatropSolution::set_dims(const NLPDims &dims)
 {
     sol_primal_.resize(dims.nvars);
     sol_dual_.resize(dims.neqs);
     sol_zL_.resize(dims.nineqs);
     sol_zU_.resize(dims.nineqs);
 };
-void FatropSolution::SetSolution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU)
+void FatropSolution::set_solution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU)
 {
     sol_primal.copyto(sol_primal_);
     sol_dual.copyto(sol_dual_);
     sol_zL.copyto(sol_zL_);
     sol_zU.copyto(sol_zU_);
 };
-void FatropSolution::SetPrimalSolution(const FatropVecBF &sol)
+void FatropSolution::set_primal_solution(const FatropVecBF &sol)
 {
     sol.copyto(sol_primal_);
 }
@@ -141,12 +141,12 @@ void FatropSolution::SetPrimalSolution(const FatropVecBF &sol)
 // }
 StageOCPSolution::StageOCPSolution(const shared_ptr<OCP> &app)
 {
-    SetDims(app->GetOCPDims());
+    set_dims(app->GetOCPDims());
 }
 StageOCPSolution::StageOCPSolution(){};
-void StageOCPSolution::SetDims(const OCPDims &dims)
+void StageOCPSolution::set_dims(const OCPDims &dims)
 {
-    FatropSolution::SetDims(dims);
+    FatropSolution::set_dims(dims);
     nx = dims.nx.at(0);
     nu = dims.nu.at(0);
     n_stage_params = dims.n_stage_params.at(0);
@@ -155,63 +155,63 @@ void StageOCPSolution::SetDims(const OCPDims &dims)
     global_params.resize(n_global_params);
     stage_params.resize(n_stage_params);
 }
-void StageOCPSolution::SetParams(const vector<double> &global_params, const vector<double> &stage_params)
+void StageOCPSolution::set_parameters(const vector<double> &global_params, const vector<double> &stage_params)
 {
     this->global_params = global_params;
     this->stage_params = stage_params;
 }
 
-void StageOCPSolution::Sample(const StageControlGridSampler &sampler, vector<double> &result)
+void StageOCPSolution::sample(const StageControlGridSampler &sampler, vector<double> &result)
 {
-    sampler.Evaluate(sol_primal_, global_params, stage_params, result);
+    sampler.evaluate(sol_primal_, global_params, stage_params, result);
 }
-vector<double> StageOCPSolution::Eval(const StageExpressionEvaluatorBase &evaluator) const
+vector<double> StageOCPSolution::evaluate(const StageExpressionEvaluatorBase &evaluator) const
 {
-    return evaluator.Evaluate(sol_primal_, global_params, stage_params);
+    return evaluator.evaluate(sol_primal_, global_params, stage_params);
 }
-void StageOCPSolution::Eval(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const
+void StageOCPSolution::evaluate(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const
 {
-    evaluator.Evaluate(sol_primal_, global_params, stage_params, result);
+    evaluator.evaluate(sol_primal_, global_params, stage_params, result);
 }
 StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 
 StageOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
-void StageOCPApplication::AppParameterSetter::SetValue(const double value[])
+void StageOCPApplication::AppParameterSetter::set_value(const double value[])
 {
-    ParameterSetter::SetValue(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
+    ParameterSetter::set_value(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
 };
 
-StageExpressionEvaluatorFactory StageOCPApplication::GetExpression(const string &sampler_name)
+StageExpressionEvaluatorFactory StageOCPApplication::get_expression(const string &sampler_name)
 {
-    return GetExprEvaluator(stage_expressions[sampler_name]);
+    return get_expression_evaluator(stage_expressions[sampler_name]);
 }
-StageOCPApplication::AppParameterSetter StageOCPApplication::GetParameterSetter(const string &setter_name)
+StageOCPApplication::AppParameterSetter StageOCPApplication::get_parameter_setter(const string &setter_name)
 {
     return AppParameterSetter(adapter, param_setters[setter_name]);
 }
-void StageOCPApplication::Build()
+void StageOCPApplication::build()
 {
-    OCPApplication::Build();
+    OCPApplication::build();
     // allocate the last solution
-    last_solution.SetDims(GetOCPDims());
+    last_solution_.set_dims(get_ocp_dims());
     dirty = false;
 }
-int StageOCPApplication::Optimize()
+int StageOCPApplication::optimize()
 {
     int ret = NLPApplication::Optimize();
-    last_solution.SetParams(GlobalParameters(), StageParameters());
+    last_solution_.set_parameters(global_parameters(), stage_parameters());
     if (ret == 0)
     {
-        last_solution.SetSolution(LastSolutionPrimal(), LastSolutionDual(), LastSolutionZL(), LastSolutionZU());
+        last_solution_.set_solution(last_solution_primal(), last_solution_dual(), last_solution_zL(), last_solution_zU());
     }
     return ret;
 }
-const StageOCPSolution &StageOCPApplication::LastStageOCPSolution()
+const StageOCPSolution &StageOCPApplication::last_stageocp_solution()
 {
-    return last_solution;
+    return last_solution_;
 }
 
-StageOCPApplication StageOCPApplicationBuilder::FromRockitInterface(const string &functions, const string &json_spec_file)
+StageOCPApplication StageOCPApplicationBuilder::from_rockit_interface(const string &functions, const string &json_spec_file)
 {
     shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
     std::ifstream t(json_spec_file);
@@ -267,15 +267,15 @@ StageOCPApplication StageOCPApplicationBuilder::FromRockitInterface(const string
         vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
         result.param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
     }
-    result.Build();
+    result.build();
     return result;
 }
-void StageOCPApplication::AppParameterSetter::SetValue(const initializer_list<double> il_)
+void StageOCPApplication::AppParameterSetter::set_value(const initializer_list<double> il_)
 {
     assert((int)il_.size() == _no_var);
-    SetValue(il_.begin());
+    set_value(il_.begin());
 }
-StageExpressionEvaluatorFactory StageOCPApplication::GetExprEvaluator(const shared_ptr<StageExpression> &expr)
+StageExpressionEvaluatorFactory StageOCPApplication::get_expression_evaluator(const shared_ptr<StageExpression> &expr)
 {
     return StageExpressionEvaluatorFactory(expr, nu_, nx_, n_stage_params_, K_);
 }
