@@ -93,6 +93,10 @@ namespace fatrop
         using NLPApplication::set_initial;
         void set_initial(vector<double> &initial_u, vector<double> &initial_x);
         OCPDims get_ocp_dims();
+        void set_params(const vector<double> &global_params, const vector<double> &stage_params)
+        {
+            adapter->SetParams(global_params, stage_params);
+        }
 
     private:
         const shared_ptr<OCPAbstract> ocp_;
@@ -102,7 +106,6 @@ namespace fatrop
         vector<double> &stage_parameters();
         shared_ptr<OCPAdapter> adapter;
     };
-
 
     struct StageOCPSolution : public FatropSolution
     {
@@ -161,7 +164,7 @@ namespace fatrop
         void build();
         int optimize();
         const StageOCPSolution &last_stageocp_solution() const;
-        const FatropSolution &last_solution() const {return last_stageocp_solution();};
+        const FatropSolution &last_solution() const { return last_stageocp_solution(); };
 
     public:
         const int nx_;

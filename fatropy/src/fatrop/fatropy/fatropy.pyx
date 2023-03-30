@@ -15,6 +15,8 @@ from fatropy cimport assign_shared_ptr
 from libcpp.memory cimport shared_ptr 
 from libcpp.vector cimport vector
 from cpython cimport array
+from cpython cimport str
+from libcpp.string cimport *
 import json
 import numpy as np
 from casadi import Callback
@@ -134,28 +136,28 @@ cdef class PyFatropStats:
     def iterations_count(self):
         return self.stats.iterations_count
     def Print(self):
-        self.stats.Print()
+        self.stats.print()
 
 cdef class OCP:
-    cdef shared_ptr[StageOCPApplication] myFatropApplication
+    cdef StageOCPApplication* myFatropApplication
     cdef int nx_
     cdef int nu_
     cdef int K_
     def __cinit__(self, functions, specfile):
-        self.myFatropApplication = StageOCPApplicationBuilder.FromRockitInterface(functions.encode('utf-8'),specfile.encode('utf-8'))
+        self.myFatropApplication =  new StageOCPApplication(StageOCPApplicationBuilder.from_rockit_interface(functions.encode('utf-8'),specfile.encode('utf-8')))
         # self.myFatropApplication.get().Build()
-        self.nx_ = self.myFatropApplication.get().nx_
-        self.nu_ = self.myFatropApplication.get().nu_
-        self.K_ = self.myFatropApplication.get().K_
+        self.nx_ = self.myFatropApplication.nx_
+        self.nu_ = self.myFatropApplication.nu_
+        self.K_ = self.myFatropApplication.K_
 
-    def Optimize(self):
-        self.myFatropApplication.get().Optimize()
+    def optimize(self):
+        self.myFatropApplication.optimize()
     # Attribute access
     @property
     # TODO make this more efficient
     def u_sol(self):
         retval = np.empty((self.nu_,self.K_-1))
-        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolutionPrimal()
+        cdef const FatropVecBF* lastsol = &self.myFatropApplication.last_solution_primal()
         for ii in range(self.K_-1):
             for jj in range(self.nu_):               
                 retval[jj,ii] = lastsol.get_el(jj+ii*(self.nx_+ self.nu_))
@@ -164,7 +166,7 @@ cdef class OCP:
     @property
     # TODO make this more efficient
     def x_sol(self):
-        cdef FatropVecBF* lastsol = &self.myFatropApplication.get().LastSolutionPrimal()
+        cdef const FatropVecBF* lastsol = &self.myFatropApplication.last_solution_primal()
         retval = np.ones((self.nx_, self.K_))
         for ii in range(self.K_-1):
             for jj in range(self.nx_):               
@@ -172,48 +174,53 @@ cdef class OCP:
         for jj in range(self.nx_):
             retval[jj,self.K_-1] = lastsol.get_el(jj+(self.K_-1)*(self.nx_ + self.nu_))
         return retval
-    def Sample(self, name):
-        # retrieve sampler
-        cdef shared_ptr[StageControlGridSampler] sampler = self.myFatropApplication.get().GetExpression(name.encode('utf-8')).get().at_control()
+    def sample(self, sampler_name):
+        # cdef string cname = name
+        # get the expression evaluator factory by name
+        cdef StageExpressionEvaluatorFactory * factory = new StageExpressionEvaluatorFactory(self.myFatropApplication.get_expression(sampler_name.encode('utf-8')))
+        # # retrieve sampler
+        cdef const StageControlGridSampler *  sampler = new StageControlGridSampler(factory.at_control())
+        # cdef StageExpressionEvaluatorFactory factory(self.myFatropApplication.get_expression(sampler_name))
+        # cdef const StageControlGridSampler sampler(factory.at_control())
         # allocate buffer
-        cdef shared_ptr[StageExpressionEvaluatorBase] sampler_b 
-        assign_shared_ptr(sampler_b, sampler)
-        cdef vector[double] buffer = self.myFatropApplication.get().LastStageOCPSolution().Eval(sampler_b)
+        cdef vector[double] buffer = self.myFatropApplication.last_stageocp_solution().evaluate(sampler[0])
         # use sampler
-        # sampler.get().Sample(self.myFatropApplication.get().LastSolution(), self.myFatropApplication.get().GlobalParameters(), self.myFatropApplication.get().StageParameters(), buffer)
-        n_rows = sampler.get().n_rows()
-        n_cols = sampler.get().n_cols()
-        K = sampler.get().K()
+        # sampler.get().Sample(self.myFatropApplication.LastSolution(), self.myFatropApplication.GlobalParameters(), self.myFatropApplication.StageParameters(), buffer)
+        n_rows = sampler.n_rows()
+        n_cols = sampler.n_cols()
+        K = sampler.K()
+
+        del factory
+        del sampler
         # deallocate sampler
         if n_cols == 1:
             return np.asarray(buffer).reshape((K, n_rows))
         else:
             res = np.asarray(buffer).reshape((n_rows, n_cols, K), order = 'F')
             return np.moveaxis(res, [0,1,2], [1, 2, 0])
-    def SetValue(self, name, double[::1] value):
-        # retrieve parameter setter
-        cdef shared_ptr[AppParameterSetter] paramsetter = self.myFatropApplication.get().GetParameterSetter(name.encode('utf-8'))
-        paramsetter.get().SetValue(&value[0])
-        return None
-    def GetStats(self):
-        res = PyFatropStats()
-        res.stats = self.myFatropApplication.get().GetStats()
-        return res 
-    def SetParams(self, stage_params_in, global_params_in):
-        cdef vector[double]* stageparams = & self.myFatropApplication.get().StageParameters() 
-        stageparams[0]= stage_params_in
-        cdef vector[double]* globalparams =& self.myFatropApplication.get().GlobalParameters() 
-        globalparams[0] = global_params_in
 
-    def SetInitial(self, initial_u, initial_x):
-        self.myFatropApplication.get().SetInitial(initial_u, initial_x)
+    def set_value(self, name, double[::1] value):
+        # retrieve parameter setter
+        self.myFatropApplication.get_parameter_setter(name.encode('utf-8')).set_value(&value[0])
+        return None
+    def get_stats(self):
+        res = PyFatropStats()
+        res.stats = self.myFatropApplication.get_stats()
+        return res 
+    def set_params(self, stage_params_in, global_params_in):
+        self.myFatropApplication.set_params(stage_params_in, global_params_in)
+
+    def set_initial(self, initial_u, initial_x):
+        self.myFatropApplication.set_initial(initial_u, initial_x)
     
     # def SetOption(self, option_name, cython.int value):
-    #     self.myFatropApplication.get().SetOption(option_name.encode('utf-8'), value)
-    def SetOption(self, option_name, cython.double value):
-        self.myFatropApplication.get().SetOption(option_name.encode('utf-8'), value)
+    #     self.myFatropApplication.SetOption(option_name.encode('utf-8'), value)
+    def set_option(self, option_name, cython.double value):
+        self.myFatropApplication.set_option(option_name.encode('utf-8'), value)
     # def SetOption(self, option_name, cython.bint value):
-    #     self.myFatropApplication.get().SetOption(option_name.encode('utf-8'), value)
+    #     self.myFatropApplication.SetOption(option_name.encode('utf-8'), value)
+    def __dealloc__(self):
+        del self.myFatropApplication
 
 
 

@@ -31,14 +31,15 @@ cdef extern from "FatropStats.hpp" namespace "fatrop":
         int eval_grad_count
         int eval_obj_count
         int iterations_count
-        void Print()
+        void print()
     
 
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
     cdef cppclass StageExpressionEvaluatorBase:
+        StageExpressionEvaluatorBase(const StageExpressionEvaluatorBase& cp)
         int n_rows() const
         int n_cols() const
-        # int K()
+        int K() const
         int size() const
         # vector[double] Eval(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params)
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
@@ -47,14 +48,16 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
 
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
     cdef cppclass StageControlGridSampler(StageExpressionEvaluatorBase):
+        StageControlGridSampler(const StageControlGridSampler& cp)
         # int Evaluate(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params, vector[double] &sample)
         # int n_rows()
         # int n_cols()
-        int K() const
+        # int K() const
         # int Size()
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
     cdef cppclass StageExpressionEvaluatorFactory:
-        StageControlGridSampler at_control()
+        StageExpressionEvaluatorFactory(const StageExpressionEvaluatorFactory& cp)
+        StageControlGridSampler at_control() const
 # cdef extern from "BasicOCPSamplers.hpp" namespace "fatrop":
 #     cdef cppclass ParameterSetter:
 #         void SetValue(vector[double]& global_params, vector[double]& stage_params, const double* value)
@@ -64,23 +67,25 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop::StageOCPApplicatio
 
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
     cdef cppclass StageOCPApplication:
+        StageOCPApplication(const StageOCPApplication& cp)
         int optimize()
         void build()
-        FatropVecBF& last_solution_primal()
+        const FatropVecBF& last_solution_primal() const
         vector[double] &global_parameters()
         vector[double] &stage_parameters()
         # vector[double] &InitialGuessPrimal()
         void set_initial(vector[double] &initial_u, vector[double]& initial_x)
         # shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
         AppParameterSetter get_parameter_setter(const string &sampler_name)
-        vector[double] sample(const string &sampler_name)
-        FatropStats get_stats()
+        vector[double] sample(const string &sampler_name) const
+        FatropStats get_stats() const
         const int nx_
         const int nu_
         const int K_
         StageExpressionEvaluatorFactory get_expression(const string &sampler_name)
-        const StageOCPSolution & last_stageocp_solution()
+        const StageOCPSolution & last_stageocp_solution() const
         void set_option[T](const string &option_name, T value)
+        void set_params(const vector[double] &global_params, const vector[double] &stage_params)
 
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
     cdef cppclass StageOCPApplicationBuilder:
