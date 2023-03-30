@@ -1,6 +1,6 @@
 #include "StageOCPExpressions.hpp"
 using namespace fatrop;
-int StageExpression::size()
+int StageExpression::size() const
 {
     return n_rows() * n_cols();
 }
@@ -10,7 +10,7 @@ IndexEpression::IndexEpression(const bool control, const vector<int> offsets_in,
                                                                                                                   _control(control)
 {
 }
-void IndexEpression::evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res)
+void IndexEpression::evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const
 {
     if (_control)
     {
@@ -27,27 +27,27 @@ void IndexEpression::evaluate(const double *u, const double *x, const double *gl
         }
     }
 };
-int IndexEpression::n_rows()
+int IndexEpression::n_rows() const
 {
     return _no_var;
 }
-int IndexEpression::n_cols()
+int IndexEpression::n_cols() const
 {
     return 1;
 }
 EvalBaseSE::EvalBaseSE(const shared_ptr<EvalBase> &evalbase) : evalbase_(evalbase), n_rows_(evalbase->out_m), n_cols_(evalbase->out_n)
 {
 }
-void EvalBaseSE::evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res)
+void EvalBaseSE::evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const
 {
     const double *arg[] = {u, x, stage_params, global_params};
     evalbase_->eval_array(arg, res);
 }
-int EvalBaseSE::n_rows()
+int EvalBaseSE::n_rows() const
 {
     return n_rows_;
 }
-int EvalBaseSE::n_cols()
+int EvalBaseSE::n_cols() const
 {
     return n_cols_;
 }

@@ -51,15 +51,15 @@ namespace fatrop
     public:
         int Optimize();
         // TODO: make this protected and use last_solution instead and choose other name
-        const FatropVecBF &last_solution_primal();
-        const FatropVecBF &last_solution_dual();
-        const FatropVecBF &last_solution_zL();
-        const FatropVecBF &last_solution_zU();
-        FatropVecBF &initial_guess_primal();
-        FatropVecBF &initial_guess_dual();
-        FatropVecBF &initial_guess_zL();
-        FatropVecBF &initial_guess_zU();
-        FatropStats get_stats();
+        const FatropVecBF &last_solution_primal() const;
+        const FatropVecBF &last_solution_dual() const;
+        const FatropVecBF &last_solution_zL() const;
+        const FatropVecBF &last_solution_zU() const;
+        FatropVecBF &initial_guess_primal() const;
+        FatropVecBF &initial_guess_dual() const;
+        FatropVecBF &initial_guess_zL() const;
+        FatropVecBF &initial_guess_zU() const;
+        FatropStats get_stats() const;
         NLPDims get_nlp_dims();
         template <typename T>
         void set_option(const string &option_name, T value);
@@ -90,8 +90,6 @@ namespace fatrop
         void build();
 
     public:
-        vector<double> &global_parameters();
-        vector<double> &stage_parameters();
         using NLPApplication::set_initial;
         void set_initial(vector<double> &initial_u, vector<double> &initial_x);
         OCPDims get_ocp_dims();
@@ -100,6 +98,8 @@ namespace fatrop
         const shared_ptr<OCPAbstract> ocp_;
 
     protected:
+        vector<double> &global_parameters();
+        vector<double> &stage_parameters();
         shared_ptr<OCPAdapter> adapter;
     };
 
@@ -121,7 +121,7 @@ namespace fatrop
 
     public:
         // todo make this deprecated, only use Eval
-        void sample(const StageControlGridSampler &sampler, vector<double> &result);
+        void sample(const StageControlGridSampler &sampler, vector<double> &result) const;
         vector<double> evaluate(const StageExpressionEvaluatorBase &evaluator) const;
         void evaluate(const StageExpressionEvaluatorBase &evaluator, vector<double> &result) const;
 
@@ -160,8 +160,8 @@ namespace fatrop
         AppParameterSetter get_parameter_setter(const string &setter_name);
         void build();
         int optimize();
-        const StageOCPSolution &last_stageocp_solution();
-        const FatropSolution &last_solution(){return last_stageocp_solution();};
+        const StageOCPSolution &last_stageocp_solution() const;
+        const FatropSolution &last_solution() const {return last_stageocp_solution();};
 
     public:
         const int nx_;

@@ -9,18 +9,18 @@ namespace fatrop
     class StageExpression
     {
     public:
-        virtual void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) = 0;
-        virtual int n_rows() = 0;
-        virtual int n_cols() = 0;
-        int size();
+        virtual void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const = 0;
+        virtual int n_rows() const = 0;
+        virtual int n_cols() const= 0;
+        int size() const;
     };
     class IndexEpression : public StageExpression
     {
     public:
         IndexEpression(const bool control, const vector<int> offsets_in, const vector<int> offsets_out);
-        void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
-        int n_rows() override;
-        int n_cols() override;
+        void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const override;
+        int n_rows() const override;
+        int n_cols() const override;
 
     private:
         const int _no_var;
@@ -32,9 +32,9 @@ namespace fatrop
     {
     public:
         EvalBaseSE(const shared_ptr<EvalBase> &evalbase);
-        void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) override;
-        int n_rows() override;
-        int n_cols() override;
+        void evaluate(const double *u, const double *x, const double *global_params, const double *stage_params, double *res) const override;
+        int n_rows() const override;
+        int n_cols() const override;
 
     private:
         shared_ptr<EvalBase> evalbase_;

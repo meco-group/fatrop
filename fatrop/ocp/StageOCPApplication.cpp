@@ -19,17 +19,17 @@ int NLPApplication::Optimize()
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
-const FatropVecBF &NLPApplication::last_solution_primal()
+const FatropVecBF &NLPApplication::last_solution_primal() const
 {
     assert(!dirty);
     return fatropdata_->x_curr;
 }
-FatropVecBF &NLPApplication::initial_guess_primal()
+FatropVecBF &NLPApplication::initial_guess_primal() const
 {
     assert(!dirty);
     return fatropdata_->x_initial;
 }
-FatropStats NLPApplication::get_stats()
+FatropStats NLPApplication::get_stats() const
 {
     return fatropalg_->GetStats();
 }
@@ -37,27 +37,27 @@ NLPDims NLPApplication::get_nlp_dims()
 {
     return nlp_->GetNLPDims();
 }
-const FatropVecBF &NLPApplication::last_solution_dual()
+const FatropVecBF &NLPApplication::last_solution_dual() const
 {
     return fatropdata_->lam_curr;
 }
-const FatropVecBF &NLPApplication::last_solution_zL()
+const FatropVecBF &NLPApplication::last_solution_zL() const
 {
     return fatropdata_->zL_curr;
 }
-const FatropVecBF &NLPApplication::last_solution_zU()
+const FatropVecBF &NLPApplication::last_solution_zU() const
 {
     return fatropdata_->zU_curr;
 }
-FatropVecBF &NLPApplication::initial_guess_dual()
+FatropVecBF &NLPApplication::initial_guess_dual() const
 {
     return fatropdata_->lam_init;
 }
-FatropVecBF &NLPApplication::initial_guess_zL()
+FatropVecBF &NLPApplication::initial_guess_zL() const
 {
     return fatropdata_->zL_init;
 }
-FatropVecBF &NLPApplication::initial_guess_zU()
+FatropVecBF &NLPApplication::initial_guess_zU() const
 {
     return fatropdata_->zU_init;
 }
@@ -161,7 +161,7 @@ void StageOCPSolution::set_parameters(const vector<double> &global_params, const
     this->stage_params = stage_params;
 }
 
-void StageOCPSolution::sample(const StageControlGridSampler &sampler, vector<double> &result)
+void StageOCPSolution::sample(const StageControlGridSampler &sampler, vector<double> &result) const
 {
     sampler.evaluate(sol_primal_, global_params, stage_params, result);
 }
@@ -199,14 +199,14 @@ void StageOCPApplication::build()
 int StageOCPApplication::optimize()
 {
     int ret = NLPApplication::Optimize();
-    last_solution_.set_parameters(global_parameters(), stage_parameters());
+    last_solution_.set_parameters(global_parameters(), stage_parameters()); 
     if (ret == 0)
     {
         last_solution_.set_solution(last_solution_primal(), last_solution_dual(), last_solution_zL(), last_solution_zU());
     }
     return ret;
 }
-const StageOCPSolution &StageOCPApplication::last_stageocp_solution()
+const StageOCPSolution &StageOCPApplication::last_stageocp_solution() const
 {
     return last_solution_;
 }
