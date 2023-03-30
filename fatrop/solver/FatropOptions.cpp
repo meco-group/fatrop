@@ -54,8 +54,8 @@ void Option<T>::set(const T &new_value)
 };
 FatropOptions::FatropOptions()
 {
-    RegisterOption(IntegerOption::BoxBounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
-    RegisterOption(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
+    register_option(IntegerOption::BoxBounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
+    register_option(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
 template <typename T>
 void FatropOptions::set(const string &option_name, T value)
@@ -125,17 +125,17 @@ void FatropOptions::set(const string &option_name, T value)
     }
 }
 
-void FatropOptions::RegisterOption(const NumericOption &option)
+void FatropOptions::register_option(const NumericOption &option)
 {
     numeric_options[option.name_] = option;
     option.SetDefault();
 }
-void FatropOptions::RegisterOption(const IntegerOption &option)
+void FatropOptions::register_option(const IntegerOption &option)
 {
     integer_options[option.name_] = option;
     option.SetDefault();
 }
-void FatropOptions::RegisterOption(const BooleanOption &option)
+void FatropOptions::register_option(const BooleanOption &option)
 {
     boolean_options[option.name_] = option;
     option.SetDefault();

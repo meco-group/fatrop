@@ -79,15 +79,15 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller)
 {
     Initialize();
-    fatrop_params_->RegisterOption(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step, false));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("delta", "delta", &delta, 1.0, 0.0));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-12, 0.0));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
-    fatrop_params_->RegisterOption(NumericOption::LowerBounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
-    fatrop_params_->RegisterOption(IntegerOption::LowerBounded("max_soc", "max_soc", &max_soc, 2, 0));
+    fatrop_params_->register_option(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step, false));
+    fatrop_params_->register_option(NumericOption::LowerBounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
+    fatrop_params_->register_option(NumericOption::LowerBounded("delta", "delta", &delta, 1.0, 0.0));
+    fatrop_params_->register_option(NumericOption::LowerBounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
+    fatrop_params_->register_option(NumericOption::LowerBounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-12, 0.0));
+    fatrop_params_->register_option(NumericOption::LowerBounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
+    fatrop_params_->register_option(NumericOption::LowerBounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
+    fatrop_params_->register_option(NumericOption::LowerBounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
+    fatrop_params_->register_option(IntegerOption::LowerBounded("max_soc", "max_soc", &max_soc, 2, 0));
 };
 void BackTrackingLineSearch::Initialize()
 {

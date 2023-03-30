@@ -61,9 +61,9 @@ namespace fatrop
         void set(const string &option_name, T value);
 
     public:
-        void RegisterOption(const NumericOption &option);
-        void RegisterOption(const IntegerOption &option);
-        void RegisterOption(const BooleanOption &option);
+        void register_option(const NumericOption &option);
+        void register_option(const IntegerOption &option);
+        void register_option(const BooleanOption &option);
         friend auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &;
         map<string, NumericOption> numeric_options;
         map<string, IntegerOption> integer_options;

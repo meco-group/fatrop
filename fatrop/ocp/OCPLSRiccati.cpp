@@ -66,7 +66,7 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> 
                                                                                             rho(vector<int>(dims.K, 0)),
                                                                                             options_(options)
 {
-    options_->RegisterOption(BooleanOption("iterative_refinement", "iterative ref", &it_ref, true));
+    options_->register_option(BooleanOption("iterative_refinement", "iterative ref", &it_ref, true));
 };
 int OCPLSRiccati::computeSD(
     OCPKKTMemory *OCP,
