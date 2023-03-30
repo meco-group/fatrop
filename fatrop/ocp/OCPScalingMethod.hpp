@@ -11,7 +11,7 @@ namespace fatrop
     {
     public:
         OCPScalingMethod(const std::shared_ptr<FatropOptions> &fatrop_params) : AlgStrategy(fatrop_params){};
-        virtual int ComputeScalings(
+        virtual int compute_scalings(
             OCPKKTMemory *OCP,
             double &obj_scale,
             FatropVecBF &x_scales,

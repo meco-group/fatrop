@@ -11,10 +11,10 @@ namespace fatrop
     {
     public:
         /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !! */
-        int AdaptKKTInitial(
+        int modify_kkt_ls_dual_estimate(
             OCPKKTMemory *OCP,
             const FatropVecBF &grad);
-        int CalcSlacks(
+        int intialize_slack_variables(
             OCPKKTMemory *OCP,
             FatropVecBF &s);
     };

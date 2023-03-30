@@ -4,7 +4,7 @@ Journaller::Journaller(const int maxiter)
 {
     iterationdata.reserve(maxiter + 1);
 }
-void Journaller::PrintIterations()
+void Journaller::print_iterations()
 {
     if (print_count == 0)
     {
@@ -32,11 +32,11 @@ void Journaller::PrintIterations()
     }
     print_count = iterationdata.size();
 }
-void Journaller::Push()
+void Journaller::push()
 {
     iterationdata.push_back(it_curr);
 }
-void Journaller::Reset()
+void Journaller::reset()
 {
     iterationdata.resize(0);
     print_count = 0;

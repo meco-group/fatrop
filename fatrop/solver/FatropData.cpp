@@ -110,22 +110,22 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                           gradb_total(memineqs[27]),
                                                                                           params(params)
 {
-    Initialize();
-    params->register_option(NumericOption::LowerBounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
-    params->register_option(NumericOption::LowerBounded("smax", "smax", &smax, 100.0, 0.0));
-    params->register_option(NumericOption::LowerBounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
-    params->register_option(NumericOption::LowerBounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
-    params->register_option(NumericOption::LowerBounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
-    params->register_option(NumericOption::LowerBounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
-    params->register_option(NumericOption::LowerBounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
+    initialize();
+    params->register_option(NumericOption::lower_bounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
+    params->register_option(NumericOption::lower_bounded("smax", "smax", &smax, 100.0, 0.0));
+    params->register_option(NumericOption::lower_bounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
+    params->register_option(NumericOption::lower_bounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
+    params->register_option(NumericOption::lower_bounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
+    params->register_option(NumericOption::lower_bounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
+    params->register_option(NumericOption::lower_bounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
 }
-void FatropData::Initialize()
+void FatropData::initialize()
 {
     kappa_d = params->kappa_d;
-    n_ineqs_r = nIneqsR();
-    RelaxBounds();
+    n_ineqs_r = number_of_bounds();
+    relax_bounds();
 }
-int FatropData::Reset()
+int FatropData::reset()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -141,24 +141,24 @@ int FatropData::Reset()
     VECSE(lam_curr.nels(), 0.0, (VEC *)lam_curr, 0);
     VECSE(s_curr.nels(), 0.0, (VEC *)s_curr, 0);
     x_curr.copy(x_initial);
-    ResetCaches();
+    reset_caches();
     return 0;
 }
-int FatropData::ResetCaches()
+int FatropData::reset_caches()
 {
     cache_curr = EvalCache();
     cache_next = EvalCache();
     return 0;
 }
-double FatropData::EMuCurr(double mu)
+double FatropData::e_mu_curr(double mu)
 {
     double res = 0.0;
-    double z_L1 = +ZL1Curr();
-    double lammean = (LamL1Curr() + z_L1) / (n_eqs + n_ineqs_r);
+    double z_L1 = +z_sum_curr();
+    double lammean = (dual_sum_curr() + z_L1) / (n_eqs + n_ineqs_r);
     double z_mean = z_L1 / n_ineqs_r;
-    double cv = CVLinfCurr();
-    double du = DuInfLinfCurr();
-    double compl_slack = EvalCompSlackInf(mu);
+    double cv = constr_viol_max_curr();
+    double du = dual_inf_max_curr();
+    double compl_slack = eval_compl_slack(mu);
     double sd = 0.0;
     double sc = 0.0;
     if (lammean > smax)
@@ -174,7 +174,7 @@ double FatropData::EMuCurr(double mu)
     res = MAX(cv, MAX(du, compl_slack));
     return res;
 };
-int FatropData::EvalDuInfSlacksEqs()
+int FatropData::eval_dual_inf_slack_eqs()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -199,7 +199,7 @@ int FatropData::EvalDuInfSlacksEqs()
     }
     return 0;
 }
-double FatropData::EvalCompSlackInf(double mu)
+double FatropData::eval_compl_slack(double mu)
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -225,7 +225,7 @@ double FatropData::EvalCompSlackInf(double mu)
     }
     return res;
 }
-double FatropData::EvalBarrier(double mu, VEC *s_p)
+double FatropData::eval_barrier_func(double mu, VEC *s_p)
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -256,19 +256,19 @@ double FatropData::EvalBarrier(double mu, VEC *s_p)
     }
     return res;
 }
-double FatropData::EvalBarrierCurr(double mu)
+double FatropData::eval_barrier_func_curr(double mu)
 {
-    return EvalBarrier(mu, (VEC *)s_curr);
+    return eval_barrier_func(mu, (VEC *)s_curr);
 }
-double FatropData::EvalBarrierBackup(double mu)
+double FatropData::eval_barrier_func_backup(double mu)
 {
-    return EvalBarrier(mu, (VEC *)s_backup);
+    return eval_barrier_func(mu, (VEC *)s_backup);
 }
-double FatropData::EvalBarrierNext(double mu)
+double FatropData::eval_barrier_func_trial(double mu)
 {
-    return EvalBarrier(mu, (VEC *)s_next);
+    return eval_barrier_func(mu, (VEC *)s_next);
 }
-double FatropData::EvalBarrierLinDecr(double mu, VEC *s_p, VEC *delta_s_p)
+double FatropData::eval_barrier_fo_decr(double mu, VEC *s_p, VEC *delta_s_p)
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -301,19 +301,19 @@ double FatropData::EvalBarrierLinDecr(double mu, VEC *s_p, VEC *delta_s_p)
     }
     return res;
 }
-double FatropData::EvalBarrierLinDecrCurr(double mu)
+double FatropData::eval_barrier_fo_decr_curr(double mu)
 {
     VEC *s_p = (VEC *)s_curr;
     VEC *delta_s_p = (VEC *)delta_s;
-    return EvalBarrierLinDecr(mu, s_p, delta_s_p);
+    return eval_barrier_fo_decr(mu, s_p, delta_s_p);
 }
-double FatropData::EvalBarrierLinDecrBackup(double mu)
+double FatropData::eval_barrier_fo_decr_backup(double mu)
 {
     VEC *s_p = (VEC *)s_backup;
     VEC *delta_s_p = (VEC *)delta_s_backup;
-    return EvalBarrierLinDecr(mu, s_p, delta_s_p);
+    return eval_barrier_fo_decr(mu, s_p, delta_s_p);
 }
-int FatropData::BoundSlacks()
+int FatropData::bound_slacks()
 {
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
@@ -344,7 +344,7 @@ int FatropData::BoundSlacks()
     }
     return 0;
 }
-int FatropData::BoundZ()
+int FatropData::bound_z()
 {
     VEC *zL_curr_p = (VEC *)zL_curr;
     VEC *zU_curr_p = (VEC *)zU_curr;
@@ -355,14 +355,14 @@ int FatropData::BoundZ()
     }
     return 0;
 }
-int FatropData::WarmStartDual()
+int FatropData::warmstart_dual()
 {
     zL_curr.copy(zL_init);
     zU_curr.copy(zU_init);
     lam_curr.copy(lam_init);
     return 0;
 }
-int FatropData::AdaptDualBounds(double mu)
+int FatropData::modify_dual_bounds(double mu)
 {
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
@@ -397,13 +397,13 @@ int FatropData::AdaptDualBounds(double mu)
     }
     return 0;
 }
-int FatropData::AcceptInitialization()
+int FatropData::accept_dual_initializiaton()
 {
     lam_calc.SwapWith(lam_curr);
     cache_curr = EvalCache();
     return 0;
 }
-int FatropData::TryStep(double alpha_primal, double alpha_dual)
+int FatropData::update_trial_step(double alpha_primal, double alpha_dual)
 {
     axpy(alpha_primal, delta_x, x_curr, x_next);
     axpy(alpha_primal, delta_s, s_curr, s_next);
@@ -415,7 +415,7 @@ int FatropData::TryStep(double alpha_primal, double alpha_dual)
     cache_next = EvalCache();
     return 0;
 }
-int FatropData::TakeStep()
+int FatropData::accept_trial_step()
 {
     // TODO make a struct which containts vectors associated with curr <-> next
     x_curr.SwapWith(x_next);
@@ -428,7 +428,7 @@ int FatropData::TakeStep()
     cache_curr = cache_next;
     return 0;
 }
-int FatropData::BackupCurr()
+int FatropData::backup_curr()
 {
     x_backup.copy(x_curr);
     s_backup.copy(s_curr);
@@ -440,14 +440,14 @@ int FatropData::BackupCurr()
     obj_backup = obj_curr;
     return 0;
 }
-int FatropData::BackupDelta()
+int FatropData::backup_delta()
 {
     delta_x_backup.copy(delta_x);
     delta_s_backup.copy(delta_s);
     lam_calc_backup.copy(lam_calc);
     return 0;
 }
-int FatropData::RestoreBackup()
+int FatropData::restore_backup()
 {
     x_curr.SwapWith(x_backup);
     s_curr.SwapWith(s_backup);
@@ -462,39 +462,39 @@ int FatropData::RestoreBackup()
     cache_curr = EvalCache();
     return 0;
 }
-double FatropData::CVLinfCurr()
+double FatropData::constr_viol_max_curr()
 {
     return CACHEMACRO(cache_curr.cv_linf, Linf(g_curr));
 }
-double FatropData::CVLinfNext()
+double FatropData::constr_viol_max_next()
 {
     return CACHEMACRO(cache_next.cv_linf, Linf(g_next));
 }
-double FatropData::CVL1Curr()
+double FatropData::constr_viol_sum_curr()
 {
     return CACHEMACRO(cache_curr.cv_l1, L1(g_curr));
 }
-double FatropData::CVL1Backup()
+double FatropData::constr_viol_sum_backup()
 {
     return L1(g_backup);
 }
-double FatropData::CVL1Next()
+double FatropData::constr_viol_sum_next()
 {
     return CACHEMACRO(cache_next.cv_l1, L1(g_next));
 }
-double FatropData::LamL1Curr()
+double FatropData::dual_sum_curr()
 {
     return CACHEMACRO(cache_curr.lam_l1, Linf(lam_curr));
 }
-double FatropData::LamLinfCurr()
+double FatropData::dual_max_curr()
 {
     return Linf(lam_curr);
 }
-double FatropData::LamMeanCurr()
+double FatropData::dual_mean_curr()
 {
-    return LamL1Curr() / nlpdims.nvars;
+    return dual_sum_curr() / nlpdims.nvars;
 }
-double FatropData::ZL1Curr()
+double FatropData::z_sum_curr()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -516,7 +516,7 @@ double FatropData::ZL1Curr()
     }
     return res;
 }
-int FatropData::nIneqsR()
+int FatropData::number_of_bounds()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -536,23 +536,23 @@ int FatropData::nIneqsR()
     }
     return res;
 }
-double FatropData::LamLinfCalc()
+double FatropData::delta_dual_max()
 {
     return Linf(lam_calc);
 }
-double FatropData::DuInfLinfCurr()
+double FatropData::dual_inf_max_curr()
 {
     return CACHEMACRO(cache_curr.du_inf_linf, MAX(Linf(du_inf_curr), Linf(du_inf_curr_s)));
 }
-double FatropData::LinDecrCurr()
+double FatropData::fo_decr_obj_curr()
 {
     return dot(grad_curr, delta_x);
 }
-double FatropData::LinDecrBackup()
+double FatropData::fo_decr_obj_backup()
 {
     return dot(grad_backup, delta_x_backup);
 }
-void FatropData::AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau)
+void FatropData::maximum_step_size(double &alpha_max_pr, double &alpha_max_du, double tau)
 {
     alpha_max_pr = 1.0;
     alpha_max_du = 1.0;
@@ -587,13 +587,13 @@ void FatropData::AlphaMax(double &alpha_max_pr, double &alpha_max_du, double tau
     }
     return;
 }
-void FatropData::SetBounds(const vector<double> &lowerin, const vector<double> &upperin)
+void FatropData::set_bounds(const vector<double> &lowerin, const vector<double> &upperin)
 {
     s_lower_orig = lowerin;
     s_upper_orig = upperin;
-    RelaxBounds();
+    relax_bounds();
 }
-void FatropData::RelaxBounds()
+void FatropData::relax_bounds()
 {
     VECCP(n_ineqs, (VEC *)s_lower_orig, 0, (VEC *)s_lower, 0);
     VECCP(n_ineqs, (VEC *)s_upper_orig, 0, (VEC *)s_upper, 0);
@@ -613,7 +613,7 @@ void FatropData::RelaxBounds()
         }
     }
 }
-void FatropData::RelaxBoundsVar(double mu)
+void FatropData::relax_bounds_var(double mu)
 {
     double emach = 1e-16;
     VEC *s_lower_p = (VEC *)s_lower;
@@ -647,7 +647,7 @@ void FatropData::RelaxBoundsVar(double mu)
         }
     }
 }
-void FatropData::ComputeBarrierQuantities(double mu)
+void FatropData::evaluate_barrier_quantities(double mu)
 {
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
@@ -716,7 +716,7 @@ void FatropData::ComputeBarrierQuantities(double mu)
     VECCP(n_ineqs, (VEC *)sigma_L, 0, (VEC *)sigma_total, 0);
     AXPY(n_ineqs, 1.0, (VEC *)sigma_U, 0, (VEC *)sigma_total, 0, (VEC *)sigma_total, 0);
 }
-void FatropData::ComputedZ()
+void FatropData::compute_delta_z()
 {
     // delta zL
     VECMUL(n_ineqs, (VEC *)sigma_L, 0, (VEC *)delta_s, 0, (VEC *)delta_zL, 0);
@@ -728,7 +728,7 @@ void FatropData::ComputedZ()
     AXPY(n_ineqs, 1.0, (VEC *)gradb_U, 0, (VEC *)delta_zU, 0, (VEC *)delta_zU, 0);
 }
 
-void FatropData::ComputePDResidu()
+void FatropData::compute_primal_dual_residu()
 {
 }
 // void FatropData::B

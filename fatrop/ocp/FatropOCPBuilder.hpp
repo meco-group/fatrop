@@ -14,15 +14,15 @@ namespace fatrop
         FatropOCPBuilder(const std::shared_ptr<OCPAbstract> &ocp, const std::shared_ptr<FatropOptions> &fatropparams) : ocp_(ocp), fatropoptions_(fatropparams)
         {
         }
-        std::shared_ptr<FatropOCP> Build()
+        std::shared_ptr<FatropOCP> build()
         {
             std::shared_ptr<OCPAdapter> adapter = std::make_shared<OCPAdapter>(ocp_);
-            return Build(adapter);
+            return build(adapter);
         }
 
-        std::shared_ptr<FatropOCP> Build(std::shared_ptr<OCPAdapter> &adapter)
+        std::shared_ptr<FatropOCP> build(std::shared_ptr<OCPAdapter> &adapter)
         {
-            return std::make_shared<FatropOCP>(adapter, std::make_shared<OCPLSRiccati>(adapter->GetOCPDims(), fatropoptions_), std::make_shared<OCPNoScaling>(fatropoptions_), fatropoptions_);
+            return std::make_shared<FatropOCP>(adapter, std::make_shared<OCPLSRiccati>(adapter->get_ocp_dims(), fatropoptions_), std::make_shared<OCPNoScaling>(fatropoptions_), fatropoptions_);
         }
 
     private:

@@ -94,7 +94,7 @@ namespace fatrop
         OCPDims get_ocp_dims();
         void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
         {
-            adapter->SetParams(global_params, stage_params);
+            adapter->set_parameters(global_params, stage_params);
         }
 
     private:

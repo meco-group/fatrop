@@ -23,14 +23,14 @@ namespace fatrop
             const std::shared_ptr<OCP> &ocp,
             const std::shared_ptr<OCPLinearSolver> &ls,
             const std::shared_ptr<OCPScalingMethod> &scaler, const std::shared_ptr<FatropOptions> &options);
-        int EvalHess(
+        int eval_lag_hess(
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) override;
-        int EvalJac(
+        int eval_constr_jac(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override;
-        int ComputeSD(
+        int solve_pd_sys(
             const double inertia_correction_w,
             const double inertia_correction_c,
             const FatropVecBF &ux,
@@ -38,60 +38,60 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total) override;
-        int SolveSOC(
+        int solve_soc_rhs(
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
             const FatropVecBF &constraint_violation) override;
-        int ComputeScalings(
+        int compute_scalings(
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr);
-        int EvalConstraintViolation(
+        int eval_constraint_viol(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override;
-        int EvalGrad(
+        int eval_obj_grad(
             double obj_scale,
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) override;
-        int EvalObj(
+        int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,
             double &res) override;
-        int EvalDuInf(
+        int eval_dual_inf(
             double obj_scale,
             const FatropVecBF &lam,
             const FatropVecBF &grad,
             FatropVecBF &du_inf) override;
-        int Initialization_s(
+        int initialize_slacks(
             FatropVecBF &s_curr) override;
-        int Initialization_dual(
+        int initialize_dual(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
             const FatropVecBF &zU) override;
 
-        int GetBounds(
+        int get_bounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const override
         {
-            return ocp_->GetBounds(lower, upper);
+            return ocp_->get_bounds(lower, upper);
         };
-        int GetInitialGuess(
+        int get_initial_sol_guess(
             FatropVecBF &initial) const override
         {
-            return ocp_->GetInitialGuess(initial);
+            return ocp_->get_initial_sol_guess(initial);
         };
         // int GetDefaultParams(
         //     FatropOptions &params) const override
         //     {
         //        return ocp_->GetDefaultParams(params);
         //     };
-        NLPDims GetNLPDims() const override;
-        void Finalize() override;
-        void Reset() override;
+        NLPDims get_nlp_dims() const override;
+        void finalize() override;
+        void reset() override;
 
     public:
         std::shared_ptr<OCP> ocp_;

@@ -23,9 +23,9 @@ namespace fatrop
     {
     public:
         Journaller(const int maxiter);
-        void PrintIterations();
-        void Push();
-        void Reset();
+        void print_iterations();
+        void push();
+        void reset();
         int print_count = 0;
         std::vector<IterationData> iterationdata;
         IterationData it_curr;

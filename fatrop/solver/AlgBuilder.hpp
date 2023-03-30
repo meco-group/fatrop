@@ -7,19 +7,19 @@ namespace fatrop
     class AlgBuilder
     {
     public:
-        void BuildFatropAlgObjects(const std::shared_ptr<FatropNLP> &nlp,
+        void build_fatrop_algorithm_objects(const std::shared_ptr<FatropNLP> &nlp,
                                     const std::shared_ptr<FatropOptions> &fatropparams,
                                    std::shared_ptr<FatropData> &fatropdata,
                                    std::shared_ptr<Journaller> &journaller)
         {
-            fatropdata = std::make_shared<FatropData>(nlp->GetNLPDims(), fatropparams);
+            fatropdata = std::make_shared<FatropData>(nlp->get_nlp_dims(), fatropparams);
             journaller = std::make_shared<Journaller>(fatropparams->maxiter + 1);
             fatropdata_ = fatropdata; // keep this around for building the algorithm
             journaller_ = journaller;
             nlp_ = nlp;
             fatropoptions_ = fatropparams;
         }
-        std::shared_ptr<FatropAlg> BuildAlgorithm()
+        std::shared_ptr<FatropAlg> build_algorithm()
         {
             // TODO unsafe if maxiter is changed during application
             std::shared_ptr<Filter> filter = std::make_shared<Filter>(fatropoptions_->maxiter + 1);

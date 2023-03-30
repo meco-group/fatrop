@@ -4,7 +4,7 @@ using namespace std;
 FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,
-    const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> & options) : ocp_(ocp), dims_(ocp_->GetOCPDims()),
+    const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> & options) : ocp_(ocp), dims_(ocp_->get_ocp_dims()),
                                                   nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.get(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
                                                   sigma(s_memvec[0]),
                                                   gradb(s_memvec[1]),
@@ -29,29 +29,29 @@ FatropOCP::FatropOCP(
 {
     options_->register_option(BooleanOption("iterative_refinement_SOC", "Use iterative refinement for SOC", &it_ref, true));
 }
-int FatropOCP::EvalHess(
+int FatropOCP::eval_lag_hess(
     double obj_scale,
     const FatropVecBF &primal_vars,
     const FatropVecBF &lam)
 {
-    int res = ocp_->evalHess(
+    int res = ocp_->eval_lag_hess(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
         lam);
     return res;
 };
-int FatropOCP::EvalJac(
+int FatropOCP::eval_constr_jac(
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars)
 {
-    int res = ocp_->evalJac(
+    int res = ocp_->eval_constr_jac(
         &ocpkktmemory_,
         primal_vars,
         slack_vars);
     return res;
 };
-int FatropOCP::ComputeSD(
+int FatropOCP::solve_pd_sys(
     const double inertia_correction_w,
     const double inertia_correction_c,
     const FatropVecBF &ux,
@@ -67,7 +67,7 @@ int FatropOCP::ComputeSD(
     inertia_correction_w_cache = inertia_correction_w;
     inertia_correction_c_cache = inertia_correction_c;
 
-    return ls_->computeSD(
+    return ls_->solve_pd_sys(
         &ocpkktmemory_,
         inertia_correction_w,
         inertia_correction_c,
@@ -78,7 +78,7 @@ int FatropOCP::ComputeSD(
         gradb_total);
 };
 
-int FatropOCP::SolveSOC(
+int FatropOCP::solve_soc_rhs(
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_s,
@@ -87,7 +87,7 @@ int FatropOCP::SolveSOC(
     if(inertia_correction_c_cache != 0.0) return -1;
     // bool it_ref = true;
     /// todo avoid retrieving unnecessary rhs'es
-    ls_->GetRHS(
+    ls_->get_rhs(
         &ocpkktmemory_,
         gradb_total_cache[0],
         rhs_rq[0],
@@ -100,7 +100,7 @@ int FatropOCP::SolveSOC(
     rhs_b[0].copy(constraint_violation.block(dims_.n_g_tot, dims_.n_b_tot));
     rhs_g_ineq[0].copy(constraint_violation.block(dims_.n_b_tot + dims_.n_g_tot, dims_.n_g_ineq_tot));
 
-    ls_->SolveRHS(
+    ls_->solve_rhs(
         &ocpkktmemory_,
         ux,
         lam,
@@ -130,7 +130,7 @@ int FatropOCP::SolveSOC(
         double error_prev = -1.0;
         for (int i = 0; i < 5; i++)
         {
-            ls_->ComputeMVProd(
+            ls_->compute_pd_sys_times_vec(
                 &ocpkktmemory_,
                 inertia_correction_w_cache,
                 0.0,
@@ -165,7 +165,7 @@ int FatropOCP::SolveSOC(
                 }
                 return 0;
             }
-            ls_->SolveRHS(
+            ls_->solve_rhs(
                 &ocpkktmemory_,
                 ux_test[0],
                 lam_test[0],
@@ -189,70 +189,70 @@ int FatropOCP::SolveSOC(
     };
     return 0;
 }
-int FatropOCP::ComputeScalings(
+int FatropOCP::compute_scalings(
     double &obj_scale,
     FatropVecBF &x_scales,
     FatropVecBF &lam_scales,
     const FatropVecBF &grad_curr)
 {
-    return scaler_->ComputeScalings(
+    return scaler_->compute_scalings(
         &ocpkktmemory_,
         obj_scale,
         x_scales,
         lam_scales,
         grad_curr);
 };
-int FatropOCP::EvalConstraintViolation(
+int FatropOCP::eval_constraint_viol(
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars,
     FatropVecBF &constraint_violation)
 {
-    int res = ocp_->EvalConstraintViolation(
+    int res = ocp_->eval_contr_viol(
         &ocpkktmemory_,
         primal_vars,
         slack_vars,
         constraint_violation);
     return res;
 };
-int FatropOCP::EvalGrad(
+int FatropOCP::eval_obj_grad(
     double obj_scale,
     const FatropVecBF &primal_vars,
     FatropVecBF &gradient)
 {
-    int res = ocp_->EvalGrad(
+    int res = ocp_->eval_obj_grad(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
         gradient);
     return res;
 };
-int FatropOCP::EvalObj(
+int FatropOCP::eval_obj(
     double obj_scale,
     const FatropVecBF &primal_vars,
     double &res)
 {
 
-    int resi = ocp_->EvalObj(
+    int resi = ocp_->eval_obj(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
         res);
     return resi;
 };
-int FatropOCP::EvalDuInf(
+int FatropOCP::eval_dual_inf(
     double obj_scale,
     const FatropVecBF &lam,
     const FatropVecBF &grad,
     FatropVecBF &du_inf)
 {
-    return duinfevaluator_.DuInfEval(
+    return duinfevaluator_.evaluate(
         &ocpkktmemory_,
         obj_scale,
         lam,
         grad,
         du_inf);
 }
-int FatropOCP::Initialization_dual(
+int FatropOCP::initialize_dual(
     const FatropVecBF &grad,
     FatropVecBF &dlam,
     // FatropVecBF &s_curr,
@@ -260,14 +260,14 @@ int FatropOCP::Initialization_dual(
     const FatropVecBF &zU)
 {
     // assume constraint jacobian evaluated
-    OCPInitializer_.AdaptKKTInitial(&ocpkktmemory_, grad);
+    OCPInitializer_.modify_kkt_ls_dual_estimate(&ocpkktmemory_, grad);
     s_dummy.SetConstant(0.0);
     s_zero.SetConstant(0.0);
     ux_dummy.SetConstant(0.0);
     sigma.SetConstant(1.0);
     axpy(-1.0, zL, zU, gradb);
 
-    return ls_->computeSD(
+    return ls_->solve_pd_sys(
         &ocpkktmemory_,
         0.0,
         0.0,
@@ -278,17 +278,17 @@ int FatropOCP::Initialization_dual(
         gradb);
     return 0;
 }
-int FatropOCP::Initialization_s(FatropVecBF &s_curr)
+int FatropOCP::initialize_slacks(FatropVecBF &s_curr)
 {
-    return OCPInitializer_.CalcSlacks(&ocpkktmemory_, s_curr);
+    return OCPInitializer_.intialize_slack_variables(&ocpkktmemory_, s_curr);
 }
-NLPDims FatropOCP::GetNLPDims() const
+NLPDims FatropOCP::get_nlp_dims() const
 {
     return nlpdims_;
 };
-void FatropOCP::Finalize()
+void FatropOCP::finalize()
 {
 }
-void FatropOCP::Reset()
+void FatropOCP::reset()
 {
 }

@@ -13,11 +13,11 @@ namespace fatrop
         // NumericOption operator=(const NumericOption &other) = default;
         Option(){};
         Option(const std::string &name, const std::string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound); 
-        static Option<T> LowerBounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound);
-        static Option<T> UpperBounded(const std::string &name, const std::string &description, T *value, T default_value, T upper_bound);
-        static Option<T> UnBounded(const std::string &name, const std::string &description, T *value, T default_value);
-        static Option<T> BoxBounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound, T upper_bound);
-        void SetDefault() const;
+        static Option<T> lower_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound);
+        static Option<T> upper_bounded(const std::string &name, const std::string &description, T *value, T default_value, T upper_bound);
+        static Option<T> un_bounded(const std::string &name, const std::string &description, T *value, T default_value);
+        static Option<T> box_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound, T upper_bound);
+        void set_default() const;
         void set(const T &new_value);
         std::string name_;
         std::string description_;
@@ -34,7 +34,7 @@ namespace fatrop
         Option(){};
         Option(const std::string &name, const std::string &description, bool *value, bool default_value);
         void set(const bool &new_value);
-        void SetDefault() const;
+        void set_default() const;
         std::string name_;
         std::string description_;
         bool *value = NULL;

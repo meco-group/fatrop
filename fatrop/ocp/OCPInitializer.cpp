@@ -1,7 +1,7 @@
 #include "ocp/OCPInitializer.hpp"
 using namespace fatrop;
 
-int OCPInitializer::AdaptKKTInitial(
+int OCPInitializer::modify_kkt_ls_dual_estimate(
     OCPKKTMemory *OCP,
     const FatropVecBF &grad)
 {
@@ -57,7 +57,7 @@ int OCPInitializer::AdaptKKTInitial(
     }
     return 0;
 }
-int OCPInitializer::CalcSlacks(
+int OCPInitializer::intialize_slack_variables(
     OCPKKTMemory *OCP,
     FatropVecBF &s)
 {

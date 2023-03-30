@@ -2,7 +2,7 @@
 
 using namespace fatrop;
 using namespace std;
-int OCPAdapter::evalHess(
+int OCPAdapter::eval_lag_hess(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -59,7 +59,7 @@ int OCPAdapter::evalHess(
     }
     return 0;
 }
-int OCPAdapter::evalJac(
+int OCPAdapter::eval_constr_jac(
     OCPKKTMemory *OCP,
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars)
@@ -148,7 +148,7 @@ int OCPAdapter::evalJac(
     }
     return 0;
 }
-int OCPAdapter::EvalConstraintViolation(
+int OCPAdapter::eval_contr_viol(
     OCPKKTMemory *OCP,
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars,
@@ -241,7 +241,7 @@ int OCPAdapter::EvalConstraintViolation(
     }
     return 0;
 }
-int OCPAdapter::EvalGrad(
+int OCPAdapter::eval_obj_grad(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -277,7 +277,7 @@ int OCPAdapter::EvalGrad(
     }
     return 0;
 };
-int OCPAdapter::EvalObj(
+int OCPAdapter::eval_obj(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
@@ -314,7 +314,7 @@ int OCPAdapter::EvalObj(
     return 0;
 };
 
-int OCPAdapter::EvalDynamics(
+int OCPAdapter::integrate_dynamics(
     OCPKKTMemory *OCP,
     const int k,
     const FatropVecBF &uk,
@@ -340,13 +340,13 @@ int OCPAdapter::EvalDynamics(
         k);
     return 0;
 };
-void OCPAdapter::SetParams(const vector<double> &stage_params_in, const vector<double> &global_params_in)
+void OCPAdapter::set_parameters(const vector<double> &stage_params_in, const vector<double> &global_params_in)
 {
     stageparams = stage_params_in;
     globalparams = global_params_in;
     return;
 }
-void OCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
+void OCPAdapter::set_initial_sol_guess(const shared_ptr<FatropData> &fatropdata, vector<double> &initial_u, vector<double> &initial_x)
 {
     // offsets
     VEC *ux_intial_p = (VEC *)fatropdata->x_initial;
@@ -367,7 +367,7 @@ void OCPAdapter::SetInitial(const shared_ptr<FatropData> &fatropdata, vector<dou
     }
     return;
 }
-void OCPAdapter::GetSolution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x)
+void OCPAdapter::get_solution(const shared_ptr<FatropData> &fatropdata, vector<double> &u, vector<double> &x)
 {
     // offsets
     VEC *ux_sol = (VEC *)fatropdata->x_curr;

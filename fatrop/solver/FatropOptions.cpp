@@ -7,7 +7,7 @@ void Option<bool>::set(const bool &new_value)
 {
     *value = new_value;
 }
-void Option<bool>::SetDefault() const
+void Option<bool>::set_default() const
 {
     *value = default_value_;
 }
@@ -15,27 +15,27 @@ void Option<bool>::SetDefault() const
 template <typename T>
 Option<T>::Option(const string &name, const string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound) : name_(name), description_(description), value(value), default_value_(default_value), lower_bound_inclusive_(lower_bound_inclusive), lower_bound_(lower_bound), upper_bound_inclusive_(upper_bound_inclusive), upper_bound_(upper_bound){};
 template <typename T>
-Option<T> Option<T>::LowerBounded(const string &name, const string &description, T *value, T default_value, T lower_bound)
+Option<T> Option<T>::lower_bounded(const string &name, const string &description, T *value, T default_value, T lower_bound)
 {
     return Option<T>(name, description, value, default_value, true, lower_bound, false, 0.0);
 };
 template <typename T>
-Option<T> Option<T>::UpperBounded(const string &name, const string &description, T *value, T default_value, T upper_bound)
+Option<T> Option<T>::upper_bounded(const string &name, const string &description, T *value, T default_value, T upper_bound)
 {
     return Option<T>(name, description, value, default_value, false, 0.0, true, upper_bound);
 };
 template <typename T>
-Option<T> Option<T>::UnBounded(const string &name, const string &description, T *value, T default_value)
+Option<T> Option<T>::un_bounded(const string &name, const string &description, T *value, T default_value)
 {
     return Option<T>(name, description, value, default_value, false, 0.0, false, 0.0);
 };
 template <typename T>
-Option<T> Option<T>::BoxBounded(const string &name, const string &description, T *value, T default_value, T lower_bound, T upper_bound)
+Option<T> Option<T>::box_bounded(const string &name, const string &description, T *value, T default_value, T lower_bound, T upper_bound)
 {
     return Option<T>(name, description, value, default_value, true, lower_bound, true, upper_bound);
 };
 template <typename T>
-void Option<T>::SetDefault() const
+void Option<T>::set_default() const
 {
     *value = default_value_;
 };
@@ -55,8 +55,8 @@ void Option<T>::set(const T &new_value)
 };
 FatropOptions::FatropOptions()
 {
-    register_option(IntegerOption::BoxBounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
-    register_option(NumericOption::LowerBounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
+    register_option(IntegerOption::box_bounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
+    register_option(NumericOption::lower_bounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
 template <typename T>
 void FatropOptions::set(const string &option_name, T value)
@@ -129,17 +129,17 @@ void FatropOptions::set(const string &option_name, T value)
 void FatropOptions::register_option(const NumericOption &option)
 {
     numeric_options[option.name_] = option;
-    option.SetDefault();
+    option.set_default();
 }
 void FatropOptions::register_option(const IntegerOption &option)
 {
     integer_options[option.name_] = option;
-    option.SetDefault();
+    option.set_default();
 }
 void FatropOptions::register_option(const BooleanOption &option)
 {
     boolean_options[option.name_] = option;
-    option.SetDefault();
+    option.set_default();
 }
 auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
 {

@@ -9,7 +9,7 @@ namespace fatrop
     class DuInfEvaluator
     {
     public:
-        int DuInfEval(
+        int evaluate(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &lam,

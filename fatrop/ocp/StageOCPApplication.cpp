@@ -8,15 +8,15 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
     AlgBuilder algbuilder;
-    algbuilder.BuildFatropAlgObjects(nlp, fatropoptions_, fatropdata_, journaller_);
-    fatropalg_ = algbuilder.BuildAlgorithm();
+    algbuilder.build_fatrop_algorithm_objects(nlp, fatropoptions_, fatropdata_, journaller_);
+    fatropalg_ = algbuilder.build_algorithm();
     dirty = false;
 }
 
 int NLPApplication::optimize()
 {
     assert(!dirty);
-    int ret = fatropalg_->Optimize();
+    int ret = fatropalg_->optimize();
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
@@ -32,11 +32,11 @@ FatropVecBF &NLPApplication::initial_guess_primal() const
 }
 FatropStats NLPApplication::get_stats() const
 {
-    return fatropalg_->GetStats();
+    return fatropalg_->get_stats();
 }
 NLPDims NLPApplication::get_nlp_dims()
 {
-    return nlp_->GetNLPDims();
+    return nlp_->get_nlp_dims();
 }
 const FatropVecBF &NLPApplication::last_solution_dual() const
 {
@@ -93,7 +93,7 @@ void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
     adapter = make_shared<OCPAdapter>(ocp_);
-    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_).Build(adapter));
+    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_).build(adapter));
     NLPApplication::build(nlp);
     dirty = false;
 }
@@ -101,21 +101,21 @@ void OCPApplication::build()
 vector<double> &OCPApplication::global_parameters()
 {
     assert(!dirty);
-    return adapter->GetGlobalParamsVec();
+    return adapter->get_global_parameters_vec();
 }
 vector<double> &OCPApplication::stage_parameters()
 {
     assert(!dirty);
-    return adapter->GetStageParamsVec();
+    return adapter->get_stage_parameters_vec();
 }
 void OCPApplication::set_initial(vector<double> &initial_u, vector<double> &initial_x)
 {
     assert(!dirty);
-    adapter->SetInitial(fatropdata_, initial_u, initial_x);
+    adapter->set_initial_sol_guess(fatropdata_, initial_u, initial_x);
 }
 OCPDims OCPApplication::get_ocp_dims()
 {
-    return adapter->GetOCPDims();
+    return adapter->get_ocp_dims();
 }
 
 FatropSolution::FatropSolution(){};
@@ -142,7 +142,7 @@ void FatropSolution::set_primal_solution(const FatropVecBF &sol)
 // }
 StageOCPSolution::StageOCPSolution(const shared_ptr<OCP> &app)
 {
-    set_dims(app->GetOCPDims());
+    set_dims(app->get_ocp_dims());
 }
 StageOCPSolution::StageOCPSolution(){};
 void StageOCPSolution::set_dims(const OCPDims &dims)
@@ -179,7 +179,7 @@ StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPA
 StageOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
 void StageOCPApplication::AppParameterSetter::set_value(const double value[])
 {
-    ParameterSetter::set_value(adapter_->GetGlobalParamsVec(), adapter_->GetStageParamsVec(), value);
+    ParameterSetter::set_value(adapter_->get_global_parameters_vec(), adapter_->get_stage_parameters_vec(), value);
 };
 
 StageExpressionEvaluatorFactory StageOCPApplication::get_expression(const string &sampler_name)

@@ -17,12 +17,12 @@ namespace fatrop
     {
     public:
         Filter(const int size);
-        void Augment(const FilterData &filterdata);
+        void augment(const FilterData &filterdata);
         /** \brief check if fdin0 is dominated by fdin1 */
-        inline bool IsDominated(const FilterData &fdin0, const FilterData &fdin1) const;
-        bool IsAcceptable(const FilterData &fdin) const;
-        void Reset();
-        int GetSize() const
+        inline bool a_dominmates_b(const FilterData &fdin0, const FilterData &fdin1) const;
+        bool is_acceptable(const FilterData &fdin) const;
+        void reset();
+        int size() const
         {
             return filterdata_.size();
         }

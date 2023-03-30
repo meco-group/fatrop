@@ -15,7 +15,7 @@ namespace fatrop
     public:
         OCPLSRiccati(const OCPDims &dims, const std::shared_ptr<FatropOptions>& options);
         // solve a KKT system
-        int computeSD(
+        int solve_pd_sys(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -25,7 +25,7 @@ namespace fatrop
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total) override;
         // solve a KKT system
-        int computeSDDeg(
+        int solve_pd_sys_degenerate(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -36,7 +36,7 @@ namespace fatrop
             const FatropVecBF &gradb_total);
         // solve a KKT system
         int
-        computeSDnor(
+        solve_pd_sys_normal(
             OCPKKTMemory *OCP,
             const double inertia_correction,
             const FatropVecBF &ux,
@@ -44,7 +44,7 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total);
-        int GetRHS(
+        int get_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &gradb_total,
             const FatropVecBF &rhs_rq,
@@ -52,7 +52,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb) override;
-        int ComputeMVProd(
+        int compute_pd_sys_times_vec(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -65,7 +65,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb);
-        int SolveRHS(
+        int solve_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &ux,
             const FatropVecBF &lam,

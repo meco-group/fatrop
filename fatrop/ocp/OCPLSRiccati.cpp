@@ -68,7 +68,7 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> 
 {
     options_->register_option(BooleanOption("iterative_refinement", "iterative ref", &it_ref, true));
 };
-int OCPLSRiccati::computeSD(
+int OCPLSRiccati::solve_pd_sys(
     OCPKKTMemory *OCP,
     const double inertia_correction_w,
     const double inertia_correction_c,
@@ -82,14 +82,14 @@ int OCPLSRiccati::computeSD(
     lastused_.inertia_correction_w = inertia_correction_w;
     if (inertia_correction_c == 0.0)
     {
-        return computeSDnor(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
+        return solve_pd_sys_normal(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
     }
     else
     {
-        return computeSDDeg(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, gradb_total);
+        return solve_pd_sys_degenerate(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, gradb_total);
     }
 }
-int OCPLSRiccati::computeSDDeg(
+int OCPLSRiccati::solve_pd_sys_degenerate(
     OCPKKTMemory *OCP,
     const double inertia_correction_w,
     const double inertia_correction_c,
@@ -354,7 +354,7 @@ int OCPLSRiccati::computeSDDeg(
     // // cout << "el time " << el << endl;
     return 0;
 }
-int OCPLSRiccati::computeSDnor(
+int OCPLSRiccati::solve_pd_sys_normal(
     OCPKKTMemory *OCP,
     const double inertia_correction,
     const FatropVecBF &ux,
@@ -757,7 +757,7 @@ int OCPLSRiccati::computeSDnor(
         // copy(lam, lam_test[0]);
         // copy(delta_s, delta_s_test[0]);
         // blasfeo_tic(&timer);
-        GetRHS(
+        get_rhs(
             OCP,
             gradb_total,
             rhs_rq2[0],
@@ -773,7 +773,7 @@ int OCPLSRiccati::computeSDnor(
         for (int i = 0; i < 5; i++)
         {
             // blasfeo_tic(&timer);
-            ComputeMVProd(
+            compute_pd_sys_times_vec(
                 OCP,
                 inertia_correction,
                 0.0,
@@ -813,7 +813,7 @@ int OCPLSRiccati::computeSDnor(
                 }
             }
             // blasfeo_tic(&timer);
-            SolveRHS(
+            solve_rhs(
                 OCP,
                 ux_test[0],
                 lam_test[0],
@@ -839,7 +839,7 @@ int OCPLSRiccati::computeSDnor(
     }
     return 0;
 }
-int OCPLSRiccati::GetRHS(
+int OCPLSRiccati::get_rhs(
     OCPKKTMemory *OCP,
     const FatropVecBF &gradb_total,
     const FatropVecBF &rhs_rq,
@@ -922,7 +922,7 @@ int OCPLSRiccati::GetRHS(
     }
     return 0;
 }
-int OCPLSRiccati::ComputeMVProd(
+int OCPLSRiccati::compute_pd_sys_times_vec(
     OCPKKTMemory *OCP,
     const double inertia_correction_w,
     const double inertia_correction_c,
@@ -1067,7 +1067,7 @@ int OCPLSRiccati::ComputeMVProd(
     }
     return 0;
 };
-int OCPLSRiccati::SolveRHS(
+int OCPLSRiccati::solve_rhs(
     OCPKKTMemory *OCP,
     const FatropVecBF &ux,
     const FatropVecBF &lam,

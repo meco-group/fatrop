@@ -28,29 +28,29 @@ namespace fatrop
             const std::shared_ptr<Filter> &filter,
             const std::shared_ptr<LineSearch> &linesearch,
             const std::shared_ptr<Journaller> &journaller);
-        void Initialize() ;
-        void Reset() ;
-        void SetBounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
-        void SetInitial(const std::vector<double> &initial) ;
-        void GetSolution(std::vector<double> &sol) ;
-        int Optimize() ;
-        int EvalHess();
-        int EvalJac();
-        inline int EvalCVCurr();
-        inline int EvalCVNext();
-        inline int EvalGradCurr();
-        double EvalObjCurr();
-        double EvalObjNext();
-        int EvalDuInf();
-        inline int Initialization();
-        int ComputeSD(double inertia_correction_w, double inertia_correction_c, double mu);
+        void initialize() ;
+        void reset() ;
+        void set_bounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
+        void set_initial(const std::vector<double> &initial) ;
+        void get_solution(std::vector<double> &sol) ;
+        int optimize() ;
+        int eval_lag_hess();
+        int eval_constr_viol();
+        inline int eval_constr_viol_curr();
+        inline int eval_constr_viol_trial();
+        inline int eval_obj_grad_curr();
+        double eval_objective_curr();
+        double eval_objective_trial();
+        int eval_dual_infeasiblity();
+        inline int perform_initializiation();
+        int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropOptions> fatropoptions_;
         std::shared_ptr<Filter> filter_;
         std::shared_ptr<LineSearch> linesearch_;
         std::shared_ptr<Journaller> journaller_;
-        FatropStats GetStats() 
+        FatropStats get_stats() 
         {
             return stats;
         };

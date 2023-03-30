@@ -46,66 +46,66 @@ namespace fatrop
             }
             x_dummy = std::vector<double>(max(nxexpr), 0.0);
         }
-        int evalHess(
+        int eval_lag_hess(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) override;
-        int evalJac(
+        int eval_constr_jac(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override;
-        int EvalConstraintViolation(
+        int eval_contr_viol(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override;
-        int EvalGrad(
+        int eval_obj_grad(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) override;
-        int EvalObj(
+        int eval_obj(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             double &res);
-        int EvalDynamics(
+        int integrate_dynamics(
             OCPKKTMemory *OCP,
             const int k,
             const FatropVecBF &uk,
             const FatropVecBF &xk,
             FatropVecBF &xkp1);
-        OCPDims GetOCPDims() const override
+        OCPDims get_ocp_dims() const override
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr, nstageparamsexpr, ocptempl->get_n_global_params());
         }
 
     public:
-        void SetParams(const std::vector<double> &stage_params_in, const std::vector<double> &global_params_in) override;
-        void SetInitial(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &initial_u, std::vector<double> &initial_x) override;
-        void GetSolution(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &u, std::vector<double> &x) override;
-        double *GetGlobalParams()
+        void set_parameters(const std::vector<double> &stage_params_in, const std::vector<double> &global_params_in) override;
+        void set_initial_sol_guess(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &initial_u, std::vector<double> &initial_x) override;
+        void get_solution(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &u, std::vector<double> &x) override;
+        double *get_global_parameters()
         {
             if (globalparams.size() == 0)
                 return nullptr;
             return globalparams.data();
         }
-        double *GetStageParams()
+        double *get_stage_parameters()
         {
             if (stageparams.size() == 0)
                 return nullptr;
             return stageparams.data();
         }
-        std::vector<double> & GetGlobalParamsVec()
+        std::vector<double> & get_global_parameters_vec()
         {
             return globalparams;
         }
-        std::vector<double> & GetStageParamsVec()
+        std::vector<double> & get_stage_parameters_vec()
         {
             return stageparams;
         }
-        int GetBounds(
+        int get_bounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const override
         {
@@ -119,7 +119,7 @@ namespace fatrop
             }
             return 0;
         };
-        int GetInitialGuess(
+        int get_initial_sol_guess(
             FatropVecBF &initial) const override
         {
             int offs = 0;

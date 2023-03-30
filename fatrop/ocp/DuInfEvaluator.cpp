@@ -1,6 +1,6 @@
 #include "ocp/DuInfEvaluator.hpp"
 using namespace fatrop;
-int DuInfEvaluator::DuInfEval(
+int DuInfEvaluator::evaluate(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &lam,
