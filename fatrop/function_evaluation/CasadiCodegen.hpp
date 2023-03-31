@@ -45,12 +45,23 @@ namespace fatrop
         EvalCasGen();
         /// constructor from file
         EvalCasGen(const std::shared_ptr<DLHandler> &handle, const std::string &function_name);
-        /// pointer to result_buffer
-        #ifndef ENABLE_MULTITHREADING
-            double *output_buffer_p;
-        #else  
-            std::vector<double*> output_buffer_p = std::vector<double*>(omp_get_max_threads());
-        #endif
+        EvalCasGen(
+            const signal_t incref,
+            const signal_t decref,
+            const casadi_checkout_t checkout,
+            const casadi_release_t release,
+            const getint_t n_in_fcn,
+            const getint_t n_out_fcn,
+            const sparsity_t sp_in,
+            const sparsity_t sp_out,
+            const work_t work,
+            const eval_t eval);
+/// pointer to result_buffer
+#ifndef ENABLE_MULTITHREADING
+        double *output_buffer_p;
+#else
+        std::vector<double *> output_buffer_p = std::vector<double *>(omp_get_max_threads());
+#endif
         /// pointer to casadi codegen evalutation function
         eval_t eval; // !! multhithreading of this function not yet supported
         /// casadi int work vector
@@ -77,6 +88,8 @@ namespace fatrop
         std::shared_ptr<DLHandler> handle;
         ~EvalCasGen();
     };
+    // define a macro that instantiates an EvalCasGen object with a given name
+
 } // fatrop
 
 #endif // CASADICODEGENINCLUDED
