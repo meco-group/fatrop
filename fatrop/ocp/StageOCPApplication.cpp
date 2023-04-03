@@ -210,6 +210,24 @@ void StageOCPSolution::evaluate(const StageExpressionEvaluatorBase &evaluator, v
     evaluator.evaluate(sol_primal_, global_params, stage_params, result);
 }
 StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
+void StageOCPApplication::set_initial_u(const std::vector<double> &initial_guess_u) const
+{
+    for (int k = 0; k < K_ - 1; k++)
+    {
+        int offs = (nu_ + nx_) * k;
+        for (int i = 0; i < nu_; i++)
+            initial_guess_primal().at(offs + i) = initial_guess_u[nu_ * k + i];
+    }
+}
+void StageOCPApplication::set_initial_x(const std::vector<double> &initial_guess_x) const
+{
+    for (int k = 0; k < K_; k++)
+    {
+        int offs = (k == K_ - 1) ? (nu_ + nx_) * k : (nu_ + nx_) * k + nu_;
+        for (int i = 0; i < nx_; i++)
+            initial_guess_primal().at(offs + i) = initial_guess_x[nx_ * k + i];
+    }
+}
 
 StageOCPApplication::AppParameterSetter::AppParameterSetter(const shared_ptr<OCPAdapter> &adapter, const shared_ptr<ParameterSetter> &ps) : ParameterSetter(*ps), adapter_(adapter){};
 void StageOCPApplication::AppParameterSetter::set_value(const double value[])
