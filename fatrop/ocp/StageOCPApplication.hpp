@@ -128,6 +128,8 @@ namespace fatrop
     {
     public:
         StageOCPSolution(const std::shared_ptr<OCP> &app);
+        void get_u(std::vector<double> &result) const;
+        void get_x(std::vector<double> &result) const;
 
     protected:
         StageOCPSolution();
@@ -169,6 +171,7 @@ namespace fatrop
         public:
             void set_value(const double value[]);
             void set_value(const std::initializer_list<double> il_);
+
         private:
             const std::shared_ptr<OCPAdapter> adapter_;
         };

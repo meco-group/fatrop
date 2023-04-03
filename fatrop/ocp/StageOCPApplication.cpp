@@ -85,10 +85,9 @@ void NLPApplication::set_option(const string &option_name, T value)
 {
     fatropoptions_->set(option_name, value);
 }
-template void NLPApplication::set_option<int>(const string&, int);
-template void NLPApplication::set_option<double>(const string&, double);
-template void NLPApplication::set_option<bool>(const string&, bool);
-
+template void NLPApplication::set_option<int>(const string &, int);
+template void NLPApplication::set_option<double>(const string &, double);
+template void NLPApplication::set_option<bool>(const string &, bool);
 
 void NLPApplication::set_initial(const FatropSolution &initial_guess)
 {
@@ -218,7 +217,7 @@ void StageOCPApplication::build()
 int StageOCPApplication::optimize()
 {
     int ret = NLPApplication::optimize();
-    last_solution_.set_parameters(global_parameters(), stage_parameters()); 
+    last_solution_.set_parameters(global_parameters(), stage_parameters());
     if (ret == 0)
     {
         last_solution_.set_solution(last_solution_primal(), last_solution_dual(), last_solution_zL(), last_solution_zU());
