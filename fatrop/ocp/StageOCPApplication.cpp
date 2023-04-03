@@ -179,6 +179,24 @@ void StageOCPSolution::set_parameters(const vector<double> &global_params, const
     this->stage_params = stage_params;
 }
 
+void StageOCPSolution::get_u(std::vector<double> &result) const
+{
+    for (int k = 0; k < K - 1; k++)
+    {
+        int offs = (nu + nx) * k;
+        for (int i = 0; i < nu; i++)
+            result[nu * k + i] = sol_primal_[offs + i];
+    }
+}
+void StageOCPSolution::get_x(std::vector<double> &result) const
+{
+    for (int k = 0; k < K; k++)
+    {
+        int offs = (k == K - 1) ? (nu + nx) * k : (nu + nx) * k + nu;
+        for (int i = 0; i < nx; i++)
+            result[nx * k + i] = sol_primal_[offs + i];
+    }
+}
 void StageOCPSolution::sample(const StageControlGridSampler &sampler, vector<double> &result) const
 {
     sampler.evaluate(sol_primal_, global_params, stage_params, result);

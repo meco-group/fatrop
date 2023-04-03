@@ -162,6 +162,15 @@ namespace fatrop
     public:
         StageOCPApplication(const std::shared_ptr<StageOCP> &ocp);
 
+        void set_initial_u(const std::vector<double> &initial_guess_u)
+        {
+        }
+        void set_initial_x(const std::vector<double> &initial_guess_x)
+        {
+
+        }
+
+
     public:
         class AppParameterSetter : public ParameterSetter
         {
