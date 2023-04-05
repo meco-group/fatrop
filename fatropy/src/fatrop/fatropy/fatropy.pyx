@@ -199,9 +199,10 @@ cdef class OCP:
             res = np.asarray(buffer).reshape((n_rows, n_cols, K), order = 'F')
             return np.moveaxis(res, [0,1,2], [1, 2, 0])
 
-    def set_value(self, name, double[::1] value):
+    def set_value(self, name, value):
+        cdef double[::1] v2 =np.asarray(value, dtype = np.float64)
         # retrieve parameter setter
-        self.myFatropApplication.get_parameter_setter(name.encode('utf-8')).set_value(&value[0])
+        self.myFatropApplication.get_parameter_setter(name.encode('utf-8')).set_value(&v2[0])
         return None
     def get_stats(self):
         res = PyFatropStats()
