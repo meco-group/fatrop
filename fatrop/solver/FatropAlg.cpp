@@ -26,13 +26,15 @@ FatropAlg::FatropAlg(
     const shared_ptr<FatropOptions> &fatropparams,
     const shared_ptr<Filter> &filter,
     const shared_ptr<LineSearch> &linesearch,
-    const shared_ptr<Journaller> &journaller)
+    const shared_ptr<Journaller> &journaller,
+    const shared_ptr<FatropPrinter> &printer)
     : fatropnlp_(fatropnlp),
       fatropdata_(fatropdata),
       fatropoptions_(fatropparams),
       filter_(filter),
       linesearch_(linesearch),
-      journaller_(journaller)
+      journaller_(journaller),
+      printer_(printer)
 {
 
     fatropoptions_->register_option(NumericOption::lower_bounded("tol", "tolerance", &tol, 1e-8, 0.0));
@@ -121,12 +123,12 @@ int FatropAlg::optimize()
         int initialization_res = perform_initializiation();
         if (initialization_res == 0 && fatropdata_->delta_dual_max() < lammax)
         {
-            cout << PRIORITY1 << "accepted lam " << endl;
+            printer_->level(1) << "accepted lam " << endl;
             fatropdata_->accept_dual_initializiaton();
         }
         else
         {
-            cout << PRIORITY1 << "rejected lam " << endl;
+            printer_->level(1) << "rejected lam " << endl;
             fatropdata_->lam_curr.SetConstant(0.0);
         }
     }
@@ -147,7 +149,7 @@ int FatropAlg::optimize()
         //     cout << "huge Lagrange multipliers -> set to zero" << endl;
         //     fatropdata_->lam_curr.SetConstant(0.0);
         // }
-        eval_constr_viol();      // needed for dual inf
+        eval_constr_viol();   // needed for dual inf
         eval_obj_grad_curr(); // needed for dual inf
         eval_dual_infeasiblity();
         IterationData &it_curr = journaller_->it_curr;
@@ -163,7 +165,7 @@ int FatropAlg::optimize()
             bool reset_filter = (filter_reseted <= 5);
             if (reset_filter)
             {
-                cout << PRIORITY1 << "resetted filter " << endl;
+                printer_->level(1) << "resetted filter " << endl;
                 filter_reseted++;
                 filter_->reset();
                 no_no_full_steps_bc_filter = 0;
@@ -202,20 +204,23 @@ int FatropAlg::optimize()
             journaller_->print_iterations();
             if (no_conse_small_sd == 2)
             {
-                cout << "WARNING fatrop returned bc of very small search direction" << endl;
+                printer_->level(1) << "WARNING fatrop returned bc of very small search direction" << endl;
             }
             if (emu > tol && no_acceptable_steps >= acceptable_iter)
             {
-                cout << "WARNING fatrop returned acceptable tolerance" << endl;
+                printer_->level(1) << "WARNING fatrop returned acceptable tolerance" << endl;
             }
-            cout << "found solution :) " << endl;
+            printer_->level(1) << "found solution :) " << endl;
             stats.eval_cv_count += linesearch_->eval_cv_count;
             stats.eval_obj_count += linesearch_->eval_obj_count;
             stats.eval_cv_time += linesearch_->eval_cv_time;
             stats.eval_obj_time += linesearch_->eval_obj_time;
             stats.time_total = total_time;
             stats.iterations_count = i;
-            stats.print();
+            if (printer_->print_level() > 0)
+            {
+                stats.print();
+            }
             fatropnlp_->finalize();
             return 0;
         }
@@ -254,7 +259,7 @@ int FatropAlg::optimize()
                 regularity = solve_pd_sys(deltaw, deltac, mu);
                 if (deltac == 0 && regularity < 0)
                 {
-                    cout << PRIORITY1 << "degenerate Jacobian" << endl;
+                    printer_->level(1) << "degenerate Jacobian" << endl;
                     deltac = deltac_candidate;
                 }
                 if (regularity > 0) // regularization is necessary
@@ -294,7 +299,7 @@ int FatropAlg::optimize()
             if (ls == 1)
             {
                 // accept watchdog step -- continue
-                cout << PRIORITY1 << "accepted watchdog step" << endl;
+                printer_->level(1) << "accepted watchdog step" << endl;
                 watch_dog_step = false;
             }
             else
@@ -303,7 +308,7 @@ int FatropAlg::optimize()
                 if (no_watch_dog_steps_taken >= max_watchdog_steps)
                 {
                     // reject watchdog step -- go back to x_k
-                    cout << PRIORITY1 << "rejected watchdog step" << endl;
+                    printer_->level(1) << "rejected watchdog step" << endl;
                     it_curr.type = 'x';
                     fatropdata_->restore_backup();
                     // delta_w_last = delta_w_last_backup;
@@ -319,7 +324,7 @@ int FatropAlg::optimize()
 
         if (ls == 0)
         {
-            cout << "error: restoration phase not implemented yet" << endl;
+            printer_->level(1) << "error: restoration phase not implemented yet" << endl;
             return 1;
         }
         if (watch_dog_step || ls == 1)

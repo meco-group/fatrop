@@ -18,12 +18,14 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #include "solver/IterationData.hpp"
 using namespace fatrop;
-Journaller::Journaller(const int maxiter)
+Journaller::Journaller(const int maxiter, const std::shared_ptr<FatropPrinter> &printer) : printer_(printer)
 {
     iterationdata.reserve(maxiter + 1);
 }
 void Journaller::print_iterations()
 {
+    if (printer_->print_level() < 1)
+        return;
     if (print_count == 0)
     {
         printf(" it  obj            cv        du        lg(mu) reg  alpha_du  alpha_pr  ls\n");

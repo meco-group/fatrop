@@ -19,14 +19,22 @@
 #include "ocp/StageOCPApplication.hpp"
 using namespace fatrop;
 using namespace std;
-NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), journaller_(make_shared<Journaller>(fatropoptions_->maxiter + 1)){};
+NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), dirty(true)
+{
+    if (printer_ == nullptr)
+    {
+        printer_ = std::make_shared<FatropPrinter>();
+    }
+}
 
 void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
 {
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
     AlgBuilder algbuilder;
+    algbuilder.set_printer(printer_);
     algbuilder.build_fatrop_algorithm_objects(nlp, fatropoptions_, fatropdata_, journaller_);
+    fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "print level", &printer_->print_level(), 10));
     fatropalg_ = algbuilder.build_algorithm();
     dirty = false;
 }
@@ -110,7 +118,7 @@ void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
     adapter = make_shared<OCPAdapter>(ocp_);
-    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_).build(adapter));
+    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(adapter));
     NLPApplication::build(nlp);
     dirty = false;
 }

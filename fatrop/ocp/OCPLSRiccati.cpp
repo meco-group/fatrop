@@ -31,58 +31,59 @@ namespace fatrop
     }
 } // namespace fatrop
 using namespace fatrop;
-OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> &options) : Ppt(dims.nx + 1, dims.nx, dims.K),
-                                                                                            Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
-                                                                                            AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1),
-                                                                                            RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
-                                                                                            Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
-                                                                                            Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
-                                                                                            GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1),
-                                                                                            RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
-                                                                                            Llt(dims.nu + dims.nx + 1, dims.nu, dims.K),
-                                                                                            Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1),
-                                                                                            GgIt_tilde(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            GgLIt(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            HhIt(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            PpIt_hat(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            LlIt(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            Ggt_ineq_temp(vector<int>(1, max(dims.nu + dims.nx) + 1), vector<int>(1, max(dims.ng_ineq)), 1),
-                                                                                            rhs_rq(sum(dims.nu) + sum(dims.nx), 1),
-                                                                                            rhs_b(sum(dims.nx) - dims.nx.get(0), 1),
-                                                                                            rhs_g(sum(dims.ng), 1),
-                                                                                            rhs_g_ineq(sum(dims.ng_ineq), 1),
-                                                                                            rhs_gradb(sum(dims.ng_ineq), 1),
-                                                                                            rhs_rq2(sum(dims.nu) + sum(dims.nx), 1),
-                                                                                            rhs_b2(sum(dims.nx) - dims.nx.get(0), 1),
-                                                                                            rhs_g2(sum(dims.ng), 1),
-                                                                                            rhs_g_ineq2(sum(dims.ng_ineq), 1),
-                                                                                            rhs_gradb2(sum(dims.ng_ineq), 1),
-                                                                                            ux_test(sum(dims.nu) + sum(dims.nx), 1),
-                                                                                            lam_test(sum(dims.ng) + sum(dims.ng_ineq) + sum(dims.nx) - dims.nx.get(0), 1),
-                                                                                            delta_s_test(sum(dims.ng_ineq), 1),
-                                                                                            v_Ppt(dims.nx, dims.K),
-                                                                                            v_Hh(dims.nx, dims.K),
-                                                                                            v_AL(vector<int>(1, max(dims.nx)), 1),
-                                                                                            v_RSQrqt_tilde(dims.nu + dims.nx, dims.K),
-                                                                                            v_Ggt_stripe(vector<int>(1, max(dims.nx + dims.nu)), 1),
-                                                                                            v_Ggt_tilde(dims.nu + dims.nx, dims.K),
-                                                                                            v_GgLt(vector<int>(1, max(dims.nu + dims.nx)), 1),
-                                                                                            v_RSQrqt_hat(vector<int>(1, max(dims.nx + dims.nu)), 1),
-                                                                                            v_Llt(dims.nu + dims.nx, dims.K),
-                                                                                            v_Llt_shift(vector<int>(1, max(dims.nu)), 1),
-                                                                                            v_GgIt_tilde(vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            v_GgLIt(vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            v_HhIt(vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            v_PpIt_hat(vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            v_LlIt(vector<int>(1, dims.nx.get(0)), 1),
-                                                                                            v_Ggt_ineq_temp(vector<int>(1, max(dims.ng_ineq)), 1),
-                                                                                            Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
-                                                                                            Pr(max(dims.nu), dims.K),
-                                                                                            PlI(dims.nx.get(0), 1),
-                                                                                            PrI(dims.nx.get(0), 1),
-                                                                                            gamma(vector<int>(dims.K, 0)),
-                                                                                            rho(vector<int>(dims.K, 0)),
-                                                                                            options_(options)
+OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> &options, const shared_ptr<FatropPrinter> &printer) : Ppt(dims.nx + 1, dims.nx, dims.K),
+                                                                                                                                      Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
+                                                                                                                                      AL(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx)), 1),
+                                                                                                                                      RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
+                                                                                                                                      Ggt_stripe(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
+                                                                                                                                      GgLt(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu + dims.nx)), 1),
+                                                                                                                                      RSQrqt_hat(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      Llt(dims.nu + dims.nx + 1, dims.nu, dims.K),
+                                                                                                                                      Llt_shift(vector<int>(1, max(dims.nu + dims.nx + 1)), vector<int>(1, max(dims.nu)), 1),
+                                                                                                                                      GgIt_tilde(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      GgLIt(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      HhIt(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      PpIt_hat(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      LlIt(vector<int>(1, dims.nx.get(0) + 1), vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      Ggt_ineq_temp(vector<int>(1, max(dims.nu + dims.nx) + 1), vector<int>(1, max(dims.ng_ineq)), 1),
+                                                                                                                                      rhs_rq(sum(dims.nu) + sum(dims.nx), 1),
+                                                                                                                                      rhs_b(sum(dims.nx) - dims.nx.get(0), 1),
+                                                                                                                                      rhs_g(sum(dims.ng), 1),
+                                                                                                                                      rhs_g_ineq(sum(dims.ng_ineq), 1),
+                                                                                                                                      rhs_gradb(sum(dims.ng_ineq), 1),
+                                                                                                                                      rhs_rq2(sum(dims.nu) + sum(dims.nx), 1),
+                                                                                                                                      rhs_b2(sum(dims.nx) - dims.nx.get(0), 1),
+                                                                                                                                      rhs_g2(sum(dims.ng), 1),
+                                                                                                                                      rhs_g_ineq2(sum(dims.ng_ineq), 1),
+                                                                                                                                      rhs_gradb2(sum(dims.ng_ineq), 1),
+                                                                                                                                      ux_test(sum(dims.nu) + sum(dims.nx), 1),
+                                                                                                                                      lam_test(sum(dims.ng) + sum(dims.ng_ineq) + sum(dims.nx) - dims.nx.get(0), 1),
+                                                                                                                                      delta_s_test(sum(dims.ng_ineq), 1),
+                                                                                                                                      v_Ppt(dims.nx, dims.K),
+                                                                                                                                      v_Hh(dims.nx, dims.K),
+                                                                                                                                      v_AL(vector<int>(1, max(dims.nx)), 1),
+                                                                                                                                      v_RSQrqt_tilde(dims.nu + dims.nx, dims.K),
+                                                                                                                                      v_Ggt_stripe(vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      v_Ggt_tilde(dims.nu + dims.nx, dims.K),
+                                                                                                                                      v_GgLt(vector<int>(1, max(dims.nu + dims.nx)), 1),
+                                                                                                                                      v_RSQrqt_hat(vector<int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      v_Llt(dims.nu + dims.nx, dims.K),
+                                                                                                                                      v_Llt_shift(vector<int>(1, max(dims.nu)), 1),
+                                                                                                                                      v_GgIt_tilde(vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      v_GgLIt(vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      v_HhIt(vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      v_PpIt_hat(vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      v_LlIt(vector<int>(1, dims.nx.get(0)), 1),
+                                                                                                                                      v_Ggt_ineq_temp(vector<int>(1, max(dims.ng_ineq)), 1),
+                                                                                                                                      Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
+                                                                                                                                      Pr(max(dims.nu), dims.K),
+                                                                                                                                      PlI(dims.nx.get(0), 1),
+                                                                                                                                      PrI(dims.nx.get(0), 1),
+                                                                                                                                      gamma(vector<int>(dims.K, 0)),
+                                                                                                                                      rho(vector<int>(dims.K, 0)),
+                                                                                                                                      options_(options),
+                                                                                                                                      printer_(printer)
 {
     options_->register_option(BooleanOption("iterative_refinement", "iterative ref", &it_ref, true));
 };
@@ -853,7 +854,7 @@ int OCPLSRiccati::solve_pd_sys_normal(
             // prepare next iteration
             error_prev = err_curr;
         }
-        cout << PRIORITY1 << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
+        printer_->level(1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     }
     return 0;
 }

@@ -90,6 +90,7 @@ namespace fatrop
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropNLP> nlp_;
         bool dirty = true;
+        std::shared_ptr<FatropPrinter> printer_;
 
     private:
         const std::shared_ptr<OCPAbstract> ocp_;

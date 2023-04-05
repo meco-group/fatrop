@@ -30,9 +30,9 @@
 namespace fatrop
 {
 #define CACHEMACRO(instance, val) instance.evaluated ? instance.value : instance.SetValue(val)
-    struct FatropData  
+    struct FatropData
     {
-        FatropData(const NLPDims &nlpdims, const std::shared_ptr<FatropOptions> &params) ;
+        FatropData(const NLPDims &nlpdims, const std::shared_ptr<FatropOptions> &params, const std::shared_ptr<FatropPrinter> &printer);
         void initialize();
         int reset();
         int reset_caches();
@@ -43,7 +43,7 @@ namespace fatrop
         double eval_barrier_func_curr(double mu);
         double eval_barrier_func_trial(double mu);
         double eval_barrier_func_backup(double mu);
-        double eval_barrier_fo_decr(double mu, VEC* s_p, VEC* delta_s_p);
+        double eval_barrier_fo_decr(double mu, VEC *s_p, VEC *delta_s_p);
         double eval_barrier_fo_decr_curr(double mu);
         double eval_barrier_fo_decr_backup(double mu);
         int bound_slacks();
@@ -71,7 +71,7 @@ namespace fatrop
         double fo_decr_obj_curr();
         double fo_decr_obj_backup();
         void maximum_step_size(double &alpha_max_pr, double &alpha_max_du, double tau);
-        void set_bounds(const std::vector<double>& lowerin, const std::vector<double>& upperin);
+        void set_bounds(const std::vector<double> &lowerin, const std::vector<double> &upperin);
         void relax_bounds();
         void relax_bounds_var(double mu);
         void evaluate_barrier_quantities(double mu);
@@ -166,6 +166,7 @@ namespace fatrop
         double obj_backup = 0.0;
         double theta_min = 1e-4;
         const std::shared_ptr<FatropOptions> params;
+        const std::shared_ptr<FatropPrinter> printer_;
         // algorithm parameters
         double smax;
         double kappa1;

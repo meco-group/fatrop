@@ -44,6 +44,7 @@ int main(int argc, char **argv)
         app.set_option("accept_every_trial_step", false);
         app.set_option("iterative_refinement", false); // fast_step_computation
         app.set_option("warm_start_init_point", true);
+        app.set_option("print_level", 0);
         // cout << app -> GetOptions();
         app.optimize();
     }

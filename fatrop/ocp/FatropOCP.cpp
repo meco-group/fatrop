@@ -22,8 +22,8 @@ using namespace std;
 FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,
-    const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> & options) : ocp_(ocp), dims_(ocp_->get_ocp_dims()),
-                                                  nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.get(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
+    const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> & options, const shared_ptr<FatropPrinter> &printer) : ocp_(ocp), dims_(ocp_->get_ocp_dims()),
+                                                  nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.get(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), printer_(printer), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
                                                   sigma(s_memvec[0]),
                                                   gradb(s_memvec[1]),
                                                   s_dummy(s_memvec[2]),
@@ -203,7 +203,7 @@ int FatropOCP::solve_soc_rhs(
             // prepare next iteration
             error_prev = err_curr;
         }
-        cout << PRIORITY1 << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
+        printer_->level(1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     };
     return 0;
 }

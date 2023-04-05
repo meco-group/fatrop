@@ -40,7 +40,7 @@ namespace fatrop
         FatropOCP(
             const std::shared_ptr<OCP> &ocp,
             const std::shared_ptr<OCPLinearSolver> &ls,
-            const std::shared_ptr<OCPScalingMethod> &scaler, const std::shared_ptr<FatropOptions> &options);
+            const std::shared_ptr<OCPScalingMethod> &scaler, const std::shared_ptr<FatropOptions> &options, const std::shared_ptr<FatropPrinter> &printer);
         int eval_lag_hess(
             double obj_scale,
             const FatropVecBF &primal_vars,
@@ -118,6 +118,7 @@ namespace fatrop
         std::shared_ptr<OCPLinearSolver> ls_;
         std::shared_ptr<OCPScalingMethod> scaler_;
         std::shared_ptr<FatropOptions> options_;
+        std::shared_ptr<FatropPrinter> printer_;
         DuInfEvaluator duinfevaluator_;
         OCPKKTMemory ocpkktmemory_;
         OCPInitializer OCPInitializer_;

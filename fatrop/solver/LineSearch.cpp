@@ -22,9 +22,9 @@ using namespace std;
 LineSearch::LineSearch(
     const shared_ptr<FatropOptions> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,
-    const shared_ptr<FatropData> &fatropdata) : AlgStrategy(fatropparams),
-                                                fatropnlp_(nlp),
-                                                fatropdata_(fatropdata){};
+    const shared_ptr<FatropData> &fatropdata, const std::shared_ptr<FatropPrinter> &printer) : AlgStrategy(fatropparams),
+                                                                                               fatropnlp_(nlp),
+                                                                                               fatropdata_(fatropdata), printer_(printer){};
 inline int LineSearch::eval_constr_viol_trial()
 {
     blasfeo_timer timer;
@@ -84,7 +84,7 @@ int LineSearch::compute_second_order_correction(double alpha) const
     int res = fatropnlp_->solve_soc_rhs(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
     if (res != 0)
     {
-        cout << PRIORITY1 << "SolveSOC failed" << endl;
+        printer_->level(1) << "SolveSOC failed" << endl;
     }
     return res;
 };
@@ -94,8 +94,9 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     const shared_ptr<FatropNLP> &nlp,
     const shared_ptr<FatropData> &fatropdata,
     const shared_ptr<Filter> &filter,
-    const shared_ptr<Journaller> &journaller)
-    : LineSearch(fatropparams, nlp, fatropdata), filter_(filter), journaller_(journaller)
+    const shared_ptr<Journaller> &journaller,
+    const shared_ptr<FatropPrinter> &printer)
+    : LineSearch(fatropparams, nlp, fatropdata, printer), filter_(filter), journaller_(journaller)
 {
     initialize();
     fatrop_params_->register_option(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step, false));

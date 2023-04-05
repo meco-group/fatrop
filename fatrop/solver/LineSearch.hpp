@@ -40,7 +40,7 @@ namespace fatrop
         LineSearch(
             const std::shared_ptr<FatropOptions> &fatropparams,
             const std::shared_ptr<FatropNLP> &nlp,
-            const std::shared_ptr<FatropData> &fatropdata);
+            const std::shared_ptr<FatropData> &fatropdata, const std::shared_ptr<FatropPrinter> &printer);
         virtual LineSearchInfo find_acceptable_trial_point(double mu, bool small_sd, bool from_backup) = 0;
         inline int eval_constr_viol_trial();
         double eval_obj_trial();
@@ -51,6 +51,7 @@ namespace fatrop
         virtual int compute_second_order_correction(double alpha) const;
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
+        std::shared_ptr<FatropPrinter> printer_;
         int eval_cv_count;
         int eval_obj_count;
         int eval_cv_time;
@@ -65,7 +66,7 @@ namespace fatrop
             const std::shared_ptr<FatropNLP> &nlp,
             const std::shared_ptr<FatropData> &fatropdata,
             const std::shared_ptr<Filter> &filter,
-            const std::shared_ptr<Journaller> &journaller);
+            const std::shared_ptr<Journaller> &journaller, const std::shared_ptr<FatropPrinter> &printer);
         void initialize();
         LineSearchInfo find_acceptable_trial_point(double mu, bool small_sd, bool from_backup);
         std::shared_ptr<Filter> filter_;

@@ -31,17 +31,17 @@ namespace fatrop
     class OCPLSRiccati : public OCPLinearSolver
     {
     public:
-        OCPLSRiccati(const OCPDims &dims, const std::shared_ptr<FatropOptions>& options);
-        // solve a KKT system
-        int solve_pd_sys(
-            OCPKKTMemory *OCP,
-            const double inertia_correction_w,
-            const double inertia_correction_c,
-            const FatropVecBF &ux,
-            const FatropVecBF &lam,
-            const FatropVecBF &delta_s,
-            const FatropVecBF &sigma_total,
-            const FatropVecBF &gradb_total) override;
+        OCPLSRiccati(const OCPDims &dims, const std::shared_ptr<FatropOptions> &options, const std::shared_ptr<FatropPrinter> &printer);
+            // solve a KKT system
+            int solve_pd_sys(
+                OCPKKTMemory *OCP,
+                const double inertia_correction_w,
+                const double inertia_correction_c,
+                const FatropVecBF &ux,
+                const FatropVecBF &lam,
+                const FatropVecBF &delta_s,
+                const FatropVecBF &sigma_total,
+                const FatropVecBF &gradb_total) override;
         // solve a KKT system
         int solve_pd_sys_degenerate(
             OCPKKTMemory *OCP,
@@ -155,6 +155,7 @@ namespace fatrop
             double mu = 0;
         } lastused_;
         std::shared_ptr<FatropOptions> options_;
+        std::shared_ptr<FatropPrinter> printer_;
         bool it_ref = true;
     };
 };     // namespace

@@ -45,7 +45,8 @@ namespace fatrop
             const std::shared_ptr<FatropOptions> &fatropparams,
             const std::shared_ptr<Filter> &filter,
             const std::shared_ptr<LineSearch> &linesearch,
-            const std::shared_ptr<Journaller> &journaller);
+            const std::shared_ptr<Journaller> &journaller, 
+            const std::shared_ptr<FatropPrinter> &printer);
         void initialize() ;
         void reset() ;
         void set_bounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
@@ -68,6 +69,7 @@ namespace fatrop
         std::shared_ptr<Filter> filter_;
         std::shared_ptr<LineSearch> linesearch_;
         std::shared_ptr<Journaller> journaller_;
+        std::shared_ptr<FatropPrinter> printer_;
         FatropStats get_stats() 
         {
             return stats;
