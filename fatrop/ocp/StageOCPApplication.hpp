@@ -200,9 +200,9 @@ namespace fatrop
     protected:
         std::map<std::string, std::shared_ptr<StageExpression>> stage_expressions;
         std::map<std::string, std::shared_ptr<ParameterSetter>> param_setters;
-        friend class StageOCPApplicationBuilder;
+        friend class StageOCPApplicationFactory;
     };
-    class StageOCPApplicationBuilder
+    class StageOCPApplicationFactory
     {
     public:
         static StageOCPApplication from_rockit_interface(const std::string &functions, const std::string &json_spec_file);

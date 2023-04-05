@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     if (argc == 3)
     {
         //// dynamic memory allocation  
-        StageOCPApplication app = StageOCPApplicationBuilder::from_rockit_interface(argv[1], argv[2]);
+        StageOCPApplication app = StageOCPApplicationFactory::from_rockit_interface(argv[1], argv[2]);
         auto eval_expression = app.get_expression("control_u").at_t0();
         vector<double> u0_result(eval_expression.size());
         ///  no dynamic memory allocation

@@ -265,7 +265,7 @@ const StageOCPSolution &StageOCPApplication::last_stageocp_solution() const
     return last_solution_;
 }
 
-StageOCPApplication StageOCPApplicationBuilder::from_rockit_interface(const string &functions, const string &json_spec_file)
+StageOCPApplication StageOCPApplicationFactory::from_rockit_interface(const string &functions, const string &json_spec_file)
 {
     shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
     std::ifstream t(json_spec_file);
