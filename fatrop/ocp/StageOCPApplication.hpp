@@ -188,6 +188,8 @@ namespace fatrop
         int optimize();
         const StageOCPSolution &last_stageocp_solution() const;
         const FatropSolution &last_solution() const { return last_stageocp_solution(); };
+        const std::vector<std::string> parameter_names() const;
+        const std::vector<std::string> stage_expression_names() const;
 
     public:
         const int nx_;
@@ -203,6 +205,25 @@ namespace fatrop
         std::map<std::string, std::shared_ptr<ParameterSetter>> param_setters;
         friend class StageOCPApplicationFactory;
     };
+    const std::vector<std::string> StageOCPApplication::parameter_names() const
+    {
+        std::vector<std::string> ret;
+        for (auto &p : param_setters)
+        {
+            ret.push_back(p.first);
+        }
+        return ret;
+    }
+    const std::vector<std::string> StageOCPApplication::stage_expression_names() const
+    {
+        std::vector<std::string> ret;
+        for (auto &p : stage_expressions)
+        {
+            ret.push_back(p.first);
+        }
+        return ret;
+    }
+
     class StageOCPApplicationFactory
     {
     public:
