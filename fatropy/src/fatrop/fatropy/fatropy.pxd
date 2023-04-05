@@ -88,7 +88,7 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
         void set_params(const vector[double] &global_params, const vector[double] &stage_params)
 
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
-    cdef cppclass StageOCPApplicationBuilder:
+    cdef cppclass StageOCPApplicationFactory:
         @staticmethod
         StageOCPApplication from_rockit_interface(const string &functions, const string &json_spec_file) # except +
 

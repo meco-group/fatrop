@@ -9,7 +9,7 @@ from fatropy cimport StageExpressionEvaluatorBase
 from fatropy cimport StageControlGridSampler
 from fatropy cimport FatropVecBF
 from fatropy cimport StageOCPApplication
-from fatropy cimport StageOCPApplicationBuilder
+from fatropy cimport StageOCPApplicationFactory
 from fatropy cimport FatropStats
 from fatropy cimport assign_shared_ptr
 from libcpp.memory cimport shared_ptr 
@@ -144,7 +144,7 @@ cdef class OCP:
     cdef int nu_
     cdef int K_
     def __cinit__(self, functions, specfile):
-        self.myFatropApplication =  new StageOCPApplication(StageOCPApplicationBuilder.from_rockit_interface(functions.encode('utf-8'),specfile.encode('utf-8')))
+        self.myFatropApplication =  new StageOCPApplication(StageOCPApplicationFactory.from_rockit_interface(functions.encode('utf-8'),specfile.encode('utf-8')))
         # self.myFatropApplication.get().Build()
         self.nx_ = self.myFatropApplication.nx_
         self.nu_ = self.myFatropApplication.nu_
