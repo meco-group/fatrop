@@ -106,6 +106,6 @@ fatrop/executables/RunFatrop.cpp
 Developer Lander Vanroye (lander.vanroye@kuleuven.be)
 
 Thanks to all contributors:
-- Wilm Decré (python bindings)
+- Wilm Decré (python bindings, cmake configuration)
 - Ajay Sathya (rockit interface)
 
