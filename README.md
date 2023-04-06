@@ -106,6 +106,6 @@ fatrop/executables/RunFatrop.cpp
 Developer Lander Vanroye (lander.vanroye@kuleuven.be)
 
 Thanks to all contributors:
-- Wilm Decré for the cmake configuration, pip executable, pilot user instructions, fatropy python interface, ...
-- Ajay Sathya for the rockit interface
+- Wilm Decré (python bindings)
+- Ajay Sathya (rockit interface)
 
