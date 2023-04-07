@@ -19,11 +19,11 @@ along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.]]
 set(FATROP_INTERNAL
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp    blasfeo_wrapper/LinearAlgebraBlasfeo.cpp
 function_evaluation/CasadiCodegen.hpp       function_evaluation/CasadiCodegen.cpp
-aux/Aux.hpp                                 aux/Aux.cpp
-aux/Common.hpp                              aux/Common.cpp
-aux/DynamicLib.hpp                          aux/DynamicLib.cpp
-aux/FatropVector.hpp                        aux/FatropVector.cpp
-aux/LinearAlgebra.hpp                       aux/LinearAlgebra.cpp
+auxiliary/VectorUtils.hpp                   auxiliary/VectorUtils.cpp
+auxiliary/Common.hpp                        auxiliary/Common.cpp
+auxiliary/DynamicLib.hpp                    auxiliary/DynamicLib.cpp
+auxiliary/FatropVector.hpp                  auxiliary/FatropVector.cpp
+auxiliary/LinearAlgebra.hpp                 auxiliary/LinearAlgebra.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
 ocp/StageOCPApplication.hpp                 ocp/StageOCPApplication.cpp
@@ -45,7 +45,7 @@ solver/AlgBuilder.hpp
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp
 solver/FatropAlg.hpp                        solver/FatropAlg.cpp
 solver/FatropData.hpp                       solver/FatropData.cpp
-solver/FatropOptions.hpp                     solver/FatropOptions.cpp
+solver/FatropOptions.hpp                    solver/FatropOptions.cpp
 solver/FatropPrinter.hpp                    solver/FatropPrinter.cpp
 solver/Filter.hpp                           solver/Filter.cpp
 solver/IterationData.hpp                    solver/IterationData.cpp
@@ -57,11 +57,11 @@ json/json.h json/json.cpp
 set(FATROPHEADERS
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp
 function_evaluation/CasadiCodegen.hpp
-aux/Aux.hpp
-aux/Common.hpp
-aux/DynamicLib.hpp
-aux/FatropVector.hpp
-aux/LinearAlgebra.hpp
+auxiliary/VectorUtils.hpp
+auxiliary/Common.hpp
+auxiliary/DynamicLib.hpp
+auxiliary/FatropVector.hpp
+auxiliary/LinearAlgebra.hpp
 function_evaluation/FunctionEvaluation.hpp
 ocp/StageOCPApplication.hpp
 ocp/OCPAbstract.hpp
