@@ -16,28 +16,38 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "aux/LinearAlgebra.hpp"
+#ifndef FATROPAUXILIARYINCLUDED
+#define FATROPAUXILIARYINCLUDED
+#include <vector>
+#include "FatropVector.hpp"
 namespace fatrop
 {
-    void FatropMat::print()
+    /** \brief function to cumulative sum integer vector, first element is zero */
+    template <typename T, typename E>
+    FatropVector<T> offsets(const VecExpr<E, T> &a)
     {
-        int n_rows = nrows();
-        int n_cols = ncols();
-        for (int ai = 0; ai < n_rows; ai++)
+        const int size_a = a.size();
+        FatropVector<T> res(size_a);
+        res.at(0) = 0;
+        for (int i = 1; i < size_a; i++)
         {
-            for (int aj = 0; aj < n_cols; aj++)
-            {
-                printf("%9.5f ", get_el(ai, aj));
-            }
-            printf("\n");
+            res.at(i) = a.get(i - 1) + res.get(i - 1);
         }
+        return res;
     }
-    void FatropVec::print()
+
+    /** \brief returns index of max el of VecExpr */
+    template <typename T, typename E>
+    int max(const VecExpr<E, T> &a)
     {
-        int n_el = nels();
-        for (int ai = 0; ai < n_el; ai++)
+        const int size_a = a.size();
+        int res = 0;
+        for (int i = 0; i < size_a; i++)
         {
-            printf("%9.5f\n", get_el(ai));
+            int ai = a.get(i);
+            res = ai > res ? ai : res;
         }
+        return res;
     }
-}
+};     // namespace fatrop
+#endif // FATROPAUXINCLUDED

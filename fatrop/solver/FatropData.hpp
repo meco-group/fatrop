@@ -22,7 +22,7 @@
 #define FATROPDATAINCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "templates/NLPAlg.hpp"
-#include "aux/Common.hpp"
+#include "auxiliary/Common.hpp"
 #include "FatropOptions.hpp"
 #include "solver/FatropPrinter.hpp"
 #include <cmath>

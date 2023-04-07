@@ -28,7 +28,7 @@ fatrop_extension = setuptools.Extension(
     libraries=["fatrop"],
     library_dirs=["../build/fatrop"],
     # runtime_library_dirs=["INSTALLATION FOLDER"],
-    include_dirs=["../fatrop/ocp","../fatrop/aux","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "/opt/blasfeo/include", "../external/blasfeo/include","src/fatrop/fatropy"],
+    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "/opt/blasfeo/include", "../external/blasfeo/include","src/fatrop/fatropy"],
     language="c++",
     define_macros=[("LEVEL1_DCACHE_LINE_SIZE","64")]
 )

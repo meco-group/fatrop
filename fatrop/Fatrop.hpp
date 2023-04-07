@@ -22,7 +22,7 @@
 #include "ocp/OCPKKT.hpp"
 #include "ocp/OCPAdapter.hpp"
 #include "ocp/OCPAbstact.hpp"
-#include "aux/FatropVector.hpp"
+#include "auxiliary/FatropVector.hpp"
 #include "solver/FatropAlg.hpp"
 #include "solver/FatropData.hpp"
 #include "ocp/OCPScalingMethod.hpp"

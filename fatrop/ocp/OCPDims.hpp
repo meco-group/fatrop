@@ -18,7 +18,7 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef FATROP_OCPDIMS_INCLUDED
 #define FATROP_OCPDIMS_INCLUDED
-#include "aux/FatropVector.hpp"
+#include "auxiliary/FatropVector.hpp"
 #include "templates/NLPAlg.hpp"
 #include <vector>
 namespace fatrop

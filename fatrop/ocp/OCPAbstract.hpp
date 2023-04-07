@@ -20,7 +20,7 @@
 #define OCPTEMPLATEINCLUDED
 #include "ocp/OCPKKT.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "aux/FatropVector.hpp"
+#include "auxiliary/FatropVector.hpp"
 #include "OCPDims.hpp"
 namespace fatrop
 {

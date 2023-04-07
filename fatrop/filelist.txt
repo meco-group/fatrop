@@ -1,9 +1,9 @@
-aux/Aux
-aux/Common
-aux/DynamicLib
-aux/FatropVector
-aux/LinearAlgebra
-aux/SmartPtr
+auxiliary/VectorUtils
+auxiliary/Common
+auxiliary/DynamicLib
+auxiliary/FatropVector
+auxiliary/LinearAlgebra
+auxiliary/SmartPtr
 debug/FatropDebugTools
 debug/LinearAlgebraEigen
 debug/RandomOCP

@@ -16,22 +16,4 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "aux/DynamicLib.hpp"
-using namespace std;
-namespace fatrop
-{
-    DLHandler::DLHandler(const string &filename)
-    {
-        handle = dlopen(&filename[0], RTLD_LAZY);
-        if (handle == 0)
-        {
-            printf("Cannot open f.so, error %s\n", dlerror());
-        }
-    }
-
-    DLHandler::~DLHandler()
-    {
-        dlclose(handle);
-    }
-    void *handle;
-}
+#include "auxiliary/Common.hpp"

@@ -22,7 +22,7 @@
 #include <string>
 #include <memory>
 #include "FunctionEvaluation.hpp"
-#include "aux/DynamicLib.hpp"
+#include "auxiliary/DynamicLib.hpp"
 
 #ifdef ENABLE_MULTITHREADING
 #include <omp.h>

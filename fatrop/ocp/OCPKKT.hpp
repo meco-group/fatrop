@@ -20,8 +20,8 @@
 #define FATROP_OCP_KKT_INCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
-#include "aux/Aux.hpp"
-#include "aux/FatropVector.hpp"
+#include "auxiliary/VectorUtils.hpp"
+#include "auxiliary/FatropVector.hpp"
 namespace fatrop
 {
     /** \brief this class contains all information to represent the KKT system of an equality constrained OCP */

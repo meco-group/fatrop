@@ -23,7 +23,7 @@
 #include "OCPAbstract.hpp"
 #include <string>
 #include <iostream>
-#include <aux/DynamicLib.hpp>
+#include <auxiliary/DynamicLib.hpp>
 #include "function_evaluation/CasadiCodegen.hpp"
 #include "json/json.h"
 #include <fstream>
