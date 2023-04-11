@@ -72,6 +72,7 @@ namespace fatrop
             evaluate(solution, global_params, stage_params, res);
             return res;
         };
+        virtual ~StageExpressionEvaluatorBase() = default;
 
     protected:
         // virtual int Evaluate()
