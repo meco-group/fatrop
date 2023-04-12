@@ -58,8 +58,11 @@ build and install in your python environment
 
 ## install rockit with fatropy interface 
 
-    git clone --recurse-submodules https://gitlab.kuleuven.be/meco-software/rockit.git 
+    git clone https://gitlab.kuleuven.be/meco-software/rockit.git 
     cd rockit
+    git submodule init
+    git submodule update --recursive rockit/external/fatrop 
+    cd rockit/external/fatrop && git checkout fatropy && cd ../../..
     pip install -e .
 
 ## examples 
