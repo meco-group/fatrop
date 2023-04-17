@@ -26,7 +26,6 @@ project(FATROP VERSION "${VERSION}" LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # minimum cmake version to find numpy header
@@ -36,9 +35,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-execute_process(COMMAND "getconf" "LEVEL1_DCACHE_LINESIZE" OUTPUT_VARIABLE L1_CACHE_LINE_SIZE OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(CACHE_LINE_SIZE "${L1_CACHE_LINE_SIZE}" CACHE STRING "cache line size used for cache aligning")
-math(EXPR L1_CACHE_LINE_SIZE "${CACHE_LINE_SIZE}")
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0 ${PROFILINGFLAG} -DDEBUG -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} ${VERBOSEFLAG} -DPANEL_SIZE=${PANEL_SIZE} -Wall -Wextra")
@@ -62,7 +58,6 @@ set(BLASFEO_SRC_DIR ${PROJECT_SOURCE_DIR}/external/blasfeo)
 message(STATUS "Target: BLASFEO is ${BLASFEO_TARGET}")
 add_subdirectory(external)
 add_subdirectory(fatrop)
-
 
 if(BUILD_DOCS MATCHES ON)
   add_subdirectory(docs)
