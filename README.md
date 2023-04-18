@@ -2,16 +2,16 @@
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
 
 The main features of the solver are:
-- high numerical robustness by implementation of advanced numerical optimization techniques, inspired by IPOPT
-- fast by exploiting the optimal control problem structure through a specialized linear solver, based on the Riccati recursion
-- effecitve handling of path equality and inequality constraints, without relying on penalty methods
+- high numerical robustness thanks to advanced numerical optimization techniques, inspired by [Ipopt](https://coin-or.github.io/Ipopt/)
+- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://arxiv.org/abs/2302.14836)
+- effective handling of path equality and inequality constraints, without relying on penalty methods
 - ability to incorporate exact Lagrangian Hessian information
 - ability to be initialized from any, possibly infeasible, solution estimate
 - interfaced to rockit, which is a high-level optimal control problem specification framework, built on top of CasADi
 
 # Installation instructions
 ## build and install fatrop
-At this moment fatrop is only tested on linux machines.
+At this moment fatrop is only tested on Linux machines.
 clone the fatrop repository 
 
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git
@@ -36,7 +36,7 @@ if you want to install fatrop on your system:
 for non-X64 targets change the blasfeo_target parameter according to the table of https://github.com/giaf/blasfeo
 ## build and install fatropy
 fatropy is the name of the python bindings for fatrop 
-install python-dev tools (relace X.X with your python version)
+install python-dev tools (replace X.X with your python version)
 
     sudo apt-get install pythonX.X-dev
 
