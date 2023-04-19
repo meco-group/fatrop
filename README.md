@@ -7,11 +7,11 @@ The main features of the solver are:
 - effective handling of path equality and inequality constraints, without relying on penalty methods
 - ability to incorporate exact Lagrangian Hessian information
 - ability to be initialized from any, possibly infeasible, solution estimate
-- interfaced to rockit, which is a high-level optimal control problem specification framework, built on top of CasADi
+- interfaced to [rockit](https://gitlab.kuleuven.be/meco-software/rockit), which is a high-level optimal control problem specification framework, built on top of [CasADi](https://web.casadi.org/)
 
 # Installation instructions
 ## build and install fatrop
-At this moment fatrop is only tested on Linux machines.
+At this moment fatrop is only tested on (Ubuntu) Linux machines.
 clone the fatrop repository 
 
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git
