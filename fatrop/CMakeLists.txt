@@ -98,7 +98,7 @@ add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
 
 target_include_directories(fatrop
-    PRIVATE
+    PUBLIC
         ${PROJECT_SOURCE_DIR}/fatrop
 )
 
