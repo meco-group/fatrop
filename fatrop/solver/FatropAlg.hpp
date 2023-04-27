@@ -55,9 +55,9 @@ namespace fatrop
         int optimize() ;
         int eval_lag_hess();
         int eval_constr_jac();
-        inline int eval_constr_viol_curr();
-        inline int eval_constr_viol_trial();
-        inline int eval_obj_grad_curr();
+        int eval_constr_viol_curr();
+        int eval_constr_viol_trial();
+        int eval_obj_grad_curr();
         double eval_objective_curr();
         double eval_objective_trial();
         int eval_dual_infeasiblity();
