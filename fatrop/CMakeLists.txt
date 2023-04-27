@@ -97,16 +97,16 @@ templates/NLPAlg.hpp)
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 target_link_libraries(fatrop m dl blasfeo) 
 
-target_include_directories(fatrop
-    PUBLIC
-        ${PROJECT_SOURCE_DIR}/fatrop
-)
-
 add_executable(RunFatrop executables/RunFatrop.cpp)
 target_link_libraries(RunFatrop fatrop) 
 target_include_directories(RunFatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
+)
+
+target_include_directories(fatrop PUBLIC  
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fatrop>  
+    $<INSTALL_INTERFACE:fatrop>  # <prefix>/include/mylib
 )
 
 list(APPEND INCLUDEDIRSFATROP
