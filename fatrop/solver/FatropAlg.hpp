@@ -54,7 +54,7 @@ namespace fatrop
         void get_solution(std::vector<double> &sol) ;
         int optimize() ;
         int eval_lag_hess();
-        int eval_constr_viol();
+        int eval_constr_jac();
         inline int eval_constr_viol_curr();
         inline int eval_constr_viol_trial();
         inline int eval_obj_grad_curr();

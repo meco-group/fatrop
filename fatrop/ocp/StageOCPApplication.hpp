@@ -104,7 +104,7 @@ namespace fatrop
     public:
         OCPApplication(const std::shared_ptr<OCPAbstract> &ocp);
 
-    protected:
+    public:
         void build();
 
     public:

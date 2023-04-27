@@ -109,7 +109,7 @@ int FatropAlg::optimize()
     double mu = mu0;
     double delta_w_last = 0.0;
     LineSearchInfo lsinfo;
-    eval_constr_viol(); // todo twice evaluation
+    eval_constr_jac(); // todo twice evaluation
     eval_obj_grad_curr();
     if (warm_start_init_point)
     {
@@ -149,7 +149,7 @@ int FatropAlg::optimize()
         //     cout << "huge Lagrange multipliers -> set to zero" << endl;
         //     fatropdata_->lam_curr.SetConstant(0.0);
         // }
-        eval_constr_viol();   // needed for dual inf
+        eval_constr_jac();   // needed for dual inf
         eval_obj_grad_curr(); // needed for dual inf
         eval_dual_infeasiblity();
         IterationData &it_curr = journaller_->it_curr;
@@ -377,7 +377,7 @@ int FatropAlg::eval_lag_hess()
     stats.eval_hess_count++;
     return res;
 }
-int FatropAlg::eval_constr_viol()
+int FatropAlg::eval_constr_jac()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
