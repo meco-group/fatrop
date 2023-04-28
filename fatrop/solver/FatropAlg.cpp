@@ -388,7 +388,7 @@ int FatropAlg::eval_constr_jac()
     stats.eval_jac_count++;
     return res;
 }
-inline int FatropAlg::eval_constr_viol_curr()
+int FatropAlg::eval_constr_viol_curr()
 {
 
     blasfeo_timer timer;
@@ -401,7 +401,7 @@ inline int FatropAlg::eval_constr_viol_curr()
     stats.eval_cv_count++;
     return res;
 }
-inline int FatropAlg::eval_obj_grad_curr()
+int FatropAlg::eval_obj_grad_curr()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
@@ -439,7 +439,7 @@ int FatropAlg::eval_dual_infeasiblity()
     stats.duinf_time += blasfeo_toc(&timer);
     return 0;
 }
-inline int FatropAlg::perform_initializiation()
+int FatropAlg::perform_initializiation()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
