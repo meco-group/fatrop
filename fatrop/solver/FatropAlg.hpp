@@ -61,7 +61,7 @@ namespace fatrop
         double eval_objective_curr();
         double eval_objective_trial();
         int eval_dual_infeasiblity();
-        inline int perform_initializiation();
+        int perform_initializiation();
         int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
