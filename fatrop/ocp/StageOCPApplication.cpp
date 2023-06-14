@@ -337,6 +337,26 @@ void StageOCPApplication::AppParameterSetter::set_value(const initializer_list<d
     assert((int)il_.size() == _no_var);
     set_value(il_.begin());
 }
+
+const std::vector<std::string> StageOCPApplication::parameter_names() const
+{
+    std::vector<std::string> ret;
+    for (auto &p : param_setters)
+    {
+        ret.push_back(p.first);
+    }
+    return ret;
+}
+const std::vector<std::string> StageOCPApplication::stage_expression_names() const
+{
+    std::vector<std::string> ret;
+    for (auto &p : stage_expressions)
+    {
+        ret.push_back(p.first);
+    }
+    return ret;
+}
+
 StageExpressionEvaluatorFactory StageOCPApplication::get_expression_evaluator(const shared_ptr<StageExpression> &expr)
 {
     return StageExpressionEvaluatorFactory(expr, nu_, nx_, n_stage_params_, K_);

@@ -106,7 +106,7 @@ target_include_directories(RunFatrop
 
 target_include_directories(fatrop PUBLIC  
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fatrop>  
-    $<INSTALL_INTERFACE:fatrop>  # <prefix>/include/mylib
+    $<INSTALL_INTERFACE:include/fatrop> # <prefix>/include/mylib
 )
 
 list(APPEND INCLUDEDIRSFATROP
