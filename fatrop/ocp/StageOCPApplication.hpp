@@ -205,24 +205,6 @@ namespace fatrop
         std::map<std::string, std::shared_ptr<ParameterSetter>> param_setters;
         friend class StageOCPApplicationFactory;
     };
-    const std::vector<std::string> StageOCPApplication::parameter_names() const
-    {
-        std::vector<std::string> ret;
-        for (auto &p : param_setters)
-        {
-            ret.push_back(p.first);
-        }
-        return ret;
-    }
-    const std::vector<std::string> StageOCPApplication::stage_expression_names() const
-    {
-        std::vector<std::string> ret;
-        for (auto &p : stage_expressions)
-        {
-            ret.push_back(p.first);
-        }
-        return ret;
-    }
 
     class StageOCPApplicationFactory
     {
