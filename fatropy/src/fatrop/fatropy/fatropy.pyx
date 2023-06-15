@@ -213,6 +213,8 @@ cdef class OCP:
 
     def set_initial(self, initial_u, initial_x):
         self.myFatropApplication.set_initial(initial_u, initial_x)
+    def set_initial_last_solution(self):
+        self.myFatropApplication.set_initial(self.myFatropApplication.last_stageocp_solution())
     
     # def SetOption(self, option_name, cython.int value):
     #     self.myFatropApplication.SetOption(option_name.encode('utf-8'), value)

@@ -43,7 +43,10 @@ cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
         int size() const
         # vector[double] Eval(const FatropVecBF& solution, const vector[double]& global_params, const vector[double]& stage_params)
 cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
-    cdef cppclass StageOCPSolution:
+    cdef cppclass FatropSolution:
+        pass
+cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
+    cdef cppclass StageOCPSolution(FatropSolution):
         vector[double] evaluate(const StageExpressionEvaluatorBase &evaluator) const
 
 cdef extern from "StageOCPExpressions.hpp" namespace "fatrop":
@@ -75,6 +78,7 @@ cdef extern from "StageOCPApplication.hpp" namespace "fatrop":
         vector[double] &stage_parameters()
         # vector[double] &InitialGuessPrimal()
         void set_initial(vector[double] &initial_u, vector[double]& initial_x)
+        void set_initial(const FatropSolution &initial_guess)
         # shared_ptr[OCPSolutionSampler] GetSampler(const string &sampler_name)
         AppParameterSetter get_parameter_setter(const string &sampler_name)
         vector[double] sample(const string &sampler_name) const
