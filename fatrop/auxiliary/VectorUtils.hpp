@@ -38,7 +38,7 @@ namespace fatrop
 
     /** \brief returns index of max el of VecExpr */
     template <typename T, typename E>
-    int max(const VecExpr<E, T> &a)
+    int maxel(const VecExpr<E, T> &a)
     {
         const int size_a = a.size();
         int res = 0;

@@ -651,7 +651,7 @@ void FatropData::relax_bounds_var(double mu)
             if (dist_lower < mu * emach)
             {
                 printer_->level(1) << "slacks too small " << endl;
-                VECEL(s_lower_p, i) -= 1e-12 * std::max(1.0, std::abs(loweri));
+                VECEL(s_lower_p, i) -= 1e-12 * max(1.0, std::abs(loweri));
             }
         }
         if (upper_bounded)
@@ -661,7 +661,7 @@ void FatropData::relax_bounds_var(double mu)
             if (dist_upper < mu * emach)
             {
                 printer_->level(1) << "slacks too small " << endl;
-                VECEL(s_upper_p, i) += 1e-12 * std::max(1.0, std::abs(upperi));
+                VECEL(s_upper_p, i) += 1e-12 * max(1.0, std::abs(upperi));
             }
         }
     }

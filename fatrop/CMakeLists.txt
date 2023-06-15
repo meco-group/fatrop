@@ -94,11 +94,20 @@ solver/Timer.hpp
 solver/FatropStats.hpp                            
 templates/FatropApplication.hpp
 templates/NLPAlg.hpp)
-add_library(fatrop SHARED ${FATROP_INTERNAL})
-target_link_libraries(fatrop m dl blasfeo) 
+# add_library(fatrop SHARED ${FATROP_INTERNAL})
+add_library(fatrop ${FATROP_INTERNAL})
+
+if (WIN32)
+  find_package(dlfcn-win32 REQUIRED)
+  target_link_libraries(fatrop dlfcn-win32::dl blasfeo)
+else()
+  target_link_libraries(fatrop m dl blasfeo) 
+endif (WIN32)
+
 
 add_executable(RunFatrop executables/RunFatrop.cpp)
 target_link_libraries(RunFatrop fatrop) 
+
 target_include_directories(RunFatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
