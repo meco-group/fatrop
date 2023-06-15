@@ -54,8 +54,8 @@ namespace fatrop
         std::shared_ptr<FatropPrinter> printer_;
         int eval_cv_count;
         int eval_obj_count;
-        int eval_cv_time;
-        int eval_obj_time;
+        double eval_cv_time;
+        double eval_obj_time;
     };
 
     class BackTrackingLineSearch : public LineSearch
