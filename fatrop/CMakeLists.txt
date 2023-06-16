@@ -95,11 +95,10 @@ solver/FatropStats.hpp
 templates/FatropApplication.hpp
 templates/NLPAlg.hpp)
 # add_library(fatrop SHARED ${FATROP_INTERNAL})
-add_library(fatrop ${FATROP_INTERNAL})
+add_library(fatrop SHARED ${FATROP_INTERNAL})
 
 if (WIN32)
-  find_package(dlfcn-win32 REQUIRED)
-  target_link_libraries(fatrop dlfcn-win32::dl blasfeo)
+  target_link_libraries(fatrop dl blasfeo)
 else()
   target_link_libraries(fatrop m dl blasfeo) 
 endif (WIN32)

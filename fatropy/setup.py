@@ -17,24 +17,46 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.#
 import setuptools
+import os
 from Cython.Build import cythonize
 
 with open("README.md", 'r') as f:
     long_description = f.read()
 
-fatrop_extension = setuptools.Extension(
+if os.name == 'nt':
+    fatrop_extension = setuptools.Extension(
     name="fatrop.fatropy",
     sources=["src/fatrop/fatropy/fatropy.pyx"],
     libraries=["fatrop"],
     library_dirs=["../build/fatrop/Release"],
-    runtime_library_dirs=[],
-    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "../external/blasfeo/include","src/fatrop/fatropy", "../../dlfcn-win32/src"],
+    data_files=[('', ['../build/fatrop/Release/fatrop.dll','../build/fatrop/Release/fatrop.lib'])],
+    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "../external/blasfeo/include","src/fatrop/fatropy", "../external/dlfcn-win32/src"],
     language="c++",
     define_macros=[("LEVEL1_DCACHE_LINE_SIZE","64")]
-)
-setuptools.setup(
-    package_dir={"": "src"},
-    long_description=long_description,
-    packages=setuptools.find_namespace_packages(where='src'),
-    ext_modules=cythonize([fatrop_extension],compiler_directives={'language_level' : "3"})
-)
+    )
+    
+    setuptools.setup(
+        package_dir={"": "src"},
+        long_description=long_description,
+        packages=setuptools.find_namespace_packages(where='src'),
+        ext_modules=cythonize([fatrop_extension],compiler_directives={'language_level' : "3"}),
+    )
+    
+else:
+    fatrop_extension = setuptools.Extension(
+    name="fatrop.fatropy",
+    sources=["src/fatrop/fatropy/fatropy.pyx"],
+    libraries=["fatrop"],
+    library_dirs=["../build/fatrop"],
+    # runtime_library_dirs=[],
+    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "../external/blasfeo/include","src/fatrop/fatropy", "../external/dlfcn-win32/src"],
+    language="c++",
+    define_macros=[("LEVEL1_DCACHE_LINE_SIZE","64")]
+    )
+
+    setuptools.setup(
+        package_dir={"": "src"},
+        long_description=long_description,
+        packages=setuptools.find_namespace_packages(where='src'),
+        ext_modules=cythonize([fatrop_extension],compiler_directives={'language_level' : "3"})
+    )

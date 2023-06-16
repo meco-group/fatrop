@@ -22,3 +22,7 @@ set(MF "PANELMAJ" CACHE STRING "Matrix format" FORCE)
 set(BLAS_API OFF CACHE BOOL "Compile BLAS API" FORCE)
 set(BLASFEO_EXAMPLES OFF CACHE BOOL "Build blasfeo examples")
 add_subdirectory(blasfeo)
+
+if(WIN32)
+    add_subdirectory(dlfcn-win32)
+endif(WIN32)
