@@ -47,7 +47,37 @@ namespace fatrop
     class StageOCP : public OCPAbstract
     {
     public:
-        StageOCP(const int nu,
+        StageOCP(const int nu, const int nx, const int ngI, const int ng, const int ngF, const int ng_ineqI, const int ng_ineq, const int ng_ineqF, const int n_stage_params, const int n_global_params, const int K)
+        :
+        nu_(nu),
+        nx_(nx),
+        ngI_(ngI),
+        ng_(ng),
+        ngF_(ngF),
+        ng_ineqI_(ng_ineqI),
+        ng_ineq_(ng_ineq),
+        ng_ineqF_(ng_ineqF),
+        n_stage_params_(n_stage_params),
+        n_global_params_(n_global_params),
+        K_(K)
+        {
+        }
+        const int nu_;
+        const int nx_;
+        const int ngI_;
+        const int ng_;
+        const int ngF_;
+        const int ng_ineqI_;
+        const int ng_ineq_;
+        const int ng_ineqF_;
+        const int n_stage_params_;
+        const int n_global_params_;
+        const int K_;
+    };
+    class StageOCPRockit : public StageOCP
+    {
+    public:
+        StageOCPRockit(const int nu,
                  const int nx,
                  const int ngI,
                  const int ng,
@@ -250,18 +280,6 @@ namespace fatrop
             return 0;
         };
 
-    public:
-        const int nu_;
-        const int nx_;
-        const int ngI_;
-        const int ng_;
-        const int ngF_;
-        const int ng_ineqI_;
-        const int ng_ineq_;
-        const int ng_ineqF_;
-        const int n_stage_params_;
-        const int n_global_params_;
-        const int K_;
 
     private:
         EvalCasGen BAbtf;
@@ -354,7 +372,7 @@ namespace fatrop
             EvalCasGen gineqf(handle, "gineq");
             EvalCasGen GgineqFtf(handle, "GgineqFt");
             EvalCasGen gineqFf(handle, "gineqF");
-            std::shared_ptr<StageOCP> stageocp = std::make_shared<StageOCP>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
+            std::shared_ptr<StageOCP> stageocp = std::make_shared<StageOCPRockit>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
                                                                   BAbtf,
                                                                   bkf,
                                                                   RSQrqtIf,
