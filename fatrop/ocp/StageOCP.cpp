@@ -91,17 +91,17 @@ StageOCPRockit::StageOCPRockit(
                                        global_params(global_params)
 {
 }
-int StageOCPRockit::get_nxk(const int k) const
+int StageOCP::get_nxk(const int k) const
 {
     return nx_;
 }
-int StageOCPRockit::get_nuk(const int k) const
+int StageOCP::get_nuk(const int k) const
 {
     if (k == K_ - 1)
         return 0;
     return nu_;
 }
-int StageOCPRockit::get_ngk(const int k) const
+int StageOCP::get_ngk(const int k) const
 {
     if (k == 0)
         return ngI_;
@@ -109,7 +109,7 @@ int StageOCPRockit::get_ngk(const int k) const
         return ngF_;
     return ng_;
 }
-int StageOCPRockit::get_ng_ineq_k(const int k) const
+int StageOCP::get_ng_ineq_k(const int k) const
 {
     if (k == 0)
     {
@@ -121,15 +121,15 @@ int StageOCPRockit::get_ng_ineq_k(const int k) const
     }
     return ng_ineq_;
 }
-int StageOCPRockit::get_n_global_params() const
+int StageOCP::get_n_global_params() const
 {
     return n_global_params_;
 };
-int StageOCPRockit::get_n_stage_params_k(const int k) const
+int StageOCP::get_n_stage_params_k(const int k) const
 {
     return n_stage_params_;
 };
-int StageOCPRockit::get_horizon_length() const
+int StageOCP::get_horizon_length() const
 {
     return K_;
 };

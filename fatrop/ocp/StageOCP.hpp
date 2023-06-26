@@ -62,6 +62,13 @@ namespace fatrop
         K_(K)
         {
         }
+        int get_nxk(const int k) const override;
+        int get_nuk(const int k) const override;
+        int get_ngk(const int k) const override;
+        int get_ng_ineq_k(const int k) const override;
+        int get_n_global_params() const;
+        int get_n_stage_params_k(const int k) const override;
+        int get_horizon_length() const override;
         const int nu_;
         const int nx_;
         const int ngI_;
@@ -117,12 +124,6 @@ namespace fatrop
                  const std::vector<double> &global_params,
                  const std::vector<double> &initial_u,
                  const std::vector<double> &initial_x);
-        int get_nxk(const int k) const override;
-        int get_nuk(const int k) const override;
-        int get_ngk(const int k) const override;
-        int get_ng_ineq_k(const int k) const override;
-        int get_n_global_params() const;
-        int get_n_stage_params_k(const int k) const override;
         int get_default_stage_paramsk(double *stage_params_res, const int k) const override
         {
             int offs = k * n_stage_params_;
@@ -142,7 +143,6 @@ namespace fatrop
             }
             return 0;
         }
-        int get_horizon_length() const;
         int eval_BAbtk(const double *states_kp1,
                        const double *inputs_k,
                        const double *states_k,
