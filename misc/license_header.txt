@@ -1,4 +1,3 @@
-#[[
 Fatrop - A fast trajectory optimization solver
 Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
 
@@ -15,10 +14,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.]]
-set(BLASFEO_HEADERS_INSTALLATION_DIRECTORY "include/blasfeo/include" CACHE STRING "")
-set(TARGET ${BLASFEO_TARGET} CACHE STRING "Set CPU architecture target" FORCE)
-set(MF "PANELMAJ" CACHE STRING "Matrix format" FORCE)
-set(BLAS_API OFF CACHE BOOL "Compile BLAS API" FORCE)
-set(BLASFEO_EXAMPLES OFF CACHE BOOL "Build blasfeo examples")
-add_subdirectory(blasfeo)
+along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.
