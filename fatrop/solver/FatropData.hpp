@@ -34,10 +34,10 @@ namespace fatrop
     {
         FatropData(const NLPDims &nlpdims, const std::shared_ptr<FatropOptions> &params, const std::shared_ptr<FatropPrinter> &printer);
         void initialize();
-        int reset();
-        int reset_caches();
+        fatrop_int reset();
+        fatrop_int reset_caches();
         double e_mu_curr(double mu);
-        int eval_dual_inf_slack_eqs();
+        fatrop_int eval_dual_inf_slack_eqs();
         double eval_compl_slack(double mu);
         double eval_barrier_func(double mu, VEC *s_p);
         double eval_barrier_func_curr(double mu);
@@ -46,16 +46,16 @@ namespace fatrop
         double eval_barrier_fo_decr(double mu, VEC *s_p, VEC *delta_s_p);
         double eval_barrier_fo_decr_curr(double mu);
         double eval_barrier_fo_decr_backup(double mu);
-        int bound_slacks();
-        int bound_z();
-        int warmstart_dual();
-        int modify_dual_bounds(double mu);
-        int accept_dual_initializiaton();
-        int update_trial_step(double alpha_primal, double alpha_dual);
-        int accept_trial_step();
-        int backup_curr();
-        int backup_delta();
-        int restore_backup();
+        fatrop_int bound_slacks();
+        fatrop_int bound_z();
+        fatrop_int warmstart_dual();
+        fatrop_int modify_dual_bounds(double mu);
+        fatrop_int accept_dual_initializiaton();
+        fatrop_int update_trial_step(double alpha_primal, double alpha_dual);
+        fatrop_int accept_trial_step();
+        fatrop_int backup_curr();
+        fatrop_int backup_delta();
+        fatrop_int restore_backup();
         double constr_viol_max_curr();
         double constr_viol_max_next();
         double constr_viol_sum_curr();
@@ -65,7 +65,7 @@ namespace fatrop
         double dual_max_curr();
         double dual_mean_curr();
         double z_sum_curr();
-        int number_of_bounds();
+        fatrop_int number_of_bounds();
         double delta_dual_max();
         double dual_inf_max_curr();
         double fo_decr_obj_curr();
@@ -80,9 +80,9 @@ namespace fatrop
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
-        int n_eqs;
-        int n_ineqs;
-        int n_ineqs_r = 0;
+        fatrop_int n_eqs;
+        fatrop_int n_ineqs;
+        fatrop_int n_ineqs_r = 0;
         FatropMemoryVecBF memvars;
         FatropMemoryVecBF memeqs;
         FatropMemoryVecBF memineqs;

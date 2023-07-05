@@ -25,11 +25,11 @@ LineSearch::LineSearch(
     const shared_ptr<FatropData> &fatropdata, const std::shared_ptr<FatropPrinter> &printer) : AlgStrategy(fatropparams),
                                                                                                fatropnlp_(nlp),
                                                                                                fatropdata_(fatropdata), printer_(printer){};
-inline int LineSearch::eval_constr_viol_trial()
+inline fatrop_int LineSearch::eval_constr_viol_trial()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->eval_constraint_viol(
+    fatrop_int res = fatropnlp_->eval_constraint_viol(
         fatropdata_->x_next,
         fatropdata_->s_next,
         fatropdata_->g_next);
@@ -57,11 +57,11 @@ void LineSearch::reset()
     eval_cv_time = 0.;
     eval_obj_time = 0.;
 }
-int LineSearch::update_trial_step(double alpha_pr, double alpha_du) const
+fatrop_int LineSearch::update_trial_step(double alpha_pr, double alpha_du) const
 {
     return fatropdata_->update_trial_step(alpha_pr, alpha_du);
 };
-int LineSearch::initialize_second_order_correction() const
+fatrop_int LineSearch::initialize_second_order_correction() const
 {
     // backup delta_x, delta_s and lam_calc
     fatropdata_->lam_calc_backup_ls.copy(fatropdata_->lam_calc);
@@ -70,7 +70,7 @@ int LineSearch::initialize_second_order_correction() const
     fatropdata_->g_soc.copy(fatropdata_->g_curr);
     return 0;
 };
-int LineSearch::exit_second_order_correction() const
+fatrop_int LineSearch::exit_second_order_correction() const
 {
     // restore delta_x, delta_s and lam_calc
     fatropdata_->lam_calc.copy(fatropdata_->lam_calc_backup_ls);
@@ -78,10 +78,10 @@ int LineSearch::exit_second_order_correction() const
     fatropdata_->delta_s.copy(fatropdata_->delta_s_backup_ls);
     return 0;
 };
-int LineSearch::compute_second_order_correction(double alpha) const
+fatrop_int LineSearch::compute_second_order_correction(double alpha) const
 {
     axpy(alpha, fatropdata_->g_soc, fatropdata_->g_next, fatropdata_->g_soc);
-    int res = fatropnlp_->solve_soc_rhs(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
+    fatrop_int res = fatropnlp_->solve_soc_rhs(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
     if (res != 0)
     {
         printer_->level(1) << "SolveSOC failed" << endl;
@@ -140,12 +140,12 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
     // cout << "cv " << cv_curr << endl;
     // cout << "obj " << obj_curr << endl;
     // cout << "lindecr " << lin_decr_curr << endl;
-    // const int max_soc = 2;
+    // const fatrop_int max_soc = 2;
     bool soc_step = false;
     double cv_soc_old = cv_curr;
-    int p = 0;
-    int no_alpha_trials = 1;
-    for (int ll = 1; ll < 500; ll++)
+    fatrop_int p = 0;
+    fatrop_int no_alpha_trials = 1;
+    for (fatrop_int ll = 1; ll < 500; ll++)
     {
         update_trial_step(alpha_primal, alpha_dual);
         if (alpha_primal < alpha_min)
@@ -257,7 +257,7 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
             {
                 cv_soc_old = cv_next;
             }
-            int res = compute_second_order_correction(alpha_primal);
+            fatrop_int res = compute_second_order_correction(alpha_primal);
             if (res == 0)
             {
                 // cout << "size of soc x step " << L1(fatropdata_->delta_x) << endl;

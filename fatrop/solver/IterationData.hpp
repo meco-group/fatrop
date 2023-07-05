@@ -22,17 +22,18 @@
 #include <vector>
 #include <iostream>
 #include <solver/FatropPrinter.hpp>
+#include "auxiliary/Common.hpp"
 #include <memory>
 namespace fatrop
 {
     struct IterationData
     {
-        int iter = 0;
+        fatrop_int iter = 0;
         double mu = 0.0;
         double objective = 0.0;
         double constraint_violation = 0.0;
         double du_inf = 0.0;
-        int ls = 0;
+        fatrop_int ls = 0;
         double reg = 0.0;
         double alpha_pr = 0.0;
         double alpha_du = 0.0;
@@ -41,11 +42,11 @@ namespace fatrop
     class Journaller
     {
     public:
-        Journaller(const int maxiter, const std::shared_ptr<FatropPrinter> &printer);
+        Journaller(const fatrop_int maxiter, const std::shared_ptr<FatropPrinter> &printer);
         void print_iterations();
         void push();
         void reset();
-        int print_count = 0;
+        fatrop_int print_count = 0;
         std::vector<IterationData> iterationdata;
         IterationData it_curr;
         std::shared_ptr<FatropPrinter> printer_;

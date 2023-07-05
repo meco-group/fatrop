@@ -23,6 +23,7 @@
 #include "solver/FatropData.hpp"
 #include "OCP.hpp"
 #include <memory>
+#include "auxiliary/Common.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
@@ -42,55 +43,55 @@ namespace fatrop
     {
     public:
         OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
-                                                           nuexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                           nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                       { return ocptempl_->get_nuk(k); })),
-                                                           nxexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                           nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                       { return ocptempl_->get_nxk(k); })),
-                                                           ngexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                           ngexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                       { return ocptempl_->get_ngk(k); })),
-                                                           ngineqexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                           ngineqexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                           { return ocptempl_->get_ng_ineq_k(k); })),
-                                                           nstageparamsexpr(TransformRange<int>(0, K, [&ocptempl_](int k)
+                                                           nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                                 { return ocptempl_->get_n_stage_params_k(k); })),
                                                            offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
         {
             // initialize the default parameters
             ocptempl_->get_default_global_params(globalparams.data());
-            int offs = 0;
-            for (int k = 0; k < K; k++)
+            fatrop_int offs = 0;
+            for (fatrop_int k = 0; k < K; k++)
             {
                 ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
             x_dummy = std::vector<double>(max(nxexpr), 0.0);
         }
-        int eval_lag_hess(
+        fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) override;
-        int eval_constr_jac(
+        fatrop_int eval_constr_jac(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override;
-        int eval_contr_viol(
+        fatrop_int eval_contr_viol(
             OCPKKTMemory *OCP,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override;
-        int eval_obj_grad(
+        fatrop_int eval_obj_grad(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) override;
-        int eval_obj(
+        fatrop_int eval_obj(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
             double &res);
-        int integrate_dynamics(
+        fatrop_int integrate_dynamics(
             OCPKKTMemory *OCP,
-            const int k,
+            const fatrop_int k,
             const FatropVecBF &uk,
             const FatropVecBF &xk,
             FatropVecBF &xkp1);
@@ -123,25 +124,25 @@ namespace fatrop
         {
             return stageparams;
         }
-        int get_bounds(
+        fatrop_int get_bounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const override
         {
-            int offs = 0;
+            fatrop_int offs = 0;
             double *lower_p = ((VEC *)lower)->pa;
             double *upper_p = ((VEC *)upper)->pa;
-            for (int k = 0; k < K; k++)
+            for (fatrop_int k = 0; k < K; k++)
             {
                 ocptempl->get_boundsk(lower_p + offs, upper_p + offs, k);
                 offs += ocptempl->get_ng_ineq_k(k);
             }
             return 0;
         };
-        int get_initial_sol_guess(
+        fatrop_int get_initial_sol_guess(
             FatropVecBF &initial) const override
         {
-            int offs = 0;
-            for (int k = 0; k < K-1; k++)
+            fatrop_int offs = 0;
+            for (fatrop_int k = 0; k < K-1; k++)
             {
                 ocptempl->get_initial_uk(((VEC *)initial)->pa + offs, k);
                 offs += ocptempl->get_nuk(k);
@@ -151,19 +152,19 @@ namespace fatrop
             ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, K-1);
             return 0;
         }
-        // virtual int GetDefaultParams(
+        // virtual fatrop_int GetDefaultParams(
         //     FatropOptions &params)
         // {
         // };
 
     public:
-        int K;
-        FatropVector<int> nuexpr;
-        FatropVector<int> nxexpr;
-        FatropVector<int> ngexpr;
-        FatropVector<int> ngineqexpr;
-        FatropVector<int> nstageparamsexpr;
-        FatropVector<int> offs_stageparams;
+        fatrop_int K;
+        FatropVector<fatrop_int> nuexpr;
+        FatropVector<fatrop_int> nxexpr;
+        FatropVector<fatrop_int> ngexpr;
+        FatropVector<fatrop_int> ngineqexpr;
+        FatropVector<fatrop_int> nstageparamsexpr;
+        FatropVector<fatrop_int> offs_stageparams;
         std::vector<double> stageparams;
         std::vector<double> globalparams;
         std::vector<double> x_dummy;

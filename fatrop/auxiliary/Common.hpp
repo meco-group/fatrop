@@ -24,6 +24,8 @@
 #else
 #define DBGASSERT(assertion)
 #endif
+
+#define fatrop_int int
 namespace fatrop
 {
  

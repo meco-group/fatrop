@@ -89,17 +89,17 @@ void FatropAlg::get_solution(vector<double> &sol)
 {
     fatropdata_->x_curr.copyto(sol);
 };
-int FatropAlg::optimize()
+fatrop_int FatropAlg::optimize()
 {
     // bool first_try_watchdog = this->first_try_watchdog;
-    int no_watch_dog_steps_taken = 0;
-    int max_watchdog_steps = this->max_watchdog_steps;
+    fatrop_int no_watch_dog_steps_taken = 0;
+    fatrop_int max_watchdog_steps = this->max_watchdog_steps;
     initialize();
-    int no_conse_small_sd = false;
-    int filter_reseted = 0;
-    int no_no_full_steps = 0;
-    int no_no_full_steps_bc_filter = 0;
-    int no_acceptable_steps = 0;
+    fatrop_int no_conse_small_sd = false;
+    fatrop_int filter_reseted = 0;
+    fatrop_int no_no_full_steps = 0;
+    fatrop_int no_no_full_steps_bc_filter = 0;
+    fatrop_int no_acceptable_steps = 0;
     // double delta_w_last_backup = 0.;
     bool restore_watchdog_step = false;
     blasfeo_timer timer;
@@ -120,7 +120,7 @@ int FatropAlg::optimize()
     }
     else
     {
-        int initialization_res = perform_initializiation();
+        fatrop_int initialization_res = perform_initializiation();
         if (initialization_res == 0 && fatropdata_->delta_dual_max() < lammax)
         {
             printer_->level(1) << "accepted lam " << endl;
@@ -137,11 +137,11 @@ int FatropAlg::optimize()
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();
     filter_->augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
-    int ls = 0;
+    fatrop_int ls = 0;
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
-    for (int i = 0; i < maxiter; i++)
+    for (fatrop_int i = 0; i < maxiter; i++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
         // if (fatropdata_->LamLinfCurr() > 1e12)
@@ -250,8 +250,8 @@ int FatropAlg::optimize()
         deltaw = 0.0;
         deltac = 0.0;
         fatropdata_->evaluate_barrier_quantities(mu);
-        int regularity = -1;
-        int increase_counter = 0;
+        fatrop_int regularity = -1;
+        fatrop_int increase_counter = 0;
         if (!restore_watchdog_step)
         {
             while (regularity != 0)
@@ -364,11 +364,11 @@ int FatropAlg::optimize()
     journaller_->print_iterations();
     return 0;
 }
-int FatropAlg::eval_lag_hess()
+fatrop_int FatropAlg::eval_lag_hess()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res =
+    fatrop_int res =
         fatropnlp_->eval_lag_hess(
             fatropdata_->obj_scale,
             fatropdata_->x_curr,
@@ -377,23 +377,23 @@ int FatropAlg::eval_lag_hess()
     stats.eval_hess_count++;
     return res;
 }
-int FatropAlg::eval_constr_jac()
+fatrop_int FatropAlg::eval_constr_jac()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->eval_constr_jac(
+    fatrop_int res = fatropnlp_->eval_constr_jac(
         fatropdata_->x_curr,
         fatropdata_->s_curr);
     stats.eval_jac_time += blasfeo_toc(&timer);
     stats.eval_jac_count++;
     return res;
 }
-int FatropAlg::eval_constr_viol_curr()
+fatrop_int FatropAlg::eval_constr_viol_curr()
 {
 
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->eval_constraint_viol(
+    fatrop_int res = fatropnlp_->eval_constraint_viol(
         fatropdata_->x_curr,
         fatropdata_->s_curr,
         fatropdata_->g_curr);
@@ -401,11 +401,11 @@ int FatropAlg::eval_constr_viol_curr()
     stats.eval_cv_count++;
     return res;
 }
-int FatropAlg::eval_obj_grad_curr()
+fatrop_int FatropAlg::eval_obj_grad_curr()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->eval_obj_grad(
+    fatrop_int res = fatropnlp_->eval_obj_grad(
         fatropdata_->obj_scale,
         fatropdata_->x_curr,
         fatropdata_->grad_curr);
@@ -426,7 +426,7 @@ double FatropAlg::eval_objective_curr()
     stats.eval_obj_count++;
     return res;
 }
-int FatropAlg::eval_dual_infeasiblity()
+fatrop_int FatropAlg::eval_dual_infeasiblity()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
@@ -439,11 +439,11 @@ int FatropAlg::eval_dual_infeasiblity()
     stats.duinf_time += blasfeo_toc(&timer);
     return 0;
 }
-int FatropAlg::perform_initializiation()
+fatrop_int FatropAlg::perform_initializiation()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->initialize_slacks(
+    fatrop_int res = fatropnlp_->initialize_slacks(
         fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr,
@@ -454,11 +454,11 @@ int FatropAlg::perform_initializiation()
     stats.initialization_time += blasfeo_toc(&timer);
     return res;
 }
-int FatropAlg::solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu)
+fatrop_int FatropAlg::solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu)
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    int res = fatropnlp_->solve_pd_sys(
+    fatrop_int res = fatropnlp_->solve_pd_sys(
         inertia_correction_w,
         inertia_correction_c,
         fatropdata_->delta_x,

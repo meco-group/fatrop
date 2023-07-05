@@ -20,25 +20,25 @@
 
 using namespace fatrop;
 using namespace std;
-int OCPAdapter::eval_lag_hess(
+fatrop_int OCPAdapter::eval_lag_hess(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
     const FatropVecBF &lam)
 {
     // horizon length
-    int K = OCP->K;
+    fatrop_int K = OCP->K;
     // offsets
-    const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
-    int *offs_g = (int *)OCP->aux.g_offs.data();
-    int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-    int *offs_ineq = (int *)OCP->aux.g_ineq_offs.data();
-    int *offs_stageparams_p = (int *)offs_stageparams.data();
+    const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
+    fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
+    fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
+    fatrop_int *offs_ineq = (fatrop_int *)OCP->aux.g_ineq_offs.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
     OCPMACRO(MAT *, RSQrqt, _p);
-    OCPMACRO(int *, nu, _p);
-    OCPMACRO(int *, nx, _p);
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, nx, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     SOLVERMACRO(VEC *, lam, _p);
     double *primal_data = primal_vars_p->pa;
@@ -47,15 +47,15 @@ int OCPAdapter::eval_lag_hess(
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = nu_p[k];
-        int nx_k = nx_p[k];
-        int offs_ux_k = offs_ux[k];
-        int offs_dyn_eq_k = offs_dyn_eq[k];
-        int offs_g_k = offs_g[k];
-        int offs_ineq_k = offs_ineq[k];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int nx_k = nx_p[k];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
+        fatrop_int offs_g_k = offs_g[k];
+        fatrop_int offs_ineq_k = offs_ineq[k];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_RSQrqtk(
             &obj_scale,
             primal_data + offs_ux_k,
@@ -69,7 +69,7 @@ int OCPAdapter::eval_lag_hess(
             k);
         if (k > 0)
         {
-            int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
+            fatrop_int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
             ROWAD(nx_k, -1.0, lam_p, offs_dyn_eq_km1, RSQrqt_p + k, nu_k + nx_k, nu_k);
         }
         // std::cout << "k " << k << std::endl;
@@ -77,39 +77,39 @@ int OCPAdapter::eval_lag_hess(
     }
     return 0;
 }
-int OCPAdapter::eval_constr_jac(
+fatrop_int OCPAdapter::eval_constr_jac(
     OCPKKTMemory *OCP,
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars)
 {
     // horizon length
-    int K = OCP->K;
+    fatrop_int K = OCP->K;
     // offsets
-    int *offs_ux = (int *)OCP->aux.ux_offs.data();
-    int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
-    int *offs_stageparams_p = (int *)offs_stageparams.data();
+    fatrop_int *offs_ux = (fatrop_int *)OCP->aux.ux_offs.data();
+    fatrop_int *offs_ineq = (fatrop_int *)OCP->aux.ineq_offs.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
     OCPMACRO(MAT *, BAbt, _p);
     OCPMACRO(MAT *, Ggt, _p);
     OCPMACRO(MAT *, Ggt_ineq, _p);
-    OCPMACRO(int *, nu, _p);
-    OCPMACRO(int *, nx, _p);
-    OCPMACRO(int *, ng, _p);
-    OCPMACRO(int *, ng_ineq, _p);
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, nx, _p);
+    OCPMACRO(fatrop_int *, ng, _p);
+    OCPMACRO(fatrop_int *, ng_ineq, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
 
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K - 1; k++)
+    for (fatrop_int k = 0; k < K - 1; k++)
     {
-        int nu_k = nu_p[k];
-        int nu_kp1 = nu_p[k + 1];
-        int offs_ux_k = offs_ux[k];
-        int offs_ux_kp1 = offs_ux[k + 1];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int nu_kp1 = nu_p[k + 1];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_ux_kp1 = offs_ux[k + 1];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_BAbtk(
             primal_data + offs_ux_kp1 + nu_kp1,
             primal_data + offs_ux_k,
@@ -122,12 +122,12 @@ int OCPAdapter::eval_constr_jac(
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = nu_p[k];
-        int ng_k = ng_p[k];
-        int offs_ux_k = offs_ux[k];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int ng_k = ng_p[k];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         if (ng_k > 0)
         {
             ocptempl->eval_Ggtk(
@@ -143,14 +143,14 @@ int OCPAdapter::eval_constr_jac(
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = nu_p[k];
-        int nx_k = nx_p[k];
-        int ng_ineq_k = ng_ineq_p[k];
-        int offs_ux_k = offs_ux[k];
-        int offs_ineq_k = offs_ineq[k];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int nx_k = nx_p[k];
+        fatrop_int ng_ineq_k = ng_ineq_p[k];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_ineq_k = offs_ineq[k];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         if (ng_ineq_k > 0)
         {
             ocptempl->eval_Ggt_ineqk(
@@ -166,40 +166,40 @@ int OCPAdapter::eval_constr_jac(
     }
     return 0;
 }
-int OCPAdapter::eval_contr_viol(
+fatrop_int OCPAdapter::eval_contr_viol(
     OCPKKTMemory *OCP,
     const FatropVecBF &primal_vars,
     const FatropVecBF &slack_vars,
     FatropVecBF &constraint_violation)
 {
     // horizon length
-    int K = OCP->K;
+    fatrop_int K = OCP->K;
     // offsets
-    int *offs_ux = (int *)OCP->aux.ux_offs.data();
-    int *offs_g = (int *)OCP->aux.g_offs.data();
-    int *offs_dyn_eq = (int *)OCP->aux.dyn_eq_offs.data();
-    int *offs_ineq = (int *)OCP->aux.ineq_offs.data();
-    int *offs_g_ineq = (int *)OCP->aux.g_ineq_offs.data();
-    int *offs_stageparams_p = (int *)offs_stageparams.data();
+    fatrop_int *offs_ux = (fatrop_int *)OCP->aux.ux_offs.data();
+    fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
+    fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
+    fatrop_int *offs_ineq = (fatrop_int *)OCP->aux.ineq_offs.data();
+    fatrop_int *offs_g_ineq = (fatrop_int *)OCP->aux.g_ineq_offs.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
     double *cv_p = ((VEC *)constraint_violation)->pa;
-    OCPMACRO(int *, nu, _p);
-    OCPMACRO(int *, ng, _p);
-    OCPMACRO(int *, ng_ineq, _p);
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, ng, _p);
+    OCPMACRO(fatrop_int *, ng_ineq, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K - 1; k++)
+    for (fatrop_int k = 0; k < K - 1; k++)
     {
-        int nu_k = nu_p[k];
-        int nu_kp1 = nu_p[k + 1];
-        int offs_ux_k = offs_ux[k];
-        int offs_ux_kp1 = offs_ux[k + 1];
-        int offs_dyn_eq_k = offs_dyn_eq[k];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int nu_kp1 = nu_p[k + 1];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_ux_kp1 = offs_ux[k + 1];
+        fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_bk(
             primal_data + offs_ux_kp1 + nu_kp1,
             primal_data + offs_ux_k,
@@ -212,15 +212,15 @@ int OCPAdapter::eval_contr_viol(
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int ng_k = ng_p[k];
+        fatrop_int ng_k = ng_p[k];
         if (ng_k > 0)
         {
-            int nu_k = nu_p[k];
-            int offs_ux_k = offs_ux[k];
-            int offs_g_k = offs_g[k];
-            int offs_stageparams_k = offs_stageparams_p[k];
+            fatrop_int nu_k = nu_p[k];
+            fatrop_int offs_ux_k = offs_ux[k];
+            fatrop_int offs_g_k = offs_g[k];
+            fatrop_int offs_stageparams_k = offs_stageparams_p[k];
             ocptempl->eval_gk(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
@@ -235,17 +235,17 @@ int OCPAdapter::eval_contr_viol(
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int ng_ineq_k = ng_ineq_p[k];
+        fatrop_int ng_ineq_k = ng_ineq_p[k];
         if (ng_ineq_k > 0)
         {
-            int nu_k = nu_p[k];
-            int ng_ineq_k = ng_ineq_p[k];
-            int offs_ux_k = offs_ux[k];
-            int offs_ineq_k = offs_ineq[k];
-            int offs_g_ineq_k = offs_g_ineq[k];
-            int offs_stageparams_k = offs_stageparams_p[k];
+            fatrop_int nu_k = nu_p[k];
+            fatrop_int ng_ineq_k = ng_ineq_p[k];
+            fatrop_int offs_ux_k = offs_ux[k];
+            fatrop_int offs_ineq_k = offs_ineq[k];
+            fatrop_int offs_g_ineq_k = offs_g_ineq[k];
+            fatrop_int offs_stageparams_k = offs_stageparams_p[k];
             ocptempl->eval_gineqk(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
@@ -259,31 +259,31 @@ int OCPAdapter::eval_contr_viol(
     }
     return 0;
 }
-int OCPAdapter::eval_obj_grad(
+fatrop_int OCPAdapter::eval_obj_grad(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
     FatropVecBF &gradient)
 {
     // horizon length
-    int K = OCP->K;
+    fatrop_int K = OCP->K;
     // offsets
-    const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
+    const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
     double *grad_p = ((VEC *)gradient)->pa;
-    OCPMACRO(int *, nu, _p);
+    OCPMACRO(fatrop_int *, nu, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
-    int *offs_stageparams_p = (int *)offs_stageparams.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = nu_p[k];
-        int offs_ux_k = offs_ux[k];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_rqk(
             &obj_scale,
             primal_data + offs_ux_k,
@@ -295,28 +295,28 @@ int OCPAdapter::eval_obj_grad(
     }
     return 0;
 };
-int OCPAdapter::eval_obj(
+fatrop_int OCPAdapter::eval_obj(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
     double &res)
 {
     // horizon length
-    int K = OCP->K;
+    fatrop_int K = OCP->K;
     // offsets
-    const int *offs_ux = (const int *)OCP->aux.ux_offs.data();
-    int *offs_stageparams_p = (int *)offs_stageparams.data();
+    const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
-    OCPMACRO(int *, nu, _p);
+    OCPMACRO(fatrop_int *, nu, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
     double restot = 0.0;
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = nu_p[k];
-        int offs_ux_k = offs_ux[k];
-        int offs_stageparams_k = offs_stageparams_p[k];
+        fatrop_int nu_k = nu_p[k];
+        fatrop_int offs_ux_k = offs_ux[k];
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         double resk = 0.0;
         ocptempl->eval_Lk(
             &obj_scale,
@@ -332,16 +332,16 @@ int OCPAdapter::eval_obj(
     return 0;
 };
 
-int OCPAdapter::integrate_dynamics(
+fatrop_int OCPAdapter::integrate_dynamics(
     OCPKKTMemory *OCP,
-    const int k,
+    const fatrop_int k,
     const FatropVecBF &uk,
     const FatropVecBF &xk,
     FatropVecBF &xkp1)
 {
     // offsets
-    int *offs_stageparams_p = (int *)offs_stageparams.data();
-    int offs_stageparams_k = offs_stageparams_p[k];
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
+    fatrop_int offs_stageparams_k = offs_stageparams_p[k];
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
     double *ukp = ((blasfeo_dvec *)uk)->pa + uk.offset();
@@ -370,13 +370,13 @@ void OCPAdapter::set_initial_sol_guess(const shared_ptr<FatropData> &fatropdata,
     VEC *ux_intial_p = (VEC *)fatropdata->x_initial;
     double *u_p = initial_u.data();
     double *x_p = initial_x.data();
-    int offs_nu = 0;
-    int offs_nx = 0;
-    int offs_nux = 0;
-    for (int k = 0; k < K; k++)
+    fatrop_int offs_nu = 0;
+    fatrop_int offs_nx = 0;
+    fatrop_int offs_nux = 0;
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = ocptempl->get_nuk(k);
-        int nx_k = ocptempl->get_nxk(k);
+        fatrop_int nu_k = ocptempl->get_nuk(k);
+        fatrop_int nx_k = ocptempl->get_nxk(k);
         PACKVEC(nu_k, u_p + offs_nu, 1, ux_intial_p, offs_nux);
         PACKVEC(nx_k, x_p + offs_nx, 1, ux_intial_p, offs_nux + nu_k);
         offs_nu += nu_k;
@@ -391,13 +391,13 @@ void OCPAdapter::get_solution(const shared_ptr<FatropData> &fatropdata, vector<d
     VEC *ux_sol = (VEC *)fatropdata->x_curr;
     double *u_p = u.data();
     double *x_p = x.data();
-    int offs_nu = 0;
-    int offs_nx = 0;
-    int offs_nux = 0;
-    for (int k = 0; k < K; k++)
+    fatrop_int offs_nu = 0;
+    fatrop_int offs_nx = 0;
+    fatrop_int offs_nux = 0;
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int nu_k = ocptempl->get_nuk(k);
-        int nx_k = ocptempl->get_nxk(k);
+        fatrop_int nu_k = ocptempl->get_nuk(k);
+        fatrop_int nx_k = ocptempl->get_nxk(k);
         UNPACKVEC(nu_k, ux_sol, offs_nux, u_p + offs_nu, 1);
         UNPACKVEC(nx_k, ux_sol, offs_nux + nu_k, x_p + offs_nx, 1);
         offs_nu += nu_k;

@@ -184,8 +184,8 @@ auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
     }
     return os;
 }
-template class Option<int>;
+template class Option<fatrop_int>;
 template class Option<double>;
 template void FatropOptions::set<double>(const string &, double);
-template void FatropOptions::set<int>(const string &, int);
+template void FatropOptions::set<fatrop_int>(const string &, int);
 template void FatropOptions::set<bool>(const string &, bool);

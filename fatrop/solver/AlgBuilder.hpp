@@ -20,6 +20,7 @@
 #define ALBBUILDERINCLUDED
 // #include "NLPAlg.hpp"
 #include "FatropAlg.hpp"
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     class AlgBuilder

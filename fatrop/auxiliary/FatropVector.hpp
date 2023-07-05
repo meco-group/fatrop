@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <utility>
 #include <functional>
+#include <auxiliary/Common.hpp>
 namespace fatrop
 {
     // static polymorphism using CRTP
@@ -29,8 +30,8 @@ namespace fatrop
     class VecExpr
     {
     public:
-        T get(const int ai) const { return static_cast<E const &>(*this).get(ai); };
-        int size() const { return static_cast<E const &>(*this).size(); };
+        T get(const fatrop_int ai) const { return static_cast<E const &>(*this).get(ai); };
+        fatrop_int size() const { return static_cast<E const &>(*this).size(); };
     };
 
     template <typename T, typename E1, typename E2>
@@ -41,8 +42,8 @@ namespace fatrop
         {
             assert(expr1.size() == expr2.size());
         };
-        T get(const int ai) const { return expr1_.get(ai) + expr2_.get(ai); };
-        int size() const { return expr1_.size(); };
+        T get(const fatrop_int ai) const { return expr1_.get(ai) + expr2_.get(ai); };
+        fatrop_int size() const { return expr1_.size(); };
 
     private:
         const VecExpr<E1, T> &expr1_;
@@ -52,9 +53,9 @@ namespace fatrop
     class VecScalarSum : public VecExpr<VecScalarSum<T, E1>, T>
     {
     public:
-        VecScalarSum(const VecExpr<E1, T> &expr, const int scalar) : expr_(expr), scalar_(scalar){};
-        T get(const int ai) const { return expr_.get(ai) + scalar_; };
-        int size() const { return expr_.size(); };
+        VecScalarSum(const VecExpr<E1, T> &expr, const fatrop_int scalar) : expr_(expr), scalar_(scalar){};
+        T get(const fatrop_int ai) const { return expr_.get(ai) + scalar_; };
+        fatrop_int size() const { return expr_.size(); };
 
     public:
         const VecExpr<E1, T> &expr_;
@@ -64,13 +65,13 @@ namespace fatrop
     class VecRotate : public VecExpr<VecRotate<T, E1>, T>
     {
     public:
-        VecRotate(const VecExpr<E1, T> &expr, const int shift) : expr_(expr), shift_(shift){};
-        T get(const int ai) const { return expr_.get((ai + shift_ + (((ai + shift_) / size() + 1) * size())) % size()); };
-        int size() const { return expr_.size(); };
+        VecRotate(const VecExpr<E1, T> &expr, const fatrop_int shift) : expr_(expr), shift_(shift){};
+        T get(const fatrop_int ai) const { return expr_.get((ai + shift_ + (((ai + shift_) / size() + 1) * size())) % size()); };
+        fatrop_int size() const { return expr_.size(); };
 
     public:
         const VecExpr<E1, T> &expr_;
-        int shift_;
+        fatrop_int shift_;
     };
 
     template <typename T>
@@ -78,20 +79,20 @@ namespace fatrop
     {
     public:
         FatropVector() : std::vector<T>(){};
-        FatropVector(const int size) : std::vector<T>(size){};
+        FatropVector(const fatrop_int size) : std::vector<T>(size){};
         template <typename E>
         FatropVector(const VecExpr<E, T> &vecexpr) : std::vector<T>(vecexpr.size())
         {
             // todo: vector is first initialized, initialize with iterator
-            for (int i = 0; i < vecexpr.size(); i++)
+            for (fatrop_int i = 0; i < vecexpr.size(); i++)
             {
                std:: vector<T>::at(i) = vecexpr.get(i);
             }
         }
         FatropVector(const std::vector<T> &vec) : std::vector<T>(vec){};
         FatropVector(std::vector<T> &&vec) : std::vector<T>(move(vec)){};
-        T get(const int ai) const { return std::vector<T>::at(ai); };
-        int size() const { return std::vector<T>::size(); };
+        T get(const fatrop_int ai) const { return std::vector<T>::at(ai); };
+        fatrop_int size() const { return std::vector<T>::size(); };
         operator T *() { return this->data(); };
     };
     template <typename T, typename E1, typename E2>
@@ -101,13 +102,13 @@ namespace fatrop
     }
 
     template <typename T, typename E1>
-    VecScalarSum<T, E1> operator+(const VecExpr<E1, T> &expr1, const int scalar)
+    VecScalarSum<T, E1> operator+(const VecExpr<E1, T> &expr1, const fatrop_int scalar)
     {
         return VecScalarSum<T, E1>(expr1, scalar);
     }
 
     template <typename T, typename E1>
-    VecScalarSum<T, E1> operator+(const int scalar, const VecExpr<E1, T> &expr1)
+    VecScalarSum<T, E1> operator+(const fatrop_int scalar, const VecExpr<E1, T> &expr1)
     {
         return VecScalarSum<T, E1>(expr1, scalar);
     }
@@ -115,23 +116,23 @@ namespace fatrop
     T sum(const VecExpr<E1, T> &expr)
     {
         T res = 0;
-        for (int i = 0; i < expr.size(); i++)
+        for (fatrop_int i = 0; i < expr.size(); i++)
         {
             res += expr.get(i);
         }
         return res;
     }
     template <typename T, typename E1>
-    VecRotate<T, E1> rotate(const VecExpr<E1, T> &expr, const int shift)
+    VecRotate<T, E1> rotate(const VecExpr<E1, T> &expr, const fatrop_int shift)
     {
         return VecRotate<T, E1>(expr, shift);
     };
     template <typename T>
-    std::vector<T> TransformRange(const int begin, const int end, const std::function<T(int)>& func)
+    std::vector<T> TransformRange(const fatrop_int begin, const fatrop_int end, const std::function<T(fatrop_int)>& func)
     {
-        int size = end - begin;
+        fatrop_int size = end - begin;
         std::vector<T> res(size);
-        for (int i = 0; i < size; i++)
+        for (fatrop_int i = 0; i < size; i++)
         {
             res.at(i) = func(begin + i);
         }

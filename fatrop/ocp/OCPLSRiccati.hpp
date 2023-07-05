@@ -24,16 +24,17 @@
 #include <cmath>
 #include <memory>
 #include "solver/FatropOptions.hpp"
+#include "auxiliary/Common.hpp"
 #define SUMMATION_ALG kahan_sum
 namespace fatrop
 {
-    bool check_reg(const int m, MAT *sA, const int ai, const int aj);
+    bool check_reg(const fatrop_int m, MAT *sA, const fatrop_int ai, const fatrop_int aj);
     class OCPLSRiccati : public OCPLinearSolver
     {
     public:
         OCPLSRiccati(const OCPDims &dims, const std::shared_ptr<FatropOptions> &options, const std::shared_ptr<FatropPrinter> &printer);
             // solve a KKT system
-            int solve_pd_sys(
+            fatrop_int solve_pd_sys(
                 OCPKKTMemory *OCP,
                 const double inertia_correction_w,
                 const double inertia_correction_c,
@@ -43,7 +44,7 @@ namespace fatrop
                 const FatropVecBF &sigma_total,
                 const FatropVecBF &gradb_total) override;
         // solve a KKT system
-        int solve_pd_sys_degenerate(
+        fatrop_int solve_pd_sys_degenerate(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -62,7 +63,7 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total);
-        int get_rhs(
+        fatrop_int get_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &gradb_total,
             const FatropVecBF &rhs_rq,
@@ -70,7 +71,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb) override;
-        int compute_pd_sys_times_vec(
+        fatrop_int compute_pd_sys_times_vec(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -83,7 +84,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb);
-        int solve_rhs(
+        fatrop_int solve_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
@@ -143,12 +144,12 @@ namespace fatrop
         MemoryPermMat Pr;
         MemoryPermMat PlI;
         MemoryPermMat PrI;
-        FatropVector<int> gamma;
-        FatropVector<int> rho;
-        int rankI = 0;
+        FatropVector<fatrop_int> gamma;
+        FatropVector<fatrop_int> rho;
+        fatrop_int rankI = 0;
         struct LastUsed
         {
-            int rankI = 0;
+            fatrop_int rankI = 0;
             double inertia_correction_w = 0;
             double inertia_correction_c = 0;
             double kappa_d = 0;

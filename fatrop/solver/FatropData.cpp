@@ -19,7 +19,7 @@
 #include "solver/FatropData.hpp"
 using namespace fatrop;
 using namespace std;
-template <int size>
+template <fatrop_int size>
 #define SUMMATION_ALG kahan_sum
 double kahan_sum(const double *numbers)
 {
@@ -29,7 +29,7 @@ double kahan_sum(const double *numbers)
     }
     double sum = numbers[0];
     double c = 0.0;
-    for (int ii = 1; ii < size; ii++)
+    for (fatrop_int ii = 1; ii < size; ii++)
     {
         double y = numbers[ii] - c;
         volatile double t = sum + y;
@@ -39,7 +39,7 @@ double kahan_sum(const double *numbers)
     }
     return sum;
 }
-template <int size>
+template <fatrop_int size>
 double kahan_sum_ld(const double *numbers)
 {
     if (size == 0)
@@ -48,7 +48,7 @@ double kahan_sum_ld(const double *numbers)
     }
     long double sum = numbers[0];
     long double c = 0.0;
-    for (int ii = 1; ii < size; ii++)
+    for (fatrop_int ii = 1; ii < size; ii++)
     {
         long double y = numbers[ii] - c;
         volatile long double t = sum + y;
@@ -58,11 +58,11 @@ double kahan_sum_ld(const double *numbers)
     }
     return sum;
 }
-template <int size>
+template <fatrop_int size>
 double normal_sum(const double *numbers)
 {
     double sum = 0.0;
-    for (int ii = 0; ii < size; ii++)
+    for (fatrop_int ii = 0; ii < size; ii++)
     {
         sum += numbers[ii];
     }
@@ -144,13 +144,13 @@ void FatropData::initialize()
     n_ineqs_r = number_of_bounds();
     relax_bounds();
 }
-int FatropData::reset()
+fatrop_int FatropData::reset()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
     VEC *zL_p = (VEC *)zL_curr;
     VEC *zU_p = (VEC *)zU_curr;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -163,7 +163,7 @@ int FatropData::reset()
     reset_caches();
     return 0;
 }
-int FatropData::reset_caches()
+fatrop_int FatropData::reset_caches()
 {
     cache_curr = EvalCache();
     cache_next = EvalCache();
@@ -193,7 +193,7 @@ double FatropData::e_mu_curr(double mu)
     res = MAX(cv, MAX(du, compl_slack));
     return res;
 };
-int FatropData::eval_dual_inf_slack_eqs()
+fatrop_int FatropData::eval_dual_inf_slack_eqs()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
@@ -203,7 +203,7 @@ int FatropData::eval_dual_inf_slack_eqs()
     // lam_curr.print();
     VEC *zL_p = (VEC *)zL_curr;
     VEC *zU_p = (VEC *)zU_curr;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -226,7 +226,7 @@ double FatropData::eval_compl_slack(double mu)
     VEC *zL_p = (VEC *)zL_curr;
     VEC *zU_p = (VEC *)zU_curr;
     double res = 0.0;
-    for (int i = 0; i < s_curr.nels(); i++)
+    for (fatrop_int i = 0; i < s_curr.nels(); i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -250,7 +250,7 @@ double FatropData::eval_barrier_func(double mu, VEC *s_p)
     VEC *upper_bound_p = (VEC *)s_upper;
     // VEC *s_p = (VEC *)s_curr;
     double res = 0.0;
-    for (int i = 0; i < s_curr.nels(); i++)
+    for (fatrop_int i = 0; i < s_curr.nels(); i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -294,7 +294,7 @@ double FatropData::eval_barrier_fo_decr(double mu, VEC *s_p, VEC *delta_s_p)
     // VEC *s_p = (VEC *)s_curr;
     // VEC *delta_s_p = (VEC *)delta_s;
     double res = 0.0;
-    for (int i = 0; i < s_curr.nels(); i++)
+    for (fatrop_int i = 0; i < s_curr.nels(); i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -332,12 +332,12 @@ double FatropData::eval_barrier_fo_decr_backup(double mu)
     VEC *delta_s_p = (VEC *)delta_s_backup;
     return eval_barrier_fo_decr(mu, s_p, delta_s_p);
 }
-int FatropData::bound_slacks()
+fatrop_int FatropData::bound_slacks()
 {
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
     VEC *s_curr_p = (VEC *)s_curr;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(s_lower_p, i);
         double upperi = VECEL(s_upper_p, i);
@@ -363,25 +363,25 @@ int FatropData::bound_slacks()
     }
     return 0;
 }
-int FatropData::bound_z()
+fatrop_int FatropData::bound_z()
 {
     VEC *zL_curr_p = (VEC *)zL_curr;
     VEC *zU_curr_p = (VEC *)zU_curr;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         VECEL(zL_curr_p, i) = MAX(VECEL(zL_curr_p, i), warm_start_mult_bound_push);
         VECEL(zU_curr_p, i) = MAX(VECEL(zU_curr_p, i), warm_start_mult_bound_push);
     }
     return 0;
 }
-int FatropData::warmstart_dual()
+fatrop_int FatropData::warmstart_dual()
 {
     zL_curr.copy(zL_init);
     zU_curr.copy(zU_init);
     lam_curr.copy(lam_init);
     return 0;
 }
-int FatropData::modify_dual_bounds(double mu)
+fatrop_int FatropData::modify_dual_bounds(double mu)
 {
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
@@ -393,7 +393,7 @@ int FatropData::modify_dual_bounds(double mu)
     VEC *zL_curr_p = (VEC *)zL_curr;
     VEC *zU_curr_p = (VEC *)zU_curr;
     double kappa_sigma = this->kappa_sigma;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(s_lower_p, i);
         double upperi = VECEL(s_upper_p, i);
@@ -416,13 +416,13 @@ int FatropData::modify_dual_bounds(double mu)
     }
     return 0;
 }
-int FatropData::accept_dual_initializiaton()
+fatrop_int FatropData::accept_dual_initializiaton()
 {
     lam_calc.SwapWith(lam_curr);
     cache_curr = EvalCache();
     return 0;
 }
-int FatropData::update_trial_step(double alpha_primal, double alpha_dual)
+fatrop_int FatropData::update_trial_step(double alpha_primal, double alpha_dual)
 {
     axpy(alpha_primal, delta_x, x_curr, x_next);
     axpy(alpha_primal, delta_s, s_curr, s_next);
@@ -434,7 +434,7 @@ int FatropData::update_trial_step(double alpha_primal, double alpha_dual)
     cache_next = EvalCache();
     return 0;
 }
-int FatropData::accept_trial_step()
+fatrop_int FatropData::accept_trial_step()
 {
     // TODO make a struct which containts vectors associated with curr <-> next
     x_curr.SwapWith(x_next);
@@ -447,7 +447,7 @@ int FatropData::accept_trial_step()
     cache_curr = cache_next;
     return 0;
 }
-int FatropData::backup_curr()
+fatrop_int FatropData::backup_curr()
 {
     x_backup.copy(x_curr);
     s_backup.copy(s_curr);
@@ -459,14 +459,14 @@ int FatropData::backup_curr()
     obj_backup = obj_curr;
     return 0;
 }
-int FatropData::backup_delta()
+fatrop_int FatropData::backup_delta()
 {
     delta_x_backup.copy(delta_x);
     delta_s_backup.copy(delta_s);
     lam_calc_backup.copy(lam_calc);
     return 0;
 }
-int FatropData::restore_backup()
+fatrop_int FatropData::restore_backup()
 {
     x_curr.SwapWith(x_backup);
     s_curr.SwapWith(s_backup);
@@ -520,7 +520,7 @@ double FatropData::z_sum_curr()
     VEC *zL_p = (VEC *)zL_curr;
     VEC *zU_p = (VEC *)zU_curr;
     double res = 0.0;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -535,12 +535,12 @@ double FatropData::z_sum_curr()
     }
     return res;
 }
-int FatropData::number_of_bounds()
+fatrop_int FatropData::number_of_bounds()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
-    int res = 0;
-    for (int i = 0; i < n_ineqs; i++)
+    fatrop_int res = 0;
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(lower_bound_p, i);
         double upperi = VECEL(upper_bound_p, i);
@@ -583,7 +583,7 @@ void FatropData::maximum_step_size(double &alpha_max_pr, double &alpha_max_du, d
     VEC *zU_curr_p = (VEC *)zU_curr;
     VEC *delta_zL_p = (VEC *)delta_zL;
     VEC *delta_zU_p = (VEC *)delta_zU;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         if (!isinf(VECEL(s_lower_p, i)))
         {
@@ -618,7 +618,7 @@ void FatropData::relax_bounds()
     VECCP(n_ineqs, (VEC *)s_upper_orig, 0, (VEC *)s_upper, 0);
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double lower_i = VECEL(s_lower_p, i);
         if (!isinf(lower_i))
@@ -638,7 +638,7 @@ void FatropData::relax_bounds_var(double mu)
     VEC *s_lower_p = (VEC *)s_lower;
     VEC *s_upper_p = (VEC *)s_upper;
     VEC *s_curr_p = (VEC *)s_curr;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(s_lower_p, i);
         double upperi = VECEL(s_upper_p, i);
@@ -679,10 +679,10 @@ void FatropData::evaluate_barrier_quantities(double mu)
     VEC *gradb_U_p = (VEC *)gradb_U;
     VEC *gradb_plus_p = (VEC *)gradb_plus;
     VEC *lam_curr_p = (VEC *)lam_curr;
-    int eqs_offset = n_eqs - n_ineqs;
+    fatrop_int eqs_offset = n_eqs - n_ineqs;
     // compute simga_LU gradb_LU and gradbplus
 
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double loweri = VECEL(s_lower_p, i);
         double upperi = VECEL(s_upper_p, i);
@@ -727,7 +727,7 @@ void FatropData::evaluate_barrier_quantities(double mu)
     double *gradb_L_dp = ((VEC *)gradb_L)->pa;
     double *gradb_U_dp = ((VEC *)gradb_U)->pa;
     double *gradb_plus_dp = ((VEC *)gradb_plus)->pa;
-    for (int i = 0; i < n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         double terms[] = {gradb_L_dp[i], gradb_U_dp[i], gradb_plus_dp[i]};
         gradb_total_dp[i] = SUMMATION_ALG<3>(terms);

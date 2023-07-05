@@ -23,13 +23,14 @@
 #include "solver/AlgStrategy.hpp"
 #include "ocp/OCPKKT.hpp"
 #include <memory>
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     class OCPScalingMethod : public AlgStrategy // this is an OCP strategy
     {
     public:
         OCPScalingMethod(const std::shared_ptr<FatropOptions> &fatrop_params) : AlgStrategy(fatrop_params){};
-        virtual int compute_scalings(
+        virtual fatrop_int compute_scalings(
             OCPKKTMemory *OCP,
             double &obj_scale,
             FatropVecBF &x_scales,

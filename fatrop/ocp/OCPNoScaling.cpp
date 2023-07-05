@@ -22,7 +22,7 @@ using namespace std;
 OCPNoScaling::OCPNoScaling(const shared_ptr<FatropOptions> &fatrop_params) : OCPScalingMethod(fatrop_params){};
 
 
-int OCPNoScaling::compute_scalings(
+fatrop_int OCPNoScaling::compute_scalings(
     OCPKKTMemory *OCP,
     double &obj_scale,
     FatropVecBF &x_scales,
