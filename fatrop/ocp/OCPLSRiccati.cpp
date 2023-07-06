@@ -770,7 +770,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
     lastused_.inertia_correction_w = inertia_correction;
     if (it_ref)
     {
-        const fatrop_int min_it_ref = 10;
+        const fatrop_int min_it_ref = 0;
         double err_curr = 0.0;
         // copy(ux, ux_test[0]);
         // copy(lam, lam_test[0]);
@@ -789,7 +789,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
         double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
         max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
-        for (fatrop_int i = 0; i < 20; i++)
+        for (fatrop_int i = 0; i < 5; i++)
         {
             // blasfeo_tic(&timer);
             compute_pd_sys_times_vec(

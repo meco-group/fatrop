@@ -102,7 +102,7 @@ int FatropOCP::solve_soc_rhs(
     const FatropVecBF &delta_s,
     const FatropVecBF &constraint_violation)
 {
-    int min_it_ref = 10;
+    int min_it_ref = 0;
     if (inertia_correction_c_cache != 0.0)
         return -1;
     // bool it_ref = true;
@@ -148,7 +148,7 @@ int FatropOCP::solve_soc_rhs(
         double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
         max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 5; i++)
         {
             ls_->compute_pd_sys_times_vec(
                 &ocpkktmemory_,
@@ -176,7 +176,7 @@ int FatropOCP::solve_soc_rhs(
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
-            if (i > min_it_ref)
+            if (i >= min_it_ref)
             {
                 if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
                 {
