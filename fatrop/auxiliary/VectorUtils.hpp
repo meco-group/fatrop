@@ -39,7 +39,7 @@ namespace fatrop
 
     /** \brief returns index of max el of VecExpr */
     template <typename T, typename E>
-    fatrop_int max(const VecExpr<E, T> &a)
+    fatrop_int maxel(const VecExpr<E, T> &a)
     {
         const fatrop_int size_a = a.size();
         fatrop_int res = 0;

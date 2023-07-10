@@ -94,11 +94,19 @@ solver/Timer.hpp
 solver/FatropStats.hpp                            
 templates/FatropApplication.hpp
 templates/NLPAlg.hpp)
+# add_library(fatrop SHARED ${FATROP_INTERNAL})
 add_library(fatrop SHARED ${FATROP_INTERNAL})
-target_link_libraries(fatrop m dl blasfeo) 
+
+if (WIN32)
+  target_link_libraries(fatrop dl blasfeo)
+else()
+  target_link_libraries(fatrop m dl blasfeo) 
+endif (WIN32)
+
 
 add_executable(RunFatrop executables/RunFatrop.cpp)
 target_link_libraries(RunFatrop fatrop) 
+
 target_include_directories(RunFatrop
     PRIVATE
         ${PROJECT_SOURCE_DIR}/fatrop
@@ -134,7 +142,7 @@ set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_NAME "fatrop")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
-INSTALL(TARGETS fatrop blasfeo
+INSTALL(TARGETS fatrop blasfeo RunFatrop
   EXPORT fatropConfig
   LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
   ARCHIVE DESTINATION ${LIBRARY_INSTALL_DIR}

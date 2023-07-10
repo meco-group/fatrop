@@ -63,7 +63,7 @@ namespace fatrop
                 ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
-            x_dummy = std::vector<double>(max(nxexpr), 0.0);
+            x_dummy = std::vector<double>(maxel(nxexpr), 0.0);
         }
         fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,
