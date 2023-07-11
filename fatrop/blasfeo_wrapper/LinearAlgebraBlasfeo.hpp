@@ -79,27 +79,13 @@
 #define VECMULACC blasfeo_dvecmulacc
 
 
-#ifdef __cplusplus
-/*
-// #define MAX(a, b)                   \
-//     (                               \
-//         {                           \
-//             decltype(a) _a = (a); \
-//             decltype(b) _b = (b); \
-//             _a > _b ? _a : _b;      \
-//         })
-// #define MIN(a, b)                   \
-//     (                               \
-//         {                           \
-//             decltype(a) _a = (a); \
-//             decltype(b) _b = (b); \
-//             _a < _b ? _a : _b;      \
-//         })
-*/
+#ifndef __GNUC__
+
 #define MAX(a, b) max(a, b)
 #define MIN(a, b) min(a, b)
 
 #else
+
 #define MAX(a, b)                   \
     (                               \
         {                           \
@@ -114,8 +100,8 @@
             __typeof__(b) _b = (b); \
             _a < _b ? _a : _b;      \
         })
-#endif
 
+#endif
 
 #include <iostream>
 extern "C"
