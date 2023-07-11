@@ -30,7 +30,7 @@ if os.name == 'nt':
     libraries=["fatrop"],
     library_dirs=["../build/fatrop/Release"],
     data_files=[('', ['../build/fatrop/Release/fatrop.dll','../build/fatrop/Release/fatrop.lib'])],
-    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "../external/blasfeo/include","src/fatrop/fatropy", "../external/dlfcn-win32/src"],
+    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop","../external/blasfeo/include","src/fatrop/fatropy","../external/dlfcn-win32/src"],
     language="c++",
     define_macros=[("LEVEL1_DCACHE_LINE_SIZE","64")]
     )
@@ -49,7 +49,7 @@ else:
     libraries=["fatrop"],
     library_dirs=["../build/fatrop"],
     # runtime_library_dirs=[],
-    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop", "../external/blasfeo/include","src/fatrop/fatropy"],
+    include_dirs=["../fatrop/ocp","../fatrop/auxiliary","../fatrop/solver","../fatrop/blasfeo_wrapper","../fatrop/templates","../fatrop","../external/blasfeo/include","src/fatrop/fatropy"],
     language="c++",
     define_macros=[("LEVEL1_DCACHE_LINE_SIZE","64")]
     )
