@@ -55,6 +55,7 @@ FatropAlg::FatropAlg(
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
     fatropoptions_->register_option(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
     fatropoptions_->register_option(NumericOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
+    fatropoptions_->register_option(BooleanOption("recalc_y", "recalc_y", &recalc_y, false));
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
     fatropnlp->get_bounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
@@ -143,13 +144,23 @@ int FatropAlg::optimize()
     bool watch_dog_step = false;
     for (int i = 0; i < maxiter; i++)
     {
+        if(recalc_y)
+        {
+            eval_constr_jac(); // needed for dual inf
+            fatropnlp_->initialize_dual(
+                fatropdata_->grad_curr,
+                fatropdata_->lam_curr,
+                // fatropdata_->s_curr,
+                fatropdata_->zL_curr,
+                fatropdata_->zU_curr);
+        }
         fatropdata_->obj_curr = eval_objective_curr();
         // if (fatropdata_->LamLinfCurr() > 1e12)
         // {
         //     cout << "huge Lagrange multipliers -> set to zero" << endl;
         //     fatropdata_->lam_curr.SetConstant(0.0);
         // }
-        eval_constr_jac();   // needed for dual inf
+        eval_constr_jac();    // needed for dual inf
         eval_obj_grad_curr(); // needed for dual inf
         eval_dual_infeasiblity();
         IterationData &it_curr = journaller_->it_curr;

@@ -98,6 +98,7 @@ namespace fatrop
         double theta_min;
         int max_watchdog_steps;
         bool warm_start_init_point;
+        bool recalc_y;
         // bool first_try_watchdog;
         FatropStats stats;
     };
