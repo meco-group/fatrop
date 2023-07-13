@@ -100,6 +100,7 @@ namespace fatrop
         fatrop_int max_watchdog_steps;
         bool warm_start_init_point;
         bool recalc_y;
+        double recalc_y_feas_tol;
         // bool first_try_watchdog;
         FatropStats stats;
     };

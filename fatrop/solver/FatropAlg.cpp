@@ -56,6 +56,7 @@ FatropAlg::FatropAlg(
     fatropoptions_->register_option(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
     fatropoptions_->register_option(NumericOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
     fatropoptions_->register_option(BooleanOption("recalc_y", "recalc_y", &recalc_y, false));
+    fatropoptions_->register_option(NumericOption::lower_bounded("recalc_y_feas_tol", "recalc_y_feas_tol", &recalc_y_feas_tol, 1e-6, 0.0));
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
     fatropnlp->get_bounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
@@ -144,16 +145,6 @@ fatrop_int FatropAlg::optimize()
     bool watch_dog_step = false;
     for (fatrop_int i = 0; i < maxiter; i++)
     {
-        if(recalc_y)
-        {
-            eval_constr_jac(); // needed for dual inf
-            fatropnlp_->initialize_dual(
-                fatropdata_->grad_curr,
-                fatropdata_->lam_curr,
-                // fatropdata_->s_curr,
-                fatropdata_->zL_curr,
-                fatropdata_->zU_curr);
-        }
         fatropdata_->obj_curr = eval_objective_curr();
         // if (fatropdata_->LamLinfCurr() > 1e12)
         // {
@@ -298,6 +289,14 @@ fatrop_int FatropAlg::optimize()
         double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = stepsize < 1e-14;
         lsinfo = linesearch_->find_acceptable_trial_point(mu, small_search_direction_curr || watch_dog_step, watch_dog_step);
+        if (recalc_y && (deltac == 0.0) && (fatropdata_->constr_viol_max_curr() < recalc_y_feas_tol))
+        {
+            fatropnlp_->initialize_dual(
+                fatropdata_->grad_curr,
+                fatropdata_->lam_curr,
+                fatropdata_->zL_curr,
+                fatropdata_->zU_curr);
+        }
         fatropdata_->relax_bounds_var(mu);
         fatropdata_->modify_dual_bounds(mu);
         ls = lsinfo.ls;
