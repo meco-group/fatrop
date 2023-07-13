@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -25,23 +25,25 @@
 #ifndef FATROP_LA_INCLUDED
 #define FATROP_LA_INCLUDED
 #include <iostream>
+#include "auxiliary/Common.hpp"
+
 namespace fatrop
 {
     struct MatrixInd
     {
-        int ai;
-        int aj;
+        fatrop_int ai;
+        fatrop_int aj;
     };
     /** \brief Interface class for matrix representations */
     class FatropMat
     {
     public:
         /** \brief Copy of matrix element */
-        virtual double get_el(const int ai, const int aj) const = 0;
+        virtual double get_el(const fatrop_int ai, const fatrop_int aj) const = 0;
         /** \brief Number of rows */
-        virtual int nrows() const = 0;
+        virtual fatrop_int nrows() const = 0;
         /** \brief Number of cols */
-        virtual int ncols() const = 0;
+        virtual fatrop_int ncols() const = 0;
         void print();
     };
     // special matrices
@@ -50,9 +52,9 @@ namespace fatrop
     {
     public:
         /** \brief Constructor */
-        eye(int dim) : dim_(dim){};
+        eye(fatrop_int dim) : dim_(dim){};
         /** \brief Copy of matrix element */
-        inline double get_el(const int ai, const int aj) const
+        inline double get_el(const fatrop_int ai, const fatrop_int aj) const
         {
             if (ai == aj)
             {
@@ -64,21 +66,21 @@ namespace fatrop
             }
         };
         /** \brief Number of rows */
-        int nrows() const { return dim_; };
+        fatrop_int nrows() const { return dim_; };
         /** \brief Number of cols */
-        int ncols() const { return dim_; };
+        fatrop_int ncols() const { return dim_; };
 
     private:
-        int dim_;
+        fatrop_int dim_;
     };
     /** \brief Interface class for matrix representations */
     class FatropVec
     {
     public:
         /** \brief Copy of matrix element */
-        virtual double get_el(const int ai) const = 0;
+        virtual double get_el(const fatrop_int ai) const = 0;
         /** \brief Number of elements */
-        virtual int nels() const = 0;
+        virtual fatrop_int nels() const = 0;
         void print();
     };
 } // namespace fatrop

@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -20,12 +20,13 @@
 #define NLPLSINCLUDED
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     class OCPLinearSolver
     {
     public:
-        virtual int solve_pd_sys(
+        virtual fatrop_int solve_pd_sys(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -34,7 +35,7 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total) = 0;
-        virtual int compute_pd_sys_times_vec(
+        virtual fatrop_int compute_pd_sys_times_vec(
             OCPKKTMemory *OCP,
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -47,7 +48,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb_total) = 0;
-        virtual int solve_rhs(
+        virtual fatrop_int solve_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
@@ -58,7 +59,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb_total) = 0;
-        virtual int get_rhs(
+        virtual fatrop_int get_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &gradb_total,
             const FatropVecBF &rhs_rq,

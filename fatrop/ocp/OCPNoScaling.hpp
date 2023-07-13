@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -24,13 +24,14 @@
 #include "OCPScalingMethod.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include <memory>
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     class OCPNoScaling : public OCPScalingMethod
     {
     public:
         OCPNoScaling(const std::shared_ptr<FatropOptions> &fatrop_params);
-        virtual int compute_scalings(
+        virtual fatrop_int compute_scalings(
             OCPKKTMemory *OCP,
             double &obj_scale,
             FatropVecBF &x_scales,

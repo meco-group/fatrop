@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -22,28 +22,28 @@ using namespace std;
 FatropOCP::FatropOCP(
     const shared_ptr<OCP> &ocp,
     const shared_ptr<OCPLinearSolver> &ls,
-    const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> & options, const shared_ptr<FatropPrinter> &printer) : ocp_(ocp), dims_(ocp_->get_ocp_dims()),
-                                                  nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.get(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), printer_(printer), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
-                                                  sigma(s_memvec[0]),
-                                                  gradb(s_memvec[1]),
-                                                  s_dummy(s_memvec[2]),
-                                                  s_zero(s_memvec[3]),
-                                                  ux_dummy(ux_memvec[0]),
-                                                  rhs_rq(nlpdims_.nvars, 1),
-                                                  rhs_b(dims_.n_b_tot, 1),
-                                                  rhs_g(dims_.n_g_tot, 1),
-                                                  rhs_g_ineq(dims_.n_g_ineq_tot, 1),
-                                                  rhs_gradb(dims_.n_g_ineq_tot, 1),
-                                                  rhs_rq2(nlpdims_.nvars, 1),
-                                                  rhs_b2(dims_.n_b_tot, 1),
-                                                  rhs_g2(dims_.n_g_tot, 1),
-                                                  rhs_g_ineq2(dims_.n_g_ineq_tot, 1),
-                                                  rhs_gradb2(dims_.n_g_ineq_tot, 1),
-                                                  gradb_total_cache(dims_.n_g_ineq_tot, 1),
-                                                  sigma_total_cache(dims_.n_g_ineq_tot, 1),
-                                                  ux_test(nlpdims_.nvars, 1),
-                                                  lam_test(nlpdims_.neqs, 1),
-                                                  delta_s_test(nlpdims_.nineqs, 1)
+    const shared_ptr<OCPScalingMethod> &scaler, const shared_ptr<FatropOptions> &options, const shared_ptr<FatropPrinter> &printer) : ocp_(ocp), dims_(ocp_->get_ocp_dims()),
+                                                                                                                                      nlpdims_({sum(dims_.nx + dims_.nu), sum(dims_.ng + dims_.ng_ineq + dims_.nx) - dims_.nx.get(0), sum(dims_.ng_ineq)}), ls_(ls), scaler_(scaler), options_(options), printer_(printer), ocpkktmemory_(dims_), s_memvec(nlpdims_.nineqs, 4), ux_memvec(nlpdims_.nvars, 1),
+                                                                                                                                      sigma(s_memvec[0]),
+                                                                                                                                      gradb(s_memvec[1]),
+                                                                                                                                      s_dummy(s_memvec[2]),
+                                                                                                                                      s_zero(s_memvec[3]),
+                                                                                                                                      ux_dummy(ux_memvec[0]),
+                                                                                                                                      rhs_rq(nlpdims_.nvars, 1),
+                                                                                                                                      rhs_b(dims_.n_b_tot, 1),
+                                                                                                                                      rhs_g(dims_.n_g_tot, 1),
+                                                                                                                                      rhs_g_ineq(dims_.n_g_ineq_tot, 1),
+                                                                                                                                      rhs_gradb(dims_.n_g_ineq_tot, 1),
+                                                                                                                                      rhs_rq2(nlpdims_.nvars, 1),
+                                                                                                                                      rhs_b2(dims_.n_b_tot, 1),
+                                                                                                                                      rhs_g2(dims_.n_g_tot, 1),
+                                                                                                                                      rhs_g_ineq2(dims_.n_g_ineq_tot, 1),
+                                                                                                                                      rhs_gradb2(dims_.n_g_ineq_tot, 1),
+                                                                                                                                      gradb_total_cache(dims_.n_g_ineq_tot, 1),
+                                                                                                                                      sigma_total_cache(dims_.n_g_ineq_tot, 1),
+                                                                                                                                      ux_test(nlpdims_.nvars, 1),
+                                                                                                                                      lam_test(nlpdims_.neqs, 1),
+                                                                                                                                      delta_s_test(nlpdims_.nineqs, 1)
 {
     options_->register_option(BooleanOption("iterative_refinement_SOC", "Use iterative refinement for SOC", &it_ref, true));
 }
@@ -102,7 +102,9 @@ int FatropOCP::solve_soc_rhs(
     const FatropVecBF &delta_s,
     const FatropVecBF &constraint_violation)
 {
-    if(inertia_correction_c_cache != 0.0) return -1;
+    int min_it_ref = 0;
+    if (inertia_correction_c_cache != 0.0)
+        return -1;
     // bool it_ref = true;
     /// todo avoid retrieving unnecessary rhs'es
     ls_->get_rhs(
@@ -174,14 +176,17 @@ int FatropOCP::solve_soc_rhs(
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
-            if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
+            if (i >= min_it_ref)
             {
-                if (err_curr > 1e-6)
+                if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 0.9 * error_prev))
                 {
-                    return -2;
-                    // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    if (err_curr > 1e-6)
+                    {
+                        return -2;
+                        // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    }
+                    return 0;
                 }
-                return 0;
             }
             ls_->solve_rhs(
                 &ocpkktmemory_,

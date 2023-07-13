@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -30,6 +30,7 @@
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
 #include <memory>
+#include "auxiliary/Common.hpp"
 // #include <unistd.h>
 namespace fatrop
 {
@@ -41,14 +42,14 @@ namespace fatrop
             const std::shared_ptr<OCP> &ocp,
             const std::shared_ptr<OCPLinearSolver> &ls,
             const std::shared_ptr<OCPScalingMethod> &scaler, const std::shared_ptr<FatropOptions> &options, const std::shared_ptr<FatropPrinter> &printer);
-        int eval_lag_hess(
+        fatrop_int eval_lag_hess(
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &lam) override;
-        int eval_constr_jac(
+        fatrop_int eval_constr_jac(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override;
-        int solve_pd_sys(
+        fatrop_int solve_pd_sys(
             const double inertia_correction_w,
             const double inertia_correction_c,
             const FatropVecBF &ux,
@@ -56,48 +57,48 @@ namespace fatrop
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
             const FatropVecBF &gradb_total) override;
-        int solve_soc_rhs(
+        fatrop_int solve_soc_rhs(
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
             const FatropVecBF &constraint_violation) override;
-        int compute_scalings(
+        fatrop_int compute_scalings(
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr);
-        int eval_constraint_viol(
+        fatrop_int eval_constraint_viol(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override;
-        int eval_obj_grad(
+        fatrop_int eval_obj_grad(
             double obj_scale,
             const FatropVecBF &primal_vars,
             FatropVecBF &gradient) override;
-        int eval_obj(
+        fatrop_int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,
             double &res) override;
-        int eval_dual_inf(
+        fatrop_int eval_dual_inf(
             double obj_scale,
             const FatropVecBF &lam,
             const FatropVecBF &grad,
             FatropVecBF &du_inf) override;
-        int initialize_slacks(
+        fatrop_int initialize_slacks(
             FatropVecBF &s_curr) override;
-        int initialize_dual(
+        fatrop_int initialize_dual(
             const FatropVecBF &grad,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
             const FatropVecBF &zU) override;
 
-        int get_bounds(
+        fatrop_int get_bounds(
             FatropVecBF &lower,
             FatropVecBF &upper) const override
         {
             return ocp_->get_bounds(lower, upper);
         };
-        int get_initial_sol_guess(
+        fatrop_int get_initial_sol_guess(
             FatropVecBF &initial) const override
         {
             return ocp_->get_initial_sol_guess(initial);

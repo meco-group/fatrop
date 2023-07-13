@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -22,6 +22,7 @@
 #include <map>
 #include <type_traits>
 #include <iostream>
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     template <typename T>
@@ -61,7 +62,7 @@ namespace fatrop
 
    // define Numeric option as Option<double>
     typedef Option<double> NumericOption;
-    typedef Option<int> IntegerOption;
+    typedef Option<fatrop_int> IntegerOption;
     typedef Option<std::string> StringOption;
     typedef Option<bool> BooleanOption;
 

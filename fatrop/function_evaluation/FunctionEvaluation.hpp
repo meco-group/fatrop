@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -21,6 +21,7 @@
 #include <vector>
 #include <cstring>
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "auxiliary/Common.hpp"
 
 #ifdef ENABLE_MULTITHREADING
 #include <omp.h>
@@ -33,15 +34,15 @@ namespace fatrop
     {
     public:
         /// number of input vectors of the function
-        int n_in;
+        fatrop_int n_in;
         /// number of columns in output matrix
-        int out_m;
+        fatrop_int out_m;
         /// number of rows in output matrix
-        int out_n;
+        fatrop_int out_n;
         /// number of nonzeros in output matrix
-        int out_nnz;
+        fatrop_int out_nnz;
         /// sparsity pattern of output matrix sparsity pattern [m,n|0,ncol0, ncol0:1 , ..., | nnz | row_el0, row_el1, ...]
-        std::vector<int> sparsity_out;
+        std::vector<fatrop_int> sparsity_out;
         /// buffer to safe evaluation result, in a buffer we always save a matrix in CCS format with lda==out_m
         #ifndef ENABLE_MULTITHREADING
         std::vector<double> buffer;
@@ -49,10 +50,10 @@ namespace fatrop
         vector<vector<double>> buffer = vector<vector<double>>(omp_get_max_threads());
         #endif
         /// evaluate function and save res in "ccs format with lda==out_m"
-        virtual int eval_buffer(const double **arg) = 0;
+        virtual fatrop_int eval_buffer(const double **arg) = 0;
         /// evaluate function and save res in "blasfeo format"
-        int eval_bf(const double **arg, MAT *bf_mat);
-        int eval_array(const double **arg, double *array);
+        fatrop_int eval_bf(const double **arg, MAT *bf_mat);
+        fatrop_int eval_array(const double **arg, double *array);
         ~EvalBase(){};
     };
 };     // namespace fatrop

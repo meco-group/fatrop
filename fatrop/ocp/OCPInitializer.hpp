@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -19,6 +19,7 @@
 #ifndef OCPINITIALIZERINCLUDED
 #define OCPINITIALIZERINCLUDED
 #include "OCPKKT.hpp"
+#include "auxiliary/Common.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
@@ -29,10 +30,10 @@ namespace fatrop
     {
     public:
         /** \brief this method adapts KKT system for initialization, JAC and GRAD are assumed evaluated !! */
-        int modify_kkt_ls_dual_estimate(
+        fatrop_int modify_kkt_ls_dual_estimate(
             OCPKKTMemory *OCP,
             const FatropVecBF &grad);
-        int intialize_slack_variables(
+        fatrop_int intialize_slack_variables(
             OCPKKTMemory *OCP,
             FatropVecBF &s);
     };

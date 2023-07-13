@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -32,6 +32,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "auxiliary/Common.hpp"
 
 namespace fatrop
 {
@@ -66,7 +67,7 @@ namespace fatrop
         void build(const std::shared_ptr<FatropNLP> &nlp);
 
     public:
-        int optimize();
+        fatrop_int optimize();
         // TODO: make this protected and use last_solution instead and choose other name
         const FatropVecBF &last_solution_primal() const;
         const FatropVecBF &last_solution_dual() const;
@@ -136,11 +137,11 @@ namespace fatrop
         StageOCPSolution();
         void set_dims(const OCPDims &dims);
         void set_parameters(const std::vector<double> &global_params, const std::vector<double> &stage_params);
-        int nx;
-        int nu;
-        int n_stage_params;
-        int n_global_params;
-        int K;
+        fatrop_int nx;
+        fatrop_int nu;
+        fatrop_int n_stage_params;
+        fatrop_int n_global_params;
+        fatrop_int K;
 
     public:
         // todo make this deprecated, only use Eval
@@ -185,17 +186,17 @@ namespace fatrop
         StageExpressionEvaluatorFactory get_expression_evaluator(const std::shared_ptr<StageExpression> &expr);
         AppParameterSetter get_parameter_setter(const std::string &setter_name);
         void build();
-        int optimize();
+        fatrop_int optimize();
         const StageOCPSolution &last_stageocp_solution() const;
         const FatropSolution &last_solution() const { return last_stageocp_solution(); };
         const std::vector<std::string> parameter_names() const;
         const std::vector<std::string> stage_expression_names() const;
 
     public:
-        const int nx_;
-        const int nu_;
-        const int n_stage_params_;
-        const int K_;
+        const fatrop_int nx_;
+        const fatrop_int nu_;
+        const fatrop_int n_stage_params_;
+        const fatrop_int K_;
 
     private:
         StageOCPSolution last_solution_;

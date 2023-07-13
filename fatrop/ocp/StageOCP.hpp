@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -24,6 +24,7 @@
 #include <string>
 #include <iostream>
 #include <auxiliary/DynamicLib.hpp>
+#include <auxiliary/Common.hpp>
 #include "function_evaluation/CasadiCodegen.hpp"
 #include "json/json.h"
 #include <fstream>
@@ -31,7 +32,7 @@
 
 namespace fatrop
 {
-    /* TODO: at this point the StageOCP's implementation implements function evaluation through Casadi Codegen 
+    /* TODO: at this pofatrop_int the StageOCP's implementation implements function evaluation through Casadi Codegen 
     *  it should become an interface that can be implemented by user defined function evaluation methods 
     *  the StageOCP is then characterised by its structure that is a bit less general than the OCPAbstract interface
     *  more in particular it seperates initial, intermediate and terminal stages, where it has different constraints and objectives
@@ -47,7 +48,7 @@ namespace fatrop
     class StageOCP : public OCPAbstract
     {
     public:
-        StageOCP(const int nu, const int nx, const int ngI, const int ng, const int ngF, const int ng_ineqI, const int ng_ineq, const int ng_ineqF, const int n_stage_params, const int n_global_params, const int K)
+        StageOCP(const fatrop_int nu, const fatrop_int nx, const fatrop_int ngI, const fatrop_int ng, const fatrop_int ngF, const fatrop_int ng_ineqI, const fatrop_int ng_ineq, const fatrop_int ng_ineqF, const fatrop_int n_stage_params, const fatrop_int n_global_params, const fatrop_int K)
         :
         nu_(nu),
         nx_(nx),
@@ -62,39 +63,39 @@ namespace fatrop
         K_(K)
         {
         }
-        int get_nxk(const int k) const override;
-        int get_nuk(const int k) const override;
-        int get_ngk(const int k) const override;
-        int get_ng_ineq_k(const int k) const override;
-        int get_n_global_params() const;
-        int get_n_stage_params_k(const int k) const override;
-        int get_horizon_length() const override;
-        const int nu_;
-        const int nx_;
-        const int ngI_;
-        const int ng_;
-        const int ngF_;
-        const int ng_ineqI_;
-        const int ng_ineq_;
-        const int ng_ineqF_;
-        const int n_stage_params_;
-        const int n_global_params_;
-        const int K_;
+        fatrop_int get_nxk(const fatrop_int k) const override;
+        fatrop_int get_nuk(const fatrop_int k) const override;
+        fatrop_int get_ngk(const fatrop_int k) const override;
+        fatrop_int get_ng_ineq_k(const fatrop_int k) const override;
+        fatrop_int get_n_global_params() const;
+        fatrop_int get_n_stage_params_k(const fatrop_int k) const override;
+        fatrop_int get_horizon_length() const override;
+        const fatrop_int nu_;
+        const fatrop_int nx_;
+        const fatrop_int ngI_;
+        const fatrop_int ng_;
+        const fatrop_int ngF_;
+        const fatrop_int ng_ineqI_;
+        const fatrop_int ng_ineq_;
+        const fatrop_int ng_ineqF_;
+        const fatrop_int n_stage_params_;
+        const fatrop_int n_global_params_;
+        const fatrop_int K_;
     };
     class StageOCPRockit : public StageOCP
     {
     public:
-        StageOCPRockit(const int nu,
-                 const int nx,
-                 const int ngI,
-                 const int ng,
-                 const int ngF,
-                 const int ng_ineqI,
-                 const int ng_ineq,
-                 const int ng_ineqF,
-                 const int n_stage_params,
-                 const int n_global_params,
-                 const int K,
+        StageOCPRockit(const fatrop_int nu,
+                 const fatrop_int nx,
+                 const fatrop_int ngI,
+                 const fatrop_int ng,
+                 const fatrop_int ngF,
+                 const fatrop_int ng_ineqI,
+                 const fatrop_int ng_ineq,
+                 const fatrop_int ng_ineqF,
+                 const fatrop_int n_stage_params,
+                 const fatrop_int n_global_params,
+                 const fatrop_int K,
                  const EvalCasGen &BAbtf,
                  const EvalCasGen &bkf,
                  const EvalCasGen &RSQrqtIf,
@@ -124,33 +125,33 @@ namespace fatrop
                  const std::vector<double> &global_params,
                  const std::vector<double> &initial_u,
                  const std::vector<double> &initial_x);
-        int get_default_stage_paramsk(double *stage_params_res, const int k) const override
+        fatrop_int get_default_stage_paramsk(double *stage_params_res, const fatrop_int k) const override
         {
-            int offs = k * n_stage_params_;
+            fatrop_int offs = k * n_stage_params_;
             const double *stage_params_p = stage_params.data();
-            for (int i = 0; i < n_stage_params_; i++)
+            for (fatrop_int i = 0; i < n_stage_params_; i++)
             {
                 stage_params_res[i] = stage_params_p[offs + i];
             }
             return 0;
         }
-        int get_default_global_params(double *global_params_res) const override
+        fatrop_int get_default_global_params(double *global_params_res) const override
         {
             const double *global_params_p = global_params.data();
-            for (int i = 0; i < n_global_params_; i++)
+            for (fatrop_int i = 0; i < n_global_params_; i++)
             {
                 global_params_res[i] = global_params_p[i];
             }
             return 0;
         }
-        int eval_BAbtk(const double *states_kp1,
+        fatrop_int eval_BAbtk(const double *states_kp1,
                        const double *inputs_k,
                        const double *states_k,
                        const double *stage_params_k,
                        const double *global_params,
                        MAT *res,
-                       const int k) override;
-        int eval_RSQrqtk(const double *objective_scale,
+                       const fatrop_int k) override;
+        fatrop_int eval_RSQrqtk(const double *objective_scale,
                          const double *inputs_k,
                          const double *states_k,
                          const double *lam_dyn_k,
@@ -159,102 +160,102 @@ namespace fatrop
                          const double *stage_params_k,
                          const double *global_params,
                          MAT *res,
-                         const int k) override;
-        int eval_Ggtk(
+                         const fatrop_int k) override;
+        fatrop_int eval_Ggtk(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             MAT *res,
-            const int k) override;
-        int eval_Ggt_ineqk(
+            const fatrop_int k) override;
+        fatrop_int eval_Ggt_ineqk(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             MAT *res,
-            const int k) override;
-        int eval_bk(
+            const fatrop_int k) override;
+        fatrop_int eval_bk(
             const double *states_kp1,
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *constraint_violation_k,
-            const int k) override;
-        int eval_gk(
+            const fatrop_int k) override;
+        fatrop_int eval_gk(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
-            const int k) override;
-        int eval_gineqk(
+            const fatrop_int k) override;
+        fatrop_int eval_gineqk(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
-            const int k) override;
-        int eval_rqk(
+            const fatrop_int k) override;
+        fatrop_int eval_rqk(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
-            const int k) override;
+            const fatrop_int k) override;
 
-        int eval_Lk(
+        fatrop_int eval_Lk(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
-            const int k) override;
-        int get_initial_xk(double *xk, const int k) const override
+            const fatrop_int k) override;
+        fatrop_int get_initial_xk(double *xk, const fatrop_int k) const override
         {
             const double *initial_x_p = initial_x.data();
-            for (int i = 0; i < nx_; i++)
+            for (fatrop_int i = 0; i < nx_; i++)
             {
                 xk[i] = initial_x_p[i + k * nx_];
             }
             return 0;
         };
-        int get_initial_uk(double *uk, const int k) const override
+        fatrop_int get_initial_uk(double *uk, const fatrop_int k) const override
         {
             const double *initial_u_p = initial_u.data();
-            for (int i = 0; i < nu_; i++)
+            for (fatrop_int i = 0; i < nu_; i++)
             {
                 uk[i] = initial_u_p[i + k * nu_];
             }
             return 0;
         };
-        int set_initial_xk(double *xk, const int k)
+        fatrop_int set_initial_xk(double *xk, const fatrop_int k)
         {
             double *initial_x_p = initial_x.data();
-            for (int i = 0; i < nx_; i++)
+            for (fatrop_int i = 0; i < nx_; i++)
             {
                 initial_x_p[i + k * nx_] = xk[i];
             }
             return 0;
         };
-        int set_initial_uk(double *uk, const int k)
+        fatrop_int set_initial_uk(double *uk, const fatrop_int k)
         {
             double *initial_u_p = initial_u.data();
-            for (int i = 0; i < nu_; i++)
+            for (fatrop_int i = 0; i < nu_; i++)
             {
                 initial_u_p[i + k * nu_] = uk[i];
             }
             return 0;
         };
-        int get_boundsk(double *lower, double *upper, const int k) const override
+        fatrop_int get_boundsk(double *lower, double *upper, const fatrop_int k) const override
         {
             const double *bounds_L_p = bounds_L.data();
             const double *bounds_U_p = bounds_U.data();
-            int offs = 0;
-            int ngineq = ng_ineq_;
+            fatrop_int offs = 0;
+            fatrop_int ngineq = ng_ineq_;
             if (k == 0)
             {
                 offs = 0;
@@ -272,7 +273,7 @@ namespace fatrop
                 ngineq = ng_ineqF_;
             }
 
-            for (int i = 0; i < ngineq; i++)
+            for (fatrop_int i = 0; i < ngineq; i++)
             {
                 lower[i] = bounds_L_p[i + offs];
                 upper[i] = bounds_U_p[i + offs];
@@ -326,17 +327,17 @@ namespace fatrop
             // std::stringstream buffer;
             // buffer << t.rdbuf();
             // json::jobject json_spec = json::jobject::parse(buffer.str());
-            const int K = json_spec["K"];
-            const int nx = json_spec["nx"];
-            const int nu = json_spec["nu"];
-            const int ngI = json_spec["ngI"];
-            const int ng = json_spec["ng"];
-            const int ngF = json_spec["ngF"];
-            const int ng_ineqI = json_spec["ng_ineqI"];
-            const int ng_ineq = json_spec["ng_ineq"];
-            const int ng_ineqF = json_spec["ng_ineqF"];
-            const int no_stage_params = json_spec["n_stage_params"];
-            const int no_global_params = json_spec["n_global_params"];
+            const fatrop_int K = json_spec["K"];
+            const fatrop_int nx = json_spec["nx"];
+            const fatrop_int nu = json_spec["nu"];
+            const fatrop_int ngI = json_spec["ngI"];
+            const fatrop_int ng = json_spec["ng"];
+            const fatrop_int ngF = json_spec["ngF"];
+            const fatrop_int ng_ineqI = json_spec["ng_ineqI"];
+            const fatrop_int ng_ineq = json_spec["ng_ineq"];
+            const fatrop_int ng_ineqF = json_spec["ng_ineqF"];
+            const fatrop_int no_stage_params = json_spec["n_stage_params"];
+            const fatrop_int no_global_params = json_spec["n_global_params"];
             std::vector<double> lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
             std::vector<double> upperI = json_spec["upperI"].get_number_array<double>("%lf");
             std::vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
@@ -409,24 +410,24 @@ namespace fatrop
     // {
     // public:
     //     // problem dimensions
-    //     virtual int get_ng_initial() { return 0; };
-    //     virtual int get_ng_intermediate() { return 0; };
-    //     virtual int get_ng_terminal() { return 0; };
-    //     virtual int get_ng_ineq_initial() { return 0; };
-    //     virtual int get_ng_ineq_intermediate() { return 0; };
-    //     virtual int get_ng_ineq_terminal() { return 0; }
-    //     virtual int get_nxk(const int k) const = 0;
-    //     virtual int get_nuk(const int k) const = 0;
-    //     virtual int get_n_global_params() const = 0;
-    //     virtual int get_n_stage_params_k(const int k) const = 0;
+    //     virtual fatrop_int get_ng_initial() { return 0; };
+    //     virtual fatrop_int get_ng_intermediate() { return 0; };
+    //     virtual fatrop_int get_ng_terminal() { return 0; };
+    //     virtual fatrop_int get_ng_ineq_initial() { return 0; };
+    //     virtual fatrop_int get_ng_ineq_intermediate() { return 0; };
+    //     virtual fatrop_int get_ng_ineq_terminal() { return 0; }
+    //     virtual fatrop_int get_nxk(const fatrop_int k) const = 0;
+    //     virtual fatrop_int get_nuk(const fatrop_int k) const = 0;
+    //     virtual fatrop_int get_n_global_params() const = 0;
+    //     virtual fatrop_int get_n_stage_params_k(const fatrop_int k) const = 0;
     //     // functions related to dynamics
-    //     virtual int eval_BAbt(const double *states_kp1,
+    //     virtual fatrop_int eval_BAbt(const double *states_kp1,
     //                           const double *inputs_k,
     //                           const double *states_k,
     //                           const double *stage_params_k,
     //                           const double *global_params,
     //                           MAT *res) = 0;
-    //     virtual int eval_RSQrqt_initial(const double *objective_scale,
+    //     virtual fatrop_int eval_RSQrqt_initial(const double *objective_scale,
     //                                     const double *inputs_k,
     //                                     const double *states_k,
     //                                     const double *lam_dyn_k,
@@ -435,7 +436,7 @@ namespace fatrop
     //                                     const double *stage_params_k,
     //                                     const double *global_params,
     //                                     MAT *res) = 0;
-    //     virtual int eval_RSQrqt_intermediate(const double *objective_scale,
+    //     virtual fatrop_int eval_RSQrqt_intermediate(const double *objective_scale,
     //                                          const double *inputs_k,
     //                                          const double *states_k,
     //                                          const double *lam_dyn_k,
@@ -444,7 +445,7 @@ namespace fatrop
     //                                          const double *stage_params_k,
     //                                          const double *global_params,
     //                                          MAT *res) = 0;
-    //     virtual int eval_RSQrqt_terminal(const double *objective_scale,
+    //     virtual fatrop_int eval_RSQrqt_terminal(const double *objective_scale,
     //                                      const double *inputs_k,
     //                                      const double *states_k,
     //                                      const double *lam_dyn_k,
@@ -453,135 +454,135 @@ namespace fatrop
     //                                      const double *stage_params_k,
     //                                      const double *global_params,
     //                                      MAT *res) = 0;
-    //     virtual int eval_Ggtk_initial(
+    //     virtual fatrop_int eval_Ggtk_initial(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         MAT *res) { return 0; };
-    //     virtual int eval_Ggtk_intermediate(
+    //     virtual fatrop_int eval_Ggtk_intermediate(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         MAT *res) { return 0; };
-    //     virtual int eval_Ggtk_terminal(
+    //     virtual fatrop_int eval_Ggtk_terminal(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         MAT *res) { return 0; };
-    //     virtual int eval_Ggt_ineq_initial(
+    //     virtual fatrop_int eval_Ggt_ineq_initial(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         MAT *res) { return 0; };
-    //     virtual int eval_Ggt_ineq_intermediate(
+    //     virtual fatrop_int eval_Ggt_ineq_intermediate(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         MAT *res) { return 0; };
-    //     virtual int eval_Ggt_ineq_terminal(
+    //     virtual fatrop_int eval_Ggt_ineq_terminal(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         MAT *res) { return 0; };
-    //     virtual int eval_b_initial(
+    //     virtual fatrop_int eval_b_initial(
     //         const double *states_kp1,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *constraint_violation_k) = 0;
-    //     virtual int eval_b_intermediate(
+    //     virtual fatrop_int eval_b_intermediate(
     //         const double *states_kp1,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *constraint_violation_k) = 0;
-    //     virtual int eval_b_terminal(
+    //     virtual fatrop_int eval_b_terminal(
     //         const double *states_kp1,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *constraint_violation_k) = 0;
-    //     virtual int eval_g_initial(
+    //     virtual fatrop_int eval_g_initial(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) { return 0; };
-    //     virtual int eval_g_intermediate(
+    //     virtual fatrop_int eval_g_intermediate(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) { return 0; };
-    //     virtual int eval_g_terminal(
+    //     virtual fatrop_int eval_g_terminal(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) { return 0; };
-    //     virtual int eval_gineq_initial(
+    //     virtual fatrop_int eval_gineq_initial(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) { return 0; };
-    //     virtual int eval_gineq_intermediate(
+    //     virtual fatrop_int eval_gineq_intermediate(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) { return 0; };
-    //     virtual int eval_gineq_terminal(
+    //     virtual fatrop_int eval_gineq_terminal(
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) { return 0; };
-    //     virtual int eval_rq_initial(
+    //     virtual fatrop_int eval_rq_initial(
     //         const double *objective_scale,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) = 0;
-    //     virtual int eval_rq_intermediate(
+    //     virtual fatrop_int eval_rq_intermediate(
     //         const double *objective_scale,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) = 0;
-    //     virtual int eval_rq_terminal(
+    //     virtual fatrop_int eval_rq_terminal(
     //         const double *objective_scale,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) = 0;
-    //     virtual int eval_L_initial(
+    //     virtual fatrop_int eval_L_initial(
     //         const double *objective_scale,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) = 0;
-    //     virtual int eval_L_intermediate(
+    //     virtual fatrop_int eval_L_intermediate(
     //         const double *objective_scale,
     //         const double *inputs_k,
     //         const double *states_k,
     //         const double *stage_params_k,
     //         const double *global_params,
     //         double *res) = 0;
-    //     virtual int eval_L_terminal(
+    //     virtual fatrop_int eval_L_terminal(
     //         const double *objective_scale,
     //         const double *inputs_k,
     //         const double *states_k,

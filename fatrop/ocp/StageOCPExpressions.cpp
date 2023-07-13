@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -19,11 +19,11 @@
 #include "StageOCPExpressions.hpp"
 using namespace fatrop;
 using namespace std;
-int StageExpression::size() const
+fatrop_int StageExpression::size() const
 {
     return n_rows() * n_cols();
 }
-IndexEpression::IndexEpression(const bool control, const vector<int> offsets_in, const vector<int> offsets_out) : _no_var(offsets_in.size()),
+IndexEpression::IndexEpression(const bool control, const vector<fatrop_int> offsets_in, const vector<fatrop_int> offsets_out) : _no_var(offsets_in.size()),
                                                                                                                   _offsets_in(offsets_in),
                                                                                                                   _offsets_out(offsets_out),
                                                                                                                   _control(control)
@@ -33,24 +33,24 @@ void IndexEpression::evaluate(const double *u, const double *x, const double *gl
 {
     if (_control)
     {
-        for (int i = 0; i < _no_var; i++)
+        for (fatrop_int i = 0; i < _no_var; i++)
         {
             res[_offsets_in.at(i)] = u[_offsets_out.at(i)];
         }
     }
     else
     {
-        for (int i = 0; i < _no_var; i++)
+        for (fatrop_int i = 0; i < _no_var; i++)
         {
             res[_offsets_in.at(i)] = x[_offsets_out.at(i)];
         }
     }
 };
-int IndexEpression::n_rows() const
+fatrop_int IndexEpression::n_rows() const
 {
     return _no_var;
 }
-int IndexEpression::n_cols() const
+fatrop_int IndexEpression::n_cols() const
 {
     return 1;
 }
@@ -62,15 +62,15 @@ void EvalBaseSE::evaluate(const double *u, const double *x, const double *global
     const double *arg[] = {u, x, stage_params, global_params};
     evalbase_->eval_array(arg, res);
 }
-int EvalBaseSE::n_rows() const
+fatrop_int EvalBaseSE::n_rows() const
 {
     return n_rows_;
 }
-int EvalBaseSE::n_cols() const
+fatrop_int EvalBaseSE::n_cols() const
 {
     return n_cols_;
 }
-StageControlGridSampler::StageControlGridSampler(int nu, int nx, int no_stage_params, int K, const shared_ptr<StageExpression> &eval) : nu(nu),
+StageControlGridSampler::StageControlGridSampler(fatrop_int nu, fatrop_int nx, fatrop_int no_stage_params, fatrop_int K, const shared_ptr<StageExpression> &eval) : nu(nu),
                                                                                                                              nx(nx),
                                                                                                                              no_stage_params(no_stage_params),
                                                                                                                              K_(K),
@@ -78,31 +78,31 @@ StageControlGridSampler::StageControlGridSampler(int nu, int nx, int no_stage_pa
 {
 }
 
-int StageControlGridSampler::size() const
+fatrop_int StageControlGridSampler::size() const
 {
     return K_ * eval_->size();
 }
-int StageControlGridSampler::n_rows() const
+fatrop_int StageControlGridSampler::n_rows() const
 {
     return eval_->n_rows();
 }
-int StageControlGridSampler::n_cols() const
+fatrop_int StageControlGridSampler::n_cols() const
 {
     return eval_->n_cols();
 }
-int StageControlGridSampler::K() const
+fatrop_int StageControlGridSampler::K() const
 {
     return K_;
 }
 
-int StageControlGridSampler::evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample) const
+fatrop_int StageControlGridSampler::evaluate(const vector<double> &solution, const vector<double> &global_params, const vector<double> &stage_params, vector<double> &sample) const
 {
     const double *sol_p = solution.data();
     double *res_p = sample.data();
     const double *global_params_p = global_params.data();
     const double *stage_params_p = stage_params.data();
-    int size = eval_->size();
-    for (int k = 0; k < K_ - 1; k++)
+    fatrop_int size = eval_->size();
+    for (fatrop_int k = 0; k < K_ - 1; k++)
     {
         eval_->evaluate(sol_p + k * (nu + nx), sol_p + k * (nu + nx) + nu, global_params_p, stage_params_p + k * no_stage_params, res_p + k * size);
     };
@@ -110,7 +110,7 @@ int StageControlGridSampler::evaluate(const vector<double> &solution, const vect
     return 0;
 }
 
-ParameterSetter::ParameterSetter(const vector<int> &offsets_in, const vector<int> &offsets_out, const int no_stage_params, const int no_var, const int K, const bool global) : _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
+ParameterSetter::ParameterSetter(const vector<fatrop_int> &offsets_in, const vector<fatrop_int> &offsets_out, const fatrop_int no_stage_params, const fatrop_int no_var, const fatrop_int K, const bool global) : _offsets_in(offsets_in), _offsets_out(offsets_out), no_stage_params(no_stage_params), _no_var(no_var), K(K), _global(global)
 {
 }
 void ParameterSetter::set_value(vector<double>& global_params, vector<double>& stage_params, const double value[])
@@ -118,7 +118,7 @@ void ParameterSetter::set_value(vector<double>& global_params, vector<double>& s
     if (_global)
     {
         double *params = global_params.data();
-        for (int i = 0; i < _no_var; i++)
+        for (fatrop_int i = 0; i < _no_var; i++)
         {
             params[_offsets_out.at(i)] = value[_offsets_in.at(i)];
         }
@@ -126,9 +126,9 @@ void ParameterSetter::set_value(vector<double>& global_params, vector<double>& s
     else // stage paramter
     {
         double *params = stage_params.data(); 
-        for (int k = 0; k < K; k++)
+        for (fatrop_int k = 0; k < K; k++)
         {
-            for (int i = 0; i < _no_var; i++)
+            for (fatrop_int i = 0; i < _no_var; i++)
             {
                 params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
             }

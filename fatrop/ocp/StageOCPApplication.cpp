@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -34,15 +34,15 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
     AlgBuilder algbuilder;
     algbuilder.set_printer(printer_);
     algbuilder.build_fatrop_algorithm_objects(nlp, fatropoptions_, fatropdata_, journaller_);
-    fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "print level", &printer_->print_level(), 10));
+    fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "prfatrop_fatrop_int level", &printer_->print_level(), 10));
     fatropalg_ = algbuilder.build_algorithm();
     dirty = false;
 }
 
-int NLPApplication::optimize()
+fatrop_int NLPApplication::optimize()
 {
     assert(!dirty);
-    int ret = fatropalg_->optimize();
+    fatrop_int ret = fatropalg_->optimize();
     return ret;
 }
 // TODO: make this protected and use last_solution instead and choose other name
@@ -93,7 +93,7 @@ void NLPApplication::set_option(const string &option_name, T value)
 {
     fatropoptions_->set(option_name, value);
 }
-template void NLPApplication::set_option<int>(const string &, int);
+template void NLPApplication::set_option<fatrop_int>(const string &, int);
 template void NLPApplication::set_option<double>(const string &, double);
 template void NLPApplication::set_option<bool>(const string &, bool);
 
@@ -189,19 +189,19 @@ void StageOCPSolution::set_parameters(const vector<double> &global_params, const
 
 void StageOCPSolution::get_u(std::vector<double> &result) const
 {
-    for (int k = 0; k < K - 1; k++)
+    for (fatrop_int k = 0; k < K - 1; k++)
     {
-        int offs = (nu + nx) * k;
-        for (int i = 0; i < nu; i++)
+        fatrop_int offs = (nu + nx) * k;
+        for (fatrop_int i = 0; i < nu; i++)
             result[nu * k + i] = sol_primal_[offs + i];
     }
 }
 void StageOCPSolution::get_x(std::vector<double> &result) const
 {
-    for (int k = 0; k < K; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
-        int offs = (k == K - 1) ? (nu + nx) * k : (nu + nx) * k + nu;
-        for (int i = 0; i < nx; i++)
+        fatrop_int offs = (k == K - 1) ? (nu + nx) * k : (nu + nx) * k + nu;
+        for (fatrop_int i = 0; i < nx; i++)
             result[nx * k + i] = sol_primal_[offs + i];
     }
 }
@@ -220,19 +220,19 @@ void StageOCPSolution::evaluate(const StageExpressionEvaluatorBase &evaluator, v
 StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 void StageOCPApplication::set_initial_u(const std::vector<double> &initial_guess_u) const
 {
-    for (int k = 0; k < K_ - 1; k++)
+    for (fatrop_int k = 0; k < K_ - 1; k++)
     {
-        int offs = (nu_ + nx_) * k;
-        for (int i = 0; i < nu_; i++)
+        fatrop_int offs = (nu_ + nx_) * k;
+        for (fatrop_int i = 0; i < nu_; i++)
             initial_guess_primal().at(offs + i) = initial_guess_u[nu_ * k + i];
     }
 }
 void StageOCPApplication::set_initial_x(const std::vector<double> &initial_guess_x) const
 {
-    for (int k = 0; k < K_; k++)
+    for (fatrop_int k = 0; k < K_; k++)
     {
-        int offs = (k == K_ - 1) ? (nu_ + nx_) * k : (nu_ + nx_) * k + nu_;
-        for (int i = 0; i < nx_; i++)
+        fatrop_int offs = (k == K_ - 1) ? (nu_ + nx_) * k : (nu_ + nx_) * k + nu_;
+        for (fatrop_int i = 0; i < nx_; i++)
             initial_guess_primal().at(offs + i) = initial_guess_x[nx_ * k + i];
     }
 }
@@ -258,9 +258,9 @@ void StageOCPApplication::build()
     last_solution_.set_dims(get_ocp_dims());
     dirty = false;
 }
-int StageOCPApplication::optimize()
+fatrop_int StageOCPApplication::optimize()
 {
-    int ret = NLPApplication::optimize();
+    fatrop_int ret = NLPApplication::optimize();
     last_solution_.set_parameters(global_parameters(), stage_parameters());
     if (ret == 0)
     {
@@ -285,10 +285,10 @@ StageOCPApplication StageOCPApplicationFactory::from_rockit_interface(const stri
     auto result = StageOCPApplication(stageocp);
     // add all samplers
     vector<string> sampler_names = json_spec["samplers"];
-    // const int nu = stageocp->nu_;
-    // const int nx = stageocp->nx_;
-    const int no_stage_params = stageocp->n_stage_params_;
-    const int K = stageocp->K_;
+    // const fatrop_int nu = stageocp->nu_;
+    // const fatrop_int nx = stageocp->nx_;
+    const fatrop_int no_stage_params = stageocp->n_stage_params_;
+    const fatrop_int K = stageocp->K_;
     for (auto sampler_name : sampler_names)
     {
         auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
@@ -299,8 +299,8 @@ StageOCPApplication StageOCPApplicationFactory::from_rockit_interface(const stri
     vector<string> state_names = states_offset.keys();
     for (auto state_name : state_names)
     {
-        vector<int> in = states_offset[state_name].as_object().array(0).get_number_array<int>("%d");
-        vector<int> out = states_offset[state_name].as_object().array(1).get_number_array<int>("%d");
+        vector<fatrop_int> in = states_offset[state_name].as_object().array(0).get_number_array<fatrop_int>("%d");
+        vector<fatrop_int> out = states_offset[state_name].as_object().array(1).get_number_array<fatrop_int>("%d");
         result.stage_expressions[string("state_") + state_name] = make_shared<IndexEpression>(false, in, out);
     }
     // add control samplers
@@ -308,8 +308,8 @@ StageOCPApplication StageOCPApplicationFactory::from_rockit_interface(const stri
     vector<string> control_names = controls_offset.keys();
     for (auto control_name : control_names)
     {
-        vector<int> in = controls_offset[control_name].as_object().array(0).get_number_array<int>("%d");
-        vector<int> out = controls_offset[control_name].as_object().array(1).get_number_array<int>("%d");
+        vector<fatrop_int> in = controls_offset[control_name].as_object().array(0).get_number_array<fatrop_int>("%d");
+        vector<fatrop_int> out = controls_offset[control_name].as_object().array(1).get_number_array<fatrop_int>("%d");
         result.stage_expressions[string("control_") + control_name] = make_shared<IndexEpression>(true, in, out);
     }
     // add all parameter setters
@@ -317,16 +317,16 @@ StageOCPApplication StageOCPApplicationFactory::from_rockit_interface(const stri
     vector<string> control_params_names = control_params_offset.keys();
     for (auto control_params_name : control_params_names)
     {
-        vector<int> in = control_params_offset[control_params_name].as_object().array(0).get_number_array<int>("%d");
-        vector<int> out = control_params_offset[control_params_name].as_object().array(1).get_number_array<int>("%d");
+        vector<fatrop_int> in = control_params_offset[control_params_name].as_object().array(0).get_number_array<fatrop_int>("%d");
+        vector<fatrop_int> out = control_params_offset[control_params_name].as_object().array(1).get_number_array<fatrop_int>("%d");
         result.param_setters[control_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, false);
     }
     json::jobject global_params_offset = json_spec["global_params_offset"];
     vector<string> global_params_names = global_params_offset.keys();
     for (auto global_params_name : global_params_names)
     {
-        vector<int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<int>("%d");
-        vector<int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<int>("%d");
+        vector<fatrop_int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<fatrop_int>("%d");
+        vector<fatrop_int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<fatrop_int>("%d");
         result.param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
     }
     result.build();

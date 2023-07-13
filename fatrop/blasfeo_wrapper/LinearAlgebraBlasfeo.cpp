@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -20,47 +20,47 @@
 using namespace std;
 namespace fatrop
 {
-    void fatrop_dcolsc(int kmax, double alpha, struct blasfeo_dmat *sA, int ai, int aj)
+    void fatrop_dcolsc(fatrop_int kmax, double alpha, struct blasfeo_dmat *sA, fatrop_int ai, fatrop_int aj)
     {
-        for (int k = 0; k < kmax; k++)
+        for (fatrop_int k = 0; k < kmax; k++)
         {
             MATEL(sA, ai + k, aj) *= alpha;
         }
     }
     /** \brief copy elements from sx to sy but in reversed order to avoid aliasing issues in recursion */
-    void fatrop_dveccp_reversed(int m, struct blasfeo_dvec *sx, int xi, struct blasfeo_dvec *sy, int yi)
+    void fatrop_dveccp_reversed(fatrop_int m, struct blasfeo_dvec *sx, fatrop_int xi, struct blasfeo_dvec *sy, fatrop_int yi)
     {
-        for (int i = m - 1; i >= 0; i--)
+        for (fatrop_int i = m - 1; i >= 0; i--)
         {
             VECEL(sy, yi + i) = VECEL(sx, xi + i);
         }
     }
 
-    // void fatrop_potrf_l_mn(int m, int n, struct blasfeo_dmat *sC, int ci, int cj, struct blasfeo_dmat *sD, int di, int dj)
+    // void fatrop_potrf_l_mn(fatrop_int m, fatrop_int n, struct blasfeo_dmat *sC, fatrop_int ci, fatrop_int cj, struct blasfeo_dmat *sD, fatrop_int di, fatrop_int dj)
     // {
     //     blasfeo_dpotrf_l_mn(m, n, sC, ci, cj, sD, di, dj);
-    //     int minmn = (m < n) ? m : n;
-    //     for (int i =0; i<minmn; i++){
+    //     fatrop_int minmn = (m < n) ? m : n;
+    //     for (fatrop_int i =0; i<minmn; i++){
     //         assert(MATEL(sD, di+i,dj+i)>0);
     //     }
     // }
     /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
-    void fatrop_dtrsm_rlnn(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
+    void fatrop_dtrsm_rlnn(fatrop_int m, fatrop_int n, double alpha, MAT *sA, fatrop_int offs_ai, fatrop_int offs_aj, MAT *sB, fatrop_int offs_bi, fatrop_int offs_bj, MAT *sD, fatrop_int offs_di, fatrop_int offs_dj)
     {
         sD->use_dA = 0;
-        for (int aj = n - 1; aj >= 0; aj--)
+        for (fatrop_int aj = n - 1; aj >= 0; aj--)
         {
             double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
             double inv_ajj = 1.0 / ajj;
             double scjj = alpha * inv_ajj;
-            for (int k = 0; k < m; k++)
+            for (fatrop_int k = 0; k < m; k++)
             {
                 MATEL(sD, offs_di + k, offs_dj + aj) = scjj * MATEL(sB, offs_bi + k, offs_bj + aj);
             }
-            for (int ai = aj + 1; ai < n; ai++)
+            for (fatrop_int ai = aj + 1; ai < n; ai++)
             {
                 double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
-                for (int k = 0; k < m; k++)
+                for (fatrop_int k = 0; k < m; k++)
                 {
                     // this algorithm is "store bounded", the loops can be switched like in the alt version to make this more efficient
                     MATEL(sD, offs_di + k, offs_dj + aj) += sc * MATEL(sD, offs_di + k, offs_dj + ai);
@@ -70,26 +70,26 @@ namespace fatrop
     }
     // /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     // // this is an experimental, more efficient, but the corner cases are not treated in unrolled loop!! it achieves a speed-up of about factor 3 w.r.t naive implementation
-    void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
+    void fatrop_dtrsm_rlnn_alt(fatrop_int m, fatrop_int n, double alpha, MAT *sA, fatrop_int offs_ai, fatrop_int offs_aj, MAT *sB, fatrop_int offs_bi, fatrop_int offs_bj, MAT *sD, fatrop_int offs_di, fatrop_int offs_dj)
     {
-        for (int aj = n - 1; aj >= 0; aj--)
+        for (fatrop_int aj = n - 1; aj >= 0; aj--)
         {
             double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
             double inv_ajj = 1.0 / ajj;
             double scjj = alpha * inv_ajj;
-            for (int k = 0; k < m; k++)
+            for (fatrop_int k = 0; k < m; k++)
             {
                 // todo, check if possible to incude in main loop
                 MATEL(sD, offs_di + k, offs_dj + aj) = scjj * MATEL(sB, offs_bi + k, offs_bj + aj);
             }
-            for (int k = 0; k < m; k++)
+            for (fatrop_int k = 0; k < m; k++)
             {
                 double res = 0.0;
                 // double res4 = 0.0;
                 // double res5 = 0.0;
                 // double res6 = 0.0;
                 // double res7 = 0.0;
-                for (int ai = aj + 1; ai < n; ai = ai + 1)
+                for (fatrop_int ai = aj + 1; ai < n; ai = ai + 1)
                 {
                     // todo unroll loop -> more independent operations -> filled pipelines
                     double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
@@ -101,19 +101,19 @@ namespace fatrop
     }
     // /** \brief D <= alpha * B * A^{-1} , with A lower triangular employing explicit inverse of diagonal, fatrop uses its own (naive) implementation since it  not implemented yet in blasfeo*/
     // // this is an experimental, more efficient, but the corner cases are not treated in unrolled loop!! it achieves a speed-up of about factor 3 w.r.t naive implementation
-    // void fatrop_dtrsm_rlnn_alt(int m, int n, double alpha, MAT *sA, int offs_ai, int offs_aj, MAT *sB, int offs_bi, int offs_bj, MAT *sD, int offs_di, int offs_dj)
+    // void fatrop_dtrsm_rlnn_alt(fatrop_int m, fatrop_int n, double alpha, MAT *sA, fatrop_int offs_ai, fatrop_int offs_aj, MAT *sB, fatrop_int offs_bi, fatrop_int offs_bj, MAT *sD, fatrop_int offs_di, fatrop_int offs_dj)
     // {
-    //     for (int aj = n - 1; aj >= 0; aj--)
+    //     for (fatrop_int aj = n - 1; aj >= 0; aj--)
     //     {
     //         double ajj = MATEL(sA, offs_ai + aj, aj + offs_aj);
     //         double inv_ajj = 1.0 / ajj;
     //         double scjj = alpha * inv_ajj;
-    //         for (int k = 0; k < m; k++)
+    //         for (fatrop_int k = 0; k < m; k++)
     //         {
     //             // todo, check if possible to incude in main loop
     //             MATEL(sD, offs_di + k, offs_dj + aj) = scjj * MATEL(sB, offs_bi + k, offs_bj + aj);
     //         }
-    //         for (int k = 0; k < m; k++)
+    //         for (fatrop_int k = 0; k < m; k++)
     //         {
     //             double res = 0.0;
     //             double res1 = 0.0;
@@ -123,7 +123,7 @@ namespace fatrop
     //             // double res5 = 0.0;
     //             // double res6 = 0.0;
     //             // double res7 = 0.0;
-    //             for (int ai = aj + 1; ai < n; ai = ai + 4)
+    //             for (fatrop_int ai = aj + 1; ai < n; ai = ai + 4)
     //             {
     //                 // todo unroll loop -> more independent operations -> filled pipelines
     //                 double sc = -inv_ajj * MATEL(sA, offs_ai + ai, offs_aj + aj);
@@ -149,11 +149,11 @@ namespace fatrop
     //     }
     // }
     // B <= B + alpha*A^T (B is mxn)
-    void fatrop_dgead_transposed(int m, int n, double alpha, struct blasfeo_dmat *sA, int offs_ai, int offs_aj, struct blasfeo_dmat *sB, int offs_bi, int offs_bj)
+    void fatrop_dgead_transposed(fatrop_int m, fatrop_int n, double alpha, struct blasfeo_dmat *sA, fatrop_int offs_ai, fatrop_int offs_aj, struct blasfeo_dmat *sB, fatrop_int offs_bi, fatrop_int offs_bj)
     {
-        for (int bj = 0; bj < n; bj++)
+        for (fatrop_int bj = 0; bj < n; bj++)
         {
-            for (int bi = 0; bi < m; bi++)
+            for (fatrop_int bi = 0; bi < m; bi++)
             {
                 MATEL(sB, offs_bi + bi, offs_bj + bj) += alpha * MATEL(sA, offs_ai + bj, offs_aj + bi);
             }
@@ -161,15 +161,15 @@ namespace fatrop
     }
 
     /** \brief Returns the maximum element of a blasfeo matrix of size (m,n), starting at (ai,aj) */
-    MatrixInd max_el(int m, int n, MAT *matr, int ai, int aj)
+    MatrixInd max_el(fatrop_int m, fatrop_int n, MAT *matr, fatrop_int ai, fatrop_int aj)
     {
         MatrixInd res;
         res.ai = ai;
         res.aj = aj;
         double valmax = 0.0;
-        for (int j = aj; j < n; j++)
+        for (fatrop_int j = aj; j < n; j++)
         {
-            for (int i = ai; i < m; i++)
+            for (fatrop_int i = ai; i < m; i++)
             {
                 double valij = abs(MATEL(matr, i, j));
                 if (valij >= valmax)
@@ -183,14 +183,14 @@ namespace fatrop
         return res;
     };
     /** \brief Function to calculate LU factorization result is saved in A, L is lower unitriangular */
-    void LU_FACT(const int m, const int n, const int n_max, int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol)
+    void LU_FACT(const fatrop_int m, const fatrop_int n, const fatrop_int n_max, fatrop_int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol)
     {
         A->use_dA = 0;
-        int *perm_left = (int *)(*Pl_p);
-        int *perm_right = (int *)(*Pr_p);
-        int minmn = MIN(m, n_max);
-        int j = 0;
-        for (int i = 0; i < minmn; i++)
+        fatrop_int *perm_left = (fatrop_int *)(*Pl_p);
+        fatrop_int *perm_right = (fatrop_int *)(*Pr_p);
+        fatrop_int minmn = MIN(m, n_max);
+        fatrop_int j = 0;
+        for (fatrop_int i = 0; i < minmn; i++)
         {
             MatrixInd max_curr = max_el(m, n_max, A, i, i);
             if (abs(MATEL(A, max_curr.ai, max_curr.aj)) < tol)
@@ -205,7 +205,7 @@ namespace fatrop
             COLSW(m, A, 0, i, A, 0, max_curr.aj);
             // save in permutation vector
             perm_right[i] = max_curr.aj;
-            for (int j = i + 1; j < m; j++)
+            for (fatrop_int j = i + 1; j < m; j++)
             {
                 double Lji = MATEL(A, j, i) / MATEL(A, i, i);
                 MATEL(A, j, i) = Lji;
@@ -216,14 +216,14 @@ namespace fatrop
         rank = j;
     };
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
-    void LU_FACT_transposed(const int m, const int n, const int n_max, int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol)
+    void LU_FACT_transposed(const fatrop_int m, const fatrop_int n, const fatrop_int n_max, fatrop_int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol)
     {
         At->use_dA = 0;
-        int *perm_left = (int *)(*Pl_p);
-        int *perm_right = (int *)(*Pr_p);
-        int minmn = MIN(m, n_max);
-        int j = 0;
-        for (int i = 0; i < minmn; i++)
+        fatrop_int *perm_left = (fatrop_int *)(*Pl_p);
+        fatrop_int *perm_right = (fatrop_int *)(*Pr_p);
+        fatrop_int minmn = MIN(m, n_max);
+        fatrop_int j = 0;
+        for (fatrop_int i = 0; i < minmn; i++)
         {
             MatrixInd max_curr = max_el(n_max, m, At, i, i);
             if (abs(MATEL(At, max_curr.ai, max_curr.aj)) < tol)
@@ -238,7 +238,7 @@ namespace fatrop
             ROWSW(m, At, i, 0, At, max_curr.ai, 0);
             // save in permutation vector
             perm_right[i] = max_curr.ai;
-            for (int j = i + 1; j < m; j++)
+            for (fatrop_int j = i + 1; j < m; j++)
             {
                 double Lji = MATEL(At, i, j) / MATEL(At, i, i);
                 MATEL(At, i, j) = Lji;
@@ -249,42 +249,42 @@ namespace fatrop
         rank = j;
     };
 
-    void fatrop_dtrsv_unu(const int m, const int n, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi)
+    void fatrop_dtrsv_unu(const fatrop_int m, const fatrop_int n, blasfeo_dmat *sA, const fatrop_int ai, const fatrop_int aj, blasfeo_dvec *sx, const fatrop_int xi, blasfeo_dvec *sz, const fatrop_int zi)
     {
-        for (int i = m; i < n; i++)
+        for (fatrop_int i = m; i < n; i++)
         {
             VECEL(sz, zi + i) = VECEL(sx, xi + i);
         }
-        for (int i = m - 1; i >= 0; i--)
+        for (fatrop_int i = m - 1; i >= 0; i--)
         {
             double res = VECEL(sx, xi + i);
-            for (int j = i + 1; j < n; j++)
+            for (fatrop_int j = i + 1; j < n; j++)
             {
                 res -= MATEL(sA, ai + i, aj + j) * VECEL(sz, zi + j);
             }
             VECEL(sz, zi + i) = res;
         }
     }
-    void fatrop_dtrsv_utu(const int m, blasfeo_dmat *sA, const int ai, const int aj, blasfeo_dvec *sx, const int xi, blasfeo_dvec *sz, const int zi)
+    void fatrop_dtrsv_utu(const fatrop_int m, blasfeo_dmat *sA, const fatrop_int ai, const fatrop_int aj, blasfeo_dvec *sx, const fatrop_int xi, blasfeo_dvec *sz, const fatrop_int zi)
     {
-        for (int i = 0; i < m; i++)
+        for (fatrop_int i = 0; i < m; i++)
         {
             double res = VECEL(sx, xi + i);
-            for (int j = 0; j < i; j++)
+            for (fatrop_int j = 0; j < i; j++)
             {
                 res -= MATEL(sA, ai + j, aj + i) * VECEL(sz, zi + j);
             }
             VECEL(sz, zi + i) = res;
         }
     }
-    void fatrop_identity(const int m, MAT *sA, const int ai, const int aj)
+    void fatrop_identity(const fatrop_int m, MAT *sA, const fatrop_int ai, const fatrop_int aj)
     {
         GESE(m, m, 0.0, sA, ai, aj);
         DIARE(m, 1.0, sA, ai, aj);
     }
-    void fatrop_drowad(int kmax, double alpha, struct blasfeo_dvec *sx, int xi, struct blasfeo_dmat *sA, int ai, int aj)
+    void fatrop_drowad(fatrop_int kmax, double alpha, struct blasfeo_dvec *sx, fatrop_int xi, struct blasfeo_dmat *sA, fatrop_int ai, fatrop_int aj)
     {
-        for (int i = 0; i < kmax; i++)
+        for (fatrop_int i = 0; i < kmax; i++)
         {
             MATEL(sA, ai, aj + i) += alpha * VECEL(sx, xi + i);
         }
@@ -324,10 +324,10 @@ namespace fatrop
     double Linf(const FatropVecBF &va)
     {
         VEC *va_p = (VEC *)va;
-        int nels = va.nels();
-        int offset = va.offset();
+        fatrop_int nels = va.nels();
+        fatrop_int offset = va.offset();
         double res = 0.0;
-        for (int i = offset; i < nels + offset; i++)
+        for (fatrop_int i = offset; i < nels + offset; i++)
         {
             res = MAX(res, abs(VECEL(va_p, i)));
         }
@@ -337,10 +337,10 @@ namespace fatrop
     {
         VEC *va_p = (VEC *)va;
         VEC *scales_p = (VEC *)scales;
-        int nels = va.nels();
-        int offset = va.offset();
+        fatrop_int nels = va.nels();
+        fatrop_int offset = va.offset();
         double res = 0.0;
-        for (int i = offset; i < nels + offset; i++)
+        for (fatrop_int i = offset; i < nels + offset; i++)
         {
             res = MAX(res, abs(VECEL(va_p, i)) / (1. + abs(VECEL(scales_p, i))));
         }
@@ -349,14 +349,14 @@ namespace fatrop
     double minabs(const FatropVecBF &va)
     {
         VEC *va_p = (VEC *)va;
-        int nels = va.nels();
-        int offset = va.offset();
+        fatrop_int nels = va.nels();
+        fatrop_int offset = va.offset();
         if (nels == 0)
         {
             return 0.0;
         }
         double res = abs(VECEL(va_p, offset));
-        for (int i = offset + 1; i < nels + offset; i++)
+        for (fatrop_int i = offset + 1; i < nels + offset; i++)
         {
             res = MIN(res, abs(VECEL(va_p, i)));
         }
@@ -365,10 +365,10 @@ namespace fatrop
     double L1(const FatropVecBF &va)
     {
         VEC *va_p = (VEC *)va;
-        int nels = va.nels();
-        int offset = va.offset();
+        fatrop_int nels = va.nels();
+        fatrop_int offset = va.offset();
         double res = 0.0;
-        for (int i = offset; i < nels + offset; i++)
+        for (fatrop_int i = offset; i < nels + offset; i++)
         {
             res += abs(VECEL(va_p, i));
         }
@@ -376,10 +376,10 @@ namespace fatrop
     };
 } // namespace fatrop
 using namespace fatrop;
-FatropMatBF::FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols)
+FatropMatBF::FatropMatBF(const fatrop_int nrows, const fatrop_int ncols, const fatrop_int row_offset, const fatrop_int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols)
 {
 }
-FatropMatBF::FatropMatBF(const int nrows, const int ncols, const int row_offset, const int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols)
+FatropMatBF::FatropMatBF(const fatrop_int nrows, const fatrop_int ncols, const fatrop_int row_offset, const fatrop_int col_offset, MAT *matbf) : mat_(matbf), row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols)
 {
 }
 FatropMatBF::FatropMatBF(MAT *matbf) : mat_(matbf), row_offset_(0), col_offset_(0), nrows_(matbf->m), ncols_(matbf->n)
@@ -387,34 +387,34 @@ FatropMatBF::FatropMatBF(MAT *matbf) : mat_(matbf), row_offset_(0), col_offset_(
 }
 void FatropMatBF::operator=(const FatropMat &fm)
 {
-    for (int ai = 0; ai < fm.nrows(); ai++)
-    // for (int ai = 0; ai < nrows_; ai++)
+    for (fatrop_int ai = 0; ai < fm.nrows(); ai++)
+    // for (fatrop_int ai = 0; ai < nrows_; ai++)
     {
-        for (int aj = 0; aj < fm.ncols(); aj++)
-        // for (int aj = 0; aj < ncols_; aj++)
+        for (fatrop_int aj = 0; aj < fm.ncols(); aj++)
+        // for (fatrop_int aj = 0; aj < ncols_; aj++)
         {
             this->at(ai, aj) = fm.get_el(ai, aj);
         }
     }
 }
-FatropMemoryMatBF::FatropMemoryMatBF(const FatropVector<int> &nrows, const FatropVector<int> &ncols, int N) : N_(N), nrows_(nrows), ncols_(ncols)
+FatropMemoryMatBF::FatropMemoryMatBF(const FatropVector<fatrop_int> &nrows, const FatropVector<fatrop_int> &ncols, fatrop_int N) : N_(N), nrows_(nrows), ncols_(ncols)
 // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
 {
     set_up();
 }
-FatropMemoryMatBF::FatropMemoryMatBF(const int nrows, const int ncols, int N) : N_(N), nrows_(vector<int>(N, nrows)), ncols_(vector<int>(N, ncols))
+FatropMemoryMatBF::FatropMemoryMatBF(const fatrop_int nrows, const fatrop_int ncols, fatrop_int N) : N_(N), nrows_(vector<fatrop_int>(N, nrows)), ncols_(vector<fatrop_int>(N, ncols))
 {
     set_up();
 }
-int FatropMemoryMatBF::memory_size() const
+fatrop_int FatropMemoryMatBF::memory_size() const
 {
-    int result = 0;
+    fatrop_int result = 0;
     // size to store structs
     result += N_ * sizeof(MAT);
     // sufficient space for cache alignment
     result = (result + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE + CACHE_LINE_SIZE;
     // size to store date
-    for (int i = 0; i < N_; i++)
+    for (fatrop_int i = 0; i < N_; i++)
     {
         // result += MEMSIZE_MAT(nrows_.at(i), ncols_.at(i));
         result += MEMSIZE_MAT(nrows_.get(i), ncols_.get(i));
@@ -434,7 +434,7 @@ void FatropMemoryMatBF::set_up()
     l_ptr = (l_ptr + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE;
     data_p = (char *)l_ptr;
     double *d_ptr_begin = (double *)data_p;
-    for (int i = 0; i < N_; i++)
+    for (fatrop_int i = 0; i < N_; i++)
     {
         CREATE_MAT(nrows_.get(i), ncols_.get(i), mat + i, data_p);
         data_p += MEMSIZE_MAT(nrows_.get(i), ncols_.get(i));
@@ -449,7 +449,7 @@ void FatropMemoryMatBF::set_up()
     // cout << "used memory size " << (unsigned long long) d_ptr_end - (unsigned long long) mem << endl;
     // cout << "difference " << this->memory_size()-((unsigned long long) d_ptr_end - (unsigned long long) mem)<< endl;
 }
-FatropMatBF FatropMemoryMatBF::operator[](const int N) const
+FatropMatBF FatropMemoryMatBF::operator[](const fatrop_int N) const
 {
 #if DEBUG
     assert(N < N_);
@@ -462,24 +462,24 @@ FatropMemoryMatBF::~FatropMemoryMatBF()
 {
     free(mem);
 }
-FatropMemoryVecBF::FatropMemoryVecBF(const FatropVector<int> &nels, int N) : N_(N), nels_(nels)
+FatropMemoryVecBF::FatropMemoryVecBF(const FatropVector<fatrop_int> &nels, fatrop_int N) : N_(N), nels_(nels)
 // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.
 {
     set_up();
 }
-FatropMemoryVecBF::FatropMemoryVecBF(const int nels, int N) : N_(N), nels_(vector<int>(N, nels))
+FatropMemoryVecBF::FatropMemoryVecBF(const fatrop_int nels, fatrop_int N) : N_(N), nels_(vector<fatrop_int>(N, nels))
 {
     set_up();
 }
-int FatropMemoryVecBF::memory_size() const
+fatrop_int FatropMemoryVecBF::memory_size() const
 {
-    int result = 0;
+    fatrop_int result = 0;
     // size to store structs
     result += N_ * sizeof(VEC);
     // sufficient space for cache alignment
     result = (result + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE + CACHE_LINE_SIZE;
     // size to store date
-    for (int i = 0; i < N_; i++)
+    for (fatrop_int i = 0; i < N_; i++)
     {
         result += MEMSIZE_VEC(nels_.get(i));
     }
@@ -498,7 +498,7 @@ void FatropMemoryVecBF::set_up()
     l_ptr = (l_ptr + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE * CACHE_LINE_SIZE;
     data_p = (char *)l_ptr;
     double *d_ptr_begin = (double *)data_p;
-    for (int i = 0; i < N_; i++)
+    for (fatrop_int i = 0; i < N_; i++)
     {
         CREATE_VEC(nels_.get(i), vec + i, data_p);
         data_p += MEMSIZE_VEC(nels_.get(i));
@@ -510,38 +510,38 @@ void FatropMemoryVecBF::set_up()
     }
 }
 
-FatropVecBF::FatropVecBF(const int nels, const int offset) : offset_(offset), nels_(nels)
+FatropVecBF::FatropVecBF(const fatrop_int nels, const fatrop_int offset) : offset_(offset), nels_(nels)
 {
 }
-FatropVecBF::FatropVecBF(const int nels, const int offset, VEC *vecbf) : vec_(vecbf), offset_(offset), nels_(nels)
+FatropVecBF::FatropVecBF(const fatrop_int nels, const fatrop_int offset, VEC *vecbf) : vec_(vecbf), offset_(offset), nels_(nels)
 {
 }
 FatropVecBF::operator VEC *() const
 {
     return this->vec_;
 }
-double &FatropVecBF::at(const int ai) const
+double &FatropVecBF::at(const fatrop_int ai) const
 {
 #if DEBUG
     assert(ai < nels_);
 #endif
     return VECEL(vec_, ai + offset_);
 };
-double FatropVecBF::get_el(const int ai) const
+double FatropVecBF::get_el(const fatrop_int ai) const
 {
     return this->at(ai);
 }
-int FatropVecBF::nels() const
+fatrop_int FatropVecBF::nels() const
 {
     return nels_;
 }
-int FatropVecBF::offset() const
+fatrop_int FatropVecBF::offset() const
 {
     return offset_;
 };
 void FatropVecBF::operator=(const FatropVec &fm)
 {
-    for (int ai = 0; ai < nels_; ai++)
+    for (fatrop_int ai = 0; ai < nels_; ai++)
     {
         this->at(ai) = fm.get_el(ai);
     }
@@ -554,14 +554,14 @@ void FatropVecBF::copy(const FatropVecBF &fm)
 }
 void FatropVecBF::copyto(vector<double> &fm) const
 {
-    for (int ai = 0; ai < nels_; ai++)
+    for (fatrop_int ai = 0; ai < nels_; ai++)
     {
         fm.at(ai) = this->at(ai);
     }
 }
 void FatropVecBF::operator=(const vector<double> &fm)
 {
-    for (int ai = 0; ai < nels_; ai++)
+    for (fatrop_int ai = 0; ai < nels_; ai++)
     {
         this->at(ai) = fm.at(ai);
     }
@@ -570,7 +570,7 @@ void FatropVecBF::set_datap(VEC *vecbf)
 {
     vec_ = vecbf;
 }
-FatropVecBF FatropVecBF::block(const int i, const int p) const
+FatropVecBF FatropVecBF::block(const fatrop_int i, const fatrop_int p) const
 {
     DBGASSERT(i + p <= nels_);
     return FatropVecBF(p, offset_ + i, this->vec_);
@@ -587,7 +587,7 @@ void FatropVecBF::SetConstant(double constant) const
 {
     VECSE(nels_, constant, vec_, offset_);
 }
-FatropVecBF FatropMemoryVecBF::operator[](const int N) const
+FatropVecBF FatropMemoryVecBF::operator[](const fatrop_int N) const
 {
 #if DEBUG
     assert(N < N_);
@@ -601,19 +601,19 @@ FatropMemoryVecBF::~FatropMemoryVecBF()
     free(mem);
 }
 
-PermMat::PermMat(const int dim) : dim_(dim)
+PermMat::PermMat(const fatrop_int dim) : dim_(dim)
 {
 }
-PermMat::PermMat(const int dim, int *data) : dim_(dim), data_(data)
+PermMat::PermMat(const fatrop_int dim, fatrop_int *data) : dim_(dim), data_(data)
 {
 }
-double PermMat::get_el(const int ai, const int aj) const
+double PermMat::get_el(const fatrop_int ai, const fatrop_int aj) const
 {
 #if DEBUG
     assert(data_ != NULL);
 #endif
-    int aj_one = data_[ai];
-    int row_curr = ai - 1;
+    fatrop_int aj_one = data_[ai];
+    fatrop_int row_curr = ai - 1;
     while (row_curr >= 0)
     {
         if (aj_one == data_[row_curr])
@@ -631,18 +631,18 @@ double PermMat::get_el(const int ai, const int aj) const
         return 0.0;
     }
 };
-void PermMat::print(const int kmax) const
+void PermMat::print(const fatrop_int kmax) const
 {
-    for (int k = 0; k < kmax; k++)
+    for (fatrop_int k = 0; k < kmax; k++)
     {
         cout << k << " <-> " << data_[k] << endl;
     }
 }
-void PermMat::set_datap(int *data)
+void PermMat::set_datap(fatrop_int *data)
 {
     data_ = data;
 }
-void PermMat::set_datap(const int i, const int val)
+void PermMat::set_datap(const fatrop_int i, const fatrop_int val)
 {
 #if DEBUG
     assert(data_ != NULL);
@@ -650,28 +650,28 @@ void PermMat::set_datap(const int i, const int val)
 #endif
     data_[i] = val;
 }
-void PermMat::PM(const int kmax, MAT *M) const
+void PermMat::PM(const fatrop_int kmax, MAT *M) const
 {
 #if DEBUG
     assert(data_ != NULL);
 #endif
     ROWPE(kmax, data_, M);
 }
-void PermMat::PV(const int kmax, VEC *V, const int offs) const
+void PermMat::PV(const fatrop_int kmax, VEC *V, const fatrop_int offs) const
 {
 #if DEBUG
     assert(data_ != NULL);
 #endif
     VECPE(kmax, data_, V, offs);
 }
-void PermMat::PtV(const int kmax, VEC *V, const int offs) const
+void PermMat::PtV(const fatrop_int kmax, VEC *V, const fatrop_int offs) const
 {
 #if DEBUG
     assert(data_ != NULL);
 #endif
     VECPEI(kmax, data_, V, offs);
 }
-void PermMat::PM(const int kmax, const int n, MAT *M, const int ai, const int aj) const
+void PermMat::PM(const fatrop_int kmax, const fatrop_int n, MAT *M, const fatrop_int ai, const fatrop_int aj) const
 {
 #if DEBUG
     assert(data_ != NULL);
@@ -679,7 +679,7 @@ void PermMat::PM(const int kmax, const int n, MAT *M, const int ai, const int aj
     // invalidate stored inverse diagonal
     M->use_dA = 0;
 
-    int ii;
+    fatrop_int ii;
     for (ii = 0; ii < kmax; ii++)
     {
         if (data_[ii] != ii)
@@ -687,21 +687,21 @@ void PermMat::PM(const int kmax, const int n, MAT *M, const int ai, const int aj
     }
     return;
 }
-void PermMat::PtM(const int kmax, MAT *M) const
+void PermMat::PtM(const fatrop_int kmax, MAT *M) const
 {
 #if DEBUG
     assert(data_ != NULL);
 #endif
     ROWPEI(kmax, data_, M);
 }
-void PermMat::MP(const int kmax, MAT *M) const
+void PermMat::MP(const fatrop_int kmax, MAT *M) const
 {
 #if DEBUG
     assert(data_ != NULL);
 #endif
     COLPEI(kmax, data_, M);
 }
-void PermMat::MPt(const int kmax, MAT *M) const
+void PermMat::MPt(const fatrop_int kmax, MAT *M) const
 {
 #if DEBUG
     assert(data_ != NULL);
@@ -709,13 +709,13 @@ void PermMat::MPt(const int kmax, MAT *M) const
     COLPE(kmax, data_, M);
 }
 
-MemoryPermMat::MemoryPermMat(const int dim, const int N) : PermMat(dim), dim_(dim), N_(N)
+MemoryPermMat::MemoryPermMat(const fatrop_int dim, const fatrop_int N) : PermMat(dim), dim_(dim), N_(N)
 {
     set_up();
 };
-int MemoryPermMat::memory_size() const
+fatrop_int MemoryPermMat::memory_size() const
 {
-    int size = 0;
+    fatrop_int size = 0;
     size += N_ * sizeof(PermMat) + N_ * dim_ * sizeof(int);
     return size;
 }
@@ -726,14 +726,14 @@ void MemoryPermMat::set_up()
     char *char_p = (char *)mem;
     perm_p = (PermMat *)char_p;
     PermMat *perm_pp = perm_p;
-    for (int i = 0; i < N_; i++)
+    for (fatrop_int i = 0; i < N_; i++)
     {
         new (perm_pp) PermMat(dim_);
         perm_pp++;
     }
-    int *data_p = (int *)perm_pp;
+    fatrop_int *data_p = (fatrop_int *)perm_pp;
     this->set_datap(data_p);
-    for (int i = 0; i < N_; i++)
+    for (fatrop_int i = 0; i < N_; i++)
     {
         perm_p[i].set_datap(data_p);
         data_p += dim_;

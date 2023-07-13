@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -27,7 +27,7 @@ namespace fatrop
     class DuInfEvaluator
     {
     public:
-        int evaluate(
+        fatrop_int evaluate(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &lam,

@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -22,6 +22,7 @@
 #include "OCPDims.hpp"
 #include "auxiliary/VectorUtils.hpp"
 #include "auxiliary/FatropVector.hpp"
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     /** \brief this class contains all information to represent the KKT system of an equality constrained OCP */
@@ -30,11 +31,11 @@ namespace fatrop
     public:
         OCPKKTMemory(const OCPDims &dims);
         OCPKKTMemory(const OCPKKTMemory &cpy) = delete;
-        int K;
-        FatropVector<int> nu;
-        FatropVector<int> nx;
-        FatropVector<int> ng;
-        FatropVector<int> ng_ineq;
+        fatrop_int K;
+        FatropVector<fatrop_int> nu;
+        FatropVector<fatrop_int> nx;
+        FatropVector<fatrop_int> ng;
+        FatropVector<fatrop_int> ng_ineq;
         /// small-scale Hessian
         FatropMemoryMatBF RSQrqt;
         /// small-scale Jacobian dynamics
@@ -48,18 +49,18 @@ namespace fatrop
         public:
             OCPAux(const OCPDims &dims);
             /// offset arrays are used for efficiency
-            const FatropVector<int> ux_offs;
+            const FatropVector<fatrop_int> ux_offs;
             /// offset arrays are used for efficiency
-            const FatropVector<int> g_offs;
-            const FatropVector<int> dyn_offs;
-            const FatropVector<int> dyn_eq_offs;
-            const FatropVector<int> g_ineq_offs;
-            const FatropVector<int> ineq_offs;
-            int max_nu;
-            int max_nx;
-            int max_ng;
-            int max_ngineq;
-            int n_ineqs;
+            const FatropVector<fatrop_int> g_offs;
+            const FatropVector<fatrop_int> dyn_offs;
+            const FatropVector<fatrop_int> dyn_eq_offs;
+            const FatropVector<fatrop_int> g_ineq_offs;
+            const FatropVector<fatrop_int> ineq_offs;
+            fatrop_int max_nu;
+            fatrop_int max_nx;
+            fatrop_int max_ng;
+            fatrop_int max_ngineq;
+            fatrop_int n_ineqs;
         };
         OCPAux aux;
     };

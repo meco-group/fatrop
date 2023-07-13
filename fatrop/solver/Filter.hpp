@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -19,13 +19,14 @@
 #ifndef FILTERINCLUDED
 #define FILTERINCLUDED
 #include "vector"
+#include "auxiliary/Common.hpp"
 namespace fatrop
 {
     struct FilterData
     {
         FilterData(){};
-        FilterData(const int iteration, const double phi, const double theta):iteration(iteration),phi(phi),theta(theta){};
-        const int iteration = 0;
+        FilterData(const fatrop_int iteration, const double phi, const double theta):iteration(iteration),phi(phi),theta(theta){};
+        const fatrop_int iteration = 0;
         /** \brief barrier function value */
         const double phi = 0.0;
         /** \brief constraint violation value */
@@ -34,13 +35,13 @@ namespace fatrop
     class Filter
     {
     public:
-        Filter(const int size);
+        Filter(const fatrop_int size);
         void augment(const FilterData &filterdata);
         /** \brief check if fdin0 is dominated by fdin1 */
         inline bool a_dominmates_b(const FilterData &fdin0, const FilterData &fdin1) const;
         bool is_acceptable(const FilterData &fdin) const;
         void reset();
-        int size() const
+        fatrop_int size() const
         {
             return filterdata_.size();
         }

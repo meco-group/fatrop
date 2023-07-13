@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -28,6 +28,7 @@
 #include "FatropStats.hpp"
 #include <limits>
 #include <solver/FatropPrinter.hpp>
+#include "auxiliary/Common.hpp"
 // #include "AlgorithmQuantities.hpp"
 #ifdef ENABLE_MULTITHREADING
 #include "auxiliary/Worker.hpp"
@@ -52,17 +53,17 @@ namespace fatrop
         void set_bounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
         void set_initial(const std::vector<double> &initial) ;
         void get_solution(std::vector<double> &sol) ;
-        int optimize() ;
-        int eval_lag_hess();
-        int eval_constr_jac();
-        int eval_constr_viol_curr();
-        int eval_constr_viol_trial();
-        int eval_obj_grad_curr();
+        fatrop_int optimize() ;
+        fatrop_int eval_lag_hess();
+        fatrop_int eval_constr_jac();
+        fatrop_int eval_constr_viol_curr();
+        fatrop_int eval_constr_viol_trial();
+        fatrop_int eval_obj_grad_curr();
         double eval_objective_curr();
         double eval_objective_trial();
-        int eval_dual_infeasiblity();
-        int perform_initializiation();
-        int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
+        fatrop_int eval_dual_infeasiblity();
+        fatrop_int perform_initializiation();
+        fatrop_int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropOptions> fatropoptions_;
@@ -78,8 +79,8 @@ namespace fatrop
     public:
         double tol;
         double acceptable_tol;
-        int acceptable_iter;
-        int maxiter;
+        fatrop_int acceptable_iter;
+        fatrop_int maxiter;
 
     private:
         double lammax;
@@ -96,7 +97,7 @@ namespace fatrop
         double kappa_c;
         double kappa_d;
         double theta_min;
-        int max_watchdog_steps;
+        fatrop_int max_watchdog_steps;
         bool warm_start_init_point;
         bool recalc_y;
         // bool first_try_watchdog;

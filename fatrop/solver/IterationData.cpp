@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye <lander.vanroye@kuleuven.be>
+ * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -18,7 +18,7 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #include "solver/IterationData.hpp"
 using namespace fatrop;
-Journaller::Journaller(const int maxiter, const std::shared_ptr<FatropPrinter> &printer) : printer_(printer)
+Journaller::Journaller(const fatrop_int maxiter, const std::shared_ptr<FatropPrinter> &printer) : printer_(printer)
 {
     iterationdata.reserve(maxiter + 1);
 }
