@@ -171,6 +171,60 @@ namespace fatrop
         const fatrop_int ncols_;
     };
 
+    class MATBF
+    {
+    public:
+        MATBF(const int m, const int n) : m_(m), n_(n)
+        {
+            blasfeo_allocate_dmat(m_, n_, &mat_);
+        }
+        MATBF(MATBF &&other) : m_(other.m_), n_(other.n_)
+        {
+            mat_ = other.mat_;
+            other.mat_.pA = nullptr;
+            other.mat_.mem = nullptr;
+            other.mat_.dA = nullptr;
+        }
+        ~MATBF()
+        {
+            blasfeo_free_dmat(&mat_);
+        }
+        operator MAT *()
+        {
+            return &mat_;
+        }
+        MAT mat_;
+        const int m_;
+        const int n_;
+    };
+
+    class VECBF
+    {
+    public:
+        VECBF(const int m) : m_(m)
+        {
+            blasfeo_allocate_dvec(m_, &vec_);
+            // zero out vector
+            blasfeo_dvecse(m_, 0.0, &vec_, 0);
+        }
+        VECBF(VECBF &&other) : m_(other.m_)
+        {
+            vec_ = other.vec_;
+            other.vec_.pa = nullptr;
+            other.vec_.mem = nullptr;
+        }
+        ~VECBF()
+        {
+            blasfeo_free_dvec(&vec_);
+        }
+        operator VEC *()
+        {
+            return &vec_;
+        }
+        VEC vec_;
+        const int m_;
+    };
+
     /** \brief this class is used for the allocation of a blasfeo matrix, the dimsensions are set from a vector */
     class FatropMemoryMatBF
     {
@@ -222,7 +276,7 @@ namespace fatrop
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm);
         void copy(const FatropVecBF &fm);
-        void copyto(std::vector<double>& dest) const;
+        void copyto(std::vector<double> &dest) const;
         void operator=(const std::vector<double> &fm);
         /** \brief set data pointer*/
         void set_datap(VEC *vecbf);
