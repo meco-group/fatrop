@@ -83,6 +83,7 @@ namespace fatrop
     };
     class OCPBFGSUpdater
     {
+        public:
         OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1, 1), Gt_prev(nu + nx, ng, 1), Gt_ineq_prev(nu + nx, ng_ineq, 1), ux_prev(nu + nx, 1), grad_obj_prev(nu + nx, 1), s(nu + nx, 1), y(nu + nx, 1), bfgs(nu + nx) {}
         void update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
         {
@@ -106,7 +107,7 @@ namespace fatrop
             GEMV_N(nu + nx, ng, 1.0, Ggt, 0, 0, lam_eq, a_lam_eq, 1.0, y_p, 0, y_p, 0);
             // contribution from inequality constraints
             GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq, 0, 0, lam_ineq, a_lam_ineq, 1.0, y_p, 0, y_p, 0);
-            ROWIN(nu + nx, 1.0, y_p, 0, Bkp1, nu+nx, 0);
+            ROWIN(nu + nx, 1.0, y_p, 0, Bkp1, nu + nx, 0);
             if (!last)
             {
                 // contribution from dynamics
@@ -164,6 +165,8 @@ namespace fatrop
                 ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
+            for (fatrop_int k = 0; k < K; k++)
+                OCPBFGS_updaters.emplace_back(ocptempl_->get_nuk(k), ocptempl_->get_nxk(k), K == K - 1 ? 0 : ocptempl_->get_nxk(k + 1), ocptempl_->get_ngk(k), ocptempl_->get_ng_ineq_k(k), k == 0, k == K - 1);
             x_dummy = std::vector<double>(max(nxexpr), 0.0);
         }
         fatrop_int eval_lag_hess(
@@ -269,6 +272,7 @@ namespace fatrop
         std::vector<double> stageparams;
         std::vector<double> globalparams;
         std::vector<double> x_dummy;
+        std::vector<OCPBFGSUpdater> OCPBFGS_updaters;
 
     private:
         std::shared_ptr<OCPAbstract> ocptempl;
