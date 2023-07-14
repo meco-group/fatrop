@@ -39,21 +39,122 @@
 
 namespace fatrop
 {
+    class BFGSUpdater
+    {
+    public:
+        BFGSUpdater(const int m) : m(m), Bk_prev(m, m, 1), vk(m, 1), yk_tilde(m, 1) {}
+        void update(MAT *Bip1, VEC *si, VEC *yi)
+        {
+            // powell update formula
+            MAT *Bk_prev_p = (MAT *)Bk_prev[0];
+            VEC *vk_p = (VEC *)vk[0];
+            VEC *yk_tilde_p = (VEC *)yk_tilde[0];
+            // compute update
+            double sts = DOT(m, si, 0, si, 0);
+            if (sts == 0.0)
+            {
+                reset();
+                GECP(m, m, Bk_prev_p, 0, 0, Bip1, 0, 0);
+            }
+            double sty = DOT(m, si, 0, yi, 0);
+            GEMV_N(m, m, 1.0, Bk_prev_p, 0, 0, si, 0, 0.0, vk_p, 0, vk_p, 0);
+            double stv = DOT(m, si, 0, vk_p, 0);
+            double beta = -1.0 / stv;
+            double theta = sty > 0.2 * stv ? 1.0 : (0.8 * stv) / (stv - sty);
+            AXPBY(m, theta, yi, 0, theta - 1.0, vk_p, 0, yk_tilde_p, 0);
+            double sty_tilde = DOT(m, si, 0, yk_tilde_p, 0);
+            double alpha_tilde = 1.0 / sty_tilde;
+            GER(m, m, alpha_tilde, yk_tilde_p, 0, yk_tilde_p, 0, Bk_prev_p, 0, 0, Bip1, 0, 0);
+            GER(m, m, beta, vk_p, 0, vk_p, 0, Bip1, 0, 0, Bip1, 0, 0);
+            // save the previous Bk
+            GECP(m, m, Bip1, 0, 0, Bk_prev_p, 0, 0);
+        }
+        void reset()
+        {
+            MAT *Bk_prev_p = (MAT *)Bk_prev[0];
+            // identity matrix for B0
+            GESE(m, m, 0.0, Bk_prev_p, 0, 0);
+            DIARE(m, 1.0, Bk_prev_p, 0, 0);
+        }
+        const int m;
+        FatropMemoryMatBF Bk_prev;
+        FatropMemoryVecBF vk;
+        FatropMemoryVecBF yk_tilde;
+    };
+    class OCPBFGSUpdater
+    {
+        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1, 1), Gt_prev(nu + nx, ng, 1), Gt_ineq_prev(nu + nx, ng_ineq, 1), ux_prev(nu + nx, 1), grad_obj_prev(nu + nx, 1), s(nu + nx, 1), y(nu + nx, 1), bfgs(nu + nx) {}
+        void update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
+        {
+            MAT *BAt_prev_p = (MAT *)BAt_prev[0];
+            MAT *Gt_prev_p = (MAT *)Gt_prev[0];
+            MAT *Gt_ineq_prev_p = (MAT *)Gt_ineq_prev[0];
+            VEC *ux_prev_p = (VEC *)ux_prev[0];
+            VEC *grad_obj_prev_p = (VEC *)grad_obj_prev[0];
+            VEC *s_p = (VEC *)s[0];
+            VEC *y_p = (VEC *)y[0];
+            // compute s
+            AXPBY(nu + nx, 1.0, ux, a_ux, -1.0, ux_prev_p, 0, s_p, 0);
+            // compute y
+            AXPBY(nu + nx, 1.0, grad_obj, a_grad_obj, -1.0, grad_obj_prev_p, 0, y_p, 0);
+            if (!last)
+            {
+                // contribution from dynamics
+                GEMV_N(nu + nx, nxp1, 1.0, BAbt, 0, 0, lam_dyn, a_lam_dyn, 1.0, y_p, 0, y_p, 0);
+            }
+            // contribution from equality constraints
+            GEMV_N(nu + nx, ng, 1.0, Ggt, 0, 0, lam_eq, a_lam_eq, 1.0, y_p, 0, y_p, 0);
+            // contribution from inequality constraints
+            GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq, 0, 0, lam_ineq, a_lam_ineq, 1.0, y_p, 0, y_p, 0);
+            ROWIN(nu + nx, 1.0, y_p, 0, Bkp1, nu+nx, 0);
+            if (!last)
+            {
+                // contribution from dynamics
+                GEMV_N(nu + nx, nxp1, -1.0, BAt_prev_p, 0, 0, lam_dyn, a_lam_dyn, 1.0, y_p, 0, y_p, 0);
+            }
+            // contribution from equality constraints
+            GEMV_N(nu + nx, ng, -1.0, Gt_prev_p, 0, 0, lam_eq, a_lam_eq, 1.0, y_p, 0, y_p, 0);
+            // contribution from inequality constraints
+            GEMV_N(nu + nx, ng_ineq, -1.0, Gt_ineq_prev_p, 0, 0, lam_ineq, a_lam_ineq, 1.0, y_p, 0, y_p, 0);
+            // call BFGS update
+            bfgs.update(Bkp1, s_p, y_p);
+            // save ux and grad_obj
+            VECCP(nu + nx, ux, a_ux, ux_prev_p, 0);
+            VECCP(nu + nx, grad_obj, a_grad_obj, grad_obj_prev_p, 0);
+            // save BAt, Gt, Gt_ineq
+            GECP(nu + nx, nxp1, BAbt, 0, 0, BAt_prev_p, 0, 0);
+            GECP(nu + nx, ng, Ggt, 0, 0, Gt_prev_p, 0, 0);
+            GECP(nu + nx, ng_ineq, Ggt_ineq, 0, 0, Gt_ineq_prev_p, 0, 0);
+        }
+        void reset()
+        {
+        }
+        const int nu, nx, nxp1, ng, ng_ineq;
+        const bool first, last;
+        FatropMemoryMatBF BAt_prev;
+        FatropMemoryMatBF Gt_prev;
+        FatropMemoryMatBF Gt_ineq_prev;
+        FatropMemoryVecBF ux_prev;
+        FatropMemoryVecBF grad_obj_prev;
+        FatropMemoryVecBF s;
+        FatropMemoryVecBF y;
+        BFGSUpdater bfgs;
+    };
     class OCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
         OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
-                                                           nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                      { return ocptempl_->get_nuk(k); })),
-                                                           nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                      { return ocptempl_->get_nxk(k); })),
-                                                           ngexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                      { return ocptempl_->get_ngk(k); })),
-                                                           ngineqexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                          { return ocptempl_->get_ng_ineq_k(k); })),
-                                                           nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
-                                                           offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
+                                                                    nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                      { return ocptempl_->get_nuk(k); })),
+                                                                    nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                      { return ocptempl_->get_nxk(k); })),
+                                                                    ngexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                      { return ocptempl_->get_ngk(k); })),
+                                                                    ngineqexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                          { return ocptempl_->get_ng_ineq_k(k); })),
+                                                                    nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
+                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
         {
             // initialize the default parameters
             ocptempl_->get_default_global_params(globalparams.data());
@@ -116,11 +217,11 @@ namespace fatrop
                 return nullptr;
             return stageparams.data();
         }
-        std::vector<double> & get_global_parameters_vec()
+        std::vector<double> &get_global_parameters_vec()
         {
             return globalparams;
         }
-        std::vector<double> & get_stage_parameters_vec()
+        std::vector<double> &get_stage_parameters_vec()
         {
             return stageparams;
         }
@@ -142,14 +243,14 @@ namespace fatrop
             FatropVecBF &initial) const override
         {
             fatrop_int offs = 0;
-            for (fatrop_int k = 0; k < K-1; k++)
+            for (fatrop_int k = 0; k < K - 1; k++)
             {
                 ocptempl->get_initial_uk(((VEC *)initial)->pa + offs, k);
                 offs += ocptempl->get_nuk(k);
                 ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, k);
                 offs += ocptempl->get_nxk(k);
             }
-            ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, K-1);
+            ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, K - 1);
             return 0;
         }
         // virtual fatrop_int GetDefaultParams(

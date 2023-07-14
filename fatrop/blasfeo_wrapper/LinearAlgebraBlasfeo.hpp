@@ -77,6 +77,7 @@
 #define COLSC blasfeo_dcolsc
 #define VECMUL blasfeo_dvecmul
 #define VECMULACC blasfeo_dvecmulacc
+#define GER blasfeo_dger
 
 #define MAX(a, b)                   \
     (                               \
