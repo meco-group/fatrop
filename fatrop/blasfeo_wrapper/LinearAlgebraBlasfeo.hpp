@@ -50,11 +50,13 @@
 #define GEMM_NT blasfeo_dgemm_nt
 #define GEAD blasfeo_dgead
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
+#define SYRK_LN blasfeo_dsyrk_ln
 #define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define ROWIN blasfeo_drowin
+#define COLIN blasfeo_dcolin
 #define ROWAD fatrop_drowad
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
