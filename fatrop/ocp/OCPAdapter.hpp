@@ -42,7 +42,7 @@ namespace fatrop
     class BFGSUpdater
     {
     public:
-        BFGSUpdater(const int m) : m(m), Bk_prev(m, m), vk(m), yk_tilde(m) {}
+        BFGSUpdater(const int m) : m(m), Bk_prev(m, m),tmp1(m,2),tmp2(m,2), vk(m), yk_tilde(m) {}
         void update(MAT *Bip1, VEC *si, VEC *yi)
         {
             MAT *Bk_prev_p = Bk_prev;
@@ -67,8 +67,23 @@ namespace fatrop
             AXPBY(m, theta, yi, 0, 1.0 - theta, vk_p, 0, yk_tilde_p, 0);
             double sty_tilde = DOT(m, si, 0, yk_tilde_p, 0);
             double alpha_tilde = 1.0 / sty_tilde;
+            #define ALT_RANK1
+            #ifdef ALT_RANK1
+
+            COLIN(m, yk_tilde_p, 0, tmp1, 0, 0);
+            VECSC(m, alpha_tilde, yk_tilde_p, 0);
+            COLIN(m, yk_tilde_p, 0, tmp2, 0, 0);
+
+            COLIN(m, vk_p, 0, tmp1, 0, 1);
+            VECSC(m, beta, vk_p, 0);
+            COLIN(m, vk_p, 0, tmp2, 0, 1);
+
+            SYRK_LN(m, 2, 1.0, tmp1, 0, 0, tmp2, 0,0, 1.0, Bk_prev_p, 0, 0, Bip1, 0, 0);
+            TRTR_L(m, Bip1, 0, 0, Bip1, 0, 0);
+            #else
             GER(m, m, alpha_tilde, yk_tilde_p, 0, yk_tilde_p, 0, Bk_prev_p, 0, 0, Bip1, 0, 0);
             GER(m, m, beta, vk_p, 0, vk_p, 0, Bip1, 0, 0, Bip1, 0, 0);
+            #endif
             // save the previous Bk
             GECP(m, m, Bip1, 0, 0, Bk_prev_p, 0, 0);
             first = false;
@@ -82,6 +97,8 @@ namespace fatrop
         }
         const int m;
         MATBF Bk_prev;
+        MATBF tmp1;
+        MATBF tmp2;
         VECBF vk;
         VECBF yk_tilde;
         bool first = true;
