@@ -53,21 +53,37 @@ namespace fatrop
             // compute update
             double sts = DOT(m, si, 0, si, 0);
             double sty = DOT(m, si, 0, yi, 0);
-            if (sts == 0.0 || first)
+            if (sts == 0.0 || first_time)
             {
                 reset();
                 GECP(m, m, Bk_prev_p, 0, 0, Bip1, 0, 0);
-                first = false;
                 return;
             }
             GEMV_N(m, m, 1.0, Bk_prev_p, 0, 0, si, 0, 0.0, vk_p, 0, vk_p, 0);
             double stv = DOT(m, si, 0, vk_p, 0);
             double beta = -1.0 / stv;
+            #define SKIPPING
+            #define ALT_RANK1
+            #ifdef SKIPPING
+            double alpha_tilde = 1.0 / sty;
+            AXPBY(m, 1.0, yi, 0, 0.0, vk_p, 0, yk_tilde_p, 0);
+            if(sty <= 0)
+            {
+                if(skips>2)
+                {
+                    reset();
+                    // std::cout << "resetting Bk" << std::endl;
+                }
+                GECP(m, m, Bk_prev_p, 0, 0, Bip1, 0, 0);
+                skips++;
+                return;
+            }
+            #else
             double theta = sty > 0.2 * stv ? 1.0 : (0.8 * stv) / (stv - sty);
             AXPBY(m, theta, yi, 0, 1.0 - theta, vk_p, 0, yk_tilde_p, 0);
             double sty_tilde = DOT(m, si, 0, yk_tilde_p, 0);
             double alpha_tilde = 1.0 / sty_tilde;
-            #define ALT_RANK1
+            #endif
             #ifdef ALT_RANK1
 
             COLIN(m, yk_tilde_p, 0, tmp1, 0, 0);
@@ -86,10 +102,10 @@ namespace fatrop
             #endif
             // save the previous Bk
             GECP(m, m, Bip1, 0, 0, Bk_prev_p, 0, 0);
-            first = false;
         }
         void reset()
         {
+            skips = 0;
             MAT *Bk_prev_p = Bk_prev;
             // identity matrix for B0
             GESE(m, m, 0.0, Bk_prev_p, 0, 0);
@@ -101,12 +117,13 @@ namespace fatrop
         MATBF tmp2;
         VECBF vk;
         VECBF yk_tilde;
-        bool first = true;
+        int skips =0;
+        bool first_time = true;
     };
-    class OCPBFGSUpdater
+    class OCPBFGSUpdater: public BFGSUpdater
     {
     public:
-        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx), bfgs(nu + nx) {}
+        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : BFGSUpdater(nu+nx), nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx){}
         void update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
         {
             VEC *ux_prev_p = ux_prev;
@@ -147,7 +164,7 @@ namespace fatrop
                 GEMV_N(nu + nx, ng_ineq, -1.0, Gt_ineq_prev_p, 0, 0, lam_ineq, a_lam_ineq, 1.0, y_p, 0, y_p, 0);
             }
             // call BFGS update
-            bfgs.update(Bkp1, s_p, y_p);
+            BFGSUpdater::update(Bkp1, s_p, y_p);
             // save ux and grad_obj
             VECCP(nu + nx, ux, a_ux, ux_prev_p, 0);
             VECCP(nu + nx, grad_obj, a_grad_obj, grad_obj_prev_p, 0);
@@ -160,6 +177,8 @@ namespace fatrop
         }
         void reset()
         {
+            first_time = true;
+            BFGSUpdater::reset();
         }
         const int nu, nx, nxp1, ng, ng_ineq;
         const bool first, last;
@@ -170,8 +189,6 @@ namespace fatrop
         VECBF grad_obj_prev;
         VECBF s;
         VECBF y;
-        BFGSUpdater bfgs;
-        bool first_time = true;
     };
     class OCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
@@ -203,6 +220,11 @@ namespace fatrop
             for (fatrop_int k = 0; k < K; k++)
                 gradbuf.emplace_back(ocptempl_->get_nuk(k) + ocptempl_->get_nxk(k));
             x_dummy = std::vector<double>(max(nxexpr), 0.0);
+        }
+        void reset()
+        {
+            for (auto& updater : OCPBFGS_updaters)
+                updater.reset();
         }
         fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,
