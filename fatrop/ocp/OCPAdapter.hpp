@@ -42,7 +42,7 @@ namespace fatrop
     class BFGSUpdater
     {
     public:
-        BFGSUpdater(const int m) : m(m), Bk_prev(m, m),tmp1(m,2),tmp2(m,2), vk(m), yk_tilde(m) {}
+        BFGSUpdater(const int m) : m(m), Bk_prev(m, m), tmp1(m, 2), tmp2(m, 2), vk(m), yk_tilde(m) {}
         void update(MAT *Bip1, VEC *si, VEC *yi)
         {
             MAT *Bk_prev_p = Bk_prev;
@@ -53,6 +53,7 @@ namespace fatrop
             // compute update
             double sts = DOT(m, si, 0, si, 0);
             double sty = DOT(m, si, 0, yi, 0);
+            double yty = DOT(m, yi, 0, yi, 0);
             if (sts == 0.0 || first_time)
             {
                 reset();
@@ -62,14 +63,14 @@ namespace fatrop
             GEMV_N(m, m, 1.0, Bk_prev_p, 0, 0, si, 0, 0.0, vk_p, 0, vk_p, 0);
             double stv = DOT(m, si, 0, vk_p, 0);
             double beta = -1.0 / stv;
-            #define SKIPPING
-            #define ALT_RANK1
-            #ifdef SKIPPING
+#define SKIPPING
+#define ALT_RANK1
+#ifdef SKIPPING
             double alpha_tilde = 1.0 / sty;
             AXPBY(m, 1.0, yi, 0, 0.0, vk_p, 0, yk_tilde_p, 0);
-            if(sty <= 0)
+            if (sty <= 1e-8 * std::sqrt(yty) * std::sqrt(sts))
             {
-                if(skips>2)
+                if (skips >= 2)
                 {
                     reset();
                     // std::cout << "resetting Bk" << std::endl;
@@ -78,13 +79,13 @@ namespace fatrop
                 skips++;
                 return;
             }
-            #else
+#else
             double theta = sty > 0.2 * stv ? 1.0 : (0.8 * stv) / (stv - sty);
             AXPBY(m, theta, yi, 0, 1.0 - theta, vk_p, 0, yk_tilde_p, 0);
             double sty_tilde = DOT(m, si, 0, yk_tilde_p, 0);
             double alpha_tilde = 1.0 / sty_tilde;
-            #endif
-            #ifdef ALT_RANK1
+#endif
+#ifdef ALT_RANK1
 
             COLIN(m, yk_tilde_p, 0, tmp1, 0, 0);
             VECSC(m, alpha_tilde, yk_tilde_p, 0);
@@ -94,22 +95,22 @@ namespace fatrop
             VECSC(m, beta, vk_p, 0);
             COLIN(m, vk_p, 0, tmp2, 0, 1);
 
-            SYRK_LN(m, 2, 1.0, tmp1, 0, 0, tmp2, 0,0, 1.0, Bk_prev_p, 0, 0, Bip1, 0, 0);
+            SYRK_LN(m, 2, 1.0, tmp1, 0, 0, tmp2, 0, 0, 1.0, Bk_prev_p, 0, 0, Bip1, 0, 0);
             TRTR_L(m, Bip1, 0, 0, Bip1, 0, 0);
-            #else
+#else
             GER(m, m, alpha_tilde, yk_tilde_p, 0, yk_tilde_p, 0, Bk_prev_p, 0, 0, Bip1, 0, 0);
             GER(m, m, beta, vk_p, 0, vk_p, 0, Bip1, 0, 0, Bip1, 0, 0);
-            #endif
+#endif
             // save the previous Bk
             GECP(m, m, Bip1, 0, 0, Bk_prev_p, 0, 0);
         }
-        void reset()
+        void reset(double alpha = 1.0)
         {
             skips = 0;
             MAT *Bk_prev_p = Bk_prev;
             // identity matrix for B0
             GESE(m, m, 0.0, Bk_prev_p, 0, 0);
-            DIARE(m, 1.0, Bk_prev_p, 0, 0);
+            DIARE(m, alpha, Bk_prev_p, 0, 0);
         }
         const int m;
         MATBF Bk_prev;
@@ -117,13 +118,13 @@ namespace fatrop
         MATBF tmp2;
         VECBF vk;
         VECBF yk_tilde;
-        int skips =0;
+        int skips = 0;
         bool first_time = true;
     };
-    class OCPBFGSUpdater: public BFGSUpdater
+    class OCPBFGSUpdater : public BFGSUpdater
     {
     public:
-        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : BFGSUpdater(nu+nx), nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx){}
+        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : BFGSUpdater(nu + nx), nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx) {}
         void update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
         {
             VEC *ux_prev_p = ux_prev;
@@ -223,7 +224,7 @@ namespace fatrop
         }
         void reset()
         {
-            for (auto& updater : OCPBFGS_updaters)
+            for (auto &updater : OCPBFGS_updaters)
                 updater.reset();
         }
         fatrop_int eval_lag_hess(
