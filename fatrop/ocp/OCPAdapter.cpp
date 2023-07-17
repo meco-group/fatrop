@@ -33,16 +33,16 @@ fatrop_int OCPAdapter::eval_lag_hess(
     fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
     fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
     fatrop_int *offs_ineq = (fatrop_int *)OCP->aux.g_ineq_offs.data();
-    // fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
-    // double *stageparams_p = (double *)stageparams.data();
-    // double *globalparams_p = (double *)globalparams.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
+    double *stageparams_p = (double *)stageparams.data();
+    double *globalparams_p = (double *)globalparams.data();
     OCPMACRO(MAT *, RSQrqt, _p);
     OCPMACRO(fatrop_int *, nu, _p);
     OCPMACRO(fatrop_int *, nx, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     SOLVERMACRO(VEC *, lam, _p);
-    // double *primal_data = primal_vars_p->pa;
-    // double *lam_data = lam_p->pa;
+    double *primal_data = primal_vars_p->pa;
+    double *lam_data = lam_p->pa;
 
     OCPMACRO(MAT *, BAbt, _p);
     OCPMACRO(MAT *, Ggt, _p);
@@ -59,21 +59,21 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
         fatrop_int offs_g_k = offs_g[k];
         fatrop_int offs_ineq_k = offs_ineq[k];
-        // fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        // ocptempl->eval_RSQrqtk(
-        //     &obj_scale,
-        //     primal_data + offs_ux_k,
-        //     primal_data + offs_ux_k + nu_k,
-        //     lam_data + offs_dyn_eq_k,
-        //     lam_data + offs_g_k,
-        //     lam_data + offs_ineq_k,
-        //     stageparams_p + offs_stageparams_k,
-        //     globalparams_p,
-        //     RSQrqt_p + k,
-        //     k);
-        // copy x to ux_buff
-        OCPBFGS_updaters[k].update(RSQrqt_p+k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p+k, lam_p, offs_dyn_eq_k, Ggt_p+k, lam_p, offs_g_k, Ggt_ineq_p+k, lam_p, offs_ineq_k);
-
+        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
+        if (!bfgs)
+            ocptempl->eval_RSQrqtk(
+                &obj_scale,
+                primal_data + offs_ux_k,
+                primal_data + offs_ux_k + nu_k,
+                lam_data + offs_dyn_eq_k,
+                lam_data + offs_g_k,
+                lam_data + offs_ineq_k,
+                stageparams_p + offs_stageparams_k,
+                globalparams_p,
+                RSQrqt_p + k,
+                k);
+        else
+            OCPBFGS_updaters[k].update(RSQrqt_p + k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p + k, lam_p, offs_dyn_eq_k, Ggt_p + k, lam_p, offs_g_k, Ggt_ineq_p + k, lam_p, offs_ineq_k);
 
         if (k > 0)
         {
@@ -304,7 +304,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
             grad_p + offs_ux_k,
             k);
         // save result in grad buf
-        VECCP(nu_k + nx_k, gradient_p,  offs_ux_k, gradbuf[k], 0);
+        VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
         // blasfeo_print_dvec(nu_k + nx_k, gradbuf[k], 0);
     }
     return 0;

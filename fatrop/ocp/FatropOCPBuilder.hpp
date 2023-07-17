@@ -34,7 +34,7 @@ namespace fatrop
         }
         std::shared_ptr<FatropOCP> build()
         {
-            std::shared_ptr<OCPAdapter> adapter = std::make_shared<OCPAdapter>(ocp_);
+            std::shared_ptr<OCPAdapter> adapter = std::make_shared<OCPAdapter>(ocp_, fatropoptions_);
             return build(adapter);
         }
 

@@ -194,7 +194,7 @@ namespace fatrop
     class OCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_) : K(ocptempl_->get_horizon_length()),
+        OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_, const std::shared_ptr<FatropOptions>& options) : K(ocptempl_->get_horizon_length()),
                                                                     nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                                       { return ocptempl_->get_nuk(k); })),
                                                                     nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
@@ -205,7 +205,7 @@ namespace fatrop
                                                                                                           { return ocptempl_->get_ng_ineq_k(k); })),
                                                                     nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                                                 { return ocptempl_->get_n_stage_params_k(k); })),
-                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_)
+                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_), options(options)
         {
             // initialize the default parameters
             ocptempl_->get_default_global_params(globalparams.data());
@@ -221,6 +221,7 @@ namespace fatrop
             for (fatrop_int k = 0; k < K; k++)
                 gradbuf.emplace_back(ocptempl_->get_nuk(k) + ocptempl_->get_nxk(k));
             x_dummy = std::vector<double>(max(nxexpr), 0.0);
+            options -> register_option(BooleanOption("bfgs", "bfgs Hessian approximation", &bfgs, false));
         }
         void reset()
         {
@@ -332,7 +333,8 @@ namespace fatrop
         std::vector<double> x_dummy;
         std::vector<OCPBFGSUpdater> OCPBFGS_updaters;
         std::vector<VECBF> gradbuf;
-
+        std::shared_ptr<FatropOptions> options;
+        bool bfgs;
     private:
         std::shared_ptr<OCPAbstract> ocptempl;
     };
