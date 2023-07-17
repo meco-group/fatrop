@@ -194,18 +194,18 @@ namespace fatrop
     class OCPAdapter : public OCP // public OCP -> also include KKTmemory, OCPDims, ...
     {
     public:
-        OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_, const std::shared_ptr<FatropOptions>& options) : K(ocptempl_->get_horizon_length()),
-                                                                    nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                      { return ocptempl_->get_nuk(k); })),
-                                                                    nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                      { return ocptempl_->get_nxk(k); })),
-                                                                    ngexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                      { return ocptempl_->get_ngk(k); })),
-                                                                    ngineqexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                          { return ocptempl_->get_ng_ineq_k(k); })),
-                                                                    nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
-                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_), options(options)
+        OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_, const std::shared_ptr<FatropOptions> &options) : K(ocptempl_->get_horizon_length()),
+                                                                                                                   nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                                                                     { return ocptempl_->get_nuk(k); })),
+                                                                                                                   nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                                                                     { return ocptempl_->get_nxk(k); })),
+                                                                                                                   ngexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                                                                     { return ocptempl_->get_ngk(k); })),
+                                                                                                                   ngineqexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                                                                         { return ocptempl_->get_ng_ineq_k(k); })),
+                                                                                                                   nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
+                                                                                                                                                               { return ocptempl_->get_n_stage_params_k(k); })),
+                                                                                                                   offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_), options(options)
         {
             // initialize the default parameters
             ocptempl_->get_default_global_params(globalparams.data());
@@ -221,12 +221,15 @@ namespace fatrop
             for (fatrop_int k = 0; k < K; k++)
                 gradbuf.emplace_back(ocptempl_->get_nuk(k) + ocptempl_->get_nxk(k));
             x_dummy = std::vector<double>(max(nxexpr), 0.0);
-            options -> register_option(BooleanOption("bfgs", "bfgs Hessian approximation", &bfgs, false));
+            options->register_option(BooleanOption("bfgs", "bfgs Hessian approximation", &bfgs, false));
         }
         void reset()
         {
-            for (auto &updater : OCPBFGS_updaters)
-                updater.reset();
+            if (bfgs)
+            {
+                for (auto &updater : OCPBFGS_updaters)
+                    updater.reset();
+            }
         }
         fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,
@@ -335,6 +338,7 @@ namespace fatrop
         std::vector<VECBF> gradbuf;
         std::shared_ptr<FatropOptions> options;
         bool bfgs;
+
     private:
         std::shared_ptr<OCPAbstract> ocptempl;
     };
