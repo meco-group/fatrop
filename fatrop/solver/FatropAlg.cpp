@@ -55,7 +55,7 @@ FatropAlg::FatropAlg(
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
     fatropoptions_->register_option(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
     fatropoptions_->register_option(NumericOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
-    fatropoptions_->register_option(BooleanOption("recalc_y", "recalc_y", &recalc_y, true));
+    fatropoptions_->register_option(BooleanOption("recalc_y", "recalc_y", &recalc_y, false));
     fatropoptions_->register_option(NumericOption::lower_bounded("recalc_y_feas_tol", "recalc_y_feas_tol", &recalc_y_feas_tol, 1e-6, 0.0));
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
