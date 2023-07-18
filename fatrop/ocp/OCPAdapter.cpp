@@ -60,8 +60,13 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_g_k = offs_g[k];
         fatrop_int offs_ineq_k = offs_ineq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        if (!bfgs)
-            ocptempl->eval_RSQrqtk(
+        int ret = 0;
+        if (bfgs)
+            ret = OCPBFGS_updaters[k].update(RSQrqt_p + k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p + k, lam_p, offs_dyn_eq_k, Ggt_p + k, lam_p, offs_g_k, Ggt_ineq_p + k, lam_p, offs_ineq_k);
+        if (!bfgs || ret == 1)
+        {
+        // std::cout << "using exact Hess " << k << std::endl;
+            ret = ocptempl->eval_RSQrqtk(
                 &obj_scale,
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
@@ -72,8 +77,7 @@ fatrop_int OCPAdapter::eval_lag_hess(
                 globalparams_p,
                 RSQrqt_p + k,
                 k);
-        else
-            OCPBFGS_updaters[k].update(RSQrqt_p + k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p + k, lam_p, offs_dyn_eq_k, Ggt_p + k, lam_p, offs_g_k, Ggt_ineq_p + k, lam_p, offs_ineq_k);
+        }
 
         if (k > 0)
         {

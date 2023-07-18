@@ -43,7 +43,7 @@ namespace fatrop
     {
     public:
         BFGSUpdater(const int m) : m(m), Bk_prev(m, m), tmp1(m, 2), tmp2(m, 2), vk(m), yk_tilde(m) {}
-        void update(MAT *Bip1, VEC *si, VEC *yi)
+        int update(MAT *Bip1, VEC *si, VEC *yi)
         {
             MAT *Bk_prev_p = Bk_prev;
             VEC *vk_p = vk;
@@ -58,7 +58,7 @@ namespace fatrop
             {
                 reset();
                 GECP(m, m, Bk_prev_p, 0, 0, Bip1, 0, 0);
-                return;
+                return 0;
             }
             GEMV_N(m, m, 1.0, Bk_prev_p, 0, 0, si, 0, 0.0, vk_p, 0, vk_p, 0);
             double stv = DOT(m, si, 0, vk_p, 0);
@@ -70,14 +70,16 @@ namespace fatrop
             AXPBY(m, 1.0, yi, 0, 0.0, vk_p, 0, yk_tilde_p, 0);
             if (sty <= 1e-8 * std::sqrt(yty) * std::sqrt(sts))
             {
-                if (skips >= 2)
+                int ret = 0;
+                if (skips >= 1)
                 {
-                    reset();
+                    reset(1.0, false);
+                    ret = 1;
                     // std::cout << "resetting Bk" << std::endl;
                 }
                 GECP(m, m, Bk_prev_p, 0, 0, Bip1, 0, 0);
                 skips++;
-                return;
+                return ret;
             }
 #else
             double theta = sty > 0.2 * stv ? 1.0 : (0.8 * stv) / (stv - sty);
@@ -103,14 +105,16 @@ namespace fatrop
 #endif
             // save the previous Bk
             GECP(m, m, Bip1, 0, 0, Bk_prev_p, 0, 0);
-        }
-        void reset(double alpha = 1.0)
-        {
             skips = 0;
+            return 0;
+        }
+        void reset(double alpha = 1.0, bool reset_skips = true)
+        {
             MAT *Bk_prev_p = Bk_prev;
             // identity matrix for B0
             GESE(m, m, 0.0, Bk_prev_p, 0, 0);
             DIARE(m, alpha, Bk_prev_p, 0, 0);
+            if(reset_skips) skips = 0;
         }
         const int m;
         MATBF Bk_prev;
@@ -125,7 +129,7 @@ namespace fatrop
     {
     public:
         OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : BFGSUpdater(nu + nx), nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx) {}
-        void update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
+        int update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
         {
             VEC *ux_prev_p = ux_prev;
             VEC *grad_obj_prev_p = grad_obj_prev;
@@ -165,7 +169,7 @@ namespace fatrop
                 GEMV_N(nu + nx, ng_ineq, -1.0, Gt_ineq_prev_p, 0, 0, lam_ineq, a_lam_ineq, 1.0, y_p, 0, y_p, 0);
             }
             // call BFGS update
-            BFGSUpdater::update(Bkp1, s_p, y_p);
+            int ret = BFGSUpdater::update(Bkp1, s_p, y_p);
             // save ux and grad_obj
             VECCP(nu + nx, ux, a_ux, ux_prev_p, 0);
             VECCP(nu + nx, grad_obj, a_grad_obj, grad_obj_prev_p, 0);
@@ -175,6 +179,7 @@ namespace fatrop
             GECP(nu + nx, ng_ineq, Ggt_ineq, 0, 0, Gt_ineq_prev_p, 0, 0);
             first_time = false;
             // blasfeo_print_dmat(nu+nx+1, nu+nx, Bkp1, 0, 0);
+            return ret;
         }
         void reset()
         {
