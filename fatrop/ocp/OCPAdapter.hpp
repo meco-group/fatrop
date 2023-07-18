@@ -56,6 +56,7 @@ namespace fatrop
             double yty = DOT(m, yi, 0, yi, 0);
             if (sts == 0.0 || first_time)
             {
+                skips = 0;
                 reset();
                 GECP(m, m, Bk_prev_p, 0, 0, Bip1, 0, 0);
                 return 0;
@@ -73,7 +74,7 @@ namespace fatrop
                 int ret = 0;
                 if (skips >= 1)
                 {
-                    reset(1.0, false);
+                    reset(1.0);
                     ret = 1;
                     // std::cout << "resetting Bk" << std::endl;
                 }
@@ -110,11 +111,11 @@ namespace fatrop
         }
         void reset(double alpha = 1.0, bool reset_skips = true)
         {
+            // std:: cout << "resetting Bk" << std::endl;
             MAT *Bk_prev_p = Bk_prev;
             // identity matrix for B0
             GESE(m, m, 0.0, Bk_prev_p, 0, 0);
             DIARE(m, alpha, Bk_prev_p, 0, 0);
-            if(reset_skips) skips = 0;
         }
         const int m;
         MATBF Bk_prev;
@@ -128,7 +129,7 @@ namespace fatrop
     class OCPBFGSUpdater : public BFGSUpdater
     {
     public:
-        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : BFGSUpdater(nu + nx), nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx) {}
+        OCPBFGSUpdater(int nu, int nx, int nxp1, int ng, int ng_ineq, bool first, bool last) : BFGSUpdater(nu + nx), nu(nu), nx(nx), nxp1(nxp1), ng(ng), ng_ineq(ng_ineq), first(first), last(last), BAt_prev(nu + nx, nxp1), Gt_prev(nu + nx, ng), Gt_ineq_prev(nu + nx, ng_ineq), ux_prev(nu + nx), grad_obj_prev(nu + nx), s(nu + nx), y(nu + nx) {reset();}
         int update(MAT *Bkp1, VEC *ux, int a_ux, VEC *grad_obj, int a_grad_obj, MAT *BAbt, VEC *lam_dyn, int a_lam_dyn, MAT *Ggt, VEC *lam_eq, int a_lam_eq, MAT *Ggt_ineq, VEC *lam_ineq, int a_lam_ineq)
         {
             VEC *ux_prev_p = ux_prev;
