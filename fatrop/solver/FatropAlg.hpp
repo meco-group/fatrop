@@ -30,9 +30,9 @@
 #include <solver/FatropPrinter.hpp>
 #include "auxiliary/Common.hpp"
 // #include "AlgorithmQuantities.hpp"
-#ifdef ENABLE_MULTITHREADING
-#include "auxiliary/Worker.hpp"
-#endif
+// #ifdef ENABLE_MULTITHREADING
+// #include "auxiliary/Worker.hpp"
+// #endif
 
 namespace fatrop
 {
