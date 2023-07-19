@@ -221,6 +221,7 @@ namespace fatrop
                 ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
+<<<<<<< HEAD
             for (fatrop_int k = 0; k < K; k++)
                 OCPBFGS_updaters.emplace_back(ocptempl_->get_nuk(k), ocptempl_->get_nxk(k), K == K - 1 ? 0 : ocptempl_->get_nxk(k + 1), ocptempl_->get_ngk(k), ocptempl_->get_ng_ineq_k(k), k == 0, k == K - 1);
             // initialize gradbuf
@@ -236,6 +237,9 @@ namespace fatrop
                 for (auto &updater : OCPBFGS_updaters)
                     updater.reset();
             }
+=======
+            x_dummy = std::vector<double>(maxel(nxexpr), 0.0);
+>>>>>>> main
         }
         fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,

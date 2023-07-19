@@ -81,6 +81,14 @@
 #define VECMULACC blasfeo_dvecmulacc
 #define GER blasfeo_dger
 
+
+#ifndef __GNUC__
+
+#define MAX(a, b) max(a, b)
+#define MIN(a, b) min(a, b)
+
+#else
+
 #define MAX(a, b)                   \
     (                               \
         {                           \
@@ -95,6 +103,9 @@
             __typeof__(b) _b = (b); \
             _a < _b ? _a : _b;      \
         })
+
+#endif
+
 #include <iostream>
 extern "C"
 {

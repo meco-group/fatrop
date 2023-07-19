@@ -33,20 +33,20 @@ namespace fatrop
 using namespace fatrop;
 OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> &options, const shared_ptr<FatropPrinter> &printer) : Ppt(dims.nx + 1, dims.nx, dims.K),
                                                                                                                                       Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
-                                                                                                                                      AL(vector<fatrop_int>(1, max(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, max(dims.nx)), 1),
+                                                                                                                                      AL(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nx)), 1),
                                                                                                                                       RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
-                                                                                                                                      Ggt_stripe(vector<fatrop_int>(1, max(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      Ggt_stripe(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
-                                                                                                                                      GgLt(vector<fatrop_int>(1, max(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, max(dims.nu + dims.nx)), 1),
-                                                                                                                                      RSQrqt_hat(vector<fatrop_int>(1, max(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      GgLt(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nu + dims.nx)), 1),
+                                                                                                                                      RSQrqt_hat(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       Llt(dims.nu + dims.nx + 1, dims.nu, dims.K),
-                                                                                                                                      Llt_shift(vector<fatrop_int>(1, max(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, max(dims.nu)), 1),
+                                                                                                                                      Llt_shift(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nu)), 1),
                                                                                                                                       GgIt_tilde(vector<fatrop_int>(1, dims.nx.get(0) + 1), vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       GgLIt(vector<fatrop_int>(1, dims.nx.get(0) + 1), vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       HhIt(vector<fatrop_int>(1, dims.nx.get(0) + 1), vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       PpIt_hat(vector<fatrop_int>(1, dims.nx.get(0) + 1), vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       LlIt(vector<fatrop_int>(1, dims.nx.get(0) + 1), vector<fatrop_int>(1, dims.nx.get(0)), 1),
-                                                                                                                                      Ggt_ineq_temp(vector<fatrop_int>(1, max(dims.nu + dims.nx) + 1), vector<fatrop_int>(1, max(dims.ng_ineq)), 1),
+                                                                                                                                      Ggt_ineq_temp(vector<fatrop_int>(1, maxel(dims.nu + dims.nx) + 1), vector<fatrop_int>(1, maxel(dims.ng_ineq)), 1),
                                                                                                                                       rhs_rq(sum(dims.nu) + sum(dims.nx), 1),
                                                                                                                                       rhs_b(sum(dims.nx) - dims.nx.get(0), 1),
                                                                                                                                       rhs_g(sum(dims.ng), 1),
@@ -62,22 +62,22 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> 
                                                                                                                                       delta_s_test(sum(dims.ng_ineq), 1),
                                                                                                                                       v_Ppt(dims.nx, dims.K),
                                                                                                                                       v_Hh(dims.nx, dims.K),
-                                                                                                                                      v_AL(vector<fatrop_int>(1, max(dims.nx)), 1),
+                                                                                                                                      v_AL(vector<fatrop_int>(1, maxel(dims.nx)), 1),
                                                                                                                                       v_RSQrqt_tilde(dims.nu + dims.nx, dims.K),
-                                                                                                                                      v_Ggt_stripe(vector<fatrop_int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      v_Ggt_stripe(vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       v_Ggt_tilde(dims.nu + dims.nx, dims.K),
-                                                                                                                                      v_GgLt(vector<fatrop_int>(1, max(dims.nu + dims.nx)), 1),
-                                                                                                                                      v_RSQrqt_hat(vector<fatrop_int>(1, max(dims.nx + dims.nu)), 1),
+                                                                                                                                      v_GgLt(vector<fatrop_int>(1, maxel(dims.nu + dims.nx)), 1),
+                                                                                                                                      v_RSQrqt_hat(vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       v_Llt(dims.nu + dims.nx, dims.K),
-                                                                                                                                      v_Llt_shift(vector<fatrop_int>(1, max(dims.nu)), 1),
+                                                                                                                                      v_Llt_shift(vector<fatrop_int>(1, maxel(dims.nu)), 1),
                                                                                                                                       v_GgIt_tilde(vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       v_GgLIt(vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       v_HhIt(vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       v_PpIt_hat(vector<fatrop_int>(1, dims.nx.get(0)), 1),
                                                                                                                                       v_LlIt(vector<fatrop_int>(1, dims.nx.get(0)), 1),
-                                                                                                                                      v_Ggt_ineq_temp(vector<fatrop_int>(1, max(dims.ng_ineq)), 1),
-                                                                                                                                      Pl(max(dims.nu), dims.K), // number of equations can never exceed nx
-                                                                                                                                      Pr(max(dims.nu), dims.K),
+                                                                                                                                      v_Ggt_ineq_temp(vector<fatrop_int>(1, maxel(dims.ng_ineq)), 1),
+                                                                                                                                      Pl(maxel(dims.nu), dims.K), // number of equations can never exceed nx
+                                                                                                                                      Pr(maxel(dims.nu), dims.K),
                                                                                                                                       PlI(dims.nx.get(0), 1),
                                                                                                                                       PrI(dims.nx.get(0), 1),
                                                                                                                                       gamma(vector<fatrop_int>(dims.K, 0)),
@@ -786,7 +786,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
             rhs_gradb2[0]);
         // el = blasfeo_toc(&timer);
         // cout << "el time get rhs" << el << endl; //
-        double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
+        double max_norm = max(Linf(rhs_gradb2[0]), max(Linf(rhs_g_ineq2[0]), max(Linf(rhs_g2[0]), max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
         max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
         for (fatrop_int i = 0; i < 5; i++)
@@ -818,7 +818,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
             // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-            err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+            err_curr = max(Linf(rhs_gradb[0]), max(Linf(rhs_g_ineq[0]), max(Linf(rhs_g[0]), max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
             if (i >= min_it_ref)
             {

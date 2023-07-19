@@ -286,7 +286,7 @@ fatrop_int FatropAlg::optimize()
         // cout << "norm delta_s " << Linf(fatropdata_->delta_s) << endl;
         // cout << "norm delta_x " << Linf(fatropdata_->delta_x) << endl;
         // cout << "norm delta_lam " << Linf(fatropdata_->lam_calc) << endl;
-        double stepsize = std::max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
+        double stepsize = max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = stepsize < 1e-14;
         lsinfo = linesearch_->find_acceptable_trial_point(mu, small_search_direction_curr || watch_dog_step, watch_dog_step);
         if (recalc_y && (deltac == 0.0) && (fatropdata_->constr_viol_max_curr() < recalc_y_feas_tol))

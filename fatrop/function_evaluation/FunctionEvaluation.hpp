@@ -47,7 +47,7 @@ namespace fatrop
         #ifndef ENABLE_MULTITHREADING
         std::vector<double> buffer;
         #else
-        vector<vector<double>> buffer = vector<vector<double>>(omp_get_max_threads());
+        std::vector<std::vector<double>> buffer = std::vector<std::vector<double>>(omp_get_max_threads());
         #endif
         /// evaluate function and save res in "ccs format with lda==out_m"
         virtual fatrop_int eval_buffer(const double **arg) = 0;

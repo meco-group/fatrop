@@ -145,7 +145,7 @@ int FatropOCP::solve_soc_rhs(
         //     rhs_g2[0],
         //     rhs_g_ineq2[0],
         //     rhs_gradb2[0]);
-        double max_norm = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
+        double max_norm = max(Linf(rhs_gradb[0]), max(Linf(rhs_g_ineq[0]), max(Linf(rhs_g[0]), max(Linf(rhs_rq[0]), Linf(rhs_b[0])))));
         max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
         for (int i = 0; i < 5; i++)
@@ -174,7 +174,7 @@ int FatropOCP::solve_soc_rhs(
             // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-            err_curr = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0]))))) / max_norm;
+            err_curr = max(Linf(rhs_gradb2[0]), max(Linf(rhs_g_ineq2[0]), max(Linf(rhs_g2[0]), max(Linf(rhs_rq2[0]), Linf(rhs_b2[0]))))) / max_norm;
             // cout << "residu:  " << err_curr << endl;
             if (i >= min_it_ref)
             {
