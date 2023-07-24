@@ -27,9 +27,9 @@
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)
-// #ifdef ENABLE_MULTITHREADING
-// #include <omp.h>
-// #endif
+#ifdef ENABLE_MULTITHREADING
+#include <omp.h>
+#endif
 
 // Example: you can make a for loop parallel with the following code. But to be further investigated to do this in an efficient way...
 // #ifdef ENABLE_MULTITHREADING
@@ -213,6 +213,14 @@ namespace fatrop
                                                                                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
                                                                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_), options(options)
         {
+            #ifdef ENABLE_MULTITHREADING
+            // check if environment variable OMP_NUM_THREADS is set
+            if (getenv("OMP_NUM_THREADS") == NULL)
+            {
+                throw std::runtime_error("Environment variable OMP_NUM_THREADS is not set. Please set it to the number of threads you want to use or compile fatrop with multithreading disabled.");
+            } 
+            #endif
+
             // initialize the default parameters
             ocptempl_->get_default_global_params(globalparams.data());
             fatrop_int offs = 0;
