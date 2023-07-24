@@ -20,6 +20,7 @@ set(BLASFEO_HEADERS_INSTALLATION_DIRECTORY "include/blasfeo/include" CACHE STRIN
 set(TARGET ${BLASFEO_TARGET} CACHE STRING "Set CPU architecture target" FORCE)
 set(MF "PANELMAJ" CACHE STRING "Matrix format" FORCE)
 set(BLAS_API OFF CACHE BOOL "Compile BLAS API" FORCE)
+set(BLASFEO_REF_API ON CACHE BOOL "REF")
 set(BLASFEO_EXAMPLES OFF CACHE BOOL "Build blasfeo examples")
 add_subdirectory(blasfeo)
 

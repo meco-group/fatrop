@@ -35,13 +35,10 @@
 #define ROWSW blasfeo_drowsw
 #define COLSW blasfeo_dcolsw
 #define GEAD blasfeo_dgead
-#define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
 #define GESC blasfeo_dgesc
 #define VECCP blasfeo_dveccp
 #define VECCPSC blasfeo_dveccpsc
-#define VECCPR fatrop_dveccp_reversed
-#define TRSM_RLNN fatrop_dtrsm_rlnn_alt // TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 // #define TRSM_LLNN blasfeo_dtrsm_llnn
 #define TRSM_RLTN blasfeo_dtrsm_rltn
 #define VECEL BLASFEO_DVECEL
@@ -55,12 +52,9 @@
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define ROWIN blasfeo_drowin
-#define ROWAD fatrop_drowad
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
-#define TRSV_UNU fatrop_dtrsv_unu
 #define TRSV_UTN blasfeo_dtrsv_utn
-#define TRSV_UTU fatrop_dtrsv_utu
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
 #define VECSE blasfeo_dvecse
@@ -78,6 +72,18 @@
 #define VECMUL blasfeo_dvecmul
 #define VECMULACC blasfeo_dvecmulacc
 
+// functions not implemented by blasfeo_hp
+#define GEADTR fatrop_dgead_transposed
+#define VECCPR fatrop_dveccp_reversed
+#define ROWAD fatrop_drowad
+#define TRSV_UNU fatrop_dtrsv_unu
+#define TRSV_UTU fatrop_dtrsv_utu
+
+#if defined(BLASFEO_REF_API)
+#define TRSM_RLNN blasfeo_dtrsm_rlnn
+#else
+#define TRSM_RLNN fatrop_dtrsm_rlnn_alt
+#endif
 
 #ifndef __GNUC__
 
@@ -232,7 +238,7 @@ namespace fatrop
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm);
         void copy(const FatropVecBF &fm);
-        void copyto(std::vector<double>& dest) const;
+        void copyto(std::vector<double> &dest) const;
         void operator=(const std::vector<double> &fm);
         /** \brief set data pointer*/
         void set_datap(VEC *vecbf);
