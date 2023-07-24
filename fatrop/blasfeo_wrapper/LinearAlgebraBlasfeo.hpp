@@ -35,13 +35,10 @@
 #define ROWSW blasfeo_drowsw
 #define COLSW blasfeo_dcolsw
 #define GEAD blasfeo_dgead
-#define GEADTR fatrop_dgead_transposed
 #define GECP blasfeo_dgecp
 #define GESC blasfeo_dgesc
 #define VECCP blasfeo_dveccp
 #define VECCPSC blasfeo_dveccpsc
-#define VECCPR fatrop_dveccp_reversed
-#define TRSM_RLNN fatrop_dtrsm_rlnn_alt // TODO this is not implemented by blasfeo so we defined our own (naive) implementation
 // #define TRSM_LLNN blasfeo_dtrsm_llnn
 #define TRSM_RLTN blasfeo_dtrsm_rltn
 #define VECEL BLASFEO_DVECEL
@@ -60,9 +57,7 @@
 #define ROWAD fatrop_drowad
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
-#define TRSV_UNU fatrop_dtrsv_unu
 #define TRSV_UTN blasfeo_dtrsv_utn
-#define TRSV_UTU fatrop_dtrsv_utu
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
 #define VECSE blasfeo_dvecse
@@ -81,6 +76,18 @@
 #define VECMULACC blasfeo_dvecmulacc
 #define GER blasfeo_dger
 
+// functions not implemented by blasfeo_hp
+#define GEADTR fatrop_dgead_transposed
+#define VECCPR fatrop_dveccp_reversed
+#define ROWAD fatrop_drowad
+#define TRSV_UNU fatrop_dtrsv_unu
+#define TRSV_UTU fatrop_dtrsv_utu
+
+#if defined(BLASFEO_REF_API)
+#define TRSM_RLNN blasfeo_dtrsm_rlnn
+#else
+#define TRSM_RLNN fatrop_dtrsm_rlnn_alt
+#endif
 
 #ifndef __GNUC__
 
