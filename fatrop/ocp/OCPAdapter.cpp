@@ -44,6 +44,10 @@ fatrop_int OCPAdapter::eval_lag_hess(
     double *primal_data = primal_vars_p->pa;
     double *lam_data = lam_p->pa;
 
+    OCPMACRO(MAT *, BAbt, _p);
+    OCPMACRO(MAT *, Ggt, _p);
+    OCPMACRO(MAT *, Ggt_ineq, _p);
+
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
@@ -56,17 +60,25 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_g_k = offs_g[k];
         fatrop_int offs_ineq_k = offs_ineq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_RSQrqtk(
-            &obj_scale,
-            primal_data + offs_ux_k,
-            primal_data + offs_ux_k + nu_k,
-            lam_data + offs_dyn_eq_k,
-            lam_data + offs_g_k,
-            lam_data + offs_ineq_k,
-            stageparams_p + offs_stageparams_k,
-            globalparams_p,
-            RSQrqt_p + k,
-            k);
+        int ret = 0;
+        if (bfgs)
+            ret = OCPBFGS_updaters[k].update(RSQrqt_p + k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p + k, lam_p, offs_dyn_eq_k, Ggt_p + k, lam_p, offs_g_k, Ggt_ineq_p + k, lam_p, offs_ineq_k);
+        if (!bfgs || ret == 1)
+        {
+        // std::cout << "using exact Hess " << k << std::endl;
+            ret = ocptempl->eval_RSQrqtk(
+                &obj_scale,
+                primal_data + offs_ux_k,
+                primal_data + offs_ux_k + nu_k,
+                lam_data + offs_dyn_eq_k,
+                lam_data + offs_g_k,
+                lam_data + offs_ineq_k,
+                stageparams_p + offs_stageparams_k,
+                globalparams_p,
+                RSQrqt_p + k,
+                k);
+        }
+
         if (k > 0)
         {
             fatrop_int offs_dyn_eq_km1 = offs_dyn_eq[k - 1];
@@ -271,7 +283,9 @@ fatrop_int OCPAdapter::eval_obj_grad(
     const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
     double *grad_p = ((VEC *)gradient)->pa;
     OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, nx, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
+    SOLVERMACRO(VEC *, gradient, _p);
     double *primal_data = primal_vars_p->pa;
     fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
@@ -282,6 +296,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
     for (fatrop_int k = 0; k < K; k++)
     {
         fatrop_int nu_k = nu_p[k];
+        fatrop_int nx_k = nx_p[k];
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_rqk(
@@ -292,6 +307,9 @@ fatrop_int OCPAdapter::eval_obj_grad(
             globalparams_p,
             grad_p + offs_ux_k,
             k);
+        // save result in grad buf
+        VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
+        // blasfeo_print_dvec(nu_k + nx_k, gradbuf[k], 0);
     }
     return 0;
 };

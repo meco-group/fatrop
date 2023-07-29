@@ -66,6 +66,7 @@ namespace fatrop
             FatropVecBF &upper) const = 0;
         virtual fatrop_int get_initial_sol_guess(
             FatropVecBF &initial) const = 0;
+        virtual void reset() = 0;
         // virtual fatrop_int GetDefaultParams(
         //     FatropOptions &params) const = 0;
         virtual void set_parameters(const std::vector<double> &stage_params_in, const std::vector<double> &global_params_in) = 0;

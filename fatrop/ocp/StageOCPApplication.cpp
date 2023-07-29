@@ -117,7 +117,7 @@ OCPApplication::OCPApplication(const shared_ptr<OCPAbstract> &ocp) : ocp_(ocp)
 void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
-    adapter = make_shared<OCPAdapter>(ocp_);
+    adapter = make_shared<OCPAdapter>(ocp_, fatropoptions_);
     shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(adapter));
     NLPApplication::build(nlp);
     dirty = false;

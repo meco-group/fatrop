@@ -314,4 +314,5 @@ void FatropOCP::finalize()
 }
 void FatropOCP::reset()
 {
+    ocp_->reset();
 }

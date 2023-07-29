@@ -47,11 +47,14 @@
 #define GEMM_NT blasfeo_dgemm_nt
 #define GEAD blasfeo_dgead
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
+#define SYRK_LN blasfeo_dsyrk_ln
 #define GETR blasfeo_dgetr
 #define TRTR_L blasfeo_dtrtr_l
 #define POTRF_L_MN blasfeo_dpotrf_l_mn
 #define ROWEX blasfeo_drowex
 #define ROWIN blasfeo_drowin
+#define COLIN blasfeo_dcolin
+#define ROWAD fatrop_drowad
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
 #define TRSV_UTN blasfeo_dtrsv_utn
@@ -71,6 +74,7 @@
 #define COLSC blasfeo_dcolsc
 #define VECMUL blasfeo_dvecmul
 #define VECMULACC blasfeo_dvecmulacc
+#define GER blasfeo_dger
 
 // functions not implemented by blasfeo_hp
 #define GEADTR fatrop_dgead_transposed
@@ -185,6 +189,60 @@ namespace fatrop
         const fatrop_int col_offset_;
         const fatrop_int nrows_;
         const fatrop_int ncols_;
+    };
+
+    class MATBF
+    {
+    public:
+        MATBF(const int m, const int n) : m_(m), n_(n)
+        {
+            blasfeo_allocate_dmat(m_, n_, &mat_);
+        }
+        MATBF(MATBF &&other) : m_(other.m_), n_(other.n_)
+        {
+            mat_ = other.mat_;
+            other.mat_.pA = nullptr;
+            other.mat_.mem = nullptr;
+            other.mat_.dA = nullptr;
+        }
+        ~MATBF()
+        {
+            blasfeo_free_dmat(&mat_);
+        }
+        operator MAT *()
+        {
+            return &mat_;
+        }
+        MAT mat_;
+        const int m_;
+        const int n_;
+    };
+
+    class VECBF
+    {
+    public:
+        VECBF(const int m) : m_(m)
+        {
+            blasfeo_allocate_dvec(m_, &vec_);
+            // zero out vector
+            blasfeo_dvecse(m_, 0.0, &vec_, 0);
+        }
+        VECBF(VECBF &&other) : m_(other.m_)
+        {
+            vec_ = other.vec_;
+            other.vec_.pa = nullptr;
+            other.vec_.mem = nullptr;
+        }
+        ~VECBF()
+        {
+            blasfeo_free_dvec(&vec_);
+        }
+        operator VEC *()
+        {
+            return &vec_;
+        }
+        VEC vec_;
+        const int m_;
     };
 
     /** \brief this class is used for the allocation of a blasfeo matrix, the dimsensions are set from a vector */
