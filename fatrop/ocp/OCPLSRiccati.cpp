@@ -32,8 +32,8 @@ namespace fatrop
 } // namespace fatrop
 using namespace fatrop;
 OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> &options, const shared_ptr<FatropPrinter> &printer) : Ppt(dims.nx + 1, dims.nx, dims.K),
-                                                                                                                                      Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nx
-                                                                                                                                      AL(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nx)), 1),
+                                                                                                                                      Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nu + nx
+                                                                                                                                      AL(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nu+dims.nx)), 1),
                                                                                                                                       RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
                                                                                                                                       Ggt_stripe(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
@@ -62,7 +62,7 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> 
                                                                                                                                       delta_s_test(sum(dims.ng_ineq), 1),
                                                                                                                                       v_Ppt(dims.nx, dims.K),
                                                                                                                                       v_Hh(dims.nx, dims.K),
-                                                                                                                                      v_AL(vector<fatrop_int>(1, maxel(dims.nx)), 1),
+                                                                                                                                      v_AL(vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       v_RSQrqt_tilde(dims.nu + dims.nx, dims.K),
                                                                                                                                       v_Ggt_stripe(vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       v_Ggt_tilde(dims.nu + dims.nx, dims.K),
