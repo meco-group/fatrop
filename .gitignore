@@ -28,7 +28,7 @@ invariants/trans_FS/f.c
 *.fdb_latexmk
 *.egg
 *.whl
-fatropy.cpp
+fatropy_old/fatropy.cpp
 casadi_codegen*
 *.tar.gz
 output.txt
