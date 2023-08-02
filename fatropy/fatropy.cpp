@@ -6,11 +6,6 @@
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-int add(int i, int j)
-{
-    return i + j;
-}
-
 namespace py = pybind11;
 namespace fatropy
 {
