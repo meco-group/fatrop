@@ -132,6 +132,18 @@ namespace fatrop
         StageOCPSolution(const std::shared_ptr<OCP> &app);
         void get_u(std::vector<double> &result) const;
         void get_x(std::vector<double> &result) const;
+        int get_nx() const
+        {
+            return nx;
+        };
+        int get_nu() const
+        {
+            return nu;
+        };
+        int get_K() const
+        {
+            return K;
+        };
 
     protected:
         StageOCPSolution();

@@ -189,6 +189,7 @@ void StageOCPSolution::set_parameters(const vector<double> &global_params, const
 
 void StageOCPSolution::get_u(std::vector<double> &result) const
 {
+    result.resize(nu * (K - 1));
     for (fatrop_int k = 0; k < K - 1; k++)
     {
         fatrop_int offs = (nu + nx) * k;
@@ -198,6 +199,7 @@ void StageOCPSolution::get_u(std::vector<double> &result) const
 }
 void StageOCPSolution::get_x(std::vector<double> &result) const
 {
+    result.resize(nx * K);
     for (fatrop_int k = 0; k < K; k++)
     {
         fatrop_int offs = (k == K - 1) ? (nu + nx) * k : (nu + nx) * k + nu;
