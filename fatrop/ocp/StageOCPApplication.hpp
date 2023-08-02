@@ -188,6 +188,10 @@ namespace fatrop
         public:
             void set_value(const double value[]);
             void set_value(const std::initializer_list<double> il_);
+            void set_value(const std::vector<double> il_)
+            {
+                set_value(il_.data());
+            };
 
         private:
             const std::shared_ptr<OCPAdapter> adapter_;
@@ -197,6 +201,10 @@ namespace fatrop
         StageExpressionEvaluatorFactory get_expression(const std::string &sampler_name);
         StageExpressionEvaluatorFactory get_expression_evaluator(const std::shared_ptr<StageExpression> &expr);
         AppParameterSetter get_parameter_setter(const std::string &setter_name);
+        void set_value(const std::string &setter_name, const std::vector<double>& value)
+        {
+            get_parameter_setter(setter_name).set_value(value);
+        };
         void build();
         fatrop_int optimize();
         const StageOCPSolution &last_stageocp_solution() const;

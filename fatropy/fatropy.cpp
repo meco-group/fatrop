@@ -17,6 +17,29 @@ namespace fatropy
     struct MatBind : public std::vector<double>
     {
         using std::vector<double>::vector;
+        MatBind(const py::array_t<double> &x)
+        {
+            auto buf = x.request();
+            auto ptr = static_cast<double *>(buf.ptr);
+            this->resize(buf.size);
+            if (buf.ndim == 1)
+            {
+                std::copy(ptr, ptr + buf.size, this->begin());
+            }
+            else
+            {
+                const int m = buf.shape[0];
+                const int n = buf.shape[1];
+                const int stride_0 = buf.strides[0] / buf.itemsize;
+                const int stride_1 = buf.strides[1] / buf.itemsize;
+                std::cout << "stride_0: " << stride_0 << std::endl;
+                std::cout << "stride_1: " << stride_1 << std::endl;
+                // copy to fortran format
+                for (int j = 0; j < n; j++)
+                    for (int i = 0; i < m; i++)
+                        (*this)[i + j * m] = ptr[stride_0 * i + stride_1 * j];
+            }
+        };
         py::array_t<double> to_numpy()
         {
             auto result = py::array(py::buffer_info(
@@ -68,10 +91,26 @@ PYBIND11_MODULE(fatropy, m)
     py::class_<fatrop::FatropSolution>(m, "FatropSolution");
     py::class_<fatrop::OCPTimeStepSampler>(m, "OCPTimeStepSampler");
     py::class_<fatrop::StageControlGridSampler>(m, "StageControlGridSampler");
+    py::class_<fatrop::FatropStats>(m, "FatropStats")
+        .def_readonly("compute_sd_time", &fatrop::FatropStats::compute_sd_time)
+        .def_readonly("duinf_time", &fatrop::FatropStats::duinf_time)
+        .def_readonly("eval_hess_time", &fatrop::FatropStats::eval_hess_time)
+        .def_readonly("eval_jac_time", &fatrop::FatropStats::eval_jac_time)
+        .def_readonly("eval_cv_time", &fatrop::FatropStats::eval_cv_time)
+        .def_readonly("eval_grad_time", &fatrop::FatropStats::eval_grad_time)
+        .def_readonly("eval_obj_time", &fatrop::FatropStats::eval_obj_time)
+        .def_readonly("initialization_time", &fatrop::FatropStats::initialization_time)
+        .def_readonly("time_total", &fatrop::FatropStats::time_total)
+        .def_readonly("eval_hess_count", &fatrop::FatropStats::eval_hess_count)
+        .def_readonly("eval_jac_count", &fatrop::FatropStats::eval_jac_count)
+        .def_readonly("eval_cv_count", &fatrop::FatropStats::eval_cv_count)
+        .def_readonly("eval_grad_count", &fatrop::FatropStats::eval_grad_count)
+        .def_readonly("eval_obj_count", &fatrop::FatropStats::eval_obj_count)
+        .def_readonly("iterations_count", &fatrop::FatropStats::iterations_count);
     py::class_<fatrop::StageExpressionEvaluatorFactory>(m, "StageExpressionEvaluatorFactory")
-    .def("at_t0", &fatrop::StageExpressionEvaluatorFactory::at_t0)
-    .def("at_tf", &fatrop::StageExpressionEvaluatorFactory::at_tf)
-    .def("at_control", &fatrop::StageExpressionEvaluatorFactory::at_control);
+        .def("at_t0", &fatrop::StageExpressionEvaluatorFactory::at_t0)
+        .def("at_tf", &fatrop::StageExpressionEvaluatorFactory::at_tf)
+        .def("at_control", &fatrop::StageExpressionEvaluatorFactory::at_control);
     py::class_<fatrop::StageOCPSolution, fatrop::FatropSolution>(m, "StageOCPSolution")
         .def(py::init<const std::shared_ptr<fatrop::OCP>>())
         .def_property_readonly("u", [](const fatrop::StageOCPSolution &sol)
@@ -100,7 +139,6 @@ PYBIND11_MODULE(fatropy, m)
                 else
                     return result.to_numpy(sol.get_K(), t.n_cols(), t.n_rows()); });
 
-
     py::class_<fatrop::StageOCPApplication>(m, "StageOCPApplication")
         .def(py::init<const std::shared_ptr<fatrop::StageOCP> &>())
         .def("optimize", &fatrop::StageOCPApplication::optimize)
@@ -108,19 +146,22 @@ PYBIND11_MODULE(fatropy, m)
         .def("last_stageocp_solution", &fatrop::StageOCPApplication::last_stageocp_solution)
         .def("get_expression", &fatrop::StageOCPApplication::get_expression)
         .def("set_initial", &fatrop::NLPApplication::set_initial)
-        // .def("set_initial_x", [](fatrop::StageOCPApplication &app, const py::array_t<double> &x)
-        //      {
-        //         auto buf = x.request();
-        //         if (buf.ndim != 2)
-        //             throw std::runtime_error("Number of dimensions must be two");
-        //         if (buf.shape[0] != app.get_nx())
-        //             throw std::runtime_error("Number of rows must be equal to nx");
-        //         if (buf.shape[1] != app.get_K())
-        //             throw std::runtime_error("Number of columns must be equal to K");
-        //         app.set_initial_x(reinterpret_cast<double *>(buf.ptr));
-        //      });
-        ;
-        
+        .def("set_initial_x", [](fatrop::StageOCPApplication &app, const py::array_t<double> &x)
+             { app.set_initial_x(MatBind(x)); })
+        .def("set_initial_u", [](fatrop::StageOCPApplication &app, const py::array_t<double> &u)
+             { app.set_initial_u(MatBind(u)); })
+        .def("set_value",
+             [](fatrop::StageOCPApplication &self, const std::string &name, const py::array_t<double> &value)
+             {
+                 self.set_value(name, MatBind(value));
+             })
+        .def("set_params",
+             [](fatrop::StageOCPApplication &self, const py::array_t<double> &stage_params, const py::array_t<double> &global_params)
+             {
+                 self.set_params(MatBind(stage_params), MatBind(global_params));
+             })
+        .def("get_stats", &fatrop::StageOCPApplication::get_stats);
+
     py::class_<fatrop::StageOCPApplicationFactory>(m, "StageOCPApplicationFactory")
         .def(py::init<>())
         .def("from_rockit_interface", &fatrop::StageOCPApplicationFactory::from_rockit_interface);
