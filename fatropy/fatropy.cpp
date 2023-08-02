@@ -32,8 +32,6 @@ namespace fatropy
                 const int n = buf.shape[1];
                 const int stride_0 = buf.strides[0] / buf.itemsize;
                 const int stride_1 = buf.strides[1] / buf.itemsize;
-                std::cout << "stride_0: " << stride_0 << std::endl;
-                std::cout << "stride_1: " << stride_1 << std::endl;
                 // copy to fortran format
                 for (int j = 0; j < n; j++)
                     for (int i = 0; i < m; i++)
