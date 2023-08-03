@@ -151,7 +151,7 @@ PYBIND11_MODULE(fatropy, m)
         .def("set_params",
              [](fatrop::StageOCPApplication &self, const py::array_t<double> &stage_params, const py::array_t<double> &global_params)
              {
-                 self.set_params(MatBind(stage_params), MatBind(global_params));
+                 self.set_params(MatBind(global_params), MatBind(stage_params));
              })
         .def("get_stats", &fatrop::StageOCPApplication::get_stats);
 
