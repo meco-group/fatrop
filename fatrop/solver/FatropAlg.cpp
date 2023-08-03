@@ -372,7 +372,7 @@ fatrop_int FatropAlg::optimize()
         // if linesearch unsuccessful -> resto phase
     }
     journaller_->print_iterations();
-    return 0;
+    return 1;
 }
 fatrop_int FatropAlg::eval_lag_hess()
 {
