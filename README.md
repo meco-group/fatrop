@@ -32,56 +32,30 @@ The main features of the solver are:
 At this moment fatrop is only tested on (Ubuntu) Linux machines.
 clone the fatrop repository 
 
-    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git
+    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
     cd fatrop
 
-(optionally) checkout the branch with the most recent fatrop version:
-
-    git checkout develop
-
-load the blasfeo submodule
-
-    git submodule update --recursive --init
 build and install the fatrop project
 
     mkdir build
     cd build
     cmake -DBLASFEO_TARGET=X64_AUTOMATIC ..
     make -j
+
 if you want to install fatrop on your system: 
     sudo make install
 
 for non-X64 targets change the blasfeo_target parameter according to the table of https://github.com/giaf/blasfeo
 ## build and install fatropy
-fatropy is the name of the python bindings for fatrop 
-install python-dev tools (replace X.X with your python version)
 
-    sudo apt-get install pythonX.X-dev
-
-navigate to the fatropy source folder
-
-    cd <fatrop_source_dir>/fatropy
-
-tell fatropy where to find the libfatrop.so shared library file: uncomment the following line in the setup.py file and replace INSTALLATION FOLDER with the absolute path to the libfatrop.so file. 
-
-either <fatrop_source_dir>/build/fatrop or your installation directory (for example /usr/local/lib)
-
-        # runtime_library_dirs=["INSTALLATION FOLDER"],
-
-alternatively you could set the LD_LIBRARY_PATH to include the folder with the libfatrop.so shared library file
-
-build and install in your python environment
-
-    pip install -e .
+    cd fatropy 
+    pip install .
 
 ## install rockit with fatropy interface 
 
-    git clone https://gitlab.kuleuven.be/meco-software/rockit.git 
+    git clone https://gitlab.kuleuven.be/meco-software/rockit.git --recursive
     cd rockit
-    git submodule init
-    git submodule update --recursive rockit/external/fatrop 
-    cd rockit/external/fatrop && git checkout fatropy && cd ../../..
-    pip install -e .
+    pip install .
 
 ## examples 
 
@@ -129,4 +103,3 @@ Developer Lander Vanroye (lander.vanroye@kuleuven.be)
 Thanks to all contributors:
 - Wilm Decré (python bindings, cmake configuration)
 - Ajay Sathya (rockit interface)
-
