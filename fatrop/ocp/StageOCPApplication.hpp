@@ -208,7 +208,7 @@ namespace fatrop
         void build();
         fatrop_int optimize();
         const StageOCPSolution &last_solution() const;
-        const FatropSolution &last_solution() const { return last_solution(); };
+        // const FatropSolution &last_solution() const { return last_solution(); };
         const std::vector<std::string> parameter_names() const;
         const std::vector<std::string> stage_expression_names() const;
 
