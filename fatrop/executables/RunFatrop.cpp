@@ -33,7 +33,7 @@ int main(int argc, char **argv)
         ///  no dynamic memory allocation
         app.optimize();
         // ///  retrieve solution
-        app.last_stageocp_solution().evaluate(eval_expression, u0_result);
+        app.last_solution().evaluate(eval_expression, u0_result);
         ///  initialize next solver run 
         app.set_initial(app.last_solution());
         ///  change solver options

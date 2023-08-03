@@ -270,7 +270,7 @@ fatrop_int StageOCPApplication::optimize()
     }
     return ret;
 }
-const StageOCPSolution &StageOCPApplication::last_stageocp_solution() const
+const StageOCPSolution &StageOCPApplication::last_solution() const
 {
     return last_solution_;
 }
