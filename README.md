@@ -28,13 +28,17 @@ The main features of the solver are:
 - interfaced to [rockit](https://gitlab.kuleuven.be/meco-software/rockit), which is a high-level optimal control problem specification framework, built on top of [CasADi](https://web.casadi.org/)
 
 # Installation instructions
-## build and install fatrop
-At this moment fatrop is only tested on (Ubuntu) Linux machines.
-clone the fatrop repository 
-
+## clone this repository
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
     cd fatrop
 
+## build and install fatrop + fatropy
+At this moment fatrop is only tested on (Ubuntu) Linux machines.
+    cd fatropy 
+    pip install .
+
+## build and install fatrop
+Make sure pybind11 is installed on your system.
 build and install the fatrop project
 
     mkdir build
@@ -46,10 +50,6 @@ if you want to install fatrop on your system:
     sudo make install
 
 for non-X64 targets change the blasfeo_target parameter according to the table of https://github.com/giaf/blasfeo
-## build and install fatropy
-
-    cd fatropy 
-    pip install .
 
 ## install rockit with fatropy interface 
 

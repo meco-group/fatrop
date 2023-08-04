@@ -135,6 +135,7 @@ setup(
     ext_modules=[CMakeExtension("fatropy", sourcedir = "..")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
+    install_requires=["pybind11[global]>=2.6.2"],
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",
 )
