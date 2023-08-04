@@ -39,8 +39,14 @@ Set the CMake flags, change the blasfeo target to your system architecture (see 
 
     export CMAKE_FLAGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
 
+build and install the fatropy project
+
     cd fatropy 
     pip install .
+
+Trouble shoot: make sure you have the newest version of pip and setuptools installed
+
+    pip install --upgrade pip setuptools
 
 ## build and install fatrop (c++ only)
 Make sure pybind11 is installed on your system.
