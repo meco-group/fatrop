@@ -47,7 +47,7 @@ Set the CMake flags, change the BLASFEO target to your system architecture (see 
 
     export CMAKE_FLAGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
 
-Build and install the fatropy project
+Build and install the Fatropy project
 
     cd fatropy 
     pip install .
@@ -58,12 +58,7 @@ Build and install the fatropy project
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
     cd fatrop
 
-<<<<<<< HEAD
 Build and install the Fatrop project
-=======
-## build and install fatrop (c++ only)
-build and install the fatrop project
->>>>>>> a05327fe781d9a23b417e3ebc414a707c452f4b9
 
     mkdir build
     cd build
@@ -76,7 +71,7 @@ If you want to install Fatrop on your system
 
 For non-x64 targets change the BLASFEO_target parameter according to the table of https://github.com/giaf/blasfeo
 
-## Install rockit with fatropy interface 
+## Install rockit with Fatropy interface 
 
     git clone https://gitlab.kuleuven.be/meco-software/rockit.git
     git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop --recursive
