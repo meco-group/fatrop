@@ -58,12 +58,8 @@ Build and install the fatropy project
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
     cd fatrop
 
-<<<<<<< HEAD
-Build and install the Fatrop project
-=======
 ## build and install fatrop (c++ only)
 build and install the fatrop project
->>>>>>> a05327fe781d9a23b417e3ebc414a707c452f4b9
 
     mkdir build
     cd build
