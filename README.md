@@ -49,7 +49,6 @@ Trouble shoot: make sure you have the newest version of pip and setuptools insta
     pip install --upgrade pip setuptools
 
 ## build and install fatrop (c++ only)
-Make sure pybind11 is installed on your system.
 build and install the fatrop project
 
     mkdir build
