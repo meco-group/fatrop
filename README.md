@@ -28,59 +28,66 @@ The main features of the solver are:
 - interfaced to [rockit](https://gitlab.kuleuven.be/meco-software/rockit), which is a high-level optimal control problem specification framework, built on top of [CasADi](https://web.casadi.org/)
 
 # Installation instructions
-## (recursively) clone this repository
+At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two installation types: 
+- [installation of Fatrop (C++) and Fatropy providing Python bindings (using pybind11)](#build-and-install-fatrop-and-fatropy)
+- [installation of Fatrop (C++) only](#build-and-install-fatrop-only)
+
+## Build and install Fatrop and Fatropy
+(Recursively) clone this repository
+
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
     cd fatrop
 
-## build and install fatrop + fatropy
-At this moment fatrop is only tested on (Ubuntu) Linux machines.
+Install dependencies/tools
 
-Set the CMake flags, change the blasfeo target to your system architecture (see table of https://github.com/giaf/blasfeo).
+    sudo apt install pybind11-dev
+    pip install --upgrade pip setuptools
+
+Set the CMake flags, change the BLASFEO target to your system architecture (see table of https://github.com/giaf/blasfeo)
 
     export CMAKE_FLAGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
 
-build and install the fatropy project
+Build and install the fatropy project
 
     cd fatropy 
     pip install .
 
-Trouble shoot: make sure you have the newest version of pip and setuptools installed
+## Build and install Fatrop only
+(Recursively) clone this repository
 
-    pip install --upgrade pip setuptools
+    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
+    cd fatrop
 
-## build and install fatrop (c++ only)
-Make sure pybind11 is installed on your system.
-build and install the fatrop project
+Build and install the Fatrop project
 
     mkdir build
     cd build
     cmake -DBLASFEO_TARGET=X64_AUTOMATIC ..
     make -j
 
-if you want to install fatrop on your system: 
+If you want to install Fatrop on your system
+
     sudo make install
 
-for non-X64 targets change the blasfeo_target parameter according to the table of https://github.com/giaf/blasfeo
+For non-x64 targets change the BLASFEO_target parameter according to the table of https://github.com/giaf/blasfeo
 
-## install rockit with fatropy interface 
+## Install rockit with fatropy interface 
 
     git clone https://gitlab.kuleuven.be/meco-software/rockit.git
     git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop --recursive
     cd rockit
     pip install .
 
-## examples 
-
+## Examples 
 https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo
 
 https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_benchmarks
 
-using fatrop from cpp:
+Using Fatrop from C++: check file `fatrop/executables/RunFatrop.cpp`
 
-fatrop/executables/RunFatrop.cpp
+# Developers
 
-Developer Lander Vanroye (lander.vanroye@kuleuven.be)
+Fatrop is developed by [Lander Vanroye](https://www.kuleuven.be/wieiswie/en/person/00116913) at the [KU Leuven Robotics Research Group](https://www.mech.kuleuven.be/robotics) under supervision of [Wilm Decre](https://www.kuleuven.be/wieiswie/en/person/00052672).
 
-Thanks to all contributors:
-- Wilm Decré (python bindings, cmake configuration)
-- Ajay Sathya (rockit interface)
+Contributors:
+- [Ajay Sathya](https://www.kuleuven.be/wieiswie/en/person/00110259) ([rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface)
