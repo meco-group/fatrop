@@ -38,10 +38,6 @@ At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two i
     git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
     cd fatrop
 
-Install dependencies/tools
-
-    sudo apt install pybind11-dev
-    pip install --upgrade pip setuptools
 
 Set the CMake flags, change the BLASFEO target to your system architecture (see table of https://github.com/giaf/blasfeo)
 
@@ -51,6 +47,8 @@ Build and install the Fatropy project
 
     cd fatropy 
     pip install .
+
+Trouble shoot: make sure you're using the newest pip version (pip install --upgrade pip setuptools)
 
 ## Build and install Fatrop only
 (Recursively) clone this repository
