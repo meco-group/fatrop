@@ -211,7 +211,7 @@ namespace fatrop
                                                                                                                                                          { return ocptempl_->get_ng_ineq_k(k); })),
                                                                                                                    nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
                                                                                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
-                                                                                                                   offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), ocptempl(ocptempl_), options(options)
+                                                                                                                   offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), options(options), ocptempl(ocptempl_)
         {
             #ifdef ENABLE_MULTITHREADING
             // check if environment variable OMP_NUM_THREADS is set
