@@ -8,6 +8,34 @@ namespace fatrop
         class FatropCasadiSolver : public OCPAbstract
         {
         public:
+            fatrop_int get_nxk(const fatrop_int k) const override
+            {
+                return evaluation_quantities_ptr_[k]->nx;
+            };
+            fatrop_int get_nuk(const fatrop_int k) const override
+            {
+                return evaluation_quantities_ptr_[k]->nu;
+            };
+            fatrop_int get_ngk(const fatrop_int k) const override
+            {
+                return evaluation_quantities_ptr_[k]->ng_eq;
+            };
+            fatrop_int get_ng_ineq_k(const fatrop_int k) const override
+            {
+                return evaluation_quantities_ptr_[k]->ng_ineq;
+            };
+            fatrop_int get_n_global_params() const
+            {
+                return np_global_;
+            };
+            fatrop_int get_n_stage_params_k(const fatrop_int k) const override
+            {
+                return evaluation_quantities_ptr_[k]->np_stage;
+            };
+            fatrop_int get_horizon_length() const override
+            {
+                return horizon_length_;
+            };
             // implementation of the OCPAbstract methods
             int eval_BAbtk(const double *states_kp1,
                            const double *inputs_k,
@@ -169,26 +197,28 @@ namespace fatrop
             {
                 int nx = this->get_nxk(k);
                 for (int i = 0; i < nx; i++)
-                {
                     xk[i] = x_initial[k][i];
-                }
                 return 0;
             };
             int get_initial_uk(double *uk, const int k) const override
             {
                 int nu = this->get_nuk(k);
                 for (int i = 0; i < nu; i++)
-                {
                     uk[i] = u_initial[k][i];
-                }
                 return 0;
             };
             int set_initial_xk(double *xk, const int k)
             {
+                int nx = this->get_nxk(k);
+                for (int i = 0; i < nx; i++)
+                    x_initial[k][i] = xk[i];
                 return 0;
             };
             int set_initial_uk(double *uk, const int k)
             {
+                int nu = this->get_nuk(k);
+                for (int i = 0; i < nu; i++)
+                    u_initial[k][i] = uk[i];
                 return 0;
             };
             int get_boundsk(double *lower, double *upper, const int k) const override
@@ -206,10 +236,18 @@ namespace fatrop
             };
             int get_default_stage_paramsk(double *stage_params_res, const int k) const override
             {
+                int np = this->get_n_stage_params_k(k);
+                const double *p_stage_default = evaluation_quantities_ptr_[k]->p_stage_default.data();
+                for (int i = 0; i < np; i++)
+                    stage_params_res[i] = p_stage_default[i];
                 return 0;
             }
             int get_default_global_params(double *global_params_res) const override
             {
+                int np = this->get_n_global_params();
+                const double *p_global_default = p_global_default_.data();
+                for (int i = 0; i < np; i++)
+                    global_params_res[i] = p_global_default[i];
                 return 0;
             }
 
@@ -217,6 +255,7 @@ namespace fatrop
             typedef std::vector<double> vd;
             struct evaluation_quantities
             {
+                int nx, nu, np_stage, ng_eq, ng_ineq;
                 eval_bf L;
                 eval_bf RSQrq;
                 eval_bf rq;
@@ -228,9 +267,13 @@ namespace fatrop
                 eval_bf b;
                 vd lb;
                 vd ub;
+                vd p_stage_default;
             };
             std::vector<evaluation_quantities> evaluation_quantities_;
-            std::vector<evaluation_quantities*> evaluation_quantities_ptr_;
+            std::vector<evaluation_quantities *> evaluation_quantities_ptr_;
+            vd p_global_default_;
+            int np_global_;
+            int horizon_length_;
             std::vector<vd> x_initial;
             std::vector<vd> u_initial;
         };
