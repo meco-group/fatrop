@@ -52,7 +52,6 @@ namespace fatrop
                 jit_name_ = std::string(jit_name_.begin(), jit_name_.begin() + jit_name_.size() - 2);
                 if (func_internal->has_codegen())
                 {
-                    // this part is based on casadi/core/function_internal.cpp -- all rights reserved to the original authors
                     // JIT everything
                     casadi::Dict opts;
                     // Override the default to avoid random strings in the generated code
