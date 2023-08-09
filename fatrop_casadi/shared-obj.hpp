@@ -1,7 +1,7 @@
 #pragma once
 namespace fatrop
 {
-    namespace specification
+    namespace fatrop_casadi
     {
         template <typename T, typename Derived>
         struct SharedObj: public std::shared_ptr<T>
@@ -11,5 +11,5 @@ namespace fatrop
             template <class... Args>
             static Derived create (const Args &...args) { return Derived(std::make_shared<T>(args...)); }
         };
-    }; // namespace specification
+    }; // namespace casadi
 }; // namespace fatrop

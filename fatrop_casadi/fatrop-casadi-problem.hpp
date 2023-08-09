@@ -5,7 +5,7 @@
 #include "shared-obj.hpp"
 namespace fatrop
 {
-    namespace specification
+    namespace fatrop_casadi
     {
         namespace cs = casadi;
         struct StageQuantitiesInternal
@@ -143,5 +143,5 @@ namespace fatrop
         class FatropCasadiProblem : public std::vector<StageQuantities>
         {
         };
-    } // namespace specification
+    } // namespace casadi
 } // namespace fatrop

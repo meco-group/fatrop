@@ -10,7 +10,7 @@
  */
 namespace fatrop
 {
-    namespace specification
+    namespace fatrop_casadi
     {
         // class SingleStageProblemFatrop : public StageOCP
         // {

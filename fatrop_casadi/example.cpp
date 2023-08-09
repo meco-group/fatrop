@@ -5,7 +5,7 @@
 #include <limits>
 #define INF std::numeric_limits<double>::infinity()
 using namespace fatrop;
-using namespace fatrop::specification;
+using namespace fatrop::fatrop_casadi;
 int main()
 {
     // define variables
@@ -51,6 +51,8 @@ int main()
     auto solver = std::make_shared<FatropCasadiSolver>(problem);
     auto fatrop_solver = OCPApplication(solver);
     fatrop_solver.build();
+    fatrop_solver.optimize();
+    fatrop_solver.optimize();
     fatrop_solver.optimize();
     return 0;
 }

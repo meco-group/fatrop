@@ -5,7 +5,7 @@
 #include <unordered_map>
 namespace fatrop
 {
-    namespace specification
+    namespace fatrop_casadi
     {
         class FatropCasadiSolver : public OCPAbstract
         {
@@ -328,5 +328,5 @@ namespace fatrop
             std::vector<vd> x_initial;
             std::vector<vd> u_initial;
         };
-    } // namespace specification
+    } // namespace casadi
 } // namespace fatrop

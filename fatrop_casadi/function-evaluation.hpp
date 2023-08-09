@@ -10,7 +10,7 @@
 #define JIT_HACKED_CASADI
 namespace fatrop
 {
-    namespace specification
+    namespace fatrop_casadi
     {
         typedef int (*eval_t)(const double **arg, double **res,
                               long long int *iw, double *w, int);
@@ -24,7 +24,7 @@ namespace fatrop
                 m = (int)funcin.size1_out(0);
                 n = (int)funcin.size2_out(0);
                 func = funcin;
-                // func.expand();
+                func = func.expand();
                 mem = 0;
                 // allocate work vectors
                 size_t sz_arg,

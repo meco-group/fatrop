@@ -7,7 +7,7 @@
  */
 namespace fatrop
 {
-    namespace specification
+    namespace fatrop_casadi
     {
         struct SingleStageDimensions
         {
