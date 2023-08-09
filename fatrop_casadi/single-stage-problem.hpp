@@ -19,9 +19,9 @@ namespace fatrop
         struct SingleStageProblem
         {
             SingleStageDimensions dims;
-            StageQuantitiesInternal initial;
-            StageQuantitiesInternal middle;
-            StageQuantitiesInternal terminal;
+            MicroStageInternal initial;
+            MicroStageInternal middle;
+            MicroStageInternal terminal;
         };
     }
 } // namespace fatrop_specification

@@ -13,10 +13,10 @@ namespace fatrop
             FatropCasadiSolver(const FatropCasadiProblem& prob)
             {
                 horizon_length_ = prob.size();
-                np_global_ = prob[0] -> np_global;
+                np_global_ = prob[0] -> dims.np_global;
                 u_initial.reserve(horizon_length_);
                 x_initial.reserve(horizon_length_ + 1);
-                std::unordered_map<std::shared_ptr<StageQuantitiesInternal>, std::shared_ptr<evaluation_quantities> > evaluation_quantities_map;
+                std::unordered_map<std::shared_ptr<MicroStageInternal>, std::shared_ptr<evaluation_quantities> > evaluation_quantities_map;
                 for (int k = 0; k < horizon_length_; k++)
                 {
                     // check if prob[k] is already in the map
@@ -280,14 +280,14 @@ namespace fatrop
             typedef std::vector<double> vd;
             struct evaluation_quantities
             {
-                evaluation_quantities(const StageQuantities& stagequantities)
+                evaluation_quantities(const MicroStage& stagequantities)
                 {
-                    nx = stagequantities -> nx;
-                    int nxp1 = stagequantities -> nxp1;
-                    nu = stagequantities -> nu;
-                    np_stage = stagequantities -> np_stage;
-                    ng_eq = stagequantities -> ng_equality;
-                    ng_ineq = stagequantities -> ng_inequality;
+                    nx = stagequantities -> dims.nx;
+                    int nxp1 = stagequantities -> dims.nxp1;
+                    nu = stagequantities -> dims.nu;
+                    np_stage = stagequantities -> dims.np_stage;
+                    ng_eq = stagequantities -> dims.ng_equality;
+                    ng_ineq = stagequantities -> dims.ng_inequality;
                     L = EvalBF::create(stagequantities -> L);
                     RSQrq = EvalBF::create(stagequantities -> RSQrq);
                     rq = EvalBF::create(stagequantities -> rq);

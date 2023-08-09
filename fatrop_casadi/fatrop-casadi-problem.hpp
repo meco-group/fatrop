@@ -8,31 +8,31 @@ namespace fatrop
     namespace fatrop_casadi
     {
         namespace cs = casadi;
-        struct StageQuantitiesInternal
+        struct MicroStageDims
         {
-            StageQuantitiesInternal(const cs::Function &L, const cs::Function &dynamics, const cs::Function &g_eq, const cs::Function &g_ineq, const std::vector<double> &lb, const std::vector<double> &ub)
-                : L(L), g_equality(g_eq), g_inequality(g_ineq), Lb(lb), Ub(ub)
+            int nx;
+            int nxp1;
+            int nu;
+            int ng_equality;
+            int ng_inequality;
+            int np_stage;
+            int np_global;
+        };
+        struct MicroStageInternal
+        {
+            MicroStageInternal(const MicroStageDims& dims ,const cs::Function &L, const cs::Function &dynamics, const cs::Function &g_eq, const cs::Function &g_ineq, const std::vector<double> &lb, const std::vector<double> &ub)
+                : dims(dims), L(L), g_equality(g_eq), g_inequality(g_ineq), Lb(lb), Ub(ub)
             {
-                // TODO, make this part of the solver?
-                // this is not required for opti for example
-                // deduce problem dimensions
-                nx = L.nnz_in(0);
-                nu = L.nnz_in(1);
-                np_stage = L.nnz_in(2);
-                nxp1 = dynamics.is_null() ? 0 : dynamics.nnz_out(0);
-                ng_equality = g_equality.is_null() ? 0 : g_equality.nnz_out(0);
-                ng_inequality = g_inequality.is_null() ? 0 : g_inequality.nnz_out(0);
-                np_global = L.nnz_in(3);
                 // instantiate required symbols
-                cs::MX x = cs::MX::sym("x", nx);
-                cs::MX xp1 = cs::MX::sym("xp1", nxp1);
-                cs::MX u = cs::MX::sym("u", nu);
-                cs::MX p_stage = cs::MX::sym("p", np_stage);
-                cs::MX p_global = cs::MX::sym("p_global", np_global);
+                cs::MX x = cs::MX::sym("x", dims.nx);
+                cs::MX xp1 = cs::MX::sym("xp1", dims.nxp1);
+                cs::MX u = cs::MX::sym("u", dims.nu);
+                cs::MX p_stage = cs::MX::sym("p", dims.np_stage);
+                cs::MX p_global = cs::MX::sym("p_global", dims.np_global);
                 // instantiate required dual variabels symbols
-                cs::MX lam_g_equality = cs::MX::sym("lam_g_equality", ng_equality);
-                cs::MX lam_g_inequality = cs::MX::sym("lam_g_inequality", ng_inequality);
-                cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", nxp1);
+                cs::MX lam_g_equality = cs::MX::sym("lam_g_equality", dims.ng_equality);
+                cs::MX lam_g_inequality = cs::MX::sym("lam_g_inequality", dims.ng_inequality);
+                cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", dims.nxp1);
                 // instantiate all requried symbols
                 auto L_sym = L({x, u, p_stage, p_global})[0];
                 auto ux = cs::MX::vertcat({u, x});
@@ -41,7 +41,7 @@ namespace fatrop
                 // deduce rq
                 rq = casadi::Function("rq", {x, u, p_stage, p_global}, {cs::MX::densify(rq_sym)});
                 // deduce BAbt
-                if (nxp1 > 0)
+                if (dims.nxp1 > 0)
                 {
                     auto x_next_sym = dynamics({x, u, p_stage, p_global})[0];
                     auto b_sym = -xp1 + x_next_sym;
@@ -54,7 +54,7 @@ namespace fatrop
                     RSQ_sym += RSQ_dyn_sym;
                 }
                 // deduce Ggt_equality
-                if (ng_equality > 0)
+                if (dims.ng_equality > 0)
                 {
                     auto g_eq_sym = g_equality({x, u, p_stage, p_global})[0];
                     auto Ggt_equality_sym = cs::MX::horzcat({cs::MX::jacobian(g_eq_sym, ux), g_eq_sym}).T();
@@ -65,7 +65,7 @@ namespace fatrop
                     RSQ_sym += RSQ_eq;
                 }
                 // deduce Ggt_inequality
-                if (ng_inequality > 0)
+                if (dims.ng_inequality > 0)
                 {
                     auto g_ineq_sym = g_inequality({x, u, p_stage, p_global})[0];
                     auto Ggt_inequality_sym = cs::MX::horzcat({cs::MX::jacobian(g_ineq_sym, ux), g_ineq_sym}).T();
@@ -82,19 +82,19 @@ namespace fatrop
             {
                 // expand all functions
                 L.expand();
-                if (nxp1 > 0)
+                if (dims.nxp1 > 0)
                     b.expand();
-                if (ng_equality > 0)
+                if (dims.ng_equality > 0)
                     g_equality.expand();
-                if (ng_inequality > 0)
+                if (dims.ng_inequality > 0)
                     g_inequality.expand();
                 RSQrq.expand();
                 rq.expand();
-                if (ng_equality > 0)
+                if (dims.ng_equality > 0)
                     Ggt_equality.expand();
-                if (ng_inequality > 0)
+                if (dims.ng_inequality > 0)
                     Ggt_inequality.expand();
-                if (nxp1 > 0)
+                if (dims.nxp1 > 0)
                     BAbt.expand();
             }
             // quantities that must be provided
@@ -111,36 +111,29 @@ namespace fatrop
             cs::Function Ggt_equality;
             cs::Function Ggt_inequality;
             cs::Function BAbt;
-            // problem dimensions
-            int ng_equality;
-            int ng_inequality;
-            int nx;
-            int nxp1;
-            int nu;
-            int np_stage;
-            int np_global;
+            MicroStageDims dims;
         };
 
-        struct StageQuantities : public SharedObj<StageQuantitiesInternal, StageQuantities> 
+        struct MicroStage : public SharedObj<MicroStageInternal, MicroStage> 
         {
-            using SharedObj<StageQuantitiesInternal, StageQuantities>::SharedObj;
-            StageQuantities &expand()
+            using SharedObj<MicroStageInternal, MicroStage>::SharedObj;
+            MicroStage &expand()
             {
                 (*this)->expand();
                 return *this;
             }
         };
 
-        // struct StageQuantities : public std::shared_ptr<StageQuantitiesInternal>
+        // struct StageQuantities : public std::shared_ptr<MicroStageInternal>
         // {
         //     template <class... Args>
-        //     static StageQuantities create (const Args &...args) { return StageQuantities(std::make_shared<StageQuantitiesInternal>(args...)); }
+        //     static StageQuantities create (const Args &...args) { return StageQuantities(std::make_shared<MicroStageInternal>(args...)); }
 
         // private:
-        //     StageQuantities(const std::shared_ptr<StageQuantitiesInternal> &other) : std::shared_ptr<StageQuantitiesInternal>(other) {}
+        //     StageQuantities(const std::shared_ptr<MicroStageInternal> &other) : std::shared_ptr<MicroStageInternal>(other) {}
         // };
 
-        class FatropCasadiProblem : public std::vector<StageQuantities>
+        class FatropCasadiProblem : public std::vector<MicroStage>
         {
         };
     } // namespace casadi
