@@ -37,12 +37,6 @@ int main()
     auto stage_middle = StageQuantities::create(L, dynamics, casadi::Function(), g_ineq_middle, lb_middle, ub_middle).expand();
     auto stage_terminal = StageQuantities::create(L_term, casadi::Function(), g_term, g_ineq_term, lb_term, ub_term).expand();
 
-
-
-    // auto stage_initial = StageQuantities::create(L, dynamics, g_eq0, casadi::Function(), std::vector<double>(), std::vector<double>()).expand();
-    // auto stage_middle = StageQuantities::create(L, dynamics, casadi::Function(), casadi::Function(), std::vector<double>(), std::vector<double>()).expand();
-    // auto stage_terminal = StageQuantities::create(L_term, casadi::Function(), casadi::Function(), casadi::Function(), std::vector<double>(), std::vector<double>()).expand();
-
     // set up the problem
     auto problem = FatropCasadiProblem();
     // add the stage quantities

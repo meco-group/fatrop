@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 #include "shared-obj.hpp"
-// #define JIT_HACKED_CASADI
+#define JIT_HACKED_CASADI
 namespace fatrop
 {
     namespace specification
