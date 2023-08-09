@@ -20,6 +20,37 @@
 
 using namespace fatrop;
 using namespace std;
+void OCPAdapter::print_kkt_matrix(OCPKKTMemory *OCP)
+{
+    int K = OCP->K;
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, nx, _p);
+    OCPMACRO(fatrop_int *, ng, _p);
+    OCPMACRO(fatrop_int *, ng_ineq, _p);
+    for (int k = 0; k < K; k++)
+    {
+        int nu = nu_p[k];
+        int nx = nx_p[k];
+        int ng = ng_p[k];
+        int ng_ineq = ng_ineq_p[k];
+        std::cout << "------ " << k << " ------" << std::endl;
+        std::cout << "nu: " << nu << std::endl;
+        std::cout << "nx: " << nx << std::endl;
+        std::cout << "ng: " << ng << std::endl;
+        std::cout << "ng_ineq: " << ng_ineq << std::endl;
+        std::cout << "RSQrq" << std::endl;
+        blasfeo_print_dmat(nu + nx + 1, nu + nx, ((MAT *)OCP->RSQrqt) + k, 0, 0);
+        if (k < K - 1)
+        {
+            std::cout << "BAbt" << std::endl;
+            blasfeo_print_dmat(nu + nx + 1, nx_p[k+1], ((MAT *)OCP->BAbt) + k, 0, 0);
+        }
+        std::cout << "Ggt" << std::endl;
+        blasfeo_print_dmat(nu + nx+1, ng, ((MAT *)OCP->Ggt) + k, 0, 0);
+        std::cout << "Ggt_ineq" << std::endl;
+        blasfeo_print_dmat(nu + nx +1, ng_ineq, ((MAT *)OCP->Ggt_ineq) + k, 0, 0);
+    }
+}
 fatrop_int OCPAdapter::eval_lag_hess(
     OCPKKTMemory *OCP,
     double obj_scale,
@@ -65,7 +96,7 @@ fatrop_int OCPAdapter::eval_lag_hess(
             ret = OCPBFGS_updaters[k].update(RSQrqt_p + k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p + k, lam_p, offs_dyn_eq_k, Ggt_p + k, lam_p, offs_g_k, Ggt_ineq_p + k, lam_p, offs_ineq_k);
         if (!bfgs || ret == 1)
         {
-        // std::cout << "using exact Hess " << k << std::endl;
+            // std::cout << "using exact Hess " << k << std::endl;
             ret = ocptempl->eval_RSQrqtk(
                 &obj_scale,
                 primal_data + offs_ux_k,

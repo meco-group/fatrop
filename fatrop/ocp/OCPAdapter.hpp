@@ -230,7 +230,7 @@ namespace fatrop
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
             for (fatrop_int k = 0; k < K; k++)
-                OCPBFGS_updaters.emplace_back(ocptempl_->get_nuk(k), ocptempl_->get_nxk(k), K == K - 1 ? 0 : ocptempl_->get_nxk(k + 1), ocptempl_->get_ngk(k), ocptempl_->get_ng_ineq_k(k), k == 0, k == K - 1);
+                OCPBFGS_updaters.emplace_back(ocptempl_->get_nuk(k), ocptempl_->get_nxk(k), k == K - 1 ? 0 : ocptempl_->get_nxk(k + 1), ocptempl_->get_ngk(k), ocptempl_->get_ng_ineq_k(k), k == 0, k == K - 1);
             // initialize gradbuf
             for (fatrop_int k = 0; k < K; k++)
                 gradbuf.emplace_back(ocptempl_->get_nuk(k) + ocptempl_->get_nxk(k));
@@ -245,6 +245,7 @@ namespace fatrop
                     updater.reset();
             }
         }
+        void print_kkt_matrix(OCPKKTMemory* OCP);
         fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,
             double obj_scale,
