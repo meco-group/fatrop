@@ -18,9 +18,16 @@ namespace fatrop
             int np_stage;
             int np_global;
         };
+        struct MicroStageSyms
+        {
+            cs::MX x;
+            cs::MX u;
+            cs::MX p_stage;
+            cs::MX p_global;
+        };
         struct MicroStageInternal
         {
-            MicroStageInternal(const MicroStageDims& dims ,const cs::Function &L, const cs::Function &dynamics, const cs::Function &g_eq, const cs::Function &g_ineq, const std::vector<double> &lb, const std::vector<double> &ub)
+            MicroStageInternal(const MicroStageDims &dims, const cs::Function &L, const cs::Function &dynamics, const cs::Function &g_eq, const cs::Function &g_ineq, const std::vector<double> &lb, const std::vector<double> &ub)
                 : dims(dims), L(L), g_equality(g_eq), g_inequality(g_ineq), Lb(lb), Ub(ub)
             {
                 // instantiate required symbols
@@ -78,6 +85,10 @@ namespace fatrop
                 // deduce RSQrq
                 RSQrq = casadi::Function("RSQrq", {x, u, p_stage, p_global, lam_dynamics, lam_g_equality, lam_g_inequality}, {cs::MX::densify(cs::MX::horzcat({RSQ_sym, rq_sym}).T())});
             }
+            MicroStageInternal(const MicroStageSyms &syms, const cs::MX &L, const cs::MX &x_next, const cs::MX &g_eq, const cs::MX &g_ineq, const std::vector<double> &lb, const std::vector<double> &ub)
+                : MicroStageInternal(MicroStageDims{(int)syms.x.size1(), (int)x_next.size1(), (int)syms.u.size1(), (int) g_eq.size1(), (int) g_ineq.size1(), (int)syms.p_stage.size1(), (int)syms.p_global.size1()}, cs::Function("L", {syms.x, syms.u, syms.p_stage, syms.p_global}, {L}), cs::Function("dynamics", {syms.x, syms.u, syms.p_stage, syms.p_global}, {x_next}), cs::Function("g_eq", {syms.x, syms.u, syms.p_stage, syms.p_global}, {g_eq}), cs::Function("g_ineq", {syms.x, syms.u, syms.p_stage, syms.p_global}, {g_ineq}), lb, ub)
+            {
+            }
             void expand()
             {
                 // expand all functions
@@ -98,6 +109,7 @@ namespace fatrop
                     BAbt.expand();
             }
             // quantities that must be provided
+            MicroStageDims dims;
             cs::Function L;
             cs::Function b; // actually provided as dynamics
             cs::Function g_equality;
@@ -111,10 +123,9 @@ namespace fatrop
             cs::Function Ggt_equality;
             cs::Function Ggt_inequality;
             cs::Function BAbt;
-            MicroStageDims dims;
         };
 
-        struct MicroStage : public SharedObj<MicroStageInternal, MicroStage> 
+        struct MicroStage : public SharedObj<MicroStageInternal, MicroStage>
         {
             using SharedObj<MicroStageInternal, MicroStage>::SharedObj;
             MicroStage &expand()

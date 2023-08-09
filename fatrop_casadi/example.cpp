@@ -8,6 +8,7 @@ using namespace fatrop;
 using namespace fatrop::fatrop_casadi;
 int main()
 {
+    typedef std::vector<double> vd;
     // define variables
     auto x = casadi::MX::sym("x", 2);
     auto u = casadi::MX::sym("u", 1);
@@ -15,27 +16,13 @@ int main()
     auto p_global = casadi::MX::sym("p_global", 0);
     auto e = 1. - x(0) * x(0);
     double dt = .5;
-    auto lb_middle = std::vector<double>{-0.25, -1};
-    auto ub_middle = std::vector<double>{INF, 1};
-    auto lb_term = std::vector<double>{-0.25};
-    auto ub_term = std::vector<double>{INF};
-    // define functions
-    auto x_next = x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt;
     auto obj = u * u + x(0) * x(0) + x(1) * x(1);
     auto obj_term = x(1) * x(1);
-    auto L = casadi::Function("L", {x, u, p_stage, p_global}, {obj});
-    auto L_term = casadi::Function("L", {x, casadi::MX::sym("dummy", 0), p_stage, p_global}, {obj_term});
-    auto dynamics = casadi::Function("dynamics", {x, u, p_stage, p_global}, {x_next});
-    auto g_eq0 = casadi::Function("g_eq0", {x, u, p_stage, p_global}, {cs::MX::vertcat({x(0) - 1, x(1)})});
-    // auto g_term = casadi::Function("g_eq0", {x, casadi::MX::sym("dummy",0), p_stage, p_global}, {cs::MX::vertcat({x(0) -1.0, x(1) -1.0})});
-    auto g_term = casadi::Function();
-    auto g_ineq_middle = casadi::Function("g_ineq_middle", {x, u, p_stage, p_global}, {cs::MX::vertcat({x(1), u})});
-    auto g_ineq_term = casadi::Function("g_ineq_term", {x, casadi::MX::sym("dummy", 0), p_stage, p_global}, {cs::MX::vertcat({x(1)})});
-
-    // define StageQuantities
-    auto stage_initial = MicroStage::create(MicroStageDims{2, 2, 1, 2, 0, 0, 0}, L, dynamics, g_eq0, casadi::Function(), std::vector<double>(), std::vector<double>()).expand();
-    auto stage_middle = MicroStage::create(MicroStageDims{2, 2, 1, 0, 2, 0, 0}, L, dynamics, casadi::Function(), g_ineq_middle, lb_middle, ub_middle).expand();
-    auto stage_terminal = MicroStage::create(MicroStageDims{2, 0, 0, 0, 1, 0, 0}, L_term, casadi::Function(), g_term, g_ineq_term, lb_term, ub_term).expand();
+    auto x_next = x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt;
+    auto eq_initial = cs::MX::vertcat({x(0) -1.0, x(1)});
+    auto stage_initial = MicroStage::create(MicroStageSyms{x, u, p_stage, p_global}, obj, x_next, eq_initial, cs::MX(), std::vector<double>(), std::vector<double>());
+    auto stage_middle = MicroStage::create(MicroStageSyms{x, u, p_stage, p_global}, obj, x_next, cs::MX(), cs::MX::vertcat({x(1),u}), vd{-0.25, -1} , vd{INF, 1});
+    auto stage_terminal = MicroStage::create(MicroStageSyms{x, cs::MX(), p_stage, p_global}, obj_term, cs::MX(), cs::MX(), x(1), vd{-0.25} , vd{INF});
 
     // set up the problem
     auto problem = FatropCasadiProblem();
