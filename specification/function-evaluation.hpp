@@ -1,10 +1,13 @@
 #pragma once
 #include <casadi/casadi.hpp>
-#include "casadi/core/code_generator.hpp"
-#include "casadi/core/importer.hpp"
-#include "casadi/core/function_internal.hpp"
+#include <casadi/core/code_generator.hpp>
+#include <casadi/core/importer.hpp>
+#include <casadi/core/function_internal.hpp>
 #include <array>
-#define JIT_HACKED_CASADI 1
+#include <vector>
+#include <memory>
+#include "shared-obj.hpp"
+// #define JIT_HACKED_CASADI
 namespace fatrop
 {
     namespace specification
@@ -12,15 +15,16 @@ namespace fatrop
         typedef int (*eval_t)(const double **arg, double **res,
                               long long int *iw, double *w, int);
 
-        class eval_bf
+
+        class EvalBFInternal
         {
         public:
-            eval_bf(){};
-            eval_bf(const casadi::Function &funcin)
+            EvalBFInternal(const casadi::Function &funcin)
             {
                 m = (int)funcin.size1_out(0);
                 n = (int)funcin.size2_out(0);
                 func = funcin;
+                // func.expand();
                 mem = 0;
                 // allocate work vectors
                 size_t sz_arg,
@@ -35,11 +39,11 @@ namespace fatrop
                 resdata.resize(sz_res);
                 argdata.resize(sz_arg);
                 n_in = func.n_in();
+                #ifdef JIT_HACKED_CASADI
                 fast_jit();
-
-                // resdata = {nullptr};
-                dirty = false;
+                #endif
             }
+            #ifdef JIT_HACKED_CASADI
             void fast_jit()
             {
                 casadi::FunctionInternal *func_internal = func.get();
@@ -68,33 +72,13 @@ namespace fatrop
                     std::cout << "jit compilation not possible for the provided functions" << std::endl;
                 }
             }
+            #endif
             std::string jit_name_;
             casadi::Dict jit_options_;
             std::string jit_directory;
             bool compiled_jit = false;
-            void operator=(const eval_bf &other)
-            {
-                // copy all member values
-                m = other.m;
-                n = other.n;
-                n_in = other.n_in;
-                func = other.func;
-                mem = other.mem;
-                bufout = other.bufout;
-                bufdata = other.bufdata;
-                resdata = other.resdata;
-                argdata = other.argdata;
-                iw = other.iw;
-                w = other.w;
-                dirty = other.dirty;
-                fast_jit();
-                // eval_ = other.eval_;
-                // other.eval_ = nullptr;
-            }
             void operator()(const double ** arg, MAT *res, double *buff)
             {
-                if (dirty)
-                    return;
                 // inputs
                 for (int j = 0; j < n_in; j++)
                     argdata[j] = arg[j];
@@ -115,8 +99,6 @@ namespace fatrop
             }
             void operator()(const double ** arg, double *res)
             {
-                if (dirty)
-                    return;
                 // inputs
                 for (int j = 0; j < n_in; j++)
                     argdata[j] = arg[j];
@@ -129,7 +111,7 @@ namespace fatrop
 #endif
                 // func(arg, resdata);
             }
-            ~eval_bf()
+            ~EvalBFInternal()
             {
                 if (compiled_jit)
                 {
@@ -152,8 +134,10 @@ namespace fatrop
             std::vector<long long int> iw;
             std::vector<double> w;
             casadi::Function func;
-            bool dirty = true;
-            bool bfgs = true;
+        };
+        class EvalBF: public SharedObj<EvalBFInternal, EvalBF>
+        {
+            using SharedObj<EvalBFInternal, EvalBF>::SharedObj;
         };
     };
-};
+    };

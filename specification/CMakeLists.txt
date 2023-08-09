@@ -1,3 +1,4 @@
 add_library(fatrop_specification SHARED specification.cpp)
 target_link_libraries(fatrop_specification fatrop blasfeo casadi)
 add_executable(example example.cpp)
+target_link_libraries(example fatrop_specification)

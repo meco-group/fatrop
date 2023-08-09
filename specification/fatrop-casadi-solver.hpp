@@ -1,6 +1,8 @@
 #pragma once
 #include "fatrop-casadi-problem.hpp"
+#include "function-evaluation.hpp"
 #include <ocp/OCPAbstract.hpp>
+#include <unordered_map>
 namespace fatrop
 {
     namespace specification
@@ -8,6 +10,29 @@ namespace fatrop
         class FatropCasadiSolver : public OCPAbstract
         {
         public:
+            FatropCasadiSolver(const FatropCasadiProblem& prob)
+            {
+                horizon_length_ = prob.size();
+                np_global_ = prob[0] -> np_global;
+                u_initial.reserve(horizon_length_);
+                x_initial.reserve(horizon_length_ + 1);
+                std::unordered_map<std::shared_ptr<StageQuantitiesInternal>, std::shared_ptr<evaluation_quantities> > evaluation_quantities_map;
+                for (int k = 0; k < horizon_length_; k++)
+                {
+                    // check if prob[k] is already in the map
+                    if (evaluation_quantities_map.find(prob[k]) == evaluation_quantities_map.end())
+                    {
+                        // if not, create a new entry
+                        evaluation_quantities_map[prob[k]] = std::make_shared<evaluation_quantities>(prob[k]);
+                    }
+                    evaluation_quantities_ptr_.push_back(evaluation_quantities_map[prob[k]]);
+                    // zero initialize x and u 
+                    int nu = evaluation_quantities_map[prob[k]]->nu;
+                    int nx = evaluation_quantities_map[prob[k]]->nx;
+                    u_initial.push_back(std::vector<double>(nu, 0.0));
+                    x_initial.push_back(std::vector<double>(nx, 0.0));
+                }
+            };
             fatrop_int get_nxk(const fatrop_int k) const override
             {
                 return evaluation_quantities_ptr_[k]->nx;
@@ -51,7 +76,7 @@ namespace fatrop
                 arg[2] = inputs_k;
                 arg[3] = stage_params_k;
                 arg[4] = global_params;
-                evaluation_quantities_ptr_[k]->BAbt(arg, res);
+                evaluation_quantities_ptr_[k]->BAbt->operator()(arg, res);
                 return 0;
             };
             int eval_RSQrqtk(const double *objective_scale,
@@ -73,7 +98,7 @@ namespace fatrop
                 arg[4] = lam_dyn_k;
                 arg[5] = lam_eq_k;
                 arg[6] = lam_ineq_k;
-                evaluation_quantities_ptr_[k]->RSQrq(arg, res);
+                evaluation_quantities_ptr_[k]->RSQrq->operator()(arg, res);
                 return 0;
             }
             int eval_Ggtk(
@@ -89,7 +114,7 @@ namespace fatrop
                 arg[1] = inputs_k;
                 arg[2] = stage_params_k;
                 arg[3] = global_params;
-                evaluation_quantities_ptr_[k]->Ggt_equality(arg, res);
+                evaluation_quantities_ptr_[k]->Ggt_equality->operator()(arg, res);
                 return 0;
             }
             int eval_Ggt_ineqk(
@@ -105,7 +130,7 @@ namespace fatrop
                 arg[1] = inputs_k;
                 arg[2] = stage_params_k;
                 arg[3] = global_params;
-                evaluation_quantities_ptr_[k]->Ggt_inequality(arg, res);
+                evaluation_quantities_ptr_[k]->Ggt_inequality->operator()(arg, res);
                 return 0;
             }
             int eval_bk(
@@ -123,7 +148,7 @@ namespace fatrop
                 arg[2] = inputs_k;
                 arg[3] = stage_params_k;
                 arg[4] = global_params;
-                evaluation_quantities_ptr_[k]->b(arg, res);
+                evaluation_quantities_ptr_[k]->b->operator()(arg, res);
                 return 0;
             }
             int eval_gk(
@@ -139,7 +164,7 @@ namespace fatrop
                 arg[1] = inputs_k;
                 arg[2] = stage_params_k;
                 arg[3] = global_params;
-                evaluation_quantities_ptr_[k]->g_equality(arg, res);
+                evaluation_quantities_ptr_[k]->g_equality->operator()(arg, res);
                 return 0;
             }
             int eval_gineqk(
@@ -155,7 +180,7 @@ namespace fatrop
                 arg[1] = inputs_k;
                 arg[2] = stage_params_k;
                 arg[3] = global_params;
-                evaluation_quantities_ptr_[k]->g_inequality(arg, res);
+                evaluation_quantities_ptr_[k]->g_inequality->operator()(arg, res);
                 return 0;
             }
             int eval_rqk(
@@ -172,7 +197,7 @@ namespace fatrop
                 arg[1] = inputs_k;
                 arg[2] = stage_params_k;
                 arg[3] = global_params;
-                evaluation_quantities_ptr_[k]->rq(arg, res);
+                evaluation_quantities_ptr_[k]->rq->operator()(arg, res);
                 return 0;
             }
 
@@ -190,7 +215,7 @@ namespace fatrop
                 arg[1] = inputs_k;
                 arg[2] = stage_params_k;
                 arg[3] = global_params;
-                evaluation_quantities_ptr_[k]->L(arg, res);
+                evaluation_quantities_ptr_[k]->L->operator()(arg, res);
                 return 0;
             }
             int get_initial_xk(double *xk, const int k) const override
@@ -255,22 +280,48 @@ namespace fatrop
             typedef std::vector<double> vd;
             struct evaluation_quantities
             {
+                evaluation_quantities(const StageQuantities& stagequantities)
+                {
+                    nx = stagequantities -> nx;
+                    int nxp1 = stagequantities -> nxp1;
+                    nu = stagequantities -> nu;
+                    np_stage = stagequantities -> np_stage;
+                    ng_eq = stagequantities -> ng_equality;
+                    ng_ineq = stagequantities -> ng_inequality;
+                    L = EvalBF::create(stagequantities -> L);
+                    RSQrq = EvalBF::create(stagequantities -> RSQrq);
+                    rq = EvalBF::create(stagequantities -> rq);
+                    if(ng_eq>0)
+                    g_equality = EvalBF::create(stagequantities -> g_equality);
+                    if(ng_ineq>0)
+                    g_inequality = EvalBF::create(stagequantities -> g_inequality);
+                    if(ng_eq>0)
+                    Ggt_equality = EvalBF::create(stagequantities -> Ggt_equality);
+                    if(ng_ineq>0)
+                    Ggt_inequality = EvalBF::create(stagequantities -> Ggt_inequality);
+                    if(nxp1>0)
+                    BAbt = EvalBF::create(stagequantities -> BAbt);
+                    if(nxp1>0)
+                    b = EvalBF::create(stagequantities -> b);
+                    lb = stagequantities -> Lb;
+                    ub = stagequantities -> Ub;
+                    // todo: p_stage_default
+                }
                 int nx, nu, np_stage, ng_eq, ng_ineq;
-                eval_bf L;
-                eval_bf RSQrq;
-                eval_bf rq;
-                eval_bf g_equality;
-                eval_bf g_inequality;
-                eval_bf Ggt_equality;
-                eval_bf Ggt_inequality;
-                eval_bf BAbt;
-                eval_bf b;
+                EvalBF L;
+                EvalBF RSQrq;
+                EvalBF rq;
+                EvalBF g_equality;
+                EvalBF g_inequality;
+                EvalBF Ggt_equality;
+                EvalBF Ggt_inequality;
+                EvalBF BAbt;
+                EvalBF b;
                 vd lb;
                 vd ub;
                 vd p_stage_default;
             };
-            std::vector<evaluation_quantities> evaluation_quantities_;
-            std::vector<evaluation_quantities *> evaluation_quantities_ptr_;
+            std::vector<std::shared_ptr<evaluation_quantities>>  evaluation_quantities_ptr_;
             vd p_global_default_;
             int np_global_;
             int horizon_length_;
