@@ -26,7 +26,7 @@ int main()
 
     // set up the problem
     auto problem = FatropCasadiProblem();
-    // add the stage quantities
+    // add the microstages
     problem.push_back(stage_initial);
     for (int i = 0; i < 19; i++)
     {
@@ -38,8 +38,6 @@ int main()
     auto solver = std::make_shared<FatropCasadiSolver>(problem);
     auto fatrop_solver = OCPApplication(solver);
     fatrop_solver.build();
-    fatrop_solver.optimize();
-    fatrop_solver.optimize();
     fatrop_solver.optimize();
     return 0;
 }
