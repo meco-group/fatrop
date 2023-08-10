@@ -51,7 +51,7 @@ At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two i
 
 Set the CMake flags, change the BLASFEO target to your system architecture (see table of https://github.com/giaf/blasfeo)
 
-    export CMAKE_FLAGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
+    export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
 
 Build and install the Fatropy project
 
