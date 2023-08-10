@@ -27,10 +27,20 @@ The main features of the solver are:
 - ability to be initialized from any, possibly infeasible, solution estimate
 - interfaced to [rockit](https://gitlab.kuleuven.be/meco-software/rockit), which is a high-level optimal control problem specification framework, built on top of [CasADi](https://web.casadi.org/)
 
+## Disclaimer
+
+At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying fatrop problems. Release is expected end of August 2023.
+
 # Installation instructions
 At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two installation types: 
-- [installation of Fatrop (C++) and Fatropy providing Python bindings (using pybind11)](#build-and-install-fatrop-and-fatropy)
-- [installation of Fatrop (C++) only](#build-and-install-fatrop-only)
+- [FATROP](#fatrop)
+  - [Disclaimer](#disclaimer)
+- [Installation instructions](#installation-instructions)
+  - [Build and install Fatrop and Fatropy](#build-and-install-fatrop-and-fatropy)
+  - [Build and install Fatrop only](#build-and-install-fatrop-only)
+  - [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface)
+  - [Examples](#examples)
+- [Developers](#developers)
 
 ## Build and install Fatrop and Fatropy
 (Recursively) clone this repository
@@ -41,7 +51,7 @@ At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two i
 
 Set the CMake flags, change the BLASFEO target to your system architecture (see table of https://github.com/giaf/blasfeo)
 
-    export CMAKE_FLAGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
+    export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
 
 Build and install the Fatropy project
 
