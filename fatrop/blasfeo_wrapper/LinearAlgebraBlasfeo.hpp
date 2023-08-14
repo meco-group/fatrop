@@ -20,14 +20,21 @@
 #define FATROP_BLASFEO_INCLUDED
 
 // macros
+extern "C"
+{
+void blasfeo_ref_drowpe(int kmax, int *ipiv, struct blasfeo_dmat *sA);
+void blasfeo_ref_drowpei(int kmax, int *ipiv, struct blasfeo_dmat *sA);
+}
 #define MAT blasfeo_dmat
 #define VEC blasfeo_dvec
 #define MEMSIZE_MAT blasfeo_memsize_dmat
 #define CREATE_MAT blasfeo_create_dmat
-#define ROWPE blasfeo_drowpe
+// #define ROWPE blasfeo_drowpe
+#define ROWPE blasfeo_ref_drowpe
 #define VECPE blasfeo_dvecpe
 #define VECPEI blasfeo_dvecpei
-#define ROWPEI blasfeo_drowpei
+// #define ROWPEI blasfeo_drowpei
+#define ROWPEI blasfeo_ref_drowpei
 #define COLPE blasfeo_dcolpe
 #define COLPEI blasfeo_dcolpei
 #define CREATE_MAT blasfeo_create_dmat
