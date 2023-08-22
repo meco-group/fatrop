@@ -121,6 +121,7 @@ extern "C"
 #include "auxiliary/LinearAlgebra.hpp"
 #include "auxiliary/FatropVector.hpp"
 #include "auxiliary/Common.hpp"
+#include <cmath>
 #if DEBUG
 #include <assert.h>
 #endif
@@ -241,6 +242,17 @@ namespace fatrop
         {
             return &vec_;
         }
+        bool has_inf()
+        {
+            for (int i = 0; i < m_; i++)
+            {
+                if (std::isinf(VECEL(&vec_, i)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         VEC vec_;
         const int m_;
     };
@@ -304,6 +316,28 @@ namespace fatrop
         FatropVecBF block(const fatrop_int i, const fatrop_int p) const;
         void SwapWith(FatropVecBF &vb);
         void SetConstant(double constant) const;
+        bool has_inf() const
+        {
+            for (int i = 0; i < nels(); i++)
+            {
+                if (std::isinf(VECEL(vec_, i)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool has_nan() const
+        {
+            for (int i = 0; i < nels(); i++)
+            {
+                if (std::isnan(VECEL(vec_, i)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
     protected:
         VEC *vec_ = NULL;
@@ -423,7 +457,7 @@ namespace fatrop
     /** \brief Function to calculate LU factorization result is saved in A, L is lower unitriangular */
     void LU_FACT(const fatrop_int m, const fatrop_int n, const fatrop_int n_max, fatrop_int &rank, MAT *A, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-8);
     /** \brief Function to calculate LU factorization but A, and result (L and U) are transposed, all indices refer to the dimensions of the original A matrix (and not the transposed one) */
-    void LU_FACT_transposed(const fatrop_int m, const fatrop_int n, const fatrop_int n_max, fatrop_int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-5);
+    void LU_FACT_transposed(const fatrop_int m, const fatrop_int n, const fatrop_int n_max, fatrop_int &rank, MAT *At, PMAT *Pl_p, PMAT *Pr_p, double tol = 1e-4);
     void fatrop_dtrsv_unu(const fatrop_int m, const fatrop_int n, blasfeo_dmat *sA, const fatrop_int ai, const fatrop_int aj, blasfeo_dvec *sx, const fatrop_int xi, blasfeo_dvec *sz, const fatrop_int zi);
     void fatrop_dtrsv_utu(const fatrop_int m, blasfeo_dmat *sA, const fatrop_int ai, const fatrop_int aj, blasfeo_dvec *sx, const fatrop_int xi, blasfeo_dvec *sz, const fatrop_int zi);
 } // namespace fatrop
