@@ -135,15 +135,6 @@ namespace fatrop
             }
         };
 
-        // struct StageQuantities : public std::shared_ptr<MicroStageInternal>
-        // {
-        //     template <class... Args>
-        //     static StageQuantities create (const Args &...args) { return StageQuantities(std::make_shared<MicroStageInternal>(args...)); }
-
-        // private:
-        //     StageQuantities(const std::shared_ptr<MicroStageInternal> &other) : std::shared_ptr<MicroStageInternal>(other) {}
-        // };
-
         class FatropCasadiProblem : public std::vector<MicroStage>
         {
         };
