@@ -2,9 +2,10 @@
 #include <casadi/casadi.hpp>
 #include <vector>
 // #include <utility>
-// #include <functional>
+#include <functional>
 #include <map>
 #include "fatrop-casadi-problem.hpp"
+#include "utilities.hpp"
 /**
  *  This file has a minimal casadi representation of a single stage problem.
  */
@@ -37,6 +38,7 @@ namespace fatrop
         class StageProblemInternal;
         struct MXPlaceholder : public casadi::MX
         {
+            MXPlaceholder() : casadi::MX(){};
             MXPlaceholder(const casadi::MX &expr, PlaceHolderType type, StageProblemInternal *stage) : casadi::MX(expr), type(type), stage(stage){};
             PlaceHolderType type;
             StageProblemInternal *stage; // TODO check if this can be done in a safer way
@@ -60,7 +62,7 @@ namespace fatrop
             };
         };
 
-        class Placeholders : public std::map<casadi::MX, MXPlaceholder>
+        class Placeholders : public std::map<casadi::MX, MXPlaceholder, comp_mx>
         {
         public:
             std::vector<PlaceHolderType> get_all_types(const casadi::MX &expr);
@@ -153,7 +155,7 @@ namespace fatrop
             StageProblem child;
             Placeholders placeholders;
             std::shared_ptr<StageMethod> method;
-            std::map<casadi::MX, casadi::MX> x_next;
+            std::map<casadi::MX, casadi::MX, comp_mx> x_next;
             StageProblemDimensions dims;
             std::vector<casadi::MX> constraints;
             std::vector<casadi::MX> objective_terms;
