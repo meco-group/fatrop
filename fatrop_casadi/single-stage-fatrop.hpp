@@ -17,7 +17,7 @@ namespace fatrop
         class StageProblemFatropMethod : public FatropCasadiProblem, public StageMethod
         {
         public:
-            StageProblemFatropMethod(StageProblem* problem) : problem(problem)
+            StageProblemFatropMethod(StageProblem *problem) : problem(problem)
             {
             }
             void transcribe(const int K)
@@ -29,13 +29,12 @@ namespace fatrop
                 const int nu = u_vec.size1();
                 initial_syms = MicroStageSyms{casadi::MX::sym("x0", nx), casadi::MX::sym("u0", nu), casadi::MX::sym("p_stage", 0), casadi::MX::sym("p_global", 0)};
                 middle_syms = MicroStageSyms{casadi::MX::sym("x", nx), casadi::MX::sym("u", nu), casadi::MX::sym("p_stage", 0), casadi::MX::sym("p_global", 0)};
-                terminal_syms = MicroStageSyms{casadi::MX::sym("xf", nx), casadi::MX::sym("uf", nu), casadi::MX::sym("p_stage", 0), casadi::MX::sym("p_global", 0)};
+                terminal_syms = MicroStageSyms{casadi::MX::sym("xf", nx), casadi::MX(), casadi::MX::sym("p_stage", 0), casadi::MX::sym("p_global", 0)};
                 // initialize dynamics
                 casadi::MX x_next_vec;
                 for (auto &x : problem->states)
                 {
-                    // assert(problem->x_next[x]);
-                    x_next_vec.veccat({x_next_vec, problem->x_next[x]});
+                    x_next_vec = cs::MX::veccat({x_next_vec, problem->x_next[x]});
                 }
                 casadi::MX g_eq_initial;
                 casadi::MX g_eq_middle;
@@ -53,28 +52,32 @@ namespace fatrop
                 auto t_mode = MXPlaceholder::evaluation_mode::transcribe;
                 for (auto &constraint : problem->constraints)
                 {
-                    MXPlaceholder placeholder = problem->placeholders[constraint];
+                    auto placeholder = problem->placeholders(constraint, t_mode);
+                    std::cout << constraint << std::endl;
+                    std::cout << placeholder << std::endl;
                     auto constraint_helped = ConstraintHelper(placeholder);
                     if (constraint.at_t0)
                     {
-                        g_eq_initial.veccat({g_eq_initial, problem->placeholders(problem->at_t0(constraint_helped.g), t_mode)});
-                        g_ineq_initial.veccat({g_ineq_initial, problem->placeholders(problem->at_t0(constraint_helped.g_ineq), t_mode)});
-                        lb_initial.veccat({lb_initial, constraint_helped.lb});
-                        ub_initial.veccat({ub_initial, constraint_helped.ub});
+                        std::cout << constraint_helped << std::endl;
+
+                        g_eq_initial = casadi::MX::veccat({g_eq_initial, problem->placeholders(problem->at_t0(constraint_helped.g), t_mode)});
+                        g_ineq_initial = casadi::MX::veccat({g_ineq_initial, problem->placeholders(problem->at_t0(constraint_helped.g_ineq), t_mode)});
+                        lb_initial = casadi::DM::veccat({lb_initial, constraint_helped.lb});
+                        ub_initial = casadi::DM::veccat({ub_initial, constraint_helped.ub});
                     }
                     if (constraint.at_path)
                     {
-                        g_eq_middle.veccat({g_eq_middle, problem->placeholders(problem->at_path(constraint_helped.g), t_mode)});
-                        g_ineq_middle.veccat({g_ineq_middle, problem->placeholders(problem->at_path(constraint_helped.g_ineq), t_mode)});
-                        lb_middle.veccat({lb_middle, constraint_helped.lb});
-                        ub_middle.veccat({ub_middle, constraint_helped.ub});
+                        g_eq_middle= casadi::MX::veccat({g_eq_middle, problem->placeholders(problem->at_path(constraint_helped.g), t_mode)});
+                        g_ineq_middle= casadi::MX::veccat({g_ineq_middle, problem->placeholders(problem->at_path(constraint_helped.g_ineq), t_mode)});
+                        lb_middle= casadi::DM::veccat({lb_middle, constraint_helped.lb});
+                        ub_middle= casadi::DM::veccat({ub_middle, constraint_helped.ub});
                     }
                     if (constraint.at_tf)
                     {
-                        g_eq_terminal.veccat({g_eq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g), t_mode)});
-                        g_ineq_terminal.veccat({g_ineq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g_ineq), t_mode)});
-                        lb_terminal.veccat({lb_terminal, constraint_helped.lb});
-                        ub_terminal.veccat({ub_terminal, constraint_helped.ub});
+                        g_eq_terminal = casadi::MX::veccat({g_eq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g), t_mode)});
+                        g_ineq_terminal = casadi::MX::veccat({g_ineq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g_ineq), t_mode)});
+                        lb_terminal = casadi::DM::veccat({lb_terminal, constraint_helped.lb});
+                        ub_terminal = casadi::DM::veccat({ub_terminal, constraint_helped.ub});
                     }
                 }
                 // add the objective
@@ -84,23 +87,26 @@ namespace fatrop
                 // iterate over rpoblem->objective terms
                 for (auto &objective : problem->objective_terms)
                 {
-                    MXPlaceholder ph = problem->placeholders[objective];
+                    // MXPlaceholder ph = problem->placeholders[objective];
                     if (objective.at_t0)
                     {
-                        obj_t0 += problem->placeholders(ph, t_mode);
+                        obj_t0 += problem->placeholders(objective, t_mode);
                     }
                     if (objective.at_path)
                     {
-                        obj_path += problem->placeholders(ph, t_mode);
+                        obj_path += problem->placeholders(objective, t_mode);
                     }
                     if (objective.at_tf)
                     {
-                        obj_tf += problem->placeholders(ph, t_mode);
+                        obj_tf += problem->placeholders(objective, t_mode);
                     }
                 }
-                auto microstage_initial = MicroStage::create(initial_syms, obj_t0, x_next_vec, g_eq_initial, g_ineq_initial, DM_to_vec_helper::DM_to_vec(lb_initial), DM_to_vec_helper::DM_to_vec(ub_initial));
-                auto microstage_middle = MicroStage::create(middle_syms, obj_path, x_next_vec, g_eq_middle, g_ineq_middle, DM_to_vec_helper::DM_to_vec(lb_middle), DM_to_vec_helper::DM_to_vec(ub_middle));
+                auto microstage_initial = MicroStage::create(initial_syms, obj_t0, problem->placeholders(problem->at_t0(x_next_vec), t_mode), g_eq_initial, g_ineq_initial, DM_to_vec_helper::DM_to_vec(lb_initial), DM_to_vec_helper::DM_to_vec(ub_initial));
+                auto microstage_middle = MicroStage::create(middle_syms, obj_path, problem->placeholders(problem->at_path(x_next_vec), t_mode), g_eq_middle, g_ineq_middle, DM_to_vec_helper::DM_to_vec(lb_middle), DM_to_vec_helper::DM_to_vec(ub_middle));
                 auto microstage_terminal = MicroStage::create(terminal_syms, obj_tf, cs::MX(), g_eq_terminal, g_ineq_terminal, DM_to_vec_helper::DM_to_vec(lb_terminal), DM_to_vec_helper::DM_to_vec(ub_terminal));
+                std::cout << *microstage_initial << std::endl;
+                std::cout << *microstage_middle << std::endl;
+                std::cout << *microstage_terminal << std::endl;
 
                 // add the microstages
                 push_back(microstage_initial);
@@ -113,14 +119,14 @@ namespace fatrop
 
         protected:
             friend class Placeholders;
-            casadi::MX fill_placeholder(const PlaceHolderType &type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
+            virtual casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode) override
             {
 
                 switch (type)
                 {
-                case at_t0:
+                case (at_t0):
                     return evaluate_at_control(expr, 0, mode);
-                case at_tf:
+                case (at_tf):
                     return evaluate_at_control(expr, K_ - 1, mode);
                 case (at_path): //  && mode == MXPlaceholder::evaluation_mode::transcribe
                     return evaluate_at_control(expr, 1, mode);
@@ -154,7 +160,7 @@ namespace fatrop
                 }
             }
             int K_;
-            StageProblem* problem;
+            StageProblem *problem;
             casadi::MX x_vec;
             casadi::MX u_vec;
             casadi::MX p_stage_vec;

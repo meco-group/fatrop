@@ -22,7 +22,7 @@ int main()
     ocp.set_next(x, x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt);
     ocp.subject_to(ocp.at_t0(x(0)) == 1.0);
     ocp.subject_to(ocp.at_t0(x(1)) == 0.0);
-    ocp.subject_to(-0.25 <x(1), false, true);
+    ocp.subject_to((-0.25 <x(1))< INF, false, true);
     ocp.subject_to((-1.0 <x(1))< 1, false, true);
 
     ocp.add_objective(ocp.sum(u(0) * u(0) + x(0) * x(0) + x(1) * x(1), true, false));

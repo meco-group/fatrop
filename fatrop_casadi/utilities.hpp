@@ -17,6 +17,7 @@ namespace fatrop
         public:
             ConstraintHelper(const casadi::MX &constr)
             {
+                std::cout << constr <<  std::endl;
                 assert(constr.size2() == 1);
                 auto opti = casadi::Opti();
                 auto syms = casadi::MX::symvar(constr);
@@ -42,6 +43,16 @@ namespace fatrop
                         lb = casadi::DM::veccat({ub, ub_temp(i)});
                     }
                 }
+            }
+            // make this class printable
+            friend std::ostream &operator<<(std::ostream &os, const ConstraintHelper &obj)
+            {
+                os << "ConstraintHelper with dimensions: " << std::endl;
+                os << "lb: " << obj.lb << std::endl;
+                os << "ub: " << obj.ub << std::endl;
+                os << "g_ineq: " << obj.g_ineq << std::endl;
+                os << "g: " << obj.g << std::endl;
+                return os;
             }
             casadi::DM lb;
             casadi::DM ub;
@@ -81,6 +92,8 @@ namespace fatrop
     public:
         static std::vector<double> DM_to_vec(const casadi::DM &dm)
         {
+            if(dm.size1() == 0)
+                return std::vector<double>();
             // check if dm is a vector
             if (dm.size2() != 1)
             {

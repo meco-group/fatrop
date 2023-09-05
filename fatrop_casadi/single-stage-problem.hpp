@@ -3,6 +3,7 @@
 #include <vector>
 // #include <utility>
 #include <functional>
+#include <string>
 #include <map>
 #include "fatrop-casadi-problem.hpp"
 #include "utilities.hpp"
@@ -38,9 +39,9 @@ namespace fatrop
         struct MXPlaceholder : public casadi::MX
         {
             MXPlaceholder() : casadi::MX(){};
-            MXPlaceholder(const casadi::MX &expr, PlaceHolderType type, StageProblem*stage) : casadi::MX(expr), type(type), stage(stage){};
+            MXPlaceholder(const casadi::MX &expr, PlaceHolderType type, StageProblem *stage) : casadi::MX(expr), type(type), stage(stage){};
             PlaceHolderType type;
-            StageProblem*stage; // TODO check if this can be done in a safer way
+            StageProblem *stage; // TODO check if this can be done in a safer way
             enum evaluation_mode
             {
                 transcribe,
@@ -52,7 +53,7 @@ namespace fatrop
         public:
             virtual casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
             {
-                std::runtime_error("No method set");
+                throw std::runtime_error("No method set");
                 return casadi::MX();
             };
             virtual void transcribe(const int K)
@@ -93,21 +94,21 @@ namespace fatrop
                 controls.push_back(ret);
                 return ret;
             }
-            void set_next(const casadi::MX &x, const casadi::MX &x_next)
+            void set_next(const casadi::MX &x, const casadi::MX &x_next_in)
             {
-                this->x_next[x] = x_next;
+                this->x_next[x] = x_next_in;
             }
             casadi::MX at_tf(const casadi::MX &expr)
             {
-                return new_placeholder_expression(expr, PlaceHolderType::at_tf);
+                return new_placeholder_expression(expr, PlaceHolderType::at_tf, "at_tf");
             }
             casadi::MX at_t0(const casadi::MX &expr)
             {
-                return new_placeholder_expression(expr, PlaceHolderType::at_t0);
+                return new_placeholder_expression(expr, PlaceHolderType::at_t0, "at_t0");
             }
             casadi::MX at_path(const casadi::MX &expr)
             {
-                return new_placeholder_expression(expr, PlaceHolderType::at_path);
+                return new_placeholder_expression(expr, PlaceHolderType::at_path, "at_path");
             }
             casadi::MX sum(const casadi::MX &expr, bool include_first = false, bool include_last = false)
             {
@@ -145,16 +146,17 @@ namespace fatrop
                     // check if only one placeholder
                     if (ph.size() != 1)
                         throw std::runtime_error("Objective term must contain exactly one placeholder");
-                    objective_terms.push_back(StageMX(term, placeholders.has_placeholders(expr, {PlaceHolderType::at_t0}), placeholders.has_placeholders(expr, {PlaceHolderType::at_path}),placeholders.has_placeholders(expr, {PlaceHolderType::at_tf})));
+                    auto type = ph[0].first.type;
+                    objective_terms.push_back(StageMX(term, type == PlaceHolderType::at_t0, type == PlaceHolderType::at_tf, type == PlaceHolderType::at_path));
                 }
             }
             casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
             {
                 return method->fill_placeholder(type, expr, mode);
             }
-            casadi::MX new_placeholder_expression(const casadi::MX &expr, PlaceHolderType type)
+            casadi::MX new_placeholder_expression(const casadi::MX &expr, PlaceHolderType type, const std::string &name)
             {
-                casadi::MX placeholder;
+                auto placeholder = casadi::MX::sym(name, expr.size1(), expr.size2());
                 placeholders[placeholder] = MXPlaceholder(expr, type, this);
                 return placeholder;
             };
@@ -162,8 +164,8 @@ namespace fatrop
             {
                 method->transcribe(K);
             }
-            StageProblem* parent;
-            StageProblem* child;
+            StageProblem *parent;
+            StageProblem *child;
             Placeholders placeholders;
             std::shared_ptr<StageMethod> method;
             std::map<casadi::MX, casadi::MX, comp_mx> x_next;
@@ -197,10 +199,14 @@ casadi::MX Placeholders::operator()(const casadi::MX &expr, MXPlaceholder::evalu
         std::vector<casadi::MX> from;
         std::vector<casadi::MX> to;
         auto placeholders = get_all_placeholders(ret);
-        auto p = placeholders.back();
-        placeholders.pop_back();
-        from.push_back(p.second);
-        to.push_back(p.first.stage->fill_placeholder(p.first.type, p.second, mode));
+        while (!placeholders.empty())
+        {
+            auto p = placeholders.back();
+            placeholders.pop_back();
+            from.push_back(p.second);
+            to.push_back(p.first.stage->fill_placeholder(p.first.type, p.first, mode));
+            // std::cout << "replacing " << p.second << " with " << to.back() << std::endl;
+        }
         ret = casadi::MX::substitute({ret}, from, to)[0];
     }
     return ret;
@@ -217,6 +223,7 @@ std::vector<std::pair<MXPlaceholder, casadi::MX>> Placeholders::get_all_placehol
             ret.push_back(std::make_pair(operator[](sym), sym));
         }
     }
+    // std::cout << "number of placeholders: " << ret.size() << std::endl;
     return ret;
 }
 

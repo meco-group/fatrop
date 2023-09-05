@@ -108,6 +108,41 @@ namespace fatrop
                 if (dims.nxp1 > 0)
                     BAbt.expand();
             }
+            // make this class printable
+            friend std::ostream &operator<<(std::ostream &os, const MicroStageInternal &obj)
+            {
+                os << "MicroStageInternal with dimensions: " << std::endl;
+                os << "nx: " << obj.dims.nx << std::endl;
+                os << "nxp1: " << obj.dims.nxp1 << std::endl;
+                os << "nu: " << obj.dims.nu << std::endl;
+                os << "ng_equality: " << obj.dims.ng_equality << std::endl;
+                os << "ng_inequality: " << obj.dims.ng_inequality << std::endl;
+                os << "np_stage: " << obj.dims.np_stage << std::endl;
+                os << "np_global: " << obj.dims.np_global << std::endl;
+                // cs::MX x = cs::MX::sym("x", obj.dims.nx);
+                // cs::MX xp1 = cs::MX::sym("xp1", obj.dims.nxp1);
+                // cs::MX u = cs::MX::sym("u", obj.dims.nu);
+                // cs::MX p_stage = cs::MX::sym("p", obj.dims.np_stage);
+                // cs::MX p_global = cs::MX::sym("p_global", obj.dims.np_global);
+                // std::vector<cs::MX> args = {x, u, p_stage, p_global};
+                // os << "L: " << obj.L(args)[0] << std::endl;
+                // os << "b: " << obj.b(args)[0] << std::endl;
+                // os << "g_equality: " << obj.g_equality(args)[0] << std::endl;
+                // os << "g_inequality: " << obj.g_inequality(args)[0] << std::endl;
+                os << "Lb: " <<  std::endl;
+                for (auto &l : obj.Lb)
+                {
+                    os << l << std::endl;
+                }
+                os << "Ub: " <<  std::endl;
+                for (auto &u : obj.Ub)
+                {
+                    os << u << std::endl;
+                }
+                return os;
+            }
+
+
             // quantities that must be provided
             MicroStageDims dims;
             cs::Function L;
