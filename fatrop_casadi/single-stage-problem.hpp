@@ -21,27 +21,26 @@ namespace fatrop
             int np_stage;
             int np_global;
         };
-
+        struct StageMX : public casadi::MX
+        {
+            StageMX(const casadi::MX &expr, bool at_t0, bool at_tf, bool at_path) : casadi::MX(expr), at_t0(at_t0), at_path(at_path), at_tf(at_tf){};
+            bool at_t0;
+            bool at_path;
+            bool at_tf;
+        };
         enum PlaceHolderType
         {
             at_t0,
             at_tf,
-            path,
-            path_t0tf,
-            path_t0,
-            path_tf,
-            sum,      // include_first = False, inlclude_last = False
-            sum_t0tf, // include_first = True, include_last = True
-            sum_t0,   // include_first = True, include_last = False
-            sum_tf,   // include_first = False, include_last = True
+            at_path,
         };
-        class StageProblemInternal;
+        class StageProblem;
         struct MXPlaceholder : public casadi::MX
         {
             MXPlaceholder() : casadi::MX(){};
-            MXPlaceholder(const casadi::MX &expr, PlaceHolderType type, StageProblemInternal *stage) : casadi::MX(expr), type(type), stage(stage){};
+            MXPlaceholder(const casadi::MX &expr, PlaceHolderType type, StageProblem*stage) : casadi::MX(expr), type(type), stage(stage){};
             PlaceHolderType type;
-            StageProblemInternal *stage; // TODO check if this can be done in a safer way
+            StageProblem*stage; // TODO check if this can be done in a safer way
             enum evaluation_mode
             {
                 transcribe,
@@ -66,29 +65,29 @@ namespace fatrop
         {
         public:
             std::vector<PlaceHolderType> get_all_types(const casadi::MX &expr);
-            casadi::MX operator()(casadi::MX &expr, MXPlaceholder::evaluation_mode mode);
+            casadi::MX operator()(const casadi::MX &expr, MXPlaceholder::evaluation_mode mode);
 
         public:
             std::vector<std::pair<MXPlaceholder, casadi::MX>> get_all_placeholders(const casadi::MX &expr);
             bool has_placeholders(const casadi::MX &expr, const std::vector<PlaceHolderType> &types);
         };
 
-        struct StageProblem : public SharedObj<StageProblemInternal, StageProblem>
-        {
-            using SharedObj<StageProblemInternal, StageProblem>::SharedObj;
-        };
+        // struct StageProblem : public SharedObj<StageProblemInternal, StageProblem>
+        // {
+        //     using SharedObj<StageProblemInternal, StageProblem>::SharedObj;
+        // };
 
-        class StageProblemInternal
+        class StageProblem
         {
         public:
-            casadi::MX state(const int m, const int n = 1)
+            casadi::MX state(const int m = 1, const int n = 1)
             {
                 casadi::MX ret = casadi::MX::sym("x", m, n);
                 states.push_back(ret);
                 // x_next[ret] = casadi::MX::sym("dummy", 0, 0);
                 return ret;
             }
-            casadi::MX control(const int m, const int n = 1)
+            casadi::MX control(const int m = 1, const int n = 1)
             {
                 casadi::MX ret = casadi::MX::sym("u", m, n);
                 controls.push_back(ret);
@@ -106,36 +105,48 @@ namespace fatrop
             {
                 return new_placeholder_expression(expr, PlaceHolderType::at_t0);
             }
+            casadi::MX at_path(const casadi::MX &expr)
+            {
+                return new_placeholder_expression(expr, PlaceHolderType::at_path);
+            }
             casadi::MX sum(const casadi::MX &expr, bool include_first = false, bool include_last = false)
             {
-                if (include_first && include_last)
-                    return new_placeholder_expression(expr, PlaceHolderType::sum_t0tf);
-                else if (include_first && !include_last)
-                    return new_placeholder_expression(expr, PlaceHolderType::sum_t0);
-                else if (!include_first && include_last)
-                    return new_placeholder_expression(expr, PlaceHolderType::sum_tf);
-                else if (!include_first && !include_last)
-                    return new_placeholder_expression(expr, PlaceHolderType::sum);
+                casadi::MX sum = at_path(expr);
+                if (include_first)
+                    sum += at_t0(expr);
+                if (include_last)
+                    sum += at_tf(expr);
+                return sum;
             }
             void subject_to(const casadi::MX &expr, bool include_first = false, bool include_last = false)
             {
-                if (placeholders.has_placeholders(expr, {PlaceHolderType::at_t0, PlaceHolderType::at_tf})) // check for point constraints
+                if (placeholders.has_placeholders(expr, {PlaceHolderType::at_t0})) // check for point constraints
                 {
-                    constraints.push_back(new_placeholder_expression(expr, PlaceHolderType::path));
+                    constraints.push_back(StageMX(expr, true, false, false));
                     return;
                 }
-                if (include_first && include_last)
-                    constraints.push_back(new_placeholder_expression(expr, PlaceHolderType::path_t0tf));
-                else if (include_first && !include_last)
-                    constraints.push_back(new_placeholder_expression(expr, PlaceHolderType::path_t0));
-                else if (!include_first && include_last)
-                    constraints.push_back(new_placeholder_expression(expr, PlaceHolderType::path_tf));
-                else if (!include_first && !include_last)
-                    constraints.push_back(new_placeholder_expression(expr, PlaceHolderType::path));
+                if (placeholders.has_placeholders(expr, {PlaceHolderType::at_tf})) // check for point constraints
+                {
+                    constraints.push_back(StageMX(expr, false, false, true));
+                    return;
+                }
+                // path constraints
+                constraints.push_back(StageMX(expr, include_first, true, include_last));
             }
             void add_objective(const casadi::MX &expr)
             {
-                objective_terms.push_back(expr);
+                // get all terms of expr
+                std::vector<casadi::MX> terms = get_terms_helper::get_terms(expr);
+                // iterate over all terms
+                for (auto &term : terms)
+                {
+                    // check the placeholder type
+                    auto ph = placeholders.get_all_placeholders(term);
+                    // check if only one placeholder
+                    if (ph.size() != 1)
+                        throw std::runtime_error("Objective term must contain exactly one placeholder");
+                    objective_terms.push_back(StageMX(term, placeholders.has_placeholders(expr, {PlaceHolderType::at_t0}), placeholders.has_placeholders(expr, {PlaceHolderType::at_path}),placeholders.has_placeholders(expr, {PlaceHolderType::at_tf})));
+                }
             }
             casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
             {
@@ -151,14 +162,14 @@ namespace fatrop
             {
                 method->transcribe(K);
             }
-            StageProblem parent;
-            StageProblem child;
+            StageProblem* parent;
+            StageProblem* child;
             Placeholders placeholders;
             std::shared_ptr<StageMethod> method;
             std::map<casadi::MX, casadi::MX, comp_mx> x_next;
             StageProblemDimensions dims;
-            std::vector<casadi::MX> constraints;
-            std::vector<casadi::MX> objective_terms;
+            std::vector<StageMX> constraints;
+            std::vector<StageMX> objective_terms;
             std::vector<casadi::MX> states;
             std::vector<casadi::MX> controls;
         };
@@ -178,7 +189,7 @@ std::vector<PlaceHolderType> Placeholders::get_all_types(const casadi::MX &expr)
     return ret;
 }
 
-casadi::MX Placeholders::operator()(casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
+casadi::MX Placeholders::operator()(const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
 {
     casadi::MX ret = expr;
     while (!get_all_placeholders(ret).empty()) // todo re-use this result
@@ -194,6 +205,7 @@ casadi::MX Placeholders::operator()(casadi::MX &expr, MXPlaceholder::evaluation_
     }
     return ret;
 }
+
 std::vector<std::pair<MXPlaceholder, casadi::MX>> Placeholders::get_all_placeholders(const casadi::MX &expr)
 {
     auto ret = std::vector<std::pair<MXPlaceholder, casadi::MX>>();
@@ -207,6 +219,7 @@ std::vector<std::pair<MXPlaceholder, casadi::MX>> Placeholders::get_all_placehol
     }
     return ret;
 }
+
 bool Placeholders::has_placeholders(const casadi::MX &expr, const std::vector<PlaceHolderType> &types)
 {
     auto placeholders = get_all_placeholders(expr);
