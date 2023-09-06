@@ -1,7 +1,7 @@
 #include "fatrop-casadi-problem.hpp"
 #include "fatrop-casadi-solver.hpp"
-#include "single-stage-problem.hpp"
-#include "single-stage-fatrop.hpp"
+#include "stage-problem.hpp"
+#include "method-fatrop.hpp"
 #include <casadi/casadi.hpp>
 #include "ocp/StageOCPApplication.hpp"
 #include <limits>
@@ -28,8 +28,6 @@ int main()
     ocp.add_objective(ocp.sum(u(0) * u(0) + x(0) * x(0) + x(1) * x(1), true, false));
     ocp.add_objective(ocp.at_tf(x(1) * x(1)));
 
-
-
     auto fatrop_method = std::make_shared<StageProblemFatropMethod>(&ocp);
     ocp.method = fatrop_method;
     fatrop_method -> transcribe(20);
@@ -39,12 +37,6 @@ int main()
     auto fatrop_solver = OCPApplication(solver);
     fatrop_solver.build();
     fatrop_solver.optimize();
-
-
-
-
-
-
 
     // typedef std::vector<double> vd;
     // // // define variables

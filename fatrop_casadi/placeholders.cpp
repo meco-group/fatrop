@@ -1,5 +1,5 @@
 #include "placeholders.hpp"
-#include "single-stage-fatrop.hpp"
+#include "method-fatrop.hpp"
 ///////////// IMPLEMENTATION
 using namespace fatrop::fatrop_casadi;
 

@@ -4,7 +4,7 @@
 #include <memory>
 #include "ocp/StageOCPApplication.hpp"
 #include "function-evaluation.hpp"
-#include "single-stage-problem.hpp"
+#include "stage-problem.hpp"
 #include "fatrop-casadi-problem.hpp"
 /**
  *  Wraps a SingleStageProblem into a FatropCasadiProblem
