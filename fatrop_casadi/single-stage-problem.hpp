@@ -7,6 +7,7 @@
 #include <map>
 #include "fatrop-casadi-problem.hpp"
 #include "utilities.hpp"
+#include "placeholders.hpp"
 /**
  *  This file has a minimal casadi representation of a single stage problem.
  */
@@ -22,32 +23,9 @@ namespace fatrop
             int np_stage;
             int np_global;
         };
-        struct StageMX : public casadi::MX
-        {
-            StageMX(const casadi::MX &expr, bool at_t0, bool at_path, bool at_tf) : casadi::MX(expr), at_t0(at_t0), at_path(at_path), at_tf(at_tf){};
-            bool at_t0;
-            bool at_path;
-            bool at_tf;
-        };
-        enum PlaceHolderType
-        {
-            at_t0,
-            at_path,
-            at_tf,
-        };
-        class StageProblem;
-        struct MXPlaceholder : public casadi::MX
-        {
-            MXPlaceholder() : casadi::MX(){};
-            MXPlaceholder(const casadi::MX &expr, PlaceHolderType type, StageProblem *stage) : casadi::MX(expr), type(type), stage(stage){};
-            PlaceHolderType type;
-            StageProblem *stage; // TODO check if this can be done in a safer way
-            enum evaluation_mode
-            {
-                transcribe,
-                evaluate
-            };
-        };
+        
+        enum class PlaceHolderType;
+
         class StageMethod
         {
         public:
@@ -60,17 +38,6 @@ namespace fatrop
             {
                 std::runtime_error("No method set");
             };
-        };
-
-        class Placeholders : public std::map<casadi::MX, MXPlaceholder, comp_mx>
-        {
-        public:
-            std::vector<PlaceHolderType> get_all_types(const casadi::MX &expr);
-            casadi::MX operator()(const casadi::MX &expr, MXPlaceholder::evaluation_mode mode);
-
-        public:
-            std::vector<std::pair<MXPlaceholder, casadi::MX>> get_all_placeholders(const casadi::MX &expr);
-            bool has_placeholders(const casadi::MX &expr, const std::vector<PlaceHolderType> &types);
         };
 
         // struct StageProblem : public SharedObj<StageProblemInternal, StageProblem>
@@ -177,63 +144,3 @@ namespace fatrop
         };
     }
 } // namespace fatrop_specification
-
-///////////// IMPLEMENTATION
-using namespace fatrop::fatrop_casadi;
-
-std::vector<PlaceHolderType> Placeholders::get_all_types(const casadi::MX &expr)
-{
-    std::vector<PlaceHolderType> ret;
-    for (const auto &p : get_all_placeholders(expr))
-    {
-        ret.push_back(p.first.type);
-    }
-    return ret;
-}
-
-casadi::MX Placeholders::operator()(const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
-{
-    casadi::MX ret = expr;
-    while (!get_all_placeholders(ret).empty()) // todo re-use this result
-    {
-        std::vector<casadi::MX> from;
-        std::vector<casadi::MX> to;
-        auto placeholders = get_all_placeholders(ret);
-        while (!placeholders.empty())
-        {
-            auto p = placeholders.back();
-            placeholders.pop_back();
-            from.push_back(p.second);
-            to.push_back(p.first.stage->fill_placeholder(p.first.type, p.first, mode));
-            // std::cout << "replacing " << p.second << " with " << to.back() << std::endl;
-        }
-        ret = casadi::MX::substitute({ret}, from, to)[0];
-    }
-    return ret;
-}
-
-std::vector<std::pair<MXPlaceholder, casadi::MX>> Placeholders::get_all_placeholders(const casadi::MX &expr)
-{
-    auto ret = std::vector<std::pair<MXPlaceholder, casadi::MX>>();
-    auto syms = casadi::MX::symvar(expr);
-    for (auto &sym : syms)
-    {
-        if (find(sym) != end())
-        {
-            ret.push_back(std::make_pair(operator[](sym), sym));
-        }
-    }
-    // std::cout << "number of placeholders: " << ret.size() << std::endl;
-    return ret;
-}
-
-bool Placeholders::has_placeholders(const casadi::MX &expr, const std::vector<PlaceHolderType> &types)
-{
-    auto placeholders = get_all_placeholders(expr);
-    for (auto &p : placeholders)
-    {
-        if (std::find(types.begin(), types.end(), p.first.type) != types.end())
-            return true;
-    }
-    return false;
-}

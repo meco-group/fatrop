@@ -128,11 +128,11 @@ namespace fatrop
 
                 switch (type)
                 {
-                case (at_t0):
+                case (PlaceHolderType::at_t0):
                     return evaluate_at_control(expr, 0, mode);
-                case (at_tf):
+                case (PlaceHolderType::at_tf):
                     return evaluate_at_control(expr, K_ - 1, mode);
-                case (at_path): //  && mode == MXPlaceholder::evaluation_mode::transcribe
+                case (PlaceHolderType::at_path): //  && mode == MXPlaceholder::evaluation_mode::transcribe
                     return evaluate_at_control(expr, 1, mode);
                 default:
                     throw std::runtime_error("Unknown placeholder type");
