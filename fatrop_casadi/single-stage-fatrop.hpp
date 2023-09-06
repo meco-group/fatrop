@@ -53,12 +53,9 @@ namespace fatrop
                 for (auto &constraint : problem->constraints)
                 {
                     auto placeholder = problem->placeholders(constraint, t_mode);
-                    std::cout << constraint << std::endl;
-                    std::cout << placeholder << std::endl;
                     auto constraint_helped = ConstraintHelper(placeholder);
                     if (constraint.at_t0)
                     {
-                        std::cout << constraint_helped << std::endl;
 
                         g_eq_initial = casadi::MX::veccat({g_eq_initial, problem->placeholders(problem->at_t0(constraint_helped.g), t_mode)});
                         g_ineq_initial = casadi::MX::veccat({g_ineq_initial, problem->placeholders(problem->at_t0(constraint_helped.g_ineq), t_mode)});
@@ -74,6 +71,13 @@ namespace fatrop
                     }
                     if (constraint.at_tf)
                     {
+                        // std::cout << "constraint" << std::endl;
+                        // std::cout << constraint << std::endl;
+                        // std::cout << "placeholder" << std::endl;
+                        // std::cout << placeholder << std::endl;
+                        // std::cout << "constraint_helped" << std::endl;
+                        // std::cout << constraint_helped << std::endl;
+
                         g_eq_terminal = casadi::MX::veccat({g_eq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g), t_mode)});
                         g_ineq_terminal = casadi::MX::veccat({g_ineq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g_ineq), t_mode)});
                         lb_terminal = casadi::DM::veccat({lb_terminal, constraint_helped.lb});
@@ -104,9 +108,9 @@ namespace fatrop
                 auto microstage_initial = MicroStage::create(initial_syms, obj_t0, problem->placeholders(problem->at_t0(x_next_vec), t_mode), g_eq_initial, g_ineq_initial, DM_to_vec_helper::DM_to_vec(lb_initial), DM_to_vec_helper::DM_to_vec(ub_initial));
                 auto microstage_middle = MicroStage::create(middle_syms, obj_path, problem->placeholders(problem->at_path(x_next_vec), t_mode), g_eq_middle, g_ineq_middle, DM_to_vec_helper::DM_to_vec(lb_middle), DM_to_vec_helper::DM_to_vec(ub_middle));
                 auto microstage_terminal = MicroStage::create(terminal_syms, obj_tf, cs::MX(), g_eq_terminal, g_ineq_terminal, DM_to_vec_helper::DM_to_vec(lb_terminal), DM_to_vec_helper::DM_to_vec(ub_terminal));
-                std::cout << *microstage_initial << std::endl;
-                std::cout << *microstage_middle << std::endl;
-                std::cout << *microstage_terminal << std::endl;
+                // std::cout << *microstage_initial << std::endl;
+                // std::cout << *microstage_middle << std::endl;
+                // std::cout << *microstage_terminal << std::endl;
 
                 // add the microstages
                 push_back(microstage_initial);
@@ -172,9 +176,6 @@ namespace fatrop
             MicroStageSyms initial_syms;
             MicroStageSyms middle_syms;
             MicroStageSyms terminal_syms;
-            // MicroStage microstage_initial;
-            // MicroStage microstage_middle;
-            // MicroStage microstage_terminal;
         };
     }
 };

@@ -17,7 +17,7 @@ namespace fatrop
         public:
             ConstraintHelper(const casadi::MX &constr)
             {
-                std::cout << constr <<  std::endl;
+                // std::cout << constr <<  std::endl;
                 assert(constr.size2() == 1);
                 auto opti = casadi::Opti();
                 auto syms = casadi::MX::symvar(constr);
@@ -34,13 +34,13 @@ namespace fatrop
                 {
                     if ((double)lb_temp(i) == (double)ub_temp(i))
                     {
-                        g = casadi::MX::veccat({g, g_temp(i)});
+                        g = casadi::MX::veccat({g, g_temp(i) - lb_temp(i)});
                     }
                     else
                     {
-                        g_ineq = casadi::MX::veccat({g_ineq, g_temp(i), g_temp(i)});
+                        g_ineq = casadi::MX::veccat({g_ineq, g_temp(i)});
                         lb = casadi::DM::veccat({lb, lb_temp(i)});
-                        lb = casadi::DM::veccat({ub, ub_temp(i)});
+                        ub = casadi::DM::veccat({ub, ub_temp(i)});
                     }
                 }
             }
@@ -102,7 +102,7 @@ namespace fatrop
             std::vector<double> ret(dm.size1());
             for (int i = 0; i < dm.size1(); i++)
             {
-                ret.push_back((double)dm(i));
+                ret.at(i) = (double)dm(i);
             }
             return ret;
         }

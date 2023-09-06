@@ -24,7 +24,7 @@ namespace fatrop
         };
         struct StageMX : public casadi::MX
         {
-            StageMX(const casadi::MX &expr, bool at_t0, bool at_tf, bool at_path) : casadi::MX(expr), at_t0(at_t0), at_path(at_path), at_tf(at_tf){};
+            StageMX(const casadi::MX &expr, bool at_t0, bool at_path, bool at_tf) : casadi::MX(expr), at_t0(at_t0), at_path(at_path), at_tf(at_tf){};
             bool at_t0;
             bool at_path;
             bool at_tf;
@@ -32,8 +32,8 @@ namespace fatrop
         enum PlaceHolderType
         {
             at_t0,
-            at_tf,
             at_path,
+            at_tf,
         };
         class StageProblem;
         struct MXPlaceholder : public casadi::MX
@@ -147,7 +147,7 @@ namespace fatrop
                     if (ph.size() != 1)
                         throw std::runtime_error("Objective term must contain exactly one placeholder");
                     auto type = ph[0].first.type;
-                    objective_terms.push_back(StageMX(term, type == PlaceHolderType::at_t0, type == PlaceHolderType::at_tf, type == PlaceHolderType::at_path));
+                    objective_terms.push_back(StageMX(term, type == PlaceHolderType::at_t0, type == PlaceHolderType::at_path, type == PlaceHolderType::at_tf));
                 }
             }
             casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)

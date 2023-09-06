@@ -23,7 +23,7 @@ int main()
     ocp.subject_to(ocp.at_t0(x(0)) == 1.0);
     ocp.subject_to(ocp.at_t0(x(1)) == 0.0);
     ocp.subject_to((-0.25 <x(1))< INF, false, true);
-    ocp.subject_to((-1.0 <x(1))< 1, false, true);
+    ocp.subject_to((-1.0 <u)< 1, false, false);
 
     ocp.add_objective(ocp.sum(u(0) * u(0) + x(0) * x(0) + x(1) * x(1), true, false));
     ocp.add_objective(ocp.at_tf(x(1) * x(1)));
@@ -45,7 +45,7 @@ int main()
 
 
     // typedef std::vector<double> vd;
-    // // define variables
+    // // // define variables
     // auto x = casadi::MX::sym("x", 2);
     // auto u = casadi::MX::sym("u", 1);
     // auto p_stage = casadi::MX::sym("p_stage", 0);
