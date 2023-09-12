@@ -23,13 +23,13 @@ namespace fatrop
             int np_stage;
             int np_global;
         };
-        
+
         enum class PlaceHolderType;
 
         class StageMethod
         {
         public:
-            virtual casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
+            virtual casadi::MX eval_at(const PlaceHolderType type, const casadi::MX &expr)
             {
                 throw std::runtime_error("No method set");
                 return casadi::MX();
@@ -119,7 +119,30 @@ namespace fatrop
             }
             casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
             {
-                return method->fill_placeholder(type, expr, mode);
+                switch (mode)
+                {
+                case (MXPlaceholder::evaluation_mode::evaluate):
+                    switch (type)
+                    {
+                    case (PlaceHolderType::at_t0):
+                        return evaluate_at_control(expr, 0);
+                    case (PlaceHolderType::at_tf):
+                        return evaluate_at_control(expr, K_ - 1);
+                    case (PlaceHolderType::at_path): //  && mode == MXPlaceholder::evaluation_mode::transcribe
+                        return evaluate_at_control(expr, 1);
+                    default:
+                        throw std::runtime_error("Unknown placeholder type");
+                    }
+                case (MXPlaceholder::evaluation_mode::transcribe):
+                    return method->eval_at(type, expr);
+                }
+                // return method->fill_placeholder(type, expr, mode);
+            }
+            casadi::MX evaluate_at_control(const casadi::MX &expr, const int k)
+            {
+                {
+                    throw std::runtime_error("Not implemented yet.");
+                }
             }
             casadi::MX new_placeholder_expression(const casadi::MX &expr, PlaceHolderType type, const std::string &name)
             {
@@ -127,13 +150,22 @@ namespace fatrop
                 placeholders[placeholder] = MXPlaceholder(expr, type, this);
                 return placeholder;
             };
+            // move to ocp
             void transcribe(const int K)
             {
+                K_ = K;
                 method->transcribe(K);
             }
-            StageProblem *parent;
-            StageProblem *child;
+            int K_;
+            // StageProblem *parent;
+            // StageProblem *child;
+            // placeholders should be a part of the OCP
             Placeholders placeholders;
+            // method should also be a part of OCP
+            // there should be a OCP specific method
+            // the stage method should just instantiate
+            // the required casadi syms and expressions
+            // not the whole MicroStages and transcription
             std::shared_ptr<StageMethod> method;
             std::map<casadi::MX, casadi::MX, comp_mx> x_next;
             StageProblemDimensions dims;
@@ -141,6 +173,10 @@ namespace fatrop
             std::vector<StageMX> objective_terms;
             std::vector<casadi::MX> states;
             std::vector<casadi::MX> controls;
+            std::vector<casadi::MX> X_gist;
+            std::vector<casadi::MX> U_gist;
+            std::vector<casadi::MX> P_stage_gist;
+            std::vector<casadi::MX> P_global_gist;
         };
     }
 } // namespace fatrop_specification

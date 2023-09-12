@@ -20,6 +20,9 @@ namespace fatrop
             StageProblemFatropMethod(StageProblem *problem) : problem(problem)
             {
             }
+            // transcribe should to the following tings
+            // 1) define the micros stages and add them to the FatropCasadiProblem
+            // 2) add gist to the StageProblem
             void transcribe(const int K)
             {
                 K_ = K;
@@ -64,10 +67,10 @@ namespace fatrop
                     }
                     if (constraint.at_path)
                     {
-                        g_eq_middle= casadi::MX::veccat({g_eq_middle, problem->placeholders(problem->at_path(constraint_helped.g), t_mode)});
-                        g_ineq_middle= casadi::MX::veccat({g_ineq_middle, problem->placeholders(problem->at_path(constraint_helped.g_ineq), t_mode)});
-                        lb_middle= casadi::DM::veccat({lb_middle, constraint_helped.lb});
-                        ub_middle= casadi::DM::veccat({ub_middle, constraint_helped.ub});
+                        g_eq_middle = casadi::MX::veccat({g_eq_middle, problem->placeholders(problem->at_path(constraint_helped.g), t_mode)});
+                        g_ineq_middle = casadi::MX::veccat({g_ineq_middle, problem->placeholders(problem->at_path(constraint_helped.g_ineq), t_mode)});
+                        lb_middle = casadi::DM::veccat({lb_middle, constraint_helped.lb});
+                        ub_middle = casadi::DM::veccat({ub_middle, constraint_helped.ub});
                     }
                     if (constraint.at_tf)
                     {
@@ -108,9 +111,6 @@ namespace fatrop
                 auto microstage_initial = MicroStage::create(initial_syms, obj_t0, problem->placeholders(problem->at_t0(x_next_vec), t_mode), g_eq_initial, g_ineq_initial, DM_to_vec_helper::DM_to_vec(lb_initial), DM_to_vec_helper::DM_to_vec(ub_initial));
                 auto microstage_middle = MicroStage::create(middle_syms, obj_path, problem->placeholders(problem->at_path(x_next_vec), t_mode), g_eq_middle, g_ineq_middle, DM_to_vec_helper::DM_to_vec(lb_middle), DM_to_vec_helper::DM_to_vec(ub_middle));
                 auto microstage_terminal = MicroStage::create(terminal_syms, obj_tf, cs::MX(), g_eq_terminal, g_ineq_terminal, DM_to_vec_helper::DM_to_vec(lb_terminal), DM_to_vec_helper::DM_to_vec(ub_terminal));
-                // std::cout << *microstage_initial << std::endl;
-                // std::cout << *microstage_middle << std::endl;
-                // std::cout << *microstage_terminal << std::endl;
 
                 // add the microstages
                 push_back(microstage_initial);
@@ -123,44 +123,18 @@ namespace fatrop
 
         protected:
             friend class Placeholders;
-            virtual casadi::MX fill_placeholder(const PlaceHolderType type, const casadi::MX &expr, MXPlaceholder::evaluation_mode mode) override
+            casadi::MX eval_at(const PlaceHolderType type, const casadi::MX &expr)
             {
-
                 switch (type)
                 {
                 case (PlaceHolderType::at_t0):
-                    return evaluate_at_control(expr, 0, mode);
+                    return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {initial_syms.x, initial_syms.u, initial_syms.p_stage, initial_syms.p_global})[0];
                 case (PlaceHolderType::at_tf):
-                    return evaluate_at_control(expr, K_ - 1, mode);
-                case (PlaceHolderType::at_path): //  && mode == MXPlaceholder::evaluation_mode::transcribe
-                    return evaluate_at_control(expr, 1, mode);
+                    return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {terminal_syms.x, terminal_syms.u, terminal_syms.p_stage, terminal_syms.p_global})[0];
+                case (PlaceHolderType::at_path):
+                    return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {middle_syms.x, middle_syms.u, middle_syms.p_stage, middle_syms.p_global})[0];
                 default:
                     throw std::runtime_error("Unknown placeholder type");
-                }
-            }
-
-        private:
-            casadi::MX evaluate_at_control(const casadi::MX &expr, const int k, MXPlaceholder::evaluation_mode mode)
-            {
-                switch (mode)
-                {
-                case MXPlaceholder::evaluation_mode::transcribe:
-                {
-                    if (k == 0)
-                        return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {initial_syms.x, initial_syms.u, initial_syms.p_stage, initial_syms.p_global})[0];
-                    else if (k == K_ - 1)
-                        return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {terminal_syms.x, terminal_syms.u, terminal_syms.p_stage, terminal_syms.p_global})[0];
-                    else
-                        return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {middle_syms.x, middle_syms.u, middle_syms.p_stage, middle_syms.p_global})[0];
-                }
-                case MXPlaceholder::evaluation_mode::evaluate:
-                {
-                    return casadi::MX::substitute({expr}, {x_vec, u_vec, p_stage_vec, p_global_vec}, {x_gist[k], u_gist[k], p_stage_gist[k], p_global_gist})[0];
-                }
-                default:
-                {
-                    throw std::runtime_error("Unknown evaluation type");
-                }
                 }
             }
             int K_;
