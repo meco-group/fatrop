@@ -16,21 +16,19 @@ std::vector<PlaceHolderType> Placeholders::get_all_types(const casadi::MX &expr)
 casadi::MX Placeholders::operator()(const casadi::MX &expr, MXPlaceholder::evaluation_mode mode)
 {
     casadi::MX ret = expr;
-    while (!get_all_placeholders(ret).empty()) // todo re-use this result
+    auto placeholders = get_all_placeholders(ret);
+    if (placeholders.empty())
+        return ret;
+    std::vector<casadi::MX> from;
+    std::vector<casadi::MX> to;
+    while (!placeholders.empty())
     {
-        std::vector<casadi::MX> from;
-        std::vector<casadi::MX> to;
-        auto placeholders = get_all_placeholders(ret);
-        while (!placeholders.empty())
-        {
-            auto p = placeholders.back();
-            placeholders.pop_back();
-            from.push_back(p.second);
-            to.push_back(p.first.stage->fill_placeholder(p.first.type, p.first, mode));
-            // std::cout << "replacing " << p.second << " with " << to.back() << std::endl;
-        }
-        ret = casadi::MX::substitute({ret}, from, to)[0];
+        auto p = placeholders.back();
+        placeholders.pop_back();
+        from.push_back(p.second);
+        to.push_back(p.first.stage->fill_placeholder(p.first.type, operator()(p.first, mode), mode));
     }
+    ret = casadi::MX::substitute({ret}, from, to)[0];
     return ret;
 }
 
