@@ -55,20 +55,20 @@ namespace fatrop
                 auto t_mode = MXPlaceholder::evaluation_mode::transcribe;
                 for (auto &constraint : problem->constraints)
                 {
-                    auto placeholder = problem->placeholders(constraint, t_mode);
+                    auto placeholder = problem->ocp->placeholders(constraint, t_mode);
                     auto constraint_helped = ConstraintHelper(placeholder);
                     if (constraint.at_t0)
                     {
 
-                        g_eq_initial = casadi::MX::veccat({g_eq_initial, problem->placeholders(problem->at_t0(constraint_helped.g), t_mode)});
-                        g_ineq_initial = casadi::MX::veccat({g_ineq_initial, problem->placeholders(problem->at_t0(constraint_helped.g_ineq), t_mode)});
+                        g_eq_initial = casadi::MX::veccat({g_eq_initial, problem->ocp->placeholders(problem->at_t0(constraint_helped.g), t_mode)});
+                        g_ineq_initial = casadi::MX::veccat({g_ineq_initial, problem->ocp->placeholders(problem->at_t0(constraint_helped.g_ineq), t_mode)});
                         lb_initial = casadi::DM::veccat({lb_initial, constraint_helped.lb});
                         ub_initial = casadi::DM::veccat({ub_initial, constraint_helped.ub});
                     }
                     if (constraint.at_path)
                     {
-                        g_eq_middle = casadi::MX::veccat({g_eq_middle, problem->placeholders(problem->at_path(constraint_helped.g), t_mode)});
-                        g_ineq_middle = casadi::MX::veccat({g_ineq_middle, problem->placeholders(problem->at_path(constraint_helped.g_ineq), t_mode)});
+                        g_eq_middle = casadi::MX::veccat({g_eq_middle, problem->ocp->placeholders(problem->at_path(constraint_helped.g), t_mode)});
+                        g_ineq_middle = casadi::MX::veccat({g_ineq_middle, problem->ocp->placeholders(problem->at_path(constraint_helped.g_ineq), t_mode)});
                         lb_middle = casadi::DM::veccat({lb_middle, constraint_helped.lb});
                         ub_middle = casadi::DM::veccat({ub_middle, constraint_helped.ub});
                     }
@@ -81,8 +81,8 @@ namespace fatrop
                         // std::cout << "constraint_helped" << std::endl;
                         // std::cout << constraint_helped << std::endl;
 
-                        g_eq_terminal = casadi::MX::veccat({g_eq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g), t_mode)});
-                        g_ineq_terminal = casadi::MX::veccat({g_ineq_terminal, problem->placeholders(problem->at_tf(constraint_helped.g_ineq), t_mode)});
+                        g_eq_terminal = casadi::MX::veccat({g_eq_terminal, problem->ocp->placeholders(problem->at_tf(constraint_helped.g), t_mode)});
+                        g_ineq_terminal = casadi::MX::veccat({g_ineq_terminal, problem->ocp->placeholders(problem->at_tf(constraint_helped.g_ineq), t_mode)});
                         lb_terminal = casadi::DM::veccat({lb_terminal, constraint_helped.lb});
                         ub_terminal = casadi::DM::veccat({ub_terminal, constraint_helped.ub});
                     }
@@ -97,19 +97,19 @@ namespace fatrop
                     // MXPlaceholder ph = problem->placeholders[objective];
                     if (objective.at_t0)
                     {
-                        obj_t0 += problem->placeholders(objective, t_mode);
+                        obj_t0 += problem->ocp->placeholders(objective, t_mode);
                     }
                     if (objective.at_path)
                     {
-                        obj_path += problem->placeholders(objective, t_mode);
+                        obj_path += problem->ocp->placeholders(objective, t_mode);
                     }
                     if (objective.at_tf)
                     {
-                        obj_tf += problem->placeholders(objective, t_mode);
+                        obj_tf += problem->ocp->placeholders(objective, t_mode);
                     }
                 }
-                auto microstage_initial = MicroStage::create(initial_syms, obj_t0, problem->placeholders(problem->at_t0(x_next_vec), t_mode), g_eq_initial, g_ineq_initial, DM_to_vec_helper::DM_to_vec(lb_initial), DM_to_vec_helper::DM_to_vec(ub_initial));
-                auto microstage_middle = MicroStage::create(middle_syms, obj_path, problem->placeholders(problem->at_path(x_next_vec), t_mode), g_eq_middle, g_ineq_middle, DM_to_vec_helper::DM_to_vec(lb_middle), DM_to_vec_helper::DM_to_vec(ub_middle));
+                auto microstage_initial = MicroStage::create(initial_syms, obj_t0, problem->ocp->placeholders(problem->at_t0(x_next_vec), t_mode), g_eq_initial, g_ineq_initial, DM_to_vec_helper::DM_to_vec(lb_initial), DM_to_vec_helper::DM_to_vec(ub_initial));
+                auto microstage_middle = MicroStage::create(middle_syms, obj_path, problem->ocp->placeholders(problem->at_path(x_next_vec), t_mode), g_eq_middle, g_ineq_middle, DM_to_vec_helper::DM_to_vec(lb_middle), DM_to_vec_helper::DM_to_vec(ub_middle));
                 auto microstage_terminal = MicroStage::create(terminal_syms, obj_tf, cs::MX(), g_eq_terminal, g_ineq_terminal, DM_to_vec_helper::DM_to_vec(lb_terminal), DM_to_vec_helper::DM_to_vec(ub_terminal));
 
                 // add the microstages

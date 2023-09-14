@@ -6,6 +6,7 @@
 #include "ocp/StageOCPApplication.hpp"
 #include <limits>
 #include "utilities.hpp"
+#include "ocp.hpp"
 #define INF std::numeric_limits<double>::infinity()
 using namespace fatrop;
 using namespace fatrop::fatrop_casadi;
@@ -14,22 +15,23 @@ int main()
     // auto x = casadi::MX::sym("x", 2);
     // auto u = casadi::MX::sym("u", 2);
     // std::cout << ConstraintHelper(x<u).g_ineq << std::endl;
-    StageProblem ocp;
-    auto x = ocp.state(2);
-    auto u = ocp.control();
+    auto ocp = Ocp();
+    auto stage = ocp.stage();
+    auto x = stage -> state(2);
+    auto u = stage -> control();
     auto e = 1. - x(0) * x(0);
     double dt = .5;
-    ocp.set_next(x, x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt);
-    ocp.subject_to(ocp.at_t0(x(0)) == 1.0);
-    ocp.subject_to(ocp.at_t0(x(1)) == 0.0);
-    ocp.subject_to(-0.25 <x(1), false, true);
-    ocp.subject_to((-1.0 <u)< 1, false, false);
+    stage ->set_next(x, x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt);
+    stage ->subject_to(stage ->at_t0(x(0)) == 1.0);
+    stage ->subject_to(stage ->at_t0(x(1)) == 0.0);
+    stage ->subject_to(-0.25 <x(1), false, true);
+    stage ->subject_to((-1.0 <u)< 1, false, false);
 
-    ocp.add_objective(ocp.sum(u(0) * u(0) + x(0) * x(0) + x(1) * x(1), true, false));
-    ocp.add_objective(ocp.at_tf(x(1) * x(1)));
+    stage ->add_objective(stage ->sum(u(0) * u(0) + x(0) * x(0) + x(1) * x(1), true, false));
+    stage ->add_objective(stage ->at_tf(x(1) * x(1)));
 
-    auto fatrop_method = std::make_shared<StageProblemFatropMethod>(&ocp);
-    ocp.method = fatrop_method;
+    auto fatrop_method = std::make_shared<StageProblemFatropMethod>(stage.get());
+    stage ->method = fatrop_method;
     fatrop_method -> transcribe(20);
 
     auto solver = std::make_shared<FatropCasadiSolver>(*fatrop_method);

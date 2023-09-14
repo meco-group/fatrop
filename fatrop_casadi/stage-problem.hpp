@@ -8,6 +8,7 @@
 #include "fatrop-casadi-problem.hpp"
 #include "utilities.hpp"
 #include "placeholders.hpp"
+#include "ocp-internal.hpp"
 /**
  *  This file has a minimal casadi representation of a single stage problem.
  */
@@ -45,8 +46,13 @@ namespace fatrop
         //     using SharedObj<StageProblemInternal, StageProblem>::SharedObj;
         // };
 
+
         class StageProblem
         {
+            public:
+                StageProblem(std::shared_ptr<OcpInternal> ocp) : ocp(ocp)
+                {
+                }
         public:
             casadi::MX state(const int m = 1, const int n = 1)
             {
@@ -88,12 +94,12 @@ namespace fatrop
             }
             void subject_to(const casadi::MX &expr, bool include_first = false, bool include_last = false)
             {
-                if (placeholders.has_placeholders(expr, {PlaceHolderType::at_t0})) // check for point constraints
+                if (ocp -> placeholders.has_placeholders(expr, {PlaceHolderType::at_t0})) // check for point constraints
                 {
                     constraints.push_back(StageMX(expr, true, false, false));
                     return;
                 }
-                if (placeholders.has_placeholders(expr, {PlaceHolderType::at_tf})) // check for point constraints
+                if (ocp -> placeholders.has_placeholders(expr, {PlaceHolderType::at_tf})) // check for point constraints
                 {
                     constraints.push_back(StageMX(expr, false, false, true));
                     return;
@@ -109,7 +115,7 @@ namespace fatrop
                 for (auto &term : terms)
                 {
                     // check the placeholder type
-                    auto ph = placeholders.get_all_placeholders(term);
+                    auto ph =ocp -> placeholders.get_all_placeholders(term);
                     // check if only one placeholder
                     if (ph.size() != 1)
                         throw std::runtime_error("Objective term must contain exactly one placeholder");
@@ -136,6 +142,7 @@ namespace fatrop
                 case (MXPlaceholder::evaluation_mode::transcribe):
                     return method->eval_at(type, expr);
                 }
+                return casadi::MX();
                 // return method->fill_placeholder(type, expr, mode);
             }
             casadi::MX evaluate_at_control(const casadi::MX &expr, const int k)
@@ -147,7 +154,7 @@ namespace fatrop
             casadi::MX new_placeholder_expression(const casadi::MX &expr, PlaceHolderType type, const std::string &name)
             {
                 auto placeholder = casadi::MX::sym(name, expr.size1(), expr.size2());
-                placeholders[placeholder] = MXPlaceholder(expr, type, this);
+                ocp->placeholders[placeholder] = MXPlaceholder(expr, type, this);
                 return placeholder;
             };
             // move to ocp
@@ -160,7 +167,10 @@ namespace fatrop
             // StageProblem *parent;
             // StageProblem *child;
             // placeholders should be a part of the OCP
-            Placeholders placeholders;
+            std::shared_ptr<OcpInternal> ocp;
+
+
+            // Placeholders placeholders;
             // method should also be a part of OCP
             // there should be a OCP specific method
             // the stage method should just instantiate
