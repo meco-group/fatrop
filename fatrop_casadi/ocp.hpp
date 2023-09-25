@@ -15,12 +15,18 @@ namespace fatrop
             }
             std::shared_ptr<StageProblem> stage()
             {
-                return std::make_shared<StageProblem>(*this);
+                auto ret = std::make_shared<StageProblem>(*this);
+                stageproblems.push_back(ret);
+                return ret;
             }
             void subject_to(){
 
             };
+            void solve()
+            {
+            }
             std::vector<std::shared_ptr<StageProblem>> stageproblems;
+            std::vector<casadi::MX> x_gist;
         };
 
     } // namespace fatrop_casadi
