@@ -127,8 +127,8 @@ PYBIND11_MODULE(fatropy, m)
                 MatBind result;
                 result.resize(t.size());
                 sol.evaluate(t, result);
-                if (std::min(t.n_rows(), t.n_cols()) == 1)
-                    return result.to_numpy(std::max(t.n_rows(), t.n_cols()), sol.get_K());
+                if ((std::min)(t.n_rows(), t.n_cols()) == 1)
+                    return result.to_numpy((std::max)(t.n_rows(), t.n_cols()), sol.get_K());
                 else
                     return result.to_numpy(sol.get_K(), t.n_cols(), t.n_rows()); });
 
