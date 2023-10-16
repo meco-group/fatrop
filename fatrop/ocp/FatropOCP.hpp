@@ -66,7 +66,7 @@ namespace fatrop
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr);
+            const FatropVecBF &grad_curr) override;
         fatrop_int eval_constraint_viol(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,

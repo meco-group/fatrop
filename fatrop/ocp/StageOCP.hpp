@@ -67,7 +67,7 @@ namespace fatrop
         fatrop_int get_nuk(const fatrop_int k) const override;
         fatrop_int get_ngk(const fatrop_int k) const override;
         fatrop_int get_ng_ineq_k(const fatrop_int k) const override;
-        fatrop_int get_n_global_params() const;
+        fatrop_int get_n_global_params() const override;
         fatrop_int get_n_stage_params_k(const fatrop_int k) const override;
         fatrop_int get_horizon_length() const override;
         const fatrop_int nu_;

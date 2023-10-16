@@ -83,7 +83,7 @@ namespace fatrop
             const FatropVecBF &rhs_b,
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
-            const FatropVecBF &rhs_gradb);
+            const FatropVecBF &rhs_gradb) override;
         fatrop_int solve_rhs(
             OCPKKTMemory *OCP,
             const FatropVecBF &ux,
