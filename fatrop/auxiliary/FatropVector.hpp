@@ -90,7 +90,7 @@ namespace fatrop
             }
         }
         FatropVector(const std::vector<T> &vec) : std::vector<T>(vec){};
-        FatropVector(std::vector<T> &&vec) : std::vector<T>(move(vec)){};
+        FatropVector(std::vector<T> &&vec) : std::vector<T>(std::move(vec)){};
         T get(const fatrop_int ai) const { return std::vector<T>::at(ai); };
         fatrop_int size() const { return std::vector<T>::size(); };
         operator T *() { return this->data(); };
