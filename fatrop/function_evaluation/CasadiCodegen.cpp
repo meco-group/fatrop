@@ -66,10 +66,22 @@ EvalCasGen::EvalCasGen(const shared_ptr<DLHandler> &handle_, const std::string &
     if (dlerror())
         dlerror(); // No such function, reset error flags
     assert((work && work(&sz_arg, &sz_res, &sz_iw, &sz_w)) == 0);
+#ifndef ENABLE_MULTITHREADING
     work_vector_d.resize(sz_w);
     work_vector_i.resize(sz_iw);
+    res_vec.resize(sz_res);
+    arg_vec.resize(sz_arg);
     w = work_vector_d.data();
     iw = work_vector_i.data();
+#else
+    for (int i = 0; i < omp_get_max_threads(); i++)
+    {
+        work_vector_d[i].resize(sz_w);
+        work_vector_i[i].resize(sz_iw);
+        res_vec[i].resize(sz_res);
+        arg_vec[i].resize(sz_arg);
+    }
+#endif
     /* Input sparsities */
     // sparsity_t sp_in = (sparsity_t)dlsym(handle, (function_name + (std::string) "_sparsity_in").c_str());
     // assert(dlerror() == 0);
@@ -94,12 +106,12 @@ EvalCasGen::EvalCasGen(const shared_ptr<DLHandler> &handle_, const std::string &
 // allocate output buffer
 #ifndef ENABLE_MULTITHREADING
     buffer.resize(out_nnz, 0.0);
-    output_buffer_p = buffer.data();
+    // output_buffer_p = buffer.data();
 #else
     for (int i = 0; i < omp_get_max_threads(); i++)
     {
         buffer[i].resize(out_nnz, 0.0);
-        output_buffer_p[i] = buffer[i].data();
+        // output_buffer_p[i] = buffer[i].data();
     }
 #endif
 }
@@ -113,7 +125,7 @@ EvalCasGen::EvalCasGen(
     const sparsity_t sp_in,
     const sparsity_t sp_out,
     const work_t work,
-    const eval_t eval):eval(eval), incref(incref), decref(decref), release(release)
+    const eval_t eval) : eval(eval), incref(incref), decref(decref), release(release)
 {
     /* Memory management -- increase reference counter */
 
@@ -133,10 +145,22 @@ EvalCasGen::EvalCasGen(
 
     // assert((work && work(&sz_arg, &sz_res, &sz_iw, &sz_w)) == 0);
     assert(work(&sz_arg, &sz_res, &sz_iw, &sz_w) == 0);
+#ifndef ENABLE_MULTITHREADING
     work_vector_d.resize(sz_w);
     work_vector_i.resize(sz_iw);
+    res_vec.resize(sz_res);
+    arg_vec.resize(sz_arg);
     w = work_vector_d.data();
     iw = work_vector_i.data();
+#else
+    for (int i = 0; i < omp_get_max_threads(); i++)
+    {
+        work_vector_d[i].resize(sz_w);
+        work_vector_i[i].resize(sz_iw);
+        res_vec[i].resize(sz_res);
+        arg_vec[i].resize(sz_arg);
+    }
+#endif
 
     /* Output sparsities */
     const casadi_int *sparsity_out_ci = sp_out(0); // ci stands for casadi_int
@@ -149,29 +173,36 @@ EvalCasGen::EvalCasGen(
 // allocate output buffer
 #ifndef ENABLE_MULTITHREADING
     buffer.resize(out_nnz, 0.0);
-    output_buffer_p = buffer.data();
+    // output_buffer_p = buffer.data();
 #else
     for (int i = 0; i < omp_get_max_threads(); i++)
     {
         buffer[i].resize(out_nnz, 0.0);
-        output_buffer_p[i] = buffer[i].data();
+        // output_buffer_p[i] = buffer[i].data();
     }
 #endif
 }
 
 int EvalCasGen::eval_buffer(const double **arg)
 {
+#ifndef ENABLE_MULTITHREADING
     w = work_vector_d.data();
     iw = work_vector_i.data();
-#ifndef ENABLE_MULTITHREADING
-    output_buffer_p = buffer.data();
-    if (eval(arg, &output_buffer_p, iw, w, mem))
+    for(int i =0; i < n_in; i++){
+        arg_vec[i] = arg[i];
+    }
+    res_vec[0] = buffer.data();
+    if (eval(arg_vec.data(), res_vec.data(), iw, w, mem))
         return 1;
 #else
     int tid = omp_get_thread_num();
-    output_buffer_p[tid] = buffer[tid].data();
+    // output_buffer_p[tid] = buffer[tid].data();
+    for(int i =0; i < n_in; i++){
+        arg_vec[tid][i] = arg[i];
+    }
+    res_vec[tid][0] = buffer[tid].data();
     // printf("using thread %d\n", tid);
-    if (eval(arg, &output_buffer_p[tid], iw, w, mem))
+    if (eval(arg_vec[tid].data(), res_vec[tid].data(), work_vector_i[tid].data(), work_vector_d[tid].data(), mem))
         return 1;
 #endif
 
