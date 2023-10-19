@@ -74,6 +74,11 @@ EvalCasGen::EvalCasGen(const shared_ptr<DLHandler> &handle_, const std::string &
     w = work_vector_d.data();
     iw = work_vector_i.data();
 #else
+    auto num_threads = omp_get_max_threads();
+    work_vector_d.resize(num_threads);
+    work_vector_i.resize(num_threads);
+    res_vec.resize(num_threads);
+    arg_vec.resize(num_threads);
     for (int i = 0; i < omp_get_max_threads(); i++)
     {
         work_vector_d[i].resize(sz_w);
@@ -153,6 +158,11 @@ EvalCasGen::EvalCasGen(
     w = work_vector_d.data();
     iw = work_vector_i.data();
 #else
+    auto num_threads = omp_get_max_threads();
+    work_vector_d.resize(num_threads);
+    work_vector_i.resize(num_threads);
+    res_vec.resize(num_threads);
+    arg_vec.resize(num_threads);
     for (int i = 0; i < omp_get_max_threads(); i++)
     {
         work_vector_d[i].resize(sz_w);
@@ -188,7 +198,8 @@ int EvalCasGen::eval_buffer(const double **arg)
 #ifndef ENABLE_MULTITHREADING
     w = work_vector_d.data();
     iw = work_vector_i.data();
-    for(int i =0; i < n_in; i++){
+    for (int i = 0; i < n_in; i++)
+    {
         arg_vec[i] = arg[i];
     }
     res_vec[0] = buffer.data();
@@ -197,7 +208,8 @@ int EvalCasGen::eval_buffer(const double **arg)
 #else
     int tid = omp_get_thread_num();
     // output_buffer_p[tid] = buffer[tid].data();
-    for(int i =0; i < n_in; i++){
+    for (int i = 0; i < n_in; i++)
+    {
         arg_vec[tid][i] = arg[i];
     }
     res_vec[tid][0] = buffer[tid].data();
