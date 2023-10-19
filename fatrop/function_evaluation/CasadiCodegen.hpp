@@ -58,9 +58,9 @@ namespace fatrop
             const eval_t eval);
 /// pointer to result_buffer
 #ifndef ENABLE_MULTITHREADING
-        double *output_buffer_p;
+        // double *output_buffer_p;
 #else
-        std::vector<double *> output_buffer_p = std::vector<double *>(omp_get_max_threads());
+        // std::vector<double *> output_buffer_p = std::vector<double *>(omp_get_max_threads());
 #endif
         /// pointer to casadi codegen evalutation function
         eval_t eval; // !! multhithreading of this function not yet supported
@@ -79,9 +79,18 @@ namespace fatrop
         /// thread local mem id
         int mem;
         /// double work vector
+#ifndef ENABLE_MULTITHREADING
         std::vector<double> work_vector_d;
+        std::vector<double*> res_vec;
+        std::vector<const double*> arg_vec;
         /// int work vector
         std::vector<casadi_int> work_vector_i;
+#else
+        std::vector<std::vector<double>> work_vector_d;
+        std::vector<std::vector<double*>> res_vec;
+        std::vector<std::vector<const double*>> arg_vec;
+        std::vector<std::vector<casadi_int>> work_vector_i;
+#endif
         /// evaluate function and save res in "ccs format with lda==out_m"
         int eval_buffer(const double **arg);
         /// for reference counting of handle pointer
