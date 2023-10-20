@@ -77,13 +77,19 @@ add_subdirectory(fatrop)
 if(BUILD_DOCS MATCHES ON)
   add_subdirectory(docs)
 endif()
-set(WITH_FATROP_CASADI ON CACHE BOOL "Build problem specification tools, built on top of casadi")
-
-if(${WITH_FATROP_CASADI})
+set(WITH_SPECTROP ON CACHE BOOL "Build problem specification tools, built on top of casadi")
+if(${WITH_SPECTROP})
 # casadi is required for the specification tools, find using findCasadi.cmake
   include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindCasadi.cmake)
-  add_subdirectory(fatrop_casadi)
+  add_subdirectory(spectrop)
 endif()
+
+# set(WITH_FATROP_CASADI ON CACHE BOOL "Build problem specification tools, built on top of casadi")
+# if(${WITH_FATROP_CASADI})
+# # casadi is required for the specification tools, find using findCasadi.cmake
+#   include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindCasadi.cmake)
+#   add_subdirectory(fatrop_casadi)
+# endif()
 set(WITH_PYTHON OFF CACHE BOOL "Build python bindings (fatropy)")
 if(${WITH_PYTHON})
   add_subdirectory(fatropy)
