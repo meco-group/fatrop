@@ -31,8 +31,12 @@ namespace fatrop
                 resdata.resize(sz_res);
                 argdata.resize(sz_arg);
                 n_in = func.n_in();
+                // // assert dense matrix output
+                // assert(func.nnz_out(0) == m * n);
             };
             void eval(const double **args, MAT *res){
+                // assert(res->m == m);
+                // assert(res->n == n);
                 eval(args, bufout.data());
                 PACKMAT(m, n, bufout.data(), m, res, 0, 0);
             };

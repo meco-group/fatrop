@@ -19,15 +19,15 @@ int main()
     =----  initial stage ----=
   */
   auto initial_stage = ocp.new_stage(); // states and controls are derived automatically
-  /* constraint   */ initial_stage.subject_to(x(0) == 1);
-  /* constraint   */ initial_stage.subject_to(x(1) == 0);
+  /* constraint   */ initial_stage.subject_to(x(0) == 1.);
+  /* constraint   */ initial_stage.subject_to(x(1) == 0.);
   /* dynamics     */ initial_stage.set_next(x, x_next);
   /* objective    */ initial_stage.add_objective(u * u + cs::MX::sumsqr(x));
 
   /*
     =----  middle stage ----=
   */
-  auto middle_stage = ocp.new_stage(18); // 18 is the number of nodes, states, controls and parameters are derived automatically
+  auto middle_stage = ocp.new_stage(19); // 18 is the number of nodes, states, controls and parameters are derived automatically
   /* constraints  */
   middle_stage.subject_to(-0.25 < x(1));
   middle_stage.subject_to((-1.0 < u) < 1);
@@ -39,12 +39,12 @@ int main()
   */
   auto terminal_stage = ocp.new_stage(); // the last stage also has x2 as state
   /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
-  /* objective    */ terminal_stage.add_objective(cs::MX::sumsqr(x));
+  /* objective    */ terminal_stage.add_objective(x(1)*x(1));
 
   auto fatrop_impl = std::make_shared<FatropOcpImpl>(ocp);
   auto fatrop_solver = OCPApplication(fatrop_impl);
   fatrop_solver.build();
-  // fatrop_solver.optimize();
+  fatrop_solver.optimize();
 
   // ocp.sample(x);           // check which stages have x as state, evaluate and concatenate in a matrix
   // ocp.set_initial(x, 0.5); // set initial value of x for all stages that have x as state

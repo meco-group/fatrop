@@ -48,7 +48,7 @@ namespace fatrop
                     horizon_length_ += stage.K();
                 }
             }
-            fatrop_int get_nxk(const fatrop_int k) const override { return stages_[k]->nu; };
+            fatrop_int get_nxk(const fatrop_int k) const override { return stages_[k]->nx; };
             fatrop_int get_nuk(const fatrop_int k) const override { return stages_[k]->nu; };
             fatrop_int get_ngk(const fatrop_int k) const override { return stages_[k]->ng_eq; };
             fatrop_int get_n_stage_params_k(const fatrop_int k) const override { return 0; };
@@ -88,11 +88,14 @@ namespace fatrop
                 MAT *res,
                 const fatrop_int k) override
             {
-                const double *arg[4];
+                const double *arg[7];
                 arg[0] = inputs_k;
                 arg[1] = states_k;
-                arg[2] = stage_params_k;
-                arg[3] = global_params;
+                arg[2] = lam_dyn_k;
+                arg[3] = lam_eq_k;
+                arg[4] = lam_eq_ineq_k;
+                arg[5] = stage_params_k;
+                arg[6] = global_params;
                 stages_[k]->RSQrqt.eval(arg, res);
                 return 0;
             };
@@ -137,11 +140,12 @@ namespace fatrop
                 double *res,
                 const fatrop_int k) override
             {
-                const double *arg[4];
-                arg[0] = inputs_k;
-                arg[1] = states_k;
-                arg[2] = stage_params_k;
-                arg[3] = global_params;
+                const double *arg[5];
+                arg[0] = states_k;
+                arg[1] = states_kp1;
+                arg[2] = inputs_k;
+                arg[3] = stage_params_k;
+                arg[4] = global_params;
                 stages_[k]->b.eval(arg, res);
                 return 0;
             };

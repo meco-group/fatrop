@@ -20,8 +20,8 @@ namespace fatrop{
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 ret.L = CasadiFEWrap(cs::Function("L", stage_syms, {sq.L}));
                 auto rq_sym = cs::MX();
-                ret.rq = CasadiFEWrap(cs::Function("rq", stage_syms, {cs::MX::densify(rq_sym)}));
                 auto RSQ_sym = cs::MX::hessian(sq.L, ux, rq_sym);
+                ret.rq = CasadiFEWrap(cs::Function("rq", stage_syms, {cs::MX::densify(rq_sym)}));
                 if (sq.nxp1 > 0)
                 {
                     auto xp1 = cs::MX::sym("xp1", sq.nxp1);
@@ -58,7 +58,7 @@ namespace fatrop{
                     rq_sym += rq_ineq;
                     RSQ_sym += RSQ_ineq;
                 }
-                ret.RSQrqt = CasadiFEWrap(cs::Function("RSQrqt", {sq.x, sq.u, sq.p_stage, sq.p_global, lam_dynamics, lam_g_equality, lam_g_inequality}, {cs::MX::densify(cs::MX::horzcat({RSQ_sym, rq_sym}).T())}));
+                ret.RSQrqt = CasadiFEWrap(cs::Function("RSQrqt", {sq.u, sq.x, lam_dynamics, lam_g_equality, lam_g_inequality, sq.p_stage, sq.p_global}, {cs::MX::densify(cs::MX::horzcat({RSQ_sym, rq_sym}).T())}));
                 ret.Ub = sq.ub.nonzeros();
                 ret.Lb = sq.lb.nonzeros();
                 return ret;
