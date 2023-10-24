@@ -242,7 +242,7 @@ namespace fatrop
             x_dummy = std::vector<double>(maxel(nxexpr), 0.0);
             options->register_option(BooleanOption("bfgs", "bfgs Hessian approximation", &bfgs, false));
         }
-        void reset()
+        void reset() override
         {
             if (bfgs)
             {
@@ -274,13 +274,13 @@ namespace fatrop
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            double &res);
+            double &res) override;
         fatrop_int integrate_dynamics(
             OCPKKTMemory *OCP,
             const fatrop_int k,
             const FatropVecBF &uk,
             const FatropVecBF &xk,
-            FatropVecBF &xkp1);
+            FatropVecBF &xkp1) override;
         OCPDims get_ocp_dims() const override
         {
             return OCPDims(ocptempl->get_horizon_length(), nuexpr, nxexpr, ngexpr, ngineqexpr, nstageparamsexpr, ocptempl->get_n_global_params());

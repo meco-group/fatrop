@@ -160,8 +160,8 @@ namespace fatrop
         /// @param res: pointer to array ng-vector
         /// @param k: time step
         virtual fatrop_int eval_gk(
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
@@ -174,8 +174,8 @@ namespace fatrop
         /// @param res: pointer to array ng_ineq-vector
         /// @param k: time step
         virtual fatrop_int eval_gineqk(
-            const double *states_k,
             const double *inputs_k,
+            const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,

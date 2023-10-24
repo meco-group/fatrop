@@ -121,6 +121,7 @@ extern "C"
 #include "auxiliary/LinearAlgebra.hpp"
 #include "auxiliary/FatropVector.hpp"
 #include "auxiliary/Common.hpp"
+#include <cmath>
 #if DEBUG
 #include <assert.h>
 #endif
@@ -241,6 +242,17 @@ namespace fatrop
         {
             return &vec_;
         }
+        bool has_inf()
+        {
+            for (int i = 0; i < m_; i++)
+            {
+                if (std::isinf(VECEL(&vec_, i)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         VEC vec_;
         const int m_;
     };
@@ -304,6 +316,28 @@ namespace fatrop
         FatropVecBF block(const fatrop_int i, const fatrop_int p) const;
         void SwapWith(FatropVecBF &vb);
         void SetConstant(double constant) const;
+        bool has_inf() const
+        {
+            for (int i = 0; i < nels(); i++)
+            {
+                if (std::isinf(VECEL(vec_, i)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool has_nan() const
+        {
+            for (int i = 0; i < nels(); i++)
+            {
+                if (std::isnan(VECEL(vec_, i)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
     protected:
         VEC *vec_ = NULL;
