@@ -39,7 +39,7 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
     dirty = false;
 }
 
-fatrop_int NLPApplication::optimize()
+fatrop_int NLPApplication::optimize() 
 {
     assert(!dirty);
     fatrop_int ret = fatropalg_->optimize();
@@ -97,12 +97,16 @@ template void NLPApplication::set_option<fatrop_int>(const string &, int);
 template void NLPApplication::set_option<double>(const string &, double);
 template void NLPApplication::set_option<bool>(const string &, bool);
 
-void NLPApplication::set_initial(const FatropSolution &initial_guess)
+void NLPApplication::set_initial(const FatropSolution &initial_guess) const
 {
     initial_guess_primal() = initial_guess.sol_primal_;
     initial_guess_dual() = initial_guess.sol_dual_;
     initial_guess_zL() = initial_guess.sol_zL_;
     initial_guess_zU() = initial_guess.sol_zU_;
+}
+void NLPApplication::set_initial(const std::vector<double> &initial_guess_primal_) const
+{
+    initial_guess_primal() = initial_guess_primal_;
 }
 const FatropOptions &NLPApplication::get_options() const
 {

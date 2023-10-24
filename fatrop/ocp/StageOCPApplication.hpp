@@ -83,7 +83,8 @@ namespace fatrop
         void set_option(const std::string &option_name, T value);
 
     public:
-        void set_initial(const FatropSolution &initial_guess);
+        void set_initial(const FatropSolution &initial_guess) const;
+        void set_initial(const std::vector<double> &initial_guess_primal_) const;
         const FatropOptions &get_options() const;
 
     protected:
@@ -112,7 +113,7 @@ namespace fatrop
         using NLPApplication::set_initial;
         void set_initial(std::vector<double> &initial_u, std::vector<double> &initial_x);
         OCPDims get_ocp_dims();
-        void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
+        void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params) const
         {
             adapter->set_parameters(stage_params, global_params);
         }
@@ -201,7 +202,7 @@ namespace fatrop
         StageExpressionEvaluatorFactory get_expression(const std::string &sampler_name);
         StageExpressionEvaluatorFactory get_expression_evaluator(const std::shared_ptr<StageExpression> &expr);
         AppParameterSetter get_parameter_setter(const std::string &setter_name);
-        void set_value(const std::string &setter_name, const std::vector<double>& value)
+        void set_value(const std::string &setter_name, const std::vector<double> &value)
         {
             get_parameter_setter(setter_name).set_value(value);
         };
