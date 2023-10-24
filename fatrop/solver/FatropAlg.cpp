@@ -60,7 +60,7 @@ FatropAlg::FatropAlg(
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
     fatropnlp->get_bounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
-    fatropdata->relax_bounds();
+    fatropdata_->init_bounds();
 }
 void FatropAlg::initialize()
 {
@@ -80,8 +80,7 @@ void FatropAlg::reset()
 }
 void FatropAlg::set_bounds(const vector<double> &lower, const vector<double> &upper)
 {
-    fatropdata_->s_lower_orig = lower;
-    fatropdata_->s_upper_orig = upper;
+    fatropdata_->set_bounds(lower, upper);
 };
 void FatropAlg::set_initial(const vector<double> &initial)
 {

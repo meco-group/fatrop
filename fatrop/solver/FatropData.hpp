@@ -77,6 +77,8 @@ namespace fatrop
         void evaluate_barrier_quantities(double mu);
         void compute_delta_z();
         void compute_primal_dual_residu();
+        void init_bounds();
+
 
         const NLPDims nlpdims;
         double obj_scale = 1.0;
