@@ -146,8 +146,8 @@ namespace fatrop
                 return 0;
             };
             fatrop_int eval_gk(
-                const double *states_k,
                 const double *inputs_k,
+                const double *states_k,
                 const double *stage_params_k,
                 const double *global_params,
                 double *res,
@@ -163,8 +163,8 @@ namespace fatrop
                 return 0;
             };
             fatrop_int eval_gineqk(
-                const double *states_k,
                 const double *inputs_k,
+                const double *states_k,
                 const double *stage_params_k,
                 const double *global_params,
                 double *res,
@@ -234,11 +234,10 @@ namespace fatrop
             fatrop_int get_initial_uk(double *uk, const fatrop_int k) const override
             {
                 // initialization is done higher up
-                for (int i = 0; i < stages_[k]->nx; i++)
-                    for (int i = 0; i < stages_[k]->nu; i++)
-                    {
-                        uk[i] = 0;
-                    }
+                for (int i = 0; i < stages_[k]->nu; i++)
+                {
+                    uk[i] = 0;
+                }
                 return 0;
             };
 
