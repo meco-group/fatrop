@@ -141,8 +141,6 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
 void FatropData::initialize()
 {
     kappa_d = params->kappa_d;
-    n_ineqs_r = number_of_bounds();
-    relax_bounds();
 }
 fatrop_int FatropData::reset()
 {
@@ -610,7 +608,12 @@ void FatropData::set_bounds(const vector<double> &lowerin, const vector<double> 
 {
     s_lower_orig = lowerin;
     s_upper_orig = upperin;
+    init_bounds();
+}
+void FatropData::init_bounds()
+{
     relax_bounds();
+    n_ineqs_r = number_of_bounds();
 }
 void FatropData::relax_bounds()
 {
