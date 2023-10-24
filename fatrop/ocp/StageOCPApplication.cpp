@@ -39,7 +39,7 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
     dirty = false;
 }
 
-fatrop_int NLPApplication::optimize() 
+fatrop_int NLPApplication::optimize() const
 {
     assert(!dirty);
     fatrop_int ret = fatropalg_->optimize();

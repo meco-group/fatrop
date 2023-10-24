@@ -5,8 +5,8 @@ namespace fatrop
 {
     namespace spectrop
     {
-        void SolverFatrop::transcribe(const Ocp &ocp_) 
-        {
-        }
+        // void SolverFatrop::transcribe(const Ocp &ocp_) 
+        // {
+        // }
     }; // namespace spectrop
 }; // namespace fatrop

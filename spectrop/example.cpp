@@ -10,6 +10,8 @@ int main()
   auto x = ocp.state(2);
   auto u = ocp.control();
   auto p = ocp.parameter();
+  auto x_test = ocp.state();
+  auto u_test = ocp.control(10);
 
   auto e = 1. - x(0) * x(0);
   double dt = .5;
@@ -41,10 +43,35 @@ int main()
   /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
   /* objective    */ terminal_stage.add_objective(x(1)*x(1));
 
-  auto fatrop_impl = std::make_shared<FatropOcpImpl>(ocp);
-  auto fatrop_solver = OCPApplication(fatrop_impl);
-  fatrop_solver.build();
-  fatrop_solver.optimize();
+
+
+  /*                    
+  
+      ADD an additional stage for testing purposes
+  
+   */
+
+  terminal_stage.set_next(x_test, x(1) + cs::MX::sum1(u_test));
+  auto add_stage = ocp.new_stage(10);
+  add_stage.set_next(x_test, x_test- cs::MX::sum1(u_test));
+  /* objective    */ add_stage.add_objective(x_test*x_test+ cs::MX::sum1(u_test));
+  auto tterminal_stage = ocp.new_stage();
+  tterminal_stage.add_objective(x_test*x_test);
+
+  auto solver = SolverFatrop();
+  solver.transcribe(ocp);
+  auto dummy = std::vector<cs::MX>();
+
+  auto func = solver.to_function(ocp, dummy, dummy);
+  auto dummyin0_MX = cs::MX::sym("dummy", func.get_sparsity_in(0));
+  auto dummyin1_MX = cs::MX::sym("dummy", func.get_sparsity_in(1));
+  auto dummyin2_MX = cs::MX::sym("dummy", func.get_sparsity_in(2));
+  auto dummyin0 = cs::DM::zeros(func.get_sparsity_in(0));
+  auto dummyin1 = cs::DM::zeros(func.get_sparsity_in(1));
+  auto dummyin2 = cs::DM::zeros(func.get_sparsity_in(2));
+  auto res = func(std::vector<cs::MX>{dummyin0_MX, dummyin1_MX, dummyin2_MX});
+  cs::Function func2 = cs::Function("func", {dummyin0_MX, dummyin1_MX, dummyin2_MX}, {res[0]});
+  func(std::vector<cs::DM>{dummyin0, dummyin1, dummyin2});
 
   // ocp.sample(x);           // check which stages have x as state, evaluate and concatenate in a matrix
   // ocp.set_initial(x, 0.5); // set initial value of x for all stages that have x as state
