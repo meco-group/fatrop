@@ -21,6 +21,7 @@ namespace fatrop
             {
                 auto p = cs::MX::sym(std::string("p") + std::to_string(get()->global_parameters_.size()), m, n);
                 get()->global_parameters_.insert(p);
+                get()->global_parammeter_syms_.push_back(p);
                 return p;
             }
             if (grid == "control")
@@ -78,5 +79,69 @@ namespace fatrop
         {
             return control_parameters_;
         }
+        cs::MX Ocp::sample(const cs::MX &expr) const
+        {
+            if (expr.size2() != 1)
+                return cs::MX(); // return empty matrix if input is not a column vector
+            auto ret = cs::MX::zeros(expr.size1(), 0);
+            auto vars = cs::MX::symvar(expr);
+            for (const auto &stage : get_stages())
+            {
+                if (std::all_of(vars.begin(), vars.end(), [&](const cs::MX &var)
+                                { return stage.has_variable(var); }))
+                    ret = cs::MX::horzcat({ret, stage.sample(expr)});
+            }
+            return ret;
+        }
+        const std::vector<Stage> &Ocp::get_stages() const
+        {
+            return stages_;
+        }
+        // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
+        // {
+        //     bool column_mode = initial.size2() == 1;
+        //     int offs = 0;
+        //     // iterate over stages and set initial
+        //     for (auto &stage : stages_)
+        //     {
+        //         if (stage.has_variable(var))
+        //         {
+        //             if (column_mode)
+        //                 stage.set_initial(var, var);
+        //             else
+        //             {
+        //                 if (offs + stage.K() > initial.size2())
+        //                     throw std::runtime_error("initial value has wrong size");
+        //                 stage.set_initial(var, initial(cs::Slice(), cs::Slice(offs, offs + stage.K())));
+        //             }
+        //             offs += stage.K();
+        //         }
+        //     }
+        //     if (!column_mode && offs != initial.size2())
+        //         throw std::runtime_error("initial value has wrong size");
+        // }
+        // void Ocp::set_value(const cs::MX &var, const cs::DM &val)
+        // {
+        //     bool column_mode = val.size2() == 1;
+        //     int offs = 0;
+        //     // iterate over stages and set value
+        //     for (auto &stage : stages_)
+        //     {
+        //         if (stage.has_variable(var))
+        //         {
+        //             if (column_mode)
+        //                 stage.set_value(var, val);
+        //             else
+        //             {
+        //                 if (offs + stage.K() > val.size2())
+        //                     throw std::runtime_error("initial value has wrong size");
+        //                 stage.set_initial(var, val(cs::Slice(), cs::Slice(offs, offs + stage.K())));
+        //             }
+        //             offs += stage.K();
+        //         }
+        //     }
+        //     if (!column_mode && offs != val.size2())
+        //         throw std::runtime_error("value has wrong size");
+        // }
     } // namespace spectrop
 } // namespace fatrop

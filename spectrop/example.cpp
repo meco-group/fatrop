@@ -1,39 +1,52 @@
 #include "spectrop.hpp"
+#include "ocp/StageOCPApplication.hpp"
 using namespace std;
 using namespace fatrop;
 using namespace fatrop::spectrop;
+
 int main()
 {
-    auto ocp = Ocp();
-    auto x = ocp.state();
-    auto u = ocp.control();
-    auto p = ocp.parameter();
+  auto ocp = Ocp();
+  auto x = ocp.state(2);
+  auto u = ocp.control();
+  auto p = ocp.parameter();
 
-    // /*
-    //   =----  initial stage ----=
-    // */
-    auto initial_stage = ocp.new_stage(); // states and controls are derived automatically
-    /* constraint   */ initial_stage.subject_to(x == 0);
-    /* dynamics     */ initial_stage.set_next(x, x + u + 1);
-    /* objective    */ initial_stage.add_objective(u*u);
+  auto e = 1. - x(0) * x(0);
+  double dt = .5;
+  auto x_next = x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt;
 
-    // /*
-    //   =----  middle stage ----=
-    // */
-    auto middle_stage = ocp.new_stage(18); // 18 is the number of nodes // the states, controls and parameters are derived automatically
-    /* constraints  */ middle_stage.subject_to(x <= 1);
-    /* objective    */ middle_stage.add_objective(u * u);
-    /* dynamics     */ middle_stage.set_next(initial_stage.dynamics());
+  /*
+    =----  initial stage ----=
+  */
+  auto initial_stage = ocp.new_stage(); // states and controls are derived automatically
+  /* constraint   */ initial_stage.subject_to(x(0) == 1);
+  /* constraint   */ initial_stage.subject_to(x(1) == 0);
+  /* dynamics     */ initial_stage.set_next(x, x_next);
+  /* objective    */ initial_stage.add_objective(u * u + cs::MX::sumsqr(x));
 
-    // /*
-    //   =----  terminal stage ----=
-    // */
-    auto terminal_stage = ocp.new_stage(); // the last stage also has x2 as state
-    auto x2 = ocp.state();
-    /* objective    */ terminal_stage.add_objective(x2 * x2);
-    /* dynamics     */ middle_stage.set_next(x2, x + u + 1);
+  /*
+    =----  middle stage ----=
+  */
+  auto middle_stage = ocp.new_stage(18); // 18 is the number of nodes, states, controls and parameters are derived automatically
+  /* constraints  */
+  middle_stage.subject_to(-0.25 < x(1));
+  middle_stage.subject_to((-1.0 < u) < 1);
+  /* dynamics     */ middle_stage.set_next(x, x_next);
+  /* objective    */ middle_stage.add_objective(u * u + cs::MX::sumsqr(x));
 
-    // ocp.sample(x);           // check which stages have x as state, evaluate and concatenate in a matrix
-    // ocp.set_initial(x, 0.5); // set initial value of x for all stages that have x as state
-    return 0;
+  /*
+    =----  terminal stage ----=
+  */
+  auto terminal_stage = ocp.new_stage(); // the last stage also has x2 as state
+  /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
+  /* objective    */ terminal_stage.add_objective(cs::MX::sumsqr(x));
+
+  auto fatrop_impl = std::make_shared<FatropOcpImpl>(ocp);
+  auto fatrop_solver = OCPApplication(fatrop_impl);
+  fatrop_solver.build();
+  // fatrop_solver.optimize();
+
+  // ocp.sample(x);           // check which stages have x as state, evaluate and concatenate in a matrix
+  // ocp.set_initial(x, 0.5); // set initial value of x for all stages that have x as state
+  return 0;
 }

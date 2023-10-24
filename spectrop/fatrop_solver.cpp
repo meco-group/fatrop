@@ -1,4 +1,4 @@
-#include "solver_fatrop.hpp"
+#include "fatrop_solver.hpp"
 #include "ocp.hpp"
 
 namespace fatrop

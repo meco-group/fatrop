@@ -24,23 +24,24 @@ namespace fatrop
             void add_variables(const cs::MX &expr);
 
         public:
-            const std::vector<cs::MX> &get_objective_terms();
-            const std::vector<cs::MX> &get_constraints();
-            const uo_map_mx<cs::MX> &get_next_states();
-            const std::vector<cs::MX> &get_states();
-            const uo_map_mx<cs::MX> &get_state_syms();
-            const std::vector<cs::MX> &get_controls();
-            const uo_map_mx<cs::MX> &get_control_syms();
-            const std::vector<cs::MX> &get_control_parameters();
-            const uo_map_mx<cs::MX> &get_control_parameter_syms();
-            const std::shared_ptr<OcpInternal> &get_ocp();
-            const std::shared_ptr<StageInternal> &get_next_stage();
+            const std::vector<cs::MX> &get_objective_terms() const;
+            const std::vector<cs::MX> &get_constraints() const;
+            const uo_map_mx<cs::MX> &get_next_states() const;
+            const std::vector<cs::MX> &get_states() const;
+            const uo_map_mx<cs::MX> &get_state_syms() const;
+            const std::vector<cs::MX> &get_controls() const;
+            const uo_map_mx<cs::MX> &get_control_syms() const;
+            const std::vector<cs::MX> &get_control_parameters() const;
+            const uo_map_mx<cs::MX> &get_control_parameter_syms() const;
+            const std::shared_ptr<OcpInternal> &get_ocp() const;
+            const std::shared_ptr<StageInternal> &get_next_stage() const;
+            int K() const {return K_;};
 
         private:
+            bool has_variable(const cs::MX &var) const;
             void register_state(const cs::MX &state);
             void register_control(const cs::MX &control);
             void register_control_parameter(const cs::MX &control_parameter);
-            bool has_variable(const cs::MX &var);
             const int K_;
             std::vector<cs::MX> objective_terms_;
             std::vector<cs::MX> constraints_;
@@ -68,10 +69,14 @@ namespace fatrop
             void add_objective(const cs::MX &objective);
             void set_next(const cs::MX &state, const cs::MX &next_state);
             void set_next(const uo_map_mx<cs::MX> &next_states);
+            bool has_variable(const cs::MX &var) const;
+            int K() const;
             const uo_map_mx<cs::MX> &dynamics();
-            std::shared_ptr<const StageInternal> get_internal() const
+            cs::MX eval_at_control(const cs::MX &expr, const int k) const;
+            cs::MX sample(const cs::MX &expr) const;
+            std::shared_ptr<StageInternal> get_internal() const
             {
-                return *this;
+                return static_cast<std::shared_ptr<StageInternal>>(*this);
             }
         };
     } // namespace spectrop

@@ -8,6 +8,10 @@ namespace fatrop
     namespace spectrop
     {
         namespace cs = casadi;
+        struct StageEvaluator
+        {
+
+        };
         class SolverFatrop : public SolverInterface
         {
             void transcribe(const Ocp& ocp_) override;

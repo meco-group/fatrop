@@ -13,6 +13,7 @@ namespace fatrop
         {
         public:
             virtual void transcribe(const Ocp &ocp_) = 0;
+            virtual cs::Function to_function(const Ocp &ocp_, std::vector<cs::MX>& gist_in,std::vector<cs::MX>& gist_out) = 0;
         };
     } // namespace spectrop
 } // namespace fatrop
