@@ -43,27 +43,8 @@ int main()
   /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
   /* objective    */ terminal_stage.add_objective(x(1)*x(1));
 
-  auto solver = SolverFatrop();
-  solver.transcribe(ocp);
-  auto dummy = std::vector<cs::MX>();
-  auto dummy1 = std::vector<cs::MX>();
-
-  cs::Function func = solver.to_function(ocp, dummy, dummy1);
-  ocp.to_function(dummy, dummy1);
-  // print shape of elements of dummy
-  for (auto &el : dummy)
-    std::cout << el.size1() << " " << el.size2() << std::endl;
-  auto dummyin0_MX = cs::MX::sym("dummy", func.sparsity_in(0));
-  auto dummyin1_MX = cs::MX::sym("dummy", func.sparsity_in(1));
-  auto dummyin2_MX = cs::MX::sym("dummy", func.sparsity_in(2));
-  auto dummyin0 = cs::DM::zeros(func.sparsity_in(0));
-  auto dummyin1 = cs::DM::zeros(func.sparsity_in(1));
-  auto dummyin2 = cs::DM::zeros(func.sparsity_in(2));
-  auto res = func(std::vector<cs::MX>{dummyin0_MX, dummyin1_MX, dummyin2_MX});
-  cs::Function func2 = cs::Function("func", {dummyin0_MX, dummyin1_MX, dummyin2_MX}, {res[0]});
-  func(std::vector<cs::DM>{dummyin0, dummyin1, dummyin2});
-
-  // ocp.sample(x);           // check which stages have x as state, evaluate and concatenate in a matrix
-  // ocp.set_initial(x, 0.5); // set initial value of x for all stages that have x as state
+  cs::Function ocp_func = ocp.to_function({p}, {ocp.sample(x(0))});
+  auto ret = ocp_func({cs::DM::zeros()});
+  std::cout << ret << std::endl;
   return 0;
 }
