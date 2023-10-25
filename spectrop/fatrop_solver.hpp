@@ -16,7 +16,7 @@ namespace fatrop
         class SolverFatrop : public SolverInterface
         {
         public:
-            void transcribe(const Ocp &ocp_) 
+            void transcribe(const Ocp &ocp_)
             {
                 fatrop_impl = std::make_shared<FatropOcpImpl>(ocp_);
             }
@@ -24,12 +24,18 @@ namespace fatrop
             {
                 std::vector<cs::MX> variables_v;
                 std::vector<cs::MX> control_grid_p_v;
-                // add gist 
-                for(const auto& stage: ocp_.get_stages())
+                // add gist
+                for (const auto &stage : ocp_.get_stages())
                 {
-                   variables_v.push_back(stage.sample(cs::MX::veccat(stage.get_controls())));
-                   variables_v.push_back(stage.sample(cs::MX::veccat(stage.get_states())));
-                   control_grid_p_v.push_back(stage.sample(cs::MX::veccat(stage.get_control_parameters())));
+                    auto controls = cs::MX::veccat(stage.get_controls());
+                    auto states = cs::MX::veccat(stage.get_states());
+                    auto control_grid_p = cs::MX::veccat(stage.get_control_parameters());
+                    for (int k = 0; k < stage.K(); k++)
+                    {
+                        variables_v.push_back(stage.eval_at_control(controls, k));
+                        variables_v.push_back(stage.eval_at_control(states,k));
+                        control_grid_p_v.push_back(stage.eval_at_control(control_grid_p, k));
+                    }
                 }
                 gist_in = {cs::MX::veccat(variables_v), cs::MX::veccat(control_grid_p_v), cs::MX::veccat(ocp_.get_global_parameters())};
                 gist_out = {cs::MX::veccat(variables_v)};

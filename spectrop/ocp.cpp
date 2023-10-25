@@ -1,4 +1,5 @@
 #include "ocp.hpp"
+#include "fatrop_solver.hpp"
 namespace fatrop
 {
     namespace spectrop
@@ -96,6 +97,24 @@ namespace fatrop
         const std::vector<Stage> &Ocp::get_stages() const
         {
             return stages_;
+        }
+        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out)
+        {
+            auto solver = SolverFatrop();
+            solver.transcribe(*this);
+            std::vector<cs::MX> gist_solver_in;
+            std::vector<cs::MX> gist_solver_out;
+            auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out);
+            cs::MX vars = gist_solver_in[0];
+            auto helper0 = cs::Function("helper0", {vars}, in, cs::Dict{{"allow_free",true}});
+            return fatrop_func;
+            // if (helper0.has_free())
+            // {
+            //     auto free_inits = helper0.free_mx();
+            //     for (const auto &free_var : free_inits)
+            //     {
+            //     }
+            // }
         }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {

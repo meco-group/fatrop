@@ -4,7 +4,6 @@
 #include "casadi_utilities.hpp"
 #include "stage.hpp"
 #include "solver.hpp"
-// #include "fatrop_solver.hpp"
 
 namespace fatrop
 {
@@ -57,24 +56,7 @@ namespace fatrop
             {
                 return get()->global_parammeter_syms_;
             }
-            // cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out)
-            // {
-            //     auto solver = SolverFatrop();
-            //     std::vector<cs::MX> gist_solver_in;
-            //     std::vector<cs::MX> gist_solver_out;
-            //     auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out);
-            //     cs::MX vars = gist_solver_in[0];
-            //     auto opts = cs::Dict();
-            //     opts["allow_free"] = true;
-            //     auto helper0 = cs::Function("helper0", in, {vars}, opts);
-            //     if (helper0.has_free())
-            //     {
-            //         auto free_inits = helper0.free_mx();
-            //         for (const auto &free_var : free_inits)
-            //         {
-            //         }
-            //     }
-            // }
+            cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out);
 
         protected:
             std::vector<Stage> stages_;

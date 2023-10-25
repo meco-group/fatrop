@@ -49,6 +49,7 @@ int main()
   auto dummy1 = std::vector<cs::MX>();
 
   cs::Function func = solver.to_function(ocp, dummy, dummy1);
+  ocp.to_function(dummy, dummy1);
   // print shape of elements of dummy
   for (auto &el : dummy)
     std::cout << el.size1() << " " << el.size2() << std::endl;

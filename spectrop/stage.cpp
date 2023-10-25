@@ -53,21 +53,27 @@ namespace fatrop
         {
             states_.push_back(state);
             states_set_.insert(state);
-            state_syms_[state] = cs::MX::sym(state.name(), state.size1() * state.size2(), K_);
+            state_syms_[state] = std::vector<cs::MX>(K_);
+            for(int k =0; k < K_; k++)
+                state_syms_[state][k] = cs::MX::sym(state.name() + std::to_string(k), state.size1() * state.size2());
             // state_initial_[state] = cs::DM::zeros(state.size1() * state.size2(), K_);
         }
         void StageInternal::register_control(const cs::MX &control)
         {
             controls_.push_back(control);
             controls_set_.insert(control);
-            control_syms_[control] = cs::MX::sym(control.name(), control.size1() * control.size2(), K_);
+            control_syms_[control] =  std::vector<cs::MX>(K_);
+            for (int k = 0; k < K_; k++)
+                control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k), control.size1() * control.size2());
             // control_initial_[control] = cs::DM::zeros(control.size1() * control.size2(), K_);
         }
         void StageInternal::register_control_parameter(const cs::MX &control_parameter)
         {
             control_parameters_.push_back(control_parameter);
             control_parameters_set_.insert(control_parameter);
-            control_parameter_syms_[control_parameter] = cs::MX::sym(control_parameter.name(), control_parameter.size1() * control_parameter.size2(), K_);
+            control_parameter_syms_[control_parameter] = std::vector<cs::MX>(K_);
+            for(int k =0; k < K_; k++)
+                control_parameter_syms_[control_parameter][k] = cs::MX::sym(control_parameter.name() + std::to_string(k), control_parameter.size1() * control_parameter.size2());
             // control_parameter_vals_[control_parameter] = cs::DM::zeros(control_parameter.size1() * control_parameter.size2(), K_);
         }
         bool StageInternal::has_variable(const cs::MX &var) const
@@ -93,7 +99,7 @@ namespace fatrop
         {
             return states_;
         };
-        const uo_map_mx<cs::MX> &StageInternal::get_state_syms() const
+        const uo_map_mx<std::vector<cs::MX>> &StageInternal::get_state_syms() const
         {
             return state_syms_;
         };
@@ -101,7 +107,7 @@ namespace fatrop
         {
             return controls_;
         };
-        const uo_map_mx<cs::MX> &StageInternal::get_control_syms() const
+        const uo_map_mx<std::vector<cs::MX>> &StageInternal::get_control_syms() const
         {
             return control_syms_;
         };
@@ -109,7 +115,7 @@ namespace fatrop
         {
             return control_parameters_;
         };
-        const uo_map_mx<cs::MX> &StageInternal::get_control_parameter_syms() const
+        const uo_map_mx<std::vector<cs::MX>> &StageInternal::get_control_parameter_syms() const
         {
             return control_parameter_syms_;
         };
@@ -180,17 +186,17 @@ namespace fatrop
             for (auto &state : get()->get_states())
             {
                 from.push_back(state);
-                to.push_back(get()->get_state_syms().at(state)(cs::Slice(), k));
+                to.push_back(get()->get_state_syms().at(state)[k]);
             }
             for (auto &control : get()->get_controls())
             {
                 from.push_back(control);
-                to.push_back(get()->get_control_syms().at(control)(cs::Slice(), k));
+                to.push_back(get()->get_control_syms().at(control)[k]);
             }
             for (auto &control_parameter : get()->get_control_parameters())
             {
                 from.push_back(control_parameter);
-                to.push_back(get()->get_control_parameter_syms().at(control_parameter)(cs::Slice(), k));
+                to.push_back(get()->get_control_parameter_syms().at(control_parameter)[k]);
             }
             return cs::MX::substitute(std::vector<cs::MX>{expr}, from, to)[0];
         }
@@ -199,12 +205,13 @@ namespace fatrop
             // check if expr is a column vector
             if (expr.size2() > 1)
                 throw std::runtime_error("sample: expr must be a column vector");
-            auto ret = cs::MX::zeros(expr.size1(), K());
+            // auto ret = cs::MX::zeros(expr.size1(), K());
+            std::vector<cs::MX> samples_vec;
             for (int k = 0; k < K(); k++)
             {
-                ret(cs::Slice(), k) = eval_at_control(expr, k);
+                samples_vec.push_back(eval_at_control(expr, k));
             }
-            return ret;
+            return cs::MX::horzcat(samples_vec);
         }
         const std::vector<cs::MX> &Stage::get_objective_terms() const
         {
