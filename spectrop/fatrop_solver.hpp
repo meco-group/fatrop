@@ -20,7 +20,7 @@ namespace fatrop
             {
                 fatrop_impl = std::make_shared<FatropOcpImpl>(ocp_);
             }
-            FatropFunction to_function(const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out)
+            cs::Function to_function(const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out)
             {
                 return FatropFunction(fatrop_impl);
             };

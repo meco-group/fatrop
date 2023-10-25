@@ -30,7 +30,7 @@ namespace fatrop
             FatropFunction(const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_)
             {
                 auto app_ = std::make_shared<fatrop::OCPApplication>(ocpimpl_);
-                app_ -> build();
+                app_->build();
                 // cs::Callback::construct("FatropFunction");
                 if (!is_null())
                 {
@@ -49,6 +49,11 @@ namespace fatrop
                 internal_p->arg_global_parameters = std::vector<double>(internal_p->n_global_params);
                 static_cast<cs::Function *>(this)->operator->()->casadi::FunctionInternal::construct(options_);
             }
+            ~FatropFunction() override
+            {
+                // bypass the destructor of cs::Callback
+                // this -> cs::Function::~Function();
+            };
             casadi_int get_n_in() override
             {
                 return 3; // initial vars, stage_parameters, global_paramets
@@ -62,21 +67,21 @@ namespace fatrop
                 auto internal_p = static_cast<FatropFunctionInternal *>(this->get());
                 if (i == 0)
                 {
-                    return cs::Sparsity::dense(internal_p ->n_vars, 1);
+                    return cs::Sparsity::dense(internal_p->n_vars, 1);
                 }
                 else if (i == 1)
                 {
-                    return cs::Sparsity::dense(internal_p ->n_stage_params, 1);
+                    return cs::Sparsity::dense(internal_p->n_stage_params, 1);
                 }
                 // else
                 // {
-                return cs::Sparsity::dense(internal_p ->n_global_params, 1);
+                return cs::Sparsity::dense(internal_p->n_global_params, 1);
                 // }
             }
             cs::Sparsity get_sparsity_out(casadi_int i) override
             {
                 auto internal_p = static_cast<FatropFunctionInternal *>(this->get());
-                return cs::Sparsity::dense(internal_p -> n_vars, 1);
+                return cs::Sparsity::dense(internal_p->n_vars, 1);
             }
 
             std::string get_name_in(casadi_int i) override
@@ -107,11 +112,11 @@ namespace fatrop
                 std::vector<double> initial_vars = args[0].nonzeros();
                 std::vector<double> stage_parameters = args[1].nonzeros();
                 std::vector<double> global_parameters = args[2].nonzeros();
-                internal_p -> app->set_initial(initial_vars);
-                internal_p -> app->set_params(global_parameters, stage_parameters);
-                internal_p -> app->optimize();
-                auto retv = std::vector<double>(internal_p ->n_vars);
-                internal_p -> app->last_solution_primal().copyto(retv);
+                internal_p->app->set_initial(initial_vars);
+                internal_p->app->set_params(global_parameters, stage_parameters);
+                internal_p->app->optimize();
+                auto retv = std::vector<double>(internal_p->n_vars);
+                internal_p->app->last_solution_primal().copyto(retv);
                 auto ret = std::vector<cs::DM>{retv};
                 return ret;
             }
@@ -120,15 +125,15 @@ namespace fatrop
             {
                 // no dynamic memory allocations here
                 auto internal_p = static_cast<FatropFunctionInternal *>(this->get());
-                std::copy(arg[0], arg[0] + internal_p ->n_vars, (double *) internal_p ->arg_initial_vars.data());
-                std::copy(arg[1], arg[1] + internal_p ->n_stage_params, (double *) internal_p ->arg_stage_parameters.data());
-                std::copy(arg[2], arg[2] + internal_p ->n_global_params, (double *) internal_p ->arg_global_parameters.data());
-                internal_p -> app->set_initial(internal_p -> arg_initial_vars);
-                internal_p -> app->set_params(internal_p -> arg_global_parameters, internal_p -> arg_stage_parameters);
-                internal_p -> app->optimize();
-                double *last_sol = ((VEC *)internal_p -> app->last_solution_primal())->pa;
+                std::copy(arg[0], arg[0] + internal_p->n_vars, (double *)internal_p->arg_initial_vars.data());
+                std::copy(arg[1], arg[1] + internal_p->n_stage_params, (double *)internal_p->arg_stage_parameters.data());
+                std::copy(arg[2], arg[2] + internal_p->n_global_params, (double *)internal_p->arg_global_parameters.data());
+                internal_p->app->set_initial(internal_p->arg_initial_vars);
+                internal_p->app->set_params(internal_p->arg_global_parameters, internal_p->arg_stage_parameters);
+                internal_p->app->optimize();
+                double *last_sol = ((VEC *)internal_p->app->last_solution_primal())->pa;
                 if (res[0])
-                    std::copy(last_sol, last_sol + internal_p -> n_vars, res[0]);
+                    std::copy(last_sol, last_sol + internal_p->n_vars, res[0]);
                 return 0;
             }
             bool has_eval_buffer() const override { return true; };
