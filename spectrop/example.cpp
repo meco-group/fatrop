@@ -28,9 +28,8 @@ int main()
     =----  middle stage ----=
   */
   auto middle_stage = ocp.new_stage(19); // 18 is the number of nodes, states, controls and parameters are derived automatically
-  /* constraints  */
-  middle_stage.subject_to(-0.25 < x(1));
-  middle_stage.subject_to((-1.0 < u) < 1);
+  /* constraints  */ middle_stage.subject_to(-0.25 < x(1));
+                     middle_stage.subject_to((-1.0 < u) < 1);
   /* dynamics     */ middle_stage.set_next(x, x_next);
   /* objective    */ middle_stage.add_objective(u * u + cs::MX::sumsqr(x));
 
