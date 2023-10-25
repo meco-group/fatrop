@@ -51,6 +51,10 @@ namespace fatrop
             cs::MX sample(const cs::MX &expr) const;
             Stage new_stage(const int K = 1);
             const std::vector<Stage> &get_stages() const;
+            const std::vector<cs::MX> &get_global_parameters() const
+            {
+                return get()-> global_parammeter_syms_;
+            }
 
         protected:
             std::vector<Stage> stages_;

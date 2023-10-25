@@ -74,10 +74,11 @@ namespace fatrop
             const uo_map_mx<cs::MX> &dynamics();
             cs::MX eval_at_control(const cs::MX &expr, const int k) const;
             cs::MX sample(const cs::MX &expr) const;
-            std::shared_ptr<StageInternal> get_internal() const
-            {
-                return static_cast<std::shared_ptr<StageInternal>>(*this);
-            }
+            std::shared_ptr<StageInternal> get_internal() const;
+            const std::vector<cs::MX> &get_objective_terms() const;
+            const std::vector<cs::MX> &get_states() const;
+            const std::vector<cs::MX> &get_controls() const;
+            const std::vector<cs::MX> &get_control_parameters() const;
         };
     } // namespace spectrop
 } // namespace fatrop

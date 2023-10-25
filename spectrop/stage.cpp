@@ -180,17 +180,17 @@ namespace fatrop
             for (auto &state : get()->get_states())
             {
                 from.push_back(state);
-                to.push_back(state(cs::Slice(), k));
+                to.push_back(get()->get_state_syms().at(state)(cs::Slice(), k));
             }
             for (auto &control : get()->get_controls())
             {
                 from.push_back(control);
-                to.push_back(control(cs::Slice(), k));
+                to.push_back(get()->get_control_syms().at(control)(cs::Slice(), k));
             }
             for (auto &control_parameter : get()->get_control_parameters())
             {
                 from.push_back(control_parameter);
-                to.push_back(control_parameter(cs::Slice(), k));
+                to.push_back(get()->get_control_parameter_syms().at(control_parameter)(cs::Slice(), k));
             }
             return cs::MX::substitute(std::vector<cs::MX>{expr}, from, to)[0];
         }
@@ -205,6 +205,26 @@ namespace fatrop
                 ret(cs::Slice(), k) = eval_at_control(expr, k);
             }
             return ret;
+        }
+        const std::vector<cs::MX> &Stage::get_objective_terms() const
+        {
+            return get()->get_objective_terms();
+        }
+        std::shared_ptr<StageInternal> Stage::get_internal() const
+        {
+            return static_cast<std::shared_ptr<StageInternal>>(*this);
+        }
+        const std::vector<cs::MX> &Stage::get_states() const
+        {
+            return get()->get_states();
+        }
+        const std::vector<cs::MX> &Stage::get_controls() const
+        {
+            return get()->get_controls();
+        }
+        const std::vector<cs::MX> &Stage::get_control_parameters() const
+        {
+            return get()->get_control_parameters();
         }
     }
 }
