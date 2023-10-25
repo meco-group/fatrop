@@ -1,6 +1,6 @@
 #pragma once
 #include <casadi/casadi.hpp>
-#include <casadi/core/callback_internal.hpp>
+#include <casadi/core/function_internal.hpp>
 #include <string>
 #include "casadi_utilities.hpp"
 #include "ocp/StageOCPApplication.hpp"
