@@ -51,8 +51,8 @@ namespace fatrop
             fatrop_int get_nxk(const fatrop_int k) const override { return stages_[k]->nx; };
             fatrop_int get_nuk(const fatrop_int k) const override { return stages_[k]->nu; };
             fatrop_int get_ngk(const fatrop_int k) const override { return stages_[k]->ng_eq; };
-            fatrop_int get_n_stage_params_k(const fatrop_int k) const override { return 0; };
-            fatrop_int get_n_global_params() const override { return 0; };
+            fatrop_int get_n_stage_params_k(const fatrop_int k) const override { return stages_[k]->np_stage; };
+            fatrop_int get_n_global_params() const override { return stages_[0]->np_global; };
             fatrop_int get_default_stage_paramsk(double *stage_params, const fatrop_int k) const override { return 0; };
             fatrop_int get_default_global_params(double *global_params) const override { return 0; };
             fatrop_int get_ng_ineq_k(const fatrop_int k) const override { return stages_[k]->ng_ineq; };

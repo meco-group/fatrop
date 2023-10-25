@@ -118,7 +118,7 @@ namespace fatrop
                 initial_guess = cs::MX::substitute({initial_guess}, free_inits, free_zeros)[0];
             }
             auto result = fatrop_func({initial_guess, gist_solver_in[1], gist_solver_in[2]});
-            return  cs::Function("ocp", in, cs::MX::substitute(out,gist_solver_out, result));
+            return  cs::Function("ocp", in, cs::MX::substitute(out, gist_solver_out, result));
         }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {
