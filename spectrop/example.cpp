@@ -10,8 +10,6 @@ int main()
   auto x = ocp.state(2);
   auto u = ocp.control();
   auto p = ocp.parameter();
-  auto x_test = ocp.state();
-  auto u_test = ocp.control(10);
 
   auto e = 1. - x(0) * x(0);
   double dt = .5;
@@ -44,7 +42,7 @@ int main()
                      terminal_stage.subject_to(x(1) == p);
   /* objective    */ terminal_stage.add_objective(x(1)*x(1)+p);
 
-  cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x)});
+  cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x),p});
   auto ret = ocp_func({cs::DM(1.23)});
   std::cout << ret << std::endl;
   return 0;
