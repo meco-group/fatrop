@@ -41,7 +41,7 @@ int main()
   */
   auto terminal_stage = ocp.new_stage(); // the last stage also has x2 as state
   /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
-  terminal_stage.subject_to(x(1) == p);
+                     terminal_stage.subject_to(x(1) == p);
   /* objective    */ terminal_stage.add_objective(x(1)*x(1)+p);
 
   cs::Function ocp_func = ocp.to_function({p}, {ocp.sample(x)});
