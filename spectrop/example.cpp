@@ -44,7 +44,7 @@ int main()
                      terminal_stage.subject_to(x(1) == p);
   /* objective    */ terminal_stage.add_objective(x(1)*x(1)+p);
 
-  cs::Function ocp_func = ocp.to_function({p}, {ocp.sample(x)});
+  cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x)});
   auto ret = ocp_func({cs::DM(1.23)});
   std::cout << ret << std::endl;
   return 0;

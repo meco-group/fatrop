@@ -70,6 +70,8 @@ namespace fatrop
             void set_next(const cs::MX &state, const cs::MX &next_state);
             void set_next(const uo_map_mx<cs::MX> &next_states);
             bool has_variable(const cs::MX &var) const;
+            cs::MX at_t0(const cs::MX& expr) const {return eval_at_control(expr, 0);};
+            cs::MX at_tf(const cs::MX& expr) const {return eval_at_control(expr, K()-1);};
             int K() const;
             const uo_map_mx<cs::MX> &dynamics();
             cs::MX eval_at_control(const cs::MX &expr, const int k) const;
