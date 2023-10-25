@@ -43,32 +43,21 @@ int main()
   /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
   /* objective    */ terminal_stage.add_objective(x(1)*x(1));
 
-
-
-  /*                    
-  
-      ADD an additional stage for testing purposes
-  
-   */
-
-  terminal_stage.set_next(x_test, x(1) + cs::MX::sum1(u_test));
-  auto add_stage = ocp.new_stage(10);
-  add_stage.set_next(x_test, x_test- cs::MX::sum1(u_test));
-  /* objective    */ add_stage.add_objective(x_test*x_test+ cs::MX::sum1(u_test));
-  auto tterminal_stage = ocp.new_stage();
-  tterminal_stage.add_objective(x_test*x_test);
-
   auto solver = SolverFatrop();
   solver.transcribe(ocp);
   auto dummy = std::vector<cs::MX>();
+  auto dummy1 = std::vector<cs::MX>();
 
-  auto func = solver.to_function(ocp, dummy, dummy);
-  auto dummyin0_MX = cs::MX::sym("dummy", func.get_sparsity_in(0));
-  auto dummyin1_MX = cs::MX::sym("dummy", func.get_sparsity_in(1));
-  auto dummyin2_MX = cs::MX::sym("dummy", func.get_sparsity_in(2));
-  auto dummyin0 = cs::DM::zeros(func.get_sparsity_in(0));
-  auto dummyin1 = cs::DM::zeros(func.get_sparsity_in(1));
-  auto dummyin2 = cs::DM::zeros(func.get_sparsity_in(2));
+  cs::Function func = solver.to_function(ocp, dummy, dummy1);
+  // print shape of elements of dummy
+  for (auto &el : dummy)
+    std::cout << el.size1() << " " << el.size2() << std::endl;
+  auto dummyin0_MX = cs::MX::sym("dummy", func.sparsity_in(0));
+  auto dummyin1_MX = cs::MX::sym("dummy", func.sparsity_in(1));
+  auto dummyin2_MX = cs::MX::sym("dummy", func.sparsity_in(2));
+  auto dummyin0 = cs::DM::zeros(func.sparsity_in(0));
+  auto dummyin1 = cs::DM::zeros(func.sparsity_in(1));
+  auto dummyin2 = cs::DM::zeros(func.sparsity_in(2));
   auto res = func(std::vector<cs::MX>{dummyin0_MX, dummyin1_MX, dummyin2_MX});
   cs::Function func2 = cs::Function("func", {dummyin0_MX, dummyin1_MX, dummyin2_MX}, {res[0]});
   func(std::vector<cs::DM>{dummyin0, dummyin1, dummyin2});

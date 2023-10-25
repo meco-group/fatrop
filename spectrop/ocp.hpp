@@ -4,6 +4,7 @@
 #include "casadi_utilities.hpp"
 #include "stage.hpp"
 #include "solver.hpp"
+// #include "fatrop_solver.hpp"
 
 namespace fatrop
 {
@@ -38,6 +39,7 @@ namespace fatrop
             bool is_control_parameter(const cs::MX &var);
             std::vector<std::pair<cs::MX, cs::MX>> initial_values;
             std::vector<std::pair<cs::MX, cs::MX>> parameter_values;
+            std::string solver_name = "fatrop";
         };
         class Ocp : private std::shared_ptr<OcpInternal>
         {
@@ -53,8 +55,26 @@ namespace fatrop
             const std::vector<Stage> &get_stages() const;
             const std::vector<cs::MX> &get_global_parameters() const
             {
-                return get()-> global_parammeter_syms_;
+                return get()->global_parammeter_syms_;
             }
+            // cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out)
+            // {
+            //     auto solver = SolverFatrop();
+            //     std::vector<cs::MX> gist_solver_in;
+            //     std::vector<cs::MX> gist_solver_out;
+            //     auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out);
+            //     cs::MX vars = gist_solver_in[0];
+            //     auto opts = cs::Dict();
+            //     opts["allow_free"] = true;
+            //     auto helper0 = cs::Function("helper0", in, {vars}, opts);
+            //     if (helper0.has_free())
+            //     {
+            //         auto free_inits = helper0.free_mx();
+            //         for (const auto &free_var : free_inits)
+            //         {
+            //         }
+            //     }
+            // }
 
         protected:
             std::vector<Stage> stages_;
