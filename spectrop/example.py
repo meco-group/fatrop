@@ -12,7 +12,6 @@ x_next = x + vertcat(x[1], e * x[1] - x[0] + u) * dt
 # /*
 #   =----  initial stage ----=
 # */
-
 initial_stage = ocp.new_stage() # // states and controls are derived automatically
 # constraint 
 initial_stage.subject_to(x[0] == 1.)
