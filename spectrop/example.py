@@ -12,36 +12,37 @@ x_next = x + vertcat(x[1], e * x[1] - x[0] + u) * dt
 # /*
 #   =----  initial stage ----=
 # */
-initial_stage = ocp.new_stage() # // states and controls are derived automatically
-# /* constraint   */ 
-initial_stage.subject_to(x[0] == 1.)
-# /* constraint   */ 
-initial_stage.subject_to(x[1] == 0.)
-# /* dynamics     */ 
-initial_stage.set_next(x, x_next)
-initial_stage.add_objective(u * u + sumsqr(x))
-# /* objective    */ 
 
-# /*
+initial_stage = ocp.new_stage() # // states and controls are derived automatically
+# constraint 
+initial_stage.subject_to(x[0] == 1.)
+# constraint 
+initial_stage.subject_to(x[1] == 0.)
+# dynamics 
+initial_stage.set_next(x, x_next)
+# objective  
+initial_stage.add_objective(u * u + sumsqr(x))
+
+# 
 #   =----  middle stage ----=
-# */
+# 
 middle_stage = ocp.new_stage(19) #; // 18 is the number of nodes, states, controls and parameters are derived automatically
-# /* constraints  */ 
+# constraints 
 middle_stage.subject_to(-0.25 < x[1])
 middle_stage.subject_to((-1.0 < u) < 1)
-# /* dynamics     */ 
+# dynamics  
 middle_stage.set_next(x, x_next)
-# /* objective    */ 
+# objective 
 middle_stage.add_objective(u * u + sumsqr(x))
 
-# /*
+# 
 #   =----  terminal stage ----=
-# */
+# 
 terminal_stage = ocp.new_stage() #; // the last stage also has x2 as state
-# /* constraints  */
+# constraints  
 terminal_stage.subject_to(-0.25 < x[1])
 terminal_stage.subject_to(x[1] == p)
-# /* objective    */ 
+# objective 
 terminal_stage.add_objective(x[1]*x[1]+p)
 
 ocp_func = ocp.to_function([p], [ocp.at_t0(u), ocp.sample(x),p])
