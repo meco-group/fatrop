@@ -24,6 +24,7 @@ PYBIND11_MODULE(fatropy, m)
     // m.def("print_function_name", [](const py::object &pyobj)
     //       {  print_function_nametest(*FromPySwig<casadi::Function>::convert(pyobj)); });
     m.def("print_function_name", &print_function_nametest);
+    m.def("test_change_name", &test_change_name);
     py::class_<fatrop::FatropSolution>(m, "FatropSolution");
     py::class_<fatrop::OCPTimeStepSampler>(m, "OCPTimeStepSampler");
     py::class_<fatrop::StageControlGridSampler>(m, "StageControlGridSampler");

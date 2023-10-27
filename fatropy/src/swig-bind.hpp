@@ -34,14 +34,18 @@ namespace fatropy
             return ret;
         }
     };
-    void print_function_nametest(casadi::Function f)
-    {
-        std::cout << "Function pointer: ";
-        std::cout << &f << std::endl;
-        std::cout << "Function name: ";
-        std::cout << f.name() << std::endl;
-        std::cout << "number of inputs = " << f.n_in() << std::endl;
-    };
+    // void print_function_nametest(casadi::Function f)
+    // {
+    //     std::cout << "Function pointer: ";
+    //     std::cout << &f << std::endl;
+    //     std::cout << "Function name: ";
+    //     std::cout << f.name() << std::endl;
+    //     std::cout << "number of inputs = " << f.n_in() << std::endl;
+    // };
+    // casadi::Function test_change_name(casadi::Function &f)
+    // {
+    //     return casadi::Function(f);
+    // }
 }
 namespace PYBIND11_NAMESPACE
 {
@@ -74,17 +78,23 @@ namespace PYBIND11_NAMESPACE
 
             static handle cast(type_cpp src, return_value_policy /* policy */, handle /* parent */)
             {
-                return PyLong_FromLong(0);
+                pybind11::module_ cspy_ = pybind11::module_::import("casadi");
+                auto attr_ = cspy_.attr("Function");
+                auto ret = attr_();
+                *fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name) = src;
+                Py_IncRef(ret.ptr());
+                return ret;
             }
         };
-        struct casadi_swig_wrap_type
+        struct casadi_Function_swig_wrap_type
         {
             typedef casadi::Function type;
             static constexpr char py_name[] = "Function";
+            static constexpr char module[] = "casadi";
         };
 
         template <>
-        struct type_caster<casadi::Function> : public swig_type_caster<casadi_swig_wrap_type>
+        struct type_caster<casadi::Function> : public swig_type_caster<casadi_Function_swig_wrap_type>
         {
         };
 
