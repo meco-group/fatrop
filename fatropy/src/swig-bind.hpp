@@ -34,18 +34,6 @@ namespace fatropy
             return ret;
         }
     };
-    // void print_function_nametest(casadi::Function f)
-    // {
-    //     std::cout << "Function pointer: ";
-    //     std::cout << &f << std::endl;
-    //     std::cout << "Function name: ";
-    //     std::cout << f.name() << std::endl;
-    //     std::cout << "number of inputs = " << f.n_in() << std::endl;
-    // };
-    // casadi::Function test_change_name(casadi::Function &f)
-    // {
-    //     return casadi::Function(f);
-    // }
 }
 namespace PYBIND11_NAMESPACE
 {
@@ -70,7 +58,7 @@ namespace PYBIND11_NAMESPACE
                 /* Now try to convert into a C++ int */
                 // value.long_value = PyLong_AsLong(tmp);
                 value = *fatropy::FromPySwig<type_cpp>::convert(source, T::py_name);
-                Py_DECREF(tmp);
+                // Py_DECREF(tmp);
                 /* Ensure return code was OK (to avoid out-of-range errors etc) */
                 return !PyErr_Occurred();
                 // return false;
@@ -78,25 +66,14 @@ namespace PYBIND11_NAMESPACE
 
             static handle cast(type_cpp src, return_value_policy /* policy */, handle /* parent */)
             {
-                pybind11::module_ cspy_ = pybind11::module_::import("casadi");
-                auto attr_ = cspy_.attr("Function");
+                pybind11::module_ cspy_ = pybind11::module_::import(T::module);
+                auto attr_ = cspy_.attr(T::py_name);
                 auto ret = attr_();
                 *fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name) = src;
                 Py_IncRef(ret.ptr());
+                Py_IncRef(cspy_.ptr());
                 return ret;
             }
         };
-        struct casadi_Function_swig_wrap_type
-        {
-            typedef casadi::Function type;
-            static constexpr char py_name[] = "Function";
-            static constexpr char module[] = "casadi";
-        };
-
-        template <>
-        struct type_caster<casadi::Function> : public swig_type_caster<casadi_Function_swig_wrap_type>
-        {
-        };
-
     } // namespace PYBIND11_NAMESPACE::detail
 }
