@@ -3,8 +3,9 @@
 #include <pybind11/numpy.h>
 #include "ocp/StageOCPApplication.hpp"
 #include "src/numpy.hpp"
-#include "src/casadi.hpp"
+#include "src/swig-bind.hpp"
 #include "src/specification.hpp"
+#include "src/expose-spectrop.hpp"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -18,7 +19,11 @@ PYBIND11_MODULE(fatropy, m)
 {
     using namespace fatropy;
     // wrap print_function_name
-    m.def("print_function_name", [](const py::object &pyobj){print_function_nametest(*FromPySwig<casadi::Function>::convert(pyobj));});
+    // py::class_<test_type>(m, "test_type").def(py::init<>());
+    // m.def("print", &print);
+    // m.def("print_function_name", [](const py::object &pyobj)
+    //       {  print_function_nametest(*FromPySwig<casadi::Function>::convert(pyobj)); });
+    m.def("print_function_name", &print_function_nametest);
     py::class_<fatrop::FatropSolution>(m, "FatropSolution");
     py::class_<fatrop::OCPTimeStepSampler>(m, "OCPTimeStepSampler");
     py::class_<fatrop::StageControlGridSampler>(m, "StageControlGridSampler");
@@ -77,7 +82,7 @@ PYBIND11_MODULE(fatropy, m)
         .def("last_solution", &fatrop::StageOCPApplication::last_solution)
         .def("get_expression", &fatrop::StageOCPApplication::get_expression)
         // .def("set_initial", [](fatrop::NLPApplication& app,  const fatrop::FatropSolution &initial_guess){return app.set_initial(initial_guess);}, py::const_)
-        .def("set_initial",  py::overload_cast<const fatrop::FatropSolution&>(&fatrop::NLPApplication::set_initial, py::const_))
+        .def("set_initial", py::overload_cast<const fatrop::FatropSolution &>(&fatrop::NLPApplication::set_initial, py::const_))
         .def("set_initial_x", [](fatrop::StageOCPApplication &app, const py::array_t<double> &x)
              { app.set_initial_x(MatBind(x)); })
         .def("set_initial_u", [](fatrop::StageOCPApplication &app, const py::array_t<double> &u)
@@ -97,6 +102,8 @@ PYBIND11_MODULE(fatropy, m)
     py::class_<fatrop::StageOCPApplicationFactory>(m, "StageOCPApplicationFactory")
         .def(py::init<>())
         .def("from_rockit_interface", &fatrop::StageOCPApplicationFactory::from_rockit_interface);
+
+    ExposeSpectrop::expose(m);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
