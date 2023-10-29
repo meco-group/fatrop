@@ -71,7 +71,7 @@ namespace PYBIND11_NAMESPACE
                 auto ret = attr_();
                 *fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name) = src;
                 Py_IncRef(ret.ptr());
-                Py_IncRef(cspy_.ptr());
+                // Py_IncRef(cspy_.ptr());
                 return ret;
             }
         };
