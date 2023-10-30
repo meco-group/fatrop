@@ -10,7 +10,7 @@ namespace fatrop
         StageQuantities StageQuantities::create(const std::shared_ptr<StageInternal> &stage)
         {
             StageQuantities ret;
-            ret.x = cs::MX::veccat(stage->get_automatics_states());
+            ret.x = cs::MX::veccat(stage->get_states());
             ret.p_stage = cs::MX::veccat(stage->get_control_parameters());
             ret.u = cs::MX::veccat(stage->get_controls());
             ret.p_global = cs::MX::veccat(stage->get_ocp()->get_global_parameter_syms());
