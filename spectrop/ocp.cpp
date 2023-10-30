@@ -117,19 +117,45 @@ namespace fatrop
             std::vector<cs::MX> gist_solver_out;
             auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out);
             cs::MX vars = gist_solver_in[0];
-            cs::MX initial_guess = gist_solver_in[0];
-            auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free",true}});
-            auto helper1 = cs::Function("helper0", in, {gist_solver_in[1], gist_solver_in[2]}, cs::Dict{{"allow_free",true}});
-            if(helper1.has_free()) throw std::runtime_error("to_function: problem still has undefined parameters");
+            cs::MX initial_guess = eval_at_initial(gist_solver_in[0]);
+            auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});
+            auto helper1 = cs::Function("helper0", in, {gist_solver_in[1], gist_solver_in[2]}, cs::Dict{{"allow_free", true}});
+            if (helper1.has_free())
+                throw std::runtime_error("to_function: problem still has undefined parameters");
             if (helper0.has_free())
             {
                 auto free_inits = helper0.free_mx();
                 std::vector<cs::MX> free_zeros;
-                for(const auto& free_init: free_inits) free_zeros.push_back(cs::DM::zeros(free_init.size1(), free_init.size2()));
+                for (const auto &free_init : free_inits)
+                    free_zeros.push_back(cs::DM::zeros(free_init.size1(), free_init.size2()));
                 initial_guess = cs::MX::substitute({initial_guess}, free_inits, free_zeros)[0];
             }
             auto result = fatrop_func({initial_guess, gist_solver_in[1], gist_solver_in[2]});
-            return  cs::Function("ocp", in, cs::MX::substitute(out, gist_solver_out, result));
+            return cs::Function("ocp", in, cs::MX::substitute(out, gist_solver_out, result));
+        }
+        void Ocp::set_initial(const cs::MX &var, const cs::MX &value)
+        {
+            cs::MX varr;
+            cs::MX valuee;
+            
+            if (get()->is_state(var) || get()->is_control(var) || get()->is_automatic(var))
+                varr = sample(var);
+            else
+                varr = var;
+            if (value.size2() == 1)
+                valuee = cs::MX::repmat(value, 1, varr.size2());
+            else
+                valuee = value;
+            get()->initial_values.push_back({varr, valuee});
+        }
+        cs::MX Ocp::eval_at_initial(const cs::MX &expr) const
+        {
+            auto ret = expr;
+            for (const auto &[varr, valuee] : get()->initial_values)
+            {
+                ret = cs::MX::substitute(ret, varr, valuee);
+            }
+            return ret;
         }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {

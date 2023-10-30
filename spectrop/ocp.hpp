@@ -62,6 +62,8 @@ namespace fatrop
             cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out);
             cs::MX at_t0(const cs::MX &expr) const {return stages_.front().at_t0(expr);};
             cs::MX at_tf(const cs::MX &expr) const {return stages_.back().at_tf(expr);};
+            void set_initial(const cs::MX &var, const cs::MX &value);
+            cs::MX eval_at_initial(const cs::MX &expr) const;
 
         protected:
             std::vector<Stage> stages_;
