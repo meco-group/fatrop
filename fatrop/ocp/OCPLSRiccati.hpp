@@ -86,6 +86,8 @@ namespace fatrop
             const FatropVecBF &rhs_gradb) override;
         fatrop_int solve_rhs(
             OCPKKTMemory *OCP,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
@@ -95,6 +97,32 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb) override;
+        fatrop_int solve_rhs_normal(
+            OCPKKTMemory *OCP,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam,
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_total,
+            const FatropVecBF &rhs_rq,
+            const FatropVecBF &rhs_b,
+            const FatropVecBF &rhs_g,
+            const FatropVecBF &rhs_g_ineq,
+            const FatropVecBF &rhs_gradb) ;
+        fatrop_int solve_rhs_degenerate(
+            OCPKKTMemory *OCP,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
+            const FatropVecBF &ux,
+            const FatropVecBF &lam,
+            const FatropVecBF &delta_s,
+            const FatropVecBF &sigma_total,
+            const FatropVecBF &rhs_rq,
+            const FatropVecBF &rhs_b,
+            const FatropVecBF &rhs_g,
+            const FatropVecBF &rhs_g_ineq,
+            const FatropVecBF &rhs_gradb);
         FatropMemoryMatBF Ppt;
         FatropMemoryMatBF Hh;
         FatropMemoryMatBF AL;
@@ -147,14 +175,14 @@ namespace fatrop
         FatropVector<fatrop_int> gamma;
         FatropVector<fatrop_int> rho;
         fatrop_int rankI = 0;
-        struct LastUsed
-        {
-            fatrop_int rankI = 0;
-            double inertia_correction_w = 0;
-            double inertia_correction_c = 0;
-            double kappa_d = 0;
-            double mu = 0;
-        } lastused_;
+        // struct LastUsed
+        // {
+        //     fatrop_int rankI = 0;
+        //     double inertia_correction_w = 0;
+        //     double inertia_correction_c = 0;
+        //     double kappa_d = 0;
+        //     double mu = 0;
+        // } lastused_;
         std::shared_ptr<FatropOptions> options_;
         std::shared_ptr<FatropPrinter> printer_;
         bool it_ref = true;

@@ -103,8 +103,8 @@ int FatropOCP::solve_soc_rhs(
     const FatropVecBF &constraint_violation)
 {
     int min_it_ref = 0;
-    if (inertia_correction_c_cache != 0.0)
-        return -1;
+    // if (inertia_correction_c_cache != 0.0)
+    //     return -1;
     // bool it_ref = true;
     /// todo avoid retrieving unnecessary rhs'es
     ls_->get_rhs(
@@ -122,6 +122,7 @@ int FatropOCP::solve_soc_rhs(
 
     ls_->solve_rhs(
         &ocpkktmemory_,
+        inertia_correction_w_cache, inertia_correction_c_cache,
         ux,
         lam,
         delta_s,
@@ -190,6 +191,7 @@ int FatropOCP::solve_soc_rhs(
             }
             ls_->solve_rhs(
                 &ocpkktmemory_,
+                inertia_correction_w_cache, inertia_correction_c_cache,
                 ux_test[0],
                 lam_test[0],
                 delta_s_test[0],
