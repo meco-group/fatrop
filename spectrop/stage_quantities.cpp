@@ -28,6 +28,14 @@ namespace fatrop
                     from.push_back(from_);
                     to.push_back(to_);
                 }
+                // check if every state of the next stage is defined
+                for(auto& state : stage->get_next_stage()->get_states(false))
+                {
+                    if(stage->get_next_states().find(state) == stage->get_next_states().end())
+                    {
+                        throw std::runtime_error("Did you set_next for every state?");
+                    }
+                }
                 try
                 {
                     auto x_next_vec = cs::MX::veccat(stage->get_next_stage()->get_states());
@@ -43,6 +51,7 @@ namespace fatrop
             else
             {
                 ret.nxp1 = 0;
+                ret.x_next = cs::MX::zeros(0, 1);
             }
             ConstraintHelper::process(stage->get_constraints(),
                                       ret.lb,

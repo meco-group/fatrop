@@ -27,14 +27,15 @@ namespace fatrop
                 iw.resize(sz_iw);
                 w.resize(sz_w);
                 bufout.resize(func.nnz_out(0));
-                bufdata.resize(sz_res);
-                resdata.resize(sz_res);
-                argdata.resize(sz_arg);
+                bufdata.resize(sz_res>0?sz_res:1);
+                resdata.resize(sz_res>0?sz_res:1);
+                argdata.resize(sz_arg>0?sz_arg:1);
                 n_in = func.n_in();
                 // // assert dense matrix output
                 // assert(func.nnz_out(0) == m * n);
             };
-            void eval(const double **args, MAT *res){
+            void eval(const double **args, MAT *res)
+            {
                 // assert(res->m == m);
                 // assert(res->n == n);
                 eval(args, bufout.data());
@@ -46,8 +47,11 @@ namespace fatrop
                 for (int j = 0; j < n_in; j++)
                     argdata[j] = args[j];
                 // outputs
-                resdata[0] = res;
-                func_(argdata.data(), resdata.data(), iw.data(), w.data(), 0);
+                if (res)
+                {
+                    resdata[0] = res;
+                    func_(argdata.data(), resdata.data(), iw.data(), w.data(), 0);
+                }
             };
 
         private:

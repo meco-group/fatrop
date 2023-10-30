@@ -22,7 +22,7 @@ namespace fatrop{
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(sq.L, ux, rq_sym);
                 ret.rq = CasadiFEWrap(cs::Function("rq", stage_syms, {cs::MX::densify(rq_sym)}));
-                if (sq.nxp1 > 0)
+                // if (sq.nxp1 > 0)
                 {
                     auto xp1 = cs::MX::sym("xp1", sq.nxp1);
                     auto b = -xp1 + sq.x_next;
