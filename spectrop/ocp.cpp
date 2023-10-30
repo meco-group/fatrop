@@ -16,6 +16,12 @@ namespace fatrop
             get()->controls_.insert(u);
             return u;
         }
+        cs::MX Ocp::automatic(const int m, const int n)
+        {
+            auto automatic = cs::MX::sym(std::string("automatic") + std::to_string(get()->automatics_.size()), m, n);
+            get()->automatics_.insert(automatic);
+            return automatic;
+        }
         cs::MX Ocp::parameter(const int m, const int n, const std::string &grid)
         {
             if (grid == "global")
@@ -42,6 +48,7 @@ namespace fatrop
             {
                 for (auto &[state, sym] : stages_.back().get()->next_states_)
                     ret->add_variables(state);
+                ret->prev_stage_ = stages_.back();
                 // update next stage
                 stages_.back().get()->next_stage_ = ret;
             }
@@ -55,6 +62,10 @@ namespace fatrop
         bool OcpInternal::is_control(const cs::MX &var)
         {
             return controls_.find(var) != controls_.end();
+        }
+        bool OcpInternal::is_automatic(const cs::MX &var)
+        {
+            return automatics_.find(var) != automatics_.end();
         }
         bool OcpInternal::is_global_parameter(const cs::MX &var)
         {

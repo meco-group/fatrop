@@ -29,11 +29,13 @@ namespace fatrop
             friend class StageInternal;
             uo_set_mx states_;
             uo_set_mx controls_;
+            uo_set_mx automatics_;
             uo_set_mx global_parameters_;
             uo_set_mx control_parameters_;
             std::vector<cs::MX> global_parammeter_syms_;
             bool is_state(const cs::MX &var);
             bool is_control(const cs::MX &var);
+            bool is_automatic(const cs::MX &var);
             bool is_global_parameter(const cs::MX &var);
             bool is_control_parameter(const cs::MX &var);
             std::vector<std::pair<cs::MX, cs::MX>> initial_values;
@@ -48,6 +50,7 @@ namespace fatrop
             }
             cs::MX state(const int m = 1, const int n = 1);
             cs::MX control(const int m = 1, const int n = 1);
+            cs::MX automatic(const int m = 1, const int n = 1);
             cs::MX parameter(const int m = 1, const int n = 1, const std::string &grid = "global");
             cs::MX sample(const cs::MX &expr) const;
             Stage new_stage(const int K = 1);

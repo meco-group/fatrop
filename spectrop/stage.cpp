@@ -45,6 +45,8 @@ namespace fatrop
                     register_control(sym);
                 else if (ocp_->is_control_parameter(sym))
                     register_control_parameter(sym);
+                else if (ocp_->is_automatic(sym))
+                    register_automatic(sym);
                 else
                     throw std::runtime_error("MX sym " + sym.name() + " not recognized, is it declared outside of the Ocp?");
             }
@@ -54,7 +56,7 @@ namespace fatrop
             states_.push_back(state);
             states_set_.insert(state);
             state_syms_[state] = std::vector<cs::MX>(K_);
-            for(int k =0; k < K_; k++)
+            for (int k = 0; k < K_; k++)
                 state_syms_[state][k] = cs::MX::sym(state.name() + std::to_string(k), state.size1() * state.size2());
             // state_initial_[state] = cs::DM::zeros(state.size1() * state.size2(), K_);
         }
@@ -62,17 +64,26 @@ namespace fatrop
         {
             controls_.push_back(control);
             controls_set_.insert(control);
-            control_syms_[control] =  std::vector<cs::MX>(K_);
+            control_syms_[control] = std::vector<cs::MX>(K_);
             for (int k = 0; k < K_; k++)
                 control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k), control.size1() * control.size2());
             // control_initial_[control] = cs::DM::zeros(control.size1() * control.size2(), K_);
+        }
+        void StageInternal::register_automatic(const cs::MX &automatic)
+        {
+            automatics_.push_back(automatic);
+            automatics_set_.insert(automatic);
+            automatic_syms_[automatic] = std::vector<cs::MX>(K_);
+            for (int k = 0; k < K_; k++)
+                automatic_syms_[automatic][k] = cs::MX::sym(automatic.name() + std::to_string(k), automatic.size1() * automatic.size2());
+            // automatic_initial_[automatic] = cs::DM::zeros(automatic.size1() * automatic.size2(), K_);
         }
         void StageInternal::register_control_parameter(const cs::MX &control_parameter)
         {
             control_parameters_.push_back(control_parameter);
             control_parameters_set_.insert(control_parameter);
             control_parameter_syms_[control_parameter] = std::vector<cs::MX>(K_);
-            for(int k =0; k < K_; k++)
+            for (int k = 0; k < K_; k++)
                 control_parameter_syms_[control_parameter][k] = cs::MX::sym(control_parameter.name() + std::to_string(k), control_parameter.size1() * control_parameter.size2());
             // control_parameter_vals_[control_parameter] = cs::DM::zeros(control_parameter.size1() * control_parameter.size2(), K_);
         }
@@ -81,7 +92,8 @@ namespace fatrop
             bool has_state = states_set_.find(var) != states_set_.end();
             bool has_control = controls_set_.find(var) != controls_set_.end();
             bool has_control_parameter = control_parameters_set_.find(var) != control_parameters_set_.end();
-            return has_state || has_control || has_control_parameter;
+            bool has_automatic = automatics_set_.find(var) != automatics_set_.end();
+            return has_state || has_control || has_control_parameter || has_automatic;
         }
         const std::vector<cs::MX> &StageInternal::get_objective_terms() const
         {
@@ -95,21 +107,70 @@ namespace fatrop
         {
             return next_states_;
         };
-        const std::vector<cs::MX> &StageInternal::get_states() const
+        void StageInternal::get_automatics(std::vector<cs::MX> &auto_x, std::vector<cs::MX> &auto_u) const
         {
-            return states_;
+            for (const auto &automatic : get_automatics())
+            {
+                if (get_prev_stage())
+                {
+                    auto &next_states = get_prev_stage()->get_next_states();
+                    (next_states.find(automatic) != next_states.end() ? auto_x : auto_u).push_back(automatic);
+                }
+                else
+                {
+                    auto_u.push_back(automatic);
+                }
+            }
+        };
+        const std::vector<cs::MX> StageInternal::get_automatics_states() const
+        {
+            std::vector<cs::MX> auto_x;
+            std::vector<cs::MX> auto_u;
+            get_automatics(auto_x, auto_u);
+            return auto_x;
+        };
+        const std::vector<cs::MX> StageInternal::get_automatics_controls() const
+        {
+            std::vector<cs::MX> auto_x;
+            std::vector<cs::MX> auto_u;
+            get_automatics(auto_x, auto_u);
+            return auto_u;
+        };
+        const std::vector<cs::MX> StageInternal::get_states(bool include_automatics) const
+        {
+            auto ret = states_;
+            if (include_automatics)
+            {
+                auto auto_x = get_automatics_states();
+                ret.insert(ret.end(), auto_x.begin(), auto_x.end());
+            }
+            return ret;
         };
         const uo_map_mx<std::vector<cs::MX>> &StageInternal::get_state_syms() const
         {
             return state_syms_;
         };
-        const std::vector<cs::MX> &StageInternal::get_controls() const
+        const std::vector<cs::MX> StageInternal::get_controls(bool include_automatics) const
         {
-            return controls_;
+            auto ret = controls_;
+            if (include_automatics)
+            {
+                auto auto_u = get_automatics_controls();
+                ret.insert(ret.end(), auto_u.begin(), auto_u.end());
+            }
+            return ret;
         };
         const uo_map_mx<std::vector<cs::MX>> &StageInternal::get_control_syms() const
         {
             return control_syms_;
+        };
+        const std::vector<cs::MX> &StageInternal::get_automatics() const
+        {
+            return automatics_;
+        };
+        const uo_map_mx<std::vector<cs::MX>> &StageInternal::get_automatic_syms() const
+        {
+            return automatic_syms_;
         };
         const std::vector<cs::MX> &StageInternal::get_control_parameters() const
         {
@@ -126,6 +187,10 @@ namespace fatrop
         const std::shared_ptr<StageInternal> &StageInternal::get_next_stage() const
         {
             return next_stage_;
+        };
+        const std::shared_ptr<StageInternal> &StageInternal::get_prev_stage() const
+        {
+            return prev_stage_;
         };
         // const uo_map_mx<cs::MX> &StageInternal::get_state_initial() const
         // {
@@ -183,15 +248,20 @@ namespace fatrop
         {
             std::vector<cs::MX> from;
             std::vector<cs::MX> to;
-            for (auto &state : get()->get_states())
+            for (auto &state : get()->get_states(false))
             {
                 from.push_back(state);
                 to.push_back(get()->get_state_syms().at(state)[k]);
             }
-            for (auto &control : get()->get_controls())
+            for (auto &control : get()->get_controls(false))
             {
                 from.push_back(control);
                 to.push_back(get()->get_control_syms().at(control)[k]);
+            }
+            for (auto &automatic : get()->get_automatics())
+            {
+                from.push_back(automatic);
+                to.push_back(get()->get_automatic_syms().at(automatic)[k]);
             }
             for (auto &control_parameter : get()->get_control_parameters())
             {
@@ -221,13 +291,17 @@ namespace fatrop
         {
             return static_cast<std::shared_ptr<StageInternal>>(*this);
         }
-        const std::vector<cs::MX> &Stage::get_states() const
+        const std::vector<cs::MX> Stage::get_states(bool incl_auto) const
         {
-            return get()->get_states();
+            return get()->get_states(incl_auto);
         }
-        const std::vector<cs::MX> &Stage::get_controls() const
+        const std::vector<cs::MX> Stage::get_controls(bool incl_auto) const
         {
-            return get()->get_controls();
+            return get()->get_controls(incl_auto);
+        }
+        const std::vector<cs::MX> &Stage::get_automatics() const
+        {
+            return get()->get_automatics();
         }
         const std::vector<cs::MX> &Stage::get_control_parameters() const
         {

@@ -67,6 +67,7 @@ namespace fatropy
             py::class_<fatrop::spectrop::Ocp>(m, "Ocp").def(py::init<>())
             .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
             .def("control", &fatrop::spectrop::Ocp::control, py::arg("m") = 1, py::arg("n") = 1)
+            .def("automatic", &fatrop::spectrop::Ocp::automatic, py::arg("m") = 1, py::arg("n") = 1)
             .def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
             .def("sample", &fatrop::spectrop::Ocp::sample)
             .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
