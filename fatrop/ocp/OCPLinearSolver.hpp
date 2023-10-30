@@ -50,6 +50,8 @@ namespace fatrop
             const FatropVecBF &rhs_gradb_total) = 0;
         virtual fatrop_int solve_rhs(
             OCPKKTMemory *OCP,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
