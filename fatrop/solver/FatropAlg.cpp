@@ -51,7 +51,7 @@ FatropAlg::FatropAlg(
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_wmin", "kappa_wmin", &kappa_wmin, 1.0 / 3.0, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_wplus", "kappa_wplus", &kappa_wplus, 8.0, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_wplusem", "kappa_wplusem", &kappa_wplusem, 100.0, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-2, 0.0));
+    fatropoptions_->register_option(NumericOption::lower_bounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-6, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
     fatropoptions_->register_option(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
     fatropoptions_->register_option(NumericOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
