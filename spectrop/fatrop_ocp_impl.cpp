@@ -36,7 +36,7 @@ namespace fatrop{
                     rq_sym += rq_dyn_sym;
                     RSQ_sym += RSQ_dyn_sym;
                 }
-                if(sq.ng_eq > 0)
+                // if(sq.ng_eq > 0)
                 {
                     auto g_eq = sq.g;
                     auto Ggt_equality = cs::MX::horzcat({cs::MX::jacobian(g_eq, ux), g_eq}).T();
@@ -47,7 +47,7 @@ namespace fatrop{
                     rq_sym += rq_eq;
                     RSQ_sym += RSQ_eq;
                 }
-                if(sq.ng_ineq>0)
+                // if(sq.ng_ineq>0)
                 {
                     auto g_ineq = sq.g_ineq;
                     auto Ggt_inequality = cs::MX::horzcat({cs::MX::jacobian(g_ineq, ux), g_ineq}).T();
