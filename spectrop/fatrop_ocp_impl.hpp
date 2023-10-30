@@ -32,17 +32,17 @@ namespace fatrop
             int np_global;
             int ng_eq;
             int ng_ineq;
-            static FatropStageEval create(const Stage &stage);
+            static FatropStageEval create(const Stage &stage, const cs::Dict& opts);
         };
         class FatropOcpImpl : public OCPAbstract
         {
         public:
-            FatropOcpImpl(const Ocp &ocp)
+            FatropOcpImpl(const Ocp &ocp, const cs::Dict &opts)
             {
                 horizon_length_ = 0;
                 for (const auto &stage : ocp.get_stages())
                 {
-                    stages_.push_back(std::make_shared<FatropStageEval>(FatropStageEval::create(stage)));
+                    stages_.push_back(std::make_shared<FatropStageEval>(FatropStageEval::create(stage, opts)));
                     for (int i = 1; i < stage.K(); i++)
                         stages_.push_back(stages_.back());
                     horizon_length_ += stage.K();

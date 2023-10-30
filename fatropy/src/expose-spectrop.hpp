@@ -22,6 +22,12 @@ namespace fatropy
         static constexpr char py_name[] = "MX";
         static constexpr char module[] = "casadi";
     };
+    struct casadi_dict_swig_wrap_type
+    {
+        typedef casadi::Dict type;
+        static constexpr char py_name[] = "Dict";
+        static constexpr char module[] = "casadi";
+    };
 }
 
 template <>
@@ -30,6 +36,10 @@ struct py::detail::type_caster<casadi::Function> : public py::detail::swig_type_
 };
 template <>
 struct py::detail::type_caster<casadi::MX> : public py::detail::swig_type_caster<fatropy::casadi_MX_swig_wrap_type>
+{
+};
+template <>
+struct py::detail::type_caster<casadi::Dict> : public py::detail::swig_type_caster<fatropy::casadi_dict_swig_wrap_type>
 {
 };
 
@@ -71,7 +81,7 @@ namespace fatropy
             .def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
             .def("sample", &fatrop::spectrop::Ocp::sample)
             .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
-            .def("to_function", &fatrop::spectrop::Ocp::to_function)
+            .def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("from"), py::arg("to"), py::arg("opts") = casadi::Dict())
             .def("at_t0", &fatrop::spectrop::Ocp::at_t0)
             .def("at_tf", &fatrop::spectrop::Ocp::at_tf)
             .def("set_initial", &fatrop::spectrop::Ocp::set_initial);

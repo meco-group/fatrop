@@ -109,10 +109,10 @@ namespace fatrop
         {
             return stages_;
         }
-        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out)
+        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict& opts) const
         {
             auto solver = SolverFatrop();
-            solver.transcribe(*this);
+            solver.transcribe(*this, opts);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
             auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out);

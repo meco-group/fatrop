@@ -27,10 +27,10 @@ int main()
   /*
     =----  middle stage ----=
   */
-  auto middle_stage = ocp.new_stage(19); // 18 is the number of nodes, states, controls and parameters are derived automatically
+  auto middle_stage = ocp.new_stage(18); // 18 is the number of control intervals, states, controls and parameters are derived automatically
   /* constraints  */ middle_stage.subject_to(-0.25 < x(1));
                      middle_stage.subject_to((-1.0 < u) < 1);
-  /* dynamics     */ middle_stage.set_next(x, x_next);
+  /* dynamics     */ middle_stage.set_next(initial_stage.dynamics());
   /* objective    */ middle_stage.add_objective(u * u + cs::MX::sumsqr(x));
 
   /*
@@ -40,6 +40,7 @@ int main()
   /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
                      terminal_stage.subject_to(x(1) == p);
   /* objective    */ terminal_stage.add_objective(x(1)*x(1)+p);
+
 
   cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x),p});
   auto ret = ocp_func({cs::DM(1.23)});

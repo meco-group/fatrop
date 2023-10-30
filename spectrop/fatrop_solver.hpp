@@ -16,9 +16,9 @@ namespace fatrop
         class SolverFatrop : public SolverInterface
         {
         public:
-            void transcribe(const Ocp &ocp_)
+            void transcribe(const Ocp &ocp_, const cs::Dict& opts)
             {
-                fatrop_impl = std::make_shared<FatropOcpImpl>(ocp_);
+                fatrop_impl = std::make_shared<FatropOcpImpl>(ocp_, opts);
             }
             cs::Function to_function(const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out)
             {

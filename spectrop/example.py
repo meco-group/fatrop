@@ -45,6 +45,8 @@ def get_func():
   # objective 
   terminal_stage.add_objective(x[1]*x[1]+p)
 
+  # ocp.set_initial(u, p)
+
   return ocp.to_function([p], [ocp.at_t0(u), ocp.sample(x),p])
 
 ocp_func = get_func()

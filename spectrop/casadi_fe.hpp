@@ -3,6 +3,7 @@
 #include <string>
 #include "casadi_utilities.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "casadi_jit.hpp"
 namespace fatrop
 {
     namespace spectrop
@@ -12,7 +13,7 @@ namespace fatrop
         {
         public:
             CasadiFEWrap(){};
-            CasadiFEWrap(const cs::Function &func) : func_(func)
+            CasadiFEWrap(const cs::Function &func, bool jit, bool expand) : func_(expand ? func.expand() : func), jit_(jit)
             {
                 m = (int)func_.size1_out(0);
                 n = (int)func_.size2_out(0);
@@ -27,10 +28,15 @@ namespace fatrop
                 iw.resize(sz_iw);
                 w.resize(sz_w);
                 bufout.resize(func.nnz_out(0));
-                bufdata.resize(sz_res>0?sz_res:1);
-                resdata.resize(sz_res>0?sz_res:1);
-                argdata.resize(sz_arg>0?sz_arg:1);
+                bufdata.resize(sz_res > 0 ? sz_res : 1);
+                resdata.resize(sz_res > 0 ? sz_res : 1);
+                argdata.resize(sz_arg > 0 ? sz_arg : 1);
                 n_in = func.n_in();
+                if (jit)
+                {
+                    auto jit_options_ = casadi::Dict({{"flags", "-Ofast -march=native -ffast-math"}});
+                    fe_jit_ = std::make_unique<CasadiFEJit>(func_, jit_options_);
+                }
                 // // assert dense matrix output
                 // assert(func.nnz_out(0) == m * n);
             };
@@ -50,7 +56,7 @@ namespace fatrop
                 if (res)
                 {
                     resdata[0] = res;
-                    func_(argdata.data(), resdata.data(), iw.data(), w.data(), 0);
+                    jit_ ? fe_jit_->eval_(argdata.data(), resdata.data(), iw.data(), w.data(), 0) : func_(argdata.data(), resdata.data(), iw.data(), w.data(), 0);
                 }
             };
 
@@ -60,12 +66,14 @@ namespace fatrop
             int n;
             int mem;
             int n_in;
+            bool jit_;
             std::vector<double> bufout;
             std::vector<double *> bufdata;
             std::vector<double *> resdata;
             std::vector<const double *> argdata;
             std::vector<long long int> iw;
             std::vector<double> w;
+            std::unique_ptr<CasadiFEJit> fe_jit_;
         };
         // implementation of OCPAbstract, given an OCP
     } // namespace spectrop
