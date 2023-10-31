@@ -21,14 +21,19 @@ namespace fatropy
             PyObject *obj_ptr = obj.ptr();
             return convert(obj_ptr, name);
         }
+        static PySwigObject* get_swig_ptr(PyObject* obj)
+        {
+            PyObject *this_ptr = PyObject_GetAttrString(obj, "this");
+            PySwigObject *swig_obj = reinterpret_cast<PySwigObject *>(this_ptr);
+            return swig_obj;
+        }
         static T *convert(PyObject *obj_ptr, const std::string &name)
         {
-            PyObject *this_ptr = PyObject_GetAttrString(obj_ptr, "this");
-            PySwigObject *swig_obj = reinterpret_cast<PySwigObject *>(this_ptr);
+            PySwigObject *swig_obj = get_swig_ptr(obj_ptr);
             std::string py_name = reinterpret_cast<PySwigObject *>(obj_ptr)->ob_base.ob_type->tp_name;
             if (py_name != name)
                 throw std::runtime_error("Could not convert of type " + py_name + " to " + name);
-            if (this_ptr == nullptr)
+            if (swig_obj == nullptr)
                 throw std::runtime_error("Could not convert to PySwigObject");
             auto ret = reinterpret_cast<T *>(swig_obj->ptr);
             return ret;
@@ -67,11 +72,13 @@ namespace PYBIND11_NAMESPACE
             static handle cast(type_cpp src, return_value_policy /* policy */, handle /* parent */)
             {
                 pybind11::module_ cspy_ = pybind11::module_::import(T::module);
-                auto attr_ = cspy_.attr(T::py_name);
-                auto ret = attr_();
-                *fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name) = src;
-                Py_IncRef(ret.ptr());
-                Py_IncRef(cspy_.ptr());
+                pybind11::object attr_ = cspy_.attr(T::py_name);
+                pybind11::object ret = attr_(NULL);
+                type_cpp* ret_ptr = fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name); 
+                * ret_ptr = src;
+                // PyObject* this_ptr = reinterpret_cast<PyObject*>(fatropy::FromPySwig<type_cpp>::get_swig_ptr(ret.ptr())); 
+                // Py_DecRef(ret.ptr());
+                // Py_IncRef(this_ptr);
                 return ret;
             }
         };
