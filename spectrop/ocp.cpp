@@ -109,7 +109,7 @@ namespace fatrop
         {
             return stages_;
         }
-        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict& opts) const
+        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts) const
         {
             auto solver = SolverFatrop();
             solver.transcribe(*this, opts);
@@ -135,27 +135,31 @@ namespace fatrop
         }
         void Ocp::set_initial(const cs::MX &var, const cs::MX &value)
         {
-            cs::MX varr;
-            cs::MX valuee;
-            
-            if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var))
-                varr = sample(var);
-            else
-                varr = var;
-            if (value.size2() == 1)
-                valuee = cs::MX::repmat(value, 1, varr.size2());
-            else
-                valuee = value;
-            get()->initial_values.push_back({varr, valuee});
+            get()->initial_values.push_back({var, value});
         }
         cs::MX Ocp::eval_at_initial(const cs::MX &expr) const
         {
-            auto ret = expr;
-            for (const auto &[varr, valuee] : get()->initial_values)
+            std::vector<cs::MX> from;
+            std::vector<cs::MX> to;
+            for (const auto &[var, value] : get()->initial_values)
             {
-                ret = cs::MX::substitute(ret, varr, valuee);
+                cs::MX varr;
+                cs::MX valuee;
+                if (var.size1() != value.size1())
+                    throw std::runtime_error("initial value has wrong size");
+
+                if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var))
+                    varr = sample(var);
+                else
+                    varr = var;
+                if (value.size2() == 1)
+                    valuee = cs::MX::repmat(value, 1, varr.size2());
+                else
+                    valuee = value;
+                from.push_back(varr);
+                to.push_back(valuee);
             }
-            return ret;
+            return cs::MX::substitute({expr}, from, to)[0];
         }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {
