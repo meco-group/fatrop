@@ -13,7 +13,7 @@ namespace fatrop
         {
         public:
             CasadiFEWrap(){};
-            CasadiFEWrap(const cs::Function &func, bool jit, bool expand) : func_(expand ? func.expand() : func), jit_(jit)
+            CasadiFEWrap(const cs::Function &func, bool expand, bool jit, const cs::Dict& jit_options_) : func_(expand ? func.expand() : func), jit_(jit)
             {
                 m = (int)func_.size1_out(0);
                 n = (int)func_.size2_out(0);
@@ -34,7 +34,6 @@ namespace fatrop
                 n_in = func.n_in();
                 if (jit)
                 {
-                    auto jit_options_ = casadi::Dict({{"flags", "-Ofast -march=native -ffast-math"}});
                     fe_jit_ = std::make_unique<CasadiFEJit>(func_, jit_options_);
                 }
                 // // assert dense matrix output
