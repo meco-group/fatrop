@@ -4,11 +4,13 @@
 #include "casadi_utilities.hpp"
 #include "ustage.hpp"
 #include "solver.hpp"
+#include "stage.hpp"
 
 namespace fatrop
 {
     namespace spectrop
     {
+        class Stage;
         namespace cs = casadi;
         class Ocp;
         // class Stage;
@@ -54,6 +56,7 @@ namespace fatrop
             cs::MX parameter(const int m = 1, const int n = 1, const std::string &grid = "global");
             cs::MX sample(const cs::MX &expr) const;
             uStage new_ustage(const int K = 1);
+            Stage new_stage(const int K);
             const std::vector<uStage> &get_ustages() const;
             const std::vector<cs::MX> &get_global_parameters() const
             {

@@ -161,6 +161,10 @@ namespace fatrop
             }
             return cs::MX::substitute({expr}, from, to)[0];
         }
+        Stage Ocp::new_stage(const int K)
+        {
+            return Stage(*this, K);
+        }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {
         //     bool column_mode = initial.size2() == 1;
