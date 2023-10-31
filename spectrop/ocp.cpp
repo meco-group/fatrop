@@ -16,11 +16,11 @@ namespace fatrop
             get()->controls_.insert(u);
             return u;
         }
-        cs::MX Ocp::automatic(const int m, const int n)
+        cs::MX Ocp::hybrid(const int m, const int n)
         {
-            auto automatic = cs::MX::sym(std::string("automatic") + std::to_string(get()->automatics_.size()), m, n);
-            get()->automatics_.insert(automatic);
-            return automatic;
+            auto hybrid = cs::MX::sym(std::string("hybrid") + std::to_string(get()->hybrids_.size()), m, n);
+            get()->hybrids_.insert(hybrid);
+            return hybrid;
         }
         cs::MX Ocp::parameter(const int m, const int n, const std::string &grid)
         {
@@ -63,9 +63,9 @@ namespace fatrop
         {
             return controls_.find(var) != controls_.end();
         }
-        bool OcpInternal::is_automatic(const cs::MX &var)
+        bool OcpInternal::is_hybrid(const cs::MX &var)
         {
-            return automatics_.find(var) != automatics_.end();
+            return hybrids_.find(var) != hybrids_.end();
         }
         bool OcpInternal::is_global_parameter(const cs::MX &var)
         {
@@ -138,7 +138,7 @@ namespace fatrop
             cs::MX varr;
             cs::MX valuee;
             
-            if (get()->is_state(var) || get()->is_control(var) || get()->is_automatic(var))
+            if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var))
                 varr = sample(var);
             else
                 varr = var;

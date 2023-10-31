@@ -104,7 +104,17 @@ namespace fatropy
                 .def("eval_at_control", &fatrop::spectrop::Stage::eval_at_control)
                 .def("sample", &fatrop::spectrop::Stage::sample);
 
-            py::class_<fatrop::spectrop::Ocp>(m, "Ocp").def(py::init<>()).def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1).def("control", &fatrop::spectrop::Ocp::control, py::arg("m") = 1, py::arg("n") = 1).def("automatic", &fatrop::spectrop::Ocp::automatic, py::arg("m") = 1, py::arg("n") = 1).def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global").def("sample", &fatrop::spectrop::Ocp::sample).def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1).def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict()).def("at_t0", &fatrop::spectrop::Ocp::at_t0).def("at_tf", &fatrop::spectrop::Ocp::at_tf).def("set_initial", &fatrop::spectrop::Ocp::set_initial);
+            py::class_<fatrop::spectrop::Ocp>(m, "Ocp").def(py::init<>())
+            .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
+            .def("control", &fatrop::spectrop::Ocp::control, py::arg("m") = 1, py::arg("n") = 1)
+            .def("hybrid", &fatrop::spectrop::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1)
+            .def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
+            .def("sample", &fatrop::spectrop::Ocp::sample)
+            .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
+            .def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
+            .def("at_t0", &fatrop::spectrop::Ocp::at_t0)
+            .def("at_tf", &fatrop::spectrop::Ocp::at_tf)
+            .def("set_initial", &fatrop::spectrop::Ocp::set_initial);
 
             // .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
         }
