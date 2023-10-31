@@ -68,11 +68,9 @@ namespace PYBIND11_NAMESPACE
             {
                 pybind11::module_ cspy_ = pybind11::module_::import(T::module);
                 pybind11::object attr_ = cspy_.attr(T::py_name);
-                auto ret = attr_();
+                pybind11::object ret(attr_());
                 *fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name) = src;
-                Py_IncRef(ret.ptr());
-                Py_IncRef(cspy_.ptr());
-                return ret;
+                return ret.release();
             }
         };
     } // namespace PYBIND11_NAMESPACE::detail
