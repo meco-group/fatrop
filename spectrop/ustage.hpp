@@ -9,17 +9,17 @@ namespace fatrop
     namespace spectrop
     {
         namespace cs = casadi;
-        class Stage;
+        class uStage;
         class OcpInternal;
-        class StageInternal
+        class uStageInternal
         {
         private:
-            StageInternal(int K, const std::shared_ptr<OcpInternal> &ocp) : K_(K), ocp_(ocp)
+            uStageInternal(int K, const std::shared_ptr<OcpInternal> &ocp) : K_(K), ocp_(ocp)
             {
             }
 
         private:
-            friend class Stage;
+            friend class uStage;
             friend class Ocp;
             void add_variables(const cs::MX &expr);
 
@@ -38,8 +38,8 @@ namespace fatrop
             const std::vector<cs::MX> &get_control_parameters() const;
             const uo_map_mx<std::vector<cs::MX>> &get_control_parameter_syms() const;
             const std::shared_ptr<OcpInternal> &get_ocp() const;
-            const std::shared_ptr<StageInternal> &get_next_stage() const;
-            const std::shared_ptr<StageInternal> &get_prev_stage() const;
+            const std::shared_ptr<uStageInternal> &get_next_ustage() const;
+            const std::shared_ptr<uStageInternal> &get_prev_ustage() const;
             int K() const {return K_;};
 
         private:
@@ -66,14 +66,14 @@ namespace fatrop
             uo_set_mx control_parameters_set_;
             uo_map_mx<std::vector<cs::MX>> control_parameter_syms_;
             std::shared_ptr<OcpInternal> ocp_;
-            std::shared_ptr<StageInternal> next_stage_ = nullptr;
-            std::shared_ptr<StageInternal> prev_stage_ = nullptr;
+            std::shared_ptr<uStageInternal> next_ustage_ = nullptr;
+            std::shared_ptr<uStageInternal> prev_ustage_ = nullptr;
         };
-        class Stage : private std::shared_ptr<StageInternal>
+        class uStage : private std::shared_ptr<uStageInternal>
         {
         public:
             friend class Ocp;
-            Stage(int K, const std::shared_ptr<OcpInternal> &ocp) : std::shared_ptr<StageInternal>(new StageInternal(K, ocp))
+            uStage(int K, const std::shared_ptr<OcpInternal> &ocp) : std::shared_ptr<uStageInternal>(new uStageInternal(K, ocp))
             {
             }
             void subject_to(const cs::MX &constraint);
@@ -87,7 +87,7 @@ namespace fatrop
             const uo_map_mx<cs::MX> &dynamics();
             cs::MX eval_at_control(const cs::MX &expr, const int k) const;
             cs::MX sample(const cs::MX &expr) const;
-            std::shared_ptr<StageInternal> get_internal() const;
+            std::shared_ptr<uStageInternal> get_internal() const;
             const std::vector<cs::MX> &get_objective_terms() const;
             const std::vector<cs::MX> get_states(bool include_hybrids = true) const;
             const std::vector<cs::MX> get_controls(bool include_hybrids = true) const;

@@ -10,7 +10,7 @@ namespace fatrop
     namespace spectrop
     {
         namespace cs = casadi;
-        struct StageEvaluator
+        struct uStageEvaluator
         {
         };
         class SolverFatrop : public SolverInterface
@@ -25,16 +25,16 @@ namespace fatrop
                 std::vector<cs::MX> variables_v;
                 std::vector<cs::MX> control_grid_p_v;
                 // add gist
-                for (const auto &stage : ocp_.get_stages())
+                for (const auto &ustage : ocp_.get_ustages())
                 {
-                    auto controls = cs::MX::veccat(stage.get_controls());
-                    auto states = cs::MX::veccat(stage.get_states());
-                    auto control_grid_p = cs::MX::veccat(stage.get_control_parameters());
-                    for (int k = 0; k < stage.K(); k++)
+                    auto controls = cs::MX::veccat(ustage.get_controls());
+                    auto states = cs::MX::veccat(ustage.get_states());
+                    auto control_grid_p = cs::MX::veccat(ustage.get_control_parameters());
+                    for (int k = 0; k < ustage.K(); k++)
                     {
-                        variables_v.push_back(stage.eval_at_control(controls, k));
-                        variables_v.push_back(stage.eval_at_control(states,k));
-                        control_grid_p_v.push_back(stage.eval_at_control(control_grid_p, k));
+                        variables_v.push_back(ustage.eval_at_control(controls, k));
+                        variables_v.push_back(ustage.eval_at_control(states,k));
+                        control_grid_p_v.push_back(ustage.eval_at_control(control_grid_p, k));
                     }
                 }
                 gist_in = {cs::MX::veccat(variables_v), cs::MX::veccat(control_grid_p_v), cs::MX::veccat(ocp_.get_global_parameters())};

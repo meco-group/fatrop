@@ -8,9 +8,9 @@ namespace fatrop
     {
         namespace cs = casadi;
 
-        class StageInternal; // forward declaration
+        class uStageInternal; // forward declaration
 
-        struct StageQuantities
+        struct uStageQuantities
         {
             cs::MX x;
             cs::MX u;
@@ -31,7 +31,7 @@ namespace fatrop
             int ng_eq;
             int ng_ineq;
 
-            static StageQuantities create(const std::shared_ptr<StageInternal> &stage);
+            static uStageQuantities create(const std::shared_ptr<uStageInternal> &ustage);
         };
     } // namespace spectrop
 } // namespace fatrop

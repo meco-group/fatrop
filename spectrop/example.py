@@ -13,37 +13,37 @@ def get_func():
   # 
   #   =----  initial stage ----=
   # 
-  initial_stage = ocp.new_stage() # states and controls are derived automatically
+  initial_ustage = ocp.new_ustage() # states and controls are derived automatically
   # constraint 
-  initial_stage.subject_to(x[0] == 1.)
+  initial_ustage.subject_to(x[0] == 1.)
   # constraint 
-  initial_stage.subject_to(x[1] == 0.)
+  initial_ustage.subject_to(x[1] == 0.)
   # dynamics 
-  initial_stage.set_next(x, x_next)
+  initial_ustage.set_next(x, x_next)
   # objective  
-  initial_stage.add_objective(u * u + sumsqr(x))
+  initial_ustage.add_objective(u * u + sumsqr(x))
 
   # 
   #   =----  middle stage ----=
   # 
-  middle_stage = ocp.new_stage(19) # 19 is the number of nodes, states, controls and parameters are derived automatically
+  middle_ustage = ocp.new_ustage(19) # 19 is the number of nodes, states, controls and parameters are derived automatically
   # constraints 
-  middle_stage.subject_to(-0.25 < x[1])
-  middle_stage.subject_to((-1.0 < u) < 1)
+  middle_ustage.subject_to(-0.25 < x[1])
+  middle_ustage.subject_to((-1.0 < u) < 1)
   # dynamics  
-  middle_stage.set_next(x, x_next)
+  middle_ustage.set_next(x, x_next)
   # objective 
-  middle_stage.add_objective(u * u + sumsqr(x))
+  middle_ustage.add_objective(u * u + sumsqr(x))
 
   # 
   #   =----  terminal stage ----=
   # 
-  terminal_stage = ocp.new_stage() # the last stage also has x2 as state
+  terminal_ustage = ocp.new_ustage() # the last stage also has x2 as state
   # constraints  
-  terminal_stage.subject_to(-0.25 < x[1])
-  terminal_stage.subject_to(x[1] == p)
+  terminal_ustage.subject_to(-0.25 < x[1])
+  terminal_ustage.subject_to(x[1] == p)
   # objective 
-  terminal_stage.add_objective(x[1]*x[1]+p)
+  terminal_ustage.add_objective(x[1]*x[1]+p)
 
   # ocp.set_initial(u, p)
 

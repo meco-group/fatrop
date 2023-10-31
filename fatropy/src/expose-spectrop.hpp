@@ -92,17 +92,17 @@ namespace fatropy
             // py::bind_map<casadi::Dict>(m, "cs::Dict");
 
             py::class_<fatrop::spectrop::uo_map_mx<casadi::MX>>(m, "MXMXmap");
-            py::class_<fatrop::spectrop::Stage>(m, "Stage")
-                .def("add_objective", &fatrop::spectrop::Stage::add_objective)
-                .def("subject_to", &fatrop::spectrop::Stage::subject_to)
-                .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectrop::Stage::set_next))
+            py::class_<fatrop::spectrop::uStage>(m, "Stage")
+                .def("add_objective", &fatrop::spectrop::uStage::add_objective)
+                .def("subject_to", &fatrop::spectrop::uStage::subject_to)
+                .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectrop::uStage::set_next))
                 // .def("set_next", py::overload_cast<const fatrop::spectrop::uo_map_mx<casadi::MX>&>(&fatrop::spectrop::Stage::set_next))
-                .def("at_t0", &fatrop::spectrop::Stage::at_t0)
-                .def("at_tf", &fatrop::spectrop::Stage::at_tf)
-                .def("K", &fatrop::spectrop::Stage::K)
-                .def("dynamics", &fatrop::spectrop::Stage::dynamics)
-                .def("eval_at_control", &fatrop::spectrop::Stage::eval_at_control)
-                .def("sample", &fatrop::spectrop::Stage::sample);
+                .def("at_t0", &fatrop::spectrop::uStage::at_t0)
+                .def("at_tf", &fatrop::spectrop::uStage::at_tf)
+                .def("K", &fatrop::spectrop::uStage::K)
+                .def("dynamics", &fatrop::spectrop::uStage::dynamics)
+                .def("eval_at_control", &fatrop::spectrop::uStage::eval_at_control)
+                .def("sample", &fatrop::spectrop::uStage::sample);
 
             py::class_<fatrop::spectrop::Ocp>(m, "Ocp").def(py::init<>())
             .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
@@ -110,7 +110,7 @@ namespace fatropy
             .def("hybrid", &fatrop::spectrop::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1)
             .def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
             .def("sample", &fatrop::spectrop::Ocp::sample)
-            .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
+            .def("new_stage", &fatrop::spectrop::Ocp::new_ustage, py::arg("K") = 1)
             .def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
             .def("at_t0", &fatrop::spectrop::Ocp::at_t0)
             .def("at_tf", &fatrop::spectrop::Ocp::at_tf)

@@ -16,30 +16,30 @@ int main()
   auto x_next = x + casadi::MX::vertcat({x(1), e * x(1) - x(0) + u}) * dt;
 
   /*
-    =----  initial stage ----=
+    =----  initial ustage ----=
   */
-  auto initial_stage = ocp.new_stage(); // states and controls are derived automatically
-  /* constraint   */ initial_stage.subject_to(x(0) == 1.);
-  /* constraint   */ initial_stage.subject_to(x(1) == 0.);
-  /* dynamics     */ initial_stage.set_next(x, x_next);
-  /* objective    */ initial_stage.add_objective(u * u + cs::MX::sumsqr(x));
+  auto initial_ustage = ocp.new_ustage(); // states and controls are derived automatically
+  /* constraint   */ initial_ustage.subject_to(x(0) == 1.);
+  /* constraint   */ initial_ustage.subject_to(x(1) == 0.);
+  /* dynamics     */ initial_ustage.set_next(x, x_next);
+  /* objective    */ initial_ustage.add_objective(u * u + cs::MX::sumsqr(x));
 
   /*
     =----  middle stage ----=
   */
-  auto middle_stage = ocp.new_stage(18); // 18 is the number of control intervals, states, controls and parameters are derived automatically
-  /* constraints  */ middle_stage.subject_to(-0.25 < x(1));
-                     middle_stage.subject_to((-1.0 < u) < 1);
-  /* dynamics     */ middle_stage.set_next(initial_stage.dynamics());
-  /* objective    */ middle_stage.add_objective(u * u + cs::MX::sumsqr(x));
+  auto middle_ustage = ocp.new_ustage(18); // 18 is the number of control intervals, states, controls and parameters are derived automatically
+  /* constraints  */ middle_ustage.subject_to(-0.25 < x(1));
+                     middle_ustage.subject_to((-1.0 < u) < 1);
+  /* dynamics     */ middle_ustage.set_next(initial_ustage.dynamics());
+  /* objective    */ middle_ustage.add_objective(u * u + cs::MX::sumsqr(x));
 
   /*
     =----  terminal stage ----=
   */
-  auto terminal_stage = ocp.new_stage(); // the last stage also has x2 as state
-  /* constraints  */ terminal_stage.subject_to(-0.25 < x(1));
-                     terminal_stage.subject_to(x(1) == p);
-  /* objective    */ terminal_stage.add_objective(x(1)*x(1)+p);
+  auto terminal_ustage = ocp.new_ustage(); // the last stage also has x2 as state
+  /* constraints  */ terminal_ustage.subject_to(-0.25 < x(1));
+                     terminal_ustage.subject_to(x(1) == p);
+  /* objective    */ terminal_ustage.add_objective(x(1)*x(1)+p);
 
 
   cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x),p});

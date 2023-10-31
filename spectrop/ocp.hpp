@@ -2,7 +2,7 @@
 #include <casadi/casadi.hpp>
 #include <string>
 #include "casadi_utilities.hpp"
-#include "stage.hpp"
+#include "ustage.hpp"
 #include "solver.hpp"
 
 namespace fatrop
@@ -26,7 +26,7 @@ namespace fatrop
 
         protected:
             friend class Ocp;
-            friend class StageInternal;
+            friend class uStageInternal;
             uo_set_mx states_;
             uo_set_mx controls_;
             uo_set_mx hybrids_;
@@ -53,20 +53,20 @@ namespace fatrop
             cs::MX hybrid(const int m = 1, const int n = 1);
             cs::MX parameter(const int m = 1, const int n = 1, const std::string &grid = "global");
             cs::MX sample(const cs::MX &expr) const;
-            Stage new_stage(const int K = 1);
-            const std::vector<Stage> &get_stages() const;
+            uStage new_ustage(const int K = 1);
+            const std::vector<uStage> &get_ustages() const;
             const std::vector<cs::MX> &get_global_parameters() const
             {
                 return get()->global_parammeter_syms_;
             }
             cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts = casadi::Dict()) const;
-            cs::MX at_t0(const cs::MX &expr) const {return stages_.front().at_t0(expr);};
-            cs::MX at_tf(const cs::MX &expr) const {return stages_.back().at_tf(expr);};
+            cs::MX at_t0(const cs::MX &expr) const {return ustages_.front().at_t0(expr);};
+            cs::MX at_tf(const cs::MX &expr) const {return ustages_.back().at_tf(expr);};
             void set_initial(const cs::MX &var, const cs::MX &value);
             cs::MX eval_at_initial(const cs::MX &expr) const;
 
         protected:
-            std::vector<Stage> stages_;
+            std::vector<uStage> ustages_;
         };
     } // namespace spectrop
 } // namespace fatrop

@@ -40,19 +40,19 @@ namespace fatrop
             throw std::runtime_error("grid must be either 'global' or 'control'");
             return cs::MX();
         }
-        Stage Ocp::new_stage(const int K)
+        uStage Ocp::new_ustage(const int K)
         {
-            auto ret = Stage(K, static_cast<std::shared_ptr<OcpInternal>>(*this));
+            auto ret = uStage(K, static_cast<std::shared_ptr<OcpInternal>>(*this));
             // add the states to the new stage
-            if (!stages_.empty())
+            if (!ustages_.empty())
             {
-                for (auto &[state, sym] : stages_.back().get()->next_states_)
+                for (auto &[state, sym] : ustages_.back().get()->next_states_)
                     ret->add_variables(state);
-                ret->prev_stage_ = stages_.back();
+                ret->prev_ustage_ = ustages_.back();
                 // update next stage
-                stages_.back().get()->next_stage_ = ret;
+                ustages_.back().get()->next_ustage_ = ret;
             }
-            stages_.push_back(ret);
+            ustages_.push_back(ret);
             return ret;
         }
         bool OcpInternal::is_state(const cs::MX &var)
@@ -97,17 +97,17 @@ namespace fatrop
                 return cs::MX(); // return empty matrix if input is not a column vector
             auto ret = cs::MX::zeros(expr.size1(), 0);
             auto vars = cs::MX::symvar(expr);
-            for (const auto &stage : get_stages())
+            for (const auto &ustage : get_ustages())
             {
                 if (std::all_of(vars.begin(), vars.end(), [&](const cs::MX &var)
-                                { return stage.has_variable(var); }))
-                    ret = cs::MX::horzcat({ret, stage.sample(expr)});
+                                { return ustage.has_variable(var); }))
+                    ret = cs::MX::horzcat({ret, ustage.sample(expr)});
             }
             return ret;
         }
-        const std::vector<Stage> &Ocp::get_stages() const
+        const std::vector<uStage> &Ocp::get_ustages() const
         {
-            return stages_;
+            return ustages_;
         }
         cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts) const
         {

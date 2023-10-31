@@ -2,7 +2,7 @@
 namespace fatrop{
     namespace spectrop
     {
-            FatropStageEval FatropStageEval::create(const Stage &stage, const cs::Dict& opts)
+            FatropuStageEval FatropuStageEval::create(const uStage &ustage, const cs::Dict& opts)
             {
                 auto optss = opts;
                 bool expand =cs::get_from_dict(optss, "post_expand", true);
@@ -12,8 +12,8 @@ namespace fatrop{
                 cs::Dict jit_options_ =cs::get_from_dict(optss, "jit_options", casadi::Dict({{"flags", "-Ofast -march=native -ffast-math"}}));
                 // optss.at("jit") = false;
                 // optss.at("post_expand") = false;
-                auto sq = StageQuantities::create(stage.get_internal());
-                auto ret = FatropStageEval();
+                auto sq = uStageQuantities::create(ustage.get_internal());
+                auto ret = FatropuStageEval();
                 ret.K = sq.K;
                 ret.nu = sq.nu;
                 ret.nx = sq.nx;
@@ -24,12 +24,12 @@ namespace fatrop{
                 cs::MX lam_g_equality = cs::MX::sym("lam_g_equality", sq.ng_eq);
                 cs::MX lam_g_inequality = cs::MX::sym("lam_g_inequality", sq.ng_ineq);
                 cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", sq.nxp1);
-                std::vector<cs::MX> stage_syms{sq.u, sq.x, sq.p_stage, sq.p_global};
+                std::vector<cs::MX> ustage_syms{sq.u, sq.x, sq.p_stage, sq.p_global};
                 auto ux = cs::MX::veccat({sq.u, sq.x});
-                ret.L = CasadiFEWrap(cs::Function("L", stage_syms, {sq.L}, optss), expand, jit, jit_options_);
+                ret.L = CasadiFEWrap(cs::Function("L", ustage_syms, {sq.L}, optss), expand, jit, jit_options_);
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(sq.L, ux, rq_sym);
-                ret.rq = CasadiFEWrap(cs::Function("rq", stage_syms, {cs::MX::densify(rq_sym)}, optss), expand, jit, jit_options_);
+                ret.rq = CasadiFEWrap(cs::Function("rq", ustage_syms, {cs::MX::densify(rq_sym)}, optss), expand, jit, jit_options_);
                 // if (sq.nxp1 > 0)
                 {
                     auto xp1 = cs::MX::sym("xp1", sq.nxp1);
@@ -48,8 +48,8 @@ namespace fatrop{
                 {
                     auto g_eq = sq.g;
                     auto Ggt_equality = cs::MX::horzcat({cs::MX::jacobian(g_eq, ux), g_eq}).T();
-                    ret.Ggt_equality = CasadiFEWrap(cs::Function("Ggt_equality", stage_syms, {cs::MX::densify(Ggt_equality)}, optss), expand, jit, jit_options_);
-                    ret.g_equality = CasadiFEWrap(cs::Function("g_equality", stage_syms, {cs::MX::densify(g_eq)}, optss), expand, jit, jit_options_);
+                    ret.Ggt_equality = CasadiFEWrap(cs::Function("Ggt_equality", ustage_syms, {cs::MX::densify(Ggt_equality)}, optss), expand, jit, jit_options_);
+                    ret.g_equality = CasadiFEWrap(cs::Function("g_equality", ustage_syms, {cs::MX::densify(g_eq)}, optss), expand, jit, jit_options_);
                     auto rq_eq = cs::MX();
                     auto RSQ_eq = cs::MX::hessian(cs::MX::dot(g_eq, lam_g_equality), ux, rq_eq);
                     rq_sym += rq_eq;
@@ -59,8 +59,8 @@ namespace fatrop{
                 {
                     auto g_ineq = sq.g_ineq;
                     auto Ggt_inequality = cs::MX::horzcat({cs::MX::jacobian(g_ineq, ux), g_ineq}).T();
-                    ret.Ggt_inequality = CasadiFEWrap(cs::Function("Ggt_inequality", stage_syms, {cs::MX::densify(Ggt_inequality)}, optss), expand, jit, jit_options_);
-                    ret.g_inequality = CasadiFEWrap(cs::Function("g_inequality", stage_syms, {cs::MX::densify(g_ineq)}, optss), expand, jit, jit_options_);
+                    ret.Ggt_inequality = CasadiFEWrap(cs::Function("Ggt_inequality", ustage_syms, {cs::MX::densify(Ggt_inequality)}, optss), expand, jit, jit_options_);
+                    ret.g_inequality = CasadiFEWrap(cs::Function("g_inequality", ustage_syms, {cs::MX::densify(g_ineq)}, optss), expand, jit, jit_options_);
                     auto rq_ineq = cs::MX();
                     auto RSQ_ineq = cs::MX::hessian(cs::MX::dot(g_ineq, lam_g_inequality), ux, rq_ineq);
                     rq_sym += rq_ineq;
