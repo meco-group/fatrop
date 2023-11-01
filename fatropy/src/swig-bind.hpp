@@ -30,6 +30,7 @@ namespace fatropy
                 throw std::runtime_error("Could not convert of type " + py_name + " to " + name);
             if (this_ptr == nullptr)
                 throw std::runtime_error("Could not convert to PySwigObject");
+            Py_DECREF(this_ptr);
             auto ret = reinterpret_cast<T *>(swig_obj->ptr);
             return ret;
         }
@@ -69,9 +70,7 @@ namespace PYBIND11_NAMESPACE
                 pybind11::module_ cspy_ = pybind11::module_::import(T::module);
                 pybind11::object attr_ = cspy_.attr(T::py_name);
                 pybind11::object ret(attr_());
-                pybind11::object ret2 = ret.attr("this");
-                ret2.dec_ref();
-                *fatropy::FromPySwig<type_cpp>::convert(ret.ptr(), T::py_name) = src;
+                *fatropy::FromPySwig<type_cpp>::convert(ret, T::py_name) = src;
                 return ret.release();
             }
         };
