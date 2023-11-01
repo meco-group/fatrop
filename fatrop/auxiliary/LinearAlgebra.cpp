@@ -32,7 +32,7 @@ namespace fatrop
             printf("\n");
         }
     }
-    void FatropVec::print()
+    void FatropVec::print() const
     {
         fatrop_int n_el = nels();
         for (fatrop_int ai = 0; ai < n_el; ai++)
