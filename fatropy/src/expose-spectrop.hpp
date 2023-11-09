@@ -51,6 +51,7 @@ struct py::detail::type_caster<casadi::MX> : public py::detail::swig_type_caster
 // {
 //     return casadi::Function(f);
 // }
+// PYBIND11_MAKE_OPAQUE(fatrop::spectrop::uo_map_mx_mx);
 namespace fatropy
 {
     struct ExposeSpectrop
@@ -91,13 +92,17 @@ namespace fatropy
             py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>;
             // py::bind_map<casadi::Dict>(m, "cs::Dict");
 
-            py::class_<fatrop::spectrop::uo_map_mx<casadi::MX>>(m, "MXMXmap");
+            py::bind_map<fatrop::spectrop::uo_map_mx_mx>(m, "uo_map_mx_mx");
+            py::class_<fatrop::spectrop::IntegratorRk4>(m,"IntegratorRk4").
+            def(py::init<const fatrop::spectrop::uo_map_mx_mx&, const casadi::MX&>()).
+            def("__call__", &fatrop::spectrop::IntegratorRk4::operator());
             py::enum_<fatrop::spectrop::at>(m, "at")
                 .value("t0", fatrop::spectrop::at::t0)
                 .value("mid", fatrop::spectrop::at::mid)
                 .value("tf", fatrop::spectrop::at::tf)
                 .export_values();
             py::class_<fatrop::spectrop::Stage>(m, "Stage").
+            def("set_next", &fatrop::spectrop::Stage::set_next).
             def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at>).
             def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at, fatrop::spectrop::at>).
             def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at, fatrop::spectrop::at, fatrop::spectrop::at>).
@@ -128,7 +133,8 @@ namespace fatropy
             .def("hybrid", &fatrop::spectrop::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1)
             .def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
             .def("sample", &fatrop::spectrop::Ocp::sample)
-            .def("new_stage", &fatrop::spectrop::Ocp::new_ustage, py::arg("K") = 1)
+            .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
+            .def("new_ustage", &fatrop::spectrop::Ocp::new_ustage, py::arg("K") = 1)
             .def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
             .def("at_t0", &fatrop::spectrop::Ocp::at_t0)
             .def("at_tf", &fatrop::spectrop::Ocp::at_tf)

@@ -11,7 +11,7 @@ namespace fatrop
         class IntegratorRk4
         {
         public:
-            IntegratorRk4(const uo_map_mx<cs::MX>& xdx, const casadi::MX &dt)
+            IntegratorRk4(const uo_map_mx_mx& xdx, const casadi::MX &dt)
             {
                 // put the x_dx keys into a vector
                 std::vector<cs::MX> x_vec;
