@@ -65,6 +65,8 @@ namespace fatrop
             cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts = casadi::Dict()) const;
             cs::MX at_t0(const cs::MX &expr) const {return ustages_.front().at_t0(expr);};
             cs::MX at_tf(const cs::MX &expr) const {return ustages_.back().at_tf(expr);};
+            uStage at_t0() const {return ustages_.front();};
+            uStage at_tf() const {return ustages_.back();};
             void set_initial(const cs::MX &var, const cs::MX &value);
             cs::MX eval_at_initial(const cs::MX &expr) const;
 

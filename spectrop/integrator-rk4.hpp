@@ -11,12 +11,13 @@ namespace fatrop
         class IntegratorRk4
         {
         public:
-            IntegratorRk4(const uo_map_mx_mx& xdx, const casadi::MX &dt)
+            IntegratorRk4(const std::vector<std::pair<cs::MX, cs::MX>> & xdx_in, const casadi::MX &dt_in)
             {
+                dt = dt_in;
                 // put the x_dx keys into a vector
                 std::vector<cs::MX> x_vec;
                 std::vector<cs::MX> dx_vec;
-                for (auto &xdx : xdx)
+                for (auto &xdx : xdx_in)
                 {
                     x_vec.push_back(xdx.first);
                     dx_vec.push_back(xdx.second);
@@ -32,6 +33,10 @@ namespace fatrop
             }
             cs::MX operator()(const cs::MX &expr)
             {
+                if(cs::Function("help", {x}, {expr}, cs::Dict({{"allow_free", true}})).has_free())
+                {
+                    throw std::runtime_error("IntegratorRk4: expr has free variables");
+                }
                 return cs::MX::substitute(expr, x, x_next);
             }
             cs::MX dt;

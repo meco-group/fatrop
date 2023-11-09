@@ -90,6 +90,7 @@ namespace fatropy
             py::implicitly_convertible<const casadi::Function &, casadi::GenericType>;
             py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>;
             py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>;
+            py::implicitly_convertible<py::float_, casadi::MX>;
             py::implicitly_convertible<double, casadi::MX>;
             // py::bind_map<casadi::Dict>(m, "cs::Dict");
 
