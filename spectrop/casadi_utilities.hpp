@@ -29,6 +29,8 @@ namespace fatrop
         struct uo_map_mx: public std::unordered_map<casadi::MX, T, MxHash, MxEqual>
         {
         };
+
+        typedef std::unordered_map<casadi::MX, casadi::MX, MxHash, MxEqual> uo_map_mx_mx;
         // template <typename T>
         // struct map_mx: public std::map<casadi::MX, T, MxHash, MxEqual>
         // {

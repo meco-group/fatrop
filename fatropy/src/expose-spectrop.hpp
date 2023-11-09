@@ -96,7 +96,7 @@ namespace fatropy
 
             py::bind_map<fatrop::spectrop::uo_map_mx_mx>(m, "uo_map_mx_mx");
             py::class_<fatrop::spectrop::IntegratorRk4>(m,"IntegratorRk4").
-            def(py::init<const fatrop::spectrop::uo_map_mx_mx&, const casadi::MX&>()).
+            def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX&>()).
             def("__call__", &fatrop::spectrop::IntegratorRk4::operator());
             py::enum_<fatrop::spectrop::at>(m, "at")
                 .value("t0", fatrop::spectrop::at::t0)
