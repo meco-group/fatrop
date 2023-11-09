@@ -107,12 +107,12 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
     else
     {
         ret = solve_pd_sys_degenerate(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, gradb_total);
-    }
+        }
     if (ret != 0)
         return ret;
     if (it_ref)
     {
-        const fatrop_int min_it_ref = 0;
+        const fatrop_int min_it_ref = 1;
         double err_curr = 0.0;
         get_rhs(
             OCP,
@@ -335,7 +335,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
             if (!check_reg(nx, LlIt_p, 0, 0))
                 return 2;
         }
-    }
+            }
     ////// FORWARD_SUBSTITUTION:
     // first stage
     {
@@ -1625,7 +1625,7 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
     // SOLVERMACRO(MAT *, RSQrqt_tilde, _p);
     // SOLVERMACRO(MAT *, Ggt_tilde, _p);
     SOLVERMACRO(MAT *, Llt, _p);
-    SOLVERMACRO(MAT *, Llt_shift, _p);
+    // SOLVERMACRO(MAT *, Llt_shift, _p);
     SOLVERMACRO(MAT *, LlIt, _p);
     // SOLVERMACRO(MAT *, Ggt_ineq_temp, _p);
     SOLVERMACRO(VEC *, ux, _p);
@@ -1645,7 +1645,7 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
     SOLVERMACRO(VEC *, v_Ppt, _p);
     SOLVERMACRO(VEC *, v_AL, _p);
     SOLVERMACRO(VEC *, v_RSQrqt_tilde, _p);
-    // SOLVERMACRO(VEC *, v_Ggt_tilde, _p);
+        // SOLVERMACRO(VEC *, v_Ggt_tilde, _p);
     SOLVERMACRO(VEC *, v_Llt, _p);
     SOLVERMACRO(VEC *, v_Llt_shift, _p);
     SOLVERMACRO(VEC *, v_LlIt, _p);
@@ -1654,9 +1654,10 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
     double delta_cmin1 = 1 / inertia_correction_c;
     fatrop_int *offs_ineq_p = (fatrop_int *)OCP->aux.ineq_offs.data();
     fatrop_int *offs_g_ineq_p = (fatrop_int *)OCP->aux.g_ineq_offs.data();
-    fatrop_int *offs_dyn_p = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
+    fatrop_int *offs_dyn_p = (fatrop_int *)OCP->aux.dyn_offs.data();
     fatrop_int *offs_g_p = (fatrop_int *)OCP->aux.g_offs.data();
     auto ux_offs_p = OCP->aux.ux_offs.data();
+    VEC *v_RSQrq_hat_curr_p;
 
     // /////////////// recursion ///////////////
 
@@ -1664,10 +1665,11 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
     {
         const fatrop_int nx = nx_p[K - 1];
         const fatrop_int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
-        // const fatrop_int ng = ng_p[K - 1];
+        const fatrop_int ng = ng_p[K - 1];
         const fatrop_int ng_ineq = ng_ineq_p[K - 1];
         const fatrop_int offs_ineq_k = offs_ineq_p[K - 1];
         const fatrop_int offs_ux_k = ux_offs_p[K - 1];
+        const fatrop_int offs_g_k = offs_g_p[K - 1];
         // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[K - 1];
         // Pp_Km1 <- Qq_Km1
         //     GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
@@ -1684,19 +1686,17 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
                 double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
                 //             COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
                 //             MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
-                VECEL(v_Ggt_ineq_temp_p, i) *= scaling_factor;
+                // VECEL(v_Ggt_ineq_temp_p, i) *= scaling_factor;
                 VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p, offs_ineq_k + i);
-                //         }
-                //         // add the penalty
-                //         SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-                //         // TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-                GEMV_N(nx, ng_ineq, 1.0, Ggt_ineq_p + K - 1, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_Ppt_p + K - 1, 0, v_Ppt_p + K - 1, 0);
             }
+            GEMV_N(nx, ng_ineq, 1.0, Ggt_ineq_p+K-1, 0,0, v_Ggt_ineq_temp_p, 0, 1.0, v_Ppt_p+K-1, 0, v_Ppt_p+K-1, 0);
 
             //     GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
             //     SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
             //     TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
         }
+            // VECCP(ng, rhs_g_p, offs_g_k, v_Ggt_tilde_p + K - 1, 0);
+            GEMV_N(nx, ng, delta_cmin1, Ggt_p + K - 1, 0, 0, rhs_g_p, offs_g_k, 1.0, v_Ppt_p + K - 1, 0, v_Ppt_p + K - 1, 0);
     }
     for (fatrop_int k = K - 2; k >= 0; --k)
     {
@@ -1715,6 +1715,7 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
             //         // AL <- [BAb]^T_k P_kp1
             //         GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
             GEMV_N(nxp1, nxp1, 1.0, Ppt_p + k + 1, 0, 0, rhs_b_p, offs_dyn_k, 0.0, v_AL_p, 0, v_AL_p, 0);
+        
             //         // AL[-1,:] <- AL[-1,:] + p_kp1^T
             //         GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
             AXPY(nxp1, 1.0, v_Ppt_p + (k + 1), 0, v_AL_p, 0, v_AL_p, 0);
@@ -1737,22 +1738,22 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
                     double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
                     //                 COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
                     //                 MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
-                    VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p,offs_ineq_k + i);
+                    VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p, offs_ineq_k + i);
                 }
                 //             // add the penalty
                 //             SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
                 GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_RSQrqt_tilde_p + k, 0, v_RSQrqt_tilde_p + k, 0);
             }
-        }
         //     //////// TRANSFORM_AND_SUBSEQ
-        // {
-        //     v_RSQrq_hat_curr_p = v_RSQrqt_tilde_p + k;
-        // }
+        {
+            v_RSQrq_hat_curr_p = v_RSQrqt_tilde_p + k;
+            // RSQrq_hat_curr_p = RSQrqt_tilde_p + k;
+        }
         //     //////// SCHUR
         {
             //         // DLlt_k = [chol(R_hatk); Llk@chol(R_hatk)^-T]
             //         POTRF_L_MN(nu + nx + 1, nu, RSQrq_hat_curr_p, 0, 0, Llt_p + k, 0, 0);
-            TRSV_LNN(nu, Llt_p + k, 0, 0, v_Llt_p + k, 0, v_Llt_p + k, 0);
+            TRSV_LNN(nu, Llt_p + k, 0, 0, v_RSQrq_hat_curr_p, 0, v_Llt_p + k, 0);
             //         if (!check_reg(nu, Llt_p + k, 0, 0))
             //             return 1;
             //         // Pp_k = Qq_hatk - L_k^T @ Ll_k
@@ -1760,20 +1761,21 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
             //         GECP(nx + 1, nu, Llt_p + k, nu, 0, Llt_shift_p, 0, 0); // needless operation because feature not implemented yet
             VECCP(nu, v_Llt_p + k, 0, v_Llt_shift_p, 0);
             //         SYRK_LN_MN(nx + 1, nx, nu, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, RSQrq_hat_curr_p, nu, nu, Ppt_p + k, 0, 0);
-            GEMV_N(nx, nu, -1.0, Llt_shift_p, 0, 0, v_Llt_shift_p, 0, 1.0, v_RSQrqt_tilde_p + k, nu, v_Ppt_p + k, 0);
+            GEMV_N(nx, nu, -1.0, Llt_p+k, nu, 0, v_Llt_shift_p, 0, 1.0, v_RSQrqt_tilde_p + k, nu, v_Ppt_p + k, 0);
         }
         //     TRTR_L(nx, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
+        }
     }
     // //////// FIRST_STAGE
     {
         const fatrop_int nx = nx_p[0];
         {
             // POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
-            TRSV_LNN(nx, LlIt_p, 0, 0, v_LlIt_p, 0, v_LlIt_p, 0);
+            TRSV_LNN(nx, LlIt_p, 0, 0, v_Ppt_p, 0, v_LlIt_p, 0);
             // if (!check_reg(nx, LlIt_p, 0, 0))
             //     return 2;
         }
-    }
+            }
     // ////// FORWARD_SUBSTITUTION:
     // // first stage
     {
