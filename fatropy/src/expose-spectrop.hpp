@@ -90,6 +90,7 @@ namespace fatropy
             py::implicitly_convertible<const casadi::Function &, casadi::GenericType>;
             py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>;
             py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>;
+            py::implicitly_convertible<double, casadi::MX>;
             // py::bind_map<casadi::Dict>(m, "cs::Dict");
 
             py::bind_map<fatrop::spectrop::uo_map_mx_mx>(m, "uo_map_mx_mx");
@@ -136,8 +137,10 @@ namespace fatropy
             .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
             .def("new_ustage", &fatrop::spectrop::Ocp::new_ustage, py::arg("K") = 1)
             .def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
-            .def("at_t0", &fatrop::spectrop::Ocp::at_t0)
-            .def("at_tf", &fatrop::spectrop::Ocp::at_tf)
+            .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectrop::Ocp::at_t0, py::const_))
+            .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectrop::Ocp::at_tf, py::const_))
+            .def("at_t0",py::overload_cast<>(&fatrop::spectrop::Ocp::at_t0, py::const_))
+            .def("at_tf",py::overload_cast<>(&fatrop::spectrop::Ocp::at_tf, py::const_))
             .def("set_initial", &fatrop::spectrop::Ocp::set_initial);
 
             // .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
