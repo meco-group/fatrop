@@ -92,7 +92,25 @@ namespace fatropy
             // py::bind_map<casadi::Dict>(m, "cs::Dict");
 
             py::class_<fatrop::spectrop::uo_map_mx<casadi::MX>>(m, "MXMXmap");
-            py::class_<fatrop::spectrop::uStage>(m, "Stage")
+            py::enum_<fatrop::spectrop::at>(m, "at")
+                .value("t0", fatrop::spectrop::at::t0)
+                .value("mid", fatrop::spectrop::at::mid)
+                .value("tf", fatrop::spectrop::at::tf)
+                .export_values();
+            py::class_<fatrop::spectrop::Stage>(m, "Stage").
+            def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at>).
+            def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at, fatrop::spectrop::at>).
+            def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at, fatrop::spectrop::at, fatrop::spectrop::at>).
+            def("subject_to", &fatrop::spectrop::Stage::subject_to<fatrop::spectrop::at>).
+            def("subject_to", &fatrop::spectrop::Stage::subject_to<fatrop::spectrop::at, fatrop::spectrop::at>).
+            def("subject_to", &fatrop::spectrop::Stage::subject_to<fatrop::spectrop::at, fatrop::spectrop::at, fatrop::spectrop::at>).
+            def("at_t0", &fatrop::spectrop::Stage::at_t0).
+            def("at_tf", &fatrop::spectrop::Stage::at_tf).
+            def("at_mid", &fatrop::spectrop::Stage::at_mid);
+
+            // def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at>);
+
+            py::class_<fatrop::spectrop::uStage>(m, "uStage")
                 .def("add_objective", &fatrop::spectrop::uStage::add_objective)
                 .def("subject_to", &fatrop::spectrop::uStage::subject_to)
                 .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectrop::uStage::set_next))
