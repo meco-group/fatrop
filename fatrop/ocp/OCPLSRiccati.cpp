@@ -112,7 +112,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
         return ret;
     if (it_ref)
     {
-        const fatrop_int min_it_ref = 1;
+        const fatrop_int min_it_ref = 0;
         double err_curr = 0.0;
         get_rhs(
             OCP,
