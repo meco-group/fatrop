@@ -37,9 +37,9 @@ namespace fatrop
             const uo_map_mx<std::vector<cs::MX>> &get_hybrid_syms() const;
             const std::vector<cs::MX> &get_control_parameters() const;
             const uo_map_mx<std::vector<cs::MX>> &get_control_parameter_syms() const;
-            const std::shared_ptr<OcpInternal> &get_ocp() const;
-            const std::shared_ptr<uStageInternal> &get_next_ustage() const;
-            const std::shared_ptr<uStageInternal> &get_prev_ustage() const;
+            const std::shared_ptr<OcpInternal> get_ocp() const;
+            const std::shared_ptr<uStageInternal> get_next_ustage() const;
+            const std::shared_ptr<uStageInternal> get_prev_ustage() const;
             int K() const {return K_;};
 
         private:
@@ -65,9 +65,9 @@ namespace fatrop
             std::vector<cs::MX> control_parameters_;
             uo_set_mx control_parameters_set_;
             uo_map_mx<std::vector<cs::MX>> control_parameter_syms_;
-            std::shared_ptr<OcpInternal> ocp_;
-            std::shared_ptr<uStageInternal> next_ustage_ = nullptr;
-            std::shared_ptr<uStageInternal> prev_ustage_ = nullptr;
+            std::weak_ptr<OcpInternal> ocp_;
+            std::weak_ptr<uStageInternal> next_ustage_;
+            std::weak_ptr<uStageInternal> prev_ustage_;
         };
         class uStage : private std::shared_ptr<uStageInternal>
         {

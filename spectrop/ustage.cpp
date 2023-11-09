@@ -18,8 +18,8 @@ namespace fatrop
         {
             get()->next_states_[state] = next_state;
             get()->add_variables(next_state);
-            if (get()->next_ustage_)
-                get()->next_ustage_->add_variables(state);
+            if (get()-> next_ustage_.lock())
+                get()->next_ustage_.lock()->add_variables(state);
         }
         void uStage::set_next(const uo_map_mx<cs::MX> &next_states)
         {
@@ -35,17 +35,17 @@ namespace fatrop
             auto syms = cs::MX::symvar(expr);
             for (auto &sym : syms)
             {
-                if (ocp_->is_global_parameter(sym))
+                if (ocp_.lock()->is_global_parameter(sym))
                     continue;
                 if (has_variable(sym))
                     continue;
-                if (ocp_->is_state(sym))
+                if (ocp_.lock()->is_state(sym))
                     register_state(sym);
-                else if (ocp_->is_control(sym))
+                else if (ocp_.lock()->is_control(sym))
                     register_control(sym);
-                else if (ocp_->is_control_parameter(sym))
+                else if (ocp_.lock()->is_control_parameter(sym))
                     register_control_parameter(sym);
-                else if (ocp_->is_hybrid(sym))
+                else if (ocp_.lock()->is_hybrid(sym))
                     register_hybrid(sym);
                 else
                     throw std::runtime_error("MX sym " + sym.name() + " not recognized, is it declared outside of the Ocp?");
@@ -180,17 +180,17 @@ namespace fatrop
         {
             return control_parameter_syms_;
         };
-        const std::shared_ptr<OcpInternal> &uStageInternal::get_ocp() const
+        const std::shared_ptr<OcpInternal> uStageInternal::get_ocp() const
         {
-            return ocp_;
+            return ocp_.lock();
         };
-        const std::shared_ptr<uStageInternal> &uStageInternal::get_next_ustage() const
+        const std::shared_ptr<uStageInternal> uStageInternal::get_next_ustage() const
         {
-            return next_ustage_;
+            return next_ustage_.lock();
         };
-        const std::shared_ptr<uStageInternal> &uStageInternal::get_prev_ustage() const
+        const std::shared_ptr<uStageInternal> uStageInternal::get_prev_ustage() const
         {
-            return prev_ustage_;
+            return prev_ustage_.lock();
         };
         // const uo_map_mx<cs::MX> &StageInternal::get_state_initial() const
         // {
