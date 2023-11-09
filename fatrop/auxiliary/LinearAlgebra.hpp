@@ -81,7 +81,7 @@ namespace fatrop
         virtual double get_el(const fatrop_int ai) const = 0;
         /** \brief Number of elements */
         virtual fatrop_int nels() const = 0;
-        void print();
+        void print() const;
     };
 } // namespace fatrop
 

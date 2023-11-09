@@ -1694,6 +1694,7 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
             //     GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
             //     SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
             //     TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
+                GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + K-1, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_Ppt_p + K-1, 0, v_Ppt_p + K-1, 0);
         }
             // VECCP(ng, rhs_g_p, offs_g_k, v_Ggt_tilde_p + K - 1, 0);
             GEMV_N(nx, ng, delta_cmin1, Ggt_p + K - 1, 0, 0, rhs_g_p, offs_g_k, 1.0, v_Ppt_p + K - 1, 0, v_Ppt_p + K - 1, 0);
