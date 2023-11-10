@@ -103,8 +103,10 @@ PYBIND11_MODULE(fatropy, m)
     py::class_<fatrop::StageOCPApplicationFactory>(m, "StageOCPApplicationFactory")
         .def(py::init<>())
         .def("from_rockit_interface", &fatrop::StageOCPApplicationFactory::from_rockit_interface);
+    auto module_spectrop = m.def_submodule("spectrop", "This is A.");
 
-    ExposeSpectrop::expose(m);
+
+    ExposeSpectrop::expose(module_spectrop);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
