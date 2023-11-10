@@ -14,10 +14,10 @@ namespace fatrop
             ret.p_stage = cs::MX::veccat(ustage->get_control_parameters());
             ret.u = cs::MX::veccat(ustage->get_controls());
             ret.p_global = cs::MX::veccat(ustage->get_ocp()->get_global_parameter_syms());
-            ret.nx = ret.x.size1();
-            ret.nu = ret.u.size1();
-            ret.np_stage = ret.p_stage.size1();
-            ret.np_global = ret.p_global.size1();
+            // ret.nx = ret.x.size1();
+            // ret.nu = ret.u.size1();
+            // ret.np_stage = ret.p_stage.size1();
+            // ret.np_global = ret.p_global.size1();
             ret.K = ustage->K();
             if (ustage->get_next_ustage())
             {
@@ -46,11 +46,11 @@ namespace fatrop
                     std::cerr << e.what() << '\n';
                     throw std::runtime_error("Did you set_next for every state?");
                 }
-                ret.nxp1 = ret.x_next.size1();
+                // ret.nxp1 = ret.x_next.size1();
             }
             else
             {
-                ret.nxp1 = 0;
+                // ret.nxp1 = 0;
                 ret.x_next = cs::MX::zeros(0, 1);
             }
             ConstraintHelper::process(ustage->get_constraints(),
@@ -58,8 +58,8 @@ namespace fatrop
                                       ret.ub,
                                       ret.g_ineq,
                                       ret.g);
-            ret.ng_eq = ret.g.size1();
-            ret.ng_ineq = ret.g_ineq.size1();
+            // ret.ng_eq = ret.g.size1();
+            // ret.ng_ineq = ret.g_ineq.size1();
 
             ret.L = 0;
             for (auto &term : ustage->get_objective_terms())

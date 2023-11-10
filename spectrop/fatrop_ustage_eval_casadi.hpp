@@ -21,15 +21,16 @@ namespace fatrop
                 optss["jit"] = false;
                 cs::Dict jit_options_ = cs::get_from_dict(optss, "jit_options", casadi::Dict({{"flags", "-Ofast -march=native -ffast-math"}}));
                 K_ = sq.K;
-                nu_ = sq.nu;
-                nx_ = sq.nx;
-                np_stage_ = sq.np_stage;
-                np_global_ = sq.np_global;
-                ng_eq_ = sq.ng_eq;
-                ng_ineq_ = sq.ng_ineq;
-                cs::MX lam_g_equality = cs::MX::sym("lam_g_equality", sq.ng_eq);
-                cs::MX lam_g_inequality = cs::MX::sym("lam_g_inequality", sq.ng_ineq);
-                cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", sq.nxp1);
+                nu_ = sq.nu();
+                nx_ = sq.nx();
+                np_stage_ = sq.np_stage();
+                np_global_ = sq.np_global();
+                ng_eq_ = sq.ng_eq();
+                ng_ineq_ = sq.ng_ineq();
+                nxp1_ = sq.nxp1();
+                cs::MX lam_g_equality = cs::MX::sym("lam_g_equality", ng_eq_);
+                cs::MX lam_g_inequality = cs::MX::sym("lam_g_inequality", ng_ineq_);
+                cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", nxp1_);
                 std::vector<cs::MX> ustage_syms{sq.u, sq.x, sq.p_stage, sq.p_global};
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 L_ = CasadiFEWrap(cs::Function("L", ustage_syms, {sq.L}, optss), expand, jit, jit_options_);
@@ -38,7 +39,7 @@ namespace fatrop
                 rq_ = CasadiFEWrap(cs::Function("rq", ustage_syms, {cs::MX::densify(rq_sym)}, optss), expand, jit, jit_options_);
                 // if (sq.nxp1 > 0)
                 {
-                    auto xp1 = cs::MX::sym("xp1", sq.nxp1);
+                    auto xp1 = cs::MX::sym("xp1", nxp1_);
                     auto b = -xp1 + sq.x_next;
                     auto BAbt = cs::MX::horzcat({cs::MX::jacobian(sq.x_next, ux), b}).T();
                     b_ = CasadiFEWrap(cs::Function("b", {sq.x, xp1, sq.u, sq.p_stage, sq.p_global},
@@ -260,6 +261,7 @@ namespace fatrop
             int K_;
             int nu_;
             int nx_;
+            int nxp1_;
             int np_stage_;
             int np_global_;
             int ng_eq_;

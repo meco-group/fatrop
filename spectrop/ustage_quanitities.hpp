@@ -23,13 +23,13 @@ namespace fatrop
             cs::DM lb;
             cs::DM ub;
             int K;
-            int nu;
-            int nx;
-            int nxp1;
-            int np_stage;
-            int np_global;
-            int ng_eq;
-            int ng_ineq;
+            int nu() const { return u.size1(); };
+            int nx() const { return x.size1(); };
+            int nxp1() const { return x_next.size1(); };
+            int np_stage() const { return p_stage.size1(); };
+            int np_global() const { return p_global.size1(); };
+            int ng_eq() const { return g.size1(); };
+            int ng_ineq() const { return g_ineq.size1(); };
 
             static uStageQuantities create(const std::shared_ptr<uStageInternal> &ustage);
         };
