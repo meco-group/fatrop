@@ -3,10 +3,10 @@
 
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         // void SolverFatrop::transcribe(const Ocp &ocp_) 
         // {
         // }
-    }; // namespace spectrop
+    }; // namespace spectool
 }; // namespace fatrop

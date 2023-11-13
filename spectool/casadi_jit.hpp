@@ -5,7 +5,7 @@
 #include "casadi_utilities.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         typedef int (*eval_t)(const double **arg, double **res,
                               long long int *iw, double *w, int);
@@ -18,6 +18,9 @@ namespace fatrop
                 jit_name_ = F.name();
                 jit_name_ = casadi::temporary_file(jit_name_, ".c");
                 jit_name_ = std::string(jit_name_.begin(), jit_name_.begin() + jit_name_.size() - 2);
+                // static std::map<std::string, eval_t> eval_cache;
+                // serialize the function
+                // std::string serialized_hash = std::hash<std::string>(F.serialize());
                 if (func_internal->has_codegen())
                 {
                     // JIT everything
@@ -57,5 +60,5 @@ namespace fatrop
             eval_t eval_;
         };
 
-    } // namespace spectrop
+    } // namespace spectool
 } // namespace fatrop

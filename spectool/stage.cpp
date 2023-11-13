@@ -1,7 +1,7 @@
 #include "stage.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         Stage::Stage(Ocp &ocp, const int K):std::shared_ptr<StageInternal>(std::make_shared<StageInternal>())
         {

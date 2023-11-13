@@ -10,7 +10,7 @@
 #include "fatrop_ustage_eval_casadi.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         namespace cs = casadi;
         class FatropOcpImpl : public OCPAbstract
@@ -164,5 +164,5 @@ namespace fatrop
             int n_global_parameters_ = 0;
         };
         // implementation of OCPAbstract, given an OCP
-    } // namespace spectrop
+    } // namespace spectool
 } // namespace fatrop

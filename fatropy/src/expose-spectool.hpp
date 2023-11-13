@@ -6,7 +6,7 @@
 #include "ocp/StageOCPApplication.hpp"
 #include "numpy.hpp"
 #include "swig-bind.hpp"
-#include "spectrop.hpp"
+#include "spectool.hpp"
 
 namespace py = pybind11;
 namespace fatropy
@@ -51,10 +51,10 @@ struct py::detail::type_caster<casadi::MX> : public py::detail::swig_type_caster
 // {
 //     return casadi::Function(f);
 // }
-// PYBIND11_MAKE_OPAQUE(fatrop::spectrop::uo_map_mx_mx);
+// PYBIND11_MAKE_OPAQUE(fatrop::spectool::uo_map_mx_mx);
 namespace fatropy
 {
-    struct ExposeSpectrop
+    struct ExposeSpectool
     {
         static void expose(py::module &m)
         {
@@ -94,57 +94,57 @@ namespace fatropy
             py::implicitly_convertible<double, casadi::MX>;
             // py::bind_map<casadi::Dict>(m, "cs::Dict");
 
-            py::bind_map<fatrop::spectrop::uo_map_mx_mx>(m, "uo_map_mx_mx");
-            py::class_<fatrop::spectrop::IntegratorRk4>(m,"IntegratorRk4").
+            py::bind_map<fatrop::spectool::uo_map_mx_mx>(m, "uo_map_mx_mx");
+            py::class_<fatrop::spectool::IntegratorRk4>(m,"IntegratorRk4").
             def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX&>()).
-            def("__call__", &fatrop::spectrop::IntegratorRk4::operator());
-            py::enum_<fatrop::spectrop::at>(m, "at")
-                .value("t0", fatrop::spectrop::at::t0)
-                .value("mid", fatrop::spectrop::at::mid)
-                .value("tf", fatrop::spectrop::at::tf)
+            def("__call__", &fatrop::spectool::IntegratorRk4::operator());
+            py::enum_<fatrop::spectool::at>(m, "at")
+                .value("t0", fatrop::spectool::at::t0)
+                .value("mid", fatrop::spectool::at::mid)
+                .value("tf", fatrop::spectool::at::tf)
                 .export_values();
-            py::class_<fatrop::spectrop::Stage>(m, "Stage").
-            def("set_next", &fatrop::spectrop::Stage::set_next).
-            def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at>).
-            def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at, fatrop::spectrop::at>).
-            def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at, fatrop::spectrop::at, fatrop::spectrop::at>).
-            def("subject_to", &fatrop::spectrop::Stage::subject_to<fatrop::spectrop::at>).
-            def("subject_to", &fatrop::spectrop::Stage::subject_to<fatrop::spectrop::at, fatrop::spectrop::at>).
-            def("subject_to", &fatrop::spectrop::Stage::subject_to<fatrop::spectrop::at, fatrop::spectrop::at, fatrop::spectrop::at>).
-            def("at_t0", &fatrop::spectrop::Stage::at_t0).
-            def("at_tf", &fatrop::spectrop::Stage::at_tf).
-            def("at_mid", &fatrop::spectrop::Stage::at_mid);
+            py::class_<fatrop::spectool::Stage>(m, "Stage").
+            def("set_next", &fatrop::spectool::Stage::set_next).
+            def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>).
+            def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at, fatrop::spectool::at>).
+            def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at, fatrop::spectool::at, fatrop::spectool::at>).
+            def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at>).
+            def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at, fatrop::spectool::at>).
+            def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at, fatrop::spectool::at, fatrop::spectool::at>).
+            def("at_t0", &fatrop::spectool::Stage::at_t0).
+            def("at_tf", &fatrop::spectool::Stage::at_tf).
+            def("at_mid", &fatrop::spectool::Stage::at_mid);
 
-            // def("add_objective", &fatrop::spectrop::Stage::add_objective<fatrop::spectrop::at>);
+            // def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>);
 
-            py::class_<fatrop::spectrop::uStage>(m, "uStage")
-                .def("add_objective", &fatrop::spectrop::uStage::add_objective)
-                .def("subject_to", &fatrop::spectrop::uStage::subject_to)
-                .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectrop::uStage::set_next))
-                // .def("set_next", py::overload_cast<const fatrop::spectrop::uo_map_mx<casadi::MX>&>(&fatrop::spectrop::Stage::set_next))
-                .def("at_t0", &fatrop::spectrop::uStage::at_t0)
-                .def("at_tf", &fatrop::spectrop::uStage::at_tf)
-                .def("K", &fatrop::spectrop::uStage::K)
-                .def("dynamics", &fatrop::spectrop::uStage::dynamics)
-                .def("eval_at_control", &fatrop::spectrop::uStage::eval_at_control)
-                .def("sample", &fatrop::spectrop::uStage::sample);
+            py::class_<fatrop::spectool::uStage>(m, "uStage")
+                .def("add_objective", &fatrop::spectool::uStage::add_objective)
+                .def("subject_to", &fatrop::spectool::uStage::subject_to)
+                .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectool::uStage::set_next))
+                // .def("set_next", py::overload_cast<const fatrop::spectool::uo_map_mx<casadi::MX>&>(&fatrop::spectool::Stage::set_next))
+                .def("at_t0", &fatrop::spectool::uStage::at_t0)
+                .def("at_tf", &fatrop::spectool::uStage::at_tf)
+                .def("K", &fatrop::spectool::uStage::K)
+                .def("dynamics", &fatrop::spectool::uStage::dynamics)
+                .def("eval_at_control", &fatrop::spectool::uStage::eval_at_control)
+                .def("sample", &fatrop::spectool::uStage::sample);
 
-            py::class_<fatrop::spectrop::Ocp>(m, "Ocp").def(py::init<>())
-            .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
-            .def("control", &fatrop::spectrop::Ocp::control, py::arg("m") = 1, py::arg("n") = 1)
-            .def("hybrid", &fatrop::spectrop::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1)
-            .def("parameter", &fatrop::spectrop::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
-            .def("sample", &fatrop::spectrop::Ocp::sample)
-            .def("new_stage", &fatrop::spectrop::Ocp::new_stage, py::arg("K") = 1)
-            .def("new_ustage", &fatrop::spectrop::Ocp::new_ustage, py::arg("K") = 1)
-            .def("to_function", &fatrop::spectrop::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
-            .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectrop::Ocp::at_t0, py::const_))
-            .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectrop::Ocp::at_tf, py::const_))
-            .def("at_t0",py::overload_cast<>(&fatrop::spectrop::Ocp::at_t0, py::const_))
-            .def("at_tf",py::overload_cast<>(&fatrop::spectrop::Ocp::at_tf, py::const_))
-            .def("set_initial", &fatrop::spectrop::Ocp::set_initial);
+            py::class_<fatrop::spectool::Ocp>(m, "Ocp").def(py::init<>())
+            .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
+            .def("control", &fatrop::spectool::Ocp::control, py::arg("m") = 1, py::arg("n") = 1)
+            .def("hybrid", &fatrop::spectool::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1)
+            .def("parameter", &fatrop::spectool::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
+            .def("sample", &fatrop::spectool::Ocp::sample)
+            .def("new_stage", &fatrop::spectool::Ocp::new_stage, py::arg("K") = 1)
+            .def("new_ustage", &fatrop::spectool::Ocp::new_ustage, py::arg("K") = 1)
+            .def("to_function", &fatrop::spectool::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
+            .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_t0, py::const_))
+            .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_tf, py::const_))
+            .def("at_t0",py::overload_cast<>(&fatrop::spectool::Ocp::at_t0, py::const_))
+            .def("at_tf",py::overload_cast<>(&fatrop::spectool::Ocp::at_tf, py::const_))
+            .def("set_initial", &fatrop::spectool::Ocp::set_initial);
 
-            // .def("state", &fatrop::spectrop::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
+            // .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
         }
     };
 }

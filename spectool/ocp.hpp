@@ -8,7 +8,7 @@
 
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         class Stage;
         namespace cs = casadi;

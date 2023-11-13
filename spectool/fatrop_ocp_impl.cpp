@@ -1,6 +1,6 @@
 #include "fatrop_ocp_impl.hpp"
 namespace fatrop{
-    namespace spectrop
+    namespace spectool
     {
             // FatropuStageEvalCasadi FatropuStageEvalCasadi::create(const uStage &ustage, const cs::Dict& opts)
             // {

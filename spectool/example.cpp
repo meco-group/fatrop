@@ -1,8 +1,8 @@
-#include "spectrop.hpp"
+#include "spectool.hpp"
 #include "ocp/StageOCPApplication.hpp"
 using namespace std;
 using namespace fatrop;
-using namespace fatrop::spectrop;
+using namespace fatrop::spectool;
 
 int main()
 {

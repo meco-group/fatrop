@@ -2,7 +2,7 @@
 #include "ocp.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         void uStage::subject_to(const cs::MX &constraint)
         {

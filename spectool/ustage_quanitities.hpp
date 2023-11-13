@@ -4,7 +4,7 @@
 #include <memory>
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         namespace cs = casadi;
 

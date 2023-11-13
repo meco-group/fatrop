@@ -6,7 +6,7 @@
 #include "casadi_jit.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         namespace cs = casadi;
         class CasadiFEWrap
@@ -75,5 +75,5 @@ namespace fatrop
             std::unique_ptr<CasadiFEJit> fe_jit_;
         };
         // implementation of OCPAbstract, given an OCP
-    } // namespace spectrop
+    } // namespace spectool
 } // namespace fatrop

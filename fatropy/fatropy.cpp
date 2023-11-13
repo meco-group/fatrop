@@ -5,7 +5,7 @@
 #include "src/numpy.hpp"
 #include "src/swig-bind.hpp"
 #include "src/specification.hpp"
-#include "src/expose-spectrop.hpp"
+#include "src/expose-spectool.hpp"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -103,10 +103,10 @@ PYBIND11_MODULE(fatropy, m)
     py::class_<fatrop::StageOCPApplicationFactory>(m, "StageOCPApplicationFactory")
         .def(py::init<>())
         .def("from_rockit_interface", &fatrop::StageOCPApplicationFactory::from_rockit_interface);
-    auto module_spectrop = m.def_submodule("spectrop", "This is A.");
+    auto module_spectool = m.def_submodule("spectool", "specification tool");
 
 
-    ExposeSpectrop::expose(module_spectrop);
+    ExposeSpectool::expose(module_spectool);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

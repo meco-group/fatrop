@@ -1,4 +1,4 @@
-from fatropy.spectrop import *
+from fatropy.spectool import *
 from casadi import *
 def get_func():
   ocp = Ocp()

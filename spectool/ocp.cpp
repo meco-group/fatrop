@@ -2,7 +2,7 @@
 #include "fatrop_solver.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         cs::MX Ocp::state(const int m, const int n)
         {

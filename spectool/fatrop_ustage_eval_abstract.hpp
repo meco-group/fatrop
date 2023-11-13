@@ -6,7 +6,7 @@ extern "C"
 #define MAT blasfeo_dmat
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         class FatropuStageEvalAbstract
         {

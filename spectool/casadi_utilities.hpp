@@ -7,7 +7,7 @@
 #include <map>
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         struct MxHash
         {
@@ -35,5 +35,5 @@ namespace fatrop
         // struct map_mx: public std::map<casadi::MX, T, MxHash, MxEqual>
         // {
         // };
-    } // namespace spectrop
+    } // namespace spectool
 } // namespace fatrop

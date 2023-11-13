@@ -6,7 +6,7 @@
 #include "ocp/StageOCPApplication.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         namespace cs = casadi;
         class FatropFunctionInternal : public cs::FunctionInternal
@@ -124,5 +124,5 @@ namespace fatrop
         private:
         };
 
-    } // namespace spectrop
+    } // namespace spectool
 } // namespace fatrop

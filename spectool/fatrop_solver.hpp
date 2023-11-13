@@ -7,7 +7,7 @@
 #include "fatrop_ocp_impl.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         namespace cs = casadi;
         struct uStageEvaluator

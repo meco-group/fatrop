@@ -4,7 +4,7 @@
 
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
     }; // namespace spectrop
 };  // namespace fatrop

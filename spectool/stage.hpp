@@ -5,7 +5,7 @@
 
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         enum class at
         {

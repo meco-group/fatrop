@@ -6,7 +6,7 @@
 #include "casadi_utilities.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         namespace cs = casadi;
         class uStage;

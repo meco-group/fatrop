@@ -5,7 +5,7 @@
 #include "ocp.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         uStageQuantities uStageQuantities::create(const std::shared_ptr<uStageInternal> &ustage)
         {

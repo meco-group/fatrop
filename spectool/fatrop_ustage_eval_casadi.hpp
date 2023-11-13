@@ -7,7 +7,7 @@ extern "C"
 #include "casadi_fe.hpp"
 namespace fatrop
 {
-    namespace spectrop
+    namespace spectool
     {
         class FatropuStageEvalCasadi : public FatropuStageEvalAbstract
         {
