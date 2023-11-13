@@ -20,7 +20,7 @@ namespace fatrop
             {
                 horizon_length_ = 0;
                 n_global_parameters_ = cs::MX::veccat(ocp.get_global_parameters()).size1();
-                eval_cache_map eval_cache;
+                CasadiJitCache eval_cache;
                 for (const auto &ustage : ocp.get_ustages())
                 {
                     ustages_.push_back(std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(ustage.get_internal()), opts, eval_cache));

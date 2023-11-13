@@ -12,7 +12,7 @@ namespace fatrop
         class FatropuStageEvalCasadi : public FatropuStageEvalAbstract
         {
             public:
-            FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts, eval_cache_map &eval_cache)
+            FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts, CasadiJitCache &eval_cache)
             {
                 auto optss = opts;
                 bool expand = cs::get_from_dict(optss, "post_expand", true);

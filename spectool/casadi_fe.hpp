@@ -4,17 +4,17 @@
 #include "casadi_utilities.hpp"
 #include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "casadi_jit.hpp"
+#include "casadi_jit_cache.hpp"
 namespace fatrop
 {
     namespace spectool
     {
         namespace cs = casadi;
-        typedef std::map<size_t, std::shared_ptr<CasadiFEJit>> eval_cache_map;
         class CasadiFEWrap
         {
         public:
             CasadiFEWrap(){};
-            CasadiFEWrap(const cs::Function &func, bool expand, bool jit, const cs::Dict& jit_options_, eval_cache_map& cache_map) : func_(expand ? func.expand() : func), jit_(jit)
+            CasadiFEWrap(const cs::Function &func, bool expand, bool jit, const cs::Dict& jit_options_, CasadiJitCache& cache_map) : func_(expand ? func.expand() : func), jit_(jit)
             {
                 m = (int)func_.size1_out(0);
                 n = (int)func_.size2_out(0);
