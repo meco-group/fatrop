@@ -3,6 +3,7 @@
 #include <casadi/core/function_internal.hpp>
 #include <string>
 #include "casadi_utilities.hpp"
+#include <functional>
 namespace fatrop
 {
     namespace spectool
@@ -15,14 +16,11 @@ namespace fatrop
             CasadiFEJit(const cs::Function &F, const cs::Dict &jit_options_)
             {
                 cs::FunctionInternal *func_internal = F.get();
-                jit_name_ = F.name();
-                jit_name_ = casadi::temporary_file(jit_name_, ".c");
-                jit_name_ = std::string(jit_name_.begin(), jit_name_.begin() + jit_name_.size() - 2);
-                // static std::map<std::string, eval_t> eval_cache;
-                // serialize the function
-                // std::string serialized_hash = std::hash<std::string>(F.serialize());
                 if (func_internal->has_codegen())
                 {
+                    jit_name_ = F.name();
+                    jit_name_ = casadi::temporary_file(jit_name_, ".c");
+                    jit_name_ = std::string(jit_name_.begin(), jit_name_.begin() + jit_name_.size() - 2);
                     // JIT everything
                     casadi::Dict opts;
                     // Override the default to avoid random strings in the generated code
@@ -34,8 +32,9 @@ namespace fatrop
                     std::string compiler_plugin_ = "shell";
                     compiler_ = casadi::Importer(gen.generate(jit_directory), compiler_plugin_, jit_options_);
                     eval_ = (eval_t)compiler_.get_function(F.name());
-                    casadi_assert(eval_ != nullptr, "Cannot load JIT'ed function.");
+                    // cache the function
                     compiled_jit = true;
+                    casadi_assert(eval_ != nullptr, "Cannot load JIT'ed function.");
                 }
                 else
                 {

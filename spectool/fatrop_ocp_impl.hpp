@@ -20,9 +20,10 @@ namespace fatrop
             {
                 horizon_length_ = 0;
                 n_global_parameters_ = cs::MX::veccat(ocp.get_global_parameters()).size1();
+                eval_cache_map eval_cache;
                 for (const auto &ustage : ocp.get_ustages())
                 {
-                    ustages_.push_back(std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(ustage.get_internal()), opts));
+                    ustages_.push_back(std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(ustage.get_internal()), opts, eval_cache));
                     for (int i = 1; i < ustage.K(); i++)
                         ustages_.push_back(ustages_.back());
                     horizon_length_ += ustage.K();

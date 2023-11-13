@@ -12,7 +12,7 @@ namespace fatrop
         class FatropuStageEvalCasadi : public FatropuStageEvalAbstract
         {
             public:
-            FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts)
+            FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts, eval_cache_map &eval_cache)
             {
                 auto optss = opts;
                 bool expand = cs::get_from_dict(optss, "post_expand", true);
@@ -33,10 +33,10 @@ namespace fatrop
                 cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", nxp1_);
                 std::vector<cs::MX> ustage_syms{sq.u, sq.x, sq.p_stage, sq.p_global};
                 auto ux = cs::MX::veccat({sq.u, sq.x});
-                L_ = CasadiFEWrap(cs::Function("L", ustage_syms, {sq.L}, optss), expand, jit, jit_options_);
+                L_ = CasadiFEWrap(cs::Function("L", ustage_syms, {sq.L}, optss), expand, jit, jit_options_, eval_cache);
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(sq.L, ux, rq_sym);
-                rq_ = CasadiFEWrap(cs::Function("rq", ustage_syms, {cs::MX::densify(rq_sym)}, optss), expand, jit, jit_options_);
+                rq_ = CasadiFEWrap(cs::Function("rq", ustage_syms, {cs::MX::densify(rq_sym)}, optss), expand, jit, jit_options_, eval_cache);
                 // if (sq.nxp1 > 0)
                 {
                     auto xp1 = cs::MX::sym("xp1", nxp1_);
@@ -44,10 +44,10 @@ namespace fatrop
                     auto BAbt = cs::MX::horzcat({cs::MX::jacobian(sq.x_next, ux), b}).T();
                     b_ = CasadiFEWrap(cs::Function("b", {sq.x, xp1, sq.u, sq.p_stage, sq.p_global},
                                                    {densify(b)}, optss),
-                                      expand, jit, jit_options_);
+                                      expand, jit, jit_options_, eval_cache);
                     BAbt_ = CasadiFEWrap(cs::Function("BAbt", {sq.x, xp1, sq.u, sq.p_stage, sq.p_global},
                                                       {cs::MX::densify(BAbt)}, optss),
-                                         expand, jit, jit_options_);
+                                         expand, jit, jit_options_, eval_cache);
                     auto rq_dyn_sym = cs::MX();
                     auto RSQ_dyn_sym = cs::MX::hessian(cs::MX::dot(sq.x_next, lam_dynamics), ux, rq_dyn_sym);
                     rq_sym += rq_dyn_sym;
@@ -57,8 +57,8 @@ namespace fatrop
                 {
                     auto g_eq = sq.g;
                     auto Ggt_equality = cs::MX::horzcat({cs::MX::jacobian(g_eq, ux), g_eq}).T();
-                    Ggt_equality_ = CasadiFEWrap(cs::Function("Ggt_equality", ustage_syms, {cs::MX::densify(Ggt_equality)}, optss), expand, jit, jit_options_);
-                    g_equality_ = CasadiFEWrap(cs::Function("g_equality", ustage_syms, {cs::MX::densify(g_eq)}, optss), expand, jit, jit_options_);
+                    Ggt_equality_ = CasadiFEWrap(cs::Function("Ggt_equality", ustage_syms, {cs::MX::densify(Ggt_equality)}, optss), expand, jit, jit_options_, eval_cache);
+                    g_equality_ = CasadiFEWrap(cs::Function("g_equality", ustage_syms, {cs::MX::densify(g_eq)}, optss), expand, jit, jit_options_, eval_cache);
                     auto rq_eq = cs::MX();
                     auto RSQ_eq = cs::MX::hessian(cs::MX::dot(g_eq, lam_g_equality), ux, rq_eq);
                     rq_sym += rq_eq;
@@ -68,14 +68,14 @@ namespace fatrop
                 {
                     auto g_ineq = sq.g_ineq;
                     auto Ggt_inequality = cs::MX::horzcat({cs::MX::jacobian(g_ineq, ux), g_ineq}).T();
-                    Ggt_inequality_ = CasadiFEWrap(cs::Function("Ggt_inequality", ustage_syms, {cs::MX::densify(Ggt_inequality)}, optss), expand, jit, jit_options_);
-                    g_inequality_ = CasadiFEWrap(cs::Function("g_inequality", ustage_syms, {cs::MX::densify(g_ineq)}, optss), expand, jit, jit_options_);
+                    Ggt_inequality_ = CasadiFEWrap(cs::Function("Ggt_inequality", ustage_syms, {cs::MX::densify(Ggt_inequality)}, optss), expand, jit, jit_options_, eval_cache);
+                    g_inequality_ = CasadiFEWrap(cs::Function("g_inequality", ustage_syms, {cs::MX::densify(g_ineq)}, optss), expand, jit, jit_options_, eval_cache);
                     auto rq_ineq = cs::MX();
                     auto RSQ_ineq = cs::MX::hessian(cs::MX::dot(g_ineq, lam_g_inequality), ux, rq_ineq);
                     rq_sym += rq_ineq;
                     RSQ_sym += RSQ_ineq;
                 }
-                RSQrqt_ = CasadiFEWrap(cs::Function("RSQrqt", {sq.u, sq.x, lam_dynamics, lam_g_equality, lam_g_inequality, sq.p_stage, sq.p_global}, {cs::MX::densify(cs::MX::horzcat({RSQ_sym, rq_sym}).T())}, optss), expand, jit, jit_options_);
+                RSQrqt_ = CasadiFEWrap(cs::Function("RSQrqt", {sq.u, sq.x, lam_dynamics, lam_g_equality, lam_g_inequality, sq.p_stage, sq.p_global}, {cs::MX::densify(cs::MX::horzcat({RSQ_sym, rq_sym}).T())}, optss), expand, jit, jit_options_, eval_cache);
                 Ub_ = sq.ub.nonzeros();
                 Lb_ = sq.lb.nonzeros();
             }

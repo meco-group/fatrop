@@ -9,11 +9,12 @@ namespace fatrop
     namespace spectool
     {
         namespace cs = casadi;
+        typedef std::map<size_t, std::shared_ptr<CasadiFEJit>> eval_cache_map;
         class CasadiFEWrap
         {
         public:
             CasadiFEWrap(){};
-            CasadiFEWrap(const cs::Function &func, bool expand, bool jit, const cs::Dict& jit_options_) : func_(expand ? func.expand() : func), jit_(jit)
+            CasadiFEWrap(const cs::Function &func, bool expand, bool jit, const cs::Dict& jit_options_, eval_cache_map& cache_map) : func_(expand ? func.expand() : func), jit_(jit)
             {
                 m = (int)func_.size1_out(0);
                 n = (int)func_.size2_out(0);
@@ -34,7 +35,19 @@ namespace fatrop
                 n_in = func.n_in();
                 if (jit)
                 {
-                    fe_jit_ = std::make_unique<CasadiFEJit>(func_, jit_options_);
+                    // compute the function hash
+                    size_t func_hash = std::hash<std::string>{}(func_.serialize());
+                    // check if the function is available in the cache
+                    if(cache_map.find(func_hash) != cache_map.end())
+                    {
+                        fe_jit_ = cache_map[func_hash];
+                    }
+                    else
+                    {
+                        fe_jit_ = std::make_shared<CasadiFEJit>(func_, jit_options_);
+                        // add the function to the cache
+                        cache_map[func_hash] = fe_jit_;
+                    }
                 }
                 // // assert dense matrix output
                 // assert(func.nnz_out(0) == m * n);
@@ -72,7 +85,7 @@ namespace fatrop
             std::vector<const double *> argdata;
             std::vector<long long int> iw;
             std::vector<double> w;
-            std::unique_ptr<CasadiFEJit> fe_jit_;
+            std::shared_ptr<CasadiFEJit> fe_jit_;
         };
         // implementation of OCPAbstract, given an OCP
     } // namespace spectool
