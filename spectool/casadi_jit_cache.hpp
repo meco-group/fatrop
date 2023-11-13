@@ -13,11 +13,11 @@ namespace fatrop
             void save(const std::string& filename)
             {
                 // iterate over entries 
-                for(auto& entry: *this)
-                {
-                    // save the entry key 
+                // for(auto& entry: *this)
+                // {
+                //     // save the entry key 
 
-                }
+                // }
             }
         }; 
 
