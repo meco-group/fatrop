@@ -1,4 +1,16 @@
 add_library(spectool SHARED ocp.cpp ustage.cpp fatrop_solver.cpp solver.cpp casadi_fe.cpp fatrop_ocp_impl.cpp ustage_quantities.cpp stage.cpp)
-target_link_libraries(spectool fatrop blasfeo casadi)
+# add option for specifying casadi headers location
+set(CASADI_SOURCE "" CACHE STRING "Path to casadi headers")
+# add option for specifying casadi library location
+set(CASADI_LIB "" CACHE STRING "Path to casadi library")
+if(NOT CASADI_SOURCE)
+    message(FATAL_ERROR "Please specify the path to casadi headers")
+endif()
+if(NOT CASADI_LIB)
+    message(FATAL_ERROR "Please specify the path to casadi library")
+endif()
+target_link_libraries(spectool fatrop blasfeo)
+target_include_directories(spectool PUBLIC ${CASADI_HEADERS})
+target_link_libraries(spectool ${CASADI_LIB})
 add_executable(example example.cpp)
 target_link_libraries(example spectool)
