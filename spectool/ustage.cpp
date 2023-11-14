@@ -35,6 +35,13 @@ namespace fatrop
             auto syms = cs::MX::symvar(expr);
             for (auto &sym : syms)
             {
+                if(!auto_mode)
+                {
+                    if(!has_variable(sym))
+                        throw std::runtime_error("Unregcognized variable in nonauto mode");
+                    else
+                        continue;
+                }
                 if (ocp_.lock()->is_global_parameter(sym))
                     continue;
                 if (has_variable(sym))
@@ -87,13 +94,19 @@ namespace fatrop
                 control_parameter_syms_[control_parameter][k] = cs::MX::sym(control_parameter.name() + std::to_string(k), control_parameter.size1() * control_parameter.size2());
             // control_parameter_vals_[control_parameter] = cs::DM::zeros(control_parameter.size1() * control_parameter.size2(), K_);
         }
+        void uStageInternal::register_global_parameter(const cs::MX &global_parameter)
+        {
+            global_parameters_.push_back(global_parameter);
+            global_parameters_set_.insert(global_parameter);
+        }
         bool uStageInternal::has_variable(const cs::MX &var) const
         {
             bool has_state = states_set_.find(var) != states_set_.end();
             bool has_control = controls_set_.find(var) != controls_set_.end();
             bool has_control_parameter = control_parameters_set_.find(var) != control_parameters_set_.end();
             bool has_hybrid = hybrids_set_.find(var) != hybrids_set_.end();
-            return has_state || has_control || has_control_parameter || has_hybrid;
+            bool has_global = auto_mode || global_parameters_set_.find(var) != global_parameters_set_.end();
+            return has_state || has_control || has_control_parameter || has_hybrid || has_global;
         }
         const std::vector<cs::MX> &uStageInternal::get_objective_terms() const
         {
