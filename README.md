@@ -61,9 +61,6 @@ Build and install the Fatropy project
 
 Trouble shoot: 
 - make sure you're using the newest pip version (pip install --upgrade pip setuptools)
-- if you get the error 'fatal error: pybind11/pybind11.h: No such file or directory', try to install the following dependency:
-
-	    sudo apt install pybind11-dev 
 
 ## Build and install Fatrop only
 (Recursively) clone this repository
