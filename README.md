@@ -18,8 +18,11 @@ You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.-->
 
 <p align="center">
-  <img src="https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/raw/main/misc/fatrop_logo.svg?ref_type=heads" width="400" />
+    <img src="https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/raw/main/misc/fatrop_logo.svg" width="400" />
 </p>
+
+
+
 # FATROP
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
 
