@@ -17,27 +17,9 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.]]
 
-option(BLASFEO_FROM_MAKE "Use BLASFEO from make" OFF)
+option(BUILD_WITH_BLASFEO "Build BLASFEO with cmake from git submodule" ON)
 
-if(BLASFEO_FROM_MAKE)
-    # Set default values for BLASFEO header and library directories
-    set(BLASFEO_HEADER_DIR "${CMAKE_CURRENT_LIST_DIR}/blasfeo/include" CACHE PATH "BLASFEO header installation directory")
-    set(BLASFEO_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/blasfeo/lib" CACHE PATH "BLASFEO library directory")
-
-    # Create an imported static target for blasfeo
-    add_library(blasfeo STATIC IMPORTED GLOBAL)
-
-    # Set the include directories and library file for blasfeo
-    set_target_properties(blasfeo PROPERTIES
-        IMPORTED_LOCATION ${BLASFEO_LIB_DIR}/libblasfeo.a
-        INTERFACE_INCLUDE_DIRECTORIES ${BLASFEO_HEADER_DIR}
-    )
-
-    # Print message
-    message(STATUS "Using BLASFEO from make. Make sure you compiled BLASFEO manually.")
-    message(STATUS "BLASFEO Header Directory: ${BLASFEO_HEADER_DIR}")
-    message(STATUS "BLASFEO Library Directory: ${BLASFEO_LIB_DIR}")
-else()
+if (BUILD_WITH_BLASFEO)
     message(STATUS "using BLASFEO with cmake from git submodule.")
     set(BLASFEO_HEADERS_INSTALLATION_DIRECTORY "include/blasfeo/include" CACHE STRING "")
     set(TARGET ${BLASFEO_TARGET} CACHE STRING "Set CPU architecture target" FORCE)
@@ -46,7 +28,26 @@ else()
     set(BLASFEO_REF_API ON CACHE BOOL "REF")
     set(BLASFEO_EXAMPLES OFF CACHE BOOL "Build blasfeo examples")
     add_subdirectory(blasfeo)
+
+else()
+    set(BLASFEO_INSTALL_DIR "/opt/blasfeo" CACHE PATH "Path to blasfeo installation directory")
+    # find_library(blasfeo NAMES blasfeo PATHS ${BLASFEO_INSTALL_DIR}/lib)
+
+    find_path(BLASFEO_INCLUDE_DIR NAMES "blasfeo.h" PATHS ${BLASFEO_INSTALL_DIR}/include)
+    find_library(BLASFEO_LIBRARY NAMES blasfeo HINTS ${BLASFEO_INSTALL_DIR}/lib)
+
+    # Create an imported static target for blasfeo
+    add_library(blasfeo STATIC IMPORTED GLOBAL)
+    # Set the path to the library file
+    set_target_properties(blasfeo PROPERTIES IMPORTED_LOCATION ${BLASFEO_LIBRARY})
+
+    # Set the path to the include directory
+    set_target_properties(blasfeo PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${BLASFEO_INCLUDE_DIR})
+    
 endif()
+
+# add pybind11 for python bindings
+add_subdirectory(pybind11)
 
 if(WIN32)
     add_subdirectory(dlfcn-win32)
