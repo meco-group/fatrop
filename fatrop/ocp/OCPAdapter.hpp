@@ -20,10 +20,10 @@
 #define OCPEVALUATORINCLUDED
 #include "OCPKKT.hpp"
 #include "OCPAbstract.hpp"
-#include "solver/FatropData.hpp"
+#include "fatrop/solver/FatropData.hpp"
 #include "OCP.hpp"
 #include <memory>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)

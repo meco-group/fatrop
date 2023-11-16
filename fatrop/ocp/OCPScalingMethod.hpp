@@ -18,12 +18,12 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef SCALINGMETHODINCLUDED
 #define SCALINGMETHODINCLUDED
-#include "solver/FatropData.hpp"
-#include "templates/NLPAlg.hpp"
-#include "solver/AlgStrategy.hpp"
-#include "ocp/OCPKKT.hpp"
+#include "fatrop/solver/FatropData.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
+#include "fatrop/solver/AlgStrategy.hpp"
+#include "fatrop/ocp/OCPKKT.hpp"
 #include <memory>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     class OCPScalingMethod : public AlgStrategy // this is an OCP strategy

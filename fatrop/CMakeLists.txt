@@ -109,12 +109,12 @@ target_link_libraries(RunFatrop fatrop)
 
 target_include_directories(RunFatrop
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/fatrop
+        ${PROJECT_SOURCE_DIR}
 )
 
 target_include_directories(fatrop PUBLIC  
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fatrop>  
-    $<INSTALL_INTERFACE:include/fatrop> # <prefix>/include/mylib
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>  
+    $<INSTALL_INTERFACE:include> # <prefix>/include/mylib
 )
 
 list(APPEND INCLUDEDIRSFATROP
@@ -129,7 +129,7 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
 )
 endforeach()
 
-set(INCLUDE_INSTALL_DIR "include/fatrop")
+set(INCLUDE_INSTALL_DIR "include")
 set(LIBRARY_INSTALL_DIR "lib")
 set(RUNTIME_INSTALL_DIR "bin")
 set(SYSCONFIG_INSTALL_DIR "etc/fatrop")

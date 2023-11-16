@@ -20,11 +20,11 @@
 // solver data
 #ifndef FATROPDATAINCLUDED
 #define FATROPDATAINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "templates/NLPAlg.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 #include "FatropOptions.hpp"
-#include "solver/FatropPrinter.hpp"
+#include "fatrop/solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
 namespace fatrop

@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
-#include "ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/StageOCPApplication.hpp"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)

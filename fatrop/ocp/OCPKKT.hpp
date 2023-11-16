@@ -18,11 +18,11 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef FATROP_OCP_KKT_INCLUDED
 #define FATROP_OCP_KKT_INCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
-#include "auxiliary/VectorUtils.hpp"
-#include "auxiliary/FatropVector.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/VectorUtils.hpp"
+#include "fatrop/auxiliary/FatropVector.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     /** \brief this class contains all information to represent the KKT system of an equality constrained OCP */

@@ -20,7 +20,7 @@
 #define FATROPAUXILIARYINCLUDED
 #include <vector>
 #include "FatropVector.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     /** \brief function to cumulative sum integer vector, first element is zero */

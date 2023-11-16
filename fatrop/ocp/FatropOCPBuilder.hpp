@@ -18,12 +18,12 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef FATROPOCPBUILDERINCLUDED
 #define FATROPOCPBUILDERINCLUDED
-#include "ocp/OCP.hpp"
-#include "ocp/FatropOCP.hpp"
-#include "ocp/OCPAbstract.hpp"
-#include "ocp/OCPAdapter.hpp"
-#include "ocp/OCPLSRiccati.hpp"
-#include "ocp/OCPNoScaling.hpp"
+#include "fatrop/ocp/OCP.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
+#include "fatrop/ocp/OCPLSRiccati.hpp"
+#include "fatrop/ocp/OCPNoScaling.hpp"
 namespace fatrop
 {
     class FatropOCPBuilder

@@ -125,9 +125,9 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include "auxiliary/LinearAlgebra.hpp"
-#include "auxiliary/FatropVector.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/LinearAlgebra.hpp"
+#include "fatrop/auxiliary/FatropVector.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 #include <cmath>
 #if DEBUG
 #include <assert.h>

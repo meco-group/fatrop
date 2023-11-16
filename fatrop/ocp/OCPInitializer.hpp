@@ -19,8 +19,8 @@
 #ifndef OCPINITIALIZERINCLUDED
 #define OCPINITIALIZERINCLUDED
 #include "OCPKKT.hpp"
-#include "auxiliary/Common.hpp"
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/auxiliary/Common.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)
 #define AUXMACRO(type, name, suffix) type name##suffix = ((type)OCP->aux.name)
 #define SOLVERMACRO(type, name, suffix) type name##suffix = ((type)name)

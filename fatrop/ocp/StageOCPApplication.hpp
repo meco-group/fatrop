@@ -18,21 +18,21 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef BASICOCPAPPLICATIONINCLUDED
 #define BASICOCPAPPLICATIONINCLUDED
-#include "ocp/StageOCP.hpp"
-#include "solver/AlgBuilder.hpp"
-#include "ocp/OCPAdapter.hpp"
-#include "solver/FatropAlg.hpp"
-#include "ocp/FatropOCP.hpp"
-#include "ocp/FatropOCPBuilder.hpp"
-#include "ocp/OCPAbstract.hpp"
-#include "ocp/StageOCPExpressions.hpp"
-#include "solver/FatropStats.hpp"
+#include "fatrop/ocp/StageOCP.hpp"
+#include "fatrop/solver/AlgBuilder.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
+#include "fatrop/solver/FatropAlg.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCPBuilder.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
+#include "fatrop/ocp/StageOCPExpressions.hpp"
+#include "fatrop/solver/FatropStats.hpp"
 #include <map>
-#include "json/json.h"
+#include "fatrop/json/json.h"
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 
 namespace fatrop
 {

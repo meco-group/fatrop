@@ -25,7 +25,7 @@
 #ifndef FATROP_LA_INCLUDED
 #define FATROP_LA_INCLUDED
 #include <iostream>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 
 namespace fatrop
 {

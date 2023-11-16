@@ -18,19 +18,19 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef OCPALGINCLUDED
 #define OCPALGINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "templates/NLPAlg.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"
-#include "solver/FatropPrinter.hpp"
-// #include "ocp/LineSearchDDP.hpp"
+#include "fatrop/solver/FatropPrinter.hpp"
+// #include "fatrop/ocp/LineSearchDDP.hpp"
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
 #include <memory>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 // #include <unistd.h>
 namespace fatrop
 {

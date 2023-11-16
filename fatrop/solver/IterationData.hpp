@@ -21,8 +21,8 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
-#include <solver/FatropPrinter.hpp>
-#include "auxiliary/Common.hpp"
+#include <fatrop/solver/FatropPrinter.hpp>
+#include "fatrop/auxiliary/Common.hpp"
 #include <memory>
 namespace fatrop
 {

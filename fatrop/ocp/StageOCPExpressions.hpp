@@ -18,10 +18,10 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef BASICOCPSAMPLERSINCLUDED
 #define BASICOCPSAMPLERSINCLUDED
-#include "function_evaluation/FunctionEvaluation.hpp"
-#include "ocp/OCPAdapter.hpp"
+#include "fatrop/function_evaluation/FunctionEvaluation.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
 #include <memory>
-#include <auxiliary/Common.hpp>
+#include <fatrop/auxiliary/Common.hpp>
 // todo change the name of this file to evaluators
 namespace fatrop
 {
