@@ -18,7 +18,7 @@ namespace fatrop
         {
             get()->next_states_[state] = next_state;
             get()->add_variables(next_state);
-            if (get()-> next_ustage_.lock())
+            if (get()->next_ustage_.lock())
                 get()->next_ustage_.lock()->add_variables(state);
         }
         void uStage::set_next(const uo_map_mx<cs::MX> &next_states)
@@ -35,15 +35,13 @@ namespace fatrop
             auto syms = cs::MX::symvar(expr);
             for (auto &sym : syms)
             {
-                if(!auto_mode)
+                if (!auto_mode)
                 {
-                    if(!has_variable(sym))
+                    if (!has_variable(sym))
                         throw std::runtime_error("Unregcognized variable in nonauto mode");
                     else
                         continue;
                 }
-                if (ocp_.lock()->is_global_parameter(sym))
-                    continue;
                 if (has_variable(sym))
                     continue;
                 if (ocp_.lock()->is_state(sym))
@@ -54,6 +52,8 @@ namespace fatrop
                     register_control_parameter(sym);
                 else if (ocp_.lock()->is_hybrid(sym))
                     register_hybrid(sym);
+                else if (ocp_.lock()->is_global_parameter(sym))
+                    register_global_parameter(sym);
                 else
                     throw std::runtime_error("MX sym " + sym.name() + " not recognized, is it declared outside of the Ocp?");
             }
@@ -99,14 +99,38 @@ namespace fatrop
             global_parameters_.push_back(global_parameter);
             global_parameters_set_.insert(global_parameter);
         }
+        void uStageInternal::register_state(const std::vector<cs::MX> &states)
+        {
+            std::for_each(states.begin(), states.end(), [&](const auto &state)
+                          { register_state(state); });
+        }
+        void uStageInternal::register_control(const std::vector<cs::MX> &controls)
+        {
+            std::for_each(controls.begin(), controls.end(), [&](const auto &control)
+                          { register_control(control); });
+        }
+        void uStageInternal::register_hybrid(const std::vector<cs::MX> &hybrids)
+        {
+            std::for_each(hybrids.begin(), hybrids.end(), [&](const auto &hybrid)
+                          { register_hybrid(hybrid); });
+        }
+        void uStageInternal::register_control_parameter(const std::vector<cs::MX> &control_parameters)
+        {
+            std::for_each(control_parameters.begin(), control_parameters.end(), [&](const auto &control_parameter)
+                          { register_control_parameter(control_parameter); });
+        }
+        void uStageInternal::register_global_parameter(const std::vector<cs::MX> &global_parameters)
+        {
+            std::for_each(global_parameters.begin(), global_parameters.end(), [&](const auto &global_parameter)
+                          { register_global_parameter(global_parameter); });
+        }
         bool uStageInternal::has_variable(const cs::MX &var) const
         {
             bool has_state = states_set_.find(var) != states_set_.end();
             bool has_control = controls_set_.find(var) != controls_set_.end();
             bool has_control_parameter = control_parameters_set_.find(var) != control_parameters_set_.end();
             bool has_hybrid = hybrids_set_.find(var) != hybrids_set_.end();
-            // in auto mode global variables are added at the end
-            bool has_global = (!auto_mode) && global_parameters_set_.find(var) != global_parameters_set_.end();
+            bool has_global = global_parameters_set_.find(var) != global_parameters_set_.end();
             return has_state || has_control || has_control_parameter || has_hybrid || has_global;
         }
         const std::vector<cs::MX> &uStageInternal::get_objective_terms() const
@@ -206,50 +230,6 @@ namespace fatrop
         {
             return prev_ustage_.lock();
         };
-        // const uo_map_mx<cs::MX> &StageInternal::get_state_initial() const
-        // {
-        //     return state_initial_;
-        // }
-        // const uo_map_mx<cs::MX> &StageInternal::get_control_initial() const
-        // {
-        //     return control_initial_;
-        // }
-        // const uo_map_mx<cs::DM> &StageInternal::get_control_parameter_vals() const
-        // {
-        //     return control_parameter_vals_;
-        // }
-        // void Stage::set_initial(const cs::MX &var, const cs::MX &initial)
-        // {
-        //     // check if initial is the right size
-        //     if (initial.size1() != var.size1() || initial.size2() != get()->K_)
-        //         throw std::runtime_error("initial value for state " + var.name() + " has the wrong size");
-        //     // check if var is a state or control
-        //     if (get()->states_set_.find(var) != get()->states_set_.end())
-        //     {
-        //         get()->state_initial_[var] = initial;
-        //         return;
-        //     }
-        //     if (get()->controls_set_.find(var) != get()->controls_set_.end())
-        //     {
-        //         get()->control_initial_[var] = initial;
-        //         return;
-        //     }
-        //     throw std::runtime_error("MX sym " + var.name() + " not recognized as a control or state, is it declared outside of the Ocp?");
-        // }
-        // void Stage::set_value(const cs::MX &var, const cs::DM &val)
-        // {
-        //     if (val.size2() == 1 && get()->K_ != 1) // if val is a vector, make it a matrix
-        //         return set_value(var, cs::DM::repmat(val, 1, get()->K_));
-        //     // check if initial is the right size
-        //     if (val.size1() != var.size1() || val.size2() != get()->K_)
-        //         throw std::runtime_error("initial value for state " + var.name() + " has the wrong size");
-        //     if (get()->control_parameter_vals_.find(var) != get()->control_parameter_vals_.end())
-        //     {
-        //         get()->control_parameter_vals_[var] = val;
-        //         return;
-        //     }
-        //     throw std::runtime_error("MX sym " + var.name() + " not recognized as a control-grid parameter, is it declared outside of the Ocp?");
-        // }
         bool uStage::has_variable(const cs::MX &var) const
         {
             return get()->has_variable(var);
@@ -321,5 +301,25 @@ namespace fatrop
         {
             return get()->get_control_parameters();
         }
+        void uStage::register_state(const std::vector<cs::MX> &states)
+        {
+            get()->register_state(states);
+        };
+        void uStage::register_control(const std::vector<cs::MX> &controls)
+        {
+            get()->register_control(controls);
+        };
+        void uStage::register_hybrid(const std::vector<cs::MX> &hybrids)
+        {
+            get()->register_hybrid(hybrids);
+        };
+        void uStage::register_control_parameter(const std::vector<cs::MX> &control_parameters)
+        {
+            uStage::get()->register_control_parameter(control_parameters);
+        };
+        void uStage::register_global_parameter(const std::vector<cs::MX> &global_parameters)
+        {
+            uStage::get()->register_global_parameter(global_parameters);
+        };
     }
 }

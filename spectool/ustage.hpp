@@ -19,14 +19,14 @@ namespace fatrop
             }
             uStageInternal(int K, const std::vector<cs::MX> &states, const std::vector<cs::MX> &controls, const std::vector<cs::MX> &control_parameters, const std::vector<cs::MX> &global_parameters) : K_(K), auto_mode(false)
             {
-                for (const auto &state : states)
-                    register_state(state);
-                for (const auto &control : controls)
-                    register_control(control);
-                for (const auto &control_parameter : control_parameters)
-                    register_control_parameter(control_parameter);
-                global_parameters_ = global_parameters;
+                register_state(states);
+                register_control(controls);
+                register_control_parameter(control_parameters);
+                register_global_parameter(global_parameters);
             }
+            uStageInternal(int K): K_(K), auto_mode(false) // auto mode only possible with reference to ocp
+            {
+            };
 
         private:
             friend class uStage;
@@ -59,6 +59,11 @@ namespace fatrop
             void register_hybrid(const cs::MX &hybrid);
             void register_control_parameter(const cs::MX &control_parameter);
             void register_global_parameter(const cs::MX &global_parameter);
+            void register_state(const std::vector<cs::MX> &states);
+            void register_control(const std::vector<cs::MX> &controls);
+            void register_hybrid(const std::vector<cs::MX> &hybrids);
+            void register_control_parameter(const std::vector<cs::MX> &control_parameters);
+            void register_global_parameter(const std::vector<cs::MX> &global_parameters);
             void get_hybrids(std::vector<cs::MX> &states, std::vector<cs::MX> &controls) const;
             const int K_;
             std::vector<cs::MX> objective_terms_;
@@ -76,7 +81,7 @@ namespace fatrop
             std::vector<cs::MX> control_parameters_;
             uo_set_mx control_parameters_set_;
             uo_map_mx<std::vector<cs::MX>> control_parameter_syms_;
-            std::weak_ptr<OcpInternal> ocp_;
+            std::weak_ptr<OcpInternal> ocp_; // is only used for determining symbol type (control/state/hybrid/parameter) in automatic mode
             std::weak_ptr<uStageInternal> next_ustage_;
             std::weak_ptr<uStageInternal> prev_ustage_;
             std::vector<cs::MX> global_parameters_;
@@ -87,8 +92,8 @@ namespace fatrop
         {
         public:
             friend class Ocp;
-
-            uStage(int K, const std::shared_ptr<OcpInternal> &ocp) : std::shared_ptr<uStageInternal>(new uStageInternal(K, ocp))
+            template <class... Args>
+            uStage(Args &&... args): std::shared_ptr<uStageInternal>(new uStageInternal(std::forward<Args>(args)...))
             {
             }
             void subject_to(const cs::MX &constraint);
@@ -108,6 +113,11 @@ namespace fatrop
             const std::vector<cs::MX> get_controls(bool include_hybrids = true) const;
             const std::vector<cs::MX> &get_hybrids() const;
             const std::vector<cs::MX> &get_control_parameters() const;
+            void register_state(const std::vector<cs::MX> &states);
+            void register_control(const std::vector<cs::MX> &controls);
+            void register_hybrid(const std::vector<cs::MX> &hybrids);
+            void register_control_parameter(const std::vector<cs::MX> &control_parameters);
+            void register_global_parameter(const std::vector<cs::MX> &global_parameters);
         };
     } // namespace spectrop
 } // namespace fatrop
