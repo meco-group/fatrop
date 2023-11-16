@@ -1,4 +1,4 @@
-#include "ustage_quanitities.hpp"
+#include "ustage_quantities.hpp"
 #include "casadi_utilities.hpp"
 #include "constraint_helper.hpp"
 #include "ustage.hpp"

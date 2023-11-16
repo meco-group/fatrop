@@ -1,4 +1,4 @@
-add_library(spectool SHARED ocp.cpp ustage.cpp fatrop_solver.cpp solver.cpp casadi_fe.cpp fatrop_ocp_impl.cpp ustage_quantities.cpp stage.cpp)
+add_library(spectool SHARED ocp.cpp ustage.cpp fatrop_solver.cpp solver.cpp casadi_fe.cpp fatrop_ocp_impl.cpp ustage_quantities.cpp stage.cpp fatrop_ustage_eval_casadi.cpp)
 # add option for specifying casadi headers location
 set(CASADI_SOURCE "" CACHE STRING "Path to casadi headers")
 # add option for specifying casadi library location

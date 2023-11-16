@@ -44,6 +44,11 @@ int main()
 
   ocp.set_initial(dt, 0.5);
 
+  auto my_ustage = uStage(20);
+  my_ustage.register_state({x});
+  my_ustage.register_control({u});
+  // my_ustage.add_objective(dt*dt);
+
 
   // /*
   //   =----  initial ustage ----=
