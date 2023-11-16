@@ -47,6 +47,7 @@ namespace fatrop
             const uo_map_mx<std::vector<cs::MX>> &get_hybrid_syms() const;
             const std::vector<cs::MX> &get_control_parameters() const;
             const uo_map_mx<std::vector<cs::MX>> &get_control_parameter_syms() const;
+            const std::vector<cs::MX> &get_global_parameters() const;
             const std::shared_ptr<OcpInternal> get_ocp() const;
             const std::shared_ptr<uStageInternal> get_next_ustage() const;
             const std::shared_ptr<uStageInternal> get_prev_ustage() const;
@@ -113,6 +114,7 @@ namespace fatrop
             const std::vector<cs::MX> get_controls(bool include_hybrids = true) const;
             const std::vector<cs::MX> &get_hybrids() const;
             const std::vector<cs::MX> &get_control_parameters() const;
+            const std::vector<cs::MX> &get_global_parameters() const;
             void register_state(const std::vector<cs::MX> &states);
             void register_control(const std::vector<cs::MX> &controls);
             void register_hybrid(const std::vector<cs::MX> &hybrids);

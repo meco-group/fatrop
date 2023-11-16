@@ -100,7 +100,7 @@ namespace fatrop
             for (const auto &ustage : get_ustages())
             {
                 if (std::all_of(vars.begin(), vars.end(), [&](const cs::MX &var)
-                                { return ustage.has_variable(var); }))
+                                { return get()->is_global_parameter(var) || ustage.has_variable(var); }))
                     ret = cs::MX::horzcat({ret, ustage.sample(expr)});
             }
             return ret;

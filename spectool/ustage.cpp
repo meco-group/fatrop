@@ -214,6 +214,10 @@ namespace fatrop
         {
             return control_parameters_;
         };
+        const std::vector<cs::MX> &uStageInternal::get_global_parameters() const
+        {
+            return global_parameters_;
+        };
         const uo_map_mx<std::vector<cs::MX>> &uStageInternal::get_control_parameter_syms() const
         {
             return control_parameter_syms_;
@@ -244,24 +248,29 @@ namespace fatrop
             std::vector<cs::MX> to;
             for (auto &state : get()->get_states(false))
             {
-                from.push_back(state);
+                from.push_back(cs::MX::vec(state));
                 to.push_back(get()->get_state_syms().at(state)[k]);
             }
             for (auto &control : get()->get_controls(false))
             {
-                from.push_back(control);
+                from.push_back(cs::MX::vec(control));
                 to.push_back(get()->get_control_syms().at(control)[k]);
             }
             for (auto &hybrid : get()->get_hybrids())
             {
-                from.push_back(hybrid);
+                from.push_back(cs::MX::vec(hybrid));
                 to.push_back(get()->get_hybrid_syms().at(hybrid)[k]);
             }
             for (auto &control_parameter : get()->get_control_parameters())
             {
-                from.push_back(control_parameter);
+                from.push_back(cs::MX::vec(control_parameter));
                 to.push_back(get()->get_control_parameter_syms().at(control_parameter)[k]);
             }
+            // for(auto& global_parameter: get()->get_global_parameters())
+            // {
+            //     from.push_back(global_parameter);
+            //     to.push_back(global_parameter);
+            // }
             return cs::MX::substitute(std::vector<cs::MX>{expr}, from, to)[0];
         }
         cs::MX uStage::sample(const cs::MX &expr) const
@@ -300,6 +309,10 @@ namespace fatrop
         const std::vector<cs::MX> &uStage::get_control_parameters() const
         {
             return get()->get_control_parameters();
+        }
+        const std::vector<cs::MX> &uStage::get_global_parameters() const
+        {
+            return get()->get_global_parameters();
         }
         void uStage::register_state(const std::vector<cs::MX> &states)
         {
