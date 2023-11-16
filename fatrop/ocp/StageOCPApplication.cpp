@@ -17,6 +17,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #include "fatrop/ocp/StageOCPApplication.hpp"
+#include "fatrop/solver/AlgBuilder.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCPBuilder.hpp"
+#include "fatrop/ocp/StageOCP.hpp"
+#include "fatrop/solver/FatropAlg.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
+#include "fatrop/json/json.h"
+#include "fatrop/auxiliary/Common.hpp"
 using namespace fatrop;
 using namespace std;
 NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), dirty(true)
@@ -121,6 +130,10 @@ void OCPApplication::build()
     shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(adapter));
     NLPApplication::build(nlp);
     dirty = false;
+}
+void OCPApplication::set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
+{
+    adapter->set_parameters(stage_params, global_params);
 }
 
 vector<double> &OCPApplication::global_parameters()
@@ -253,6 +266,10 @@ StageOCPApplication::AppParameterSetter StageOCPApplication::get_parameter_sette
 {
     return AppParameterSetter(adapter, param_setters[setter_name]);
 }
+void StageOCPApplication::set_value(const std::string &setter_name, const std::vector<double> &value)
+{
+    get_parameter_setter(setter_name).set_value(value);
+};
 void StageOCPApplication::build()
 {
     OCPApplication::build();

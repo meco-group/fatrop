@@ -18,13 +18,13 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef BASICOCPSAMPLERSINCLUDED
 #define BASICOCPSAMPLERSINCLUDED
-#include "fatrop/function_evaluation/FunctionEvaluation.hpp"
-#include "fatrop/ocp/OCPAdapter.hpp"
 #include <memory>
+#include <vector>
 #include <fatrop/auxiliary/Common.hpp>
 // todo change the name of this file to evaluators
 namespace fatrop
 {
+    class EvalBase;
     class StageExpression
     {
     public:
