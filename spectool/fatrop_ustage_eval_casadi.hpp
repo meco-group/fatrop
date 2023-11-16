@@ -11,7 +11,7 @@ namespace fatrop
     {
         class FatropuStageEvalCasadi : public FatropuStageEvalAbstract
         {
-            public:
+        public:
             FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts, CasadiJitCache &eval_cache)
             {
                 auto optss = opts;
@@ -21,19 +21,18 @@ namespace fatrop
                 optss["jit"] = false;
                 cs::Dict jit_options_ = cs::get_from_dict(optss, "jit_options", casadi::Dict({{"flags", "-Ofast -march=native -ffast-math"}}));
                 K_ = sq.K;
-                nu_ = sq.nu();
-                nx_ = sq.nx();
-                np_stage_ = sq.np_stage();
-                np_global_ = sq.np_global();
-                ng_eq_ = sq.ng_eq();
-                ng_ineq_ = sq.ng_ineq();
-                nxp1_ = sq.nxp1();
+                nu_ = nu(sq);
+                nx_ = nx(sq);
+                np_stage_ = np_stage(sq);
+                np_global_ = np_global(sq);
+                ng_eq_ = ng_eq(sq);
+                ng_ineq_ = ng_ineq(sq);
+                nxp1_ = nxp1(sq);
                 cs::MX lam_g_equality = cs::MX::sym("lam_g_equality", ng_eq_);
                 cs::MX lam_g_inequality = cs::MX::sym("lam_g_inequality", ng_ineq_);
                 cs::MX lam_dynamics = cs::MX::sym("lam_dynamics", nxp1_);
                 auto xp1 = cs::MX::sym("xp1", nxp1_);
                 std::vector<cs::MX> ustage_syms{sq.u, sq.x, sq.p_stage, sq.p_global};
-
 
                 auto hess_lag_obj = hess_lag_obj_sym(sq);
                 auto dynamics_jac = dynamics_jacobian_sym(sq, xp1);
@@ -46,15 +45,14 @@ namespace fatrop
                 auto Ggt_inequality = cs::MX::horzcat({inequality_jac.first, inequality_jac.second}).T();
                 auto RSQrqt = cs::MX::horzcat({hess_lag.first, hess_lag.second}).T();
 
-
                 L_ = CasadiFEWrap(cs::Function("L", ustage_syms, {sq.L}, optss), expand, jit, jit_options_, eval_cache);
                 rq_ = CasadiFEWrap(cs::Function("rq", ustage_syms, {cs::MX::densify(hess_lag_obj.second)}, optss), expand, jit, jit_options_, eval_cache);
                 b_ = CasadiFEWrap(cs::Function("b", {sq.x, xp1, sq.u, sq.p_stage, sq.p_global},
-                                                {densify(dynamics_jac.second)}, optss),
-                                    expand, jit, jit_options_, eval_cache);
+                                               {densify(dynamics_jac.second)}, optss),
+                                  expand, jit, jit_options_, eval_cache);
                 BAbt_ = CasadiFEWrap(cs::Function("BAbt", {sq.x, xp1, sq.u, sq.p_stage, sq.p_global},
-                                                    {cs::MX::densify(BAbt)}, optss),
-                                        expand, jit, jit_options_, eval_cache);
+                                                  {cs::MX::densify(BAbt)}, optss),
+                                     expand, jit, jit_options_, eval_cache);
                 Ggt_equality_ = CasadiFEWrap(cs::Function("Ggt_equality", ustage_syms, {cs::MX::densify(Ggt_equality)}, optss), expand, jit, jit_options_, eval_cache);
                 g_equality_ = CasadiFEWrap(cs::Function("g_equality", ustage_syms, {cs::MX::densify(equality_jac.second)}, optss), expand, jit, jit_options_, eval_cache);
                 Ggt_inequality_ = CasadiFEWrap(cs::Function("Ggt_inequality", ustage_syms, {cs::MX::densify(Ggt_inequality)}, optss), expand, jit, jit_options_, eval_cache);
@@ -63,7 +61,35 @@ namespace fatrop
                 Ub_ = sq.ub.nonzeros();
                 Lb_ = sq.lb.nonzeros();
             }
-            virtual std::pair<cs::MX, cs::MX> dynamics_jacobian_sym(const uStageQuantities& sq, const cs::MX& xp1)
+            virtual int nu(const uStageQuantities &sq)
+            {
+                return sq.nu();
+            }
+            virtual int nx(const uStageQuantities &sq)
+            {
+                return sq.nx();
+            }
+            virtual int np_stage(const uStageQuantities &sq)
+            {
+                return sq.np_stage();
+            }
+            virtual int np_global(const uStageQuantities &sq)
+            {
+                return sq.np_global();
+            }
+            virtual int ng_eq(const uStageQuantities &sq)
+            {
+                return sq.ng_eq();
+            }
+            virtual int ng_ineq(const uStageQuantities &sq)
+            {
+                return sq.ng_ineq();
+            }
+            virtual int nxp1(const uStageQuantities &sq)
+            {
+                return sq.nxp1();
+            }
+            virtual std::pair<cs::MX, cs::MX> dynamics_jacobian_sym(const uStageQuantities &sq, const cs::MX &xp1)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto G = cs::MX::jacobian(sq.x_next, ux);
@@ -71,7 +97,7 @@ namespace fatrop
                 return std::make_pair(G, g);
             }
 
-            virtual std::pair<cs::MX, cs::MX> equality_jacobian_sym(const uStageQuantities& sq)
+            virtual std::pair<cs::MX, cs::MX> equality_jacobian_sym(const uStageQuantities &sq)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto G = cs::MX::jacobian(sq.g, ux);
@@ -79,7 +105,7 @@ namespace fatrop
                 return std::make_pair(G, g);
             }
 
-            virtual std::pair<cs::MX, cs::MX> inequality_jacobian_sym(const uStageQuantities& sq)
+            virtual std::pair<cs::MX, cs::MX> inequality_jacobian_sym(const uStageQuantities &sq)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto G = cs::MX::jacobian(sq.g_ineq, ux);
@@ -87,35 +113,35 @@ namespace fatrop
                 return std::make_pair(G, g);
             }
 
-            virtual std::pair<cs::MX, cs::MX> hess_lag_obj_sym(const uStageQuantities& sq)
+            virtual std::pair<cs::MX, cs::MX> hess_lag_obj_sym(const uStageQuantities &sq)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(sq.L, ux, rq_sym);
                 return std::make_pair(RSQ_sym, rq_sym);
             }
-            virtual std::pair<cs::MX, cs::MX> hess_lag_dyn_sym(const uStageQuantities& sq, const cs::MX& lam_dyn)
+            virtual std::pair<cs::MX, cs::MX> hess_lag_dyn_sym(const uStageQuantities &sq, const cs::MX &lam_dyn)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(cs::MX::dot(sq.x_next, lam_dyn), ux, rq_sym);
                 return std::make_pair(RSQ_sym, rq_sym);
             }
-            virtual std::pair<cs::MX, cs::MX> hess_lag_eq_sym(const uStageQuantities& sq, const cs::MX& lam_g_equality)
+            virtual std::pair<cs::MX, cs::MX> hess_lag_eq_sym(const uStageQuantities &sq, const cs::MX &lam_g_equality)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(cs::MX::dot(sq.g, lam_g_equality), ux, rq_sym);
                 return std::make_pair(RSQ_sym, rq_sym);
             }
-            virtual std::pair<cs::MX, cs::MX> hess_lag_ineq_sym(const uStageQuantities& sq, const cs::MX& lam_g_inequality)
+            virtual std::pair<cs::MX, cs::MX> hess_lag_ineq_sym(const uStageQuantities &sq, const cs::MX &lam_g_inequality)
             {
                 auto ux = cs::MX::veccat({sq.u, sq.x});
                 auto rq_sym = cs::MX();
                 auto RSQ_sym = cs::MX::hessian(cs::MX::dot(sq.g_ineq, lam_g_inequality), ux, rq_sym);
                 return std::make_pair(RSQ_sym, rq_sym);
             }
-            virtual std::pair<cs::MX, cs::MX> hess_lag_sym(const uStageQuantities&sq, const cs::MX& lam_dyn, const cs::MX& lam_g_equality, const cs::MX& lam_g_inequality)
+            virtual std::pair<cs::MX, cs::MX> hess_lag_sym(const uStageQuantities &sq, const cs::MX &lam_dyn, const cs::MX &lam_g_equality, const cs::MX &lam_g_inequality)
             {
                 auto hess_obj = hess_lag_obj_sym(sq);
                 auto hess_dyn = hess_lag_dyn_sym(sq, lam_dyn);
@@ -223,8 +249,8 @@ namespace fatrop
                 const double *states_k,
                 const double *stage_params_k,
                 const double *global_params,
-                double *res) 
-                {
+                double *res)
+            {
 
                 const double *arg[4];
                 arg[0] = inputs_k;
@@ -233,14 +259,14 @@ namespace fatrop
                 arg[3] = global_params;
                 g_equality_.eval(arg, res);
                 return 0;
-                }
+            }
             virtual int eval_gineq(
                 const double *inputs_k,
                 const double *states_k,
                 const double *stage_params_k,
                 const double *global_params,
-                double *res) 
-                {
+                double *res)
+            {
                 const double *arg[4];
                 arg[0] = inputs_k;
                 arg[1] = states_k;
@@ -248,16 +274,15 @@ namespace fatrop
                 arg[3] = global_params;
                 g_inequality_.eval(arg, res);
                 return 0;
-
-                }
+            }
             virtual int eval_rq(
                 const double *objective_scale,
                 const double *inputs_k,
                 const double *states_k,
                 const double *stage_params_k,
                 const double *global_params,
-                double *res) 
-                {
+                double *res)
+            {
                 const double *arg[4];
                 arg[0] = inputs_k;
                 arg[1] = states_k;
@@ -265,16 +290,15 @@ namespace fatrop
                 arg[3] = global_params;
                 rq_.eval(arg, res);
                 return 0;
-
-                }
+            }
             virtual int eval_L(
                 const double *objective_scale,
                 const double *inputs_k,
                 const double *states_k,
                 const double *stage_params_k,
                 const double *global_params,
-                double *res) 
-                {
+                double *res)
+            {
                 const double *arg[4];
                 arg[0] = inputs_k;
                 arg[1] = states_k;
@@ -282,8 +306,8 @@ namespace fatrop
                 arg[3] = global_params;
                 L_.eval(arg, res);
                 return 0;
-                }
-            virtual int get_bounds(double *lower, double *upper) const 
+            }
+            virtual int get_bounds(double *lower, double *upper) const
             {
                 for (int i = 0; i < ng_ineq_; i++)
                 {
@@ -291,7 +315,6 @@ namespace fatrop
                     upper[i] = Ub_[i];
                 }
                 return 0;
-
             }
             CasadiFEWrap RSQrqt_;
             CasadiFEWrap BAbt_;
