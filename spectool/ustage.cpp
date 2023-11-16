@@ -105,7 +105,8 @@ namespace fatrop
             bool has_control = controls_set_.find(var) != controls_set_.end();
             bool has_control_parameter = control_parameters_set_.find(var) != control_parameters_set_.end();
             bool has_hybrid = hybrids_set_.find(var) != hybrids_set_.end();
-            bool has_global = auto_mode || global_parameters_set_.find(var) != global_parameters_set_.end();
+            // in auto mode global variables are added at the end
+            bool has_global = (!auto_mode) && global_parameters_set_.find(var) != global_parameters_set_.end();
             return has_state || has_control || has_control_parameter || has_hybrid || has_global;
         }
         const std::vector<cs::MX> &uStageInternal::get_objective_terms() const
