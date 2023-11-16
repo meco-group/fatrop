@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "ocp/OCPInitializer.hpp"
+#include "fatrop/ocp/OCPInitializer.hpp"
 using namespace fatrop;
 
 fatrop_int OCPInitializer::modify_kkt_ls_dual_estimate(

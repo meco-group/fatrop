@@ -1,4 +1,3 @@
-find_package(pybind11 REQUIRED)
 
 pybind11_add_module(fatropy fatropy.cpp)
 target_link_libraries(fatropy PRIVATE fatrop casadi spectool)

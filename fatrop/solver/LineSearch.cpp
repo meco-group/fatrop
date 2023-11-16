@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "solver/LineSearch.hpp"
+#include "fatrop/solver/LineSearch.hpp"
 using namespace fatrop;
 using namespace std;
 LineSearch::LineSearch(

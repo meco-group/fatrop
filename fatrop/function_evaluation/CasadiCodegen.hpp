@@ -22,7 +22,7 @@
 #include <string>
 #include <memory>
 #include "FunctionEvaluation.hpp"
-#include "auxiliary/DynamicLib.hpp"
+#include "fatrop/auxiliary/DynamicLib.hpp"
 
 #ifdef ENABLE_MULTITHREADING
 #include <omp.h>

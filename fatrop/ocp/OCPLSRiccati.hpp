@@ -20,11 +20,11 @@
 #define OCPLSRICCATIINCLUDED
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
-#include "solver/FatropPrinter.hpp"
+#include "fatrop/solver/FatropPrinter.hpp"
 #include <cmath>
 #include <memory>
-#include "solver/FatropOptions.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/solver/FatropOptions.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 #define SUMMATION_ALG kahan_sum
 namespace fatrop
 {

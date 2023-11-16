@@ -16,6 +16,13 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.-->
+
+<p align="center">
+    <img src="https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/raw/main/misc/fatrop_logo.svg" width="400" />
+</p>
+
+
+
 # FATROP
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
 
@@ -61,9 +68,6 @@ Build and install the Fatropy project
 
 Trouble shoot: 
 - make sure you're using the newest pip version (pip install --upgrade pip setuptools)
-- if you get the error 'fatal error: pybind11/pybind11.h: No such file or directory', try to install the following dependency:
-
-	    sudo apt install pybind11-dev 
 
 ## Build and install Fatrop only
 (Recursively) clone this repository

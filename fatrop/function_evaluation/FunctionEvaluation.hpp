@@ -20,8 +20,8 @@
 #define FUNCTIONEVALUATIONINCLUDED
 #include <vector>
 #include <cstring>
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 
 #ifdef ENABLE_MULTITHREADING
 #include <omp.h>

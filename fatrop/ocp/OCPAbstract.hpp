@@ -18,11 +18,11 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef OCPTEMPLATEINCLUDED
 #define OCPTEMPLATEINCLUDED
-#include "ocp/OCPKKT.hpp"
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "auxiliary/FatropVector.hpp"
+#include "fatrop/ocp/OCPKKT.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/auxiliary/FatropVector.hpp"
 #include "OCPDims.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     /// @brief  Abstract class for OCP template

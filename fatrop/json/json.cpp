@@ -522,6 +522,8 @@ void json::jobject::proxy::set_array(const std::vector<std::string> &values, con
 
 json::jobject json::jobject::parse(const char *input)
 {
+    // set locale to C to avoid problems with decimal point
+    std::setlocale(LC_NUMERIC, "C");
     const char error[] = "Input is not a valid object";
     const char *index = json::parsing::tlws(input);
     json::jobject result;

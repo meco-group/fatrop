@@ -19,7 +19,7 @@
 #ifndef FILTERINCLUDED
 #define FILTERINCLUDED
 #include "vector"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     struct FilterData

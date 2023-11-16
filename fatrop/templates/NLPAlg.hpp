@@ -18,8 +18,8 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef NLPINCLUDED
 #define NLPINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     struct NLPDims

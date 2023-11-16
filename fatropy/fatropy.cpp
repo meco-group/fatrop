@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
-#include "ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/StageOCPApplication.hpp"
 #include "src/numpy.hpp"
 #include "src/swig-bind.hpp"
 #include "src/specification.hpp"

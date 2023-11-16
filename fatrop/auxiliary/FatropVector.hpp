@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <utility>
 #include <functional>
-#include <auxiliary/Common.hpp>
+#include <fatrop/auxiliary/Common.hpp>
 namespace fatrop
 {
     // static polymorphism using CRTP

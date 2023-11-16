@@ -23,10 +23,10 @@
 #include "OCPAbstract.hpp"
 #include <string>
 #include <iostream>
-#include <auxiliary/DynamicLib.hpp>
-#include <auxiliary/Common.hpp>
-#include "function_evaluation/CasadiCodegen.hpp"
-#include "json/json.h"
+#include <fatrop/auxiliary/DynamicLib.hpp>
+#include <fatrop/auxiliary/Common.hpp>
+#include "fatrop/function_evaluation/CasadiCodegen.hpp"
+#include "fatrop/json/json.h"
 #include <fstream>
 #include <sstream>
 

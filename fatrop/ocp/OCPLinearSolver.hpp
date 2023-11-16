@@ -18,9 +18,9 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef NLPLSINCLUDED
 #define NLPLSINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     class OCPLinearSolver

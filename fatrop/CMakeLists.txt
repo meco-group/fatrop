@@ -109,12 +109,12 @@ target_link_libraries(RunFatrop fatrop)
 
 target_include_directories(RunFatrop
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/fatrop
+        ${PROJECT_SOURCE_DIR}
 )
 
 target_include_directories(fatrop PUBLIC  
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fatrop>  
-    $<INSTALL_INTERFACE:include/fatrop> # <prefix>/include/mylib
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>  
+    $<INSTALL_INTERFACE:include> # <prefix>/include/mylib
 )
 
 list(APPEND INCLUDEDIRSFATROP
@@ -129,7 +129,7 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
 )
 endforeach()
 
-set(INCLUDE_INSTALL_DIR "include/fatrop")
+set(INCLUDE_INSTALL_DIR "include")
 set(LIBRARY_INSTALL_DIR "lib")
 set(RUNTIME_INSTALL_DIR "bin")
 set(SYSCONFIG_INSTALL_DIR "etc/fatrop")
@@ -142,12 +142,22 @@ set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_NAME "fatrop")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
-INSTALL(TARGETS fatrop RunFatrop
+if (BUILD_WITH_BLASFEO)
+  INSTALL(TARGETS fatrop RunFatrop blasfeo
+    EXPORT fatropConfig
+    LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+    ARCHIVE DESTINATION ${LIBRARY_INSTALL_DIR}
+    INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
+    RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+    )
+else()
+  INSTALL(TARGETS fatrop RunFatrop 
   EXPORT fatropConfig
   LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
   ARCHIVE DESTINATION ${LIBRARY_INSTALL_DIR}
   INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
   RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
-  )
+)
 
+endif()
 INSTALL(EXPORT fatropConfig DESTINATION cmake)

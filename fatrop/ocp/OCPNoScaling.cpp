@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "ocp/OCPNoScaling.hpp"
+#include "fatrop/ocp/OCPNoScaling.hpp"
 using namespace fatrop;
 using namespace std;
 OCPNoScaling::OCPNoScaling(const shared_ptr<FatropOptions> &fatrop_params) : OCPScalingMethod(fatrop_params){};
