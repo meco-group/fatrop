@@ -3,7 +3,7 @@
 #include <casadi/core/function_internal.hpp>
 #include <string>
 #include "casadi_utilities.hpp"
-#include "ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/StageOCPApplication.hpp"
 namespace fatrop
 {
     namespace spectool

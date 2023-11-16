@@ -2,7 +2,7 @@
 #include <casadi/casadi.hpp>
 #include <string>
 #include "casadi_utilities.hpp"
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "casadi_jit.hpp"
 #include "casadi_jit_cache.hpp"
 namespace fatrop

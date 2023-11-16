@@ -1,5 +1,5 @@
 #include "spectool.hpp"
-#include "ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/StageOCPApplication.hpp"
 using namespace std;
 using namespace fatrop;
 using namespace fatrop::spectool;

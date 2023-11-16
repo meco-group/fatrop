@@ -6,7 +6,7 @@
 #include "ustage.hpp"
 #include "ocp.hpp"
 #include "ustage_quantities.hpp"
-#include "ocp/OCPAbstract.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
 #include "fatrop_ustage_eval_casadi.hpp"
 namespace fatrop
 {
