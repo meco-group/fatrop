@@ -1,4 +1,4 @@
-project(spectool)
+# project(spectool)
 
 
 add_library(spectool SHARED spec/ocp.cpp spec/ustage.cpp solver_interfaces/fatrop/fatrop_solver.cpp solver_interfaces/solver.cpp function_evaluation/casadi_fe.cpp solver_interfaces/fatrop/fatrop_ocp_impl.cpp spec/ustage_quantities.cpp spec/stage.cpp solver_interfaces/fatrop/fatrop_ustage_eval_casadi.cpp function_evaluation/casadi_fe.cpp function_evaluation/casadi_jit.cpp)
@@ -43,17 +43,17 @@ function_evaluation/casadi_jit.hpp
 spectool.hpp
 )
 
-install(TARGETS spectool fatrop blasfeo EXPORT spectoolTargets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-)
+# install(TARGETS spectool fatrop blasfeo EXPORT fatropConfig
+#     LIBRARY DESTINATION lib
+#     ARCHIVE DESTINATION lib
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+# )
 
 install(DIRECTORY auxiliary spec solver_interfaces function_evaluation DESTINATION include/fatrop/spectool
     FILES_MATCHING PATTERN "*.hpp")
 
-install(EXPORT spectoolTargets
-    NAMESPACE fatrop::
-    DESTINATION cmake
-)
+# install(EXPORT spectoolConfig
+#     # NAMESPACE fatrop::
+#     DESTINATION cmake
+# )
