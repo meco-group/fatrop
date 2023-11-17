@@ -3,6 +3,16 @@
 #include <pybind11/numpy.h>
 #include "fatrop/ocp/StageOCPApplication.hpp"
 
+#include "fatrop/solver/AlgBuilder.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCPBuilder.hpp"
+#include "fatrop/ocp/StageOCP.hpp"
+#include "fatrop/solver/FatropAlg.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
+#include "fatrop/json/json.h"
+#include "fatrop/auxiliary/Common.hpp"
+
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
