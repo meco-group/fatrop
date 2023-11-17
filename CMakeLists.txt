@@ -81,7 +81,7 @@ set(WITH_SPECTOOL ON CACHE BOOL "Build problem specification tools, built on top
 if(${WITH_SPECTOOL})
 # casadi is required for the specification tools, find using findCasadi.cmake
   # include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindCasadi.cmake)
-  add_subdirectory(spectool)
+  add_subdirectory(fatrop/spectool)
 endif()
 
 # set(WITH_FATROP_CASADI ON CACHE BOOL "Build problem specification tools, built on top of casadi")

@@ -3,10 +3,21 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/numpy.h>
-#include "ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/StageOCPApplication.hpp"
 #include "numpy.hpp"
 #include "swig-bind.hpp"
-#include "spectool.hpp"
+#include "fatrop/spectool/spectool.hpp"
+
+
+#include "fatrop/solver/AlgBuilder.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCPBuilder.hpp"
+#include "fatrop/ocp/StageOCP.hpp"
+#include "fatrop/solver/FatropAlg.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
+#include "fatrop/json/json.h"
+#include "fatrop/auxiliary/Common.hpp"
 
 namespace py = pybind11;
 namespace fatropy
