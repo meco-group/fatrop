@@ -3,9 +3,11 @@
 #include <pybind11/numpy.h>
 #include "fatrop/ocp/StageOCPApplication.hpp"
 #include "src/numpy.hpp"
+#ifdef WITH_SPECTOOL
 #include "src/swig-bind.hpp"
 #include "src/specification.hpp"
 #include "src/expose-spectool.hpp"
+#endif
 
 #include "fatrop/solver/AlgBuilder.hpp"
 #include "fatrop/ocp/OCPAdapter.hpp"
@@ -113,10 +115,11 @@ PYBIND11_MODULE(fatropy, m)
     py::class_<fatrop::StageOCPApplicationFactory>(m, "StageOCPApplicationFactory")
         .def(py::init<>())
         .def("from_rockit_interface", &fatrop::StageOCPApplicationFactory::from_rockit_interface);
+
+#ifdef WITH_SPECTOOL
     auto module_spectool = m.def_submodule("spectool", "specification tool");
-
-
     ExposeSpectool::expose(module_spectool);
+#endif
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
