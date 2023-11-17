@@ -82,7 +82,7 @@ if(BUILD_DOCS MATCHES ON)
   add_subdirectory(docs)
 endif()
 
-set(WITH_SPECTOOL ON CACHE BOOL "Build problem specification tools, built on top of casadi")
+set(WITH_SPECTOOL OFF CACHE BOOL "Build problem specification tools, built on top of casadi")
 SET(INSTALL_TARGETS fatrop)
 
 if(${WITH_SPECTOOL})
