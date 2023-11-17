@@ -42,6 +42,8 @@ function_evaluation/casadi_fe.hpp
 function_evaluation/casadi_jit.hpp
 spectool.hpp
 )
+# install spectool.hpp
+install(FILES spectool.hpp DESTINATION include/fatrop/spectool)
 
 # install(TARGETS spectool fatrop blasfeo EXPORT fatropConfig
 #     LIBRARY DESTINATION lib
