@@ -118,7 +118,14 @@ target_include_directories(fatrop PUBLIC
 )
 
 list(APPEND INCLUDEDIRSFATROP
-.
+auxiliary
+blasfeo_wrapper
+function_evaluation
+json
+ocp
+quasi_newton
+solver
+templates
 )
 foreach(incl IN LISTS INCLUDEDIRSFATROP) 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
