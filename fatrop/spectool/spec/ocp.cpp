@@ -8,18 +8,21 @@ namespace fatrop
         {
             auto x = cs::MX::sym(std::string("x") + std::to_string(get()->states_.size()), m, n);
             get()->states_.insert(x);
+            get()->add_to_ordering(x);
             return x;
         }
         cs::MX Ocp::control(const int m, const int n)
         {
             auto u = cs::MX::sym(std::string("u") + std::to_string(get()->controls_.size()), m, n);
             get()->controls_.insert(u);
+            get()->add_to_ordering(u);
             return u;
         }
         cs::MX Ocp::hybrid(const int m, const int n)
         {
             auto hybrid = cs::MX::sym(std::string("hybrid") + std::to_string(get()->hybrids_.size()), m, n);
             get()->hybrids_.insert(hybrid);
+            get()->add_to_ordering(hybrid);
             return hybrid;
         }
         cs::MX Ocp::parameter(const int m, const int n, const std::string &grid)
@@ -29,12 +32,14 @@ namespace fatrop
                 auto p = cs::MX::sym(std::string("p") + std::to_string(get()->global_parameters_.size()), m, n);
                 get()->global_parameters_.insert(p);
                 get()->global_parammeter_syms_.push_back(p);
+                get()->add_to_ordering(p);
                 return p;
             }
             if (grid == "control")
             {
                 auto p = cs::MX::sym(std::string("p") + std::to_string(get()->control_parameters_.size()), m, n);
                 get()->control_parameters_.insert(p);
+                get()->add_to_ordering(p);
                 return p;
             }
             throw std::runtime_error("grid must be either 'global' or 'control'");

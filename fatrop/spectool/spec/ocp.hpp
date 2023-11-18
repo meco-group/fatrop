@@ -43,6 +43,20 @@ namespace fatrop
             std::vector<std::pair<cs::MX, cs::MX>> initial_values;
             std::vector<std::pair<cs::MX, cs::MX>> parameter_values;
             std::string solver_name = "fatrop";
+
+        private:
+            void add_to_ordering(const cs::MX &var)
+            {
+                ordering_[var] = ordering_.size();
+            }
+            std::vector<cs::MX> order_vars(const std::vector<cs::MX> &vars)
+            {
+                auto ret = vars;
+                std::sort(ret.begin(), ret.end(), [this](const cs::MX &a, const cs::MX &b)
+                          { return ordering_[a] < ordering_[b]; });
+                return ret;
+            }
+            uo_map_mx<size_t> ordering_;
         };
         class Ocp : private std::shared_ptr<OcpInternal>
         {
@@ -63,10 +77,10 @@ namespace fatrop
                 return get()->global_parammeter_syms_;
             }
             cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts = casadi::Dict()) const;
-            cs::MX at_t0(const cs::MX &expr) const {return ustages_.front().at_t0(expr);};
-            cs::MX at_tf(const cs::MX &expr) const {return ustages_.back().at_tf(expr);};
-            uStage at_t0() const {return ustages_.front();};
-            uStage at_tf() const {return ustages_.back();};
+            cs::MX at_t0(const cs::MX &expr) const { return ustages_.front().at_t0(expr); };
+            cs::MX at_tf(const cs::MX &expr) const { return ustages_.back().at_tf(expr); };
+            uStage at_t0() const { return ustages_.front(); };
+            uStage at_tf() const { return ustages_.back(); };
             void set_initial(const cs::MX &var, const cs::MX &value);
             cs::MX eval_at_initial(const cs::MX &expr) const;
 

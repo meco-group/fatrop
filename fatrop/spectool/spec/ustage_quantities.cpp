@@ -15,6 +15,8 @@ namespace fatrop
             ret.u = cs::MX::veccat(ustage->get_controls(true, prev));
             ret.p_global = cs::MX::veccat(ustage->get_ocp()->get_global_parameter_syms());
             ret.K = ustage->K();
+            std::cout << "number of hybrids that are states " << ustage->get_hybrids_states(prev).size() << std::endl;
+            std::cout << "number of hybrids that are controls " << ustage->get_hybrids_controls(prev).size() << std::endl;
             if (next)
             {
                 std::vector<cs::MX> from;
