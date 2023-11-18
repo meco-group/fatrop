@@ -15,8 +15,8 @@ namespace fatrop
             ret.u = cs::MX::veccat(ustage->get_controls(true, prev));
             ret.p_global = cs::MX::veccat(ustage->get_ocp()->get_global_parameter_syms());
             ret.K = ustage->K();
-            std::cout << "number of hybrids that are states " << ustage->get_hybrids_states(prev).size() << std::endl;
-            std::cout << "number of hybrids that are controls " << ustage->get_hybrids_controls(prev).size() << std::endl;
+            // std::cout << "number of hybrids that are states " << ustage->get_hybrids_states(prev).size() << std::endl;
+            // std::cout << "number of hybrids that are controls " << ustage->get_hybrids_controls(prev).size() << std::endl;
             if (next)
             {
                 std::vector<cs::MX> from;
@@ -43,6 +43,25 @@ namespace fatrop
                 {
                     std::cerr << e.what() << '\n';
                     throw std::runtime_error("Did you set_next for every state?");
+                }
+                if(ustage->K()>1)
+                {
+                    // check if x_next is same as x
+                    auto x_next_vec = next->get_states(true, ustage);
+                    auto x_vec = ustage->get_states(true, prev);
+                    // check if size is same
+                    if(x_next_vec.size() != x_vec.size())
+                    {
+                        throw std::runtime_error("x_next and x must have the same size");
+                    }
+                    // iterate over elements and check if the same
+                    for(int i = 0; i < x_next_vec.size(); i++)
+                    {
+                        if (x_next_vec[i].get() != x_vec[i].get())
+                        {
+                            throw std::runtime_error("x_next and x must be the same");
+                        }
+                    }
                 }
                 // ret.nxp1 = ret.x_next.size1();
             }

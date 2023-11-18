@@ -18,6 +18,8 @@ namespace fatrop
         {
             at_t0().set_next(state, next_state);
             at_mid().set_next(state, next_state);
+            // add the variables to the terminal stage
+            at_tf().get_internal()->add_variables({state});
         }
         cs::MX Stage::sample(const cs::MX &expr)
         {

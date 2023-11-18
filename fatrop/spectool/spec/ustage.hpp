@@ -10,6 +10,7 @@ namespace fatrop
     {
         namespace cs = casadi;
         class uStage;
+        class Stage;
         class OcpInternal;
         class uStageInternal
         {
@@ -28,10 +29,11 @@ namespace fatrop
             {
             };
             uStageInternal(): uStageInternal{0, {}, {}, {}, {}}{}; // empty ustage
-
-        private:
             friend class uStage;
+            friend class Stage;
             friend class Ocp;
+
+        protected:
             void add_variables(const cs::MX &expr);
 
         public:

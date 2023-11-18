@@ -44,9 +44,9 @@ int main()
 
   ocp.set_initial(dt, 0.5);
 
-  auto my_ustage = uStage(20);
-  my_ustage.register_state({x});
-  my_ustage.register_control({u});
+  // auto my_ustage = uStage(20);
+  // my_ustage.register_state({x});
+  // my_ustage.register_control({u});
   // my_ustage.add_objective(dt*dt);
 
 
@@ -77,7 +77,7 @@ int main()
   // /* objective    */ terminal_ustage.add_objective(x(1)*x(1)+p);
 
 
-  cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x),p, ocp.at_t0(dt), ocp.at_tf(dt)}, {{"jit",true}});
+  cs::Function ocp_func = ocp.to_function({p}, {ocp.at_t0(u), ocp.sample(x),p, ocp.at_t0(dt), ocp.at_tf(dt)}, {{"jit",false}});
   auto ret = ocp_func({cs::DM(1.23)});
   std::cout << ret << std::endl;
   return 0;
