@@ -25,10 +25,12 @@ namespace fatrop
                 std::vector<cs::MX> variables_v;
                 std::vector<cs::MX> control_grid_p_v;
                 // add gist
-                for (const auto &ustage : ocp_.get_ustages())
+                for (auto ustage_it = ocp_.get_ustages().begin(); ustage_it != ocp_.get_ustages().end(); ustage_it++)
                 {
-                    auto controls = cs::MX::veccat(ustage.get_controls());
-                    auto states = cs::MX::veccat(ustage.get_states());
+                    const auto &ustage = *ustage_it;
+                    const auto &prev = ustage_it == ocp_.get_ustages().begin() ? std::make_shared<uStageInternal>() : (ustage_it - 1)->get_internal();
+                    auto controls = cs::MX::veccat(ustage.get_controls(true, prev));
+                    auto states = cs::MX::veccat(ustage.get_states(true, prev));
                     auto control_grid_p = cs::MX::veccat(ustage.get_control_parameters());
                     for (int k = 0; k < ustage.K(); k++)
                     {

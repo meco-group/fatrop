@@ -44,14 +44,6 @@ namespace fatrop
         {
             auto ret = uStage(K, static_cast<std::shared_ptr<OcpInternal>>(*this));
             // add the states to the new stage
-            if (!ustages_.empty())
-            {
-                for (auto &[state, sym] : ustages_.back().get()->next_states_)
-                    ret->add_variables(state);
-                ret->prev_ustage_ = ustages_.back();
-                // update next stage
-                ustages_.back().get()->next_ustage_ = ret;
-            }
             ustages_.push_back(ret);
             return ret;
         }

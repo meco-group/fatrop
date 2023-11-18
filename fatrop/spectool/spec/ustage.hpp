@@ -13,7 +13,7 @@ namespace fatrop
         class OcpInternal;
         class uStageInternal
         {
-        private:
+        public:
             uStageInternal(int K, const std::shared_ptr<OcpInternal> &ocp) : K_(K), ocp_(ocp), auto_mode(true)
             {
             }
@@ -27,6 +27,7 @@ namespace fatrop
             uStageInternal(int K): K_(K), auto_mode(false) // auto mode only possible with reference to ocp
             {
             };
+            uStageInternal(): uStageInternal{0, {}, {}, {}, {}}{}; // empty ustage
 
         private:
             friend class uStage;
@@ -37,20 +38,18 @@ namespace fatrop
             const std::vector<cs::MX> &get_objective_terms() const;
             const std::vector<cs::MX> &get_constraints() const;
             const uo_map_mx<cs::MX> &get_next_states() const;
-            const std::vector<cs::MX> get_states(bool include_hybrids = true) const;
+            const std::vector<cs::MX> get_states(bool include_hybrids = true, const std::shared_ptr<const uStageInternal>& prev = nullptr) const;
             const uo_map_mx<std::vector<cs::MX>> &get_state_syms() const;
-            const std::vector<cs::MX> get_controls(bool include_hybrids = true) const;
+            const std::vector<cs::MX> get_controls(bool include_hybrids = true, const std::shared_ptr<const uStageInternal>& prev = nullptr) const;
             const uo_map_mx<std::vector<cs::MX>> &get_control_syms() const;
             const std::vector<cs::MX> &get_hybrids() const;
-            const std::vector<cs::MX> get_hybrids_states() const;
-            const std::vector<cs::MX> get_hybrids_controls() const;
+            const std::vector<cs::MX> get_hybrids_states(const std::shared_ptr<const uStageInternal>& prev) const;
+            const std::vector<cs::MX> get_hybrids_controls(const std::shared_ptr<const uStageInternal>& prev) const;
             const uo_map_mx<std::vector<cs::MX>> &get_hybrid_syms() const;
             const std::vector<cs::MX> &get_control_parameters() const;
             const uo_map_mx<std::vector<cs::MX>> &get_control_parameter_syms() const;
             const std::vector<cs::MX> &get_global_parameters() const;
             const std::shared_ptr<OcpInternal> get_ocp() const;
-            const std::shared_ptr<uStageInternal> get_next_ustage() const;
-            const std::shared_ptr<uStageInternal> get_prev_ustage() const;
             int K() const { return K_; };
 
         private:
@@ -65,7 +64,7 @@ namespace fatrop
             void register_hybrid(const std::vector<cs::MX> &hybrids);
             void register_control_parameter(const std::vector<cs::MX> &control_parameters);
             void register_global_parameter(const std::vector<cs::MX> &global_parameters);
-            void get_hybrids(std::vector<cs::MX> &states, std::vector<cs::MX> &controls) const;
+            void get_hybrids(std::vector<cs::MX> &states, std::vector<cs::MX> &controls, const std::shared_ptr<const uStageInternal>& prev) const;
             const int K_;
             std::vector<cs::MX> objective_terms_;
             std::vector<cs::MX> constraints_;
@@ -83,11 +82,10 @@ namespace fatrop
             uo_set_mx control_parameters_set_;
             uo_map_mx<std::vector<cs::MX>> control_parameter_syms_;
             std::weak_ptr<OcpInternal> ocp_; // is only used for determining symbol type (control/state/hybrid/parameter) in automatic mode
-            std::weak_ptr<uStageInternal> next_ustage_;
-            std::weak_ptr<uStageInternal> prev_ustage_;
             std::vector<cs::MX> global_parameters_;
             uo_set_mx global_parameters_set_;
             bool auto_mode = false;
+            bool has_hybrids = false;
         };
         class uStage : private std::shared_ptr<uStageInternal>
         {
@@ -110,8 +108,8 @@ namespace fatrop
             cs::MX sample(const cs::MX &expr) const;
             std::shared_ptr<uStageInternal> get_internal() const;
             const std::vector<cs::MX> &get_objective_terms() const;
-            const std::vector<cs::MX> get_states(bool include_hybrids = true) const;
-            const std::vector<cs::MX> get_controls(bool include_hybrids = true) const;
+            const std::vector<cs::MX> get_states(bool include_hybrids = true, const std::shared_ptr<uStageInternal>& prev = nullptr) const;
+            const std::vector<cs::MX> get_controls(bool include_hybrids = true, const std::shared_ptr<uStageInternal>& prev = nullptr) const;
             const std::vector<cs::MX> &get_hybrids() const;
             const std::vector<cs::MX> &get_control_parameters() const;
             const std::vector<cs::MX> &get_global_parameters() const;

@@ -18,8 +18,6 @@ namespace fatrop
         {
             get()->next_states_[state] = next_state;
             get()->add_variables(next_state);
-            if (get()->next_ustage_.lock())
-                get()->next_ustage_.lock()->add_variables(state);
         }
         void uStage::set_next(const uo_map_mx<cs::MX> &next_states)
         {
@@ -83,6 +81,7 @@ namespace fatrop
             hybrid_syms_[hybrid] = std::vector<cs::MX>(K_);
             for (int k = 0; k < K_; k++)
                 hybrid_syms_[hybrid][k] = cs::MX::sym(hybrid.name() + std::to_string(k), hybrid.size1() * hybrid.size2());
+            has_hybrids = true;
             // automatic_initial_[automatic] = cs::DM::zeros(automatic.size1() * automatic.size2(), K_);
         }
         void uStageInternal::register_control_parameter(const cs::MX &control_parameter)
@@ -145,13 +144,16 @@ namespace fatrop
         {
             return next_states_;
         };
-        void uStageInternal::get_hybrids(std::vector<cs::MX> &auto_x, std::vector<cs::MX> &auto_u) const
+        void uStageInternal::get_hybrids(std::vector<cs::MX> &auto_x, std::vector<cs::MX> &auto_u, const std::shared_ptr<const uStageInternal> &prev) const
         {
+            if(has_hybrids && !prev)
+                throw std::runtime_error("get_hybrids: prev ustage must be provided if stage has hybrids");
+
             for (const auto &hybrid : get_hybrids())
             {
-                if (get_prev_ustage())
+                if (prev)
                 {
-                    auto &next_states = get_prev_ustage()->get_next_states();
+                    auto &next_states =prev->get_next_states();
                     (next_states.find(hybrid) != next_states.end() ? auto_x : auto_u).push_back(hybrid);
                 }
                 else
@@ -160,26 +162,26 @@ namespace fatrop
                 }
             }
         };
-        const std::vector<cs::MX> uStageInternal::get_hybrids_states() const
+        const std::vector<cs::MX> uStageInternal::get_hybrids_states(const std::shared_ptr<const uStageInternal> &prev) const
         {
             std::vector<cs::MX> auto_x;
             std::vector<cs::MX> auto_u;
-            get_hybrids(auto_x, auto_u);
+            get_hybrids(auto_x, auto_u, prev);
             return auto_x;
         };
-        const std::vector<cs::MX> uStageInternal::get_hybrids_controls() const
+        const std::vector<cs::MX> uStageInternal::get_hybrids_controls(const std::shared_ptr<const uStageInternal> &prev) const
         {
             std::vector<cs::MX> auto_x;
             std::vector<cs::MX> auto_u;
-            get_hybrids(auto_x, auto_u);
+            get_hybrids(auto_x, auto_u, prev);
             return auto_u;
         };
-        const std::vector<cs::MX> uStageInternal::get_states(bool include_hybrids) const
+        const std::vector<cs::MX> uStageInternal::get_states(bool include_hybrids, const std::shared_ptr<const uStageInternal> &prev) const
         {
             auto ret = states_;
             if (include_hybrids)
             {
-                auto auto_x = get_hybrids_states();
+                auto auto_x = get_hybrids_states(prev);
                 ret.insert(ret.end(), auto_x.begin(), auto_x.end());
             }
             return ret;
@@ -188,12 +190,12 @@ namespace fatrop
         {
             return state_syms_;
         };
-        const std::vector<cs::MX> uStageInternal::get_controls(bool include_hybrids) const
+        const std::vector<cs::MX> uStageInternal::get_controls(bool include_hybrids, const std::shared_ptr<const uStageInternal> &prev) const
         {
             auto ret = controls_;
             if (include_hybrids)
             {
-                auto auto_u = get_hybrids_controls();
+                auto auto_u = get_hybrids_controls(prev);
                 ret.insert(ret.end(), auto_u.begin(), auto_u.end());
             }
             return ret;
@@ -225,14 +227,6 @@ namespace fatrop
         const std::shared_ptr<OcpInternal> uStageInternal::get_ocp() const
         {
             return ocp_.lock();
-        };
-        const std::shared_ptr<uStageInternal> uStageInternal::get_next_ustage() const
-        {
-            return next_ustage_.lock();
-        };
-        const std::shared_ptr<uStageInternal> uStageInternal::get_prev_ustage() const
-        {
-            return prev_ustage_.lock();
         };
         bool uStage::has_variable(const cs::MX &var) const
         {
@@ -294,13 +288,13 @@ namespace fatrop
         {
             return static_cast<std::shared_ptr<uStageInternal>>(*this);
         }
-        const std::vector<cs::MX> uStage::get_states(bool incl_auto) const
+        const std::vector<cs::MX> uStage::get_states(bool incl_auto, const std::shared_ptr<uStageInternal> &prev) const
         {
-            return get()->get_states(incl_auto);
+            return get()->get_states(incl_auto, prev);
         }
-        const std::vector<cs::MX> uStage::get_controls(bool incl_auto) const
+        const std::vector<cs::MX> uStage::get_controls(bool incl_auto, const std::shared_ptr<uStageInternal> &prev) const
         {
-            return get()->get_controls(incl_auto);
+            return get()->get_controls(incl_auto, prev);
         }
         const std::vector<cs::MX> &uStage::get_hybrids() const
         {

@@ -7,19 +7,15 @@ namespace fatrop
 {
     namespace spectool
     {
-        uStageQuantities uStageQuantities::create(const std::shared_ptr<uStageInternal> &ustage)
+        uStageQuantities uStageQuantities::create(const std::shared_ptr<const uStageInternal> &ustage, const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next)
         {
             uStageQuantities ret;
-            ret.x = cs::MX::veccat(ustage->get_states());
+            ret.x = cs::MX::veccat(ustage->get_states(true, prev));
             ret.p_stage = cs::MX::veccat(ustage->get_control_parameters());
-            ret.u = cs::MX::veccat(ustage->get_controls());
+            ret.u = cs::MX::veccat(ustage->get_controls(true, prev));
             ret.p_global = cs::MX::veccat(ustage->get_ocp()->get_global_parameter_syms());
-            // ret.nx = ret.x.size1();
-            // ret.nu = ret.u.size1();
-            // ret.np_stage = ret.p_stage.size1();
-            // ret.np_global = ret.p_global.size1();
             ret.K = ustage->K();
-            if (ustage->get_next_ustage())
+            if (next)
             {
                 std::vector<cs::MX> from;
                 std::vector<cs::MX> to;
@@ -29,7 +25,7 @@ namespace fatrop
                     to.push_back(to_);
                 }
                 // check if every state of the next stage is defined
-                for(auto& state : ustage->get_next_ustage()->get_states(false))
+                for(auto& state : next->get_states(false))
                 {
                     if(ustage->get_next_states().find(state) == ustage->get_next_states().end())
                     {
@@ -38,8 +34,8 @@ namespace fatrop
                 }
                 try
                 {
-                    auto x_next_vec = cs::MX::veccat(ustage->get_next_ustage()->get_states());
-                    ret.x_next = cs::MX::veccat(cs::MX::substitute({ustage->get_next_ustage()->get_states()}, from, to));
+                    auto x_next_vec = cs::MX::veccat(next->get_states(true, ustage));
+                    ret.x_next = cs::MX::veccat(cs::MX::substitute({next->get_states(true, ustage)}, from, to));
                 }
                 catch (const std::exception &e)
                 {
