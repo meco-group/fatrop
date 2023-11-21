@@ -53,7 +53,7 @@ At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two i
 ## Build and install Fatrop and Fatropy
 (Recursively) clone this repository
 
-    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
+    git clone https://github.com/meco-group/fatrop.git --recursive
     cd fatrop
 
 
@@ -72,7 +72,7 @@ Trouble shoot:
 ## Build and install Fatrop only
 (Recursively) clone this repository
 
-    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
+    git clone https://github.com/meco-group/fatrop.git --recursive
     cd fatrop
 
 Build and install the Fatrop project
