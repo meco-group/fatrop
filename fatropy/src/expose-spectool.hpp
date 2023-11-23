@@ -69,6 +69,7 @@ namespace fatropy
     {
         static void expose(py::module &m)
         {
+            // py::bind_map<casadi::Dict>(m, "cs::Dict");
             py::class_<casadi::GenericType>(m, "csGenericType")
                 .def(py::init<bool>())
                 .def(py::init<casadi_int>())
@@ -87,23 +88,23 @@ namespace fatropy
                 .def(py::init<const casadi::Dict &>())
                 .def(py::init<void *>());
             py::implicitly_convertible<bool, casadi::GenericType>();
-            py::implicitly_convertible<casadi_int, casadi::GenericType>;
-            py::implicitly_convertible<int, casadi::GenericType>;
-            py::implicitly_convertible<double, casadi::GenericType>;
-            py::implicitly_convertible<const std::string &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<bool> &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<casadi_int> &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<int> &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<std::vector<casadi_int>> &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<double> &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<std::vector<double>> &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<std::string> &, casadi::GenericType>;
-            py::implicitly_convertible<const casadi::Function &, casadi::GenericType>;
-            py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>;
-            py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>;
-            py::implicitly_convertible<py::float_, casadi::MX>;
-            py::implicitly_convertible<double, casadi::MX>;
-            // py::bind_map<casadi::Dict>(m, "cs::Dict");
+            py::implicitly_convertible<casadi_int, casadi::GenericType>();
+            py::implicitly_convertible<int, casadi::GenericType>();
+            py::implicitly_convertible<double, casadi::GenericType>();
+            py::implicitly_convertible<const std::string &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<bool> &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<casadi_int> &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<int> &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<std::vector<casadi_int>> &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<double> &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<std::vector<double>> &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<std::string> &, casadi::GenericType>();
+            py::implicitly_convertible<const casadi::Function &, casadi::GenericType>();
+            py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>();
+            py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>();
+            py::implicitly_convertible<casadi::Dict, casadi::GenericType>();
+            py::implicitly_convertible<py::float_, casadi::MX>();
+            py::implicitly_convertible<double, casadi::MX>();
 
             py::bind_map<fatrop::spectool::uo_map_mx_mx>(m, "uo_map_mx_mx");
             py::class_<fatrop::spectool::IntegratorRk4>(m,"IntegratorRk4").
