@@ -277,7 +277,7 @@ namespace fatrop
             // }
             return cs::MX::substitute(std::vector<cs::MX>{expr}, from, to)[0];
         }
-        std::pair<cs::MX, std::vector<int>> uStage::sample(const cs::MX &expr) const
+        std::pair<std::vector<int>, cs::MX> uStage::sample(const cs::MX &expr) const
         {
             // check if expr is a column vector
             if (expr.size2() > 1)
@@ -293,7 +293,7 @@ namespace fatrop
                     reti.push_back(k);
                 }
             }
-            return {cs::MX::horzcat(samples_vec), reti};
+            return {reti, cs::MX::horzcat(samples_vec)};
         }
         const std::vector<cs::MX> &uStage::get_objective_terms() const
         {

@@ -89,10 +89,10 @@ namespace fatrop
         {
             return control_parameters_;
         }
-        std::pair<cs::MX, std::vector<int>> Ocp::sample(const cs::MX &expr) const
+        std::pair<std::vector<int>,cs::MX> Ocp::sample(const cs::MX &expr) const
         {
             if (expr.size2() != 1)
-                return {cs::MX(), {}}; // return empty matrix if input is not a column vector
+                return {{},cs::MX()}; // return empty matrix if input is not a column vector
             auto ret = std::vector<cs::MX>();
             auto vars = cs::MX::symvar(expr);
             auto reti = std::vector<int>();
@@ -102,17 +102,17 @@ namespace fatrop
                 const auto &ustage = get_ustages()[i];
                 {
                     auto sample_ = ustage.sample(expr);
-                    if(sample_.first.size2() == 0)
+                    if(sample_.second.size2() == 0)
                         continue;
                     // add samples to ret
-                    ret.push_back(sample_.first);
+                    ret.push_back(sample_.second);
                     // add indices to reti
-                    for (const auto &idx : sample_.second)
+                    for (const auto &idx : sample_.first)
                         reti.push_back(k + idx);
                 }
                 k += ustage.K();
             }
-            return {cs::MX::horzcat(ret), reti};
+            return {reti, cs::MX::horzcat(ret)};
         }
         const std::vector<uStage> &Ocp::get_ustages() const
         {
@@ -158,7 +158,7 @@ namespace fatrop
                     throw std::runtime_error("initial value has wrong size");
 
                 if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var))
-                    varr = sample(var).first;
+                    varr = sample(var).second;
                 else
                     varr = var;
                 if (value.size2() == 1)

@@ -21,10 +21,10 @@ namespace fatrop
             // add the variables to the terminal stage
             at_tf().get_internal()->add_variables({state});
         }
-        std::pair<cs::MX, std::vector<int>> Stage::sample(const cs::MX &expr) const
+        std::pair<std::vector<int>, cs::MX> Stage::sample(const cs::MX &expr) const
         {
             if (expr.size2() != 1)
-                return {cs::MX(), {}}; // return empty matrix if input is not a column vector
+                return {{},cs::MX()}; // return empty matrix if input is not a column vector
             auto ret = std::vector<cs::MX>();
             auto vars = cs::MX::symvar(expr);
             auto reti = std::vector<int>();
@@ -35,17 +35,17 @@ namespace fatrop
                 const auto &ustage = ustages_[i];
                 {
                     auto sample_ = (*ustage).sample(expr);
-                    if(sample_.first.size2() == 0)
+                    if(sample_.second.size2() == 0)
                         continue;
                     // add samples to ret
-                    ret.push_back(sample_.first);
+                    ret.push_back(sample_.second);
                     // add indices to reti
-                    for (const auto &idx : sample_.second)
+                    for (const auto &idx : sample_.first)
                         reti.push_back(k + idx);
                 }
                 k += (*ustage).K();
             }
-            return {cs::MX::horzcat(ret), reti};
+            return {reti, cs::MX::horzcat(ret)};
         }
         uStage &Stage::at_t0() const { return *get()->initial; }
         uStage &Stage::at_tf() const { return *get()->terminal; }

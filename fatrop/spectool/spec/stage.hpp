@@ -31,7 +31,7 @@ namespace fatrop
 
         public:
             void set_next(const cs::MX &state, const cs::MX &next_state);
-            std::pair<cs::MX, std::vector<int>> sample(const cs::MX &expr) const;
+            std::pair<std::vector<int>, cs::MX> sample(const cs::MX &expr) const;
             template <class... args>
             void subject_to(const cs::MX &expr, args... argss)
             {

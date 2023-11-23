@@ -69,7 +69,7 @@ namespace fatrop
             cs::MX control(const int m = 1, const int n = 1);
             cs::MX hybrid(const int m = 1, const int n = 1);
             cs::MX parameter(const int m = 1, const int n = 1, const std::string &grid = "global");
-            std::pair<cs::MX, std::vector<int>> sample(const cs::MX &expr) const;
+            std::pair<std::vector<int>,cs::MX> sample(const cs::MX &expr) const;
             uStage new_ustage(const int K = 1);
             Stage new_stage(const int K);
             const std::vector<uStage> &get_ustages() const;
