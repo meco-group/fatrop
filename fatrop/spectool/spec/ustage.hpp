@@ -107,7 +107,7 @@ namespace fatrop
             int K() const;
             const uo_map_mx<cs::MX> &dynamics();
             cs::MX eval_at_control(const cs::MX &expr, const int k) const;
-            cs::MX sample(const cs::MX &expr) const;
+            std::pair<cs::MX, std::vector<int>> sample(const cs::MX &expr) const;
             std::shared_ptr<uStageInternal> get_internal() const;
             const std::vector<cs::MX> &get_objective_terms() const;
             const std::vector<cs::MX> get_states(bool include_hybrids = true, const std::shared_ptr<uStageInternal>& prev = nullptr) const;

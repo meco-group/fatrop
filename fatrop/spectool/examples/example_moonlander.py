@@ -78,18 +78,20 @@ ocp.set_initial(F2, cs.MX(5.))
 ocp.set_initial(T, cs.MX(10.))
 
 # Retrieve the results
-F_r_sample = ocp.sample(F_r)
-F_tot_sample = ocp.sample(F_tot)
-F1_sample = ocp.sample(F1)
-F2_sample = ocp.sample(F2)
-p_sample = ocp.sample(p)
+F_r_sample = ocp.sample(F_r)[0]
+F_tot_sample = ocp.sample(F_tot)[0]
+F1_sample = ocp.sample(F1)[0]
+F2_sample = ocp.sample(F2)[0]
+p_sample = ocp.sample(p)[0]
+
+print(ocp.sample(F1)[1])
 
 
 ### More efficient usage of the solver: make use of to_function, to reduce overhead of the rockit layer
 # the arguments should consist of all defined problem parameters
 # state and control variables are treated as initial guess for the solver
 # stage and control variables that are not defined as arguments use the default initialization
-fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)], {"jit":True})
+fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[0]], {"jit":True})
 p_sol, F1_sol, F2_sol, T_sol = fatrop_func(np.array([6., 5.]))
 
 print(p_sol)

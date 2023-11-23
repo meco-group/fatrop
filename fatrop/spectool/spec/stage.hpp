@@ -31,7 +31,7 @@ namespace fatrop
 
         public:
             void set_next(const cs::MX &state, const cs::MX &next_state);
-            cs::MX sample(const cs::MX &expr);
+            std::pair<cs::MX, std::vector<int>> sample(const cs::MX &expr) const;
             template <class... args>
             void subject_to(const cs::MX &expr, args... argss)
             {
@@ -42,9 +42,9 @@ namespace fatrop
             {
                 return apply_at(&uStage::add_objective, expr, argss...);
             }
-            uStage &at_t0();
-            uStage &at_tf();
-            uStage &at_mid();
+            uStage &at_t0() const;
+            uStage &at_tf() const;
+            uStage &at_mid() const;
 
             template <class F>
             void apply_at_single(F f, const cs::MX &expr, const at &type)

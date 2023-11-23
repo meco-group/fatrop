@@ -1,5 +1,6 @@
 #include "ocp.hpp"
 #include "fatrop/spectool/solver_interfaces/fatrop/fatrop_solver.hpp"
+#include <numeric>
 namespace fatrop
 {
     namespace spectool
@@ -88,19 +89,30 @@ namespace fatrop
         {
             return control_parameters_;
         }
-        cs::MX Ocp::sample(const cs::MX &expr) const
+        std::pair<cs::MX, std::vector<int>> Ocp::sample(const cs::MX &expr) const
         {
             if (expr.size2() != 1)
-                return cs::MX(); // return empty matrix if input is not a column vector
-            auto ret = cs::MX::zeros(expr.size1(), 0);
+                return {cs::MX(), {}}; // return empty matrix if input is not a column vector
+            auto ret = std::vector<cs::MX>();
             auto vars = cs::MX::symvar(expr);
-            for (const auto &ustage : get_ustages())
+            auto reti = std::vector<int>();
+            int k = 0;
+            for (auto i = 0; i < get_ustages().size(); ++i)
             {
-                if (std::all_of(vars.begin(), vars.end(), [&](const cs::MX &var)
-                                { return get()->is_global_parameter(var) || ustage.has_variable(var); }))
-                    ret = cs::MX::horzcat({ret, ustage.sample(expr)});
+                const auto &ustage = get_ustages()[i];
+                {
+                    auto sample_ = ustage.sample(expr);
+                    if(sample_.first.size2() == 0)
+                        continue;
+                    // add samples to ret
+                    ret.push_back(sample_.first);
+                    // add indices to reti
+                    for (const auto &idx : sample_.second)
+                        reti.push_back(k + idx);
+                }
+                k += ustage.K();
             }
-            return ret;
+            return {cs::MX::horzcat(ret), reti};
         }
         const std::vector<uStage> &Ocp::get_ustages() const
         {
@@ -146,7 +158,7 @@ namespace fatrop
                     throw std::runtime_error("initial value has wrong size");
 
                 if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var))
-                    varr = sample(var);
+                    varr = sample(var).first;
                 else
                     varr = var;
                 if (value.size2() == 1)

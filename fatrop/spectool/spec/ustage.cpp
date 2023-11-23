@@ -59,7 +59,8 @@ namespace fatrop
         void uStageInternal::register_state(const cs::MX &state)
         {
             states_.push_back(state);
-            if(ocp_.lock()) states_ = ocp_.lock() -> order_vars(states_);
+            if (ocp_.lock())
+                states_ = ocp_.lock()->order_vars(states_);
             states_set_.insert(state);
             state_syms_[state] = std::vector<cs::MX>(K_);
             for (int k = 0; k < K_; k++)
@@ -69,7 +70,8 @@ namespace fatrop
         void uStageInternal::register_control(const cs::MX &control)
         {
             controls_.push_back(control);
-            if(ocp_.lock()) controls_ = ocp_.lock() -> order_vars(controls_);
+            if (ocp_.lock())
+                controls_ = ocp_.lock()->order_vars(controls_);
             controls_set_.insert(control);
             control_syms_[control] = std::vector<cs::MX>(K_);
             for (int k = 0; k < K_; k++)
@@ -79,7 +81,8 @@ namespace fatrop
         void uStageInternal::register_hybrid(const cs::MX &hybrid)
         {
             hybrids_.push_back(hybrid);
-            if(ocp_.lock()) hybrids_ = ocp_.lock() -> order_vars(hybrids_);
+            if (ocp_.lock())
+                hybrids_ = ocp_.lock()->order_vars(hybrids_);
             hybrids_set_.insert(hybrid);
             hybrid_syms_[hybrid] = std::vector<cs::MX>(K_);
             for (int k = 0; k < K_; k++)
@@ -90,7 +93,8 @@ namespace fatrop
         void uStageInternal::register_control_parameter(const cs::MX &control_parameter)
         {
             control_parameters_.push_back(control_parameter);
-            if(ocp_.lock()) control_parameters_ = ocp_.lock() -> order_vars(control_parameters_);
+            if (ocp_.lock())
+                control_parameters_ = ocp_.lock()->order_vars(control_parameters_);
             control_parameters_set_.insert(control_parameter);
             control_parameter_syms_[control_parameter] = std::vector<cs::MX>(K_);
             for (int k = 0; k < K_; k++)
@@ -100,7 +104,8 @@ namespace fatrop
         void uStageInternal::register_global_parameter(const cs::MX &global_parameter)
         {
             global_parameters_.push_back(global_parameter);
-            if(ocp_.lock()) global_parameters_ = ocp_.lock() -> order_vars(global_parameters_);
+            if (ocp_.lock())
+                global_parameters_ = ocp_.lock()->order_vars(global_parameters_);
             global_parameters_set_.insert(global_parameter);
         }
         void uStageInternal::register_state(const std::vector<cs::MX> &states)
@@ -151,14 +156,14 @@ namespace fatrop
         };
         void uStageInternal::get_hybrids(std::vector<cs::MX> &auto_x, std::vector<cs::MX> &auto_u, const std::shared_ptr<const uStageInternal> &prev) const
         {
-            if(has_hybrids && !prev)
+            if (has_hybrids && !prev)
                 throw std::runtime_error("get_hybrids: prev ustage must be provided if stage has hybrids");
 
             for (const auto &hybrid : get_hybrids())
             {
                 if (prev)
                 {
-                    auto &next_states =prev->get_next_states();
+                    auto &next_states = prev->get_next_states();
                     (next_states.find(hybrid) != next_states.end() ? auto_x : auto_u).push_back(hybrid);
                 }
                 else
@@ -272,18 +277,23 @@ namespace fatrop
             // }
             return cs::MX::substitute(std::vector<cs::MX>{expr}, from, to)[0];
         }
-        cs::MX uStage::sample(const cs::MX &expr) const
+        std::pair<cs::MX, std::vector<int>> uStage::sample(const cs::MX &expr) const
         {
             // check if expr is a column vector
             if (expr.size2() > 1)
                 throw std::runtime_error("sample: expr must be a column vector");
-            // auto ret = cs::MX::zeros(expr.size1(), K());
-            std::vector<cs::MX> samples_vec;
-            for (int k = 0; k < K(); k++)
+            auto vars = cs::MX::symvar(expr);
+            auto samples_vec = std::vector<cs::MX>();
+            auto reti = std::vector<int>();
+            if (std::all_of(vars.begin(), vars.end(), [this](const cs::MX& var) { return has_variable(var); }))
             {
-                samples_vec.push_back(eval_at_control(expr, k));
+                for (int k = 0; k < K(); k++)
+                {
+                    samples_vec.push_back(eval_at_control(expr, k));
+                    reti.push_back(k);
+                }
             }
-            return cs::MX::horzcat(samples_vec);
+            return {cs::MX::horzcat(samples_vec), reti};
         }
         const std::vector<cs::MX> &uStage::get_objective_terms() const
         {
