@@ -1,6 +1,9 @@
 
 pybind11_add_module(fatropy fatropy.cpp)
-target_link_libraries(fatropy PRIVATE fatrop casadi spectool)
+target_link_libraries(fatropy PRIVATE fatrop casadi)
+if(${WITH_SPECTOOL})
+    target_link_libraries(fatropy PRIVATE spectool)
+endif()
 target_include_directories(fatropy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../fatrop)
 target_include_directories(fatropy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../fatrop/spectool)
 
