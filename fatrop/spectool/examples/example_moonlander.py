@@ -78,11 +78,11 @@ ocp.set_initial(F2, cs.MX(5.))
 ocp.set_initial(T, cs.MX(10.))
 
 # Retrieve the results
-k_F_r_sample, F_r_sample = ocp.sample(F_r)[0]
-k_F_tot_sample, F_tot_sample = ocp.sample(F_tot)[0]
-k_F1_sample, F1_sample = ocp.sample(F1)[0]
-k_F2_sample, F2_sample = ocp.sample(F2)[0]
-k_p_sample, p_sample = ocp.sample(p)[0]
+k_F_r_sample, F_r_sample = ocp.sample(F_r)
+k_F_tot_sample, F_tot_sample = ocp.sample(F_tot)
+k_F1_sample, F1_sample = ocp.sample(F1)
+k_F2_sample, F2_sample = ocp.sample(F2)
+k_p_sample, p_sample = ocp.sample(p)
 
 ### More efficient usage of the solver: make use of to_function, to reduce overhead of the rockit layer
 # the arguments should consist of all defined problem parameters
@@ -90,12 +90,9 @@ k_p_sample, p_sample = ocp.sample(p)[0]
 # stage and control variables that are not defined as arguments use the default initialization
 fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1]], {"jit":True})
 p_sol, F1_sol, F2_sol, T_sol, timesteps = fatrop_func(np.array([6., 5.]))
-print(timesteps)
-
-print(p_sol)
-print(F1_sol)
-print(F2_sol)
-print(T_sol)
+t_F1_sol = timesteps[k_F1_sample]
+print("t_F1_sol", t_F1_sol)
+print("F1_sol", F1_sol)
 
 # plot the trajectory
 import matplotlib.pyplot as plt
