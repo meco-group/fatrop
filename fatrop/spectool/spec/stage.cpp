@@ -10,7 +10,7 @@ namespace fatrop
                 throw std::runtime_error("K must be greater than 1");
             }
             get()->initial = std::make_unique<uStage>(ocp.new_ustage());
-            get()->middle = std::make_unique<uStage>(ocp.new_ustage(K - 2));
+            get()->middle = std::make_unique<uStage>(ocp.new_ustage(K - 1));
             get()->terminal = std::make_unique<uStage>(ocp.new_ustage());
         }
 
