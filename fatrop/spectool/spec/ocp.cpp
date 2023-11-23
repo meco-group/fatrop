@@ -118,13 +118,13 @@ namespace fatrop
         {
             return ustages_;
         }
-        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts) const
+        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
         {
             auto solver = SolverFatrop();
             solver.transcribe(*this, opts);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
-            auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out);
+            auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out, opts_fatrop);
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = eval_at_initial(gist_solver_in[0]);
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});

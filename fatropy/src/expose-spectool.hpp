@@ -102,9 +102,9 @@ namespace fatropy
             py::implicitly_convertible<const casadi::Function &, casadi::GenericType>();
             py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>();
             py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>();
-            py::implicitly_convertible<casadi::Dict, casadi::GenericType>();
-            py::implicitly_convertible<py::float_, casadi::MX>();
-            py::implicitly_convertible<double, casadi::MX>();
+            // py::implicitly_convertible<casadi::Dict, casadi::GenericType>();
+            // py::implicitly_convertible<py::float_, casadi::MX>();
+            // py::implicitly_convertible<double, >();
 
             py::bind_map<fatrop::spectool::uo_map_mx_mx>(m, "uo_map_mx_mx");
             py::class_<fatrop::spectool::IntegratorRk4>(m,"IntegratorRk4").
@@ -149,7 +149,7 @@ namespace fatropy
             .def("sample", &fatrop::spectool::Ocp::sample)
             .def("new_stage", &fatrop::spectool::Ocp::new_stage, py::arg("K") = 1)
             .def("new_ustage", &fatrop::spectool::Ocp::new_ustage, py::arg("K") = 1)
-            .def("to_function", &fatrop::spectool::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict())
+            .def("to_function", &fatrop::spectool::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
             .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_t0, py::const_))
             .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_tf, py::const_))
             .def("at_t0",py::overload_cast<>(&fatrop::spectool::Ocp::at_t0, py::const_))

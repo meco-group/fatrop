@@ -88,7 +88,8 @@ k_p_sample, p_sample = ocp.sample(p)
 # the arguments should consist of all defined problem parameters
 # state and control variables are treated as initial guess for the solver
 # stage and control variables that are not defined as arguments use the default initialization
-fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1]], {"jit":True})
+# fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1]], {"jit":True, "fatrop":{"mu_init":1e-1}})
+fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1]], {"jit":True}, {"mu_init":1e-1})
 p_sol, F1_sol, F2_sol, T_sol, timesteps = fatrop_func(np.array([6., 5.]))
 t_F1_sol = timesteps[k_F1_sample]
 print("t_F1_sol", t_F1_sol)

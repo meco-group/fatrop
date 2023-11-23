@@ -20,7 +20,7 @@ namespace fatrop
             {
                 fatrop_impl = std::make_shared<FatropOcpImpl>(ocp_, opts);
             }
-            cs::Function to_function(const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out)
+            cs::Function to_function(const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict& opts)
             {
                 std::vector<cs::MX> variables_v;
                 std::vector<cs::MX> control_grid_p_v;
@@ -42,7 +42,7 @@ namespace fatrop
                 gist_in = {cs::MX::veccat(variables_v), cs::MX::veccat(control_grid_p_v), cs::MX::veccat(ocp_.get_global_parameters())};
                 gist_out = {cs::MX::veccat(variables_v)};
 
-                return FatropFunction(fatrop_impl);
+                return FatropFunction(fatrop_impl, opts);
             };
             std::shared_ptr<FatropOcpImpl> fatrop_impl;
         };
