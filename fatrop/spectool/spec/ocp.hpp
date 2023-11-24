@@ -84,6 +84,8 @@ namespace fatrop
             uStage at_tf() const { return ustages_.back(); };
             void set_initial(const cs::MX &var, const cs::MX &value);
             cs::MX eval_at_initial(const cs::MX &expr) const;
+            cs::MX all_variables();
+
 
         protected:
             std::vector<uStage> ustages_;

@@ -89,10 +89,10 @@ namespace fatrop
         {
             return control_parameters_;
         }
-        std::pair<std::vector<int>,cs::MX> Ocp::sample(const cs::MX &expr) const
+        std::pair<std::vector<int>, cs::MX> Ocp::sample(const cs::MX &expr) const
         {
             if (expr.size2() != 1)
-                return {{},cs::MX()}; // return empty matrix if input is not a column vector
+                return {{}, cs::MX()}; // return empty matrix if input is not a column vector
             auto ret = std::vector<cs::MX>();
             auto vars = cs::MX::symvar(expr);
             auto reti = std::vector<int>();
@@ -102,7 +102,7 @@ namespace fatrop
                 const auto &ustage = get_ustages()[i];
                 {
                     auto sample_ = ustage.sample(expr);
-                    if(sample_.second.size2() == 0)
+                    if (sample_.second.size2() == 0)
                         continue;
                     // add samples to ret
                     ret.push_back(sample_.second);
@@ -118,7 +118,7 @@ namespace fatrop
         {
             return ustages_;
         }
-        cs::Function Ocp::to_function(const std::string& name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
+        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
         {
             auto solver = SolverFatrop();
             solver.transcribe(*this, opts);
@@ -173,6 +173,13 @@ namespace fatrop
         Stage Ocp::new_stage(const int K)
         {
             return Stage(*this, K);
+        }
+        cs::MX Ocp::all_variables()
+        {
+            std::vector<cs::MX> gist_in;
+            std::vector<cs::MX> gist_out;
+            SolverFatrop().gist(*this, gist_in, gist_out);
+            return cs::MX::veccat(gist_out);
         }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {

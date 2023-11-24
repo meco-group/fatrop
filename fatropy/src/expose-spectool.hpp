@@ -154,7 +154,8 @@ namespace fatropy
             .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_tf, py::const_))
             .def("at_t0",py::overload_cast<>(&fatrop::spectool::Ocp::at_t0, py::const_))
             .def("at_tf",py::overload_cast<>(&fatrop::spectool::Ocp::at_tf, py::const_))
-            .def("set_initial", &fatrop::spectool::Ocp::set_initial);
+            .def("set_initial", &fatrop::spectool::Ocp::set_initial)
+            .def("all_variables", &fatrop::spectool::Ocp::all_variables);
 
             // .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
         }
