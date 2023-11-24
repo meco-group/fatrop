@@ -149,7 +149,7 @@ namespace fatropy
             .def("sample", &fatrop::spectool::Ocp::sample)
             .def("new_stage", &fatrop::spectool::Ocp::new_stage, py::arg("K") = 1)
             .def("new_ustage", &fatrop::spectool::Ocp::new_ustage, py::arg("K") = 1)
-            .def("to_function", &fatrop::spectool::Ocp::to_function, py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
+            .def("to_function", &fatrop::spectool::Ocp::to_function,py::arg("name"), py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
             .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_t0, py::const_))
             .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_tf, py::const_))
             .def("at_t0",py::overload_cast<>(&fatrop::spectool::Ocp::at_t0, py::const_))

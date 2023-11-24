@@ -107,7 +107,7 @@ namespace fatrop
         class FatropFunction : public cs::Function
         {
         public:
-            FatropFunction(const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_, const cs::Dict &options)
+            FatropFunction(const std::string&name, const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_, const cs::Dict &options)
             {
                 auto app_ = std::make_shared<fatrop::OCPApplication>(ocpimpl_);
                 app_->build();
@@ -126,7 +126,7 @@ namespace fatrop
                 {
                     casadi_error("Cannot create 'FatropFunction': Internal class already created");
                 }
-                auto ptr = new FatropFunctionInternal("FatropFunction", app_);
+                auto ptr = new FatropFunctionInternal(std::string("FatropFunction_") + name, app_);
                 static_cast<cs::SharedObject *>(this)->own(ptr);
                 auto options_ = cs::Dict();
                 static_cast<cs::Function *>(this)->operator->()->casadi::FunctionInternal::construct(options_);

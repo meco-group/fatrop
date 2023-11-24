@@ -47,7 +47,7 @@ def get_func():
 
   # ocp.set_initial(u, p)
 
-  return ocp.to_function([p], [ocp.at_t0(u), ocp.sample(x)[1],p], {"jit":True})
+  return ocp.to_function("example_ocp", [p], [ocp.at_t0(u), ocp.sample(x)[1],p], {"jit":True})
 
 ocp_func = get_func()
 ret = ocp_func(2.5)

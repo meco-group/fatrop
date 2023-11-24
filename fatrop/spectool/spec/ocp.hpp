@@ -77,7 +77,7 @@ namespace fatrop
             {
                 return get()->global_parammeter_syms_;
             }
-            cs::Function to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts = casadi::Dict(), const cs::Dict &opts_fatrop = casadi::Dict()) const;
+            cs::Function to_function(const std::string& name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts = casadi::Dict(), const cs::Dict &opts_fatrop = casadi::Dict()) const;
             cs::MX at_t0(const cs::MX &expr) const { return ustages_.front().at_t0(expr); };
             cs::MX at_tf(const cs::MX &expr) const { return ustages_.back().at_tf(expr); };
             uStage at_t0() const { return ustages_.front(); };

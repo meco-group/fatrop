@@ -118,13 +118,13 @@ namespace fatrop
         {
             return ustages_;
         }
-        cs::Function Ocp::to_function(const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
+        cs::Function Ocp::to_function(const std::string& name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
         {
             auto solver = SolverFatrop();
             solver.transcribe(*this, opts);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
-            auto fatrop_func = solver.to_function(*this, gist_solver_in, gist_solver_out, opts_fatrop);
+            auto fatrop_func = solver.to_function(name, *this, gist_solver_in, gist_solver_out, opts_fatrop);
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = eval_at_initial(gist_solver_in[0]);
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});
@@ -140,7 +140,7 @@ namespace fatrop
                 initial_guess = cs::MX::substitute({initial_guess}, free_inits, free_zeros)[0];
             }
             auto result = fatrop_func({initial_guess, gist_solver_in[1], gist_solver_in[2]});
-            return cs::Function("ocp", in, cs::MX::substitute(out, gist_solver_out, result));
+            return cs::Function(name, in, cs::MX::substitute(out, gist_solver_out, result));
         }
         void Ocp::set_initial(const cs::MX &var, const cs::MX &value)
         {
