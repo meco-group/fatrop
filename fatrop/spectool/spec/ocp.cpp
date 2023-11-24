@@ -126,7 +126,7 @@ namespace fatrop
             std::vector<cs::MX> gist_solver_out;
             auto fatrop_func = solver.to_function(name, *this, gist_solver_in, gist_solver_out, opts_fatrop);
             cs::MX vars = gist_solver_in[0];
-            cs::MX initial_guess = eval_at_initial(gist_solver_in[0]);
+            cs::MX initial_guess = gist_solver_in[0];
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});
             auto helper1 = cs::Function("helper0", in, {gist_solver_in[1], gist_solver_in[2]}, cs::Dict{{"allow_free", true}});
             if (helper1.has_free())
@@ -134,10 +134,12 @@ namespace fatrop
             if (helper0.has_free())
             {
                 auto free_inits = helper0.free_mx();
-                std::vector<cs::MX> free_zeros;
+                std::vector<cs::MX> init_evals;
                 for (const auto &free_init : free_inits)
-                    free_zeros.push_back(cs::DM::zeros(free_init.size1(), free_init.size2()));
-                initial_guess = cs::MX::substitute({initial_guess}, free_inits, free_zeros)[0];
+                {
+                    init_evals.push_back(eval_at_initial(free_init));
+                }
+                initial_guess = cs::MX::substitute({initial_guess}, free_inits, init_evals)[0];
             }
             auto result = fatrop_func({initial_guess, gist_solver_in[1], gist_solver_in[2]});
             return cs::Function(name, in, cs::MX::substitute(out, gist_solver_out, result));
@@ -148,6 +150,7 @@ namespace fatrop
         }
         cs::MX Ocp::eval_at_initial(const cs::MX &expr) const
         {
+            auto all_vars = cs::MX::symvar(expr);
             std::vector<cs::MX> from;
             std::vector<cs::MX> to;
             for (const auto &[var, value] : get()->initial_values)
@@ -168,6 +171,14 @@ namespace fatrop
                 from.push_back(varr);
                 to.push_back(valuee);
             }
+            // set the values for which no initialization is provided to zero
+            auto helper0 = cs::Function("helper0", from, all_vars, cs::Dict{{"allow_free", true}});
+            for (const auto &free : helper0.free_mx())
+            {
+                from.push_back(free);
+                to.push_back(cs::DM::zeros(free.size1(), free.size2()));
+            }
+
             return cs::MX::substitute({expr}, from, to)[0];
         }
         Stage Ocp::new_stage(const int K)
