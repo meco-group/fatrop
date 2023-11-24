@@ -3,7 +3,7 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include "fatrop_ustage_eval_abstract.hpp"
+#include "fatrop/spectool/spec/ustage_eval_abstract.hpp"
 #include "fatrop/spectool/function_evaluation/casadi_fe.hpp"
 #include "fatrop/spectool/spec/ustage_quantities.hpp"
 namespace fatrop

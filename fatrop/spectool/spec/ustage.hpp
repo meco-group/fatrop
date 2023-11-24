@@ -4,6 +4,9 @@
 #include <string>
 #include <memory>
 #include "fatrop/spectool/auxiliary/casadi_utilities.hpp"
+#include "fatrop/spectool/function_evaluation/casadi_jit_cache.hpp"
+#include "ustage_eval_abstract.hpp"
+#include "ustage_eval_casadi.hpp"
 namespace fatrop
 {
     namespace spectool
@@ -120,6 +123,10 @@ namespace fatrop
             void register_hybrid(const std::vector<cs::MX> &hybrids);
             void register_control_parameter(const std::vector<cs::MX> &control_parameters);
             void register_global_parameter(const std::vector<cs::MX> &global_parameters);
+            std::shared_ptr<FatropuStageEvalAbstract> get_evaluator(const std::shared_ptr<const uStageInternal>& prev, const std::shared_ptr<const uStageInternal>&next, const cs::Dict& opts, CasadiJitCache& cache) const
+            {
+                return std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(this -> get_internal(), prev, next), opts, cache);
+            }
         };
     } // namespace spectrop
 } // namespace fatrop

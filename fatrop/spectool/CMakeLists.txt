@@ -1,7 +1,7 @@
 # project(spectool)
 
 
-add_library(spectool SHARED spec/ocp.cpp spec/ustage.cpp solver_interfaces/fatrop/fatrop_solver.cpp solver_interfaces/solver.cpp function_evaluation/casadi_fe.cpp solver_interfaces/fatrop/fatrop_ocp_impl.cpp spec/ustage_quantities.cpp spec/stage.cpp solver_interfaces/fatrop/fatrop_ustage_eval_casadi.cpp function_evaluation/casadi_fe.cpp function_evaluation/casadi_jit.cpp)
+add_library(spectool SHARED spec/ocp.cpp spec/ustage.cpp solver_interfaces/fatrop/fatrop_solver.cpp solver_interfaces/solver.cpp function_evaluation/casadi_fe.cpp solver_interfaces/fatrop/fatrop_ocp_impl.cpp spec/ustage_quantities.cpp spec/stage.cpp spec/ustage_eval_casadi.cpp function_evaluation/casadi_fe.cpp function_evaluation/casadi_jit.cpp)
 
 
 target_include_directories(spectool PUBLIC  
@@ -37,7 +37,7 @@ solver_interfaces/fatrop/fatrop_function.hpp
 spec/ustage_quantities.hpp
 spec/stage.hpp
 spec/integrator-rk4.hpp
-solver_interfaces/fatrop/fatrop_ustage_eval_casadi.hpp
+spec/ustage_eval_casadi.hpp
 function_evaluation/casadi_fe.hpp
 function_evaluation/casadi_jit.hpp
 spectool.hpp

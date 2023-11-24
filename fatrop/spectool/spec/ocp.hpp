@@ -6,6 +6,7 @@
 #include "fatrop/spectool/solver_interfaces/solver.hpp"
 #include "stage.hpp"
 #include <utility>
+// #include "ustage_eval_casadi.hpp"
 
 namespace fatrop
 {
