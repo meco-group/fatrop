@@ -285,7 +285,8 @@ namespace fatrop
             auto vars = cs::MX::symvar(expr);
             auto samples_vec = std::vector<cs::MX>();
             auto reti = std::vector<int>();
-            if (std::all_of(vars.begin(), vars.end(), [this](const cs::MX& var) { return has_variable(var); }))
+            if (std::all_of(vars.begin(), vars.end(), [this](const cs::MX &var)
+                            { return has_variable(var); }))
             {
                 for (int k = 0; k < K(); k++)
                 {
@@ -343,5 +344,10 @@ namespace fatrop
         {
             uStage::get()->register_global_parameter(global_parameters);
         };
+        std::shared_ptr<FatropuStageEvalAbstract> uStage::get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const cs::Dict &opts, CasadiJitCache &cache) const
+        {
+            return std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(this->get_internal(), prev, next), opts, cache);
+        }
+
     }
 }

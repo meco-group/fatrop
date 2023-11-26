@@ -95,7 +95,7 @@ t_F1_sol = timesteps[k_F1_sample]
 print("t_F1_sol", t_F1_sol)
 print("F1_sol", F1_sol)
 fatrop_func_warmstart = ocp.to_function("moonlander_ocp_warmstart", [target, ocp.all_variables()], [p_sample], {"jit":True}, {"mu_init":1e-4})
-fatrop_func_warmstart(np.array([6., 5.]), all_vars)
+fatrop_func_warmstart(np.array([10., 5.]), all_vars)
 
 # plot the trajectory
 import matplotlib.pyplot as plt
