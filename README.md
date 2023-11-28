@@ -28,7 +28,7 @@ Fatrop is a constrained nonlinear optimal control problem solver that is fast an
 
 The main features of the solver are:
 - high numerical robustness thanks to advanced numerical optimization techniques, inspired by [Ipopt](https://coin-or.github.io/Ipopt/)
-- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://arxiv.org/abs/2302.14836)
+- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://onlinelibrary.wiley.com/doi/full/10.1002/oca.3064)
 - effective handling of path equality and inequality constraints, without relying on penalty methods
 - ability to incorporate exact Lagrangian Hessian information
 - ability to be initialized from any, possibly infeasible, solution estimate
@@ -36,7 +36,7 @@ The main features of the solver are:
 
 ## Disclaimer
 
-At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying fatrop problems. An example is available in the **specification** branch, spectool/example.cpp.
+At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying Fatrop problems. An example is available in the **specification** branch, spectool/example.cpp.
 <!-- Release is expected end of August 2023. -->
 
 # Installation instructions
@@ -108,3 +108,4 @@ Fatrop is developed by [Lander Vanroye](https://www.kuleuven.be/wieiswie/en/pers
 
 Contributors:
 - [Ajay Sathya](https://www.kuleuven.be/wieiswie/en/person/00110259) ([rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface)
+- The Fatrop logo was designed by [Louis Callens](https://www.kuleuven.be/wieiswie/en/person/00143705)
