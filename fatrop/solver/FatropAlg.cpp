@@ -211,7 +211,7 @@ fatrop_int FatropAlg::optimize()
             {
                 printer_->level(1) << "WARNING fatrop returned acceptable tolerance" << endl;
             }
-            printer_->level(1) << "found solution :) " << endl;
+            printer_->level(1) << "found solution" << endl;
             stats.eval_cv_count += linesearch_->eval_cv_count;
             stats.eval_obj_count += linesearch_->eval_obj_count;
             stats.eval_cv_time += linesearch_->eval_cv_time;

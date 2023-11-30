@@ -82,7 +82,9 @@ namespace fatrop
                 std::copy(arg[2], arg[2] + n_global_params, (double *)arg_global_parameters.data());
                 app->set_initial(arg_initial_vars);
                 app->set_params(arg_global_parameters, arg_stage_parameters);
-                app->optimize();
+                int ret = app->optimize();
+                if(ret != 0)
+                    throw std::runtime_error("fatrop solver failed");
                 double *last_sol = ((VEC *)app->last_solution_primal())->pa;
                 if (res[0])
                     std::copy(last_sol, last_sol + n_vars, res[0]);
