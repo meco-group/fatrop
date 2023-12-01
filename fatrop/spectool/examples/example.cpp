@@ -60,6 +60,17 @@ int main()
     std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
     std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   }
+  {
+    
+    auto ss = Ocp();
+    auto x = ss.state(10);
+    auto stage = ss.new_ustage(1);
+    stage.add_objective(sum1(sin(x)));
+    stage.subject_to(sumsqr(x) == 1.);
+    auto funcc = ss.to_function("example_dense", {}, {stage.at_t0(x)}, {{"jit", true}});
+    std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
+    std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
+  }
 
   return 0;
 }
