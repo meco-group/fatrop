@@ -157,14 +157,13 @@ namespace fatrop
             FatropVecBF &initial) const override
         {
             fatrop_int offs = 0;
-            for (fatrop_int k = 0; k < K - 1; k++)
+            for (fatrop_int k = 0; k < K; k++)
             {
                 ocptempl->get_initial_uk(((VEC *)initial)->pa + offs, k);
                 offs += ocptempl->get_nuk(k);
                 ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, k);
                 offs += ocptempl->get_nxk(k);
             }
-            ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, K - 1);
             return 0;
         }
         // virtual fatrop_int GetDefaultParams(
