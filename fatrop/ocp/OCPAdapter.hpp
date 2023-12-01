@@ -55,11 +55,6 @@ namespace fatrop
                                                                                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
                                                                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), options(options), ocptempl(ocptempl_)
         {
-            // check if nu[K-1] is zero 
-            if (nuexpr[K - 1] != 0)
-            {
-                throw std::runtime_error("The last stage of the OCP has nonzero nu. This is not supported by this version of fatrop fatrop.");
-            } 
             #ifdef ENABLE_MULTITHREADING
             // check if environment variable OMP_NUM_THREADS is set
             if (getenv("OMP_NUM_THREADS") == NULL)

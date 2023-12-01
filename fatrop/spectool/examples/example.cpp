@@ -20,7 +20,6 @@ int main()
   // first stage
   auto stage = ocp.new_stage(20);
   stage.at_t0().subject_to(x(0) == 1.);
-  stage.at_t0().subject_to(x(1) == 0.);
   stage.add_objective(u * u + casadi::MX::sumsqr(x), at::t0, at::mid);
   stage.add_objective(casadi::MX::sumsqr(x), at::tf);
   stage.add_objective(dt*dt, at::t0, at::mid, at::tf);
@@ -40,6 +39,8 @@ int main()
   stage2.set_next(x, x_next);
   stage2.subject_to(-0.25 < x(1), at::tf);
   stage2.set_next(dt, dt);
+  auto dum = ocp.control();
+  ocp.at_tf().subject_to(dum == 0.5);
 
 
   ocp.set_initial(dt, 0.5);
@@ -77,7 +78,7 @@ int main()
   // /* objective    */ terminal_ustage.add_objective(x(1)*x(1)+p);
 
 
-  cs::Function ocp_func = ocp.to_function("example", {p}, {ocp.at_t0(u), ocp.sample(x).second,p, ocp.at_t0(dt), ocp.at_tf(dt)}, {{"jit",false}});
+  cs::Function ocp_func = ocp.to_function("example", {p}, {ocp.at_t0(u), ocp.sample(x).second,p, ocp.at_t0(dt), ocp.at_tf(dt), ocp.at_tf(dum)}, {{"jit",false}});
   auto ret = ocp_func({cs::DM(1.23)});
   std::cout << ret << std::endl;
   return 0;
