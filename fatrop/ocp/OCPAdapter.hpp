@@ -72,8 +72,8 @@ namespace fatrop
                 offs += ocptempl_->get_n_stage_params_k(k);
             }
             // initialize gradbuf
-            for (fatrop_int k = 0; k < K; k++)
-                gradbuf.emplace_back(ocptempl_->get_nuk(k) + ocptempl_->get_nxk(k));
+            // for (fatrop_int k = 0; k < K; k++)
+            //     gradbuf.emplace_back(ocptempl_->get_nuk(k) + ocptempl_->get_nxk(k));
             x_dummy = std::vector<double>(maxel(nxexpr), 0.0);
         }
         void reset() override
@@ -182,7 +182,7 @@ namespace fatrop
         std::vector<double> stageparams;
         std::vector<double> globalparams;
         std::vector<double> x_dummy;
-        std::vector<VECBF> gradbuf;
+        // std::vector<VECBF> gradbuf;
         std::shared_ptr<FatropOptions> options;
 
     private:

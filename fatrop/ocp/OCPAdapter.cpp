@@ -75,9 +75,9 @@ fatrop_int OCPAdapter::eval_lag_hess(
     double *primal_data = primal_vars_p->pa;
     double *lam_data = lam_p->pa;
 
-    OCPMACRO(MAT *, BAbt, _p);
-    OCPMACRO(MAT *, Ggt, _p);
-    OCPMACRO(MAT *, Ggt_ineq, _p);
+    // OCPMACRO(MAT *, BAbt, _p);
+    // OCPMACRO(MAT *, Ggt, _p);
+    // OCPMACRO(MAT *, Ggt_ineq, _p);
 
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
@@ -91,9 +91,8 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_g_k = offs_g[k];
         fatrop_int offs_ineq_k = offs_ineq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        int ret = 0;
         // std::cout << "using exact Hess " << k << std::endl;
-            ret = ocptempl->eval_RSQrqtk(
+        ocptempl->eval_RSQrqtk(
                 &obj_scale,
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
@@ -309,9 +308,9 @@ fatrop_int OCPAdapter::eval_obj_grad(
     const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
     double *grad_p = ((VEC *)gradient)->pa;
     OCPMACRO(fatrop_int *, nu, _p);
-    OCPMACRO(fatrop_int *, nx, _p);
+    // OCPMACRO(fatrop_int *, nx, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
-    SOLVERMACRO(VEC *, gradient, _p);
+    // SOLVERMACRO(VEC *, gradient, _p);
     double *primal_data = primal_vars_p->pa;
     fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
@@ -322,7 +321,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
     for (fatrop_int k = 0; k < K; k++)
     {
         fatrop_int nu_k = nu_p[k];
-        fatrop_int nx_k = nx_p[k];
+        // fatrop_int nx_k = nx_p[k];
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_rqk(
@@ -334,7 +333,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
             grad_p + offs_ux_k,
             k);
         // save result in grad buf
-        VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
+        // VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
         // blasfeo_print_dvec(nu_k + nx_k, gradbuf[k], 0);
     }
     return 0;
