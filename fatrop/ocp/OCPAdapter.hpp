@@ -94,6 +94,10 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override;
+        fatrop_int eval_ineqs(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &primal_vars,
+            FatropVecBF &constraint_violation) override;
         fatrop_int eval_obj_grad(
             OCPKKTMemory *OCP,
             double obj_scale,

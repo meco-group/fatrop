@@ -45,6 +45,7 @@ double LineSearch::eval_obj_trial()
     fatropnlp_->eval_obj(
         fatropdata_->obj_scale,
         fatropdata_->x_next,
+        fatropdata_->s_next,
         res);
     eval_obj_time += blasfeo_toc(&timer);
     eval_obj_count++;
