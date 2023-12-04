@@ -247,7 +247,6 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
     {
         const fatrop_int nu = nu_p[k];
         const fatrop_int nx = nx_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
         const fatrop_int ng = ng_p[k];
         const fatrop_int ng_ineq = ng_ineq_p[k];
         const fatrop_int offs_ineq_k = offs_ineq_p[k];
@@ -259,6 +258,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
         }
         else
         {
+            const fatrop_int nxp1 = nx_p[k + 1];
             // AL <- [BAb]^T_k P_kp1
             GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
             // AL[-1,:] <- AL[-1,:] + p_kp1^T
