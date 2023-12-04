@@ -314,6 +314,11 @@ namespace fatrop
         fatrop_int offset() const;
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm);
+        void operator=(const double &val)
+        {
+            blasfeo_dvecse(nels(), val, vec_, offset());
+        }
+
         void copy(const FatropVecBF &fm);
         void copyto(std::vector<double> &dest) const;
         void operator=(const std::vector<double> &fm);
@@ -323,6 +328,16 @@ namespace fatrop
         FatropVecBF block(const fatrop_int i, const fatrop_int p) const;
         void SwapWith(FatropVecBF &vb);
         void SetConstant(double constant) const;
+        friend double sum(const FatropVecBF &va)
+        {
+            double ret = 0.0;
+            int offset = va.offset();
+            for(int i = 0; i < va.nels(); i++)
+            {
+                ret += va.at(i + offset);
+            }
+            return ret;
+        }
         bool has_inf() const
         {
             for (int i = 0; i < nels(); i++)
@@ -368,7 +383,7 @@ namespace fatrop
         /** \brief constuction for allocation on MemoryAllocator*/
         FatropMemoryVecBF(const FatropVector<fatrop_int> &nels, fatrop_int N);
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.;
-        FatropMemoryVecBF(const fatrop_int nels, fatrop_int N);
+        FatropMemoryVecBF(const fatrop_int nels, fatrop_int N =1);
         /** \brief calculate memory size*/
         fatrop_int memory_size() const;
         /** \brief set up memory element and advance pointer */
