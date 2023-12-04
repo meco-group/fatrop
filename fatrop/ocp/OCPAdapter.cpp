@@ -347,13 +347,15 @@ fatrop_int OCPAdapter::eval_obj_grad(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
-    FatropVecBF &gradient)
+    FatropVecBF &gradient_x, 
+    FatropVecBF &gradient_s)
 {
+    gradient_s = 0.0;
     // horizon length
     fatrop_int K = OCP->K;
     // offsets
     const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
-    double *grad_p = ((VEC *)gradient)->pa;
+    double *grad_p = ((VEC *)gradient_x)->pa;
     OCPMACRO(fatrop_int *, nu, _p);
     // OCPMACRO(fatrop_int *, nx, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);

@@ -80,7 +80,7 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
-            FatropVecBF &gradient) override;
+            FatropVecBF &gradient_x,FatropVecBF &gradient_s) override;
         fatrop_int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,

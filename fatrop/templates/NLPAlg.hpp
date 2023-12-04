@@ -51,7 +51,8 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
-            FatropVecBF &gradient) = 0;
+            FatropVecBF &gradient_x,
+            FatropVecBF &gradient_s) = 0;
         virtual fatrop_int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,
