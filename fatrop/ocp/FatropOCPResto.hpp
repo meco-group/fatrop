@@ -4,7 +4,7 @@ namespace fatrop
 {
     class FatropNLPResto : public FatropNLP
     {
-        FatropNLPResto(const std::shared_ptr<FatropNLP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs)
+        FatropNLPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs)
         {
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
