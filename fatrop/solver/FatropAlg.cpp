@@ -449,7 +449,7 @@ fatrop_int FatropAlg::eval_dual_infeasiblity()
         fatropdata_->lam_curr,
         fatropdata_->grad_curr_x,
         fatropdata_->grad_curr_s,
-        fatropdata_->du_inf_curr);
+        fatropdata_->du_inf_curr, fatropdata_->du_inf_curr_s_wo_z);
     fatropdata_->eval_dual_inf_slack_eqs();
     stats.duinf_time += blasfeo_toc(&timer);
     return 0;

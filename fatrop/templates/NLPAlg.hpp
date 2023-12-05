@@ -63,7 +63,7 @@ namespace fatrop
             const FatropVecBF &lam,
             const FatropVecBF &grad_x,
             const FatropVecBF &grad_s,
-            FatropVecBF &du_inf) = 0;
+            FatropVecBF &du_inf_x, FatropVecBF& du_inf_s) = 0;
         virtual fatrop_int solve_pd_sys(
             const double inertia_correction_w,
             const double inertia_correction_c,
