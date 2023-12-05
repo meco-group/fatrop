@@ -240,16 +240,6 @@ int FatropOCP::eval_constraint_viol(
         constraint_violation);
     return res;
 };
-fatrop_int FatropOCP::eval_ineqs(
-    const FatropVecBF &primal_vars,
-    const FatropVecBF &slack_vars,
-    FatropVecBF &ineqs)
-{
-    return ocp_->eval_ineqs(
-        &ocpkktmemory_,
-        primal_vars,
-        ineqs);
-}
 int FatropOCP::eval_obj_grad(
     double obj_scale,
     const FatropVecBF &primal_vars,
