@@ -347,10 +347,8 @@ fatrop_int OCPAdapter::eval_obj_grad(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
-    FatropVecBF &gradient_x, 
-    FatropVecBF &gradient_s)
+    FatropVecBF &gradient_x)
 {
-    gradient_s = 0.0;
     // horizon length
     fatrop_int K = OCP->K;
     // offsets

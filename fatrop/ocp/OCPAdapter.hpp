@@ -102,8 +102,7 @@ namespace fatrop
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            FatropVecBF &gradient_x,
-            FatropVecBF &gradient_s) override;
+            FatropVecBF &gradient_x) override;
         fatrop_int eval_obj(
             OCPKKTMemory *OCP,
             double obj_scale,

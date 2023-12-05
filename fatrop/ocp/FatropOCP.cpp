@@ -257,11 +257,12 @@ int FatropOCP::eval_obj_grad(
     FatropVecBF &gradient_x,
     FatropVecBF &gradient_s)
 {
+    gradient_s = 0.0;
     int res = ocp_->eval_obj_grad(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
-        gradient_x, gradient_s);
+        gradient_x);
     return res;
 };
 int FatropOCP::eval_obj(
