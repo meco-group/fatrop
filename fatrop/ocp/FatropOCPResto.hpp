@@ -104,9 +104,8 @@ namespace fatrop
             auto du_inf_s_wo_z_or = du_inf_s_wo_z.block(0, orig_dims_.nineqs);
             orig_->eval_dual_inf(obj_scale, lam, grad_x, grad_s, du_inf_x, du_inf_s_wo_z_or);
             auto lam_I = lam.block(orig_dims_.neqs - orig_dims_.nineqs, orig_dims_.nineqs);
-            lam_I.print();
-            axpby(-1.0, lam_I, 1.0, grad_s.block(orig_dims_.nineqs, n_n), du_inf_s_wo_z.block(orig_dims_.nineqs, n_n));
-            axpby(1.0, lam_I, 1.0, grad_s.block(orig_dims_.nineqs + n_n, n_p), du_inf_s_wo_z.block(orig_dims_.nineqs + n_n, n_p));
+            axpby(1.0, lam_I, 1.0, grad_s.block(orig_dims_.nineqs, n_n), du_inf_s_wo_z.block(orig_dims_.nineqs, n_n));
+            axpby(-1.0, lam_I, 1.0, grad_s.block(orig_dims_.nineqs + n_n, n_p), du_inf_s_wo_z.block(orig_dims_.nineqs + n_n, n_p));
             return 0;
         }
         void update_sigma_gradb(double inertia, const FatropVecBF &sigma_s, const FatropVecBF &sigma_n, const FatropVecBF &sigma_p, const FatropVecBF &gradb_s, const FatropVecBF &gradb_n, const FatropVecBF &gradb_p, const FatropVecBF &sigma_update, const FatropVecBF &gradb_update)
@@ -241,6 +240,6 @@ namespace fatrop
         double inertia_correction_w_cache = 0.0;
         FatropMemoryVecBF sigma_cache_;
         FatropMemoryVecBF gradb_cache_;
-        double rho = 1000;
+        double rho = 0.0;
     };
 };
