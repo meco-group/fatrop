@@ -2,9 +2,9 @@
 #include "fatrop/templates/NLPAlg.hpp"
 namespace fatrop
 {
-    class FatropNLPResto : public FatropNLP
+    class FatropOCPResto : public FatropNLP
     {
-        FatropNLPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs)
+        FatropOCPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs)
         {
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
@@ -23,15 +23,15 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
-            const FatropVecBF &lam)
+            const FatropVecBF &lam) override
         {
             orig_->eval_lag_hess(obj_scale, primal_vars, slack_vars, lam);
             return 0;
-        };
+        } ;
 
         virtual fatrop_int eval_constr_jac(
             const FatropVecBF &primal_vars,
-            const FatropVecBF &slack_vars)
+            const FatropVecBF &slack_vars) override
         {
             FatropVecBF slack_dummy_v = slack_dummy_[0];
             update_slack_vars(slack_vars, slack_dummy_v);
@@ -50,7 +50,7 @@ namespace fatrop
         virtual fatrop_int eval_constraint_viol(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
-            FatropVecBF &constraint_violation)
+            FatropVecBF &constraint_violation) override
         {
             FatropVecBF slack_dummy_v = slack_dummy_[0];
             update_slack_vars(slack_vars, slack_dummy_v);
@@ -72,7 +72,7 @@ namespace fatrop
             double obj_scale,
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
-            double &res)
+            double &res) override
         {
             res = orig_->eval_obj(obj_scale, primal_vars, slack_vars, res);
             res += rho * sum(primal_vars.block(orig_dims_.nvars, n_n + n_p));
@@ -91,7 +91,8 @@ namespace fatrop
         virtual fatrop_int eval_dual_inf(
             double obj_scale,
             const FatropVecBF &lam,
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &du_inf) = 0;
         virtual fatrop_int solve_pd_sys(
             const double inertia_correction_w,
@@ -124,7 +125,7 @@ namespace fatrop
             FatropVecBF &upper) const = 0;
         virtual fatrop_int get_initial_sol_guess(
             FatropVecBF &initial) const = 0;
-        std::shared_ptr<FatropNLP> orig_;
+        std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;
         NLPDims this_dims_;
         FatropMemoryVecBF lower_, upper_;

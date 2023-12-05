@@ -26,6 +26,7 @@
 #include "fatrop/ocp/OCPAbstract.hpp"
 #include "fatrop/json/json.h"
 #include "fatrop/auxiliary/Common.hpp"
+#include "fatrop/ocp/FatropOCPResto.hpp"
 using namespace fatrop;
 using namespace std;
 NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), dirty(true)
