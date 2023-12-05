@@ -190,11 +190,11 @@ namespace fatrop
             auto s_curr_or = s_curr.block(0, orig_dims_.nineqs);
             auto n_curr = s_curr.block(orig_dims_.nineqs, n_n);
             auto p_curr = s_curr.block(orig_dims_.nineqs + n_n, n_p);
-            orig_->initialize_slacks(s_curr_or);
+            int ret = orig_->initialize_slacks(s_curr_or);
             // set zero for now TODO use quadratic formula here
             n_curr = 0.0;
             p_curr = 0.0;
-            return 0;
+            return ret;
         }
         virtual fatrop_int initialize_dual(
             const FatropVecBF &grad_x,
@@ -204,8 +204,7 @@ namespace fatrop
             const FatropVecBF &zU) override
         {
             // todo check if this is correct
-            orig_->initialize_dual(grad_x, grad_s, dlam, zL.block(0, orig_dims_.nineqs), zU.block(0, orig_dims_.nineqs));
-            return 0;
+            return orig_->initialize_dual(grad_x, grad_s, dlam, zL.block(0, orig_dims_.nineqs), zU.block(0, orig_dims_.nineqs));
         };
         virtual fatrop_int get_bounds(
             FatropVecBF &lower,
