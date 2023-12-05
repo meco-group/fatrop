@@ -43,10 +43,6 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) = 0;
-        virtual fatrop_int eval_ineqs(
-            const FatropVecBF &primal_vars,
-            const FatropVecBF &slack_vars,
-            FatropVecBF &ineqs) = 0;
         virtual fatrop_int eval_obj_grad(
             double obj_scale,
             const FatropVecBF &primal_vars,

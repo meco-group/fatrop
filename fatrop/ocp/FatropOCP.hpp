@@ -50,10 +50,6 @@ namespace fatrop
         fatrop_int eval_constr_jac(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override;
-        fatrop_int eval_ineqs(
-            const FatropVecBF &primal_vars,
-            const FatropVecBF &slack_vars,
-            FatropVecBF &ineqs) override;
         fatrop_int solve_pd_sys(
             const double inertia_correction_w,
             const double inertia_correction_c,
