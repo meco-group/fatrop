@@ -144,6 +144,7 @@ namespace fatrop
         FatropVecBF grad_curr_s;
         FatropVecBF grad_next_s;
         FatropVecBF grad_backup_s;
+        FatropVecBF du_inf_curr_s_wo_z;
         // vector<bool> lower_bounded_v;
         // vector<bool> upper_bounded_v;
         struct EvalCache

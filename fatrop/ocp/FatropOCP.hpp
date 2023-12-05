@@ -91,7 +91,7 @@ namespace fatrop
             const FatropVecBF &lam,
             const FatropVecBF &grad_x,
             const FatropVecBF &grad_s,
-            FatropVecBF &du_inf) override;
+            FatropVecBF &du_inf_x, FatropVecBF& du_inf_s) override;
         fatrop_int initialize_slacks(
             FatropVecBF &s_curr) override;
         fatrop_int initialize_dual(

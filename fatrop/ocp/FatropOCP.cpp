@@ -284,14 +284,15 @@ int FatropOCP::eval_dual_inf(
     const FatropVecBF &lam,
     const FatropVecBF &grad_x,
     const FatropVecBF &grad_s,
-    FatropVecBF &du_inf)
+    FatropVecBF &du_inf_x, FatropVecBF &du_inf_s)
 {
+    axpby(-1.0, lam.block(nlpdims_.neqs - nlpdims_.nineqs, nlpdims_.nineqs), 0.0, du_inf_s, du_inf_s);
     return duinfevaluator_.evaluate(
         &ocpkktmemory_,
         obj_scale,
         lam,
         grad_x,
-        du_inf);
+        du_inf_x);
 }
 int FatropOCP::initialize_dual(
     const FatropVecBF &grad_x,
