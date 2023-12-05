@@ -50,6 +50,7 @@ FatropOCP::FatropOCP(
 int FatropOCP::eval_lag_hess(
     double obj_scale,
     const FatropVecBF &primal_vars,
+    const FatropVecBF &slack_vars,
     const FatropVecBF &lam)
 {
     int res = ocp_->eval_lag_hess(
@@ -239,21 +240,35 @@ int FatropOCP::eval_constraint_viol(
         constraint_violation);
     return res;
 };
+fatrop_int FatropOCP::eval_ineqs(
+    const FatropVecBF &primal_vars,
+    const FatropVecBF &slack_vars,
+    FatropVecBF &ineqs)
+{
+    return ocp_->eval_ineqs(
+        &ocpkktmemory_,
+        primal_vars,
+        ineqs);
+}
 int FatropOCP::eval_obj_grad(
     double obj_scale,
     const FatropVecBF &primal_vars,
-    FatropVecBF &gradient)
+    const FatropVecBF &slack_vars,
+    FatropVecBF &gradient_x,
+    FatropVecBF &gradient_s)
 {
+    gradient_s = 0.0;
     int res = ocp_->eval_obj_grad(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
-        gradient);
+        gradient_x);
     return res;
 };
 int FatropOCP::eval_obj(
     double obj_scale,
     const FatropVecBF &primal_vars,
+    const FatropVecBF &slack_vars,
     double &res)
 {
 

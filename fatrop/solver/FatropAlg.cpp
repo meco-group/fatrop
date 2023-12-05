@@ -291,7 +291,7 @@ fatrop_int FatropAlg::optimize()
         if (recalc_y && (deltac == 0.0) && (fatropdata_->constr_viol_max_curr() < recalc_y_feas_tol))
         {
             fatropnlp_->initialize_dual(
-                fatropdata_->grad_curr,
+                fatropdata_->grad_curr_x,
                 fatropdata_->lam_curr,
                 fatropdata_->zL_curr,
                 fatropdata_->zU_curr);
@@ -381,6 +381,7 @@ fatrop_int FatropAlg::eval_lag_hess()
         fatropnlp_->eval_lag_hess(
             fatropdata_->obj_scale,
             fatropdata_->x_curr,
+            fatropdata_->s_curr,
             fatropdata_->lam_curr);
     stats.eval_hess_time += blasfeo_toc(&timer);
     stats.eval_hess_count++;
@@ -417,7 +418,9 @@ fatrop_int FatropAlg::eval_obj_grad_curr()
     fatrop_int res = fatropnlp_->eval_obj_grad(
         fatropdata_->obj_scale,
         fatropdata_->x_curr,
-        fatropdata_->grad_curr);
+        fatropdata_->s_curr,
+        fatropdata_->grad_curr_x,
+        fatropdata_->grad_curr_s);
     stats.eval_grad_time += blasfeo_toc(&timer);
     stats.eval_grad_count++;
     return res;
@@ -430,6 +433,7 @@ double FatropAlg::eval_objective_curr()
     fatropnlp_->eval_obj(
         fatropdata_->obj_scale,
         fatropdata_->x_curr,
+        fatropdata_->s_curr,
         res);
     stats.eval_obj_time += blasfeo_toc(&timer);
     stats.eval_obj_count++;
@@ -442,7 +446,7 @@ fatrop_int FatropAlg::eval_dual_infeasiblity()
     fatropnlp_->eval_dual_inf(
         fatropdata_->obj_scale,
         fatropdata_->lam_curr,
-        fatropdata_->grad_curr,
+        fatropdata_->grad_curr_x,
         fatropdata_->du_inf_curr);
     fatropdata_->eval_dual_inf_slack_eqs();
     stats.duinf_time += blasfeo_toc(&timer);
@@ -455,7 +459,7 @@ fatrop_int FatropAlg::perform_initializiation()
     fatrop_int res = fatropnlp_->initialize_slacks(
         fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
-        fatropdata_->grad_curr,
+        fatropdata_->grad_curr_x,
         fatropdata_->lam_calc,
         // fatropdata_->s_curr,
         fatropdata_->zL_curr,

@@ -73,7 +73,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     n_ineqs(nlpdims.nineqs),
                                                                                                                                     memvars(nlpdims.nvars, 12),
                                                                                                                                     memeqs(nlpdims.neqs, 12),
-                                                                                                                                    memineqs(nlpdims.nineqs, 28),
+                                                                                                                                    memineqs(nlpdims.nineqs, 31),
                                                                                                                                     x_curr(memvars[0]),
                                                                                                                                     x_next(memvars[1]),
                                                                                                                                     x_backup(memvars[2]),
@@ -94,9 +94,9 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     g_next(memeqs[9]),
                                                                                                                                     g_backup(memeqs[10]),
                                                                                                                                     g_soc(memeqs[11]),
-                                                                                                                                    grad_curr(memvars[8]),
-                                                                                                                                    grad_next(memvars[9]),
-                                                                                                                                    grad_backup(memvars[10]),
+                                                                                                                                    grad_curr_x(memvars[8]),
+                                                                                                                                    grad_next_x(memvars[9]),
+                                                                                                                                    grad_backup_x(memvars[10]),
                                                                                                                                     du_inf_curr(memvars[11]),
                                                                                                                                     du_inf_curr_s(memineqs[0]),
                                                                                                                                     s_curr(memineqs[1]),
@@ -126,6 +126,9 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     gradb_U(memineqs[25]),
                                                                                                                                     gradb_plus(memineqs[26]),
                                                                                                                                     gradb_total(memineqs[27]),
+                                                                                                                                    grad_curr_s(memineqs[28]),
+                                                                                                                                    grad_next_s(memineqs[29]),
+                                                                                                                                    grad_backup_s(memineqs[30]),
                                                                                                                                     params(params),
                                                                                                                                     printer_(printer)
 {
@@ -440,7 +443,8 @@ fatrop_int FatropData::accept_trial_step()
     lam_curr.SwapWith(lam_next);
     zL_curr.SwapWith(zL_next);
     zU_curr.SwapWith(zU_next);
-    grad_curr.SwapWith(grad_next);
+    grad_curr_x.SwapWith(grad_next_x);
+    grad_curr_s.SwapWith(grad_next_s);
     g_curr.SwapWith(g_next);
     cache_curr = cache_next;
     return 0;
@@ -452,7 +456,8 @@ fatrop_int FatropData::backup_curr()
     lam_backup.copy(lam_curr);
     zL_backup.copy(zL_curr);
     zU_backup.copy(zU_curr);
-    grad_backup.copy(grad_curr);
+    grad_backup_x.copy(grad_curr_x);
+    grad_backup_s.copy(grad_curr_s);
     g_backup.copy(g_curr);
     obj_backup = obj_curr;
     return 0;
@@ -471,7 +476,8 @@ fatrop_int FatropData::restore_backup()
     lam_curr.SwapWith(lam_backup);
     zL_curr.SwapWith(zL_backup);
     zU_curr.SwapWith(zU_backup);
-    grad_backup.SwapWith(grad_curr);
+    grad_backup_x.SwapWith(grad_curr_x);
+    grad_backup_s.SwapWith(grad_curr_s);
     g_backup.SwapWith(g_curr);
     delta_x_backup.SwapWith(delta_x);
     delta_s_backup.SwapWith(delta_s);
@@ -563,11 +569,11 @@ double FatropData::dual_inf_max_curr()
 }
 double FatropData::fo_decr_obj_curr()
 {
-    return dot(grad_curr, delta_x);
+    return dot(grad_curr_x, delta_x) + dot(grad_curr_s, delta_s);
 }
 double FatropData::fo_decr_obj_backup()
 {
-    return dot(grad_backup, delta_x_backup);
+    return dot(grad_backup_x, delta_x_backup) + dot(grad_backup_s, delta_s_backup);
 }
 void FatropData::maximum_step_size(double &alpha_max_pr, double &alpha_max_du, double tau)
 {

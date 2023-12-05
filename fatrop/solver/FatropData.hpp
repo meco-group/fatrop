@@ -108,9 +108,9 @@ namespace fatrop
         FatropVecBF g_next;
         FatropVecBF g_backup;
         FatropVecBF g_soc;
-        FatropVecBF grad_curr;
-        FatropVecBF grad_next;
-        FatropVecBF grad_backup;
+        FatropVecBF grad_curr_x;
+        FatropVecBF grad_next_x;
+        FatropVecBF grad_backup_x;
         FatropVecBF du_inf_curr;
         FatropVecBF du_inf_curr_s;
         // vectors neccessary for inequality constraints
@@ -141,6 +141,9 @@ namespace fatrop
         FatropVecBF gradb_U;
         FatropVecBF gradb_plus;
         FatropVecBF gradb_total;
+        FatropVecBF grad_curr_s;
+        FatropVecBF grad_next_s;
+        FatropVecBF grad_backup_s;
         // vector<bool> lower_bounded_v;
         // vector<bool> upper_bounded_v;
         struct EvalCache

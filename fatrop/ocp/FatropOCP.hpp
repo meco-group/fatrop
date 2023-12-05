@@ -45,10 +45,15 @@ namespace fatrop
         fatrop_int eval_lag_hess(
             double obj_scale,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             const FatropVecBF &lam) override;
         fatrop_int eval_constr_jac(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars) override;
+        fatrop_int eval_ineqs(
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
+            FatropVecBF &ineqs) override;
         fatrop_int solve_pd_sys(
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -74,10 +79,12 @@ namespace fatrop
         fatrop_int eval_obj_grad(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            FatropVecBF &gradient) override;
+            const FatropVecBF &slack_vars,
+            FatropVecBF &gradient_x,FatropVecBF &gradient_s) override;
         fatrop_int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             double &res) override;
         fatrop_int eval_dual_inf(
             double obj_scale,

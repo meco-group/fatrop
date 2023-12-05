@@ -34,6 +34,7 @@ namespace fatrop
         virtual fatrop_int eval_lag_hess(
             double obj_scale,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             const FatropVecBF &lam) = 0;
         virtual fatrop_int eval_constr_jac(
             const FatropVecBF &primal_vars,
@@ -42,13 +43,20 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) = 0;
+        virtual fatrop_int eval_ineqs(
+            const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
+            FatropVecBF &ineqs) = 0;
         virtual fatrop_int eval_obj_grad(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            FatropVecBF &gradient) = 0;
+            const FatropVecBF &slack_vars,
+            FatropVecBF &gradient_x,
+            FatropVecBF &gradient_s) = 0;
         virtual fatrop_int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             double &res) = 0;
         virtual fatrop_int eval_dual_inf(
             double obj_scale,

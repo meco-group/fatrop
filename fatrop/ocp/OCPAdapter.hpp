@@ -55,13 +55,13 @@ namespace fatrop
                                                                                                                                                                { return ocptempl_->get_n_stage_params_k(k); })),
                                                                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), options(options), ocptempl(ocptempl_)
         {
-            #ifdef ENABLE_MULTITHREADING
+#ifdef ENABLE_MULTITHREADING
             // check if environment variable OMP_NUM_THREADS is set
             if (getenv("OMP_NUM_THREADS") == NULL)
             {
                 throw std::runtime_error("Environment variable OMP_NUM_THREADS is not set. Please set it to the number of threads you want to use or compile fatrop with multithreading disabled.");
-            } 
-            #endif
+            }
+#endif
 
             // initialize the default parameters
             ocptempl_->get_default_global_params(globalparams.data());
@@ -79,7 +79,7 @@ namespace fatrop
         void reset() override
         {
         }
-        void print_kkt_matrix(OCPKKTMemory* OCP);
+        void print_kkt_matrix(OCPKKTMemory *OCP);
         fatrop_int eval_lag_hess(
             OCPKKTMemory *OCP,
             double obj_scale,
@@ -94,11 +94,15 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) override;
+        fatrop_int eval_ineqs(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &primal_vars,
+            FatropVecBF &constraint_violation) override;
         fatrop_int eval_obj_grad(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            FatropVecBF &gradient) override;
+            FatropVecBF &gradient_x) override;
         fatrop_int eval_obj(
             OCPKKTMemory *OCP,
             double obj_scale,
