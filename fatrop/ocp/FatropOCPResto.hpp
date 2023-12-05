@@ -114,7 +114,7 @@ namespace fatrop
             {
                 double sigma_updt = 1.0 / (1.0 / (sigma_s.at(i) + inertia) + 1.0 / (sigma_n.at(i) + inertia) + 1.0 / (sigma_p.at(i) + inertia));
                 sigma_update.at(i) = sigma_updt - inertia;
-                gradb_update.at(i) = ((gradb_s.at(i)) / (sigma_s.at(i) + inertia) - (gradb_n.at(i) + rho) / (sigma_n.at(i) + inertia) + (gradb_p.at(i) + rho) / (sigma_p.at(i) + inertia)) * sigma_updt;
+                gradb_update.at(i) = ((gradb_s.at(i)) / (sigma_s.at(i) + inertia) - (gradb_n.at(i)) / (sigma_n.at(i) + inertia) + (gradb_p.at(i)) / (sigma_p.at(i) + inertia)) * sigma_updt;
             }
         }
         void update_delta_snp(double inertia, const FatropVecBF &sigma_s, const FatropVecBF &sigma_n, const FatropVecBF &sigma_p, const FatropVecBF &gradb_s, const FatropVecBF &gradb_n, const FatropVecBF &gradb_p, const FatropVecBF &lam_I, const FatropVecBF &delta_s, const FatropVecBF &delta_n, const FatropVecBF &delta_p)
@@ -123,8 +123,8 @@ namespace fatrop
             {
                 double lam_I_i = lam_I.at(i);
                 delta_s.at(i) = (-gradb_s.at(i) + lam_I_i) / (sigma_s.at(i) + inertia);
-                delta_n.at(i) = (-gradb_n.at(i) - rho - lam_I_i) / (sigma_n.at(i) + inertia);
-                delta_p.at(i) = (-gradb_p.at(i) - rho + lam_I_i) / (sigma_p.at(i) + inertia);
+                delta_n.at(i) = (-gradb_n.at(i) - lam_I_i) / (sigma_n.at(i) + inertia);
+                delta_p.at(i) = (-gradb_p.at(i) + lam_I_i) / (sigma_p.at(i) + inertia);
             }
         }
 
@@ -240,6 +240,6 @@ namespace fatrop
         double inertia_correction_w_cache = 0.0;
         FatropMemoryVecBF sigma_cache_;
         FatropMemoryVecBF gradb_cache_;
-        double rho = 0.0;
+        double rho = 1e4;
     };
 };
