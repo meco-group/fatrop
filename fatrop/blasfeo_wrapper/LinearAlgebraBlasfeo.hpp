@@ -337,10 +337,9 @@ namespace fatrop
         friend double sum(const FatropVecBF &va)
         {
             double ret = 0.0;
-            int offset = va.offset();
             for (int i = 0; i < va.nels(); i++)
             {
-                ret += va.at(i + offset);
+                ret += va.at(i);
             }
             return ret;
         }

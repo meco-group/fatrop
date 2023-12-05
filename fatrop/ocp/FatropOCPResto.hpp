@@ -4,7 +4,8 @@ namespace fatrop
 {
     class FatropOCPResto : public FatropNLP
     {
-        FatropOCPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs)
+    public:
+        FatropOCPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs), zl_dummy_(orig_dims_.nineqs), zu_dummy_(orig_dims_.nineqs), sigma_cache_(orig_dims_.nineqs * 3), gradb_cache_(orig_dims_.nineqs * 3)
         {
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
@@ -28,7 +29,15 @@ namespace fatrop
             const FatropVecBF &slack_vars,
             const FatropVecBF &lam) override
         {
-            orig_->eval_lag_hess(obj_scale, primal_vars, slack_vars, lam);
+            FatropVecBF slack_dummy_v = slack_dummy_[0];
+            update_slack_vars(slack_vars, slack_dummy_v);
+            orig_->eval_lag_hess(obj_scale, primal_vars, slack_dummy_v, lam);
+            // auto slacks_n = slack_vars.block(orig_dims_.nineqs, n_n);
+            // auto slacks_p = slack_vars.block(orig_dims_.nineqs + n_n, n_p);
+            // std::cout << "slacks_n "<< std::endl;
+            // slacks_n.print();
+            // std::cout << "slacks_p "<< std::endl;
+            // slacks_p.print();
             return 0;
         };
 
@@ -77,7 +86,7 @@ namespace fatrop
             const FatropVecBF &slack_vars,
             double &res) override
         {
-            res = orig_->eval_obj(obj_scale, primal_vars, slack_vars, res);
+            orig_->eval_obj(obj_scale, primal_vars, slack_vars, res);
             res += rho * sum(slack_vars.block(orig_dims_.nineqs, n_n + n_p));
             return 0;
         };
@@ -92,10 +101,13 @@ namespace fatrop
             const FatropVecBF &grad_s,
             FatropVecBF &du_inf_x, FatropVecBF &du_inf_s_wo_z) override
         {
-            orig_->eval_dual_inf(obj_scale, lam, grad_x, grad_s, du_inf_x, du_inf_s_wo_z);
+            auto du_inf_s_wo_z_or = du_inf_s_wo_z.block(0, orig_dims_.nineqs);
+            orig_->eval_dual_inf(obj_scale, lam, grad_x, grad_s, du_inf_x, du_inf_s_wo_z_or);
             auto lam_I = lam.block(orig_dims_.neqs - orig_dims_.nineqs, orig_dims_.nineqs);
-            axpby(-1.0, lam_I, 0.0, lam_I, du_inf_s_wo_z.block(orig_dims_.nineqs, n_n));
-            axpby(1.0, lam_I, 0.0, lam_I, du_inf_s_wo_z.block(orig_dims_.nineqs + n_n, n_p));
+            lam_I.print();
+            axpby(-1.0, lam_I, 1.0, grad_s.block(orig_dims_.nineqs, n_n), du_inf_s_wo_z.block(orig_dims_.nineqs, n_n));
+            axpby(1.0, lam_I, 1.0, grad_s.block(orig_dims_.nineqs + n_n, n_p), du_inf_s_wo_z.block(orig_dims_.nineqs + n_n, n_p));
+            return 0;
         }
         void update_sigma_gradb(double inertia, const FatropVecBF &sigma_s, const FatropVecBF &sigma_n, const FatropVecBF &sigma_p, const FatropVecBF &gradb_s, const FatropVecBF &gradb_n, const FatropVecBF &gradb_p, const FatropVecBF &sigma_update, const FatropVecBF &gradb_update)
         {
@@ -103,7 +115,7 @@ namespace fatrop
             {
                 double sigma_updt = 1.0 / (1.0 / (sigma_s.at(i) + inertia) + 1.0 / (sigma_n.at(i) + inertia) + 1.0 / (sigma_p.at(i) + inertia));
                 sigma_update.at(i) = sigma_updt - inertia;
-                gradb_update.at(i) = (gradb_s.at(i) / (sigma_s.at(i) + inertia) - gradb_n.at(i) / (sigma_n.at(i) + inertia) + gradb_p.at(i) / (sigma_p.at(i) + inertia)) * sigma_updt;
+                gradb_update.at(i) = ((gradb_s.at(i)) / (sigma_s.at(i) + inertia) - (gradb_n.at(i) + rho) / (sigma_n.at(i) + inertia) + (gradb_p.at(i) + rho) / (sigma_p.at(i) + inertia)) * sigma_updt;
             }
         }
         void update_delta_snp(double inertia, const FatropVecBF &sigma_s, const FatropVecBF &sigma_n, const FatropVecBF &sigma_p, const FatropVecBF &gradb_s, const FatropVecBF &gradb_n, const FatropVecBF &gradb_p, const FatropVecBF &lam_I, const FatropVecBF &delta_s, const FatropVecBF &delta_n, const FatropVecBF &delta_p)
@@ -112,8 +124,8 @@ namespace fatrop
             {
                 double lam_I_i = lam_I.at(i);
                 delta_s.at(i) = (-gradb_s.at(i) + lam_I_i) / (sigma_s.at(i) + inertia);
-                delta_n.at(i) = (-gradb_n.at(i) - lam_I_i) / (sigma_n.at(i) + inertia);
-                delta_p.at(i) = (-gradb_p.at(i) + lam_I_i) / (sigma_p.at(i) + inertia);
+                delta_n.at(i) = (-gradb_n.at(i) - rho - lam_I_i) / (sigma_n.at(i) + inertia);
+                delta_p.at(i) = (-gradb_p.at(i) - rho + lam_I_i) / (sigma_p.at(i) + inertia);
             }
         }
 
@@ -127,6 +139,8 @@ namespace fatrop
             const FatropVecBF &gradb_total) override
         {
             inertia_correction_w_cache = inertia_correction_w;
+            sigma_cache_[0].copy(sigma_total);
+            gradb_cache_[0].copy(gradb_total);
             auto lam_I = lam.block(orig_dims_.neqs - orig_dims_.nineqs, orig_dims_.nineqs);
             auto sigma_s = sigma_total.block(0, orig_dims_.nineqs);
             auto sigma_n = sigma_total.block(orig_dims_.nineqs, n_n);
@@ -138,7 +152,7 @@ namespace fatrop
             auto delta_n = delta_s.block(orig_dims_.nineqs, n_n);
             auto delta_p = delta_s.block(orig_dims_.nineqs + n_n, n_p);
             update_sigma_gradb(inertia_correction_w, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, sigma_dummy_[0], gradb_dummy_[0]);
-            int ret = orig_->solve_pd_sys(inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_dummy_[0], gradb_dummy_[0]);
+            int ret = orig_->solve_pd_sys(inertia_correction_w, inertia_correction_c, ux, lam, delta_s.block(0, orig_dims_.nineqs), sigma_dummy_[0], gradb_dummy_[0]);
             update_delta_snp(inertia_correction_w, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
             return ret;
         };
@@ -149,16 +163,16 @@ namespace fatrop
             const FatropVecBF &cosntraint_violation) override
         {
             auto lam_I = lam.block(orig_dims_.neqs - orig_dims_.nineqs, orig_dims_.nineqs);
-            auto sigma_s = sigma_dummy_[0].block(0, orig_dims_.nineqs);
-            auto sigma_n = sigma_dummy_[0].block(orig_dims_.nineqs, n_n);
-            auto sigma_p = sigma_dummy_[0].block(orig_dims_.nineqs + n_n, n_p);
-            auto gradb_s = gradb_dummy_[0].block(0, orig_dims_.nineqs);
-            auto gradb_n = gradb_dummy_[0].block(orig_dims_.nineqs, n_n);
-            auto gradb_p = gradb_dummy_[0].block(orig_dims_.nineqs + n_n, n_p);
+            auto sigma_s = sigma_cache_[0].block(0, orig_dims_.nineqs);
+            auto sigma_n = sigma_cache_[0].block(orig_dims_.nineqs, n_n);
+            auto sigma_p = sigma_cache_[0].block(orig_dims_.nineqs + n_n, n_p);
+            auto gradb_s = gradb_cache_[0].block(0, orig_dims_.nineqs);
+            auto gradb_n = gradb_cache_[0].block(orig_dims_.nineqs, n_n);
+            auto gradb_p = gradb_cache_[0].block(orig_dims_.nineqs + n_n, n_p);
             auto delta_s_or = delta_s.block(0, orig_dims_.nineqs);
             auto delta_n = delta_s.block(orig_dims_.nineqs, n_n);
             auto delta_p = delta_s.block(orig_dims_.nineqs + n_n, n_p);
-            int ret = orig_->solve_soc_rhs(ux, lam, delta_s, cosntraint_violation);
+            int ret = orig_->solve_soc_rhs(ux, lam, delta_s.block(0, orig_dims_.nineqs), cosntraint_violation);
             update_delta_snp(inertia_correction_w_cache, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
             return ret;
         }
@@ -181,18 +195,36 @@ namespace fatrop
             // set zero for now TODO use quadratic formula here
             n_curr = 0.0;
             p_curr = 0.0;
+            return 0;
         }
         virtual fatrop_int initialize_dual(
             const FatropVecBF &grad_x,
             const FatropVecBF &grad_s,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
-            const FatropVecBF &zU) override = 0;
+            const FatropVecBF &zU) override
+        {
+            // todo check if this is correct
+            orig_->initialize_dual(grad_x, grad_s, dlam, zL.block(0, orig_dims_.nineqs), zU.block(0, orig_dims_.nineqs));
+            return 0;
+        };
         virtual fatrop_int get_bounds(
             FatropVecBF &lower,
-            FatropVecBF &upper) const override = 0;
+            FatropVecBF &upper) const override
+        {
+            orig_->get_bounds(lower, upper);
+            lower.block(orig_dims_.nineqs, n_n) = 0.0;
+            lower.block(orig_dims_.nineqs + n_n, n_p) = 0.0;
+            upper.block(orig_dims_.nineqs, n_n) = std::numeric_limits<double>::infinity();
+            upper.block(orig_dims_.nineqs + n_n, n_p) = std::numeric_limits<double>::infinity();
+            return 0;
+        };
         virtual fatrop_int get_initial_sol_guess(
-            FatropVecBF &initial) const override = 0;
+            FatropVecBF &initial) const override
+        {
+            orig_->get_initial_sol_guess(initial);
+            return 0;
+        }
         std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;
         NLPDims this_dims_;
@@ -204,7 +236,11 @@ namespace fatrop
         FatropMemoryVecBF slack_dummy_;
         FatropMemoryVecBF sigma_dummy_;
         FatropMemoryVecBF gradb_dummy_;
+        FatropMemoryVecBF zl_dummy_;
+        FatropMemoryVecBF zu_dummy_;
         double inertia_correction_w_cache = 0.0;
-        double rho = 1e4;
+        FatropMemoryVecBF sigma_cache_;
+        FatropMemoryVecBF gradb_cache_;
+        double rho = 1000;
     };
 };
