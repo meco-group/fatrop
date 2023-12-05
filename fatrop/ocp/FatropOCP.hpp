@@ -71,7 +71,7 @@ namespace fatrop
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr) override;
+            const FatropVecBF &grad_curr_x, const FatropVecBF& grad_curr_s) override;
         fatrop_int eval_constraint_viol(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
@@ -89,12 +89,14 @@ namespace fatrop
         fatrop_int eval_dual_inf(
             double obj_scale,
             const FatropVecBF &lam,
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &du_inf) override;
         fatrop_int initialize_slacks(
             FatropVecBF &s_curr) override;
         fatrop_int initialize_dual(
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
             const FatropVecBF &zU) override;

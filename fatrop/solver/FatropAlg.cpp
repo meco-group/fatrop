@@ -292,6 +292,7 @@ fatrop_int FatropAlg::optimize()
         {
             fatropnlp_->initialize_dual(
                 fatropdata_->grad_curr_x,
+                fatropdata_->grad_curr_s,
                 fatropdata_->lam_curr,
                 fatropdata_->zL_curr,
                 fatropdata_->zU_curr);
@@ -447,6 +448,7 @@ fatrop_int FatropAlg::eval_dual_infeasiblity()
         fatropdata_->obj_scale,
         fatropdata_->lam_curr,
         fatropdata_->grad_curr_x,
+        fatropdata_->grad_curr_s,
         fatropdata_->du_inf_curr);
     fatropdata_->eval_dual_inf_slack_eqs();
     stats.duinf_time += blasfeo_toc(&timer);
@@ -460,6 +462,7 @@ fatrop_int FatropAlg::perform_initializiation()
         fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr_x,
+        fatropdata_->grad_curr_s,
         fatropdata_->lam_calc,
         // fatropdata_->s_curr,
         fatropdata_->zL_curr,

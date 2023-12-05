@@ -219,14 +219,14 @@ int FatropOCP::compute_scalings(
     double &obj_scale,
     FatropVecBF &x_scales,
     FatropVecBF &lam_scales,
-    const FatropVecBF &grad_curr)
+    const FatropVecBF &grad_curr_x, const FatropVecBF &grad_curr_s)
 {
     return scaler_->compute_scalings(
         &ocpkktmemory_,
         obj_scale,
         x_scales,
         lam_scales,
-        grad_curr);
+        grad_curr_x);
 };
 int FatropOCP::eval_constraint_viol(
     const FatropVecBF &primal_vars,
@@ -282,25 +282,27 @@ int FatropOCP::eval_obj(
 int FatropOCP::eval_dual_inf(
     double obj_scale,
     const FatropVecBF &lam,
-    const FatropVecBF &grad,
+    const FatropVecBF &grad_x,
+    const FatropVecBF &grad_s,
     FatropVecBF &du_inf)
 {
     return duinfevaluator_.evaluate(
         &ocpkktmemory_,
         obj_scale,
         lam,
-        grad,
+        grad_x,
         du_inf);
 }
 int FatropOCP::initialize_dual(
-    const FatropVecBF &grad,
+    const FatropVecBF &grad_x,
+    const FatropVecBF &grad_s,
     FatropVecBF &dlam,
     // FatropVecBF &s_curr,
     const FatropVecBF &zL,
     const FatropVecBF &zU)
 {
     // assume constraint jacobian evaluated
-    OCPInitializer_.modify_kkt_ls_dual_estimate(&ocpkktmemory_, grad);
+    OCPInitializer_.modify_kkt_ls_dual_estimate(&ocpkktmemory_, grad_x);
     s_dummy.SetConstant(0.0);
     s_zero.SetConstant(0.0);
     ux_dummy.SetConstant(0.0);

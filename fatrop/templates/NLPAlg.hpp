@@ -61,7 +61,8 @@ namespace fatrop
         virtual fatrop_int eval_dual_inf(
             double obj_scale,
             const FatropVecBF &lam,
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &du_inf) = 0;
         virtual fatrop_int solve_pd_sys(
             const double inertia_correction_w,
@@ -81,11 +82,12 @@ namespace fatrop
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr) = 0;
+            const FatropVecBF &grad_curr_x, const FatropVecBF& grad_curr_s) = 0;
         virtual fatrop_int initialize_slacks(
             FatropVecBF &s_curr) = 0;
         virtual fatrop_int initialize_dual(
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
             const FatropVecBF &zU) = 0;
