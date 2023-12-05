@@ -444,6 +444,7 @@ fatrop_int FatropData::accept_trial_step()
     zL_curr.SwapWith(zL_next);
     zU_curr.SwapWith(zU_next);
     grad_curr_x.SwapWith(grad_next_x);
+    grad_curr_s.SwapWith(grad_next_s);
     g_curr.SwapWith(g_next);
     cache_curr = cache_next;
     return 0;
@@ -456,6 +457,7 @@ fatrop_int FatropData::backup_curr()
     zL_backup.copy(zL_curr);
     zU_backup.copy(zU_curr);
     grad_backup_x.copy(grad_curr_x);
+    grad_backup_s.copy(grad_curr_s);
     g_backup.copy(g_curr);
     obj_backup = obj_curr;
     return 0;
@@ -475,6 +477,7 @@ fatrop_int FatropData::restore_backup()
     zL_curr.SwapWith(zL_backup);
     zU_curr.SwapWith(zU_backup);
     grad_backup_x.SwapWith(grad_curr_x);
+    grad_backup_s.SwapWith(grad_curr_s);
     g_backup.SwapWith(g_curr);
     delta_x_backup.SwapWith(delta_x);
     delta_s_backup.SwapWith(delta_s);
