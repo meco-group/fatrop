@@ -4,7 +4,7 @@ namespace fatrop
 {
     class FatropOCPResto : public FatropNLP
     {
-        FatropOCPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs)
+        FatropOCPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs)
         {
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
@@ -18,6 +18,9 @@ namespace fatrop
                 upper_bounded_[i] = upper_bounded;
                 lower_bounded_[i] = lower_bounded;
             }
+            this_dims_.nvars = orig_dims_.nvars;
+            this_dims_.nineqs = orig_dims_.nineqs + n_n + n_p;
+            this_dims_.neqs = orig_dims_.neqs;
         }
         virtual fatrop_int eval_lag_hess(
             double obj_scale,
@@ -62,7 +65,7 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &gradient_x,
-            FatropVecBF &gradient_s)
+            FatropVecBF &gradient_s) override
         {
             orig_->eval_obj_grad(obj_scale, primal_vars, slack_vars, gradient_x, gradient_s);
             gradient_x.block(orig_dims_.nvars, n_n + n_p) = rho;
@@ -93,7 +96,7 @@ namespace fatrop
             const FatropVecBF &lam,
             const FatropVecBF &grad_x,
             const FatropVecBF &grad_s,
-            FatropVecBF &du_inf) = 0;
+            FatropVecBF &du_inf_x, FatropVecBF& du_inf_s_wo_z) override= 0;
         virtual fatrop_int solve_pd_sys(
             const double inertia_correction_w,
             const double inertia_correction_c,
@@ -101,30 +104,31 @@ namespace fatrop
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
             const FatropVecBF &sigma_total,
-            const FatropVecBF &gradb_total) = 0;
+            const FatropVecBF &gradb_total) override = 0;
         virtual fatrop_int solve_soc_rhs(
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,
-            const FatropVecBF &cosntraint_violation) = 0;
-        virtual NLPDims get_nlp_dims() const = 0;
+            const FatropVecBF &cosntraint_violation) override = 0;
+        virtual NLPDims get_nlp_dims() const override= 0;
         virtual fatrop_int compute_scalings(
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr) = 0;
+            const FatropVecBF &grad_curr_x, const FatropVecBF& grad_curr_s) override= 0;
         virtual fatrop_int initialize_slacks(
-            FatropVecBF &s_curr) = 0;
+            FatropVecBF &s_curr) override = 0;
         virtual fatrop_int initialize_dual(
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
-            const FatropVecBF &zU) = 0;
+            const FatropVecBF &zU) override= 0;
         virtual fatrop_int get_bounds(
             FatropVecBF &lower,
-            FatropVecBF &upper) const = 0;
+            FatropVecBF &upper) const override = 0;
         virtual fatrop_int get_initial_sol_guess(
-            FatropVecBF &initial) const = 0;
+            FatropVecBF &initial) const override = 0;
         std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;
         NLPDims this_dims_;
@@ -134,6 +138,8 @@ namespace fatrop
         fatrop_int n_p = 0;
         fatrop_int n_n = 0;
         FatropMemoryVecBF slack_dummy_;
+        FatropMemoryVecBF sigma_dummy_;
+        FatropMemoryVecBF gradb_dummy_;
         double rho = 1e4;
     };
 };
