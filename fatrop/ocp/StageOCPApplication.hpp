@@ -119,6 +119,7 @@ namespace fatrop
         void set_initial(std::vector<double> &initial_u, std::vector<double> &initial_x);
         OCPDims get_ocp_dims();
         void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params);
+        std::shared_ptr<FatropNLP> nlp_resto;
 
     private:
         const std::shared_ptr<OCPAbstract> ocp_;
@@ -204,7 +205,7 @@ namespace fatrop
         StageExpressionEvaluatorFactory get_expression(const std::string &sampler_name);
         StageExpressionEvaluatorFactory get_expression_evaluator(const std::shared_ptr<StageExpression> &expr);
         AppParameterSetter get_parameter_setter(const std::string &setter_name);
-        void set_value(const std::string &setter_name, const std::vector<double>& value);
+        void set_value(const std::string &setter_name, const std::vector<double> &value);
         void build();
         fatrop_int optimize();
         const StageOCPSolution &last_solution() const;
