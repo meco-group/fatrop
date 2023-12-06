@@ -51,6 +51,7 @@ namespace fatrop
         virtual fatrop_int exit_second_order_correction() const;
         virtual fatrop_int compute_second_order_correction(double alpha) const;
         virtual bool is_acceptable_to_filter(double mu, const FatropVecBF& trial_point_x, const FatropVecBF& trial_point_s) = 0;
+        virtual void augment_filter(double mu) = 0;
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropPrinter> printer_;
@@ -72,6 +73,7 @@ namespace fatrop
         void initialize();
         LineSearchInfo find_acceptable_trial_point(double mu, bool small_sd, bool from_backup);
         bool is_acceptable_to_filter(double mu, const FatropVecBF& trial_point_x, const FatropVecBF& trial_point_s);
+        virtual void augment_filter(double mu);
         std::shared_ptr<Filter> filter_;
         std::shared_ptr<Journaller> journaller_;
         double s_phi;

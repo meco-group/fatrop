@@ -110,10 +110,18 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     fatrop_params_->register_option(NumericOption::lower_bounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
     fatrop_params_->register_option(IntegerOption::lower_bounded("max_soc", "max_soc", &max_soc, 2, 0));
 };
+void BackTrackingLineSearch::augment_filter(double mu)
+{
+    double cv_next = fatropdata_->constr_viol_sum_next();
+    double obj_next = eval_obj_trial();
+    double barrier_next = fatropdata_->eval_barrier_func_trial(mu);
+    obj_next += barrier_next;
+    filter_->augment(FilterData(0, obj_next - gamma_phi * cv_next, cv_next * (1 - gamma_theta)));
+}
 void BackTrackingLineSearch::initialize()
 {
 }
-bool BackTrackingLineSearch::is_acceptable_to_filter(double mu, const FatropVecBF &trial_point_x, const FatropVecBF& trial_point_s)
+bool BackTrackingLineSearch::is_acceptable_to_filter(double mu, const FatropVecBF &trial_point_x, const FatropVecBF &trial_point_s)
 {
     fatropdata_->x_next.copy(trial_point_x);
     fatropdata_->s_next.copy(trial_point_s);

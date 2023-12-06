@@ -203,7 +203,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         {
             no_acceptable_steps = 0;
         }
-        if (is_resto_alg() && i>2)
+        if (is_resto_alg() && i > 2)
         {
             // check if current iterate is acceptable wrt orig filter
             if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
@@ -508,7 +508,8 @@ fatrop_int FatropAlg::solve_pd_sys(double inertia_correction_w, double inertia_c
 }
 fatrop_int FatropAlg::solve_resto_alg(double mu)
 {
-    if(is_resto_alg()) return 100;
+    if (is_resto_alg())
+        return 100;
     // prepare resto alg required quantities
     resto_alg_->linesearch_orig_ = linesearch_;
     resto_alg_->mu_orig_ = mu;
@@ -525,6 +526,11 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
         double alpha_max_du;
         fatropdata_->maximum_step_size(alpha_max_pr, alpha_max_du, MAX(1 - mu, 0.99));
         fatropdata_->update_trial_step(1.0, alpha_max_du);
+        fatrop_int res = fatropnlp_->eval_constraint_viol(
+            fatropdata_->x_next,
+            fatropdata_->s_next,
+            fatropdata_->g_next);
+        linesearch_->augment_filter(mu);
         fatropdata_->s_curr = 0.0;
         fatropdata_->reset();
         eval_constr_jac();
