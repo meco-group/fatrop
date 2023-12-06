@@ -524,13 +524,14 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
         double alpha_max_pr;
         double alpha_max_du;
         fatropdata_->maximum_step_size(alpha_max_pr, alpha_max_du, MAX(1 - mu, 0.99));
-        fatropdata_->update_trial_step(alpha_max_pr, alpha_max_du);
+        fatropdata_->update_trial_step(1.0, alpha_max_du);
         fatropdata_->s_curr = 0.0;
+        fatropdata_->reset();
         eval_constr_jac();
         fatropnlp_->initialize_slacks(mu,
                                       fatropdata_->s_curr);
-        eval_obj_grad_curr();
         fatropdata_->accept_trial_step();
+        eval_obj_grad_curr();
         fatropnlp_->initialize_dual(
             fatropdata_->grad_curr_x,
             fatropdata_->grad_curr_s,

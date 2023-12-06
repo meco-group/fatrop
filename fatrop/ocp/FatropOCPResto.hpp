@@ -239,6 +239,6 @@ namespace fatrop
         double inertia_correction_w_cache = 0.0;
         FatropMemoryVecBF sigma_cache_;
         FatropMemoryVecBF gradb_cache_;
-        double rho = 1e4;
+        double rho = 1e-1;
     };
 };
