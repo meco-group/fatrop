@@ -97,6 +97,8 @@ namespace fatrop
         virtual fatrop_int Callback(FatropVecBF& primal_vars){return 0;};
         virtual void finalize(){};
         virtual void reset(){};
+        double rho;
+        void set_rho(double rho_in){rho = rho_in;};
     };
 } // namespace fatrop
 #endif // NLPINCLUDED

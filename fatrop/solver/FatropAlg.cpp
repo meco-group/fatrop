@@ -44,7 +44,7 @@ FatropAlg::FatropAlg(
     fatropoptions_->register_option(IntegerOption::lower_bounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
     fatropoptions_->register_option(IntegerOption::lower_bounded("acceptable_iter", "acceptable iter", &acceptable_iter, 15, 0));
     fatropoptions_->register_option(NumericOption::lower_bounded("lammax", "lammax", &lammax, 1e3, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("mu_init", "mu_init", &mu0_, 1e2, 0.0));
+    fatropoptions_->register_option(NumericOption::lower_bounded("mu_init", "mu_init", &mu0_, 1e-1, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
@@ -143,6 +143,7 @@ fatrop_int FatropAlg::optimize(double mu0)
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();
+    if(is_resto_alg()) fatropnlp_->set_rho(std::max(mu0, fatropdata_->constr_viol_max_curr()));
     filter_->augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
     fatrop_int ls = 0;
     double deltaw = 0;
@@ -204,7 +205,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         {
             no_acceptable_steps = 0;
         }
-        if (is_resto_alg() &&emu<1e-2)
+        if (is_resto_alg() && i>2)
         {
             // check if current iterate is acceptable wrt orig filter
             if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
@@ -239,7 +240,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         }
         // update mu
         // todo make a seperate class
-        while (!watch_dog_step && mu > mu_min && (fatropdata_->e_mu_curr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
+        while (!is_resto_alg() &&!watch_dog_step && mu > mu_min && (fatropdata_->e_mu_curr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_reseted = 0;

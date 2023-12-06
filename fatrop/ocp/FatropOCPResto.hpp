@@ -199,8 +199,10 @@ namespace fatrop
                 double dist_L = lower_bounded_[i] ? s_curr_or.at(i) - lower_v.at(i) : 0.0;
                 double dist_U = upper_bounded_[i] ? upper_v.at(i) - s_curr_or.at(i) : 0.0;
                 double viol = 0.0;
+                    // viol = c - (s_projected-n+p)
                 if (dist_L < 0.0)
                 {
+                    // 
                     viol = -dist_L;
                 }
                 else if (dist_U < 0.0)
@@ -208,6 +210,7 @@ namespace fatrop
                     viol = dist_U;
                 }
                 double n_init = (mu0 - rho * viol) / (2 * rho) + std::sqrt(std::pow((mu0 - rho * viol) / (2 * rho), 2) + mu0 * viol / (2 * rho));
+                // if viol >>>> 0 -> n_init = 0 if viol <<< 0 n_init = viol
                 n_curr.at(i) = n_init;
                 p_curr.at(i) = viol + n_init;
             }
@@ -256,6 +259,6 @@ namespace fatrop
         double inertia_correction_w_cache = 0.0;
         FatropMemoryVecBF sigma_cache_;
         FatropMemoryVecBF gradb_cache_;
-        double rho = 1e0;
+        double rho = 1e-1;
     };
 };
