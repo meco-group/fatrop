@@ -167,6 +167,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         it_curr.du_inf = fatropdata_->dual_inf_max_curr();
         it_curr.ls = ls;
         it_curr.reg = deltaw;
+        it_curr.resto = is_resto_alg();
         if (no_no_full_steps_bc_filter >= 5)
         {
             bool reset_filter = (filter_reseted <= 5);
@@ -345,7 +346,6 @@ fatrop_int FatropAlg::optimize(double mu0)
 
         if (ls == 0)
         {
-            std::cout << "GOING INTO RESTO" << std::endl;
             int ret = solve_resto_alg(mu);
             if (ret != 0)
             {

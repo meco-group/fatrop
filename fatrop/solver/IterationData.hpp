@@ -38,6 +38,7 @@ namespace fatrop
         double alpha_pr = 0.0;
         double alpha_du = 0.0;
         char type = 'x';
+        bool resto = false;
     };
     class Journaller
     {
