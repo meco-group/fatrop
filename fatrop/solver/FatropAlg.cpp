@@ -204,7 +204,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         {
             no_acceptable_steps = 0;
         }
-        if (is_resto_alg() && i > 2)
+        if (is_resto_alg() &&emu<1e-2)
         {
             // check if current iterate is acceptable wrt orig filter
             if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
