@@ -184,13 +184,13 @@ namespace fatrop
         {
             return orig_->compute_scalings(obj_scale, x_scales, lam_scales, grad_curr_x, grad_curr_s);
         };
-        virtual fatrop_int initialize_slacks(
+        virtual fatrop_int initialize_slacks(double mu,
             FatropVecBF &s_curr) override
         {
             auto s_curr_or = s_curr.block(0, orig_dims_.nineqs);
             auto n_curr = s_curr.block(orig_dims_.nineqs, n_n);
             auto p_curr = s_curr.block(orig_dims_.nineqs + n_n, n_p);
-            int ret = orig_->initialize_slacks(s_curr_or);
+            int ret = orig_->initialize_slacks(mu, s_curr_or);
             // set zero for now TODO use quadratic formula here
             n_curr = 0.0;
             p_curr = 0.0;

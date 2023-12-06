@@ -29,7 +29,7 @@ namespace fatrop
         void build_fatrop_algorithm_objects(const std::shared_ptr<FatropNLP> &nlp,
                                             const std::shared_ptr<FatropOptions> &fatropparams,
                                             std::shared_ptr<FatropData> &fatropdata,
-                                            std::shared_ptr<Journaller> &journaller)
+                                            std::shared_ptr<Journaller> &journaller, const std::shared_ptr<FatropAlg> &resto_alg)
         {
             if (fatropprinter_ == nullptr)
             {
@@ -41,6 +41,7 @@ namespace fatrop
             journaller_ = journaller;
             nlp_ = nlp;
             fatropoptions_ = fatropparams;
+            resto_alg_ = resto_alg;
         }
         void set_printer(const std::shared_ptr<FatropPrinter> &printer)
         {
@@ -51,7 +52,7 @@ namespace fatrop
             // TODO unsafe if maxiter is changed during application
             std::shared_ptr<Filter> filter = std::make_shared<Filter>(fatropoptions_->maxiter + 1);
             std::shared_ptr<LineSearch> linesearch = std::make_shared<BackTrackingLineSearch>(fatropoptions_, nlp_, fatropdata_, filter, journaller_, fatropprinter_);
-            return std::make_shared<FatropAlg>(nlp_, fatropdata_, fatropoptions_, filter, linesearch, journaller_, fatropprinter_);
+            return std::make_shared<FatropAlg>(nlp_, fatropdata_, fatropoptions_, filter, linesearch, journaller_, fatropprinter_, resto_alg_);
         }
 
     private:
@@ -60,6 +61,7 @@ namespace fatrop
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<Journaller> journaller_;
         std::shared_ptr<FatropPrinter> fatropprinter_;
+        std::shared_ptr<FatropAlg> resto_alg_;
     };
 };
 

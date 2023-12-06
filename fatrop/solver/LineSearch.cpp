@@ -104,7 +104,7 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     fatrop_params_->register_option(NumericOption::lower_bounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
     fatrop_params_->register_option(NumericOption::lower_bounded("delta", "delta", &delta, 1.0, 0.0));
     fatrop_params_->register_option(NumericOption::lower_bounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
-    fatrop_params_->register_option(NumericOption::lower_bounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-12, 0.0));
+    fatrop_params_->register_option(NumericOption::lower_bounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-8, 0.0));
     fatrop_params_->register_option(NumericOption::lower_bounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
     fatrop_params_->register_option(NumericOption::lower_bounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
     fatrop_params_->register_option(NumericOption::lower_bounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
@@ -112,6 +112,17 @@ BackTrackingLineSearch::BackTrackingLineSearch(
 };
 void BackTrackingLineSearch::initialize()
 {
+}
+bool BackTrackingLineSearch::is_acceptable_to_filter(double mu, const FatropVecBF &trial_point_x, const FatropVecBF& trial_point_s)
+{
+    fatropdata_->x_next.copy(trial_point_x);
+    fatropdata_->s_next.copy(trial_point_s);
+    eval_constr_viol_trial();
+    double cv_next = fatropdata_->constr_viol_sum_next();
+    double obj_next = eval_obj_trial();
+    double barrier_next = fatropdata_->eval_barrier_func_trial(mu);
+    obj_next += barrier_next;
+    return filter_->is_acceptable(FilterData(0, obj_next, cv_next));
 }
 LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bool small_sd, bool from_backup)
 {

@@ -27,14 +27,16 @@ FatropAlg::FatropAlg(
     const shared_ptr<Filter> &filter,
     const shared_ptr<LineSearch> &linesearch,
     const shared_ptr<Journaller> &journaller,
-    const shared_ptr<FatropPrinter> &printer)
+    const shared_ptr<FatropPrinter> &printer,
+    const shared_ptr<FatropAlg> &resto_alg)
     : fatropnlp_(fatropnlp),
       fatropdata_(fatropdata),
       fatropoptions_(fatropparams),
       filter_(filter),
       linesearch_(linesearch),
       journaller_(journaller),
-      printer_(printer)
+      printer_(printer),
+      resto_alg_(resto_alg)
 {
 
     fatropoptions_->register_option(NumericOption::lower_bounded("tol", "tolerance", &tol, 1e-8, 0.0));
@@ -42,7 +44,7 @@ FatropAlg::FatropAlg(
     fatropoptions_->register_option(IntegerOption::lower_bounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
     fatropoptions_->register_option(IntegerOption::lower_bounded("acceptable_iter", "acceptable iter", &acceptable_iter, 15, 0));
     fatropoptions_->register_option(NumericOption::lower_bounded("lammax", "lammax", &lammax, 1e3, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("mu_init", "mu_init", &mu0, 1e2, 0.0));
+    fatropoptions_->register_option(NumericOption::lower_bounded("mu_init", "mu_init", &mu0_, 1e2, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
     fatropoptions_->register_option(NumericOption::lower_bounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
@@ -92,6 +94,10 @@ void FatropAlg::get_solution(vector<double> &sol)
 };
 fatrop_int FatropAlg::optimize()
 {
+    return optimize(mu0_);
+}
+fatrop_int FatropAlg::optimize(double mu0)
+{
     // bool first_try_watchdog = this->first_try_watchdog;
     fatrop_int no_watch_dog_steps_taken = 0;
     fatrop_int max_watchdog_steps = this->max_watchdog_steps;
@@ -114,14 +120,14 @@ fatrop_int FatropAlg::optimize()
     eval_obj_grad_curr();
     if (warm_start_init_point)
     {
-        fatropnlp_->initialize_slacks(
-            fatropdata_->s_curr);
+        fatropnlp_->initialize_slacks(mu,
+                                      fatropdata_->s_curr);
         fatropdata_->warmstart_dual();
         fatropdata_->bound_z();
     }
     else
     {
-        fatrop_int initialization_res = perform_initializiation();
+        fatrop_int initialization_res = perform_initializiation(mu);
         if (initialization_res == 0 && fatropdata_->delta_dual_max() < lammax)
         {
             printer_->level(1) << "accepted lam " << endl;
@@ -197,8 +203,13 @@ fatrop_int FatropAlg::optimize()
         {
             no_acceptable_steps = 0;
         }
-
-        if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
+        if (is_resto_alg() && i>2)
+        {
+            // check if current iterate is acceptable wrt orig filter
+            if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
+                return 0;
+        }
+        else if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
         {
             double total_time = blasfeo_toc(&timer);
@@ -334,8 +345,17 @@ fatrop_int FatropAlg::optimize()
 
         if (ls == 0)
         {
-            printer_->level(1) << "error: restoration phase not implemented yet" << endl;
-            return 1;
+            std::cout << "GOING INTO RESTO" << std::endl;
+            int ret = solve_resto_alg(mu);
+            if (ret != 0)
+            {
+                printer_->level(1) << "error: fatrop failed to find a solution" << endl;
+                return 1;
+            }
+            else
+            {
+                continue;
+            }
         }
         if (watch_dog_step || ls == 1)
         {
@@ -454,12 +474,12 @@ fatrop_int FatropAlg::eval_dual_infeasiblity()
     stats.duinf_time += blasfeo_toc(&timer);
     return 0;
 }
-fatrop_int FatropAlg::perform_initializiation()
+fatrop_int FatropAlg::perform_initializiation(double mu)
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    fatrop_int res = fatropnlp_->initialize_slacks(
-        fatropdata_->s_curr);
+    fatrop_int res = fatropnlp_->initialize_slacks(mu,
+                                                   fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr_x,
         fatropdata_->grad_curr_s,
@@ -485,4 +505,42 @@ fatrop_int FatropAlg::solve_pd_sys(double inertia_correction_w, double inertia_c
     double el = blasfeo_toc(&timer);
     stats.compute_sd_time += el;
     return res;
+}
+fatrop_int FatropAlg::solve_resto_alg(double mu)
+{
+    if(is_resto_alg()) return 100;
+    // prepare resto alg required quantities
+    resto_alg_->linesearch_orig_ = linesearch_;
+    resto_alg_->mu_orig_ = mu;
+    resto_alg_->n_ineqs_orig_ = fatropdata_->n_ineqs;
+    resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
+    int ret = resto_alg_->optimize(mu);
+    // return from resto alg
+    if (ret == 0)
+    {
+        axpby(1.0, resto_alg_->fatropdata_->s_curr.block(0, fatropdata_->n_ineqs), -1.0, fatropdata_->s_curr, fatropdata_->delta_s);
+        axpby(1.0, resto_alg_->fatropdata_->x_curr, -1.0, fatropdata_->x_curr, fatropdata_->delta_x);
+        fatropdata_->compute_delta_z();
+        double alpha_max_pr;
+        double alpha_max_du;
+        fatropdata_->maximum_step_size(alpha_max_pr, alpha_max_du, MAX(1 - mu, 0.99));
+        fatropdata_->update_trial_step(alpha_max_pr, alpha_max_du);
+        fatropdata_->s_curr = 0.0;
+        eval_constr_jac();
+        fatropnlp_->initialize_slacks(mu,
+                                      fatropdata_->s_curr);
+        eval_obj_grad_curr();
+        fatropdata_->accept_trial_step();
+        fatropnlp_->initialize_dual(
+            fatropdata_->grad_curr_x,
+            fatropdata_->grad_curr_s,
+            fatropdata_->lam_calc,
+            fatropdata_->zL_curr,
+            fatropdata_->zU_curr);
+        fatropdata_->accept_dual_initializiaton();
+        fatropdata_->relax_bounds_var(mu);
+        fatropdata_->modify_dual_bounds(mu);
+    }
+
+    return ret;
 }

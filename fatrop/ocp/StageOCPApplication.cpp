@@ -37,14 +37,22 @@ NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()),
     }
 }
 
-void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
+void NLPApplication::build(const shared_ptr<FatropNLP> &nlp, const std::shared_ptr<FatropNLP> &nlp_resto)
 {
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
+    AlgBuilder algbuilder_resto;
+    algbuilder_resto.set_printer(printer_);
+    std::shared_ptr<FatropData> fatropdata_resto;
+    std::shared_ptr<FatropOptions> fatropoptions_resto = std::make_shared<FatropOptions>();
+    std::shared_ptr<Journaller> journaller_resto;
+    algbuilder_resto.build_fatrop_algorithm_objects(nlp_resto, fatropoptions_resto, fatropdata_resto, journaller_resto, nullptr);
+    fatropoptions_resto->register_option(IntegerOption::un_bounded("print_level", "print level", &printer_->print_level(), 10));
+    auto resto_alg = algbuilder_resto.build_algorithm();
     AlgBuilder algbuilder;
     algbuilder.set_printer(printer_);
-    algbuilder.build_fatrop_algorithm_objects(nlp, fatropoptions_, fatropdata_, journaller_);
-    fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "prfatrop_fatrop_int level", &printer_->print_level(), 10));
+    algbuilder.build_fatrop_algorithm_objects(nlp, fatropoptions_, fatropdata_, journaller_, resto_alg);
+    fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "print level", &printer_->print_level(), 10));
     fatropalg_ = algbuilder.build_algorithm();
     dirty = false;
 }
@@ -134,7 +142,7 @@ void OCPApplication::build()
     adapter = make_shared<OCPAdapter>(ocp_, fatropoptions_);
     shared_ptr<FatropOCP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(adapter));
     nlp_resto = std::make_shared<FatropOCPResto>(nlp);
-    NLPApplication::build(nlp_resto);
+    NLPApplication::build(nlp, nlp_resto);
     dirty = false;
 }
 void OCPApplication::set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
@@ -174,8 +182,8 @@ void FatropSolution::set_solution(const FatropVecBF &sol_primal, const FatropVec
 {
     sol_primal.copyto(sol_primal_);
     sol_dual.copyto(sol_dual_);
-    // sol_zL.copyto(sol_zL_);
-    // sol_zU.copyto(sol_zU_);
+    sol_zL.copyto(sol_zL_);
+    sol_zU.copyto(sol_zU_);
 };
 void FatropSolution::set_primal_solution(const FatropVecBF &sol)
 {

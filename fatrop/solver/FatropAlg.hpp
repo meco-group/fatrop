@@ -47,13 +47,15 @@ namespace fatrop
             const std::shared_ptr<Filter> &filter,
             const std::shared_ptr<LineSearch> &linesearch,
             const std::shared_ptr<Journaller> &journaller, 
-            const std::shared_ptr<FatropPrinter> &printer);
+            const std::shared_ptr<FatropPrinter> &printer, 
+            const std::shared_ptr<FatropAlg> &resto_alg);
         void initialize() ;
         void reset() ;
         void set_bounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
         void set_initial(const std::vector<double> &initial) ;
         void get_solution(std::vector<double> &sol) ;
         fatrop_int optimize() ;
+        fatrop_int optimize(double mu0) ;
         fatrop_int eval_lag_hess();
         fatrop_int eval_constr_jac();
         fatrop_int eval_constr_viol_curr();
@@ -62,8 +64,10 @@ namespace fatrop
         double eval_objective_curr();
         double eval_objective_trial();
         fatrop_int eval_dual_infeasiblity();
-        fatrop_int perform_initializiation();
+        fatrop_int perform_initializiation(double mu);
         fatrop_int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
+        inline bool is_resto_alg() const { return resto_alg_ == nullptr; }
+        fatrop_int solve_resto_alg(double mu);
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropOptions> fatropoptions_;
@@ -84,7 +88,7 @@ namespace fatrop
 
     private:
         double lammax;
-        double mu0;
+        double mu0_;
         double kappa_eta;
         double kappa_mu;
         double theta_mu;
@@ -103,6 +107,11 @@ namespace fatrop
         double recalc_y_feas_tol;
         // bool first_try_watchdog;
         FatropStats stats;
+        ///// restoration phase information
+        std::shared_ptr<FatropAlg> resto_alg_;
+        std::weak_ptr<LineSearch> linesearch_orig_;
+        double mu_orig_;
+        int n_ineqs_orig_;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED
