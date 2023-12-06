@@ -184,16 +184,33 @@ namespace fatrop
         {
             return orig_->compute_scalings(obj_scale, x_scales, lam_scales, grad_curr_x, grad_curr_s);
         };
-        virtual fatrop_int initialize_slacks(
-            FatropVecBF &s_curr) override
+        virtual fatrop_int initialize_slacks(double mu0,
+                                             FatropVecBF &s_curr) override
         {
             auto s_curr_or = s_curr.block(0, orig_dims_.nineqs);
             auto n_curr = s_curr.block(orig_dims_.nineqs, n_n);
             auto p_curr = s_curr.block(orig_dims_.nineqs + n_n, n_p);
-            int ret = orig_->initialize_slacks(s_curr_or);
+            int ret = orig_->initialize_slacks(mu0, s_curr_or);
+            auto upper_v = upper_[0];
+            auto lower_v = lower_[0];
             // set zero for now TODO use quadratic formula here
-            n_curr = 0.0;
-            p_curr = 0.0;
+            for (int i = 0; i < orig_dims_.nineqs; ++i)
+            {
+                double dist_L = lower_bounded_[i] ? s_curr_or.at(i) - lower_v.at(i) : 0.0;
+                double dist_U = upper_bounded_[i] ? upper_v.at(i) - s_curr_or.at(i) : 0.0;
+                double viol = 0.0;
+                if (dist_L < 0.0)
+                {
+                    viol = -dist_L;
+                }
+                else if (dist_U < 0.0)
+                {
+                    viol = dist_U;
+                }
+                double n_init = (mu0 - rho * viol) / (2 * rho) + std::sqrt(std::pow((mu0 - rho * viol) / (2 * rho), 2) + mu0 * viol / (2 * rho));
+                n_curr.at(i) = n_init;
+                p_curr.at(i) = viol + n_init;
+            }
             return ret;
         }
         virtual fatrop_int initialize_dual(

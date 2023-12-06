@@ -114,14 +114,14 @@ fatrop_int FatropAlg::optimize()
     eval_obj_grad_curr();
     if (warm_start_init_point)
     {
-        fatropnlp_->initialize_slacks(
+        fatropnlp_->initialize_slacks(mu,
             fatropdata_->s_curr);
         fatropdata_->warmstart_dual();
         fatropdata_->bound_z();
     }
     else
     {
-        fatrop_int initialization_res = perform_initializiation();
+        fatrop_int initialization_res = perform_initializiation(mu);
         if (initialization_res == 0 && fatropdata_->delta_dual_max() < lammax)
         {
             printer_->level(1) << "accepted lam " << endl;
@@ -454,11 +454,11 @@ fatrop_int FatropAlg::eval_dual_infeasiblity()
     stats.duinf_time += blasfeo_toc(&timer);
     return 0;
 }
-fatrop_int FatropAlg::perform_initializiation()
+fatrop_int FatropAlg::perform_initializiation(double mu)
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    fatrop_int res = fatropnlp_->initialize_slacks(
+    fatrop_int res = fatropnlp_->initialize_slacks(mu,
         fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr_x,
