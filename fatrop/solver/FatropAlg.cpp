@@ -121,7 +121,7 @@ fatrop_int FatropAlg::optimize(double mu0)
     if (warm_start_init_point)
     {
         fatropnlp_->initialize_slacks(mu,
-                                      fatropdata_->s_curr);
+            fatropdata_->s_curr);
         fatropdata_->warmstart_dual();
         fatropdata_->bound_z();
     }
@@ -479,7 +479,7 @@ fatrop_int FatropAlg::perform_initializiation(double mu)
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     fatrop_int res = fatropnlp_->initialize_slacks(mu,
-                                                   fatropdata_->s_curr);
+        fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr_x,
         fatropdata_->grad_curr_s,

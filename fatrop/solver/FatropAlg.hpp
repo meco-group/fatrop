@@ -64,7 +64,7 @@ namespace fatrop
         double eval_objective_curr();
         double eval_objective_trial();
         fatrop_int eval_dual_infeasiblity();
-        fatrop_int perform_initializiation(double mu);
+        fatrop_int perform_initializiation(double mu0);
         fatrop_int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
         inline bool is_resto_alg() const { return resto_alg_ == nullptr; }
         fatrop_int solve_resto_alg(double mu);
