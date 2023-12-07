@@ -149,7 +149,7 @@ fatrop_int FatropAlg::optimize(double mu0)
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
-    double emu0;
+    double e_00;
     for (fatrop_int i = 0; i < maxiter; i++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
@@ -206,8 +206,9 @@ fatrop_int FatropAlg::optimize(double mu0)
         {
             no_acceptable_steps = 0;
         }
-        double emu_curr = fatropdata_->e_mu_curr(0.0);
-        if(i==0) emu0 = emu_curr;
+        double emu_curr = fatropdata_->e_mu_curr(mu);
+        double e0_curr = fatropdata_->e_mu_curr(0.0);
+        if(i==0) e_00 = e0_curr;
         // if (is_resto_alg() && (emu_curr < 0.1*emu0 || emu_curr< kappa_eta*mu))
         if (is_resto_alg())
         {
@@ -216,7 +217,7 @@ fatrop_int FatropAlg::optimize(double mu0)
             // check if current iterate is acceptable wrt orig filter
             std::cout << "cv orig " << cv_orig<<std::endl;
             // if (acceptable && cv_orig < cv_orig_tol)
-            if (acceptable && emu_curr < 0.1*emu0)
+            if (acceptable && e0_curr < 0.1*e_00)
             {
                 return 0;
             }
