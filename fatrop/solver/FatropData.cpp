@@ -505,7 +505,8 @@ double FatropData::constr_viol_sum_backup()
 }
 double FatropData::constr_viol_sum_next()
 {
-    return CACHEMACRO(cache_next.cv_l1, L1(g_next));
+    return L1(g_next);
+    // return CACHEMACRO(cache_next.cv_l1, L1(g_next));
 }
 double FatropData::dual_sum_curr()
 {

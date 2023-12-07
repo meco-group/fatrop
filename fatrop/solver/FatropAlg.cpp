@@ -210,15 +210,16 @@ fatrop_int FatropAlg::optimize(double mu0)
         // if (is_resto_alg() && (emu_curr < 0.1*emu0 || emu_curr< kappa_eta*mu))
         if (is_resto_alg())
         {
+            bool acceptable = linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_));
+            double cv_orig = fatropdata_orig_.lock()->constr_viol_sum_next();
             // check if current iterate is acceptable wrt orig filter
-            if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
+            std::cout << "cv orig " << cv_orig<<std::endl;
+            if (acceptable && cv_orig < cv_orig_tol)
             {
-                std::cout << "cv orig linf " << fatropdata_orig_.lock()->constr_viol_max_next() << std::endl;
-                std::cout << "cv orig l1 " << fatropdata_orig_.lock()->constr_viol_sum_next() << std::endl;
                 return 0;
             }
         }
-        else if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
+        if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
         {
             if(is_resto_alg()) return 100;
@@ -526,9 +527,10 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->n_ineqs_orig_ = fatropdata_->n_ineqs;
     resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
     resto_alg_->fatropdata_orig_ = fatropdata_;
+    resto_alg_->cv_orig_tol = 0.9*fatropdata_->constr_viol_sum_curr();
     // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
-    resto_alg_->fatropnlp_->set_rho(0.1);
+    resto_alg_->fatropnlp_->set_rho(10.);
     int ret = resto_alg_->optimize(mu);
     // return from resto alg
     if (ret == 0)

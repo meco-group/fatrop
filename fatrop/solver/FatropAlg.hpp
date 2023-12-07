@@ -113,6 +113,7 @@ namespace fatrop
         std::weak_ptr<FatropData> fatropdata_orig_;
         double mu_orig_;
         int n_ineqs_orig_;
+        double cv_orig_tol;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED
