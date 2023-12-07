@@ -206,8 +206,8 @@ fatrop_int FatropAlg::optimize(double mu0)
         {
             no_acceptable_steps = 0;
         }
-        double emu_curr = fatropdata_->e_mu_curr(mu);
-        if(i==0) emu0 = emu;
+        double emu_curr = fatropdata_->e_mu_curr(0.0);
+        if(i==0) emu0 = emu_curr;
         // if (is_resto_alg() && (emu_curr < 0.1*emu0 || emu_curr< kappa_eta*mu))
         if (is_resto_alg())
         {
@@ -215,7 +215,8 @@ fatrop_int FatropAlg::optimize(double mu0)
             double cv_orig = fatropdata_orig_.lock()->constr_viol_sum_next();
             // check if current iterate is acceptable wrt orig filter
             std::cout << "cv orig " << cv_orig<<std::endl;
-            if (acceptable && cv_orig < cv_orig_tol)
+            // if (acceptable && cv_orig < cv_orig_tol)
+            if (acceptable && emu_curr < 0.1*emu0)
             {
                 return 0;
             }
@@ -531,7 +532,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->cv_orig_tol = 0.9*fatropdata_->constr_viol_sum_curr();
     // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
-    resto_alg_->fatropnlp_->set_rho(100.);
+    resto_alg_->fatropnlp_->set_rho(1000.);
     int ret = resto_alg_->optimize(std::max(fatropdata_->constr_viol_max_curr(), mu));
     // return from resto alg
     if (ret == 0)
