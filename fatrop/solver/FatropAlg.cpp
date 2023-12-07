@@ -531,6 +531,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
     resto_alg_->fatropdata_orig_ = fatropdata_;
     resto_alg_->cv_orig_tol = 0.9*fatropdata_->constr_viol_sum_curr();
+    linesearch_->augment_filter(mu);
     // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
     resto_alg_->fatropnlp_->set_rho(100.);
