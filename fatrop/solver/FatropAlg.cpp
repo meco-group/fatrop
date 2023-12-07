@@ -217,7 +217,7 @@ fatrop_int FatropAlg::optimize(double mu0)
             // check if current iterate is acceptable wrt orig filter
             // std::cout << "cv orig " << cv_orig<<std::endl;
             // if (acceptable && cv_orig < cv_orig_tol)
-            if (acceptable && e0_curr < 1e-2)
+            if (acceptable && e0_curr < 1e-4)
             {
                 return 0;
             }
@@ -533,7 +533,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->cv_orig_tol = 0.9*fatropdata_->constr_viol_sum_curr();
     // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
-    resto_alg_->fatropnlp_->set_rho(10.);
+    resto_alg_->fatropnlp_->set_rho(100.);
     int ret = resto_alg_->optimize(std::max(fatropdata_->constr_viol_max_curr(), mu));
     // return from resto alg
     if (ret == 0)
