@@ -239,9 +239,9 @@ fatrop_int FatropAlg::optimize(double mu0)
         }
         // update mu
         // todo make a seperate class
-        while (!watch_dog_step && mu > mu_min && (fatropdata_->e_mu_curr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
+        while (!is_resto_alg() &&!watch_dog_step && mu > mu_min && (fatropdata_->e_mu_curr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
-            if(is_resto_alg()) return -1;
+            // if(is_resto_alg()) return -1;
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             filter_reseted = 0;
             filter_->reset();
