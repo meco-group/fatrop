@@ -207,7 +207,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         }
         double emu_curr = fatropdata_->e_mu_curr(mu);
         if(i==0) emu0 = emu;
-        if (is_resto_alg() && (emu_curr < 0.5*emu0 || emu_curr<kappa_eta*mu))
+        if (is_resto_alg() && (emu_curr < 0.1*emu0 || emu_curr< kappa_eta*mu))
         {
             // check if current iterate is acceptable wrt orig filter
             if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
@@ -240,6 +240,7 @@ fatrop_int FatropAlg::optimize(double mu0)
             fatropnlp_->finalize();
             return 0;
         }
+        if(is_resto_alg()&& emu<tol) return -1;
         // update mu
         // todo make a seperate class
         while (!is_resto_alg() &&!watch_dog_step && mu > mu_min && (emu_curr <= kappa_eta * mu || (no_conse_small_sd == 2)))
@@ -519,7 +520,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->mu_orig_ = mu;
     resto_alg_->n_ineqs_orig_ = fatropdata_->n_ineqs;
     resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
-    resto_alg_->fatropnlp_->set_rho(std::abs(fatropdata_->obj_curr)*std::max(mu, fatropdata_->constr_viol_max_curr()));
+    resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     int ret = resto_alg_->optimize(mu);
     // return from resto alg
     if (ret == 0)
