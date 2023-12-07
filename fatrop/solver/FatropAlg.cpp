@@ -215,7 +215,7 @@ fatrop_int FatropAlg::optimize(double mu0)
             bool acceptable = linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_));
             double cv_orig = fatropdata_orig_.lock()->constr_viol_sum_next();
             // check if current iterate is acceptable wrt orig filter
-            std::cout << "cv orig " << cv_orig<<std::endl;
+            // std::cout << "cv orig " << cv_orig<<std::endl;
             // if (acceptable && cv_orig < cv_orig_tol)
             if (acceptable && e0_curr < 0.1*e_00)
             {
