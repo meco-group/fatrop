@@ -110,6 +110,7 @@ namespace fatrop
         ///// restoration phase information
         std::shared_ptr<FatropAlg> resto_alg_;
         std::weak_ptr<LineSearch> linesearch_orig_;
+        std::weak_ptr<FatropData> fatropdata_orig_;
         double mu_orig_;
         int n_ineqs_orig_;
     };

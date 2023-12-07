@@ -207,15 +207,21 @@ fatrop_int FatropAlg::optimize(double mu0)
         }
         double emu_curr = fatropdata_->e_mu_curr(mu);
         if(i==0) emu0 = emu;
-        if (is_resto_alg() && (emu_curr < 0.1*emu0 || emu_curr< kappa_eta*mu))
+        // if (is_resto_alg() && (emu_curr < 0.1*emu0 || emu_curr< kappa_eta*mu))
+        if (is_resto_alg())
         {
             // check if current iterate is acceptable wrt orig filter
             if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
+            {
+                std::cout << "cv orig linf " << fatropdata_orig_.lock()->constr_viol_max_next() << std::endl;
+                std::cout << "cv orig l1 " << fatropdata_orig_.lock()->constr_viol_sum_next() << std::endl;
                 return 0;
+            }
         }
         else if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
         {
+            if(is_resto_alg()) return 100;
             double total_time = blasfeo_toc(&timer);
             journaller_->print_iterations();
             if (no_conse_small_sd == 2)
@@ -240,10 +246,9 @@ fatrop_int FatropAlg::optimize(double mu0)
             fatropnlp_->finalize();
             return 0;
         }
-        if(is_resto_alg()&& emu<tol) return -1;
         // update mu
         // todo make a seperate class
-        while (!is_resto_alg() &&!watch_dog_step && mu > mu_min && (emu_curr <= kappa_eta * mu || (no_conse_small_sd == 2)))
+        while (!watch_dog_step && mu > mu_min && (emu_curr <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             // if(is_resto_alg()) return -1;
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
@@ -520,6 +525,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->mu_orig_ = mu;
     resto_alg_->n_ineqs_orig_ = fatropdata_->n_ineqs;
     resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
+    resto_alg_->fatropdata_orig_ = fatropdata_;
     // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
     resto_alg_->fatropnlp_->set_rho(0.1);
