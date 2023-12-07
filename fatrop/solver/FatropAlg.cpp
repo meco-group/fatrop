@@ -118,6 +118,7 @@ fatrop_int FatropAlg::optimize(double mu0)
     LineSearchInfo lsinfo;
     eval_constr_jac(); // todo twice evaluation
     eval_obj_grad_curr();
+    if(is_resto_alg()) fatropdata_->init_z_from_s(n_ineqs_orig_, mu);
     if (warm_start_init_point)
     {
         fatropnlp_->initialize_slacks(mu,
@@ -530,7 +531,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->cv_orig_tol = 0.9*fatropdata_->constr_viol_sum_curr();
     // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
-    resto_alg_->fatropnlp_->set_rho(10.);
+    resto_alg_->fatropnlp_->set_rho(100.);
     int ret = resto_alg_->optimize(mu);
     // return from resto alg
     if (ret == 0)

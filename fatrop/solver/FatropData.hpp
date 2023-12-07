@@ -34,6 +34,7 @@ namespace fatrop
     {
         FatropData(const NLPDims &nlpdims, const std::shared_ptr<FatropOptions> &params, const std::shared_ptr<FatropPrinter> &printer);
         void initialize();
+        fatrop_int init_z_from_s(double mu, int from);
         fatrop_int reset();
         fatrop_int reset_caches();
         double e_mu_curr(double mu);

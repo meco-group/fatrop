@@ -165,6 +165,26 @@ fatrop_int FatropData::reset()
     reset_caches();
     return 0;
 }
+fatrop_int FatropData::init_z_from_s(double mu, int from)
+{
+    VEC *lower_bound_p = (VEC *)s_lower;
+    VEC *upper_bound_p = (VEC *)s_upper;
+    VEC *zL_p = (VEC *)zL_curr;
+    VEC *zU_p = (VEC *)zU_curr;
+    VEC *s_curr_p = (VEC *)s_curr;
+    for (fatrop_int i = from; i < n_ineqs; i++)
+    {
+        double loweri = VECEL(lower_bound_p, i);
+        double upperi = VECEL(upper_bound_p, i);
+        bool lower_bounded = !isinf(loweri);
+        bool upper_bounded = !isinf(upperi);
+        if (lower_bounded && (loweri == 0) && !upper_bounded)
+        {
+            VECEL(zL_p, i) = mu / abs(VECEL(s_curr_p, i));
+        }
+    }
+    return 0;
+}
 fatrop_int FatropData::reset_caches()
 {
     cache_curr = EvalCache();
@@ -691,7 +711,7 @@ void FatropData::evaluate_barrier_quantities(double mu)
     VEC *gradb_U_p = (VEC *)gradb_U;
     VEC *gradb_plus_p = (VEC *)gradb_plus;
     // VEC *lam_curr_p = (VEC *)lam_curr;
-    VEC* du_inf_curr_s_wo_z_p = (VEC*)du_inf_curr_s_wo_z;
+    VEC *du_inf_curr_s_wo_z_p = (VEC *)du_inf_curr_s_wo_z;
     // fatrop_int eqs_offset = n_eqs - n_ineqs;
     // compute simga_LU gradb_LU and gradbplus
 
@@ -725,7 +745,7 @@ void FatropData::evaluate_barrier_quantities(double mu)
             VECEL(sigma_U_p, i) = 0.0;
             VECEL(gradb_U_p, i) = 0.0;
         }
-        double grad_barrier_plusi = VECEL(du_inf_curr_s_wo_z_p,  i);
+        double grad_barrier_plusi = VECEL(du_inf_curr_s_wo_z_p, i);
         if (!(lower_bounded && upper_bounded))
         {
             grad_barrier_plusi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
