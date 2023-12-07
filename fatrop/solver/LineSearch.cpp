@@ -168,12 +168,12 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
     for (fatrop_int ll = 1; ll < 500; ll++)
     {
         update_trial_step(alpha_primal, alpha_dual);
+        eval_constr_viol_trial();
         if (alpha_primal < alpha_min)
         {
             res.ls = 0;
             return res;
         }
-        eval_constr_viol_trial();
         double cv_next = fatropdata_->constr_viol_sum_next();
         double obj_next = eval_obj_trial();
         double barrier_next = fatropdata_->eval_barrier_func_trial(mu);
