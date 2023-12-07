@@ -148,6 +148,7 @@ fatrop_int FatropAlg::optimize(double mu0)
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
+    double emu0;
     for (fatrop_int i = 0; i < maxiter; i++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
@@ -204,7 +205,9 @@ fatrop_int FatropAlg::optimize(double mu0)
         {
             no_acceptable_steps = 0;
         }
-        if (is_resto_alg() && i>2)
+        double emu_curr = fatropdata_->e_mu_curr(mu);
+        if(i==0) emu0 = emu;
+        if (is_resto_alg() && (emu_curr < 0.5*emu0 || emu_curr<kappa_eta*mu))
         {
             // check if current iterate is acceptable wrt orig filter
             if (linesearch_orig_.lock()->is_acceptable_to_filter(mu, fatropdata_->x_curr, fatropdata_->s_curr.block(0, n_ineqs_orig_)))
@@ -239,7 +242,7 @@ fatrop_int FatropAlg::optimize(double mu0)
         }
         // update mu
         // todo make a seperate class
-        while (!is_resto_alg() &&!watch_dog_step && mu > mu_min && (fatropdata_->e_mu_curr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
+        while (!is_resto_alg() &&!watch_dog_step && mu > mu_min && (emu_curr <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             // if(is_resto_alg()) return -1;
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
