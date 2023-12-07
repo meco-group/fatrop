@@ -143,7 +143,6 @@ fatrop_int FatropAlg::optimize(double mu0)
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();
-    if(is_resto_alg()) fatropnlp_->set_rho(std::max(mu0, fatropdata_->constr_viol_max_curr()));
     filter_->augment(FilterData(0, std::numeric_limits<double>::infinity(), theta_max));
     fatrop_int ls = 0;
     double deltaw = 0;
@@ -516,6 +515,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->mu_orig_ = mu;
     resto_alg_->n_ineqs_orig_ = fatropdata_->n_ineqs;
     resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
+    resto_alg_->fatropnlp_->set_rho(std::abs(fatropdata_->obj_curr)*std::max(mu, fatropdata_->constr_viol_max_curr()));
     int ret = resto_alg_->optimize(mu);
     // return from resto alg
     if (ret == 0)
@@ -532,11 +532,7 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
             fatropdata_->s_next,
             fatropdata_->g_next);
         linesearch_->augment_filter(mu);
-        fatropdata_->s_curr = 0.0;
         fatropdata_->reset();
-        eval_constr_jac();
-        fatropnlp_->initialize_slacks(mu,
-                                      fatropdata_->s_curr);
         fatropdata_->accept_trial_step();
         eval_obj_grad_curr();
         fatropnlp_->initialize_dual(
