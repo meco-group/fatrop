@@ -520,7 +520,9 @@ fatrop_int FatropAlg::solve_resto_alg(double mu)
     resto_alg_->mu_orig_ = mu;
     resto_alg_->n_ineqs_orig_ = fatropdata_->n_ineqs;
     resto_alg_->fatropdata_->x_initial.copy(fatropdata_->x_curr);
-    resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
+    // resto_alg_->fatropnlp_->set_rho(std::max(std::abs(fatropdata_->obj_curr), 1.0)*std::max(mu, fatropdata_->constr_viol_max_curr()));
+    // resto_alg_->fatropnlp_->set_rho(std::min(mu, fatropdata_->constr_viol_max_curr()));
+    resto_alg_->fatropnlp_->set_rho(0.1);
     int ret = resto_alg_->optimize(mu);
     // return from resto alg
     if (ret == 0)
