@@ -55,6 +55,9 @@ namespace fatrop
         }
         void Ocp::add_ustage(const uStage &ustage)
         {
+            // check if ustage is already registered
+            if(ustages_.find(ustage) == ustages_.end())
+                std::runtime_error("ustage is already registered, consider using uStage::clone()");
             ustages_.push_back(ustage);
         }
 

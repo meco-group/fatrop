@@ -128,7 +128,7 @@ namespace fatrop
             const std::vector<cs::MX> &get_hybrids() const;
             const std::vector<cs::MX> &get_control_parameters() const;
             const std::vector<cs::MX> &get_global_parameters() const;
-            uStage duplicate() const;
+            uStage clone() const;
             void register_state(const std::vector<cs::MX> &states);
             void register_control(const std::vector<cs::MX> &controls);
             void register_hybrid(const std::vector<cs::MX> &hybrids);

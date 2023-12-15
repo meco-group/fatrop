@@ -384,7 +384,7 @@ namespace fatrop
         {
             return std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(this->get_internal(), prev, next, global_parameter_syms), opts, cache);
         }
-        uStage uStage::duplicate() const
+        uStage uStage::clone() const
         {
             auto ret = uStage(*(this->get()));
             ret.get()->reset_evaluation_syms();

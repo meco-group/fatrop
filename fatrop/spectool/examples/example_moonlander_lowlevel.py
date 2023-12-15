@@ -47,7 +47,7 @@ ustage_proto.register_global_parameter([target])
 #########
 # define a proto microstage that contains the dynamics
 #########
-ustage_proto_dyn = ustage_proto.duplicate()
+ustage_proto_dyn = ustage_proto.clone()
 ustage_proto_dyn.register_control([F1, F2])
 #########
 # define the dynamics and the constraints related to the dynamics
@@ -79,9 +79,9 @@ ustage_proto_dyn.subject_to((0<F2)<max_thrust)
 #########
 # Specify the different microstages of the ocp
 #########
-ustage_t0 = ustage_proto_dyn.duplicate()
-ustage_mid = ustage_proto_dyn.duplicate()
-ustage_tf = ustage_proto.duplicate() # no dynamics at the terminal stage
+ustage_t0 = ustage_proto_dyn.clone()
+ustage_mid = ustage_proto_dyn.clone()
+ustage_tf = ustage_proto.clone() # no dynamics at the terminal stage
 
 # Define the initial constraints
 ustage_t0.subject_to(p == [0, 0])
@@ -102,7 +102,7 @@ ustage_t0.subject_to(T > 0)
 #########
 ocp.add_ustage(ustage_t0)
 for i in range(49):
-    ocp.add_ustage(ustage_mid.duplicate())
+    ocp.add_ustage(ustage_mid.clone())
 ocp.add_ustage(ustage_tf)
 
 

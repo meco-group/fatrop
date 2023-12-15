@@ -142,7 +142,7 @@ namespace fatropy
                 .def("dynamics", &fatrop::spectool::uStage::dynamics)
                 .def("eval_at_control", &fatrop::spectool::uStage::eval_at_control)
                 .def("sample", &fatrop::spectool::uStage::sample)
-                .def("duplicate", &fatrop::spectool::uStage::duplicate)
+                .def("clone", &fatrop::spectool::uStage::clone)
                 .def("register_state", &fatrop::spectool::uStage::register_state)
                 .def("register_control", &fatrop::spectool::uStage::register_control)
                 .def("register_hybrid", &fatrop::spectool::uStage::register_hybrid)
