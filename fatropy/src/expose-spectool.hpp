@@ -8,7 +8,6 @@
 #include "swig-bind.hpp"
 #include "fatrop/spectool/spectool.hpp"
 
-
 #include "fatrop/solver/AlgBuilder.hpp"
 #include "fatrop/ocp/OCPAdapter.hpp"
 #include "fatrop/ocp/FatropOCP.hpp"
@@ -105,11 +104,11 @@ namespace fatropy
             // py::implicitly_convertible<casadi::Dict, casadi::GenericType>();
             // py::implicitly_convertible<py::float_, casadi::MX>();
             // py::implicitly_convertible<double, >();
+            py::class_<fatrop::spectool::Jacobian>(m, "Jacobian").def(py::init<casadi::MX, casadi::MX>());
+            py::class_<fatrop::spectool::Hessian>(m, "Hessian").def(py::init<casadi::MX, casadi::MX, casadi::MX>());
 
             py::bind_map<fatrop::spectool::uo_map_mx_mx>(m, "uo_map_mx_mx");
-            py::class_<fatrop::spectool::IntegratorRk4>(m,"IntegratorRk4").
-            def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX&>()).
-            def("__call__", &fatrop::spectool::IntegratorRk4::operator());
+            py::class_<fatrop::spectool::IntegratorRk4>(m, "IntegratorRk4").def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX &>()).def("__call__", &fatrop::spectool::IntegratorRk4::operator());
             py::enum_<fatrop::spectool::at>(m, "at")
                 .value("t0", fatrop::spectool::at::t0)
                 .value("mid", fatrop::spectool::at::mid)
@@ -133,8 +132,8 @@ namespace fatropy
                 .def(py::init<>())
                 .def(py::init<const int>())
                 .def("add_objective", &fatrop::spectool::uStage::add_objective)
-                .def("subject_to", &fatrop::spectool::uStage::subject_to)
-                .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectool::uStage::set_next))
+                .def("subject_to", py::overload_cast<const casadi::MX &, const fatrop::spectool::Jacobian &, const fatrop::spectool::Hessian &>(&fatrop::spectool::uStage::subject_to), py::arg("constraint"), py::arg("jacobian") = fatrop::spectool::Jacobian{}, py::arg("hessian") = fatrop::spectool::Hessian{})
+                .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &, const fatrop::spectool::Jacobian &, const fatrop::spectool::Hessian &>(&fatrop::spectool::uStage::set_next), py::arg("x_next"), py::arg("expr"), py::arg("jacobian") = fatrop::spectool::Jacobian{}, py::arg("hessian") = fatrop::spectool::Hessian{})
                 // .def("set_next", py::overload_cast<const fatrop::spectool::uo_map_mx<casadi::MX>&>(&fatrop::spectool::Stage::set_next))
                 .def("at_t0", &fatrop::spectool::uStage::at_t0)
                 .def("at_tf", &fatrop::spectool::uStage::at_tf)
@@ -149,23 +148,7 @@ namespace fatropy
                 .def("register_control_parameter", &fatrop::spectool::uStage::register_control_parameter)
                 .def("register_global_parameter", &fatrop::spectool::uStage::register_global_parameter);
 
-            py::class_<fatrop::spectool::Ocp>(m, "Ocp").def(py::init<>())
-            .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
-            .def("control", &fatrop::spectool::Ocp::control, py::arg("m") = 1, py::arg("n") = 1)
-            .def("hybrid", &fatrop::spectool::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1)
-            .def("parameter", &fatrop::spectool::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global")
-            .def("sample", &fatrop::spectool::Ocp::sample)
-            .def("new_stage", &fatrop::spectool::Ocp::new_stage, py::arg("K") = 1)
-            .def("new_ustage", &fatrop::spectool::Ocp::new_ustage, py::arg("K") = 1)
-            .def("add_ustage", &fatrop::spectool::Ocp::add_ustage)
-            .def("to_function", &fatrop::spectool::Ocp::to_function,py::arg("name"), py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
-            .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_t0, py::const_))
-            .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_tf, py::const_))
-            .def("at_t0",py::overload_cast<>(&fatrop::spectool::Ocp::at_t0, py::const_))
-            .def("at_tf",py::overload_cast<>(&fatrop::spectool::Ocp::at_tf, py::const_))
-            .def("set_initial", &fatrop::spectool::Ocp::set_initial)
-            .def("all_variables", &fatrop::spectool::Ocp::all_variables)
-            .def("eval_at_initial", &fatrop::spectool::Ocp::eval_at_initial);
+            py::class_<fatrop::spectool::Ocp>(m, "Ocp").def(py::init<>()).def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1).def("control", &fatrop::spectool::Ocp::control, py::arg("m") = 1, py::arg("n") = 1).def("hybrid", &fatrop::spectool::Ocp::hybrid, py::arg("m") = 1, py::arg("n") = 1).def("parameter", &fatrop::spectool::Ocp::parameter, py::arg("m") = 1, py::arg("n") = 1, py::arg("grid") = "global").def("sample", &fatrop::spectool::Ocp::sample).def("new_stage", &fatrop::spectool::Ocp::new_stage, py::arg("K") = 1).def("new_ustage", &fatrop::spectool::Ocp::new_ustage, py::arg("K") = 1).def("add_ustage", &fatrop::spectool::Ocp::add_ustage).def("to_function", &fatrop::spectool::Ocp::to_function, py::arg("name"), py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict()).def("at_t0", py::overload_cast<const casadi::MX &>(&fatrop::spectool::Ocp::at_t0, py::const_)).def("at_tf", py::overload_cast<const casadi::MX &>(&fatrop::spectool::Ocp::at_tf, py::const_)).def("at_t0", py::overload_cast<>(&fatrop::spectool::Ocp::at_t0, py::const_)).def("at_tf", py::overload_cast<>(&fatrop::spectool::Ocp::at_tf, py::const_)).def("set_initial", &fatrop::spectool::Ocp::set_initial).def("all_variables", &fatrop::spectool::Ocp::all_variables).def("eval_at_initial", &fatrop::spectool::Ocp::eval_at_initial);
 
             // .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
         }

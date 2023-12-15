@@ -35,12 +35,12 @@ namespace fatrop
             template <class... args>
             void subject_to(const cs::MX &expr, args... argss)
             {
-                return apply_at(&uStage::subject_to, expr, argss...);
+                apply_at(static_cast<void (uStage::*)(const cs::MX&)>(&uStage::subject_to), expr, argss...);
             }
             template <class... args>
             void add_objective(const cs::MX &expr, args... argss)
             {
-                return apply_at(&uStage::add_objective, expr, argss...);
+                apply_at(&uStage::add_objective, expr, argss...);
             }
             uStage &at_t0() const;
             uStage &at_tf() const;

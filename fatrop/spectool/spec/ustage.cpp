@@ -4,10 +4,12 @@ namespace fatrop
 {
     namespace spectool
     {
-        void uStage::subject_to(const cs::MX &constraint)
+        void uStage::subject_to(const cs::MX &constraint, const Jacobian &jac, const Hessian &hess)
         {
             get()->set_dirty();
             get()->constraints_.push_back(constraint);
+            get()->constraint_jacobians_[constraint] = jac;
+            get()->constraint_hessians_[constraint] = hess;
             get()->add_variables(constraint);
         }
         void uStage::add_objective(const cs::MX &objective)
@@ -16,10 +18,12 @@ namespace fatrop
             get()->objective_terms_.push_back(objective);
             get()->add_variables(objective);
         }
-        void uStage::set_next(const cs::MX &state, const cs::MX &next_state)
+        void uStage::set_next(const cs::MX &state, const cs::MX &next_state, const Jacobian &jac, const Hessian &hess)
         {
             get()->set_dirty();
             get()->next_states_[state] = next_state;
+            get()->next_state_jacobians_[state] = jac;
+            get()->next_state_hessians_[state] = hess;
             get()->add_variables(next_state);
         }
         void uStage::set_next(const uo_map_mx<cs::MX> &next_states)

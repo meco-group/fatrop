@@ -7,6 +7,8 @@
 #include "fatrop/spectool/function_evaluation/casadi_jit_cache.hpp"
 #include "ustage_eval_abstract.hpp"
 #include "ustage_eval_casadi.hpp"
+#include "custom_jacobian.hpp"
+#include "custom_hessian.hpp"
 namespace fatrop
 {
     namespace spectool
@@ -83,7 +85,11 @@ namespace fatrop
             const int K_;
             std::vector<cs::MX> objective_terms_;
             std::vector<cs::MX> constraints_;
+            uo_map_mx<Jacobian> constraint_jacobians_;
+            uo_map_mx<Hessian> constraint_hessians_;
             uo_map_mx<cs::MX> next_states_;
+            uo_map_mx<Jacobian> next_state_jacobians_;
+            uo_map_mx<Hessian> next_state_hessians_;
             std::vector<cs::MX> states_;
             uo_set_mx states_set_;
             uo_map_mx<std::vector<cs::MX>> state_syms_;
@@ -115,9 +121,10 @@ namespace fatrop
             uStage(Args &&...args) : std::shared_ptr<uStageInternal>(new uStageInternal(std::forward<Args>(args)...))
             {
             }
-            void subject_to(const cs::MX &constraint);
+            void subject_to(const cs::MX &constraint, const Jacobian & jacobian, const Hessian & hessian);
+            void subject_to(const cs::MX &constraint){ subject_to(constraint, Jacobian{}, Hessian{}); };
             void add_objective(const cs::MX &objective);
-            void set_next(const cs::MX &state, const cs::MX &next_state);
+            void set_next(const cs::MX &state, const cs::MX &next_state, const Jacobian & jacobian = Jacobian{}, const Hessian & hessian = Hessian{});
             void set_next(const uo_map_mx<cs::MX> &next_states);
             bool has_variable(const cs::MX &var) const;
             cs::MX at_t0(const cs::MX &expr) const { return eval_at_control(expr, 0); };

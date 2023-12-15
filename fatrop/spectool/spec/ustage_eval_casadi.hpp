@@ -21,14 +21,6 @@ namespace fatrop
             virtual int ng_eq(const uStageQuantities &sq);
             virtual int ng_ineq(const uStageQuantities &sq);
             virtual int nxp1(const uStageQuantities &sq);
-            virtual std::pair<cs::MX, cs::MX> dynamics_jacobian_sym(const uStageQuantities &sq, const cs::MX &xp1);
-            virtual std::pair<cs::MX, cs::MX> equality_jacobian_sym(const uStageQuantities &sq);
-            virtual std::pair<cs::MX, cs::MX> inequality_jacobian_sym(const uStageQuantities &sq);
-            virtual std::pair<cs::MX, cs::MX> hess_lag_obj_sym(const uStageQuantities &sq);
-            virtual std::pair<cs::MX, cs::MX> hess_lag_dyn_sym(const uStageQuantities &sq, const cs::MX &lam_dyn);
-            virtual std::pair<cs::MX, cs::MX> hess_lag_eq_sym(const uStageQuantities &sq, const cs::MX &lam_g_equality);
-            virtual std::pair<cs::MX, cs::MX> hess_lag_ineq_sym(const uStageQuantities &sq, const cs::MX &lam_g_inequality);
-            virtual std::pair<cs::MX, cs::MX> hess_lag_sym(const uStageQuantities &sq, const cs::MX &lam_dyn, const cs::MX &lam_g_equality, const cs::MX &lam_g_inequality);
 
         public:
             virtual int get_nx() const;

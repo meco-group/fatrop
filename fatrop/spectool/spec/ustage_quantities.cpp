@@ -17,6 +17,7 @@ namespace fatrop
             ret.K = ustage->K();
             // std::cout << "number of hybrids that are states " << ustage->get_hybrids_states(prev).size() << std::endl;
             // std::cout << "number of hybrids that are controls " << ustage->get_hybrids_controls(prev).size() << std::endl;
+            cs::MX x_next;
             if (next)
             {
                 std::vector<cs::MX> from;
@@ -36,8 +37,9 @@ namespace fatrop
                 }
                 try
                 {
-                    auto x_next_vec = cs::MX::veccat(next->get_states(true, ustage));
-                    ret.x_next = cs::MX::veccat(cs::MX::substitute({next->get_states(true, ustage)}, from, to));
+                    auto x_next_vec = next->get_states(true, ustage);
+                    ret.xp1 = cs::MX::sym("xp1", cs::MX::veccat(next->get_states(true, ustage)).size1());
+                    x_next = cs::MX::veccat(cs::MX::substitute({x_next_vec}, from, to));
                 }
                 catch (const std::exception &e)
                 {
@@ -68,21 +70,35 @@ namespace fatrop
             else
             {
                 // ret.nxp1 = 0;
-                ret.x_next = cs::MX::zeros(0, 1);
+                x_next = cs::MX::zeros(0, 1);
+                ret.xp1 = cs::MX::zeros(0, 1);
             }
+            cs::MX g;
+            cs::MX g_ineq;
             ConstraintHelper::process(ustage->get_constraints(),
                                       ret.lb,
                                       ret.ub,
-                                      ret.g_ineq,
-                                      ret.g);
-            // ret.ng_eq = ret.g.size1();
-            // ret.ng_ineq = ret.g_ineq.size1();
+                                      g_ineq,
+                                      g);
+            ret.lam_dyn = cs::MX::sym("lam_dyn", x_next.size1(), 1);
+            ret.lam_g_ineq = cs::MX::sym("lam_g_ineq", g_ineq.size1(), 1);
+            ret.lam_g_eq = cs::MX::sym("lam_g_eq", g.size1(), 1);
+            auto ux = cs::MX::veccat({ret.u, ret.x});
+            ret.Gg_dyn = uStageQuantities::dynamics_jacobian_sym(ux, ret.xp1, x_next);
+            ret.Gg_ineq = uStageQuantities::inequality_jacobian_sym(ux, g_ineq);
+            ret.Gg_eq = uStageQuantities::equality_jacobian_sym(ux, g);
+
+
 
             ret.L = 0;
             for (auto &term : ustage->get_objective_terms())
             {
                 ret.L += term;
             }
+            ret.hess_obj = uStageQuantities::hess_lag_obj_sym(ux, ret.L);
+            ret.hess_dyn = uStageQuantities::hess_lag_dyn_sym(ux, x_next, ret.lam_dyn);
+            ret.hess_g_ineq = uStageQuantities::hess_lag_dyn_sym(ux, g_ineq, ret.lam_g_ineq);
+            ret.hess_g_eq = uStageQuantities::hess_lag_dyn_sym(ux, g, ret.lam_g_eq);
             return ret;
         }
     }
