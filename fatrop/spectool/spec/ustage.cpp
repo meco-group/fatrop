@@ -58,55 +58,91 @@ namespace fatrop
         }
         void uStageInternal::register_state(const cs::MX &state)
         {
-            states_.push_back(state);
-            if (ocp_.lock())
-                states_ = ocp_.lock()->order_vars(states_);
-            states_set_.insert(state);
-            state_syms_[state] = std::vector<cs::MX>(K_);
-            for (int k = 0; k < K_; k++)
-                state_syms_[state][k] = cs::MX::sym(state.name() + std::to_string(k), state.size1() * state.size2());
+            // check if already registered
+            if (states_set_.find(state) == states_set_.end())
+            {
+                states_.push_back(state);
+                if (ocp_.lock())
+                    states_ = ocp_.lock()->order_vars(states_);
+                states_set_.insert(state);
+            }
+            // check if syms already registered
+            if (state_syms_.find(state) == state_syms_.end())
+            {
+                state_syms_[state] = std::vector<cs::MX>(K_);
+                for (int k = 0; k < K_; k++)
+                    state_syms_[state][k] = cs::MX::sym(state.name() + std::to_string(k), state.size1() * state.size2());
+            }
             // state_initial_[state] = cs::DM::zeros(state.size1() * state.size2(), K_);
         }
         void uStageInternal::register_control(const cs::MX &control)
         {
-            controls_.push_back(control);
-            if (ocp_.lock())
-                controls_ = ocp_.lock()->order_vars(controls_);
-            controls_set_.insert(control);
-            control_syms_[control] = std::vector<cs::MX>(K_);
-            for (int k = 0; k < K_; k++)
-                control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k), control.size1() * control.size2());
+            // check if already registered
+            if (controls_set_.find(control) == controls_set_.end())
+            {
+                controls_.push_back(control);
+                if (ocp_.lock())
+                    controls_ = ocp_.lock()->order_vars(controls_);
+                controls_set_.insert(control);
+            }
+            // check if syms already registered
+            if (control_syms_.find(control) == control_syms_.end())
+            {
+                control_syms_[control] = std::vector<cs::MX>(K_);
+                for (int k = 0; k < K_; k++)
+                    control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k) + std::string("_dup"), control.size1() * control.size2());
+            }
             // control_initial_[control] = cs::DM::zeros(control.size1() * control.size2(), K_);
         }
         void uStageInternal::register_hybrid(const cs::MX &hybrid)
         {
-            hybrids_.push_back(hybrid);
-            if (ocp_.lock())
-                hybrids_ = ocp_.lock()->order_vars(hybrids_);
-            hybrids_set_.insert(hybrid);
-            hybrid_syms_[hybrid] = std::vector<cs::MX>(K_);
-            for (int k = 0; k < K_; k++)
-                hybrid_syms_[hybrid][k] = cs::MX::sym(hybrid.name() + std::to_string(k), hybrid.size1() * hybrid.size2());
+            // check if already registered
+            if (hybrids_set_.find(hybrid) == hybrids_set_.end())
+            {
+                hybrids_.push_back(hybrid);
+                if (ocp_.lock())
+                    hybrids_ = ocp_.lock()->order_vars(hybrids_);
+                hybrids_set_.insert(hybrid);
+            }
+            // check if syms already registered
+            if (hybrid_syms_.find(hybrid) == hybrid_syms_.end())
+            {
+                hybrid_syms_[hybrid] = std::vector<cs::MX>(K_);
+                for (int k = 0; k < K_; k++)
+                    hybrid_syms_[hybrid][k] = cs::MX::sym(hybrid.name() + std::to_string(k), hybrid.size1() * hybrid.size2());
+            }
             has_hybrids = true;
             // automatic_initial_[automatic] = cs::DM::zeros(automatic.size1() * automatic.size2(), K_);
         }
         void uStageInternal::register_control_parameter(const cs::MX &control_parameter)
         {
-            control_parameters_.push_back(control_parameter);
-            if (ocp_.lock())
-                control_parameters_ = ocp_.lock()->order_vars(control_parameters_);
-            control_parameters_set_.insert(control_parameter);
-            control_parameter_syms_[control_parameter] = std::vector<cs::MX>(K_);
-            for (int k = 0; k < K_; k++)
-                control_parameter_syms_[control_parameter][k] = cs::MX::sym(control_parameter.name() + std::to_string(k), control_parameter.size1() * control_parameter.size2());
+            // check if already registered
+            if (control_parameters_set_.find(control_parameter) == control_parameters_set_.end())
+            {
+                control_parameters_.push_back(control_parameter);
+                if (ocp_.lock())
+                    control_parameters_ = ocp_.lock()->order_vars(control_parameters_);
+                control_parameters_set_.insert(control_parameter);
+            }
+            // check if syms already registered
+            if (control_parameter_syms_.find(control_parameter) == control_parameter_syms_.end())
+            {
+                control_parameter_syms_[control_parameter] = std::vector<cs::MX>(K_);
+                for (int k = 0; k < K_; k++)
+                    control_parameter_syms_[control_parameter][k] = cs::MX::sym(control_parameter.name() + std::to_string(k), control_parameter.size1() * control_parameter.size2());
+            }
             // control_parameter_vals_[control_parameter] = cs::DM::zeros(control_parameter.size1() * control_parameter.size2(), K_);
         }
         void uStageInternal::register_global_parameter(const cs::MX &global_parameter)
         {
-            global_parameters_.push_back(global_parameter);
-            if (ocp_.lock())
-                global_parameters_ = ocp_.lock()->order_vars(global_parameters_);
-            global_parameters_set_.insert(global_parameter);
+            // check if already registered
+            if (global_parameters_set_.find(global_parameter) == global_parameters_set_.end())
+            {
+                global_parameters_.push_back(global_parameter);
+                if (ocp_.lock())
+                    global_parameters_ = ocp_.lock()->order_vars(global_parameters_);
+                global_parameters_set_.insert(global_parameter);
+            }
         }
         void uStageInternal::register_state(const std::vector<cs::MX> &states)
         {
@@ -344,13 +380,15 @@ namespace fatrop
         {
             uStage::get()->register_global_parameter(global_parameters);
         };
-        std::shared_ptr<FatropuStageEvalAbstract> uStage::get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> & global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const
+        std::shared_ptr<FatropuStageEvalAbstract> uStage::get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const
         {
             return std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(this->get_internal(), prev, next, global_parameter_syms), opts, cache);
         }
         uStage uStage::duplicate() const
         {
-            return uStage(*this);
+            auto ret = uStage(*(this->get()));
+            ret.get()->reset_evaluation_syms();
+            return ret;
         }
 
     }

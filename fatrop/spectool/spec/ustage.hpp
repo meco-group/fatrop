@@ -69,6 +69,17 @@ namespace fatrop
             void register_control_parameter(const std::vector<cs::MX> &control_parameters);
             void register_global_parameter(const std::vector<cs::MX> &global_parameters);
             void get_hybrids(std::vector<cs::MX> &states, std::vector<cs::MX> &controls, const std::shared_ptr<const uStageInternal> &prev) const;
+            void reset_evaluation_syms()
+            {
+                state_syms_.clear();
+                control_syms_.clear();
+                hybrid_syms_.clear();
+                control_parameter_syms_.clear();
+                register_state(states_);
+                register_control(controls_);
+                register_hybrid(hybrids_);
+                register_control_parameter(control_parameters_);
+            }
             const int K_;
             std::vector<cs::MX> objective_terms_;
             std::vector<cs::MX> constraints_;
@@ -124,6 +135,9 @@ namespace fatrop
             void register_control_parameter(const std::vector<cs::MX> &control_parameters);
             void register_global_parameter(const std::vector<cs::MX> &global_parameters);
             virtual std::shared_ptr<FatropuStageEvalAbstract> get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const;
+
+        // private:
+        //     uStage(const std::shared_ptr<uStageInternal> &internal) : std::shared_ptr<uStageInternal>(internal){};
         };
     } // namespace spectrop
 } // namespace fatrop
