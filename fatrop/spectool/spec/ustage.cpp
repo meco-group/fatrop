@@ -6,16 +6,19 @@ namespace fatrop
     {
         void uStage::subject_to(const cs::MX &constraint)
         {
+            get()->set_dirty();
             get()->constraints_.push_back(constraint);
             get()->add_variables(constraint);
         }
         void uStage::add_objective(const cs::MX &objective)
         {
+            get()->set_dirty();
             get()->objective_terms_.push_back(objective);
             get()->add_variables(objective);
         }
         void uStage::set_next(const cs::MX &state, const cs::MX &next_state)
         {
+            get()->set_dirty();
             get()->next_states_[state] = next_state;
             get()->add_variables(next_state);
         }
@@ -65,6 +68,7 @@ namespace fatrop
                 if (ocp_.lock())
                     states_ = ocp_.lock()->order_vars(states_);
                 states_set_.insert(state);
+                set_dirty();
             }
             // check if syms already registered
             if (state_syms_.find(state) == state_syms_.end())
@@ -84,6 +88,7 @@ namespace fatrop
                 if (ocp_.lock())
                     controls_ = ocp_.lock()->order_vars(controls_);
                 controls_set_.insert(control);
+                set_dirty();
             }
             // check if syms already registered
             if (control_syms_.find(control) == control_syms_.end())
@@ -103,6 +108,7 @@ namespace fatrop
                 if (ocp_.lock())
                     hybrids_ = ocp_.lock()->order_vars(hybrids_);
                 hybrids_set_.insert(hybrid);
+                set_dirty();
             }
             // check if syms already registered
             if (hybrid_syms_.find(hybrid) == hybrid_syms_.end())
@@ -123,6 +129,7 @@ namespace fatrop
                 if (ocp_.lock())
                     control_parameters_ = ocp_.lock()->order_vars(control_parameters_);
                 control_parameters_set_.insert(control_parameter);
+                set_dirty();
             }
             // check if syms already registered
             if (control_parameter_syms_.find(control_parameter) == control_parameter_syms_.end())
@@ -388,6 +395,7 @@ namespace fatrop
         {
             auto ret = uStage(*(this->get()));
             ret.get()->reset_evaluation_syms();
+            ret.get()->cloned_from_ = *this;
             return ret;
         }
 

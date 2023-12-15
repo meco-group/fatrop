@@ -101,6 +101,11 @@ namespace fatrop
             uo_set_mx global_parameters_set_;
             bool auto_mode = false;
             bool has_hybrids = false;
+            void set_dirty()
+            {
+                cloned_from_ = nullptr;
+            }
+            std::shared_ptr<uStageInternal> cloned_from_ = nullptr;
         };
         class uStage : private std::shared_ptr<uStageInternal>
         {
@@ -136,6 +141,7 @@ namespace fatrop
             void register_global_parameter(const std::vector<cs::MX> &global_parameters);
             virtual std::shared_ptr<FatropuStageEvalAbstract> get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const;
             bool operator==(const uStage &other) const { return get() == other.get(); };
+            std::shared_ptr<uStageInternal>& get_original() const { return get()->cloned_from_;};
 
             // private:
             //     uStage(const std::shared_ptr<uStageInternal> &internal) : std::shared_ptr<uStageInternal>(internal){};

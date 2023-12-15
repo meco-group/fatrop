@@ -53,7 +53,6 @@ namespace fatrop
             ustages_.push_back(ret);
             return ret;
         }
-        #include <algorithm> // Add this line
 
         void Ocp::add_ustage(const uStage &ustage)
         {

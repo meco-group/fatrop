@@ -21,12 +21,25 @@ namespace fatrop
                 horizon_length_ = 0;
                 n_global_parameters_ = cs::MX::veccat(ocp.get_global_parameters()).size1();
                 CasadiJitCache eval_cache;
+                std::unordered_map<uStageInternal *, std::shared_ptr<FatropuStageEvalAbstract>> ustage_eval_cache;
+                std::shared_ptr<FatropuStageEvalAbstract> evaluator = nullptr;
                 for (auto ustage_it = ocp.get_ustages().begin(); ustage_it != ocp.get_ustages().end(); ustage_it++)
                 {
                     const auto &ustage = *ustage_it;
-                    const auto &prev = ustage_it == ocp.get_ustages().begin() ? std::make_shared<uStageInternal>() : (ustage_it - 1)->get_internal();
-                    const auto &next = ustage_it + 1 == ocp.get_ustages().end() ? nullptr : (ustage_it + 1)->get_internal();
-                    ustages_.push_back(ustage.get_evaluator(prev, next, ocp.get_global_parameters(), opts, eval_cache));
+                    auto &original = ustage.get_original();
+                    // check if evaluator is already available
+                    auto ustage_eval_it = ustage_eval_cache.find(original.get());
+                    if (original && ustage_eval_it != ustage_eval_cache.end())
+                        evaluator = ustage_eval_it->second;
+                    else
+                    {
+                        const auto &prev = ustage_it == ocp.get_ustages().begin() ? std::make_shared<uStageInternal>() : (ustage_it - 1)->get_internal();
+                        const auto &next = ustage_it + 1 == ocp.get_ustages().end() ? nullptr : (ustage_it + 1)->get_internal();
+                        evaluator = ustage.get_evaluator(prev, next, ocp.get_global_parameters(), opts, eval_cache);
+                        // add to cache
+                        ustage_eval_cache[ustage_it->get_original().get()] = evaluator;
+                    }
+                    ustages_.push_back(evaluator);
                     for (int i = 1; i < ustage.K(); i++)
                         ustages_.push_back(ustages_.back());
                     horizon_length_ += ustage.K();
