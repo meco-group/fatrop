@@ -31,7 +31,7 @@ namespace fatrop
             int ng_eq() const { return g.size1(); };
             int ng_ineq() const { return g_ineq.size1(); };
 
-            static uStageQuantities create(const std::shared_ptr<const uStageInternal> &ustage, const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next);
+            static uStageQuantities create(const std::shared_ptr<const uStageInternal> &ustage, const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms);
         };
     } // namespace spectrop
 } // namespace fatrop

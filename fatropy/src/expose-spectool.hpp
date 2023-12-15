@@ -130,6 +130,8 @@ namespace fatropy
             // def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>);
 
             py::class_<fatrop::spectool::uStage>(m, "uStage")
+                .def(py::init<>())
+                .def(py::init<const int>())
                 .def("add_objective", &fatrop::spectool::uStage::add_objective)
                 .def("subject_to", &fatrop::spectool::uStage::subject_to)
                 .def("set_next", py::overload_cast<const casadi::MX &, const casadi::MX &>(&fatrop::spectool::uStage::set_next))
@@ -139,7 +141,13 @@ namespace fatropy
                 .def("K", &fatrop::spectool::uStage::K)
                 .def("dynamics", &fatrop::spectool::uStage::dynamics)
                 .def("eval_at_control", &fatrop::spectool::uStage::eval_at_control)
-                .def("sample", &fatrop::spectool::uStage::sample);
+                .def("sample", &fatrop::spectool::uStage::sample)
+                .def("duplicate", &fatrop::spectool::uStage::duplicate)
+                .def("register_state", &fatrop::spectool::uStage::register_state)
+                .def("register_control", &fatrop::spectool::uStage::register_control)
+                .def("register_hybrid", &fatrop::spectool::uStage::register_hybrid)
+                .def("register_control_parameter", &fatrop::spectool::uStage::register_control_parameter)
+                .def("register_global_parameter", &fatrop::spectool::uStage::register_global_parameter);
 
             py::class_<fatrop::spectool::Ocp>(m, "Ocp").def(py::init<>())
             .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1)
@@ -149,6 +157,7 @@ namespace fatropy
             .def("sample", &fatrop::spectool::Ocp::sample)
             .def("new_stage", &fatrop::spectool::Ocp::new_stage, py::arg("K") = 1)
             .def("new_ustage", &fatrop::spectool::Ocp::new_ustage, py::arg("K") = 1)
+            .def("add_ustage", &fatrop::spectool::Ocp::add_ustage)
             .def("to_function", &fatrop::spectool::Ocp::to_function,py::arg("name"), py::arg("in"), py::arg("out"), py::arg("opts") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
             .def("at_t0", py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_t0, py::const_))
             .def("at_tf",py::overload_cast<const casadi::MX&>(&fatrop::spectool::Ocp::at_tf, py::const_))

@@ -7,13 +7,13 @@ namespace fatrop
 {
     namespace spectool
     {
-        uStageQuantities uStageQuantities::create(const std::shared_ptr<const uStageInternal> &ustage, const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next)
+        uStageQuantities uStageQuantities::create(const std::shared_ptr<const uStageInternal> &ustage, const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms)
         {
             uStageQuantities ret;
             ret.x = cs::MX::veccat(ustage->get_states(true, prev));
             ret.p_stage = cs::MX::veccat(ustage->get_control_parameters());
             ret.u = cs::MX::veccat(ustage->get_controls(true, prev));
-            ret.p_global = cs::MX::veccat(ustage->get_ocp()->get_global_parameter_syms());
+            ret.p_global = cs::MX::veccat(global_parameter_syms);
             ret.K = ustage->K();
             // std::cout << "number of hybrids that are states " << ustage->get_hybrids_states(prev).size() << std::endl;
             // std::cout << "number of hybrids that are controls " << ustage->get_hybrids_controls(prev).size() << std::endl;
@@ -27,9 +27,9 @@ namespace fatrop
                     to.push_back(to_);
                 }
                 // check if every state of the next stage is defined
-                for(auto& state : next->get_states(false))
+                for (auto &state : next->get_states(false))
                 {
-                    if(ustage->get_next_states().find(state) == ustage->get_next_states().end())
+                    if (ustage->get_next_states().find(state) == ustage->get_next_states().end())
                     {
                         throw std::runtime_error("Did you set_next for every state?");
                     }
@@ -44,18 +44,18 @@ namespace fatrop
                     std::cerr << e.what() << '\n';
                     throw std::runtime_error("Did you set_next for every state?");
                 }
-                if(ustage->K()>1)
+                if (ustage->K() > 1)
                 {
                     // check if x_next is same as x
                     auto x_next_vec = next->get_states(true, ustage);
                     auto x_vec = ustage->get_states(true, prev);
                     // check if size is same
-                    if(x_next_vec.size() != x_vec.size())
+                    if (x_next_vec.size() != x_vec.size())
                     {
                         throw std::runtime_error("x_next and x must have the same size");
                     }
                     // iterate over elements and check if the same
-                    for(int i = 0; i < x_next_vec.size(); i++)
+                    for (int i = 0; i < x_next_vec.size(); i++)
                     {
                         if (x_next_vec[i].get() != x_vec[i].get())
                         {

@@ -47,17 +47,8 @@ namespace fatrop
             std::string solver_name = "fatrop";
 
         private:
-            void add_to_ordering(const cs::MX &var)
-            {
-                ordering_[var] = ordering_.size();
-            }
-            std::vector<cs::MX> order_vars(const std::vector<cs::MX> &vars)
-            {
-                auto ret = vars;
-                std::sort(ret.begin(), ret.end(), [this](const cs::MX &a, const cs::MX &b)
-                          { return ordering_[a] < ordering_[b]; });
-                return ret;
-            }
+            void add_to_ordering(const cs::MX &var);
+            std::vector<cs::MX> order_vars(const std::vector<cs::MX> &vars);
             uo_map_mx<size_t> ordering_;
         };
         class Ocp : private std::shared_ptr<OcpInternal>
@@ -73,6 +64,7 @@ namespace fatrop
             std::pair<std::vector<int>,cs::MX> sample(const cs::MX &expr) const;
             uStage new_ustage(const int K = 1);
             Stage new_stage(const int K);
+            void add_ustage(const uStage &ustage);
             const std::vector<uStage> &get_ustages() const;
             const std::vector<cs::MX> &get_global_parameters() const
             {

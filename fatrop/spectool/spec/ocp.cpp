@@ -53,6 +53,11 @@ namespace fatrop
             ustages_.push_back(ret);
             return ret;
         }
+        void Ocp::add_ustage(const uStage &ustage)
+        {
+            ustages_.push_back(ustage);
+        }
+        
         bool OcpInternal::is_state(const cs::MX &var)
         {
             return states_.find(var) != states_.end();
@@ -88,6 +93,17 @@ namespace fatrop
         const uo_set_mx &OcpInternal::get_control_parameters()
         {
             return control_parameters_;
+        }
+        void OcpInternal::add_to_ordering(const cs::MX &var)
+        {
+            ordering_[var] = ordering_.size();
+        }
+        std::vector<cs::MX> OcpInternal::order_vars(const std::vector<cs::MX> &vars)
+        {
+            auto ret = vars;
+            std::sort(ret.begin(), ret.end(), [this](const cs::MX &a, const cs::MX &b)
+                      { return ordering_[a] < ordering_[b]; });
+            return ret;
         }
         std::pair<std::vector<int>, cs::MX> Ocp::sample(const cs::MX &expr) const
         {
