@@ -90,7 +90,7 @@ namespace fatrop
             {
                 control_syms_[control] = std::vector<cs::MX>(K_);
                 for (int k = 0; k < K_; k++)
-                    control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k) + std::string("_dup"), control.size1() * control.size2());
+                    control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k), control.size1() * control.size2());
             }
             // control_initial_[control] = cs::DM::zeros(control.size1() * control.size2(), K_);
         }
