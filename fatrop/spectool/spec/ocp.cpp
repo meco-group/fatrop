@@ -57,7 +57,7 @@ namespace fatrop
         {
             ustages_.push_back(ustage);
         }
-        
+
         bool OcpInternal::is_state(const cs::MX &var)
         {
             return states_.find(var) != states_.end();
@@ -144,7 +144,7 @@ namespace fatrop
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = gist_solver_in[0];
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});
-            auto helper1 = cs::Function("helper0", in, {gist_solver_in[1], gist_solver_in[2]}, cs::Dict{{"allow_free", true}});
+            auto helper1 = cs::Function("helper1", in, {gist_solver_in[1], gist_solver_in[2]}, cs::Dict{{"allow_free", true}});
             if (helper1.has_free())
                 throw std::runtime_error("to_function: problem still has undefined parameters");
             if (helper0.has_free())
@@ -176,10 +176,15 @@ namespace fatrop
                 if (var.size1() != value.size1())
                     throw std::runtime_error("initial value has wrong size");
 
-                if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var))
+                if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var) || get()->is_control_parameter(var))
                     varr = sample(var).second;
                 else
-                    varr = var;
+                {
+                    if (get()->is_global_parameter(var))
+                        varr = var;
+                    else
+                        std::runtime_error("at eval_at_initial variable is not a state, control, hybrid or parameter");
+                }
                 if (value.size2() == 1)
                     valuee = cs::MX::repmat(value, 1, varr.size2());
                 else
