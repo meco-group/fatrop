@@ -53,10 +53,12 @@ namespace fatrop
             ustages_.push_back(ret);
             return ret;
         }
+        #include <algorithm> // Add this line
+
         void Ocp::add_ustage(const uStage &ustage)
         {
             // check if ustage is already registered
-            if(ustages_.find(ustage) == ustages_.end())
+            if(std::find(ustages_.begin(), ustages_.end(), ustage) == ustages_.end()) 
                 std::runtime_error("ustage is already registered, consider using uStage::clone()");
             ustages_.push_back(ustage);
         }
