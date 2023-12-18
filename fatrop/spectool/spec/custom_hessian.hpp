@@ -10,6 +10,7 @@ namespace fatrop
         struct Hessian
         {
             cs::MX Hxx;
+            cs::MX Hx;
             cs::MX x;
             cs::MX lam;
             bool is_empty() const {return Hxx.is_empty();}

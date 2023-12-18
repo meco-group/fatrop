@@ -56,6 +56,10 @@ namespace fatrop
             const uo_map_mx<std::vector<cs::MX>> &get_control_parameter_syms() const;
             const std::vector<cs::MX> &get_global_parameters() const;
             const std::shared_ptr<OcpInternal> get_ocp() const;
+            const uo_map_mx<Jacobian> &get_constraint_jacobians() const;
+            const uo_map_mx<Hessian> &get_constraint_hessians() const;
+            const uo_map_mx<Jacobian> &get_next_state_jacobians() const;
+            const uo_map_mx<Hessian> &get_next_state_hessians() const;
             int K() const { return K_; };
 
         private:

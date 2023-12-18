@@ -285,6 +285,22 @@ namespace fatrop
         {
             return ocp_.lock();
         };
+        const uo_map_mx<Jacobian> &uStageInternal::get_constraint_jacobians() const
+        {
+            return constraint_jacobians_;
+        }
+        const uo_map_mx<Hessian> &uStageInternal::get_constraint_hessians() const
+        {
+            return constraint_hessians_;
+        }
+        const uo_map_mx<Jacobian> &uStageInternal::get_next_state_jacobians() const
+        {
+            return next_state_jacobians_;
+        }
+        const uo_map_mx<Hessian> &uStageInternal::get_next_state_hessians() const
+        {
+            return next_state_hessians_;
+        }
         bool uStage::has_variable(const cs::MX &var) const
         {
             return get()->has_variable(var);
