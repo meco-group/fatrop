@@ -145,7 +145,7 @@ namespace fatrop
                 // check if all elements of x are the same as jac.x
                 for (int i = 0; i < jac.x.size1(); i++)
                 {
-                    if (!is_equal(x(i), jac.x(i)))
+                    if (!is_equal(x(i), jac.x(i), 1))
                     {
                         throw std::runtime_error("x must be the same as in jac");
                     }
@@ -179,7 +179,7 @@ namespace fatrop
                 // check if all elements of x are the same as hess.x
                 for (int i = 0; i < hess.x.size1(); i++)
                 {
-                    if (!is_equal(x(i), hess.x(i)))
+                    if (!is_equal(x(i), hess.x(i), 1))
                     {
                         throw std::runtime_error("x must be the same as in hess");
                     }
