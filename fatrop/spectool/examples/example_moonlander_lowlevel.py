@@ -66,11 +66,18 @@ intg = sp.IntegratorRk4([
     ], T/50.)
 
 # set up the discretized dynamics
-ustage_proto_dyn.set_next(p, intg(p))
 ustage_proto_dyn.set_next(theta, intg(theta))
 ustage_proto_dyn.set_next(dp, intg(dp))
 ustage_proto_dyn.set_next(dtheta, intg(dtheta))
 ustage_proto_dyn.set_next(T, T)
+# just as an example, here we show how custom Jacobians and Hessians can be provided
+p_next =  intg(p)
+all_vars = cs.veccat(F1, F2, p, dp, theta, dtheta, T)
+jac_p_next = sp.Jacobian(cs.jacobian(p_next, all_vars), all_vars)
+lam = cs.MX.sym("lam", p_next.size1())
+H, h = cs.hessian(cs.dot(lam, p_next), all_vars)
+hess_p_next = sp.Hessian(H, h, all_vars, lam)
+ustage_proto_dyn.set_next(p, p_next, jacobian = jac_p_next)
 
 # Define the path constraints
 ustage_proto_dyn.subject_to((0<F1)<max_thrust)
