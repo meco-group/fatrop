@@ -184,8 +184,14 @@ namespace fatrop
                         throw std::runtime_error("x must be the same as in hess");
                     }
                 }
+                // check if lam has the right dimensions
+                if(hess.lam.size()!= g.size())
+                {
+                    throw std::runtime_error("lam has wrong dimensions");
+                }
                 ret_H = hess.Hxx;
                 ret_h = hess.Hx;
+                lam = hess.lam;
             }
             return {ret_H, ret_h};
         }

@@ -77,7 +77,7 @@ jac_p_next = sp.Jacobian(cs.jacobian(p_next, all_vars), all_vars)
 lam = cs.MX.sym("lam", p_next.size1())
 H, h = cs.hessian(cs.dot(lam, p_next), all_vars)
 hess_p_next = sp.Hessian(H, h, all_vars, lam)
-ustage_proto_dyn.set_next(p, p_next, jacobian = jac_p_next)
+ustage_proto_dyn.set_next(p, p_next, jacobian = jac_p_next, hessian = hess_p_next)
 
 # Define the path constraints
 ustage_proto_dyn.subject_to((0<F1)<max_thrust)
