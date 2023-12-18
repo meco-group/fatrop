@@ -66,15 +66,34 @@ intg = sp.IntegratorRk4([
     ], T/50.)
 
 # set up the discretized dynamics
-ustage_proto_dyn.set_next(p, intg(p))
 ustage_proto_dyn.set_next(theta, intg(theta))
 ustage_proto_dyn.set_next(dp, intg(dp))
 ustage_proto_dyn.set_next(dtheta, intg(dtheta))
 ustage_proto_dyn.set_next(T, T)
 
+#########
+# add dynamics with --- custom --- Jacobian and Hessian
+#########
+p_next =  intg(p)
+all_vars = cs.veccat(F1, F2, p, dp, theta, dtheta, T)
+jac_p_next = sp.Jacobian(cs.jacobian(p_next, all_vars), all_vars)
+lam = cs.MX.sym("lam", p_next.size1())
+H, h = cs.hessian(cs.dot(lam, p_next), all_vars)
+hess_p_next = sp.Hessian(H, h, all_vars, lam)
+ustage_proto_dyn.set_next(p, p_next, jacobian = jac_p_next, hessian = hess_p_next)
+
 # Define the path constraints
 ustage_proto_dyn.subject_to((0<F1)<max_thrust)
-ustage_proto_dyn.subject_to((0<F2)<max_thrust)
+ineq = F2
+
+#########
+# add constraint with --- custom --- Jacobian and Hessian
+#########
+jac_ineq = sp.Jacobian(cs.jacobian(ineq, all_vars), all_vars)
+lam = cs.MX.sym("lam", ineq.size1())
+H, h = cs.hessian(cs.dot(lam, ineq), all_vars)
+hess_ineq = sp.Hessian(H, h, all_vars, lam)
+ustage_proto_dyn.subject_to((0<F2)<max_thrust, jacobian = jac_ineq, hessian = hess_ineq)
 
 #########
 # Specify the different microstages of the ocp
