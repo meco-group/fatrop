@@ -105,7 +105,7 @@ namespace fatropy
             // py::implicitly_convertible<py::float_, casadi::MX>();
             // py::implicitly_convertible<double, >();
             py::class_<fatrop::spectool::Jacobian>(m, "Jacobian").def(py::init<casadi::MX, casadi::MX>());
-            py::class_<fatrop::spectool::Hessian>(m, "Hessian").def(py::init<casadi::MX, casadi::MX, casadi::MX>());
+            py::class_<fatrop::spectool::Hessian>(m, "Hessian").def(py::init<casadi::MX, casadi::MX, casadi::MX, casadi::MX>());
 
             py::bind_map<fatrop::spectool::uo_map_mx_mx>(m, "uo_map_mx_mx");
             py::class_<fatrop::spectool::IntegratorRk4>(m, "IntegratorRk4").def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX &>()).def("__call__", &fatrop::spectool::IntegratorRk4::operator());
