@@ -127,6 +127,7 @@ int main()
 
     auto a = ocp.parameter();
 
+    ocp.solver("fatrop");
     auto func = ocp.to_function({a}, {ocp.at_tf(T)}, casadi::Dict({{"post_expand", true}}));
     func(cs::DM(0.0));
     return 0;

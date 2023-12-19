@@ -44,7 +44,7 @@ namespace fatrop
             bool is_control_parameter(const cs::MX &var);
             std::vector<std::pair<cs::MX, cs::MX>> initial_values;
             std::vector<std::pair<cs::MX, cs::MX>> parameter_values;
-            std::string solver_name = "fatrop";
+            std::string solver_name = "";
 
         private:
             void add_to_ordering(const cs::MX &var);
@@ -78,6 +78,7 @@ namespace fatrop
             void set_initial(const cs::MX &var, const cs::MX &value);
             cs::MX eval_at_initial(const cs::MX &expr) const;
             cs::MX all_variables();
+            void solver(const std::string &name){get()->solver_name = name;};
 
 
         protected:

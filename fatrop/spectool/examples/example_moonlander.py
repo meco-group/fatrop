@@ -89,6 +89,7 @@ k_p_sample, p_sample = ocp.sample(p)
 # state and control variables are treated as initial guess for the solver
 # stage and control variables that are not defined as arguments use the default initialization
 # fatrop_func = ocp.to_function([target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1]], {"jit":True, "fatrop":{"mu_init":1e-1}})
+ocp.solver('fatrop')
 fatrop_func = ocp.to_function("moonlander_ocp", [target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1], ocp.all_variables()], {"jit":True}, {"mu_init":1e-1})
 p_sol, F1_sol, F2_sol, T_sol, timesteps, all_vars = fatrop_func(np.array([6., 5.]))
 t_F1_sol = timesteps[k_F1_sample]

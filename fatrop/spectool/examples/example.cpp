@@ -42,6 +42,7 @@ int main()
 
     ocp.set_initial(dt, 0.5);
 
+    ocp.solver("fatrop");
     cs::Function ocp_func = ocp.to_function("example_ocp", {p}, {ocp.at_t0(u), ocp.sample(x).second, p, ocp.at_t0(dt), ocp.at_tf(dt), ocp.at_tf(dum)}, {{"jit", true}});
     auto ret = ocp_func({cs::DM(1.23)});
     std::cout << ret << std::endl;
@@ -56,17 +57,18 @@ int main()
   //   auto stage = ss.new_ustage(1);
   //   stage.add_objective(y * sin(x) + x * cos(y) + z * z);
   //   stage.subject_to(x + y + z == 0.);
+  //   ss.solver("fatrop");
   //   auto funcc = ss.to_function("example_dense_smallscale", {}, {stage.at_t0(x)}, {{"jit", true}});
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   // }
   // {
-    
+
   //   auto ss = Ocp();
   //   auto x = ss.state(10);
   //   auto stage = ss.new_ustage(1);
   //   stage.add_objective(sum1(sin(x)));
-  //   stage.subject_to(sumsqr(x) == 1.);
+  //   ss.solver("fatrop");
   //   auto funcc = ss.to_function("example_dense", {}, {stage.at_t0(x)}, {{"jit", true}});
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
@@ -81,6 +83,7 @@ int main()
     auto ustage_dup = ustage.clone();
     ss.add_ustage(ustage);
     ss.add_ustage(ustage_dup);
+    ss.solver("fatrop");
     auto funcc = ss.to_function("example_dense", {}, {ustage.at_t0(x)}, {{"jit", true}});
     std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
     std::cout << funcc(std::vector<cs::DM>{}) << std::endl;

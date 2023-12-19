@@ -1,5 +1,6 @@
 #include "ocp.hpp"
 #include "fatrop/spectool/solver_interfaces/fatrop/fatrop_solver.hpp"
+#include "fatrop/spectool/solver_interfaces/casadi_opti/opti_solver.hpp"
 #include <numeric>
 namespace fatrop
 {
@@ -140,11 +141,19 @@ namespace fatrop
         }
         cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
         {
-            auto solver = SolverFatrop();
-            solver.transcribe(*this, opts);
+            if(get()->solver_name == "")
+                throw std::runtime_error("solver not set, use ocp.set_solve(\"fatrop\") or ocp.set_solve(\"ipopt\")");
+            std::unique_ptr<SolverInterface> solver;
+            if(get()->solver_name == "fatrop")
+                solver = std::make_unique<SolverFatrop>();
+            else if(get()-> solver_name == "ipopt")
+                solver = std::make_unique<SolverOpti>();
+            else
+                throw std::runtime_error("solver not supported");
+            solver -> transcribe(*this, opts);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
-            auto fatrop_func = solver.to_function(name, *this, gist_solver_in, gist_solver_out, opts_fatrop);
+            auto fatrop_func = solver -> to_function(name, *this, gist_solver_in, gist_solver_out, opts_fatrop);
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = gist_solver_in[0];
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});
