@@ -16,6 +16,7 @@ namespace fatrop
         public:
             void transcribe(const Ocp &ocp_, const cs::Dict &opts)
             {
+                optss_ = opts;
             }
             cs::Function to_function(const std::string &name, const Ocp &ocp, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict &opts)
             {
@@ -75,7 +76,7 @@ namespace fatrop
                     J += cs::MX::substitute({ustages_quantities_[i].L}, from, to)[0];
                 }
                 opti.minimize(J);
-                opti.solver("ipopt");
+                opti.solver("ipopt", optss_, opts);
                 auto all_vars = cs::MX::veccat({variables_ux});
                 return opti.to_function(name, {all_vars, cs::MX::veccat(p_stage), p_global}, {all_vars});
             };
@@ -101,6 +102,7 @@ namespace fatrop
                 in = {cs::MX::veccat(variables_v), cs::MX::veccat(control_grid_p_v), cs::MX::veccat(ocp_.get_global_parameters())};
                 out = {cs::MX::veccat(variables_v)};
             }
+            cs::Dict optss_;
         };
     } // namespace spectrop
 } // namespace fatrop
