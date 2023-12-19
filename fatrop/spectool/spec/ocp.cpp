@@ -142,7 +142,7 @@ namespace fatrop
         cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
         {
             if(get()->solver_name == "")
-                throw std::runtime_error("solver not set, use ocp.set_solve(\"fatrop\") or ocp.set_solve(\"ipopt\")");
+                throw std::runtime_error("solver not set, use ocp.set_solver(\"fatrop\") or ocp.set_solver(\"ipopt\")");
             std::unique_ptr<SolverInterface> solver;
             if(get()->solver_name == "fatrop")
                 solver = std::make_unique<SolverFatrop>();
