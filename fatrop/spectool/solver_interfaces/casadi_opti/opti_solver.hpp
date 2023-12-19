@@ -37,6 +37,7 @@ namespace fatrop
                 cs::Opti opti;
                 std::vector<cs::MX> variables_u;
                 std::vector<cs::MX> variables_x;
+                std::vector<cs::MX> variables_ux;
                 std::vector<cs::MX> p_stage;
                 // add all variables
                 auto p_global = opti.parameter(n_global_parameters_);
@@ -44,6 +45,7 @@ namespace fatrop
                 {
                     variables_u.push_back(opti.variable(ustage_q.nu()));
                     variables_x.push_back(opti.variable(ustage_q.nx()));
+                    variables_ux.push_back(cs::MX::veccat({variables_u.back(), variables_x.back()}));
                     p_stage.push_back(opti.parameter(ustage_q.np_stage()));
                 }
                 // add dynamics constraints
@@ -74,7 +76,7 @@ namespace fatrop
                 }
                 opti.minimize(J);
                 opti.solver("ipopt");
-                auto all_vars = cs::MX::veccat({cs::MX::veccat(variables_u), cs::MX::veccat(variables_x)});
+                auto all_vars = cs::MX::veccat({variables_ux});
                 return opti.to_function(name, {all_vars, cs::MX::veccat(p_stage), p_global}, {all_vars});
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
@@ -92,11 +94,8 @@ namespace fatrop
                     for (int k = 0; k < ustage.K(); k++)
                     {
                         variables_v.push_back(ustage.eval_at_control(controls, k));
-                        control_grid_p_v.push_back(ustage.eval_at_control(control_grid_p, k));
-                    }
-                    for (int k = 0; k < ustage.K(); k++)
-                    {
                         variables_v.push_back(ustage.eval_at_control(states, k));
+                        control_grid_p_v.push_back(ustage.eval_at_control(control_grid_p, k));
                     }
                 }
                 in = {cs::MX::veccat(variables_v), cs::MX::veccat(control_grid_p_v), cs::MX::veccat(ocp_.get_global_parameters())};
