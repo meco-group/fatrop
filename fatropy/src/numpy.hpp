@@ -3,9 +3,9 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <vector>
+namespace py = pybind11;
 namespace fatropy
 {
-    namespace py = pybind11;
     struct MatBind : public std::vector<double>
     {
         using std::vector<double>::vector;
