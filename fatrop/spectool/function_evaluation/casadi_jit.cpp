@@ -33,7 +33,6 @@ namespace fatrop
         }
         CasadiFEJit::~CasadiFEJit()
         {
-            std::cout << "destructor called" << std::endl;
             if (compiled_jit)
             {
                 std::string jit_directory = get_from_dict(jit_options_, "directory", std::string(""));
