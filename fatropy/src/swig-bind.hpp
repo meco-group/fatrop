@@ -4,9 +4,9 @@
 #include <pybind11/numpy.h>
 #include <casadi/casadi.hpp>
 #include <vector>
+namespace py = pybind11;
 namespace fatropy
 {
-    namespace py = pybind11;
     struct PySwigObject
     {
         PyObject_HEAD void *ptr;
