@@ -139,7 +139,7 @@ namespace fatrop
         {
             return ustages_;
         }
-        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out, const cs::Dict &opts, const cs::Dict &opts_fatrop) const
+        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out) const
         {
             if(get()->solver_name == "")
                 throw std::runtime_error("solver not set, use ocp.solver(\"fatrop\") or ocp.solver(\"ipopt\")");
@@ -150,10 +150,10 @@ namespace fatrop
                 solver = std::make_unique<SolverOpti>();
             else
                 throw std::runtime_error("solver not supported");
-            solver -> transcribe(*this, opts);
+            solver -> transcribe(*this, function_opts_);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
-            auto fatrop_func = solver -> to_function(name, *this, gist_solver_in, gist_solver_out, opts_fatrop);
+            auto fatrop_func = solver -> to_function(name, *this, gist_solver_in, gist_solver_out, solver_opts_);
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = gist_solver_in[0];
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});

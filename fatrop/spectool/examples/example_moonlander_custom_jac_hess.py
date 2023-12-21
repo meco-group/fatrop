@@ -143,14 +143,18 @@ k_p_sample, p_sample = ocp.sample(p)
 # the arguments should consist of all defined problem parameters
 # state and control variables are treated as initial guess for the solver
 # stage and control variables that are not defined as arguments use the default initialization
-ocp.solver('fatrop')
-fatrop_func = ocp.to_function("moonlander_ocp", [target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1], ocp.all_variables()], {"jit":True}, {"mu_init":1e-1})
+ocp.solver('fatrop', {"jit":True}, {"mu_init":1e-1})
+fatrop_func = ocp.to_function("moonlander_ocp", [target], [p_sample, F1_sample, F2_sample, ocp.sample(T)[1], cs.horzcat(0, ocp.sample(T/50.)[1])[:-1], ocp.all_variables()])
 p_sol, F1_sol, F2_sol, T_sol, timesteps, all_vars = fatrop_func(np.array([6., 5.]))
 t_F1_sol = timesteps[k_F1_sample]
 print("t_F1_sol", t_F1_sol)
 print("F1_sol", F1_sol)
-# fatrop_func_warmstart = ocp.to_function("moonlander_ocp_warmstart", [target, ocp.all_variables()], [p_sample], {"jit":True}, {"mu_init":1e-4})
-# fatrop_func_warmstart(np.array([10., 5.]), all_vars)
+
+
+
+ocp.solver('fatrop', {"jit":True}, {"mu_init":1e-4})
+fatrop_func_warmstart = ocp.to_function("moonlander_ocp_warmstart", [target, ocp.all_variables()], [p_sample])
+fatrop_func_warmstart(np.array([10., 5.]), all_vars)
 
 # plot the trajectory
 import matplotlib.pyplot as plt

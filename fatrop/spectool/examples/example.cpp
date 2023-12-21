@@ -43,9 +43,9 @@ int main()
     ocp.set_initial(dt, 0.5);
 
     ocp.solver("fatrop");
-    cs::Function ocp_func = ocp.to_function("example_ocp", {p}, {ocp.at_t0(u), ocp.sample(x).second, p, ocp.at_t0(dt), ocp.at_tf(dt), ocp.at_tf(dum)}, {{"jit", true}});
-    auto ret = ocp_func({cs::DM(1.23)});
-    std::cout << ret << std::endl;
+    // cs::Function ocp_func = ocp.to_function("example_ocp", {p}, {ocp.at_t0(u), ocp.sample(x).second, p, ocp.at_t0(dt), ocp.at_tf(dt), ocp.at_tf(dum)});
+    // auto ret = ocp_func({cs::DM(1.23)});
+    // std::cout << ret << std::endl;
   }
 
   // it's somewhat of a hack, but fatrop can also be used to solve small-scale dense problems, by using only one ustage.
@@ -58,7 +58,7 @@ int main()
   //   stage.add_objective(y * sin(x) + x * cos(y) + z * z);
   //   stage.subject_to(x + y + z == 0.);
   //   ss.solver("fatrop");
-  //   auto funcc = ss.to_function("example_dense_smallscale", {}, {stage.at_t0(x)}, {{"jit", true}});
+  //   auto funcc = ss.to_function("example_dense_smallscale", {}, {stage.at_t0(x)});
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   // }
@@ -69,7 +69,7 @@ int main()
   //   auto stage = ss.new_ustage(1);
   //   stage.add_objective(sum1(sin(x)));
   //   ss.solver("fatrop");
-  //   auto funcc = ss.to_function("example_dense", {}, {stage.at_t0(x)}, {{"jit", true}});
+  //   auto funcc = ss.to_function("example_dense", {}, {stage.at_t0(x)});
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   // }
@@ -83,10 +83,13 @@ int main()
     auto ustage_dup = ustage.clone();
     ss.add_ustage(ustage);
     ss.add_ustage(ustage_dup);
-    ss.solver("fatrop");
-    auto funcc = ss.to_function("example_dense", {}, {ustage.at_t0(x)}, {{"jit", true}});
+    ss.solver("fatrop", {{"jit", true}});
+    std::cout <<cs::MX::evalf(cs::MX::substitute(sumsqr(x), x, cs::MX::ones(10))) << std::endl;
+    auto test_func = cs::Function("test", {x}, {x});
+    std::cout << test_func(cs::DM::ones(10)) << std::endl;
+    auto funcc = ss.to_function("example_dense", {}, {ustage.at_t0(x)});
     std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
-    std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
+    // std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   }
 
   return 0;

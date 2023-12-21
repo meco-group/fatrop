@@ -46,9 +46,9 @@ def get_func():
   terminal_ustage.add_objective(x[1]*x[1]+p)
 
   # ocp.set_initial(u, p)
-  ocp.solver('fatrop')
+  ocp.solver('fatrop', {"jit":True}, {"mu_init":1e-1})
 
-  return ocp.to_function("example_ocp", [p], [ocp.at_t0(u), ocp.sample(x)[1],p], {"jit":True}, {"mu_init":1e-1})
+  return ocp.to_function("example_ocp", [p], [ocp.at_t0(u), ocp.sample(x)[1],p])
 
 ocp_func = get_func()
 ret = ocp_func(2.5)
