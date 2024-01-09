@@ -50,8 +50,11 @@ namespace PYBIND11_NAMESPACE
 
             bool load(handle src, bool)
             {
+                pybind11::module_ cspy_ = pybind11::module_::import(T::module);
+                pybind11::object attr_ = cspy_.attr(T::py_name);
+                pybind11::object src2(attr_(src));
                 /* Extract PyObject from handle */
-                PyObject *source = src.ptr();
+                PyObject *source = src2.ptr();
                 /* Try converting into a Python integer value */
                 PyObject *tmp = source;
                 if (!tmp)
