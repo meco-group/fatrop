@@ -101,6 +101,15 @@ namespace fatropy
             py::implicitly_convertible<const casadi::Function &, casadi::GenericType>();
             py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>();
             py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>();
+            // this can maybe be used for nesting of dicts
+            //             // ...
+            //         .def("__init__", [](Bar &self, py::tuple t) {
+            //             if (py::len(t) != 2)
+            //                 throw std::runtime_error("oh no");
+            //             new(&self) Bar(t[0].cast<int>(), t[1].cast<int>());
+            //         })
+            // // ...
+            //     py::implicitly_convertible<py::tuple, Bar>();
             // py::implicitly_convertible<casadi::Dict, casadi::GenericType>();
             // py::implicitly_convertible<py::float_, casadi::MX>();
             // py::implicitly_convertible<double, >();
