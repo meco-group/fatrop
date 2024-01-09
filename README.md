@@ -18,7 +18,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.-->
 
 <p align="center">
-    <img src="https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop/-/raw/main/misc/fatrop_logo.svg" width="400" />
+    <img src="https://raw.githubusercontent.com/meco-group/fatrop/00a50ff13e6a6a8118951e6e5307f5907dda193c/misc/fatrop_logo.svg" width="400" />
 </p>
 
 
