@@ -88,6 +88,12 @@ SET(INSTALL_TARGETS fatrop)
 if(${WITH_SPECTOOL})
   # casadi is required for the specification tools, find using findCasadi.cmake
   include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindCasadi.cmake)
+  # check if casadi/core/function_internal.hpp is available in the casadi path (CASADI_INCLUDE_DIR is set by findCasadi.cmake, and can contain multiple paths)
+  message (STATUS "CASADI_INCLUDE_DIR is ${CASADI_INCLUDE_DIR}")
+  if(NOT EXISTS "${CASADI_INCLUDE_DIR}/casadi/core/function_internal.hpp")
+    message(SEND_ERROR "${CASADI_INCLUDE_DIR}/casadi/core/function_internal.hpp not found, please install casadi with cmake option -DINSTALL_INTERNAL_HEADERS=ON") 
+  endif()
+
   set(INSTALL_TARGETS ${INSTALL_TARGETS} spectool)
   # add the WITH_SPECTOOL compiler flag
   add_definitions(-DWITH_SPECTOOL)
