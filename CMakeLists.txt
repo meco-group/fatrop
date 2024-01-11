@@ -87,7 +87,7 @@ SET(INSTALL_TARGETS fatrop)
 
 if(${WITH_SPECTOOL})
   # casadi is required for the specification tools, find using findCasadi.cmake
-  # include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindCasadi.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindCasadi.cmake)
   set(INSTALL_TARGETS ${INSTALL_TARGETS} spectool)
   # add the WITH_SPECTOOL compiler flag
   add_definitions(-DWITH_SPECTOOL)
