@@ -43,9 +43,9 @@ int main()
     ocp.set_initial(dt, 0.5);
 
     ocp.solver("fatrop");
-    // cs::Function ocp_func = ocp.to_function("example_ocp", {p}, {ocp.at_t0(u), ocp.sample(x).second, p, ocp.at_t0(dt), ocp.at_tf(dt), ocp.at_tf(dum)});
-    // auto ret = ocp_func({cs::DM(1.23)});
-    // std::cout << ret << std::endl;
+    cs::Function ocp_func = ocp.to_function("example_ocp", {p}, {ocp.at_t0(u), ocp.sample(x).second, p, ocp.at_t0(dt), ocp.at_tf(dt), ocp.at_tf(dum)});
+    auto ret = ocp_func({cs::DM(1.23)});
+    std::cout << ret << std::endl;
   }
 
   // it's somewhat of a hack, but fatrop can also be used to solve small-scale dense problems, by using only one ustage.
