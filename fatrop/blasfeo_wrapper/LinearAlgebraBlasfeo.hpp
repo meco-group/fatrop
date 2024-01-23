@@ -22,8 +22,8 @@
 // macros
 extern "C"
 {
-void blasfeo_ref_drowpe(int kmax, int *ipiv, struct blasfeo_dmat *sA);
-void blasfeo_ref_drowpei(int kmax, int *ipiv, struct blasfeo_dmat *sA);
+    void blasfeo_ref_drowpe(int kmax, int *ipiv, struct blasfeo_dmat *sA);
+    void blasfeo_ref_drowpei(int kmax, int *ipiv, struct blasfeo_dmat *sA);
 }
 #define MAT blasfeo_dmat
 #define VEC blasfeo_dvec
@@ -305,7 +305,13 @@ namespace fatrop
         /** \brief type conversion to blasfeo vector pointer*/
         explicit operator VEC *() const;
         /** \brief access to element of matrix */
-        double &at(const fatrop_int ai) const;
+        inline double &at(const fatrop_int ai) const
+        {
+#if DEBUG
+            assert(ai < nels_);
+#endif
+            return VECEL(vec_, ai + offset_);
+        };
         /** \brief get element of vector */
         double get_el(const fatrop_int ai) const;
         /** \brief get number of elements */
@@ -331,10 +337,9 @@ namespace fatrop
         friend double sum(const FatropVecBF &va)
         {
             double ret = 0.0;
-            int offset = va.offset();
-            for(int i = 0; i < va.nels(); i++)
+            for (int i = 0; i < va.nels(); i++)
             {
-                ret += va.at(i + offset);
+                ret += va.at(i);
             }
             return ret;
         }
@@ -383,7 +388,7 @@ namespace fatrop
         /** \brief constuction for allocation on MemoryAllocator*/
         FatropMemoryVecBF(const FatropVector<fatrop_int> &nels, fatrop_int N);
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.;
-        FatropMemoryVecBF(const fatrop_int nels, fatrop_int N =1);
+        FatropMemoryVecBF(const fatrop_int nels, fatrop_int N = 1);
         /** \brief calculate memory size*/
         fatrop_int memory_size() const;
         /** \brief set up memory element and advance pointer */
