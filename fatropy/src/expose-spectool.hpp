@@ -68,7 +68,7 @@ namespace fatropy
     {
         static void expose(py::module &m)
         {
-            // py::bind_map<casadi::Dict>(m, "cs::Dict");
+            py::bind_map<casadi::Dict>(m, "csDict");
             py::class_<casadi::GenericType>(m, "csGenericType")
                 .def(py::init<bool>())
                 .def(py::init<casadi_int>())
