@@ -24,6 +24,7 @@
 #include "json.h"
 #include <string.h>
 #include <iostream>
+#include <clocale>
 
 /*! \brief Checks for an empty string
  *
