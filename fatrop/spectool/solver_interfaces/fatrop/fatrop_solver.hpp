@@ -27,10 +27,9 @@ namespace fatrop
                 // C-api approach
                 // C_api
                 C_api_userdata* userdata = new C_api_userdata(fatrop_impl, opts); 
-                // userdata->ref_count = 1;
-                std::cout << "userdata pointer is " << userdata << std::endl;
+                userdata->ref_count = 1;
                 auto func = cs::external("fatrop_func", "/home/lander/fatrop/build/fatrop/spectool/libspectool.so", cs::Dict{{"user_data", static_cast<void*>(userdata)}});
-                // fatrop_func_decref(static_cast<void*>(userdata));
+                fatrop_func_decref(static_cast<void*>(userdata));
                 return func;
 
             };
