@@ -23,7 +23,16 @@ namespace fatrop
             cs::Function to_function(const std::string &name, const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict &opts)
             {
                 gist(ocp_, gist_in, gist_out);
-                return FatropFunction(name, fatrop_impl, opts);
+                // return FatropFunction(name, fatrop_impl, opts);
+                // C-api approach
+                // C_api
+                C_api_userdata* userdata = new C_api_userdata(fatrop_impl, opts); 
+                // userdata->ref_count = 1;
+                std::cout << "userdata pointer is " << userdata << std::endl;
+                auto func = cs::external("fatrop_func", "/home/lander/fatrop/build/fatrop/spectool/libspectool.so", cs::Dict{{"user_data", static_cast<void*>(userdata)}});
+                // fatrop_func_decref(static_cast<void*>(userdata));
+                return func;
+
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
             {
