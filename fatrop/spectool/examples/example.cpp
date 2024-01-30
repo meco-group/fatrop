@@ -1,5 +1,6 @@
 #include "fatrop/spectool/spectool.hpp"
 #include "fatrop/ocp/StageOCPApplication.hpp"
+// #include "fatropy/src/python_func_import.hpp"
 using namespace std;
 using namespace fatrop;
 using namespace fatrop::spectool;
@@ -91,6 +92,10 @@ int main()
     std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
     // std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   }
+  // {
+  //   auto func = fatropy::get_func_from_py("example", "get_func");
+  //   func(std::vector<cs::DM>{2.5});
+  // }
 
   return 0;
 }
