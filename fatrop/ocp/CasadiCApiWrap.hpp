@@ -10,6 +10,7 @@
 #define casadi_int long long int
 #endif
 // c++ stuff here
+// TODO: this can become part of the default fatrop API as well. It has no dependency on casadi.
 namespace fatrop
 {
   namespace spectool

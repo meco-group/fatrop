@@ -1,4 +1,4 @@
-#include "fatrop_function_c_api.hpp"
+#include "CasadiCApiWrap.hpp"
 
 // c++ stuff here
 namespace fatrop
