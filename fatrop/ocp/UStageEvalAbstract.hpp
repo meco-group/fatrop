@@ -6,9 +6,7 @@ extern "C"
 #define MAT blasfeo_dmat
 namespace fatrop
 {
-    namespace spectool
-    {
-        class FatropuStageEvalAbstract
+        class UStageEvalAbstract
         {
         public:
             /// @brief number of states for time step k
@@ -167,5 +165,4 @@ namespace fatrop
             /// @brief default initial guess for the states of stage k
             /// @param xk: pointer to states of time step k
         };
-    }
 }

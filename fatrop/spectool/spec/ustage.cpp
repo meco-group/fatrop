@@ -407,7 +407,7 @@ namespace fatrop
         {
             uStage::get()->register_global_parameter(global_parameters);
         };
-        std::shared_ptr<FatropuStageEvalAbstract> uStage::get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const
+        std::shared_ptr<UStageEvalAbstract> uStage::get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const
         {
             return std::make_shared<FatropuStageEvalCasadi>(uStageQuantities::create(this->get_internal(), prev, next, global_parameter_syms), opts, cache);
         }

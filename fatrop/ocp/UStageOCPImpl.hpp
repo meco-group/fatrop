@@ -1,49 +1,16 @@
 #pragma once
-#include <casadi/casadi.hpp>
 #include <string>
-#include "fatrop/spectool/auxiliary/casadi_utilities.hpp"
-#include "fatrop/spectool/function_evaluation/casadi_fe.hpp"
-#include "fatrop/spectool/spec/ustage.hpp"
-#include "fatrop/spectool/spec/ocp.hpp"
-#include "fatrop/spectool/spec/ustage_quantities.hpp"
 #include "fatrop/ocp/OCPAbstract.hpp"
-#include "fatrop/spectool/spec/ustage_eval_casadi.hpp"
+#include "fatrop/ocp/UStageEvalAbstract.hpp"
+#include <memory>
 namespace fatrop
 {
-    namespace spectool
-    {
-        namespace cs = casadi;
-        class FatropOcpImpl : public OCPAbstract
+        class UStageOCPImpl : public OCPAbstract
         {
         public:
-            FatropOcpImpl(const Ocp &ocp, const cs::Dict &opts)
+            UStageOCPImpl(std::vector<std::shared_ptr<UStageEvalAbstract>> && ustages, int n_global_parameters): ustages_(std::move(ustages)), n_global_parameters_(n_global_parameters)
             {
-                horizon_length_ = 0;
-                n_global_parameters_ = cs::MX::veccat(ocp.get_global_parameters()).size1();
-                CasadiJitCache eval_cache;
-                std::unordered_map<uStageInternal *, std::shared_ptr<FatropuStageEvalAbstract>> ustage_eval_cache;
-                std::shared_ptr<FatropuStageEvalAbstract> evaluator = nullptr;
-                for (auto ustage_it = ocp.get_ustages().begin(); ustage_it != ocp.get_ustages().end(); ustage_it++)
-                {
-                    const auto &ustage = *ustage_it;
-                    auto &original = ustage.get_original();
-                    // check if evaluator is already available
-                    auto ustage_eval_it = ustage_eval_cache.find(original.get());
-                    if (original && ustage_eval_it != ustage_eval_cache.end())
-                        evaluator = ustage_eval_it->second;
-                    else
-                    {
-                        const auto &prev = ustage_it == ocp.get_ustages().begin() ? std::make_shared<uStageInternal>() : (ustage_it - 1)->get_internal();
-                        const auto &next = ustage_it + 1 == ocp.get_ustages().end() ? nullptr : (ustage_it + 1)->get_internal();
-                        evaluator = ustage.get_evaluator(prev, next, ocp.get_global_parameters(), opts, eval_cache);
-                        // add to cache
-                        ustage_eval_cache[ustage_it->get_original().get()] = evaluator;
-                    }
-                    ustages_.push_back(evaluator);
-                    for (int i = 1; i < ustage.K(); i++)
-                        ustages_.push_back(ustages_.back());
-                    horizon_length_ += ustage.K();
-                }
+                horizon_length_ = ustages_.size();
             }
             fatrop_int get_nxk(const fatrop_int k) const override { return ustages_[k]->get_nx(); };
             fatrop_int get_nuk(const fatrop_int k) const override { return ustages_[k]->get_nu(); };
@@ -176,10 +143,9 @@ namespace fatrop
             };
 
         private:
-            std::vector<std::shared_ptr<FatropuStageEvalAbstract>> ustages_;
-            int horizon_length_ = 0;
-            int n_global_parameters_ = 0;
+            std::vector<std::shared_ptr<UStageEvalAbstract>> ustages_;
+            int horizon_length_;
+            int n_global_parameters_;
         };
         // implementation of OCPAbstract, given an OCP
-    } // namespace spectool
 } // namespace fatrop

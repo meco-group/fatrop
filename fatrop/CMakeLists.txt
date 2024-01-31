@@ -53,6 +53,7 @@ solver/LineSearch.hpp                       solver/LineSearch.cpp
 solver/FatropStats.hpp                            
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
 json/json.h json/json.cpp
+ocp/UStageOCPImpl.hpp                       ocp/UStageOCPImpl.cpp
 )
 set(FATROPHEADERS
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp
@@ -93,7 +94,9 @@ solver/StepAcceptor.hpp
 solver/Timer.hpp
 solver/FatropStats.hpp                            
 templates/FatropApplication.hpp
-templates/NLPAlg.hpp)
+templates/NLPAlg.hpp
+ocp/UStageOCPImpl.hpp
+ocp/UStagEvalAbstract.hpp)
 # add_library(fatrop SHARED ${FATROP_INTERNAL})
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 

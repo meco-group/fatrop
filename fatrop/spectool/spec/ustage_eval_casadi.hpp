@@ -3,14 +3,14 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include "fatrop/spectool/spec/ustage_eval_abstract.hpp"
+#include "fatrop/ocp/UStageEvalAbstract.hpp"
 #include "fatrop/spectool/function_evaluation/casadi_fe.hpp"
 #include "fatrop/spectool/spec/ustage_quantities.hpp"
 namespace fatrop
 {
     namespace spectool
     {
-        class FatropuStageEvalCasadi : public FatropuStageEvalAbstract
+        class FatropuStageEvalCasadi : public UStageEvalAbstract
         {
         public:
             FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts, CasadiJitCache &eval_cache);
