@@ -28,19 +28,8 @@ namespace fatrop
       }
     };
 
-    C_api_userdata::C_api_userdata(const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_, const cs::Dict &options) : app_(std::make_shared<fatrop::OCPApplication>(ocpimpl_))
+    C_api_userdata::C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app) : app_(app)
     {
-      app_->build();
-      // go over the options and set
-      for (auto opt : options)
-      {
-        if (opt.second.is_double())
-          app_->set_option(opt.first, (double)opt.second);
-        else if (opt.second.is_int())
-          app_->set_option(opt.first, (int)opt.second);
-        else if (opt.second.is_bool())
-          app_->set_option(opt.first, (bool)opt.second);
-      }
       fatrop::OCPDims dims = app_->get_ocp_dims();
       n_vars = dims.n_u_tot + dims.n_x_tot;
       n_stage_params = dims.n_stage_params_tot;
@@ -52,7 +41,7 @@ namespace fatrop
           SparsityAux::dense(n_vars, 1),
           SparsityAux::dense(n_stage_params, 1),
           SparsityAux::dense(n_global_params, 1)};
-      sparsity_out = {cs::Sparsity::dense(n_vars, 1)};
+      sparsity_out = {SparsityAux::dense(n_vars, 1)};
     };
   }
 }

@@ -26,12 +26,23 @@ namespace fatrop
                 // return FatropFunction(name, fatrop_impl, opts);
                 // C-api approach
                 // C_api
-                C_api_userdata* userdata = new C_api_userdata(fatrop_impl, opts); 
+                auto app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
+                app->build();
+                // go over the options and set
+                for (auto opt : opts)
+                {
+                    if (opt.second.is_double())
+                        app->set_option(opt.first, (double)opt.second);
+                    else if (opt.second.is_int())
+                        app->set_option(opt.first, (int)opt.second);
+                    else if (opt.second.is_bool())
+                        app->set_option(opt.first, (bool)opt.second);
+                }
+                C_api_userdata *userdata = new C_api_userdata(app);
                 userdata->ref_count = 1;
-                auto func = cs::external("fatrop_func", "/home/lander/fatrop/build/fatrop/spectool/libspectool.so", cs::Dict{{"user_data", static_cast<void*>(userdata)}});
-                fatrop_func_decref(static_cast<void*>(userdata));
+                auto func = cs::external("fatrop_func", "/home/lander/fatrop/build/fatrop/spectool/libspectool.so", cs::Dict{{"user_data", static_cast<void *>(userdata)}});
+                fatrop_func_decref(static_cast<void *>(userdata));
                 return func;
-
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
             {

@@ -1,6 +1,5 @@
 #pragma once
 #include <math.h>
-#include <casadi/casadi.hpp>
 #include "fatrop/ocp/StageOCPApplication.hpp"
 #include "fatrop/ocp/OCPDims.hpp"
 #ifndef casadi_real
@@ -10,7 +9,6 @@
 #ifndef casadi_int
 #define casadi_int long long int
 #endif
-namespace cs = casadi;
 // c++ stuff here
 namespace fatrop
 {
@@ -20,7 +18,7 @@ namespace fatrop
     struct C_api_userdata
     {
       // constructor
-      C_api_userdata(const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_, const cs::Dict &options);
+      C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app);
       const std::shared_ptr<fatrop::OCPApplication> app_;
       std::vector<std::vector<casadi_int>> sparsity_in;
       std::vector<std::vector<casadi_int>> sparsity_out;
