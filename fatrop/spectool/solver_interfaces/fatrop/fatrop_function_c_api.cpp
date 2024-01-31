@@ -5,6 +5,28 @@ namespace fatrop
 {
   namespace spectool
   {
+    struct SparsityAux
+    {
+      static std::vector<casadi_int> dense(casadi_int m, casadi_int n)
+      {
+        std::vector<casadi_int> ret(3 + n + m * n);
+        casadi_int count = 0;
+        ret[count++] = m;
+        ret[count++] = n;
+        for (casadi_int i = 0; i < n + 1; i++)
+        {
+          ret[count++] = i * m;
+        }
+        for (casadi_int i = 0; i < n; i++)
+        {
+          for (casadi_int j = 0; j < m; j++)
+          {
+            ret[count++] = j;
+          }
+        }
+        return ret;
+      }
+    };
 
     C_api_userdata::C_api_userdata(const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_, const cs::Dict &options) : app_(std::make_shared<fatrop::OCPApplication>(ocpimpl_))
     {
@@ -27,9 +49,9 @@ namespace fatrop
       arg_stage_parameters = std::vector<double>(n_stage_params);
       arg_global_parameters = std::vector<double>(n_global_params);
       sparsity_in = {
-          cs::Sparsity::dense(n_vars, 1),
-          cs::Sparsity::dense(n_stage_params, 1),
-          cs::Sparsity::dense(n_global_params, 1)};
+          SparsityAux::dense(n_vars, 1),
+          SparsityAux::dense(n_stage_params, 1),
+          SparsityAux::dense(n_global_params, 1)};
       sparsity_out = {cs::Sparsity::dense(n_vars, 1)};
     };
   }
