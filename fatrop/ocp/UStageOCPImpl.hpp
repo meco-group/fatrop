@@ -5,10 +5,11 @@
 #include <memory>
 namespace fatrop
 {
+        template<typename TUStageEval>
         class UStageOCPImpl : public OCPAbstract
         {
         public:
-            UStageOCPImpl(std::vector<std::shared_ptr<UStageEvalAbstract>> && ustages, int n_global_parameters): ustages_(std::move(ustages)), n_global_parameters_(n_global_parameters)
+            UStageOCPImpl(std::vector<std::shared_ptr<TUStageEval>> && ustages, int n_global_parameters): ustages_(std::move(ustages)), n_global_parameters_(n_global_parameters)
             {
                 horizon_length_ = ustages_.size();
             }
@@ -143,7 +144,7 @@ namespace fatrop
             };
 
         private:
-            std::vector<std::shared_ptr<UStageEvalAbstract>> ustages_;
+            std::vector<std::shared_ptr<TUStageEval>> ustages_;
             int horizon_length_;
             int n_global_parameters_;
         };

@@ -150,7 +150,7 @@ namespace fatrop
             void register_hybrid(const std::vector<cs::MX> &hybrids);
             void register_control_parameter(const std::vector<cs::MX> &control_parameters);
             void register_global_parameter(const std::vector<cs::MX> &global_parameters);
-            virtual std::shared_ptr<UStageEvalAbstract> get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const;
+            virtual std::shared_ptr<FatropuStageEvalCasadi> get_evaluator(const std::shared_ptr<const uStageInternal> &prev, const std::shared_ptr<const uStageInternal> &next, const std::vector<cs::MX> &global_parameter_syms, const cs::Dict &opts, CasadiJitCache &cache) const;
             bool operator==(const uStage &other) const { return get() == other.get(); };
             std::shared_ptr<uStageInternal>& get_original() const { return get()->cloned_from_;};
 
