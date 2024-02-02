@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "solver/Filter.hpp"
+#include "fatrop/solver/Filter.hpp"
 using namespace fatrop;
 using namespace std;
 Filter::Filter(const fatrop_int size)

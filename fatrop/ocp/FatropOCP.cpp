@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
 using namespace fatrop;
 using namespace std;
 FatropOCP::FatropOCP(
@@ -50,6 +50,7 @@ FatropOCP::FatropOCP(
 int FatropOCP::eval_lag_hess(
     double obj_scale,
     const FatropVecBF &primal_vars,
+    const FatropVecBF &slack_vars,
     const FatropVecBF &lam)
 {
     int res = ocp_->eval_lag_hess(
@@ -103,8 +104,8 @@ int FatropOCP::solve_soc_rhs(
     const FatropVecBF &constraint_violation)
 {
     int min_it_ref = 0;
-    if (inertia_correction_c_cache != 0.0)
-        return -1;
+    // if (inertia_correction_c_cache != 0.0)
+    //     return -1;
     // bool it_ref = true;
     /// todo avoid retrieving unnecessary rhs'es
     ls_->get_rhs(
@@ -122,6 +123,7 @@ int FatropOCP::solve_soc_rhs(
 
     ls_->solve_rhs(
         &ocpkktmemory_,
+        inertia_correction_w_cache, inertia_correction_c_cache,
         ux,
         lam,
         delta_s,
@@ -190,6 +192,7 @@ int FatropOCP::solve_soc_rhs(
             }
             ls_->solve_rhs(
                 &ocpkktmemory_,
+                inertia_correction_w_cache, inertia_correction_c_cache,
                 ux_test[0],
                 lam_test[0],
                 delta_s_test[0],
@@ -216,14 +219,14 @@ int FatropOCP::compute_scalings(
     double &obj_scale,
     FatropVecBF &x_scales,
     FatropVecBF &lam_scales,
-    const FatropVecBF &grad_curr)
+    const FatropVecBF &grad_curr_x, const FatropVecBF &grad_curr_s)
 {
     return scaler_->compute_scalings(
         &ocpkktmemory_,
         obj_scale,
         x_scales,
         lam_scales,
-        grad_curr);
+        grad_curr_x);
 };
 int FatropOCP::eval_constraint_viol(
     const FatropVecBF &primal_vars,
@@ -240,18 +243,22 @@ int FatropOCP::eval_constraint_viol(
 int FatropOCP::eval_obj_grad(
     double obj_scale,
     const FatropVecBF &primal_vars,
-    FatropVecBF &gradient)
+    const FatropVecBF &slack_vars,
+    FatropVecBF &gradient_x,
+    FatropVecBF &gradient_s)
 {
+    gradient_s = 0.0;
     int res = ocp_->eval_obj_grad(
         &ocpkktmemory_,
         obj_scale,
         primal_vars,
-        gradient);
+        gradient_x);
     return res;
 };
 int FatropOCP::eval_obj(
     double obj_scale,
     const FatropVecBF &primal_vars,
+    const FatropVecBF &slack_vars,
     double &res)
 {
 
@@ -265,25 +272,28 @@ int FatropOCP::eval_obj(
 int FatropOCP::eval_dual_inf(
     double obj_scale,
     const FatropVecBF &lam,
-    const FatropVecBF &grad,
-    FatropVecBF &du_inf)
+    const FatropVecBF &grad_x,
+    const FatropVecBF &grad_s,
+    FatropVecBF &du_inf_x, FatropVecBF &du_inf_s)
 {
+    axpby(-1.0, lam.block(nlpdims_.neqs - nlpdims_.nineqs, nlpdims_.nineqs), 0.0, du_inf_s, du_inf_s);
     return duinfevaluator_.evaluate(
         &ocpkktmemory_,
         obj_scale,
         lam,
-        grad,
-        du_inf);
+        grad_x,
+        du_inf_x);
 }
 int FatropOCP::initialize_dual(
-    const FatropVecBF &grad,
+    const FatropVecBF &grad_x,
+    const FatropVecBF &grad_s,
     FatropVecBF &dlam,
     // FatropVecBF &s_curr,
     const FatropVecBF &zL,
     const FatropVecBF &zU)
 {
     // assume constraint jacobian evaluated
-    OCPInitializer_.modify_kkt_ls_dual_estimate(&ocpkktmemory_, grad);
+    OCPInitializer_.modify_kkt_ls_dual_estimate(&ocpkktmemory_, grad_x);
     s_dummy.SetConstant(0.0);
     s_zero.SetConstant(0.0);
     ux_dummy.SetConstant(0.0);

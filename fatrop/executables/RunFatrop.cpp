@@ -19,7 +19,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ocp/StageOCPApplication.hpp>
+#include <fatrop/ocp/StageOCPApplication.hpp>
 using namespace fatrop;
 using namespace std;
 int main(int argc, char **argv)

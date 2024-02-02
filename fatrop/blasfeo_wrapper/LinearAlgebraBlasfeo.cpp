@@ -520,13 +520,6 @@ FatropVecBF::operator VEC *() const
 {
     return this->vec_;
 }
-double &FatropVecBF::at(const fatrop_int ai) const
-{
-#if DEBUG
-    assert(ai < nels_);
-#endif
-    return VECEL(vec_, ai + offset_);
-};
 double FatropVecBF::get_el(const fatrop_int ai) const
 {
     return this->at(ai);

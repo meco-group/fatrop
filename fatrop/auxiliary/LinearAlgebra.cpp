@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "auxiliary/LinearAlgebra.hpp"
+#include "fatrop/auxiliary/LinearAlgebra.hpp"
 namespace fatrop
 {
     void FatropMat::print()
@@ -32,7 +32,7 @@ namespace fatrop
             printf("\n");
         }
     }
-    void FatropVec::print()
+    void FatropVec::print() const
     {
         fatrop_int n_el = nels();
         for (fatrop_int ai = 0; ai < n_el; ai++)

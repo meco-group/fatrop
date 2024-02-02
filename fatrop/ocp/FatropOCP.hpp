@@ -18,19 +18,19 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef OCPALGINCLUDED
 #define OCPALGINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
-#include "templates/NLPAlg.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
 #include "OCPScalingMethod.hpp"
 #include "DuInfEvaluator.hpp"
 #include "OCPInitializer.hpp"
-#include "solver/FatropPrinter.hpp"
-// #include "ocp/LineSearchDDP.hpp"
+#include "fatrop/solver/FatropPrinter.hpp"
+// #include "fatrop/ocp/LineSearchDDP.hpp"
 // #include "sparse/SparseOCP.hpp"
 #include "OCP.hpp"
 #include <memory>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 // #include <unistd.h>
 namespace fatrop
 {
@@ -45,6 +45,7 @@ namespace fatrop
         fatrop_int eval_lag_hess(
             double obj_scale,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             const FatropVecBF &lam) override;
         fatrop_int eval_constr_jac(
             const FatropVecBF &primal_vars,
@@ -66,7 +67,7 @@ namespace fatrop
             double &obj_scale,
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
-            const FatropVecBF &grad_curr) override;
+            const FatropVecBF &grad_curr_x, const FatropVecBF& grad_curr_s) override;
         fatrop_int eval_constraint_viol(
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
@@ -74,20 +75,24 @@ namespace fatrop
         fatrop_int eval_obj_grad(
             double obj_scale,
             const FatropVecBF &primal_vars,
-            FatropVecBF &gradient) override;
+            const FatropVecBF &slack_vars,
+            FatropVecBF &gradient_x,FatropVecBF &gradient_s) override;
         fatrop_int eval_obj(
             double obj_scale,
             const FatropVecBF &primal_vars,
+            const FatropVecBF &slack_vars,
             double &res) override;
         fatrop_int eval_dual_inf(
             double obj_scale,
             const FatropVecBF &lam,
-            const FatropVecBF &grad,
-            FatropVecBF &du_inf) override;
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
+            FatropVecBF &du_inf_x, FatropVecBF& du_inf_s) override;
         fatrop_int initialize_slacks(
             FatropVecBF &s_curr) override;
         fatrop_int initialize_dual(
-            const FatropVecBF &grad,
+            const FatropVecBF &grad_x,
+            const FatropVecBF &grad_s,
             FatropVecBF &dlam,
             const FatropVecBF &zL,
             const FatropVecBF &zU) override;

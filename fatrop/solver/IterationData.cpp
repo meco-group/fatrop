@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "solver/IterationData.hpp"
+#include "fatrop/solver/IterationData.hpp"
 using namespace fatrop;
 Journaller::Journaller(const fatrop_int maxiter, const std::shared_ptr<FatropPrinter> &printer) : printer_(printer)
 {

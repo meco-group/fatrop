@@ -18,7 +18,7 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef FATROPALGINCLUDED
 #define FATROPALGINCLUDED
-#include "templates/NLPAlg.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
 #include "FatropData.hpp"
 #include "Filter.hpp"
 #include "LineSearch.hpp"
@@ -27,11 +27,11 @@
 #include <memory>
 #include "FatropStats.hpp"
 #include <limits>
-#include <solver/FatropPrinter.hpp>
-#include "auxiliary/Common.hpp"
+#include <fatrop/solver/FatropPrinter.hpp>
+#include "fatrop/auxiliary/Common.hpp"
 // #include "AlgorithmQuantities.hpp"
 // #ifdef ENABLE_MULTITHREADING
-// #include "auxiliary/Worker.hpp"
+// #include "fatrop/auxiliary/Worker.hpp"
 // #endif
 
 namespace fatrop

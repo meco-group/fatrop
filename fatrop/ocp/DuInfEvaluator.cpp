@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "ocp/DuInfEvaluator.hpp"
+#include "fatrop/ocp/DuInfEvaluator.hpp"
 using namespace fatrop;
 fatrop_int DuInfEvaluator::evaluate(
     OCPKKTMemory *OCP,

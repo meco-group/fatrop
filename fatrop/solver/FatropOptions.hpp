@@ -22,7 +22,7 @@
 #include <map>
 #include <type_traits>
 #include <iostream>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     template <typename T>

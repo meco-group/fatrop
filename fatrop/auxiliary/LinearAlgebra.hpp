@@ -25,7 +25,7 @@
 #ifndef FATROP_LA_INCLUDED
 #define FATROP_LA_INCLUDED
 #include <iostream>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 
 namespace fatrop
 {
@@ -81,7 +81,7 @@ namespace fatrop
         virtual double get_el(const fatrop_int ai) const = 0;
         /** \brief Number of elements */
         virtual fatrop_int nels() const = 0;
-        void print();
+        void print() const;
     };
 } // namespace fatrop
 

@@ -53,6 +53,7 @@ solver/LineSearch.hpp                       solver/LineSearch.cpp
 solver/FatropStats.hpp                            
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
 json/json.h json/json.cpp
+ocp/UStageOCPImpl.hpp                       ocp/UStageOCPImpl.cpp
 )
 set(FATROPHEADERS
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp
@@ -93,7 +94,9 @@ solver/StepAcceptor.hpp
 solver/Timer.hpp
 solver/FatropStats.hpp                            
 templates/FatropApplication.hpp
-templates/NLPAlg.hpp)
+templates/NLPAlg.hpp
+ocp/UStageOCPImpl.hpp
+ocp/UStagEvalAbstract.hpp)
 # add_library(fatrop SHARED ${FATROP_INTERNAL})
 add_library(fatrop SHARED ${FATROP_INTERNAL})
 
@@ -109,27 +112,34 @@ target_link_libraries(RunFatrop fatrop)
 
 target_include_directories(RunFatrop
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/fatrop
+        ${PROJECT_SOURCE_DIR}
 )
 
 target_include_directories(fatrop PUBLIC  
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fatrop>  
-    $<INSTALL_INTERFACE:include/fatrop> # <prefix>/include/mylib
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>  
+    $<INSTALL_INTERFACE:include> # <prefix>/include/mylib
 )
 
 list(APPEND INCLUDEDIRSFATROP
-.
+auxiliary
+blasfeo_wrapper
+function_evaluation
+json
+ocp
+quasi_newton
+solver
+templates
 )
 foreach(incl IN LISTS INCLUDEDIRSFATROP) 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
-        DESTINATION "include/fatrop/${incl}" # target directory
+        DESTINATION "include/fatrop/" # target directory
         FILES_MATCHING # install only matched files
         PATTERN "*.hpp" # select C++ header files
         PATTERN "*.h" # select C header files
 )
 endforeach()
 
-set(INCLUDE_INSTALL_DIR "include/fatrop")
+set(INCLUDE_INSTALL_DIR "include")
 set(LIBRARY_INSTALL_DIR "lib")
 set(RUNTIME_INSTALL_DIR "bin")
 set(SYSCONFIG_INSTALL_DIR "etc/fatrop")
@@ -141,13 +151,3 @@ set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 set(CPACK_PACKAGE_NAME "fatrop")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-
-INSTALL(TARGETS fatrop RunFatrop
-  EXPORT fatropConfig
-  LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
-  ARCHIVE DESTINATION ${LIBRARY_INSTALL_DIR}
-  INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
-  RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
-  )
-
-INSTALL(EXPORT fatropConfig DESTINATION cmake)

@@ -1,0 +1,17 @@
+Change stage -> u_stage
+
+Stage  
+
+       u_stage_initial u_stage_middle u_stage_terminal  
+con    c_t0            c_mid          c_tf              
+dyn    F               F              F_tf or /            
+obj    L_t0            L_mid          L_tf              
+
+
+Ipopt
+Docker
+Custom Jac and Hess
+Gitlab -> Github
+Serialization
+Codegen
+Spectrop is a submodule

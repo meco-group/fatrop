@@ -1,7 +1,23 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
-#include "ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/StageOCPApplication.hpp"
+#include "src/numpy.hpp"
+#ifdef WITH_SPECTOOL
+#include "src/swig-bind.hpp"
+#include "src/specification.hpp"
+#include "src/expose-spectool.hpp"
+#endif
+
+#include "fatrop/solver/AlgBuilder.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
+#include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCPBuilder.hpp"
+#include "fatrop/ocp/StageOCP.hpp"
+#include "fatrop/solver/FatropAlg.hpp"
+#include "fatrop/ocp/OCPAbstract.hpp"
+#include "fatrop/json/json.h"
+#include "fatrop/auxiliary/Common.hpp"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -9,78 +25,18 @@
 namespace py = pybind11;
 namespace fatropy
 {
-    struct MatBind : public std::vector<double>
-    {
-        using std::vector<double>::vector;
-        MatBind(const py::array_t<double> &x)
-        {
-            auto buf = x.request();
-            auto ptr = static_cast<double *>(buf.ptr);
-            this->resize(buf.size);
-            if (buf.ndim == 1)
-            {
-                std::copy(ptr, ptr + buf.size, this->begin());
-            }
-            else
-            {
-                const int m = buf.shape[0];
-                const int n = buf.shape[1];
-                const int stride_0 = buf.strides[0] / buf.itemsize;
-                const int stride_1 = buf.strides[1] / buf.itemsize;
-                // copy to fortran format
-                for (int j = 0; j < n; j++)
-                    for (int i = 0; i < m; i++)
-                        (*this)[i + j * m] = ptr[stride_0 * i + stride_1 * j];
-            }
-        };
-        py::array_t<double> to_numpy()
-        {
-            auto result = py::array(py::buffer_info(
-                nullptr,                              /* Pointer to data (nullptr -> ask NumPy to allocate!) */
-                sizeof(double),                       /* Size of one item */
-                py::format_descriptor<double>::value, /* Buffer format */
-                1,                                    /* How many dimensions? */
-                {this->size()},                       /* Number of elements for each dimension */
-                {sizeof(double)}                      /* Strides for each dimension */
-                ));
-            std::copy(this->begin(), this->end(), reinterpret_cast<double *>(result.request().ptr));
-            return result;
-        }
-        // 2d array to_numpy()
-        py::array_t<double> to_numpy(const int m, const int n)
-        {
-            // result is in Fortran format
-            auto result = py::array(py::buffer_info(
-                nullptr,                              /* Pointer to data (nullptr -> ask NumPy to allocate!) */
-                sizeof(double),                       /* Size of one item */
-                py::format_descriptor<double>::value, /* Buffer format */
-                2,                                    /* How many dimensions? */
-                {m, n},                               /* Number of elements for each dimension */
-                {sizeof(double), sizeof(double) * m}  /* Strides for each dimension */
-                ));
-            std::copy(this->begin(), this->end(), reinterpret_cast<double *>(result.request().ptr));
-            return result;
-        }
-        py::array_t<double> to_numpy(const int l, const int m, const int n)
-        {
-            // l is the number of 2d matrices
-            auto result = py::array(py::buffer_info(
-                nullptr,                                                     /* Pointer to data (nullptr -> ask NumPy to allocate!) */
-                sizeof(double),                                              /* Size of one item */
-                py::format_descriptor<double>::value,                        /* Buffer format */
-                3,                                                           /* How many dimensions? */
-                {l, m, n},                                                   /* Number of elements for each dimension */
-                {sizeof(double) * m * n, sizeof(double), sizeof(double) * m} /* Strides for each dimension */
-                ));
-            std::copy(this->begin(), this->end(), reinterpret_cast<double *>(result.request().ptr));
-            return result;
-        }
-    };
 }
 
 PYBIND11_MODULE(fatropy, m)
 {
     using namespace fatropy;
+    // wrap print_function_name
+    // py::class_<test_type>(m, "test_type").def(py::init<>());
+    // m.def("print", &print);
+    // m.def("print_function_name", [](const py::object &pyobj)
+    //       {  print_function_nametest(*FromPySwig<casadi::Function>::convert(pyobj)); });
+    // m.def("print_function_name", &print_function_nametest);
+    // m.def("test_change_name", &test_change_name);
     py::class_<fatrop::FatropSolution>(m, "FatropSolution");
     py::class_<fatrop::OCPTimeStepSampler>(m, "OCPTimeStepSampler");
     py::class_<fatrop::StageControlGridSampler>(m, "StageControlGridSampler");
@@ -138,7 +94,8 @@ PYBIND11_MODULE(fatropy, m)
         .def("set_option", &fatrop::StageOCPApplication::set_option<double>)
         .def("last_solution", &fatrop::StageOCPApplication::last_solution)
         .def("get_expression", &fatrop::StageOCPApplication::get_expression)
-        .def("set_initial", &fatrop::NLPApplication::set_initial)
+        // .def("set_initial", [](fatrop::NLPApplication& app,  const fatrop::FatropSolution &initial_guess){return app.set_initial(initial_guess);}, py::const_)
+        .def("set_initial", py::overload_cast<const fatrop::FatropSolution &>(&fatrop::NLPApplication::set_initial, py::const_))
         .def("set_initial_x", [](fatrop::StageOCPApplication &app, const py::array_t<double> &x)
              { app.set_initial_x(MatBind(x)); })
         .def("set_initial_u", [](fatrop::StageOCPApplication &app, const py::array_t<double> &u)
@@ -158,6 +115,11 @@ PYBIND11_MODULE(fatropy, m)
     py::class_<fatrop::StageOCPApplicationFactory>(m, "StageOCPApplicationFactory")
         .def(py::init<>())
         .def("from_rockit_interface", &fatrop::StageOCPApplicationFactory::from_rockit_interface);
+
+#ifdef WITH_SPECTOOL
+    auto module_spectool = m.def_submodule("spectool", "specification tool");
+    ExposeSpectool::expose(module_spectool);
+#endif
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

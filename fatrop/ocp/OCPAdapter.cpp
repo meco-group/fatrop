@@ -16,10 +16,41 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "ocp/OCPAdapter.hpp"
+#include "fatrop/ocp/OCPAdapter.hpp"
 
 using namespace fatrop;
 using namespace std;
+void OCPAdapter::print_kkt_matrix(OCPKKTMemory *OCP)
+{
+    int K = OCP->K;
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, nx, _p);
+    OCPMACRO(fatrop_int *, ng, _p);
+    OCPMACRO(fatrop_int *, ng_ineq, _p);
+    for (int k = 0; k < K; k++)
+    {
+        int nu = nu_p[k];
+        int nx = nx_p[k];
+        int ng = ng_p[k];
+        int ng_ineq = ng_ineq_p[k];
+        std::cout << "------ " << k << " ------" << std::endl;
+        std::cout << "nu: " << nu << std::endl;
+        std::cout << "nx: " << nx << std::endl;
+        std::cout << "ng: " << ng << std::endl;
+        std::cout << "ng_ineq: " << ng_ineq << std::endl;
+        std::cout << "RSQrq" << std::endl;
+        blasfeo_print_dmat(nu + nx + 1, nu + nx, ((MAT *)OCP->RSQrqt) + k, 0, 0);
+        if (k < K - 1)
+        {
+            std::cout << "BAbt" << std::endl;
+            blasfeo_print_dmat(nu + nx + 1, nx_p[k + 1], ((MAT *)OCP->BAbt) + k, 0, 0);
+        }
+        std::cout << "Ggt" << std::endl;
+        blasfeo_print_dmat(nu + nx + 1, ng, ((MAT *)OCP->Ggt) + k, 0, 0);
+        std::cout << "Ggt_ineq" << std::endl;
+        blasfeo_print_dmat(nu + nx + 1, ng_ineq, ((MAT *)OCP->Ggt_ineq) + k, 0, 0);
+    }
+}
 fatrop_int OCPAdapter::eval_lag_hess(
     OCPKKTMemory *OCP,
     double obj_scale,
@@ -44,9 +75,9 @@ fatrop_int OCPAdapter::eval_lag_hess(
     double *primal_data = primal_vars_p->pa;
     double *lam_data = lam_p->pa;
 
-    OCPMACRO(MAT *, BAbt, _p);
-    OCPMACRO(MAT *, Ggt, _p);
-    OCPMACRO(MAT *, Ggt_ineq, _p);
+    // OCPMACRO(MAT *, BAbt, _p);
+    // OCPMACRO(MAT *, Ggt, _p);
+    // OCPMACRO(MAT *, Ggt_ineq, _p);
 
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
@@ -60,24 +91,18 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_g_k = offs_g[k];
         fatrop_int offs_ineq_k = offs_ineq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        int ret = 0;
-        if (bfgs)
-            ret = OCPBFGS_updaters[k].update(RSQrqt_p + k, primal_vars_p, offs_ux_k, gradbuf[k], 0, BAbt_p + k, lam_p, offs_dyn_eq_k, Ggt_p + k, lam_p, offs_g_k, Ggt_ineq_p + k, lam_p, offs_ineq_k);
-        if (!bfgs || ret == 1)
-        {
         // std::cout << "using exact Hess " << k << std::endl;
-            ret = ocptempl->eval_RSQrqtk(
-                &obj_scale,
-                primal_data + offs_ux_k,
-                primal_data + offs_ux_k + nu_k,
-                lam_data + offs_dyn_eq_k,
-                lam_data + offs_g_k,
-                lam_data + offs_ineq_k,
-                stageparams_p + offs_stageparams_k,
-                globalparams_p,
-                RSQrqt_p + k,
-                k);
-        }
+        ocptempl->eval_RSQrqtk(
+            &obj_scale,
+            primal_data + offs_ux_k,
+            primal_data + offs_ux_k + nu_k,
+            lam_data + offs_dyn_eq_k,
+            lam_data + offs_g_k,
+            lam_data + offs_ineq_k,
+            stageparams_p + offs_stageparams_k,
+            globalparams_p,
+            RSQrqt_p + k,
+            k);
 
         if (k > 0)
         {
@@ -271,21 +296,68 @@ fatrop_int OCPAdapter::eval_contr_viol(
     }
     return 0;
 }
+fatrop_int OCPAdapter::eval_ineqs(
+    OCPKKTMemory *OCP,
+    const FatropVecBF &primal_vars,
+    FatropVecBF &constraint_violation)
+{
+    // horizon length
+    fatrop_int K = OCP->K;
+    // offsets
+    fatrop_int *offs_ux = (fatrop_int *)OCP->aux.ux_offs.data();
+    fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
+    fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
+    fatrop_int *offs_ineq = (fatrop_int *)OCP->aux.ineq_offs.data();
+    fatrop_int *offs_g_ineq = (fatrop_int *)OCP->aux.g_ineq_offs.data();
+    fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
+    double *stageparams_p = (double *)stageparams.data();
+    double *globalparams_p = (double *)globalparams.data();
+    double *cv_p = ((VEC *)constraint_violation)->pa;
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, ng, _p);
+    OCPMACRO(fatrop_int *, ng_ineq, _p);
+    SOLVERMACRO(VEC *, primal_vars, _p);
+    double *primal_data = primal_vars_p->pa;
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
+    for (fatrop_int k = 0; k < K; k++)
+    {
+        fatrop_int ng_ineq_k = ng_ineq_p[k];
+        if (ng_ineq_k > 0)
+        {
+            fatrop_int nu_k = nu_p[k];
+            fatrop_int ng_ineq_k = ng_ineq_p[k];
+            fatrop_int offs_ux_k = offs_ux[k];
+            fatrop_int offs_ineq_k = offs_ineq[k];
+            fatrop_int offs_g_ineq_k = offs_g_ineq[k];
+            fatrop_int offs_stageparams_k = offs_stageparams_p[k];
+            ocptempl->eval_gineqk(
+                primal_data + offs_ux_k,
+                primal_data + offs_ux_k + nu_k,
+                stageparams_p + offs_stageparams_k,
+                globalparams_p,
+                cv_p + offs_ineq_k,
+                k);
+        }
+    }
+    return 0;
+}
 fatrop_int OCPAdapter::eval_obj_grad(
     OCPKKTMemory *OCP,
     double obj_scale,
     const FatropVecBF &primal_vars,
-    FatropVecBF &gradient)
+    FatropVecBF &gradient_x)
 {
     // horizon length
     fatrop_int K = OCP->K;
     // offsets
     const fatrop_int *offs_ux = (const fatrop_int *)OCP->aux.ux_offs.data();
-    double *grad_p = ((VEC *)gradient)->pa;
+    double *grad_p = ((VEC *)gradient_x)->pa;
     OCPMACRO(fatrop_int *, nu, _p);
-    OCPMACRO(fatrop_int *, nx, _p);
+    // OCPMACRO(fatrop_int *, nx, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
-    SOLVERMACRO(VEC *, gradient, _p);
+    // SOLVERMACRO(VEC *, gradient, _p);
     double *primal_data = primal_vars_p->pa;
     fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
@@ -296,7 +368,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
     for (fatrop_int k = 0; k < K; k++)
     {
         fatrop_int nu_k = nu_p[k];
-        fatrop_int nx_k = nx_p[k];
+        // fatrop_int nx_k = nx_p[k];
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         ocptempl->eval_rqk(
@@ -308,7 +380,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
             grad_p + offs_ux_k,
             k);
         // save result in grad buf
-        VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
+        // VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
         // blasfeo_print_dvec(nu_k + nx_k, gradbuf[k], 0);
     }
     return 0;

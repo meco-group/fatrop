@@ -1,0 +1,42 @@
+{
+  "version": "1",
+  "pip_version": "23.0",
+  "install": [
+    {
+      "download_info": {
+        "url": "file:///home/lander/fatrop/fatropy",
+        "dir_info": {}
+      },
+      "is_direct": true,
+      "requested": true,
+      "metadata": {
+        "metadata_version": "2.1",
+        "name": "fatropy",
+        "version": "0.0.1",
+        "summary": "python bindings for fatrop",
+        "author": "lander vanroye",
+        "author_email": "lander.vanroye@kuleuven.be",
+        "requires_dist": [
+          "pytest>=6.0 ; extra == \"test\""
+        ],
+        "requires_python": ">=3.7",
+        "provides_extra": [
+          "test"
+        ]
+      }
+    }
+  ],
+  "environment": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.8.10",
+    "os_name": "posix",
+    "platform_machine": "x86_64",
+    "platform_release": "5.14.0-1058-oem",
+    "platform_system": "Linux",
+    "platform_version": "#66-Ubuntu SMP Fri Feb 10 09:46:18 UTC 2023",
+    "python_full_version": "3.8.10",
+    "platform_python_implementation": "CPython",
+    "python_version": "3.8",
+    "sys_platform": "linux"
+  }
+}

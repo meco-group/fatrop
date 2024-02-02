@@ -16,12 +16,19 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.-->
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/meco-group/fatrop/00a50ff13e6a6a8118951e6e5307f5907dda193c/misc/fatrop_logo.svg" width="400" />
+</p>
+
+
+
 # FATROP
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
 
 The main features of the solver are:
 - high numerical robustness thanks to advanced numerical optimization techniques, inspired by [Ipopt](https://coin-or.github.io/Ipopt/)
-- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://arxiv.org/abs/2302.14836)
+- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://onlinelibrary.wiley.com/doi/full/10.1002/oca.3064)
 - effective handling of path equality and inequality constraints, without relying on penalty methods
 - ability to incorporate exact Lagrangian Hessian information
 - ability to be initialized from any, possibly infeasible, solution estimate
@@ -29,7 +36,15 @@ The main features of the solver are:
 
 ## Disclaimer
 
-At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying fatrop problems. An example is available in the **specification** branch, spectrop/example.cpp.
+At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying Fatrop problems. An example is available in the **specification** branch, spectool/example.cpp.
+
+The spectool has several advantages over the rockit interface:
+- it supports fatrop problems in all its generality. For example: multi-stage problems are not supported by the fatrop-rockit-interface
+- it's possible to specify and solve problems directly from c++, no need for generating the .so and .json seperately from python
+- no need for function compilation, function evaluation can be performed in the casadi virtual machine
+- some handy features like custom Jacobian and Hessian expressions for more efficient function evaluation then default casadi AD
+
+To compile fatrop with the (beta) spectool make sure to set the CMake flag `-DWITH_SPECTOOL=ON`. Spectool also requires [CasADi](https://github.com/casadi/casadi) to be installed. Currently, we require the casadi/core/function_internal.hpp header, which is installed when CMake flag `-DINSTALL_INTERNAL_HEADERS=ON` is set when installing CasADi.
 <!-- Release is expected end of August 2023. -->
 
 # Installation instructions
@@ -46,7 +61,7 @@ At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two i
 ## Build and install Fatrop and Fatropy
 (Recursively) clone this repository
 
-    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
+    git clone https://github.com/meco-group/fatrop.git --recursive
     cd fatrop
 
 
@@ -61,14 +76,11 @@ Build and install the Fatropy project
 
 Trouble shoot: 
 - make sure you're using the newest pip version (pip install --upgrade pip setuptools)
-- if you get the error 'fatal error: pybind11/pybind11.h: No such file or directory', try to install the following dependency:
-
-	    sudo apt install pybind11-dev 
 
 ## Build and install Fatrop only
 (Recursively) clone this repository
 
-    git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop.git --recursive
+    git clone https://github.com/meco-group/fatrop.git --recursive
     cd fatrop
 
 Build and install the Fatrop project
@@ -87,7 +99,7 @@ For non-x64 targets change the BLASFEO_target parameter according to the table o
 ## Install rockit with Fatropy interface 
 
     git clone https://gitlab.kuleuven.be/meco-software/rockit.git
-    git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop --recursive
+    git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop
     cd rockit
     pip install .
 
@@ -104,3 +116,4 @@ Fatrop is developed by [Lander Vanroye](https://www.kuleuven.be/wieiswie/en/pers
 
 Contributors:
 - [Ajay Sathya](https://www.kuleuven.be/wieiswie/en/person/00110259) ([rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface)
+- The Fatrop logo was designed by [Louis Callens](https://www.kuleuven.be/wieiswie/en/person/00143705)

@@ -20,14 +20,21 @@
 #define FATROP_BLASFEO_INCLUDED
 
 // macros
+extern "C"
+{
+    void blasfeo_ref_drowpe(int kmax, int *ipiv, struct blasfeo_dmat *sA);
+    void blasfeo_ref_drowpei(int kmax, int *ipiv, struct blasfeo_dmat *sA);
+}
 #define MAT blasfeo_dmat
 #define VEC blasfeo_dvec
 #define MEMSIZE_MAT blasfeo_memsize_dmat
 #define CREATE_MAT blasfeo_create_dmat
-#define ROWPE blasfeo_drowpe
+// #define ROWPE blasfeo_drowpe
+#define ROWPE blasfeo_ref_drowpe
 #define VECPE blasfeo_dvecpe
 #define VECPEI blasfeo_dvecpei
-#define ROWPEI blasfeo_drowpei
+// #define ROWPEI blasfeo_drowpei
+#define ROWPEI blasfeo_ref_drowpei
 #define COLPE blasfeo_dcolpe
 #define COLPEI blasfeo_dcolpei
 #define CREATE_MAT blasfeo_create_dmat
@@ -118,9 +125,9 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include "auxiliary/LinearAlgebra.hpp"
-#include "auxiliary/FatropVector.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/LinearAlgebra.hpp"
+#include "fatrop/auxiliary/FatropVector.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 #include <cmath>
 #if DEBUG
 #include <assert.h>
@@ -298,7 +305,13 @@ namespace fatrop
         /** \brief type conversion to blasfeo vector pointer*/
         explicit operator VEC *() const;
         /** \brief access to element of matrix */
-        double &at(const fatrop_int ai) const;
+        inline double &at(const fatrop_int ai) const
+        {
+#if DEBUG
+            assert(ai < nels_);
+#endif
+            return VECEL(vec_, ai + offset_);
+        };
         /** \brief get element of vector */
         double get_el(const fatrop_int ai) const;
         /** \brief get number of elements */
@@ -307,6 +320,11 @@ namespace fatrop
         fatrop_int offset() const;
         /** \brief copies all elements from a given fatrop_vector to this vector*/
         void operator=(const FatropVec &fm);
+        void operator=(const double &val)
+        {
+            blasfeo_dvecse(nels(), val, vec_, offset());
+        }
+
         void copy(const FatropVecBF &fm);
         void copyto(std::vector<double> &dest) const;
         void operator=(const std::vector<double> &fm);
@@ -316,6 +334,15 @@ namespace fatrop
         FatropVecBF block(const fatrop_int i, const fatrop_int p) const;
         void SwapWith(FatropVecBF &vb);
         void SetConstant(double constant) const;
+        friend double sum(const FatropVecBF &va)
+        {
+            double ret = 0.0;
+            for (int i = 0; i < va.nels(); i++)
+            {
+                ret += va.at(i);
+            }
+            return ret;
+        }
         bool has_inf() const
         {
             for (int i = 0; i < nels(); i++)
@@ -361,7 +388,7 @@ namespace fatrop
         /** \brief constuction for allocation on MemoryAllocator*/
         FatropMemoryVecBF(const FatropVector<fatrop_int> &nels, fatrop_int N);
         // TODO: if rvalue-reference is used -> unecessary copy, use move sementics instead.;
-        FatropMemoryVecBF(const fatrop_int nels, fatrop_int N);
+        FatropMemoryVecBF(const fatrop_int nels, fatrop_int N = 1);
         /** \brief calculate memory size*/
         fatrop_int memory_size() const;
         /** \brief set up memory element and advance pointer */

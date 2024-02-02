@@ -18,9 +18,9 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef FATROP_OCPDIMS_INCLUDED
 #define FATROP_OCPDIMS_INCLUDED
-#include "auxiliary/FatropVector.hpp"
-#include "auxiliary/Common.hpp"
-#include "templates/NLPAlg.hpp"
+#include "fatrop/auxiliary/FatropVector.hpp"
+#include "fatrop/auxiliary/Common.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
 #include <vector>
 namespace fatrop
 {
@@ -29,12 +29,12 @@ namespace fatrop
     {
     public:
         OCPDims(const fatrop_int K, const FatropVector<fatrop_int> &nu, const FatropVector<fatrop_int> &nx, const FatropVector<fatrop_int> &ng, const FatropVector<fatrop_int> &ng_ineq, const FatropVector<fatrop_int> &n_stage_params, const fatrop_int n_global_parameters) : NLPDims({sum(nx + nu), sum(ng + ng_ineq + nx) - nx.get(0), sum(ng_ineq)}),
-                                                                                                                                                        K(K), nu(nu), nx(nx), ng(ng), ng_ineq(ng_ineq), n_stage_params(n_stage_params), n_global_params(n_global_parameters),
-                                                                                                                                                        n_u_tot(sum(nu)),
-                                                                                                                                                        n_x_tot(sum(nx)),
-                                                                                                                                                        n_b_tot(n_x_tot - nx.get(0)),
-                                                                                                                                                        n_g_tot(sum(ng)),
-                                                                                                                                                        n_g_ineq_tot(sum(ng_ineq)){};
+                                                                                                                                                                                                                                                                                 K(K), nu(nu), nx(nx), ng(ng), ng_ineq(ng_ineq), n_stage_params(n_stage_params), n_global_params(n_global_parameters),
+                                                                                                                                                                                                                                                                                 n_u_tot(sum(nu)),
+                                                                                                                                                                                                                                                                                 n_x_tot(sum(nx)),
+                                                                                                                                                                                                                                                                                 n_b_tot(n_x_tot - nx.get(0)),
+                                                                                                                                                                                                                                                                                 n_g_tot(sum(ng)),
+                                                                                                                                                                                                                                                                                 n_g_ineq_tot(sum(ng_ineq)), n_stage_params_tot(sum(n_stage_params)){};
         /// horizon length
         const fatrop_int K;
         /// input vector size
@@ -54,6 +54,7 @@ namespace fatrop
         const fatrop_int n_b_tot;
         const fatrop_int n_g_tot;
         const fatrop_int n_g_ineq_tot;
+        const fatrop_int n_stage_params_tot;
     };
 } // namespace fatrop
 #endif // FATROP_OCPDIMS_INCLUDED

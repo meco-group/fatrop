@@ -18,12 +18,12 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef OCPINCLUDED
 #define OCPINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
-#include "ocp/OCPKKT.hpp"
-#include "solver/FatropData.hpp"
+#include "fatrop/ocp/OCPKKT.hpp"
+#include "fatrop/solver/FatropData.hpp"
 #include <memory>
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     /** \brief interface class for OCP operations*/
@@ -44,11 +44,16 @@ namespace fatrop
             const FatropVecBF &primal_vars,
             const FatropVecBF &slack_vars,
             FatropVecBF &constraint_violation) = 0;
+        virtual fatrop_int eval_ineqs(
+            OCPKKTMemory *OCP,
+            const FatropVecBF &primal_vars,
+            FatropVecBF &constraint_violation) = 0;
         virtual fatrop_int eval_obj_grad(
             OCPKKTMemory *OCP,
             double obj_scale,
             const FatropVecBF &primal_vars,
-            FatropVecBF &gradient) = 0;
+            FatropVecBF &gradient_x 
+            ) = 0;
         virtual fatrop_int eval_obj(
             OCPKKTMemory *OCP,
             double obj_scale,

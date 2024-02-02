@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "ocp/OCPLSRiccati.hpp"
+#include "fatrop/ocp/OCPLSRiccati.hpp"
 using namespace std;
 namespace fatrop
 {
@@ -33,7 +33,7 @@ namespace fatrop
 using namespace fatrop;
 OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> &options, const shared_ptr<FatropPrinter> &printer) : Ppt(dims.nx + 1, dims.nx, dims.K),
                                                                                                                                       Hh(dims.nx, dims.nx + 1, dims.K), // the number of eqs can never exceed nu + nx
-                                                                                                                                      AL(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nu+dims.nx)), 1),
+                                                                                                                                      AL(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nu + dims.nx)), 1),
                                                                                                                                       RSQrqt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
                                                                                                                                       Ggt_stripe(vector<fatrop_int>(1, maxel(dims.nu + dims.nx + 1)), vector<fatrop_int>(1, maxel(dims.nx + dims.nu)), 1),
                                                                                                                                       Ggt_tilde(dims.nu + dims.nx + 1, dims.nx + dims.nu, dims.K), // TODO, only save first rho rows (can never exceed nu)
@@ -97,16 +97,105 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
     const FatropVecBF &sigma_total,
     const FatropVecBF &gradb_total)
 {
-    lastused_.inertia_correction_c = inertia_correction_c;
-    lastused_.inertia_correction_w = inertia_correction_w;
+    // lastused_.inertia_correction_c = inertia_correction_c;
+    // lastused_.inertia_correction_w = inertia_correction_w;
+    int ret;
     if (inertia_correction_c == 0.0)
     {
-        return solve_pd_sys_normal(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
+        ret = solve_pd_sys_normal(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
     }
     else
     {
-        return solve_pd_sys_degenerate(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, gradb_total);
+        ret = solve_pd_sys_degenerate(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, gradb_total);
     }
+    if (ret != 0)
+        return ret;
+    if (it_ref)
+    {
+        const fatrop_int min_it_ref = 0;
+        double err_curr = 0.0;
+        get_rhs(
+            OCP,
+            gradb_total,
+            rhs_rq2[0],
+            rhs_b2[0],
+            rhs_g2[0],
+            rhs_g_ineq2[0],
+            rhs_gradb2[0]);
+        // el = blasfeo_toc(&timer);
+        // cout << "el time get rhs" << el << endl; //
+        double max_norm = max(Linf(rhs_gradb2[0]), max(Linf(rhs_g_ineq2[0]), max(Linf(rhs_g2[0]), max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
+        max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
+        double error_prev = -1.0;
+        for (fatrop_int i = 0; i < 5; i++)
+        {
+            // blasfeo_tic(&timer);
+            compute_pd_sys_times_vec(
+                OCP,
+                inertia_correction_w,
+                inertia_correction_c,
+                ux,
+                lam,
+                delta_s,
+                sigma_total,
+                rhs_rq[0],
+                rhs_b[0],
+                rhs_g[0],
+                rhs_g_ineq[0],
+                rhs_gradb[0]);
+            // el = blasfeo_toc(&timer);
+            // cout << "el time compute mv prod" << el << endl; //
+            axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
+            axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
+            axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
+            axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
+            axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
+
+            // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
+            // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
+            // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
+            // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
+            // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
+            err_curr = max(Linf(rhs_gradb[0]), max(Linf(rhs_g_ineq[0]), max(Linf(rhs_g[0]), max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
+            // cout << "residu:  " << err_curr << endl;
+            if (i >= min_it_ref)
+            {
+                if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
+                {
+                    if (err_curr > 1e-8)
+                    {
+                        // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
+                    }
+                    return 0;
+                }
+            }
+            // blasfeo_tic(&timer);
+            solve_rhs(
+                OCP,
+                inertia_correction_w, inertia_correction_c,
+                ux_test[0],
+                lam_test[0],
+                delta_s_test[0],
+                sigma_total,
+                rhs_rq[0],
+                rhs_b[0],
+                rhs_g[0],
+                rhs_g_ineq[0],
+                rhs_gradb[0]);
+            // el = blasfeo_toc(&timer);
+            // cout << "el time solveRHS " << el << endl; //
+            // el = blasfeo_toc(&timer);
+            // cout << "el time solveRHS " << el << endl;
+            axpby(1.0, ux_test[0], 1.0, ux, ux);
+            axpby(1.0, lam_test[0], 1.0, lam, lam);
+            axpby(1.0, delta_s_test[0], 1.0, delta_s, delta_s);
+
+            // prepare next iteration
+            error_prev = err_curr;
+        }
+        printer_->level(1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
+    }
+    return 0;
 }
 fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
     OCPKKTMemory *OCP,
@@ -133,7 +222,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
     SOLVERMACRO(MAT *, Ppt, _p);
     SOLVERMACRO(MAT *, AL, _p);
     SOLVERMACRO(MAT *, RSQrqt_tilde, _p);
-    SOLVERMACRO(MAT *, Ggt_tilde, _p);
+    // SOLVERMACRO(MAT *, Ggt_tilde, _p);
     SOLVERMACRO(MAT *, Llt, _p);
     SOLVERMACRO(MAT *, Llt_shift, _p);
     SOLVERMACRO(MAT *, LlIt, _p);
@@ -154,72 +243,48 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
 
     /////////////// recursion ///////////////
 
-    // last stage
-    {
-        const fatrop_int nx = nx_p[K - 1];
-        const fatrop_int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
-        const fatrop_int ng = ng_p[K - 1];
-        const fatrop_int ng_ineq = ng_ineq_p[K - 1];
-        const fatrop_int offs_ineq_k = offs_ineq_p[K - 1];
-        // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[K - 1];
-        // Pp_Km1 <- Qq_Km1
-        GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
-        DIARE(nx, inertia_correction_w, Ppt_p + K - 1, 0, 0);
-        //// inequalities
-        if (ng_ineq > 0)
-        {
-            GECP(nx + 1, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
-            for (fatrop_int i = 0; i < ng_ineq; i++)
-            {
-                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
-                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
-                COLSC(nx + 1, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
-            }
-            // add the penalty
-            SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-            // TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        }
-
-        GECP(nx + 1, ng, Ggt_p + K - 1, nu, 0, Ggt_tilde_p + K - 1, 0, 0); // needless operation because feature not implemented yet
-        SYRK_LN_MN(nx + 1, nx, ng, delta_cmin1, Ggt_tilde_p + K - 1, 0, 0, Ggt_tilde_p + K - 1, 0, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-    }
-    for (fatrop_int k = K - 2; k >= 0; --k)
+    for (fatrop_int k = K - 1; k >= 0; --k)
     {
         const fatrop_int nu = nu_p[k];
         const fatrop_int nx = nx_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
         const fatrop_int ng = ng_p[k];
         const fatrop_int ng_ineq = ng_ineq_p[k];
         const fatrop_int offs_ineq_k = offs_ineq_p[k];
         // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[k];
         //////// SUBSDYN
+        if (k == K - 1)
         {
+            GECP(nx + nu + 1, nu + nx, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+        }
+        else
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
             // AL <- [BAb]^T_k P_kp1
             GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
             // AL[-1,:] <- AL[-1,:] + p_kp1^T
             GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
             // RSQrqt_stripe <- AL[BA] + RSQrqt
             SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+        }
+        // equality penalty
+        {
             // RSQrqt + 1/d_c At@A
             DIARE(nu + nx, inertia_correction_w, RSQrqt_tilde_p + k, 0, 0);
             SYRK_LN_MN(nu + nx + 1, nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, Ggt_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
-
-            //// inequalities
-            if (ng_ineq > 0)
+        }
+        //// inequalities
+        if (ng_ineq > 0)
+        {
+            GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+            for (fatrop_int i = 0; i < ng_ineq; i++)
             {
-                GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
-                for (fatrop_int i = 0; i < ng_ineq; i++)
-                {
-                    double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
-                    double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
-                    COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                    MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
-                }
-                // add the penalty
-                SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
+                COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
             }
+            // add the penalty
+            SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
         }
         //////// TRANSFORM_AND_SUBSEQ
         {
@@ -260,33 +325,27 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
     fatrop_int *offs_ux = (fatrop_int *)OCP->aux.ux_offs.data();
     fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
     fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
-    // other stages
-    // for (fatrop_int k = 0; k < K - 1; k++)
-    // fatrop_int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
-    for (fatrop_int k = 0; k < K - 1; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
         const fatrop_int nx = nx_p[k];
         const fatrop_int nu = nu_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
-        const fatrop_int nup1 = nu_p[k + 1];
-        const fatrop_int offsp1 = offs_ux[k + 1];
         const fatrop_int offs = offs_ux[k];
         const fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
-        /// calculate ukb_tilde
-        // -Lkxk - lk
         ROWEX(nu, -1.0, Llt_p + k, nu + nx, 0, ux_p, offs);
-        // assume aliasing of last two eliments is allowed
         GEMV_T(nx, nu, -1.0, Llt_p + k, nu, 0, ux_p, offs + nu, 1.0, ux_p, offs, ux_p, offs);
         TRSV_LTN(nu, Llt_p + k, 0, 0, ux_p, offs, ux_p, offs);
-        // calculate xkp1
-        ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
-        GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
-        // calculate lam_dyn xp1
-        ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
-        GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
-        // // calculate lam_eq xk
-        // ROWEX(ng, -1.0, Ggt_p + k, 0, 0, lam_p, offs_g_k);
-        // GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+        if (k != K - 1)
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            const fatrop_int nup1 = nu_p[k + 1];
+            const fatrop_int offsp1 = offs_ux[k + 1];
+            // calculate xkp1
+            ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+            GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+            // calculate lam_dyn xp1
+            ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+            GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        }
     }
     // calculate lam_eq xk
     for (fatrop_int k = 0; k < K; k++)
@@ -324,53 +383,6 @@ fatrop_int OCPLSRiccati::solve_pd_sys_degenerate(
             }
         }
     }
-    // double err_curr = 0.0;
-    // // copy(ux, ux_test[0]);
-    // // copy(lam, lam_test[0]);
-    // // copy(delta_s, delta_s_test[0]);
-    // // blasfeo_tic(&timer);
-    // GetRHS(
-    //     OCP,
-    //     gradb_total,
-    //     rhs_rq2[0],
-    //     rhs_b2[0],
-    //     rhs_g2[0],
-    //     rhs_g_ineq2[0],
-    //     rhs_gradb2[0]);
-    // // el = blasfeo_toc(&timer);
-    // // cout << "el time get rhs" << el << endl; //
-    // double max_norm = std::max(Linf(rhs_gradb2[0]), std::max(Linf(rhs_g_ineq2[0]), std::max(Linf(rhs_g2[0]), std::max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
-    // // blasfeo_tic(&timer);
-    // ComputeMVProd(
-    //     OCP,
-    //     inertia_correction_w,
-    //     inertia_correction_c,
-    //     ux,
-    //     lam,
-    //     delta_s,
-    //     sigma_total,
-    //     rhs_rq[0],
-    //     rhs_b[0],
-    //     rhs_g[0],
-    //     rhs_g_ineq[0],
-    //     rhs_gradb[0]);
-    // // el = blasfeo_toc(&timer);
-    // // cout << "el time compute mv prod" << el << endl; //
-    // axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
-    // axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
-    // axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
-    // axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
-    // axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
-
-    // // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
-    // // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
-    // // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
-    // // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
-    // // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-    // err_curr = std::max(Linf(rhs_gradb[0]), std::max(Linf(rhs_g_ineq[0]), std::max(Linf(rhs_g[0]), std::max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-    // cout << "residu:  " << err_curr << endl;
-    // // double el = blasfeo_toc(&timer);
-    // // cout << "el time " << el << endl;
     return 0;
 }
 fatrop_int OCPLSRiccati::solve_pd_sys_normal(
@@ -434,57 +446,30 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
 
     /////////////// recursion ///////////////
 
-    // last stage
-    {
-        const fatrop_int nx = nx_p[K - 1];
-        const fatrop_int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
-        const fatrop_int ng = ng_p[K - 1];
-        const fatrop_int ng_ineq = ng_ineq_p[K - 1];
-        const fatrop_int offs_ineq_k = offs_ineq_p[K - 1];
-        // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[K - 1];
-        // Pp_Km1 <- Qq_Km1
-        GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
-        DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
-        //// inequalities
-        if (ng_ineq > 0)
-        {
-            GECP(nx, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
-            for (fatrop_int i = 0; i < ng_ineq; i++)
-            {
-                // kahan sum
-                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction;
-                double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
-                COLSC(nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
-            }
-            // add the penalty
-            SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-            TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        }
-        // Hh_Km1 <- Gg_Km1
-        GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
-        gamma_p[K - 1] = ng;
-        rho_p[K - 1] = 0;
-    }
-    for (fatrop_int k = K - 2; k >= 0; --k)
+    for (fatrop_int k = K - 1; k >= 0; --k)
     {
         const fatrop_int nu = nu_p[k];
         const fatrop_int nx = nx_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
         const fatrop_int ng = ng_p[k];
         const fatrop_int ng_ineq = ng_ineq_p[k];
-        // const fatrop_int offs_g_k = offs_g_p[k];
         const fatrop_int offs_ineq_k = offs_ineq_p[k];
-        // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[k];
-        // calculate the size of H_{k+1} matrix
-        const fatrop_int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-        if (Hp1_size + ng > nu + nx)
-            return -1;
-        // gamma_k <- number of eqs represented by Ggt_stripe
-        const fatrop_int gamma_k = Hp1_size + ng;
         // if(k==0) blasfeo_print_dmat(1, nxp1, Ppt_p+k+1, nx, 0);
         //////// SUBSDYN
+        fatrop_int gamma_k;
+        if (k == K - 1)
         {
+            gamma_k = ng;
+            gamma_p[k] = gamma_k;
+            GECP(nx + nu + 1, ng, Ggt_p + k, 0, 0, Ggt_stripe_p, 0, 0);
+            GECP(nx + nu + 1, nu + nx, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+        }
+        else
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            const fatrop_int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
+            if (Hp1_size + ng > nu + nx)
+                return -1;
+            gamma_k = Hp1_size + ng;
             // AL <- [BAb]^T_k P_kp1
             GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
             // AL[-1,:] <- AL[-1,:] + p_kp1^T
@@ -493,20 +478,6 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
             SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
             // if(k==K-2) blasfeo_print_dmat(1, nu+nx, RSQrqt_tilde_p+k, nu+nx, 0);
             //// inequalities
-            if (ng_ineq > 0)
-            {
-                GECP(nu + nx, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
-                for (fatrop_int i = 0; i < ng_ineq; i++)
-                {
-                    double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction;
-                    double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
-                    COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                    MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
-                }
-                // add the penalty
-                SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
-            }
-            DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
             gamma_p[k] = gamma_k;
             // if ng[k]>0
             if (gamma_k > 0)
@@ -532,6 +503,23 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
                 rank_k = 0;
                 RSQrq_hat_curr_p = RSQrqt_tilde_p + k;
             }
+        }
+        // inequalities + inertia correction
+        {
+            if (ng_ineq > 0)
+            {
+                GECP(nu + nx, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+                for (fatrop_int i = 0; i < ng_ineq; i++)
+                {
+                    double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction;
+                    double grad_barrier = VECEL(gradb_total_p, offs_ineq_k + i);
+                    COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                    MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
+                }
+                // add the penalty
+                SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            }
+            DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
         }
         //////// TRANSFORM_AND_SUBSEQ
         {
@@ -681,22 +669,17 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
     // other stages
     // for (fatrop_int k = 0; k < K - 1; k++)
     // fatrop_int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
-    for (fatrop_int k = 0; k < K - 1; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
         const fatrop_int nx = nx_p[k];
         const fatrop_int nu = nu_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
-        const fatrop_int nup1 = nu_p[k + 1];
-        const fatrop_int offsp1 = offs_ux[k + 1];
         const fatrop_int offs = offs_ux[k];
         const fatrop_int rho_k = rho_p[k];
         const fatrop_int numrho_k = nu - rho_k;
         const fatrop_int offs_g_k = offs_g[k];
         const fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
-        const fatrop_int offs_g_kp1 = offs_g[k + 1];
         const fatrop_int gammamrho_k = gamma_p[k] - rho_p[k];
         const fatrop_int gamma_k = gamma_p[k];
-        const fatrop_int gammamrho_kp1 = gamma_p[k + 1] - rho_p[k + 1];
         if (numrho_k > 0)
         {
             /// calculate ukb_tilde
@@ -732,13 +715,21 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
             (Pl_p + k)->PtV(rho_k, lam_p, offs_g_k);
             (Pr_p + k)->PtV(rho_k, ux_p, offs);
         }
-        // calculate xkp1
-        ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
-        GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
-        // calculate lam_dyn xp1
-        ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
-        GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
-        GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        if (k != K - 1)
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            const fatrop_int nup1 = nu_p[k + 1];
+            const fatrop_int offsp1 = offs_ux[k + 1];
+            const fatrop_int offs_g_kp1 = offs_g[k + 1];
+            const fatrop_int gammamrho_kp1 = gamma_p[k + 1] - rho_p[k + 1];
+            // calculate xkp1
+            ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+            GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+            // calculate lam_dyn xp1
+            ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+            GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+            GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        }
     }
     for (fatrop_int k = 0; k < K; k++)
     {
@@ -763,98 +754,6 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
                 VECEL(lam_p, offs_g_ineq_k + i) = scaling_factor * ds + grad_barrier;
             }
         }
-    }
-    // double el = blasfeo_toc(&timer);
-    // cout << "el time fact solve" << el << endl; //
-    lastused_.rankI = rankI;
-    lastused_.inertia_correction_w = inertia_correction;
-    if (it_ref)
-    {
-        const fatrop_int min_it_ref = 0;
-        double err_curr = 0.0;
-        // copy(ux, ux_test[0]);
-        // copy(lam, lam_test[0]);
-        // copy(delta_s, delta_s_test[0]);
-        // blasfeo_tic(&timer);
-        get_rhs(
-            OCP,
-            gradb_total,
-            rhs_rq2[0],
-            rhs_b2[0],
-            rhs_g2[0],
-            rhs_g_ineq2[0],
-            rhs_gradb2[0]);
-        // el = blasfeo_toc(&timer);
-        // cout << "el time get rhs" << el << endl; //
-        double max_norm = max(Linf(rhs_gradb2[0]), max(Linf(rhs_g_ineq2[0]), max(Linf(rhs_g2[0]), max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
-        max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
-        double error_prev = -1.0;
-        for (fatrop_int i = 0; i < 5; i++)
-        {
-            // blasfeo_tic(&timer);
-            compute_pd_sys_times_vec(
-                OCP,
-                inertia_correction,
-                0.0,
-                ux,
-                lam,
-                delta_s,
-                sigma_total,
-                rhs_rq[0],
-                rhs_b[0],
-                rhs_g[0],
-                rhs_g_ineq[0],
-                rhs_gradb[0]);
-            // el = blasfeo_toc(&timer);
-            // cout << "el time compute mv prod" << el << endl; //
-            axpby(1.0, rhs_rq[0], 1.0, rhs_rq2[0], rhs_rq[0]);
-            axpby(1.0, rhs_b[0], 1.0, rhs_b2[0], rhs_b[0]);
-            axpby(1.0, rhs_g[0], 1.0, rhs_g2[0], rhs_g[0]);
-            axpby(1.0, rhs_g_ineq[0], 1.0, rhs_g_ineq2[0], rhs_g_ineq[0]);
-            axpby(1.0, rhs_gradb[0], 1.0, rhs_gradb2[0], rhs_gradb[0]);
-
-            // cout << "residu rq:  " << Linf(rhs_rq[0]) / max_norm << "  ";
-            // cout << "residu b:  " << Linf(rhs_b[0]) / max_norm << "  ";
-            // cout << "residu g:  " << Linf(rhs_g[0]) / max_norm << "  ";
-            // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
-            // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
-            err_curr = max(Linf(rhs_gradb[0]), max(Linf(rhs_g_ineq[0]), max(Linf(rhs_g[0]), max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-            // cout << "residu:  " << err_curr << endl;
-            if (i >= min_it_ref)
-            {
-                if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
-                {
-                    if (err_curr > 1e-8)
-                    {
-                        // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
-                    }
-                    return 0;
-                }
-            }
-            // blasfeo_tic(&timer);
-            solve_rhs(
-                OCP,
-                ux_test[0],
-                lam_test[0],
-                delta_s_test[0],
-                sigma_total,
-                rhs_rq[0],
-                rhs_b[0],
-                rhs_g[0],
-                rhs_g_ineq[0],
-                rhs_gradb[0]);
-            // el = blasfeo_toc(&timer);
-            // cout << "el time solveRHS " << el << endl; //
-            // el = blasfeo_toc(&timer);
-            // cout << "el time solveRHS " << el << endl;
-            axpby(1.0, ux_test[0], 1.0, ux, ux);
-            axpby(1.0, lam_test[0], 1.0, lam, lam);
-            axpby(1.0, delta_s_test[0], 1.0, delta_s, delta_s);
-
-            // prepare next iteration
-            error_prev = err_curr;
-        }
-        printer_->level(1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     }
     return 0;
 }
@@ -1088,6 +987,8 @@ fatrop_int OCPLSRiccati::compute_pd_sys_times_vec(
 };
 fatrop_int OCPLSRiccati::solve_rhs(
     OCPKKTMemory *OCP,
+    const double inertia_correction_w,
+    const double inertia_correction_c,
     const FatropVecBF &ux,
     const FatropVecBF &lam,
     const FatropVecBF &delta_s,
@@ -1098,8 +999,28 @@ fatrop_int OCPLSRiccati::solve_rhs(
     const FatropVecBF &rhs_g_ineq,
     const FatropVecBF &rhs_gradb)
 {
-    double inertia_correction_w = lastused_.inertia_correction_w;
-    double inertia_correction_c = lastused_.inertia_correction_c;
+    if (inertia_correction_c == 0)
+    {
+        return solve_rhs_normal(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, rhs_rq, rhs_b, rhs_g, rhs_g_ineq, rhs_gradb);
+    }
+    return solve_rhs_degenerate(OCP, inertia_correction_w, inertia_correction_c, ux, lam, delta_s, sigma_total, rhs_rq, rhs_b, rhs_g, rhs_g_ineq, rhs_gradb);
+}
+fatrop_int OCPLSRiccati::solve_rhs_normal(
+    OCPKKTMemory *OCP,
+    const double inertia_correction_w,
+    const double inertia_correction_c,
+    const FatropVecBF &ux,
+    const FatropVecBF &lam,
+    const FatropVecBF &delta_s,
+    const FatropVecBF &sigma_total,
+    const FatropVecBF &rhs_rq,
+    const FatropVecBF &rhs_b,
+    const FatropVecBF &rhs_g,
+    const FatropVecBF &rhs_g_ineq,
+    const FatropVecBF &rhs_gradb)
+{
+    // double inertia_correction_w = lastused_.inertia_correction_w;
+    // double inertia_correction_c = lastused_.inertia_correction_c;
     assert(inertia_correction_c == 0.0); // not implemented yet
     bool increased_accuracy = true;
     //     // blasfeo_timer timer;
@@ -1180,47 +1101,10 @@ fatrop_int OCPLSRiccati::solve_rhs(
 
     /////////////// recursion ///////////////
 
-    // last stage
-    {
-        const fatrop_int nx = nx_p[K - 1];
-        const fatrop_int nu = nu_p[K - 1]; // this should be zero but is included here in case of misuse
-        const fatrop_int ng = ng_p[K - 1];
-        const fatrop_int ng_ineq = ng_ineq_p[K - 1];
-        const fatrop_int offs_ineq_k = offs_ineq_p[K - 1];
-        const fatrop_int offs_g_k = offs_g[K - 1];
-        const fatrop_int offs = offs_ux[K - 1];
-        //         GECP(nx + 1, nx, RSQrqt_p + (K - 1), nu, nu, Ppt_p + K - 1, 0, 0);
-        VECCP(nx, rhs_rq_p, offs + nu, v_Ppt_p + K - 1, 0);
-        //         DIARE(nx, inertia_correction, Ppt_p + K - 1, 0, 0);
-        //         //// inequalities
-        if (ng_ineq > 0)
-        {
-            //             GECP(nx, ng_ineq, Ggt_ineq_p + K - 1, nu, 0, Ggt_ineq_temp_p, 0, 0);
-            for (fatrop_int i = 0; i < ng_ineq; i++)
-            {
-                //                 // kahan sum
-                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
-                double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
-                //                 COLSC(nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                //                 MATEL(Ggt_ineq_temp_p, nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + K - 1, nu + nx, i);
-                VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p, offs_ineq_k + i);
-            }
-            //             // add the penalty
-            //             SYRK_LN_MN(nx + 1, nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + K - 1, nu, 0, 1.0, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-            GEMV_N(nx, ng_ineq, 1.0, Ggt_ineq_p + K - 1, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_Ppt_p + K - 1, 0, v_Ppt_p + K - 1, 0);
-            //             TRTR_L(nx, Ppt_p + K - 1, 0, 0, Ppt_p + K - 1, 0, 0);
-        }
-        //         // Hh_Km1 <- Gg_Km1
-        //         GETR(nx + 1, ng, Ggt_p + (K - 1), nu, 0, Hh_p + (K - 1), 0, 0);
-        VECCP(ng, rhs_g_p, offs_g_k, v_Hh_p + (K - 1), 0);
-        //         gamma_p[K - 1] = ng;
-        //         rho_p[K - 1] = 0;
-    }
-    for (fatrop_int k = K - 2; k >= 0; --k)
+    for (fatrop_int k = K - 1; k >= 0; --k)
     {
         const fatrop_int nu = nu_p[k];
         const fatrop_int nx = nx_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
         const fatrop_int ng = ng_p[k];
         const fatrop_int ng_ineq = ng_ineq_p[k];
         const fatrop_int offs_ineq_k = offs_ineq_p[k];
@@ -1228,14 +1112,24 @@ fatrop_int OCPLSRiccati::solve_rhs(
         const fatrop_int offs_g_k = offs_g[k];
         const fatrop_int offs = offs_ux[k];
         // calculate the size of H_{k+1} matrix
-        const fatrop_int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
-        // if (Hp1_size + ng > nu + nx)
-        //     return -1;
-        // gamma_k <- number of eqs represented by Ggt_stripe
-        const fatrop_int gamma_k = Hp1_size + ng;
         // if (k==0) blasfeo_print_dvec(nxp1, v_Ppt_p+k+1, 0);
         //         //////// SUBSDYN
+        fatrop_int gamma_k;
+        if (k == K - 1)
         {
+            gamma_k = ng;
+            gamma_p[k] = gamma_k;
+            VECCP(ng, rhs_g_p, offs_g_k, v_Ggt_stripe_p, 0);
+            VECCP(nu + nx, rhs_rq_p, offs, v_RSQrqt_tilde_p + k, 0);
+        }
+        else
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            const fatrop_int Hp1_size = gamma_p[k + 1] - rho_p[k + 1];
+            // if (Hp1_size + ng > nu + nx)
+            //     return -1;
+            // gamma_k <- number of eqs represented by Ggt_stripe
+            gamma_k = Hp1_size + ng;
             //             // AL <- [BAb]^T_k P_kp1
             //             GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
             GEMV_N(nxp1, nxp1, 1.0, Ppt_p + k + 1, 0, 0, rhs_b_p, offs_dyn_k, 0.0, v_AL_p, 0, v_AL_p, 0);
@@ -1248,21 +1142,6 @@ fatrop_int OCPLSRiccati::solve_rhs(
             GEMV_N(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, v_AL_p, 0, 1.0, rhs_rq_p, offs, v_RSQrqt_tilde_p + k, 0);
             // if (k==K-2) blasfeo_print_dvec(nu+nx, v_RSQrqt_tilde_p+k, 0);
             //             //// inequalities
-            if (ng_ineq > 0)
-            {
-                //                 GECP(nu + nx , ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
-                for (fatrop_int i = 0; i < ng_ineq; i++)
-                {
-                    double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
-                    double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
-                    //                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
-                    //                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
-                    VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p, offs_ineq_k + i);
-                }
-                //                 // add the penalty
-                //                 SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
-                GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_RSQrqt_tilde_p + k, 0, v_RSQrqt_tilde_p + k, 0);
-            }
             //             DIARE(nu + nx, inertia_correction, RSQrqt_tilde_p + k, 0, 0);
             //             gamma_p[k] = gamma_k;
             //             // if ng[k]>0
@@ -1292,6 +1171,21 @@ fatrop_int OCPLSRiccati::solve_rhs(
                 rank_k = 0;
                 v_RSQrq_hat_curr_p = v_RSQrqt_tilde_p + k;
             }
+        }
+        if (ng_ineq > 0)
+        {
+            //                 GECP(nu + nx , ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+            for (fatrop_int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
+                //                     COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                //                     MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
+                VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p, offs_ineq_k + i);
+            }
+            //                 // add the penalty
+            //                 SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_RSQrqt_tilde_p + k, 0, v_RSQrqt_tilde_p + k, 0);
         }
         //         //////// TRANSFORM_AND_SUBSEQ
         {
@@ -1483,23 +1377,18 @@ fatrop_int OCPLSRiccati::solve_rhs(
     //     // other stages
     //     // for (fatrop_int k = 0; k < K - 1; k++)
     //     // fatrop_int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
-    for (fatrop_int k = 0; k < K - 1; k++)
+    for (fatrop_int k = 0; k < K; k++)
     {
         const fatrop_int nx = nx_p[k];
         const fatrop_int nu = nu_p[k];
-        const fatrop_int nxp1 = nx_p[k + 1];
-        const fatrop_int nup1 = nu_p[k + 1];
-        const fatrop_int offsp1 = offs_ux[k + 1];
         const fatrop_int offs = offs_ux[k];
         const fatrop_int rho_k = rho_p[k];
         const fatrop_int numrho_k = nu - rho_k;
         const fatrop_int offs_g_k = offs_g[k];
         const fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
         const fatrop_int offs_dyn_k = offs_dyn[k];
-        const fatrop_int offs_g_kp1 = offs_g[k + 1];
         const fatrop_int gammamrho_k = gamma_p[k] - rho_p[k];
         const fatrop_int gamma_k = gamma_p[k];
-        const fatrop_int gammamrho_kp1 = gamma_p[k + 1] - rho_p[k + 1];
         if (numrho_k > 0)
         {
             //             /// calculate ukb_tilde
@@ -1540,13 +1429,21 @@ fatrop_int OCPLSRiccati::solve_rhs(
         }
         //         // calculate xkp1
         //         ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
-        VECCP(nxp1, rhs_b_p, offs_dyn_k, ux_p, offsp1 + nup1);
-        GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
-        //         // calculate lam_dyn xp1
-        //         ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
-        VECCP(nxp1, v_Ppt_p + (k + 1), 0, lam_p, offs_dyn_eq_k);
-        GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
-        GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        if (k != K - 1)
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            const fatrop_int nup1 = nu_p[k + 1];
+            const fatrop_int offsp1 = offs_ux[k + 1];
+            const fatrop_int offs_g_kp1 = offs_g[k + 1];
+            const fatrop_int gammamrho_kp1 = gamma_p[k + 1] - rho_p[k + 1];
+            VECCP(nxp1, rhs_b_p, offs_dyn_k, ux_p, offsp1 + nup1);
+            GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+            //         // calculate lam_dyn xp1
+            //         ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+            VECCP(nxp1, v_Ppt_p + (k + 1), 0, lam_p, offs_dyn_eq_k);
+            GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+            GEMV_T(gammamrho_kp1, nxp1, 1.0, Hh_p + (k + 1), 0, 0, lam_p, offs_g_kp1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+        }
     }
     for (fatrop_int k = 0; k < K; k++)
     {
@@ -1564,6 +1461,254 @@ fatrop_int OCPLSRiccati::solve_rhs(
             //             // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
             GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
             //             // calculate lamineq
+            for (fatrop_int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
+                double ds = VECEL(delta_s_p, offs_ineq_k + i);
+                VECEL(lam_p, offs_g_ineq_k + i) = scaling_factor * ds + grad_barrier;
+            }
+        }
+    }
+    return 0;
+};
+
+fatrop_int OCPLSRiccati::solve_rhs_degenerate(
+    OCPKKTMemory *OCP,
+    const double inertia_correction_w,
+    const double inertia_correction_c,
+    const FatropVecBF &ux,
+    const FatropVecBF &lam,
+    const FatropVecBF &delta_s,
+    const FatropVecBF &sigma_total,
+    const FatropVecBF &rhs_rq,
+    const FatropVecBF &rhs_b,
+    const FatropVecBF &rhs_g,
+    const FatropVecBF &rhs_g_ineq,
+    const FatropVecBF &rhs_gradb)
+
+{
+    fatrop_int K = OCP->K;
+    // // make variables local for efficiency
+    // OCPMACRO(MAT *, RSQrqt, _p);
+    OCPMACRO(MAT *, BAbt, _p);
+    OCPMACRO(MAT *, Ggt, _p);
+    OCPMACRO(MAT *, Ggt_ineq, _p);
+    SOLVERMACRO(MAT *, Ppt, _p);
+    // SOLVERMACRO(MAT *, AL, _p);
+    // SOLVERMACRO(MAT *, RSQrqt_tilde, _p);
+    // SOLVERMACRO(MAT *, Ggt_tilde, _p);
+    SOLVERMACRO(MAT *, Llt, _p);
+    // SOLVERMACRO(MAT *, Llt_shift, _p);
+    SOLVERMACRO(MAT *, LlIt, _p);
+    // SOLVERMACRO(MAT *, Ggt_ineq_temp, _p);
+    SOLVERMACRO(VEC *, ux, _p);
+    SOLVERMACRO(VEC *, lam, _p);
+    SOLVERMACRO(VEC *, delta_s, _p);
+    SOLVERMACRO(VEC *, sigma_total, _p);
+    SOLVERMACRO(VEC *, rhs_gradb, _p);
+    OCPMACRO(fatrop_int *, nu, _p);
+    OCPMACRO(fatrop_int *, nx, _p);
+    OCPMACRO(fatrop_int *, ng, _p);
+    OCPMACRO(fatrop_int *, ng_ineq, _p);
+
+    SOLVERMACRO(VEC *, rhs_rq, _p);
+    SOLVERMACRO(VEC *, rhs_b, _p);
+    SOLVERMACRO(VEC *, rhs_g, _p);
+    SOLVERMACRO(VEC *, rhs_g_ineq, _p);
+    SOLVERMACRO(VEC *, v_Ppt, _p);
+    SOLVERMACRO(VEC *, v_AL, _p);
+    SOLVERMACRO(VEC *, v_RSQrqt_tilde, _p);
+    // SOLVERMACRO(VEC *, v_Ggt_tilde, _p);
+    SOLVERMACRO(VEC *, v_Llt, _p);
+    SOLVERMACRO(VEC *, v_Llt_shift, _p);
+    SOLVERMACRO(VEC *, v_LlIt, _p);
+    SOLVERMACRO(VEC *, v_Ggt_ineq_temp, _p);
+    // MAT *RSQrq_hat_curr_p;
+    double delta_cmin1 = 1 / inertia_correction_c;
+    fatrop_int *offs_ineq_p = (fatrop_int *)OCP->aux.ineq_offs.data();
+    fatrop_int *offs_g_ineq_p = (fatrop_int *)OCP->aux.g_ineq_offs.data();
+    fatrop_int *offs_dyn_p = (fatrop_int *)OCP->aux.dyn_offs.data();
+    fatrop_int *offs_g_p = (fatrop_int *)OCP->aux.g_offs.data();
+    auto ux_offs_p = OCP->aux.ux_offs.data();
+    VEC *v_RSQrq_hat_curr_p;
+
+    // /////////////// recursion ///////////////
+
+    for (fatrop_int k = K - 1; k >= 0; --k)
+    {
+        const fatrop_int offs_ux_k = ux_offs_p[k];
+        const fatrop_int nu = nu_p[k];
+        const fatrop_int nx = nx_p[k];
+        const fatrop_int ng = ng_p[k];
+        const fatrop_int ng_ineq = ng_ineq_p[k];
+        const fatrop_int offs_ineq_k = offs_ineq_p[k];
+        // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[k];
+        const fatrop_int offs_dyn_k = offs_dyn_p[k];
+        const fatrop_int offs_g_k = offs_g_p[k];
+        //     //////// SUBSDYN
+        if (k == K - 1)
+        {
+            VECCP(nu + nx, rhs_rq_p, offs_ux_k, v_RSQrqt_tilde_p + k, 0);
+        }
+        else
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            //         // AL <- [BAb]^T_k P_kp1
+            //         GEMM_NT(nu + nx + 1, nxp1, nxp1, 1.0, BAbt_p + k, 0, 0, Ppt_p + k + 1, 0, 0, 0.0, AL_p, 0, 0, AL_p, 0, 0);
+            GEMV_N(nxp1, nxp1, 1.0, Ppt_p + k + 1, 0, 0, rhs_b_p, offs_dyn_k, 0.0, v_AL_p, 0, v_AL_p, 0);
+
+            //         // AL[-1,:] <- AL[-1,:] + p_kp1^T
+            //         GEAD(1, nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, AL_p, nx + nu, 0);
+            AXPY(nxp1, 1.0, v_Ppt_p + (k + 1), 0, v_AL_p, 0, v_AL_p, 0);
+            //         // RSQrqt_stripe <- AL[BA] + RSQrqt
+            //         SYRK_LN_MN(nu + nx + 1, nu + nx, nxp1, 1.0, AL_p, 0, 0, BAbt_p + k, 0, 0, 1.0, RSQrqt_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            GEMV_N(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, v_AL_p, 0, 1.0, rhs_rq_p, offs_ux_k, v_RSQrqt_tilde_p + k, 0);
+        }
+        // equality penalty
+        {
+            //         // RSQrqt + 1/d_c At@A
+            //         DIARE(nu + nx, inertia_correction_w, RSQrqt_tilde_p + k, 0, 0);
+            //         SYRK_LN_MN(nu + nx + 1, nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, Ggt_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            GEMV_N(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, rhs_g_p, offs_g_k, 1.0, v_RSQrqt_tilde_p + k, 0, v_RSQrqt_tilde_p + k, 0);
+        }
+
+        //         //// inequalities
+        if (ng_ineq > 0)
+        {
+            //             GECP(nu + nx + 1, ng_ineq, Ggt_ineq_p + k, 0, 0, Ggt_ineq_temp_p, 0, 0);
+            VECCP(ng_ineq, rhs_g_ineq_p, offs_ineq_k, v_Ggt_ineq_temp_p, 0);
+            for (fatrop_int i = 0; i < ng_ineq; i++)
+            {
+                double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;
+                double grad_barrier = VECEL(rhs_gradb_p, offs_ineq_k + i);
+                //                 COLSC(nu + nx, scaling_factor, Ggt_ineq_temp_p, 0, i);
+                //                 MATEL(Ggt_ineq_temp_p, nu + nx, i) = grad_barrier + (scaling_factor)*MATEL(Ggt_ineq_p + k, nu + nx, i);
+                VECEL(v_Ggt_ineq_temp_p, i) = grad_barrier + (scaling_factor)*VECEL(rhs_g_ineq_p, offs_ineq_k + i);
+            }
+            //             // add the penalty
+            //             SYRK_LN_MN(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp_p, 0, 0, Ggt_ineq_p + k, 0, 0, 1.0, RSQrqt_tilde_p + k, 0, 0, RSQrqt_tilde_p + k, 0, 0);
+            GEMV_N(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, v_Ggt_ineq_temp_p, 0, 1.0, v_RSQrqt_tilde_p + k, 0, v_RSQrqt_tilde_p + k, 0);
+        }
+        //     //////// TRANSFORM_AND_SUBSEQ
+        {
+            v_RSQrq_hat_curr_p = v_RSQrqt_tilde_p + k;
+            // RSQrq_hat_curr_p = RSQrqt_tilde_p + k;
+        }
+        //     //////// SCHUR
+        {
+            //         // DLlt_k = [chol(R_hatk); Llk@chol(R_hatk)^-T]
+            //         POTRF_L_MN(nu + nx + 1, nu, RSQrq_hat_curr_p, 0, 0, Llt_p + k, 0, 0);
+            TRSV_LNN(nu, Llt_p + k, 0, 0, v_RSQrq_hat_curr_p, 0, v_Llt_p + k, 0);
+            //         if (!check_reg(nu, Llt_p + k, 0, 0))
+            //             return 1;
+            //         // Pp_k = Qq_hatk - L_k^T @ Ll_k
+            //         // SYRK_LN_MN(nx+1, nx, nu-rank_k, -1.0,Llt_p+k, nu-rank_k,0, Llt_p+k, nu-rank_k,0, 1.0, RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
+            //         GECP(nx + 1, nu, Llt_p + k, nu, 0, Llt_shift_p, 0, 0); // needless operation because feature not implemented yet
+            VECCP(nu, v_Llt_p + k, 0, v_Llt_shift_p, 0);
+            //         SYRK_LN_MN(nx + 1, nx, nu, -1.0, Llt_shift_p, 0, 0, Llt_shift_p, 0, 0, 1.0, RSQrq_hat_curr_p, nu, nu, Ppt_p + k, 0, 0);
+            GEMV_N(nx, nu, -1.0, Llt_p + k, nu, 0, v_Llt_shift_p, 0, 1.0, v_RSQrqt_tilde_p + k, nu, v_Ppt_p + k, 0);
+        }
+        //     TRTR_L(nx, Ppt_p + k, 0, 0, Ppt_p + k, 0, 0);
+    }
+    // //////// FIRST_STAGE
+    {
+        const fatrop_int nx = nx_p[0];
+        {
+            // POTRF_L_MN(nx + 1, nx, Ppt_p, 0, 0, LlIt_p, 0, 0);
+            TRSV_LNN(nx, LlIt_p, 0, 0, v_Ppt_p, 0, v_LlIt_p, 0);
+            // if (!check_reg(nx, LlIt_p, 0, 0))
+            //     return 2;
+        }
+    }
+    // ////// FORWARD_SUBSTITUTION:
+    // // first stage
+    {
+        const fatrop_int nx = nx_p[0];
+        const fatrop_int nu = nu_p[0];
+        //     // calculate xIb
+        //     ROWEX(nx, -1.0, LlIt_p, nx, 0, ux_p, nu);
+        VECCPSC(nx, -1.0, v_LlIt_p, 0, ux_p, nu);
+        //     // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
+        //     TRSV_LTN(nx, LlIt_p, 0, 0, ux_p, nu, ux_p, nu);
+        TRSV_LTN(nx, LlIt_p, 0, 0, ux_p, nu, ux_p, nu);
+    }
+    fatrop_int *offs_ux = (fatrop_int *)OCP->aux.ux_offs.data();
+    fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
+    fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
+    // // other stages
+    // // for (fatrop_int k = 0; k < K - 1; k++)
+    // // fatrop_int dyn_eqs_ofs = offs_g[K - 1] + ng_p[K - 1]; // this value is incremented at end of recursion
+    for (fatrop_int k = 0; k < K; k++)
+    {
+        const fatrop_int nx = nx_p[k];
+        const fatrop_int nu = nu_p[k];
+        const fatrop_int offs = offs_ux[k];
+        const fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
+        const fatrop_int offs_dyn_k = offs_dyn_p[k];
+        // const fatrop_int offs_ineq_k = offs_ineq_p[k];
+        // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[k];
+        // const fatrop_int offs_g_k = offs_g_p[k];
+        //     /// calculate ukb_tilde
+        //     // -Lkxk - lk
+        //     ROWEX(nu, -1.0, Llt_p + k, nu + nx, 0, ux_p, offs);
+        VECCPSC(nu, -1.0, v_Llt_p + k, 0, ux_p, offs);
+        //     // assume aliasing of last two eliments is allowed
+        //     GEMV_T(nx, nu, -1.0, Llt_p + k, nu, 0, ux_p, offs + nu, 1.0, ux_p, offs, ux_p, offs);
+        //     TRSV_LTN(nu, Llt_p + k, 0, 0, ux_p, offs, ux_p, offs);
+        GEMV_T(nx, nu, -1.0, Llt_p + k, nu, 0, ux_p, offs + nu, 1.0, ux_p, offs, ux_p, offs);
+        TRSV_LTN(nu, Llt_p + k, 0, 0, ux_p, offs, ux_p, offs);
+        //     // calculate xkp1
+        //     ROWEX(nxp1, 1.0, BAbt_p + k, nu + nx, 0, ux_p, offsp1 + nup1);
+        //     GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+        if (k != K - 1)
+        {
+            const fatrop_int nxp1 = nx_p[k + 1];
+            const fatrop_int nup1 = nu_p[k + 1];
+            const fatrop_int offsp1 = offs_ux[k + 1];
+            VECCP(nxp1, rhs_b_p, offs_dyn_k, ux_p, offsp1 + nup1);
+            GEMV_T(nu + nx, nxp1, 1.0, BAbt_p + k, 0, 0, ux_p, offs, 1.0, ux_p, offsp1 + nup1, ux_p, offsp1 + nup1);
+            //     // calculate lam_dyn xp1
+            //     ROWEX(nxp1, 1.0, Ppt_p + (k + 1), nxp1, 0, lam_p, offs_dyn_eq_k);
+            //     GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+            VECCP(nxp1, v_Ppt_p + (k + 1), 0, lam_p, offs_dyn_eq_k);
+            GEMV_T(nxp1, nxp1, 1.0, Ppt_p + (k + 1), 0, 0, ux_p, offsp1 + nup1, 1.0, lam_p, offs_dyn_eq_k, lam_p, offs_dyn_eq_k);
+            //     // // calculate lam_eq xk
+            //     // ROWEX(ng, -1.0, Ggt_p + k, 0, 0, lam_p, offs_g_k);
+            //     // GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+        }
+    }
+    // // calculate lam_eq xk
+    for (fatrop_int k = 0; k < K; k++)
+    {
+        const fatrop_int nx = nx_p[k];
+        const fatrop_int nu = nu_p[k];
+        const fatrop_int ng = ng_p[k];
+        const fatrop_int offs = offs_ux[k];
+        const fatrop_int offs_g_k = offs_g[k];
+        // ROWEX(ng, delta_cmin1, Ggt_p + k, nu + nx, 0, lam_p, offs_g_k);
+        // GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+        VECCPSC(ng, delta_cmin1, rhs_g_p, offs_g_k, lam_p, offs_g_k);
+        GEMV_T(nu + nx, ng, delta_cmin1, Ggt_p + k, 0, 0, ux_p, offs, 1.0, lam_p, offs_g_k, lam_p, offs_g_k);
+    }
+
+    for (fatrop_int k = 0; k < K; k++)
+    {
+        const fatrop_int nx = nx_p[k];
+        const fatrop_int nu = nu_p[k];
+        const fatrop_int ng_ineq = ng_ineq_p[k];
+        const fatrop_int offs = offs_ux[k];
+        const fatrop_int offs_g_ineq_k = offs_g_ineq_p[k];
+        const fatrop_int offs_ineq_k = offs_ineq_p[k];
+        if (ng_ineq > 0)
+        {
+            // // calculate delta_s
+            // ROWEX(ng_ineq, 1.0, Ggt_ineq_p + k, nu + nx, 0, delta_s_p, offs_ineq_k);
+            VECCP(ng_ineq, rhs_g_ineq_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            // // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            // GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            GEMV_T(nu + nx, ng_ineq, 1.0, Ggt_ineq_p + k, 0, 0, ux_p, offs, 1.0, delta_s_p, offs_ineq_k, delta_s_p, offs_ineq_k);
+            // // calculate lamineq
             for (fatrop_int i = 0; i < ng_ineq; i++)
             {
                 double scaling_factor = VECEL(sigma_total_p, offs_ineq_k + i) + inertia_correction_w;

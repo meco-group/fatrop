@@ -20,11 +20,11 @@
 #define LINESEARCHINCLUDED
 #include "AlgStrategy.hpp"
 #include "IterationData.hpp"
-#include "templates/NLPAlg.hpp"
-#include "solver/FatropData.hpp"
-#include "solver/Filter.hpp"
-#include "solver/FatropPrinter.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/templates/NLPAlg.hpp"
+#include "fatrop/solver/FatropData.hpp"
+#include "fatrop/solver/Filter.hpp"
+#include "fatrop/solver/FatropPrinter.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 #include <cmath>
 #include <memory>
 namespace fatrop

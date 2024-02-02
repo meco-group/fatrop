@@ -18,9 +18,9 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef NLPLSINCLUDED
 #define NLPLSINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
     class OCPLinearSolver
@@ -50,6 +50,8 @@ namespace fatrop
             const FatropVecBF &rhs_gradb_total) = 0;
         virtual fatrop_int solve_rhs(
             OCPKKTMemory *OCP,
+            const double inertia_correction_w,
+            const double inertia_correction_c,
             const FatropVecBF &ux,
             const FatropVecBF &lam,
             const FatropVecBF &delta_s,

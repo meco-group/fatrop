@@ -18,9 +18,9 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef DUINFEVALINCLUDED
 #define DUINFEVALINCLUDED
-#include "blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
-#include "auxiliary/Common.hpp"
+#include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
 #define OCPMACRO(type, name, suffix) type name##suffix = ((type)OCP->name)

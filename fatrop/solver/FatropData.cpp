@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "solver/FatropData.hpp"
+#include "fatrop/solver/FatropData.hpp"
 using namespace fatrop;
 using namespace std;
 template <fatrop_int size>
@@ -73,7 +73,7 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     n_ineqs(nlpdims.nineqs),
                                                                                                                                     memvars(nlpdims.nvars, 12),
                                                                                                                                     memeqs(nlpdims.neqs, 12),
-                                                                                                                                    memineqs(nlpdims.nineqs, 28),
+                                                                                                                                    memineqs(nlpdims.nineqs, 32),
                                                                                                                                     x_curr(memvars[0]),
                                                                                                                                     x_next(memvars[1]),
                                                                                                                                     x_backup(memvars[2]),
@@ -94,9 +94,9 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     g_next(memeqs[9]),
                                                                                                                                     g_backup(memeqs[10]),
                                                                                                                                     g_soc(memeqs[11]),
-                                                                                                                                    grad_curr(memvars[8]),
-                                                                                                                                    grad_next(memvars[9]),
-                                                                                                                                    grad_backup(memvars[10]),
+                                                                                                                                    grad_curr_x(memvars[8]),
+                                                                                                                                    grad_next_x(memvars[9]),
+                                                                                                                                    grad_backup_x(memvars[10]),
                                                                                                                                     du_inf_curr(memvars[11]),
                                                                                                                                     du_inf_curr_s(memineqs[0]),
                                                                                                                                     s_curr(memineqs[1]),
@@ -126,6 +126,10 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     gradb_U(memineqs[25]),
                                                                                                                                     gradb_plus(memineqs[26]),
                                                                                                                                     gradb_total(memineqs[27]),
+                                                                                                                                    grad_curr_s(memineqs[28]),
+                                                                                                                                    grad_next_s(memineqs[29]),
+                                                                                                                                    grad_backup_s(memineqs[30]),
+                                                                                                                                    du_inf_curr_s_wo_z(memineqs[31]),
                                                                                                                                     params(params),
                                                                                                                                     printer_(printer)
 {
@@ -195,9 +199,10 @@ fatrop_int FatropData::eval_dual_inf_slack_eqs()
 {
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
-    VEC *lam_curr_p = (VEC *)lam_curr;
+    // VEC *lam_curr_p = (VEC *)lam_curr;
     VEC *du_inf_curr_s_p = (VEC *)du_inf_curr_s;
-    VECCPSC(n_ineqs, -1.0, lam_curr_p, n_eqs - n_ineqs, du_inf_curr_s_p, 0);
+    VEC *du_inf_curr_s_wo_z_p = (VEC *)du_inf_curr_s_wo_z;
+    VECCPSC(n_ineqs, 1.0, du_inf_curr_s_wo_z_p, 0, du_inf_curr_s_p, 0);
     // lam_curr.print();
     VEC *zL_p = (VEC *)zL_curr;
     VEC *zU_p = (VEC *)zU_curr;
@@ -440,7 +445,8 @@ fatrop_int FatropData::accept_trial_step()
     lam_curr.SwapWith(lam_next);
     zL_curr.SwapWith(zL_next);
     zU_curr.SwapWith(zU_next);
-    grad_curr.SwapWith(grad_next);
+    grad_curr_x.SwapWith(grad_next_x);
+    grad_curr_s.SwapWith(grad_next_s);
     g_curr.SwapWith(g_next);
     cache_curr = cache_next;
     return 0;
@@ -452,7 +458,8 @@ fatrop_int FatropData::backup_curr()
     lam_backup.copy(lam_curr);
     zL_backup.copy(zL_curr);
     zU_backup.copy(zU_curr);
-    grad_backup.copy(grad_curr);
+    grad_backup_x.copy(grad_curr_x);
+    grad_backup_s.copy(grad_curr_s);
     g_backup.copy(g_curr);
     obj_backup = obj_curr;
     return 0;
@@ -471,7 +478,8 @@ fatrop_int FatropData::restore_backup()
     lam_curr.SwapWith(lam_backup);
     zL_curr.SwapWith(zL_backup);
     zU_curr.SwapWith(zU_backup);
-    grad_backup.SwapWith(grad_curr);
+    grad_backup_x.SwapWith(grad_curr_x);
+    grad_backup_s.SwapWith(grad_curr_s);
     g_backup.SwapWith(g_curr);
     delta_x_backup.SwapWith(delta_x);
     delta_s_backup.SwapWith(delta_s);
@@ -563,11 +571,11 @@ double FatropData::dual_inf_max_curr()
 }
 double FatropData::fo_decr_obj_curr()
 {
-    return dot(grad_curr, delta_x);
+    return dot(grad_curr_x, delta_x) + dot(grad_curr_s, delta_s);
 }
 double FatropData::fo_decr_obj_backup()
 {
-    return dot(grad_backup, delta_x_backup);
+    return dot(grad_backup_x, delta_x_backup) + dot(grad_backup_s, delta_s_backup);
 }
 void FatropData::maximum_step_size(double &alpha_max_pr, double &alpha_max_du, double tau)
 {
@@ -681,8 +689,9 @@ void FatropData::evaluate_barrier_quantities(double mu)
     VEC *gradb_L_p = (VEC *)gradb_L;
     VEC *gradb_U_p = (VEC *)gradb_U;
     VEC *gradb_plus_p = (VEC *)gradb_plus;
-    VEC *lam_curr_p = (VEC *)lam_curr;
-    fatrop_int eqs_offset = n_eqs - n_ineqs;
+    // VEC *lam_curr_p = (VEC *)lam_curr;
+    VEC* du_inf_curr_s_wo_z_p = (VEC*)du_inf_curr_s_wo_z;
+    // fatrop_int eqs_offset = n_eqs - n_ineqs;
     // compute simga_LU gradb_LU and gradbplus
 
     for (fatrop_int i = 0; i < n_ineqs; i++)
@@ -715,7 +724,7 @@ void FatropData::evaluate_barrier_quantities(double mu)
             VECEL(sigma_U_p, i) = 0.0;
             VECEL(gradb_U_p, i) = 0.0;
         }
-        double grad_barrier_plusi = -VECEL(lam_curr_p, eqs_offset + i);
+        double grad_barrier_plusi = VECEL(du_inf_curr_s_wo_z_p,  i);
         if (!(lower_bounded && upper_bounded))
         {
             grad_barrier_plusi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
