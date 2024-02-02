@@ -13,6 +13,7 @@ before_script:
 build:
   script:
     # build fatrop and fatropy
+    - git submodule update --init --recursive
     - apt-get update && apt-get install -y cmake
     - export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
     - cd fatropy
