@@ -1,0 +1,26 @@
+# Test whether Fatropy can be built
+
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/python/tags/
+default:
+  image: python:3.9
+
+before_script:
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+
+build:
+  script:
+    # build fatrop and fatropy
+    - git submodule update --init --recursive
+    - apt-get update && apt-get install -y cmake
+    - export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
+    - cd fatropy
+    - pip install .
+
+  # rockit and rockit-fatrop plugin
+  #- git clone https://gitlab.kuleuven.be/meco-software/rockit.git
+  #- git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/ rockit/external/fatrop
+  #- cd rockit
+  #- pip install .

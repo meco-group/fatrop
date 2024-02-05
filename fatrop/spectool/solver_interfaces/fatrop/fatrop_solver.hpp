@@ -5,6 +5,7 @@
 #include "fatrop/spectool/solver_interfaces/solver.hpp"
 #include "fatrop/spectool/function_evaluation/casadi_fe.hpp"
 #include "fatrop/spectool/spec/ustage.hpp"
+#include "fatrop/spectool/spec/ustage_eval_casadi.hpp"
 #include "fatrop/spectool/spec/ocp.hpp"
 #include "fatrop/spectool/spec/ustage_quantities.hpp"
 #include "fatrop_function.hpp"
@@ -19,13 +20,13 @@ namespace fatrop
         };
         struct UStageEvalBuilder
         {
-            static std::vector<std::shared_ptr<UStageEvalAbstract>> build(const Ocp &ocp, const cs::Dict &opts)
+            static std::vector<std::shared_ptr<FatropuStageEvalCasadi>> build(const Ocp &ocp, const cs::Dict &opts)
             {
-                std::vector<std::shared_ptr<UStageEvalAbstract>> ret; 
+                std::vector<std::shared_ptr<FatropuStageEvalCasadi>> ret; 
                 int horizon_length_ = 0;
                 CasadiJitCache eval_cache;
-                std::unordered_map<uStageInternal *, std::shared_ptr<UStageEvalAbstract>> ustage_eval_cache;
-                std::shared_ptr<UStageEvalAbstract> evaluator = nullptr;
+                std::unordered_map<uStageInternal *, std::shared_ptr<FatropuStageEvalCasadi>> ustage_eval_cache;
+                std::shared_ptr<FatropuStageEvalCasadi> evaluator = nullptr;
                 for (auto ustage_it = ocp.get_ustages().begin(); ustage_it != ocp.get_ustages().end(); ustage_it++)
                 {
                     const auto &ustage = *ustage_it;
@@ -58,7 +59,7 @@ namespace fatrop
             void transcribe(const Ocp &ocp_, const cs::Dict &opts)
             {
                 int n_global_parameters_ = cs::MX::veccat(ocp_.get_global_parameters()).size1();
-                fatrop_impl = std::make_shared<UStageOCPImpl>(UStageEvalBuilder::build(ocp_, opts), n_global_parameters_);
+                fatrop_impl = std::make_shared<UStageOCPImpl<FatropuStageEvalCasadi>>(UStageEvalBuilder::build(ocp_, opts), n_global_parameters_);
             }
             cs::Function to_function(const std::string &name, const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict &opts)
             {
@@ -87,7 +88,7 @@ namespace fatrop
                 in = {cs::MX::veccat(variables_v), cs::MX::veccat(control_grid_p_v), cs::MX::veccat(ocp_.get_global_parameters())};
                 out = {cs::MX::veccat(variables_v)};
             }
-            std::shared_ptr<UStageOCPImpl> fatrop_impl;
+            std::shared_ptr<UStageOCPImpl<FatropuStageEvalCasadi>> fatrop_impl;
         };
     } // namespace spectrop
 } // namespace fatrop
