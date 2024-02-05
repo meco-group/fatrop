@@ -3,18 +3,12 @@
 #include <string>
 #include "fatrop/spectool/auxiliary/casadi_utilities.hpp"
 #include "fatrop/spectool/solver_interfaces/solver.hpp"
-#include "fatrop/spectool/function_evaluation/casadi_fe.hpp"
-#include "fatrop/spectool/spec/ustage.hpp"
-#include "fatrop/spectool/spec/ustage_eval_casadi.hpp"
-#include "fatrop/spectool/spec/ocp.hpp"
-#include "fatrop/spectool/spec/ustage_quantities.hpp"
-// #include "fatrop_function.hpp"
-#include "fatrop/ocp/UStageOCPImpl.hpp"
-// #include "fatrop_function.hpp"
+#include "fatrop_function.hpp"
 // #include "fatrop_ocp_impl.hpp"
-#include "fatrop/ocp/CasadiCApiWrap.cpp.in"
-#include "fatrop/fatrop.hpp"
-#include "fatrop/ocp/CasadiCApiUserdataWrap.hpp"
+// #include "fatrop/ocp/CasadiCApiWrap.cpp.in"
+#include "fatrop/spectool/spec/ustage_eval_casadi.hpp"
+#include "fatrop/ocp/UStageOCPImpl.hpp"
+#include "fatrop/spectool/spec/ocp.hpp"
 namespace fatrop
 {
     namespace spectool
@@ -84,20 +78,20 @@ namespace fatrop
                     else if (opt.second.is_bool())
                         app->set_option(opt.first, (bool)opt.second);
                 }
-                C_api_userdata *userdata = new C_api_userdata(app);
-                userdata->ref_count = 0;
-                // cs::Importer importer("/home/lander/fatrop/fatrop/ocp/liboldcapi.so", "dll");
-                auto filename = cs::temporary_file("capi", ".cpp");
-                // write contens of std::string c_api_template to filename
-                std::ofstream file(filename);
-                file << c_api_template;
-                file.close();
-                cs::Importer importer(filename, "shell");
-                reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
-                auto func = cs::external("casadi_old_capi", importer);
-                // cleanup the file
-                std::remove(filename.c_str());
-                return func;
+                // C_api_userdata *userdata = new C_api_userdata(app);
+                // userdata->ref_count = 0;
+                // // cs::Importer importer("/home/lander/fatrop/fatrop/ocp/liboldcapi.so", "dll");
+                // auto filename = cs::temporary_file("capi", ".cpp");
+                // // write contens of std::string c_api_template to filename
+                // std::ofstream file(filename);
+                // file << c_api_template;
+                // file.close();
+                // cs::Importer importer(filename, "shell");
+                // reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
+                // auto func = cs::external("casadi_old_capi", importer);
+                // // cleanup the file
+                // std::remove(filename.c_str());
+                return FatropFunction(name, fatrop_impl, opts);
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
             {

@@ -1,6 +1,6 @@
 #pragma once
 #include <casadi/casadi.hpp>
-// #include <casadi/core/function_internal.hpp>
+#include <casadi/core/function_internal.hpp>
 #include <string>
 #include "fatrop/spectool/auxiliary/casadi_utilities.hpp"
 #include <functional>
