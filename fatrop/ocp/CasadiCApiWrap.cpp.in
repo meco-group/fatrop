@@ -1,3 +1,6 @@
+#pragma once
+#include <string>
+static std::string c_api_template(R"(
 #include <vector>
 #include <memory>
 #ifndef casadi_real
@@ -156,3 +159,4 @@ extern "C"
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+)");

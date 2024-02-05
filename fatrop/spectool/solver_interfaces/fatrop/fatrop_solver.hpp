@@ -5,6 +5,7 @@
 #include "fatrop/spectool/solver_interfaces/solver.hpp"
 #include "fatrop_function.hpp"
 #include "fatrop_ocp_impl.hpp"
+#include "fatrop/ocp/CasadiCApiWrap.cpp.in"
 namespace fatrop
 {
     namespace spectool
@@ -41,7 +42,12 @@ namespace fatrop
                 C_api_userdata *userdata = new C_api_userdata(app);
                 userdata->ref_count = 0;
                 // cs::Importer importer("/home/lander/fatrop/fatrop/ocp/liboldcapi.so", "dll");
-                cs::Importer importer("/home/lander/fatrop/fatrop/ocp/Casadi_CApiWrap.cpp", "shell");
+                auto filename = cs::temporary_file("capi", ".cpp");
+                // write contens of std::string c_api_template to filename
+                std::ofstream file(filename);
+                file << c_api_template;
+                file.close();
+                cs::Importer importer(filename, "shell");
                 reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
                 auto func = cs::external("casadi_old_capi", importer);
                 return func;
