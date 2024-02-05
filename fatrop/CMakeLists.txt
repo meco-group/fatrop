@@ -53,7 +53,7 @@ solver/LineSearch.hpp                       solver/LineSearch.cpp
 solver/FatropStats.hpp                            
 templates/NLPAlg.hpp                        templates/NLPAlg.cpp
 json/json.h json/json.cpp
-ocp/CasadiCApiWrap.hpp                      ocp/CasadiCApiWrap.cpp
+ocp/CasadiCApiUserdataWrap.hpp                      ocp/CasadiCApiUserdataWrap.cpp
 )
 set(FATROPHEADERS
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp
@@ -95,7 +95,7 @@ solver/Timer.hpp
 solver/FatropStats.hpp                            
 templates/FatropApplication.hpp
 templates/NLPAlg.hpp
-ocp/CasadiCApiWrap.hpp
+ocp/CasadiCApiUserdataWrap.hpp
 )
 # add_library(fatrop SHARED ${FATROP_INTERNAL})
 add_library(fatrop SHARED ${FATROP_INTERNAL})

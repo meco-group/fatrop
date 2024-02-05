@@ -1,0 +1,158 @@
+#include <vector>
+#include <memory>
+#ifndef casadi_real
+#define casadi_real double
+#endif
+
+#ifndef casadi_int
+#define casadi_int long long int
+#endif
+// c++ stuff here
+// TODO: this can become part of the default fatrop API as well. It has no dependency on casadi.
+// forward declaration of OCPApplication
+namespace fatrop
+{
+    class OCPApplication;
+    namespace spectool
+    {
+
+        struct C_api_userdata
+        {
+            // constructor
+            C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app);
+            const std::shared_ptr<fatrop::OCPApplication> app_;
+            std::vector<std::vector<casadi_int>> sparsity_in;
+            std::vector<std::vector<casadi_int>> sparsity_out;
+            std::vector<double> arg_initial_vars;
+            std::vector<double> arg_stage_parameters;
+            std::vector<double> arg_global_parameters;
+            int n_vars;
+            int n_stage_params;
+            int n_global_params;
+            int ref_count = 0;
+        };
+    }
+}
+fatrop::spectool::C_api_userdata *user_data = NULL;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+/* How to prefix internal symbols */
+#ifdef CASADI_CODEGEN_PREFIX
+#define CASADI_NAMESPACE_CONCAT(NS, ID) _CASADI_NAMESPACE_CONCAT(NS, ID)
+#define _CASADI_NAMESPACE_CONCAT(NS, ID) NS##ID
+#define CASADI_PREFIX(ID) CASADI_NAMESPACE_CONCAT(CODEGEN_PREFIX, ID)
+#else
+#define CASADI_PREFIX(ID) f_##ID
+#endif
+
+/* Symbol visibility in DLLs */
+#ifndef CASADI_SYMBOL_EXPORT
+#if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#if defined(STATIC_LINKED)
+#define CASADI_SYMBOL_EXPORT
+#else
+#define CASADI_SYMBOL_EXPORT __declspec(dllexport)
+#endif
+#elif defined(__GNUC__) && defined(GCC_HASCLASSVISIBILITY)
+#define CASADI_SYMBOL_EXPORT __attribute__((visibility("default")))
+#else
+#define CASADI_SYMBOL_EXPORT
+#endif
+#endif
+    void set_user_data(fatrop::spectool::C_api_userdata *ud)
+    {
+        if(user_data == NULL)
+        user_data = ud;
+        else
+        throw std::runtime_error("User data already set");
+    }
+
+    CASADI_SYMBOL_EXPORT int fatrop_func(const casadi_real **arg, casadi_real **res, casadi_int *iw, casadi_real *w, int mem, void *user_data);
+    CASADI_SYMBOL_EXPORT int fatrop_func_alloc_mem(void *user_data);
+    CASADI_SYMBOL_EXPORT int fatrop_func_init_mem(int mem, void *user_data);
+    CASADI_SYMBOL_EXPORT void fatrop_func_free_mem(int mem, void *user_data);
+    CASADI_SYMBOL_EXPORT int fatrop_func_checkout(void *user_data);
+    CASADI_SYMBOL_EXPORT void fatrop_func_release(int mem, void *user_data);
+    CASADI_SYMBOL_EXPORT void fatrop_func_incref(void *user_data);
+    CASADI_SYMBOL_EXPORT void fatrop_func_decref(void *user_data);
+    CASADI_SYMBOL_EXPORT casadi_int fatrop_func_n_in(void *user_data);
+    CASADI_SYMBOL_EXPORT casadi_int fatrop_func_n_out(void *user_data);
+    CASADI_SYMBOL_EXPORT casadi_real fatrop_func_default_in(casadi_int i, void *user_data);
+    CASADI_SYMBOL_EXPORT const char *fatrop_func_name_in(casadi_int i, void *user_data);
+    CASADI_SYMBOL_EXPORT const char *fatrop_func_name_out(casadi_int i, void *user_data);
+    CASADI_SYMBOL_EXPORT const casadi_int *fatrop_func_sparsity_in(casadi_int i, void *user_data);
+    CASADI_SYMBOL_EXPORT const casadi_int *fatrop_func_sparsity_out(casadi_int i, void *user_data);
+    CASADI_SYMBOL_EXPORT int fatrop_func_work(casadi_int *sz_arg, casadi_int *sz_res, casadi_int *sz_iw, casadi_int *sz_w, void *user_data);
+
+    CASADI_SYMBOL_EXPORT int casadi_old_capi(const casadi_real **arg, casadi_real **res, casadi_int *iw, casadi_real *w, int mem)
+    {
+        return fatrop_func(arg, res, iw, w, mem, user_data);
+    }
+    CASADI_SYMBOL_EXPORT int casadi_old_capi_alloc_mem()
+    {
+        return fatrop_func_alloc_mem(user_data);
+    }
+    CASADI_SYMBOL_EXPORT int casadi_old_capi_init_mem(int mem)
+    {
+        return fatrop_func_init_mem(mem, user_data);
+    }
+    CASADI_SYMBOL_EXPORT void casadi_old_capi_free_mem(int mem)
+    {
+        return fatrop_func_free_mem(mem, user_data);
+    }
+    CASADI_SYMBOL_EXPORT int casadi_old_capi_checkout()
+    {
+        return fatrop_func_checkout(user_data);
+    }
+    CASADI_SYMBOL_EXPORT void casadi_old_capi_release(int mem)
+    {
+        return fatrop_func_release(mem, user_data);
+    }
+    CASADI_SYMBOL_EXPORT void casadi_old_capi_incref()
+    {
+        return fatrop_func_incref(user_data);
+    }
+    CASADI_SYMBOL_EXPORT void casadi_old_capi_decref()
+    {
+        return fatrop_func_decref(user_data);
+    }
+    CASADI_SYMBOL_EXPORT casadi_int casadi_old_capi_n_in()
+    {
+        return fatrop_func_n_in(user_data);
+    }
+    CASADI_SYMBOL_EXPORT casadi_int casadi_old_capi_n_out()
+    {
+        return fatrop_func_n_out(user_data);
+    }
+    CASADI_SYMBOL_EXPORT casadi_real casadi_old_capi_default_in(casadi_int i)
+    {
+        return fatrop_func_default_in(i, user_data);
+    }
+    CASADI_SYMBOL_EXPORT const char *casadi_old_capi_name_in(casadi_int i)
+    {
+        return fatrop_func_name_in(i, user_data);
+    }
+    CASADI_SYMBOL_EXPORT const char *casadi_old_capi_name_out(casadi_int i)
+    {
+        return fatrop_func_name_out(i, user_data);
+    }
+    CASADI_SYMBOL_EXPORT const casadi_int *casadi_old_capi_sparsity_in(casadi_int i)
+    {
+        return fatrop_func_sparsity_in(i, user_data);
+    }
+    CASADI_SYMBOL_EXPORT const casadi_int *casadi_old_capi_sparsity_out(casadi_int i)
+    {
+        return fatrop_func_sparsity_out(i, user_data);
+    }
+    CASADI_SYMBOL_EXPORT int casadi_old_capi_work(casadi_int *sz_arg, casadi_int *sz_res, casadi_int *sz_iw, casadi_int *sz_w)
+    {
+        return fatrop_func_work(sz_arg, sz_res, sz_iw, sz_w, user_data);
+    }
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

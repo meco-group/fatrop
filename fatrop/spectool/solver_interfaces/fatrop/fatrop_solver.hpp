@@ -40,8 +40,9 @@ namespace fatrop
                 }
                 C_api_userdata *userdata = new C_api_userdata(app);
                 userdata->ref_count = 1;
-                auto func = cs::external("fatrop_func", "/home/lander/fatrop/build/fatrop/spectool/libspectool.so", cs::Dict{{"user_data", static_cast<void *>(userdata)}});
-                fatrop_func_decref(static_cast<void *>(userdata));
+                cs::Importer importer("/home/lander/fatrop/fatrop/ocp/liboldcapi.so", "dll");
+                reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
+                auto func = cs::external("casadi_old_capi", importer);
                 return func;
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)

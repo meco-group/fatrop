@@ -1,4 +1,4 @@
-#include "CasadiCApiWrap.hpp"
+#include "CasadiCApiUserdataWrap.hpp"
 #include <math.h>
 #include "fatrop/ocp/StageOCPApplication.hpp"
 #include "fatrop/ocp/OCPDims.hpp"
@@ -103,6 +103,7 @@ CASADI_SYMBOL_EXPORT void fatrop_func_decref(void *user_data)
   if (udata->ref_count == 0)
   {
     delete udata;
+    udata = NULL;
   }
 }
 
