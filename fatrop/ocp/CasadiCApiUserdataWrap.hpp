@@ -1,12 +1,12 @@
 #pragma once
 #include <vector>
 #include <memory>
-#ifndef casadi_real
-#define casadi_real double
+#ifndef casadi_real_capi
+#define casadi_real_capi double
 #endif
 
-#ifndef casadi_int
-#define casadi_int long long int
+#ifndef casadi_int_capi
+#define casadi_int_capi long long int
 #endif
 // c++ stuff here
 // TODO: this can become part of the default fatrop API as well. It has no dependency on casadi.
@@ -22,8 +22,8 @@ namespace fatrop
       // constructor
       C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app);
       const std::shared_ptr<fatrop::OCPApplication> app_;
-      std::vector<std::vector<casadi_int>> sparsity_in;
-      std::vector<std::vector<casadi_int>> sparsity_out;
+      std::vector<std::vector<casadi_int_capi>> sparsity_in;
+      std::vector<std::vector<casadi_int_capi>> sparsity_out;
       std::vector<double> arg_initial_vars;
       std::vector<double> arg_stage_parameters;
       std::vector<double> arg_global_parameters;
@@ -64,7 +64,7 @@ extern "C"
 #endif
 #endif
 
-  CASADI_SYMBOL_EXPORT int fatrop_func(const casadi_real **arg, casadi_real **res, casadi_int *iw, casadi_real *w, int mem, void *user_data);
+  CASADI_SYMBOL_EXPORT int fatrop_func(const casadi_real_capi **arg, casadi_real_capi **res, casadi_int_capi *iw, casadi_real_capi *w, int mem, void *user_data);
   CASADI_SYMBOL_EXPORT int fatrop_func_alloc_mem(void *user_data);
   CASADI_SYMBOL_EXPORT int fatrop_func_init_mem(int mem, void *user_data);
   CASADI_SYMBOL_EXPORT void fatrop_func_free_mem(int mem, void *user_data);
@@ -72,14 +72,14 @@ extern "C"
   CASADI_SYMBOL_EXPORT void fatrop_func_release(int mem, void *user_data);
   CASADI_SYMBOL_EXPORT void fatrop_func_incref(void *user_data);
   CASADI_SYMBOL_EXPORT void fatrop_func_decref(void *user_data);
-  CASADI_SYMBOL_EXPORT casadi_int fatrop_func_n_in(void *user_data);
-  CASADI_SYMBOL_EXPORT casadi_int fatrop_func_n_out(void *user_data);
-  CASADI_SYMBOL_EXPORT casadi_real fatrop_func_default_in(casadi_int i, void *user_data);
-  CASADI_SYMBOL_EXPORT const char *fatrop_func_name_in(casadi_int i, void *user_data);
-  CASADI_SYMBOL_EXPORT const char *fatrop_func_name_out(casadi_int i, void *user_data);
-  CASADI_SYMBOL_EXPORT const casadi_int *fatrop_func_sparsity_in(casadi_int i, void *user_data);
-  CASADI_SYMBOL_EXPORT const casadi_int *fatrop_func_sparsity_out(casadi_int i, void *user_data);
-  CASADI_SYMBOL_EXPORT int fatrop_func_work(casadi_int *sz_arg, casadi_int *sz_res, casadi_int *sz_iw, casadi_int *sz_w, void *user_data);
+  CASADI_SYMBOL_EXPORT casadi_int_capi fatrop_func_n_in(void *user_data);
+  CASADI_SYMBOL_EXPORT casadi_int_capi fatrop_func_n_out(void *user_data);
+  CASADI_SYMBOL_EXPORT casadi_real_capi fatrop_func_default_in(casadi_int_capi i, void *user_data);
+  CASADI_SYMBOL_EXPORT const char *fatrop_func_name_in(casadi_int_capi i, void *user_data);
+  CASADI_SYMBOL_EXPORT const char *fatrop_func_name_out(casadi_int_capi i, void *user_data);
+  CASADI_SYMBOL_EXPORT const casadi_int_capi *fatrop_func_sparsity_in(casadi_int_capi i, void *user_data);
+  CASADI_SYMBOL_EXPORT const casadi_int_capi *fatrop_func_sparsity_out(casadi_int_capi i, void *user_data);
+  CASADI_SYMBOL_EXPORT int fatrop_func_work(casadi_int_capi *sz_arg, casadi_int_capi *sz_res, casadi_int_capi *sz_iw, casadi_int_capi *sz_w, void *user_data);
 
 #ifdef __cplusplus
 } /* extern "C" */

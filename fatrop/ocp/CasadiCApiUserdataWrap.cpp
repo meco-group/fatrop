@@ -9,19 +9,19 @@ namespace fatrop
   {
     struct SparsityAux
     {
-      static std::vector<casadi_int> dense(casadi_int m, casadi_int n)
+      static std::vector<casadi_int_capi> dense(casadi_int_capi m, casadi_int_capi n)
       {
-        std::vector<casadi_int> ret(3 + n + m * n);
-        casadi_int count = 0;
+        std::vector<casadi_int_capi> ret(3 + n + m * n);
+        casadi_int_capi count = 0;
         ret[count++] = m;
         ret[count++] = n;
-        for (casadi_int i = 0; i < n + 1; i++)
+        for (casadi_int_capi i = 0; i < n + 1; i++)
         {
           ret[count++] = i * m;
         }
-        for (casadi_int i = 0; i < n; i++)
+        for (casadi_int_capi i = 0; i < n; i++)
         {
-          for (casadi_int j = 0; j < m; j++)
+          for (casadi_int_capi j = 0; j < m; j++)
           {
             ret[count++] = j;
           }
@@ -50,7 +50,7 @@ namespace fatrop
 
 /* f:(i0)->(o0) */
 
-CASADI_SYMBOL_EXPORT int fatrop_func(const casadi_real **arg, casadi_real **res, casadi_int *iw, casadi_real *w, int mem, void *user_data)
+CASADI_SYMBOL_EXPORT int fatrop_func(const casadi_real_capi **arg, casadi_real_capi **res, casadi_int_capi *iw, casadi_real_capi *w, int mem, void *user_data)
 {
   auto *udata = static_cast<fatrop::spectool::C_api_userdata *>(user_data);
   std::copy(arg[0], arg[0] + udata->n_vars, (double *)udata->arg_initial_vars.data());
@@ -107,11 +107,11 @@ CASADI_SYMBOL_EXPORT void fatrop_func_decref(void *user_data)
   }
 }
 
-CASADI_SYMBOL_EXPORT casadi_int fatrop_func_n_in(void *user_data) { return 3; }
+CASADI_SYMBOL_EXPORT casadi_int_capi fatrop_func_n_in(void *user_data) { return 3; }
 
-CASADI_SYMBOL_EXPORT casadi_int fatrop_func_n_out(void *user_data) { return 1; }
+CASADI_SYMBOL_EXPORT casadi_int_capi fatrop_func_n_out(void *user_data) { return 1; }
 
-CASADI_SYMBOL_EXPORT casadi_real fatrop_func_default_in(casadi_int i, void *user_data)
+CASADI_SYMBOL_EXPORT casadi_real_capi fatrop_func_default_in(casadi_int_capi i, void *user_data)
 {
   switch (i)
   {
@@ -120,7 +120,7 @@ CASADI_SYMBOL_EXPORT casadi_real fatrop_func_default_in(casadi_int i, void *user
   }
 }
 
-CASADI_SYMBOL_EXPORT const char *fatrop_func_name_in(casadi_int i, void *user_data)
+CASADI_SYMBOL_EXPORT const char *fatrop_func_name_in(casadi_int_capi i, void *user_data)
 {
   switch (i)
   {
@@ -135,7 +135,7 @@ CASADI_SYMBOL_EXPORT const char *fatrop_func_name_in(casadi_int i, void *user_da
   }
 }
 
-CASADI_SYMBOL_EXPORT const char *fatrop_func_name_out(casadi_int i, void *user_data)
+CASADI_SYMBOL_EXPORT const char *fatrop_func_name_out(casadi_int_capi i, void *user_data)
 {
   switch (i)
   {
@@ -146,19 +146,19 @@ CASADI_SYMBOL_EXPORT const char *fatrop_func_name_out(casadi_int i, void *user_d
   }
 }
 
-CASADI_SYMBOL_EXPORT const casadi_int *fatrop_func_sparsity_in(casadi_int i, void *user_data)
+CASADI_SYMBOL_EXPORT const casadi_int_capi *fatrop_func_sparsity_in(casadi_int_capi i, void *user_data)
 {
   auto *udata = static_cast<fatrop::spectool::C_api_userdata *>(user_data);
   return udata->sparsity_in[i].data();
 }
 
-CASADI_SYMBOL_EXPORT const casadi_int *fatrop_func_sparsity_out(casadi_int i, void *user_data)
+CASADI_SYMBOL_EXPORT const casadi_int_capi *fatrop_func_sparsity_out(casadi_int_capi i, void *user_data)
 {
   auto *udata = static_cast<fatrop::spectool::C_api_userdata *>(user_data);
   return udata->sparsity_out[i].data();
 }
 
-CASADI_SYMBOL_EXPORT int fatrop_func_work(casadi_int *sz_arg, casadi_int *sz_res, casadi_int *sz_iw, casadi_int *sz_w, void *user_data)
+CASADI_SYMBOL_EXPORT int fatrop_func_work(casadi_int_capi *sz_arg, casadi_int_capi *sz_res, casadi_int_capi *sz_iw, casadi_int_capi *sz_w, void *user_data)
 {
   if (sz_arg)
     *sz_arg = 3;
