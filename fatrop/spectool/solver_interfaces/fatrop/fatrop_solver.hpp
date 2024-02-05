@@ -39,7 +39,7 @@ namespace fatrop
                         app->set_option(opt.first, (bool)opt.second);
                 }
                 C_api_userdata *userdata = new C_api_userdata(app);
-                userdata->ref_count = 1;
+                userdata->ref_count = 0;
                 // cs::Importer importer("/home/lander/fatrop/fatrop/ocp/liboldcapi.so", "dll");
                 cs::Importer importer("/home/lander/fatrop/fatrop/ocp/Casadi_CApiWrap.cpp", "shell");
                 reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
