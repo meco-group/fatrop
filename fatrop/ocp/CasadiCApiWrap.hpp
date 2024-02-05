@@ -1,7 +1,6 @@
 #pragma once
-#include <math.h>
-#include "fatrop/ocp/StageOCPApplication.hpp"
-#include "fatrop/ocp/OCPDims.hpp"
+#include <vector>
+#include <memory>
 #ifndef casadi_real
 #define casadi_real double
 #endif
@@ -11,8 +10,10 @@
 #endif
 // c++ stuff here
 // TODO: this can become part of the default fatrop API as well. It has no dependency on casadi.
+// forward declaration of OCPApplication
 namespace fatrop
 {
+  class OCPApplication;
   namespace spectool
   {
 

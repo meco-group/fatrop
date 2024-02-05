@@ -1,5 +1,7 @@
 #include "CasadiCApiWrap.hpp"
-
+#include <math.h>
+#include "fatrop/ocp/StageOCPApplication.hpp"
+#include "fatrop/ocp/OCPDims.hpp"
 // c++ stuff here
 namespace fatrop
 {
