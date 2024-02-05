@@ -50,6 +50,8 @@ namespace fatrop
                 cs::Importer importer(filename, "shell");
                 reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
                 auto func = cs::external("casadi_old_capi", importer);
+                // cleanup the file
+                std::remove(filename.c_str());
                 return func;
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
