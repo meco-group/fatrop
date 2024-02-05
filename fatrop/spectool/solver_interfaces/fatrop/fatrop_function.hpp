@@ -5,6 +5,7 @@
 #include "fatrop/spectool/auxiliary/casadi_utilities.hpp"
 #include "fatrop/ocp/StageOCPApplication.hpp"
 #include "fatrop/ocp/OCPDims.hpp"
+#include "fatrop/ocp/CasadiCApiUserdataWrap.hpp"
 namespace fatrop
 {
     namespace spectool

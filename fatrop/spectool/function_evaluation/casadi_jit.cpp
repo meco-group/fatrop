@@ -5,9 +5,9 @@ namespace fatrop
     {
         CasadiFEJit::CasadiFEJit(const cs::Function &F, const cs::Dict &jit_options_)
         {
-            cs::FunctionInternal *func_internal = F.get();
-            if (func_internal->has_codegen())
-            {
+            // cs::FunctionInternal *func_internal = F.get();
+            // if (F.has_codegen())
+            // {
                 jit_name_ = F.name();
                 jit_name_ = casadi::temporary_file(jit_name_, ".c");
                 jit_name_ = std::string(jit_name_.begin(), jit_name_.begin() + jit_name_.size() - 2);
@@ -25,11 +25,11 @@ namespace fatrop
                 // cache the function
                 compiled_jit = true;
                 casadi_assert(eval_ != nullptr, "Cannot load JIT'ed function.");
-            }
-            else
-            {
-                std::cout << "jit compilation not possible for the provided functions" << std::endl;
-            }
+            // }
+            // else
+            // {
+            //     std::cout << "jit compilation not possible for the provided functions" << std::endl;
+            // }
         }
         CasadiFEJit::~CasadiFEJit()
         {

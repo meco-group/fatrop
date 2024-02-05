@@ -32,8 +32,8 @@ spec/ocp.hpp
 spec/ustage.hpp
 solver_interfaces/fatrop/fatrop_solver.hpp
 solver_interfaces/solver.hpp
-# solver_interfaces/fatrop/fatrop_ocp_impl.hpp
-solver_interfaces/fatrop/fatrop_function.hpp
+solver_interfaces/fatrop/fatrop_ocp_impl.hpp
+# solver_interfaces/fatrop/fatrop_function.hpp
 spec/ustage_quantities.hpp
 spec/stage.hpp
 spec/integrator-rk4.hpp
