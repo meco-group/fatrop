@@ -3,9 +3,11 @@
 #include <string>
 #include "fatrop/spectool/auxiliary/casadi_utilities.hpp"
 #include "fatrop/spectool/solver_interfaces/solver.hpp"
-#include "fatrop_function.hpp"
+// #include "fatrop_function.hpp"
 #include "fatrop_ocp_impl.hpp"
 #include "fatrop/ocp/CasadiCApiWrap.cpp.in"
+#include "fatrop/fatrop.hpp"
+#include "fatrop/ocp/CasadiCApiUserdataWrap.hpp"
 namespace fatrop
 {
     namespace spectool
