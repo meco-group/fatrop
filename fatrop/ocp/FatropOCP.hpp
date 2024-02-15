@@ -154,6 +154,7 @@ namespace fatrop
         double inertia_correction_w_cache;
         double inertia_correction_c_cache;
         bool it_ref;
+        bool ls_scaling;
         OCPLSScaler lsscaler_;
     };
 } // namespace fatrop

@@ -46,6 +46,7 @@ FatropOCP::FatropOCP(
                                                                                                                                       delta_s_test(nlpdims_.nineqs, 1), lsscaler_(dims_)
 {
     options_->register_option(BooleanOption("iterative_refinement_SOC", "Use iterative refinement for SOC", &it_ref, true));
+    options_->register_option(BooleanOption("ls_scaling", "Use automatic scaling for linear system", &ls_scaling, true));
 }
 int FatropOCP::eval_lag_hess(
     double obj_scale,
@@ -81,7 +82,8 @@ int FatropOCP::solve_pd_sys(
 {
     // ls_ = RefCountPtr<OCPLinearSolver>(new Sparse_OCP(ocp_->GetOCPDims(), ocpkktmemory_));
     // save gradb_total and sigma_total
-    lsscaler_.scale_kkt(ocpkktmemory_);
+    if (ls_scaling)
+        lsscaler_.scale_kkt(ocpkktmemory_);
     gradb_total_cache[0].copy(gradb_total);
     sigma_total_cache[0].copy(sigma_total);
     inertia_correction_w_cache = inertia_correction_w;
@@ -96,8 +98,11 @@ int FatropOCP::solve_pd_sys(
         delta_s,
         sigma_total,
         gradb_total);
-    lsscaler_.scale_lam(lam, 0);
-    lsscaler_.restore_kkt(ocpkktmemory_);
+    if (ls_scaling)
+    {
+        lsscaler_.scale_lam(lam, 0);
+        lsscaler_.restore_kkt(ocpkktmemory_);
+    }
     return ret;
 };
 
@@ -107,7 +112,8 @@ int FatropOCP::solve_soc_rhs(
     const FatropVecBF &delta_s,
     const FatropVecBF &constraint_violation)
 {
-    lsscaler_.scale_kkt(ocpkktmemory_);
+    if (ls_scaling)
+        lsscaler_.scale_kkt(ocpkktmemory_);
     int min_it_ref = 0;
     // if (inertia_correction_c_cache != 0.0)
     //     return -1;
@@ -189,13 +195,19 @@ int FatropOCP::solve_soc_rhs(
                 {
                     if (err_curr > 1e-6)
                     {
-    lsscaler_.scale_lam(lam, 0);
-    lsscaler_.restore_kkt(ocpkktmemory_);
+                        if (ls_scaling)
+                        {
+                            lsscaler_.scale_lam(lam, 0);
+                            lsscaler_.restore_kkt(ocpkktmemory_);
+                        }
                         return -2;
                         // cout << "stopped it_ref because insufficient decrease err_curr:  " << err_curr << endl;
                     }
-    lsscaler_.scale_lam(lam, 0);
-    lsscaler_.restore_kkt(ocpkktmemory_);
+                    if (ls_scaling)
+                    {
+                        lsscaler_.scale_lam(lam, 0);
+                        lsscaler_.restore_kkt(ocpkktmemory_);
+                    }
                     return 0;
                 }
             }
@@ -222,8 +234,12 @@ int FatropOCP::solve_soc_rhs(
         }
         printer_->level(1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     };
-    lsscaler_.scale_lam(lam, 0);
-    lsscaler_.restore_kkt(ocpkktmemory_);
+
+    if (ls_scaling)
+    {
+        lsscaler_.scale_lam(lam, 0);
+        lsscaler_.restore_kkt(ocpkktmemory_);
+    }
     return 0;
 }
 int FatropOCP::compute_scalings(
@@ -310,7 +326,8 @@ int FatropOCP::initialize_dual(
     ux_dummy.SetConstant(0.0);
     sigma.SetConstant(1.0);
     axpy(-1.0, zL, zU, gradb);
-    lsscaler_.scale_kkt(ocpkktmemory_);
+    if (ls_scaling)
+        lsscaler_.scale_kkt(ocpkktmemory_);
     int ret = ls_->solve_pd_sys(
         &ocpkktmemory_,
         0.0,
@@ -320,8 +337,11 @@ int FatropOCP::initialize_dual(
         s_dummy,
         sigma,
         gradb);
-    lsscaler_.scale_lam(dlam, 0);
-    lsscaler_.restore_kkt(ocpkktmemory_);
+    if (ls_scaling)
+    {
+        lsscaler_.scale_lam(dlam, 0);
+        lsscaler_.restore_kkt(ocpkktmemory_);
+    }
     return 0;
 }
 int FatropOCP::initialize_slacks(FatropVecBF &s_curr)
