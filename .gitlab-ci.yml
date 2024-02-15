@@ -12,15 +12,16 @@ before_script:
 
 build:
   script:
-    # build fatrop and fatropy
+    # build fatrop and install fatropy
     - git submodule update --init --recursive
     - apt-get update && apt-get install -y cmake
     - export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
     - cd fatropy
     - pip install .
 
-  # rockit and rockit-fatrop plugin
-  #- git clone https://gitlab.kuleuven.be/meco-software/rockit.git
-  #- git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/ rockit/external/fatrop
-  #- cd rockit
-  #- pip install .
+    # install rockit and rockit-fatrop plugin
+    - git clone https://gitlab.kuleuven.be/meco-software/rockit.git
+    - git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop
+    - cd rockit
+    - pip install .
+    - cd ../.. # return to fatrop root
