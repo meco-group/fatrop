@@ -18,7 +18,7 @@ namespace fatrop
                 for (int i = 0; i < ng_[k]; i++)
                 {
                     double scale = 1.0/std::max(inf_col(nu_[k] + nx_[k], Ggt_p + k, 0, i), 1e-8); // 1e-8 is a small number to avoid division by zero
-                    if (scale > 1e-3 || scale < 1e3) scale = 1.0; // if the scale is not very small or large, we do not scale
+                    if (scale > 1e-3 && scale < 1e3) scale = 1.0; // if the scale is not very small or large, we do not scale
                     if(scale != 1.0) COLSC(nu_[k] + nx_[k] + 1,  scale, Ggt_p + k, 0, i);
                     VECEL((VEC*)scales_, offs) = scale;
                     offs++;
