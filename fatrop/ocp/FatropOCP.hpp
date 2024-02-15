@@ -31,6 +31,7 @@
 #include "OCP.hpp"
 #include <memory>
 #include "fatrop/auxiliary/Common.hpp"
+#include "OCPLSScaler.hpp"
 // #include <unistd.h>
 namespace fatrop
 {
@@ -153,6 +154,7 @@ namespace fatrop
         double inertia_correction_w_cache;
         double inertia_correction_c_cache;
         bool it_ref;
+        OCPLSScaler lsscaler_;
     };
 } // namespace fatrop
 #endif //  OCPALGINCLUDED
