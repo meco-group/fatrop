@@ -19,6 +19,7 @@
 #ifndef BASICOCPAPPLICATIONINCLUDED
 #define BASICOCPAPPLICATIONINCLUDED
 #include "fatrop/solver/FatropStats.hpp"
+#include "fatrop/solver/FatropAlg.hpp"
 #include "fatrop/ocp/StageOCPExpressions.hpp"
 #include <map>
 #include <fstream>
