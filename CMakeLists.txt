@@ -48,6 +48,12 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DRELEASE -DLEVEL1_DCACHE_LINE_SIZE=${L1_CACHE_LINE_SIZE} -DPANEL_SIZE=${PANEL_SIZE}")
 endif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
+# Specify correct version of C Runtime Libary for MSVC
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+endif()
+
 option(BUILD_DOCS "Build documentation" OFF)
 
 # TODO write this is a more modern way
