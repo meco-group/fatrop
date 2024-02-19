@@ -132,7 +132,7 @@ void ParameterSetter::set_value(vector<double>& global_params, vector<double>& s
         {
             for (fatrop_int i = 0; i < _no_var; i++)
             {
-                params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i)];
+                params[_offsets_out.at(i) + k * no_stage_params] = value[_offsets_in.at(i) + k*no_stage_params];
             }
         }
     }
