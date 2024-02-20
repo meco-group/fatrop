@@ -210,16 +210,9 @@ namespace fatrop
 
             for (const auto &hybrid : get_hybrids())
             {
-                if (prev)
-                {
-                    auto &next_states = prev->get_next_states();
-                    auto &curr_next_states = get_next_states();
-                    (next_states.find(hybrid) != next_states.end() || (K() > 1 && curr_next_states.find(hybrid) != curr_next_states.end()) ? auto_x : auto_u).push_back(hybrid);
-                }
-                else
-                {
-                    auto_u.push_back(hybrid);
-                }
+                auto &next_states = prev->get_next_states();
+                auto &curr_next_states = get_next_states();
+                ((prev && next_states.find(hybrid) != next_states.end()) || (K() > 1 && curr_next_states.find(hybrid) != curr_next_states.end()) ? auto_x : auto_u).push_back(hybrid);
             }
         };
         const std::vector<cs::MX> uStageInternal::get_hybrids_states(const std::shared_ptr<const uStageInternal> &prev) const
