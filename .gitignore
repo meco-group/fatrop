@@ -6,6 +6,7 @@ invariants/trans_FS/f.c
 *.orig
 *jit_tmp*
 .vscode/
+.vs/
 *.pyc
 *.mp4
 /__pycache__/*
