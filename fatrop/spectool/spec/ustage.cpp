@@ -210,6 +210,7 @@ namespace fatrop
 
             for (const auto &hybrid : get_hybrids())
             {
+                // a hybrid is a state if it is defined by the dynamics function of the previous ustage OR if K>1 and it is defined by the dynamics function of the current ustage
                 auto &next_states = prev->get_next_states();
                 auto &curr_next_states = get_next_states();
                 ((prev && next_states.find(hybrid) != next_states.end()) || (K() > 1 && curr_next_states.find(hybrid) != curr_next_states.end()) ? auto_x : auto_u).push_back(hybrid);
