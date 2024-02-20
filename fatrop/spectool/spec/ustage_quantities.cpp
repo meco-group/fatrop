@@ -19,7 +19,7 @@ namespace fatrop
             std::vector<cs::MX> x_next;
             if (next || ustage -> K()>1)
             {
-                auto next_states = (ustage->K()==1)? next->get_states(true, ustage): ustage->get_states(true, next);
+                auto next_states = (ustage->K()==1)? next->get_states(true, ustage): ustage->get_states(true, prev);
                 for (auto &state : next_states)
                 {
                     try

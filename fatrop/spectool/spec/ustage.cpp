@@ -24,7 +24,8 @@ namespace fatrop
             get()->next_states_[state] = next_state;
             get()->next_state_jacobians_[state] = jac;
             get()->next_state_hessians_[state] = hess;
-            if(K()> 1) get()->add_variables(state);
+            if (K() > 1)
+                get()->add_variables(state);
             get()->add_variables(next_state);
         }
         void uStage::set_next(const uo_map_mx<cs::MX> &next_states)
@@ -204,16 +205,16 @@ namespace fatrop
         };
         void uStageInternal::get_hybrids(std::vector<cs::MX> &auto_x, std::vector<cs::MX> &auto_u, const std::shared_ptr<const uStageInternal> &prev) const
         {
-            const uStageInternal* prev_ptr = (K() > 1)? this : prev.get();
-            if (has_hybrids && !prev_ptr)
+            if (has_hybrids && !prev)
                 throw std::runtime_error("get_hybrids: prev ustage must be provided if stage has hybrids");
 
             for (const auto &hybrid : get_hybrids())
             {
-                if (prev_ptr)
+                if (prev)
                 {
-                    auto &next_states = prev_ptr->get_next_states();
-                    (next_states.find(hybrid) != next_states.end() ? auto_x : auto_u).push_back(hybrid);
+                    auto &next_states = prev->get_next_states();
+                    auto &curr_next_states = get_next_states();
+                    (next_states.find(hybrid) != next_states.end() || (K() > 1 && curr_next_states.find(hybrid) != curr_next_states.end()) ? auto_x : auto_u).push_back(hybrid);
                 }
                 else
                 {
