@@ -76,7 +76,7 @@ namespace fatrop
             uStage at_t0() const { return ustages_.front(); };
             uStage at_tf() const { return ustages_.back(); };
             void set_initial(const cs::MX &var, const cs::MX &value);
-            cs::MX eval_at_initial(const cs::MX &expr) const;
+            std::vector<cs::MX> eval_at_initial(const std::vector<cs::MX> &expr) const;
             cs::MX all_variables();
             void solver(const std::string &name, const cs::Dict &function_opts = casadi::Dict(), const cs::Dict &solver_opts = casadi::Dict()){get()->solver_name = name; solver_opts_ = solver_opts; function_opts_ = function_opts;};
 
