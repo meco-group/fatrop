@@ -17,9 +17,10 @@ namespace fatrop
             uo_map_mx<Hessian> hessians;
             uo_map_mx<Jacobian> jacobians;
             std::vector<cs::MX> x_next;
-            if (next)
+            if (next || ustage -> K()>1)
             {
-                for (auto &state : next->get_states(true, ustage))
+                auto next_states = (ustage->K()==1)? next->get_states(true, ustage): ustage->get_states(true, prev);
+                for (auto &state : next_states)
                 {
                     try
                     {
@@ -33,7 +34,7 @@ namespace fatrop
                     hessians[x_next.back()] = ustage->get_next_state_hessians().at(state);
                     jacobians[x_next.back()] = ustage->get_next_state_jacobians().at(state);
                 }
-                if (ustage->K() > 1)
+                if (next && ustage->K() > 1)
                 {
                     // check if x_next is same as x
                     auto x_next_vec = next->get_states(true, ustage);

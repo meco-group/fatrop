@@ -163,11 +163,7 @@ namespace fatrop
             if (helper0.has_free())
             {
                 auto free_inits = helper0.free_mx();
-                std::vector<cs::MX> init_evals;
-                for (const auto &free_init : free_inits)
-                {
-                    init_evals.push_back(eval_at_initial(free_init));
-                }
+                std::vector<cs::MX> init_evals = eval_at_initial(free_inits);
                 initial_guess = cs::MX::substitute({initial_guess}, free_inits, init_evals)[0];
             }
             auto result = fatrop_func({initial_guess, gist_solver_in[1], gist_solver_in[2]});
@@ -177,9 +173,9 @@ namespace fatrop
         {
             get()->initial_values.push_back({var, value});
         }
-        cs::MX Ocp::eval_at_initial(const cs::MX &expr) const
+        std::vector<cs::MX> Ocp::eval_at_initial(const std::vector<cs::MX> &expr) const
         {
-            auto all_vars = cs::MX::symvar(expr);
+            auto all_vars = cs::MX::symvar(veccat(expr));
             std::vector<cs::MX> from;
             std::vector<cs::MX> to;
             for (const auto &[var, value] : get()->initial_values)
@@ -213,7 +209,7 @@ namespace fatrop
                 to.push_back(cs::DM::zeros(free.size1(), free.size2()));
             }
 
-            return cs::MX::substitute({expr}, from, to)[0];
+            return cs::MX::substitute(expr, from, to);
         }
         Stage Ocp::new_stage(const int K)
         {
