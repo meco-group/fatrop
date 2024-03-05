@@ -5,15 +5,17 @@
 \usepackage{blkarray}
 \DeclareMathOperator*{\minimize}{minimize}
 \begin{document}
-\begin{subequations}
-    \begin{align}
-        \minimize_{\substack{x_k, u_k,x_K}} \quad & l_K(x_K) + \sum_{k=0}^{K-1} l_k(u_k, x_k) \label{eq:LQOCP-objective} \\
-        \textrm{subject to} \quad                 & x_{k+1} = F(u_k, x_k)\label{eq:LQOCP-dynamicsconstraints}            \\
-                                                  & G_K(x_{K})  =  - g_K   \label{eq:LQOCP-endconstraint}                \\
-                                                  & L_K \leq I_K(x_{K})  \leq U_K    \label{eq:LQOCP-endineq}            \\
-                                                  & G_{k}(u_k, x_k)   = - g_k         \label{eq:LQOCP-stageconstraints} \\ 
-                                                  & L_k \leq I_k(u_{k}, x_{k})  \leq U_k    \label{eq:LQOCP-stageineq}   
-    \end{align}
-    \label{eq:LQOCP}
+The fatrop solver supports problems of the form
+\begin{subequations} \label{software:eq:COCP} 
+        \begin{align}
+                \minimize_{\substack{\mathbf{x}_k, \mathbf{u}_k}} \quad & l_K(\mathbf{x}_K) + \sum_{k=0}^{K-1} l_k(\mathbf{u}_k, \mathbf{x}_k)          \\
+                \text{subject to} \quad
+                                                                                     & \mathbf{x}_{k+1} = \mathbf{f}_k(\mathbf{u}_k, \mathbf{x}_k) \text{ for }  k = 0, \dots, K-1 , \label{ch:software:eq:ocpdyn}    \\
+                                                                                     & \mathbf{L}_k \leq \mathbf{g}_k(\mathbf{u}_k, \mathbf{x}_k) \leq \mathbf{U}_k, \\
+                                                                                    & \mathbf{h}_k(\mathbf{u}_k, \mathbf{x}_k) =\mathbf{0}, \text{ for }  k = 0, \dots, K                        
+        \end{align}
 \end{subequations}
+for $k = 0, 1, \dots, K-1$, with $K$ the horizon length, $\mathbf{x}_k$ the state variables, $\mathbf{u}_k$ the control or input variables, $l_k$, $\mathbf{f}_k$, $\mathbf{g}_k$ and $\mathbf{h}_k$ the functions representing the stage cost, the discrete dynamics, the inequality and equality path constraints, respectively.
+Note that there is a slight difference with the original formulation of the original fatrop paper, namely that control variables are also possible at the last time step.
+These can be used for implementing helper variables.
 \end{document}
