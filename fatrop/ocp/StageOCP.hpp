@@ -63,12 +63,12 @@ namespace fatrop
         K_(K)
         {
         }
-        fatrop_int get_nxk(const fatrop_int k) const override;
-        fatrop_int get_nuk(const fatrop_int k) const override;
-        fatrop_int get_ngk(const fatrop_int k) const override;
-        fatrop_int get_ng_ineq_k(const fatrop_int k) const override;
+        fatrop_int get_nx(const fatrop_int k) const override;
+        fatrop_int get_nu(const fatrop_int k) const override;
+        fatrop_int get_ng(const fatrop_int k) const override;
+        fatrop_int get_ng_ineq(const fatrop_int k) const override;
         fatrop_int get_n_global_params() const override;
-        fatrop_int get_n_stage_params_k(const fatrop_int k) const override;
+        fatrop_int get_n_stage_params(const fatrop_int k) const override;
         fatrop_int get_horizon_length() const override;
         const fatrop_int nu_;
         const fatrop_int nx_;
@@ -125,7 +125,7 @@ namespace fatrop
                  const std::vector<double> &global_params,
                  const std::vector<double> &initial_u,
                  const std::vector<double> &initial_x);
-        fatrop_int get_default_stage_paramsk(double *stage_params_res, const fatrop_int k) const override
+        fatrop_int get_default_stage_params(double *stage_params_res, const fatrop_int k) const override
         {
             fatrop_int offs = k * n_stage_params_;
             const double *stage_params_p = stage_params.data();
@@ -144,14 +144,14 @@ namespace fatrop
             }
             return 0;
         }
-        fatrop_int eval_BAbtk(const double *states_kp1,
+        fatrop_int eval_BAbt(const double *states_kp1,
                        const double *inputs_k,
                        const double *states_k,
                        const double *stage_params_k,
                        const double *global_params,
                        MAT *res,
                        const fatrop_int k) override;
-        fatrop_int eval_RSQrqtk(const double *objective_scale,
+        fatrop_int eval_RSQrqt(const double *objective_scale,
                          const double *inputs_k,
                          const double *states_k,
                          const double *lam_dyn_k,
@@ -161,21 +161,21 @@ namespace fatrop
                          const double *global_params,
                          MAT *res,
                          const fatrop_int k) override;
-        fatrop_int eval_Ggtk(
+        fatrop_int eval_Ggt(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             MAT *res,
             const fatrop_int k) override;
-        fatrop_int eval_Ggt_ineqk(
+        fatrop_int eval_Ggt_ineq(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             MAT *res,
             const fatrop_int k) override;
-        fatrop_int eval_bk(
+        fatrop_int eval_b(
             const double *states_kp1,
             const double *inputs_k,
             const double *states_k,
@@ -183,21 +183,21 @@ namespace fatrop
             const double *global_params,
             double *constraint_violation_k,
             const fatrop_int k) override;
-        fatrop_int eval_gk(
+        fatrop_int eval_g(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
             const fatrop_int k) override;
-        fatrop_int eval_gineqk(
+        fatrop_int eval_gineq(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
             const double *global_params,
             double *res,
             const fatrop_int k) override;
-        fatrop_int eval_rqk(
+        fatrop_int eval_rq(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
@@ -206,7 +206,7 @@ namespace fatrop
             double *res,
             const fatrop_int k) override;
 
-        fatrop_int eval_Lk(
+        fatrop_int eval_L(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
@@ -250,7 +250,7 @@ namespace fatrop
             }
             return 0;
         };
-        fatrop_int get_boundsk(double *lower, double *upper, const fatrop_int k) const override
+        fatrop_int get_bounds(double *lower, double *upper, const fatrop_int k) const override
         {
             const double *bounds_L_p = bounds_L.data();
             const double *bounds_U_p = bounds_U.data();

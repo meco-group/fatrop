@@ -92,7 +92,7 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_ineq_k = offs_ineq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         // std::cout << "using exact Hess " << k << std::endl;
-        ocptempl->eval_RSQrqtk(
+        ocptempl->eval_RSQrqt(
             &obj_scale,
             primal_data + offs_ux_k,
             primal_data + offs_ux_k + nu_k,
@@ -147,7 +147,7 @@ fatrop_int OCPAdapter::eval_constr_jac(
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_ux_kp1 = offs_ux[k + 1];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_BAbtk(
+        ocptempl->eval_BAbt(
             primal_data + offs_ux_kp1 + nu_kp1,
             primal_data + offs_ux_k,
             primal_data + offs_ux_k + nu_k,
@@ -167,7 +167,7 @@ fatrop_int OCPAdapter::eval_constr_jac(
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         if (ng_k > 0)
         {
-            ocptempl->eval_Ggtk(
+            ocptempl->eval_Ggt(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
@@ -190,7 +190,7 @@ fatrop_int OCPAdapter::eval_constr_jac(
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         if (ng_ineq_k > 0)
         {
-            ocptempl->eval_Ggt_ineqk(
+            ocptempl->eval_Ggt_ineq(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
@@ -237,7 +237,7 @@ fatrop_int OCPAdapter::eval_contr_viol(
         fatrop_int offs_ux_kp1 = offs_ux[k + 1];
         fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_bk(
+        ocptempl->eval_b(
             primal_data + offs_ux_kp1 + nu_kp1,
             primal_data + offs_ux_k,
             primal_data + offs_ux_k + nu_k,
@@ -258,7 +258,7 @@ fatrop_int OCPAdapter::eval_contr_viol(
             fatrop_int offs_ux_k = offs_ux[k];
             fatrop_int offs_g_k = offs_g[k];
             fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-            ocptempl->eval_gk(
+            ocptempl->eval_g(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
@@ -283,7 +283,7 @@ fatrop_int OCPAdapter::eval_contr_viol(
             fatrop_int offs_ineq_k = offs_ineq[k];
             fatrop_int offs_g_ineq_k = offs_g_ineq[k];
             fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-            ocptempl->eval_gineqk(
+            ocptempl->eval_gineq(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
@@ -332,7 +332,7 @@ fatrop_int OCPAdapter::eval_ineqs(
             fatrop_int offs_ineq_k = offs_ineq[k];
             fatrop_int offs_g_ineq_k = offs_g_ineq[k];
             fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-            ocptempl->eval_gineqk(
+            ocptempl->eval_gineq(
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
@@ -371,7 +371,7 @@ fatrop_int OCPAdapter::eval_obj_grad(
         // fatrop_int nx_k = nx_p[k];
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_rqk(
+        ocptempl->eval_rq(
             &obj_scale,
             primal_data + offs_ux_k,
             primal_data + offs_ux_k + nu_k,
@@ -408,7 +408,7 @@ fatrop_int OCPAdapter::eval_obj(
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         double resk = 0.0;
-        ocptempl->eval_Lk(
+        ocptempl->eval_L(
             &obj_scale,
             primal_data + offs_ux_k,
             primal_data + offs_ux_k + nu_k,
@@ -438,7 +438,7 @@ fatrop_int OCPAdapter::integrate_dynamics(
     double *xkp = ((blasfeo_dvec *)xk)->pa + xk.offset();
     double *xkp1p = ((blasfeo_dvec *)xkp1)->pa + xkp1.offset();
     double *x_dummy_p = x_dummy.data();
-    ocptempl->eval_bk(
+    ocptempl->eval_b(
         x_dummy_p,
         ukp,
         xkp,
@@ -465,8 +465,8 @@ void OCPAdapter::set_initial_sol_guess(const shared_ptr<FatropData> &fatropdata,
     fatrop_int offs_nux = 0;
     for (fatrop_int k = 0; k < K; k++)
     {
-        fatrop_int nu_k = ocptempl->get_nuk(k);
-        fatrop_int nx_k = ocptempl->get_nxk(k);
+        fatrop_int nu_k = ocptempl->get_nu(k);
+        fatrop_int nx_k = ocptempl->get_nx(k);
         PACKVEC(nu_k, u_p + offs_nu, 1, ux_intial_p, offs_nux);
         PACKVEC(nx_k, x_p + offs_nx, 1, ux_intial_p, offs_nux + nu_k);
         offs_nu += nu_k;
@@ -486,8 +486,8 @@ void OCPAdapter::get_solution(const shared_ptr<FatropData> &fatropdata, vector<d
     fatrop_int offs_nux = 0;
     for (fatrop_int k = 0; k < K; k++)
     {
-        fatrop_int nu_k = ocptempl->get_nuk(k);
-        fatrop_int nx_k = ocptempl->get_nxk(k);
+        fatrop_int nu_k = ocptempl->get_nu(k);
+        fatrop_int nx_k = ocptempl->get_nx(k);
         UNPACKVEC(nu_k, ux_sol, offs_nux, u_p + offs_nu, 1);
         UNPACKVEC(nx_k, ux_sol, offs_nux + nu_k, x_p + offs_nx, 1);
         offs_nu += nu_k;

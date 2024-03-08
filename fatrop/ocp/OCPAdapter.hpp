@@ -44,15 +44,15 @@ namespace fatrop
     public:
         OCPAdapter(const std::shared_ptr<OCPAbstract> &ocptempl_, const std::shared_ptr<FatropOptions> &options) : K(ocptempl_->get_horizon_length()),
                                                                                                                    nuexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                                                                     { return ocptempl_->get_nuk(k); })),
+                                                                                                                                                     { return ocptempl_->get_nu(k); })),
                                                                                                                    nxexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                                                                     { return ocptempl_->get_nxk(k); })),
+                                                                                                                                                     { return ocptempl_->get_nx(k); })),
                                                                                                                    ngexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                                                                     { return ocptempl_->get_ngk(k); })),
+                                                                                                                                                     { return ocptempl_->get_ng(k); })),
                                                                                                                    ngineqexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                                                                         { return ocptempl_->get_ng_ineq_k(k); })),
+                                                                                                                                                         { return ocptempl_->get_ng_ineq(k); })),
                                                                                                                    nstageparamsexpr(TransformRange<fatrop_int>(0, K, [&ocptempl_](fatrop_int k)
-                                                                                                                                                               { return ocptempl_->get_n_stage_params_k(k); })),
+                                                                                                                                                               { return ocptempl_->get_n_stage_params(k); })),
                                                                                                                    offs_stageparams(offsets(nstageparamsexpr)), stageparams(sum(nstageparamsexpr), 0.0), globalparams(ocptempl_->get_n_global_params(), 0.0), options(options), ocptempl(ocptempl_)
         {
 #ifdef ENABLE_MULTITHREADING
@@ -68,8 +68,8 @@ namespace fatrop
             fatrop_int offs = 0;
             for (fatrop_int k = 0; k < K; k++)
             {
-                ocptempl_->get_default_stage_paramsk(stageparams.data() + offs, k);
-                offs += ocptempl_->get_n_stage_params_k(k);
+                ocptempl_->get_default_stage_params(stageparams.data() + offs, k);
+                offs += ocptempl_->get_n_stage_params(k);
             }
             // initialize gradbuf
             // for (fatrop_int k = 0; k < K; k++)
@@ -152,8 +152,8 @@ namespace fatrop
             double *upper_p = ((VEC *)upper)->pa;
             for (fatrop_int k = 0; k < K; k++)
             {
-                ocptempl->get_boundsk(lower_p + offs, upper_p + offs, k);
-                offs += ocptempl->get_ng_ineq_k(k);
+                ocptempl->get_bounds(lower_p + offs, upper_p + offs, k);
+                offs += ocptempl->get_ng_ineq(k);
             }
             return 0;
         };
@@ -164,9 +164,9 @@ namespace fatrop
             for (fatrop_int k = 0; k < K; k++)
             {
                 ocptempl->get_initial_uk(((VEC *)initial)->pa + offs, k);
-                offs += ocptempl->get_nuk(k);
+                offs += ocptempl->get_nu(k);
                 ocptempl->get_initial_xk(((VEC *)initial)->pa + offs, k);
-                offs += ocptempl->get_nxk(k);
+                offs += ocptempl->get_nx(k);
             }
             return 0;
         }

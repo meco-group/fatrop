@@ -91,17 +91,17 @@ StageOCPRockit::StageOCPRockit(
                                        global_params(global_params)
 {
 }
-fatrop_int StageOCP::get_nxk(const fatrop_int k) const
+fatrop_int StageOCP::get_nx(const fatrop_int k) const
 {
     return nx_;
 }
-fatrop_int StageOCP::get_nuk(const fatrop_int k) const
+fatrop_int StageOCP::get_nu(const fatrop_int k) const
 {
     if (k == K_ - 1)
         return 0;
     return nu_;
 }
-fatrop_int StageOCP::get_ngk(const fatrop_int k) const
+fatrop_int StageOCP::get_ng(const fatrop_int k) const
 {
     if (k == 0)
         return ngI_;
@@ -109,7 +109,7 @@ fatrop_int StageOCP::get_ngk(const fatrop_int k) const
         return ngF_;
     return ng_;
 }
-fatrop_int StageOCP::get_ng_ineq_k(const fatrop_int k) const
+fatrop_int StageOCP::get_ng_ineq(const fatrop_int k) const
 {
     if (k == 0)
     {
@@ -125,7 +125,7 @@ fatrop_int StageOCP::get_n_global_params() const
 {
     return n_global_params_;
 };
-fatrop_int StageOCP::get_n_stage_params_k(const fatrop_int k) const
+fatrop_int StageOCP::get_n_stage_params(const fatrop_int k) const
 {
     return n_stage_params_;
 };
@@ -133,7 +133,7 @@ fatrop_int StageOCP::get_horizon_length() const
 {
     return K_;
 };
-fatrop_int StageOCPRockit::eval_BAbtk(const double *states_kp1,
+fatrop_int StageOCPRockit::eval_BAbt(const double *states_kp1,
                                const double *inputs_k,
                                const double *states_k,
                                const double *stage_params_k,
@@ -149,7 +149,7 @@ fatrop_int StageOCPRockit::eval_BAbtk(const double *states_kp1,
     args[4] = global_params;
     return BAbtf.eval_bf(args, res);
 }
-fatrop_int StageOCPRockit::eval_RSQrqtk(const double *objective_scale,
+fatrop_int StageOCPRockit::eval_RSQrqt(const double *objective_scale,
                                  const double *inputs_k,
                                  const double *states_k,
                                  const double *lam_dyn_k,
@@ -175,7 +175,7 @@ fatrop_int StageOCPRockit::eval_RSQrqtk(const double *objective_scale,
         return RSQrqtFf.eval_bf(args, res);
     return RSQrqtf.eval_bf(args, res);
 };
-fatrop_int StageOCPRockit::eval_Ggtk(
+fatrop_int StageOCPRockit::eval_Ggt(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -194,7 +194,7 @@ fatrop_int StageOCPRockit::eval_Ggtk(
         return GgtIf.eval_bf(args, res);
     return Ggtf.eval_bf(args, res);
 };
-fatrop_int StageOCPRockit::eval_Ggt_ineqk(
+fatrop_int StageOCPRockit::eval_Ggt_ineq(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -219,7 +219,7 @@ fatrop_int StageOCPRockit::eval_Ggt_ineqk(
         return Ggt_ineqIf.eval_bf(args, res);
     return Ggt_ineqf.eval_bf(args, res);
 };
-fatrop_int StageOCPRockit::eval_bk(
+fatrop_int StageOCPRockit::eval_b(
     const double *states_kp1,
     const double *inputs_k,
     const double *states_k,
@@ -236,7 +236,7 @@ fatrop_int StageOCPRockit::eval_bk(
     args[4] = global_params;
     return bkf.eval_array(args, constraint_violation_k);
 };
-fatrop_int StageOCPRockit::eval_gk(
+fatrop_int StageOCPRockit::eval_g(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -255,7 +255,7 @@ fatrop_int StageOCPRockit::eval_gk(
         return gIf.eval_array(args, res);
     return gf.eval_array(args, res);
 }
-fatrop_int StageOCPRockit::eval_gineqk(
+fatrop_int StageOCPRockit::eval_gineq(
     const double *inputs_k,
     const double *states_k,
     const double *stage_params_k,
@@ -280,7 +280,7 @@ fatrop_int StageOCPRockit::eval_gineqk(
         return g_ineqIf.eval_array(args, res);
     return g_ineqf.eval_array(args, res);
 }
-fatrop_int StageOCPRockit::eval_rqk(
+fatrop_int StageOCPRockit::eval_rq(
     const double *objective_scale,
     const double *inputs_k,
     const double *states_k,
@@ -301,7 +301,7 @@ fatrop_int StageOCPRockit::eval_rqk(
         return rqIf.eval_array(args, res);
     return rqf.eval_array(args, res);
 };
-fatrop_int StageOCPRockit::eval_Lk(
+fatrop_int StageOCPRockit::eval_L(
     const double *objective_scale,
     const double *inputs_k,
     const double *states_k,

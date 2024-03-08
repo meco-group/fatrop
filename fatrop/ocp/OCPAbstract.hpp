@@ -34,28 +34,28 @@ namespace fatrop
     public:
         /// @brief number of states for time step k
         /// @param k: time step
-        virtual fatrop_int get_nxk(const fatrop_int k) const = 0;
+        virtual fatrop_int get_nx(const fatrop_int k) const = 0;
         /// @brief number of inputs for time step k
         /// @param k: time step
-        virtual fatrop_int get_nuk(const fatrop_int k) const = 0;
+        virtual fatrop_int get_nu(const fatrop_int k) const = 0;
         /// @brief number of equality constraints for time step k
         /// @param k: time step
-        virtual fatrop_int get_ngk(const fatrop_int k) const = 0;
+        virtual fatrop_int get_ng(const fatrop_int k) const = 0;
         /// @brief  number of stage parameters for time step k
         /// @param k: time step
-        virtual fatrop_int get_n_stage_params_k(const fatrop_int k) const = 0;
+        virtual fatrop_int get_n_stage_params(const fatrop_int k) const = 0;
         /// @brief  number of global parameters
         virtual fatrop_int get_n_global_params() const = 0;
         /// @brief default stage parameters for time step k
         /// @param stage_params: pointer to array of size n_stage_params_k
         /// @param k: time step
-        virtual fatrop_int get_default_stage_paramsk(double *stage_params, const fatrop_int k) const = 0;
+        virtual fatrop_int get_default_stage_params(double *stage_params, const fatrop_int k) const = 0;
         /// @brief default global parameters
         /// @param global_params: pointer to array of size n_global_params
         virtual fatrop_int get_default_global_params(double *global_params) const = 0;
         /// @brief number of inequality constraints for time step k
         /// @param k: time step
-        virtual fatrop_int get_ng_ineq_k(const fatrop_int k) const = 0;
+        virtual fatrop_int get_ng_ineq(const fatrop_int k) const = 0;
         /// @brief horizon length
         virtual fatrop_int get_horizon_length() const = 0;
         /// @brief  discretized dynamics
@@ -68,7 +68,7 @@ namespace fatrop
         /// @param global_params: pointer to array global parameters
         /// @param res: pointer to (nu+nx+1 x nu+nx)-matrix 
         /// @param k: time step
-        virtual fatrop_int eval_BAbtk(
+        virtual fatrop_int eval_BAbt(
             const double *states_kp1,
             const double *inputs_k,
             const double *states_k,
@@ -90,7 +90,7 @@ namespace fatrop
         /// @param res: pointer to (nu+nx+1 x nu+nx)-matrix. 
         /// @param k
         /// @return
-        virtual fatrop_int eval_RSQrqtk(
+        virtual fatrop_int eval_RSQrqt(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
@@ -111,7 +111,7 @@ namespace fatrop
         /// @param res: pointer to (nu+nx+1 x ng)-matrix.
         /// @param k: time step
         /// @return
-        virtual fatrop_int eval_Ggtk(
+        virtual fatrop_int eval_Ggt(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
@@ -128,7 +128,7 @@ namespace fatrop
         /// @param res: pointer to (nu+nx+1 x ng_ineq)-matrix, column major format
         /// @param k : time step
         /// @return
-        virtual fatrop_int eval_Ggt_ineqk(
+        virtual fatrop_int eval_Ggt_ineq(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
@@ -144,7 +144,7 @@ namespace fatrop
         /// @param res: pointer to array nx_{k+1}-vector
         /// @param k: time step
         /// @return
-        virtual fatrop_int eval_bk(
+        virtual fatrop_int eval_b(
             const double *states_kp1,
             const double *inputs_k,
             const double *states_k,
@@ -159,7 +159,7 @@ namespace fatrop
         /// @param global_params: pointer to array global parameters
         /// @param res: pointer to array ng-vector
         /// @param k: time step
-        virtual fatrop_int eval_gk(
+        virtual fatrop_int eval_g(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
@@ -173,7 +173,7 @@ namespace fatrop
         /// @param global_params: pointer to array global parameters
         /// @param res: pointer to array ng_ineq-vector
         /// @param k: time step
-        virtual fatrop_int eval_gineqk(
+        virtual fatrop_int eval_gineq(
             const double *inputs_k,
             const double *states_k,
             const double *stage_params_k,
@@ -188,7 +188,7 @@ namespace fatrop
         /// @param global_params: pointer to array global parameters
         /// @param res: pointer to (nu+nx)-array
         /// @param k: time step
-        virtual fatrop_int eval_rqk(
+        virtual fatrop_int eval_rq(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
@@ -204,7 +204,7 @@ namespace fatrop
         /// @param global_params: pointer to array global parameters
         /// @param res: pointer to double
         /// @param k: time step
-        virtual fatrop_int eval_Lk(
+        virtual fatrop_int eval_L(
             const double *objective_scale,
             const double *inputs_k,
             const double *states_k,
@@ -216,7 +216,7 @@ namespace fatrop
         /// @param lower: pointer to ng_ineq-vector
         /// @param upper: pointer to ng_ineq-vector
         /// @param k: time step
-        virtual fatrop_int get_boundsk(double *lower, double *upper, const fatrop_int k) const = 0;
+        virtual fatrop_int get_bounds(double *lower, double *upper, const fatrop_int k) const = 0;
         /// @brief default initial guess for the states of stage k
         /// @param xk: pointer to states of time step k 
         /// @param k: time step
