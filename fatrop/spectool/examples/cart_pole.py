@@ -54,6 +54,7 @@ ocp.solver("fatrop", {'post_expand':True, 'jit':True}, {}) # fatrop/ipopt
 func = ocp.to_function("cart_pole", [x_cart_0, dx_cart_0, theta_pole_0, dtheta_pole_0], [ocp.at_t0(F), ocp.sample(x_cart)[1], ocp.sample(theta_pole)[1]])
 
 # solve the ocp
-u0_sol, x_cart_sol, theta_pol_sol = func(0.0, 0.0, 1.0, 1.0)
+u0_sol, x_cart_sol, theta_pol_sol = func(0.0, 0.0, 0.1, 0.1)
+u0_sol, x_cart_sol, theta_pol_sol = func(0.0, 0.0, 0.1, 0.1)
 print(x_cart_sol)
 cart_pole_dynamics.animate(x_cart_sol, theta_pol_sol)

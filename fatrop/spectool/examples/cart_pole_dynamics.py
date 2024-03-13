@@ -1,10 +1,11 @@
 import casadi as cs
 import numpy as np
 import lagrangian_dynamics
+import mechanism_2d as m2d
 
 
 m_cart = 1.0
-m_pole = 0.1
+m_pole = 1.0
 g = 9.81
 l = 0.5
 I = m_pole * l**2 / 3
@@ -12,13 +13,18 @@ I = m_pole * l**2 / 3
 def ode(x_cart, dx_cart, theta_pole, dtheta_pole, F):
     q = cs.vertcat(x_cart, theta_pole)
     dq = cs.vertcat(dx_cart, dtheta_pole)
+    prism = m2d.prismatic(m2d.zero_transform(), x_cart, dx_cart, 0, 0)
+    cart = m2d.link(prism, m_cart, 0)
+    revol = m2d.revolute(cart.center.transform(m2d.transform2d(0, 0, np.pi/2)), theta_pole, dtheta_pole)
+    pole = m2d.link(revol, m_pole, l)
+    mechanism = m2d.mechanism([cart, pole])
+    W = F * cart.center.x
+    ddq = mechanism.get_dynamics(W, q, dq)
     
-    # using Lagrangian dynamics
-    T = 0.5 * m_cart * dx_cart**2 + 0.5 * m_pole * (dx_cart + l/2 * dtheta_pole)**2
-    V = m_pole * g * l/2 * cs.cos(theta_pole)
-    W = F * x_cart
-    L = T - V + W
-    ddq = lagrangian_dynamics.get_ddq(q, dq, T, V, W)
+    # # # using Lagrangian dynamics
+    # T = 0.5 * m_cart * dx_cart**2 + 0.5 * m_pole * (dx_cart + l/2 * dtheta_pole)**2
+    # V = m_pole * g * l/2 * cs.cos(theta_pole)
+    # L = T - V + W
     return dx_cart, ddq[0], dtheta_pole, ddq[1]
 
 import matplotlib.pyplot as plt
