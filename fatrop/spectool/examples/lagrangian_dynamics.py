@@ -41,6 +41,7 @@ def ldl_solve(A :cs.MX, b:cs.MX):
     return lin_solve_func(A, b)(A, b)
 
 def get_ddq(q, dq, T, V, W):
+    print("warning: this Lagrangian dynamics implementation is not very efficient (slow function evaluation), it is only for illustrative purposes. Use a more dynamics efficient method for real problems.")
     #  helper functions
     def time_der(expr):
         return [cs.jacobian(expr, q), cs.jacobian(expr, dq)] #  @ [dq, ddq]
