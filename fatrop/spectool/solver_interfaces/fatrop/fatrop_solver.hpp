@@ -79,6 +79,7 @@ namespace fatrop
                     ret["t_eval_cv"] = stats.eval_cv_time;
                     ret["t_eval_grad"] = stats.eval_grad_time;
                     ret["t_eval_obj"] = stats.eval_obj_time;
+                    ret["success"] = stats.return_flag == 0;
                     return ret;
                 }
                 return {{}};

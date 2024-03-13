@@ -218,6 +218,7 @@ fatrop_int FatropAlg::optimize()
             stats.eval_obj_time += linesearch_->eval_obj_time;
             stats.time_total = total_time;
             stats.iterations_count = i;
+            stats.return_flag = 0;
             if (printer_->print_level() > 0)
             {
                 stats.print();
@@ -335,6 +336,7 @@ fatrop_int FatropAlg::optimize()
         if (ls == 0)
         {
             printer_->level(1) << "error: restoration phase not implemented yet" << endl;
+            stats.return_flag = 1;
             return 1;
         }
         if (watch_dog_step || ls == 1)
@@ -372,6 +374,7 @@ fatrop_int FatropAlg::optimize()
         // if linesearch unsuccessful -> resto phase
     }
     journaller_->print_iterations();
+    stats.return_flag = 1;
     return 1;
 }
 fatrop_int FatropAlg::eval_lag_hess()

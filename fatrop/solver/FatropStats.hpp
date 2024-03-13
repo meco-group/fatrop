@@ -38,6 +38,7 @@ namespace fatrop
         int eval_grad_count = 0;
         int eval_obj_count = 0;
         int iterations_count = 0;
+        int return_flag = 0;
         void print()
         {
             std::cout << "---- stats ----" << std::endl;

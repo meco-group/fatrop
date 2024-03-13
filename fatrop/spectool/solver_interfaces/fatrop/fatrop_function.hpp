@@ -84,7 +84,7 @@ namespace fatrop
                 app->set_initial(arg_initial_vars);
                 app->set_params(arg_global_parameters, arg_stage_parameters);
                 int ret = app->optimize();
-                if(ret != 0)
+                if(error_on_fail_ && ret != 0)
                     throw std::runtime_error("fatrop solver failed");
                 double *last_sol = ((VEC *)app->last_solution_primal())->pa;
                 if (res[0])
@@ -105,6 +105,7 @@ namespace fatrop
             int n_vars;
             int n_stage_params;
             int n_global_params;
+            bool error_on_fail;
         };
 
         class FatropFunction : public cs::Function
@@ -131,6 +132,8 @@ namespace fatrop
                 auto ptr = new FatropFunctionInternal(std::string("FatropFunction_") + name, app_);
                 static_cast<cs::SharedObject *>(this)->own(ptr);
                 auto options_ = cs::Dict();
+                ptr -> error_on_fail = cs::get_from_dict(options_, "error_on_fail", true);
+                
                 static_cast<cs::Function *>(this)->operator->()->casadi::FunctionInternal::construct(options_);
             }
 
