@@ -50,6 +50,8 @@ namespace PYBIND11_NAMESPACE
 
             bool load(handle src, bool)
             {
+                // check if handle is a list 
+                if(py::isinstance<py::list>(src)) return false;
                 pybind11::module_ cspy_ = pybind11::module_::import(T::module);
                 pybind11::object attr_ = cspy_.attr(T::py_name);
                 pybind11::object src2(attr_(src));
