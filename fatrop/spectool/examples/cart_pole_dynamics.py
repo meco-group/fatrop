@@ -10,10 +10,6 @@ l = 0.5
 I = m_pole * l**2 / 3
 
 def ode(x_cart, dx_cart, theta_pole, dtheta_pole, F):
-    #  helper functions
-    def time_der(expr):
-        return [cs.jacobian(expr, q), cs.jacobian(expr, dq)] #  @ [dq, ddq]
-
     q = cs.vertcat(x_cart, theta_pole)
     dq = cs.vertcat(dx_cart, dtheta_pole)
     
