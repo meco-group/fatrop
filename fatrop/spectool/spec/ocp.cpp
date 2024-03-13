@@ -139,21 +139,20 @@ namespace fatrop
         {
             return ustages_;
         }
-        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out) const
+        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out) const 
         {
             if(get()->solver_name == "")
                 throw std::runtime_error("solver not set, use ocp.solver(\"fatrop\") or ocp.solver(\"ipopt\")");
-            std::unique_ptr<SolverInterface> solver;
             if(get()->solver_name == "fatrop")
-                solver = std::make_unique<SolverFatrop>();
+                get() -> solver_ptr = std::make_shared<SolverFatrop>();
             else if(get()-> solver_name == "ipopt")
-                solver = std::make_unique<SolverOpti>();
+                get() -> solver_ptr = std::make_shared<SolverOpti>();
             else
                 throw std::runtime_error("solver not supported");
-            solver -> transcribe(*this, function_opts_);
+            get()->solver_ptr -> transcribe(*this, function_opts_);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
-            auto fatrop_func = solver -> to_function(name, *this, gist_solver_in, gist_solver_out, solver_opts_);
+            auto fatrop_func = get()-> solver_ptr -> to_function(name, *this, gist_solver_in, gist_solver_out, solver_opts_);
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = gist_solver_in[0];
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});

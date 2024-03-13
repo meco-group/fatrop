@@ -46,6 +46,7 @@ namespace fatrop
             std::vector<std::pair<cs::MX, cs::MX>> parameter_values;
             std::string solver_name = "";
             std::vector<cs::MX> multi_ustage_constraints;
+            std::shared_ptr<SolverInterface> solver_ptr;
 
         private:
             void add_to_ordering(const cs::MX &var);
@@ -84,6 +85,7 @@ namespace fatrop
             std::vector<cs::MX> eval_at_initial(const std::vector<cs::MX> &expr) const;
             cs::MX all_variables();
             void solver(const std::string &name, const cs::Dict &function_opts = casadi::Dict(), const cs::Dict &solver_opts = casadi::Dict()){get()->solver_name = name; solver_opts_ = solver_opts; function_opts_ = function_opts;};
+            std::shared_ptr<SolverInterface> get_solver() const {return get()->solver_ptr;};
             void subject_to(const cs::MX &expr);
 
         protected:

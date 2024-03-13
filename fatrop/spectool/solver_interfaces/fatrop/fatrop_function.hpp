@@ -110,20 +110,19 @@ namespace fatrop
         class FatropFunction : public cs::Function
         {
         public:
-            FatropFunction(const std::string&name, const std::shared_ptr<fatrop::OCPAbstract> &ocpimpl_, const cs::Dict &options)
+            FatropFunction(const std::string&name,  const std::shared_ptr<fatrop::OCPApplication> app_, const cs::Dict &options)
             {
-                auto app_ = std::make_shared<fatrop::OCPApplication>(ocpimpl_);
-                app_->build();
+                // app_->build();
                 // go over the options and set
-                for(auto opt : options)
-                {
-                    if(opt.second.is_double())
-                    app_->set_option(opt.first, (double) opt.second);
-                    else if (opt.second.is_int())
-                    app_->set_option(opt.first, (int) opt.second);
-                    else if (opt.second.is_bool())
-                    app_->set_option(opt.first, (bool) opt.second);
-                }
+                // for(auto opt : options)
+                // {
+                //     if(opt.second.is_double())
+                //     app_->set_option(opt.first, (double) opt.second);
+                //     else if (opt.second.is_int())
+                //     app_->set_option(opt.first, (int) opt.second);
+                //     else if (opt.second.is_bool())
+                //     app_->set_option(opt.first, (bool) opt.second);
+                // }
                 // cs::Callback::construct("FatropFunction");
                 if (!is_null())
                 {

@@ -21,7 +21,7 @@ namespace fatrop
         {
             static std::vector<std::shared_ptr<FatropuStageEvalCasadi>> build(const Ocp &ocp, const cs::Dict &opts)
             {
-                std::vector<std::shared_ptr<FatropuStageEvalCasadi>> ret; 
+                std::vector<std::shared_ptr<FatropuStageEvalCasadi>> ret;
                 int horizon_length_ = 0;
                 CasadiJitCache eval_cache;
                 std::unordered_map<uStageInternal *, std::shared_ptr<FatropuStageEvalCasadi>> ustage_eval_cache;
@@ -51,7 +51,6 @@ namespace fatrop
             }
         };
 
-
         class SolverFatrop : public SolverInterface
         {
         public:
@@ -63,13 +62,34 @@ namespace fatrop
                 int n_global_parameters_ = cs::MX::veccat(ocp_.get_global_parameters()).size1();
                 fatrop_impl = std::make_shared<UStageOCPImpl<FatropuStageEvalCasadi>>(UStageEvalBuilder::build(ocp_, opts), n_global_parameters_);
             }
+            cs::Dict stats()
+            {
+                if (app)
+                {
+                    auto stats = app->get_stats();
+                    cs::Dict ret;
+                    ret["iter_count"] = stats.iterations_count;
+                    ret["t_total"] = stats.time_total;
+                    ret["t_FE"] = stats.eval_hess_time + stats.eval_jac_time + stats.eval_cv_time + stats.eval_grad_time + stats.eval_obj_time;
+                    ret["t_init"] = stats.initialization_time;
+                    ret["t_duinf"] = stats.duinf_time;
+                    ret["t_compute_sd"] = stats.compute_sd_time;
+                    ret["t_eval_hess"] = stats.eval_hess_time;
+                    ret["t_eval_jac"] = stats.eval_jac_time;
+                    ret["t_eval_cv"] = stats.eval_cv_time;
+                    ret["t_eval_grad"] = stats.eval_grad_time;
+                    ret["t_eval_obj"] = stats.eval_obj_time;
+                    return ret;
+                }
+                return {{}};
+            }
             cs::Function to_function(const std::string &name, const Ocp &ocp_, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict &opts)
             {
                 gist(ocp_, gist_in, gist_out);
                 // return FatropFunction(name, fatrop_impl, opts);
                 // C-api approach
                 // C_api
-                auto app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
+                app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
                 app->build();
                 // go over the options and set
                 for (auto opt : opts)
@@ -94,8 +114,10 @@ namespace fatrop
                 // auto func = cs::external("casadi_old_capi", importer);
                 // // cleanup the file
                 // std::remove(filename.c_str());
-                return FatropFunction(name, fatrop_impl, opts);
+                // app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
+                return FatropFunction(name, app, opts);
             };
+            std::shared_ptr<fatrop::OCPApplication> app;
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
             {
                 std::vector<cs::MX> variables_v;

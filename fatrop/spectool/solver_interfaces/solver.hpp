@@ -12,6 +12,7 @@ namespace fatrop
         class SolverInterface
         {
         public:
+            virtual cs::Dict stats() = 0;
             virtual void transcribe(const Ocp &ocp_, const cs::Dict &opts) = 0;
             virtual cs::Function to_function(const std::string &name, const Ocp &ocp, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict &opts) = 0;
             virtual void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out) = 0;

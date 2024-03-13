@@ -61,14 +61,13 @@ struct py::detail::type_caster<casadi::MX> : public py::detail::swig_type_caster
 // {
 //     return casadi::Function(f);
 // }
-// PYBIND11_MAKE_OPAQUE(fatrop::spectool::uo_map_mx_mx);
+// PYBIND11_MAKE_OPAQUE(casadi::Dict);
 namespace fatropy
 {
     struct ExposeSpectool
     {
         static void expose(py::module &m)
         {
-            py::bind_map<casadi::Dict>(m, "csDict");
             py::class_<casadi::GenericType>(m, "csGenericType")
                 .def(py::init<bool>())
                 .def(py::init<casadi_int>())
@@ -85,7 +84,11 @@ namespace fatropy
                 .def(py::init<const casadi::Function &>())
                 .def(py::init<const std::vector<casadi::Function> &>())
                 .def(py::init<const casadi::Dict &>())
-                .def(py::init<void *>());
+                .def(py::init<void *>())
+                .def("bool", &casadi::GenericType::operator bool)
+                .def("int", &casadi::GenericType::operator casadi_int)
+                .def("double", &casadi::GenericType::operator double)
+                ;
             py::implicitly_convertible<bool, casadi::GenericType>();
             py::implicitly_convertible<casadi_int, casadi::GenericType>();
             py::implicitly_convertible<int, casadi::GenericType>();
@@ -101,6 +104,7 @@ namespace fatropy
             py::implicitly_convertible<const casadi::Function &, casadi::GenericType>();
             py::implicitly_convertible<const std::vector<casadi::Function> &, casadi::GenericType>();
             py::implicitly_convertible<const casadi::Dict &, casadi::GenericType>();
+            py::bind_map<casadi::Dict>(m, "csDict");
             // this can maybe be used for nesting of dicts
             //             // ...
             //         .def("__init__", [](Bar &self, py::tuple t) {
@@ -151,6 +155,10 @@ namespace fatropy
                 .def("register_hybrid", &fatrop::spectool::uStage::register_hybrid)
                 .def("register_control_parameter", &fatrop::spectool::uStage::register_control_parameter)
                 .def("register_global_parameter", &fatrop::spectool::uStage::register_global_parameter);
+            py::class_<fatrop::spectool::SolverInterface, std::shared_ptr<fatrop::spectool::SolverInterface>>(m, "SolverInterface")
+                .def("stats", &fatrop::spectool::SolverInterface::stats);
+            // py::class_<std::shared_ptr<fatrop::spectool::SolverInterface>>(m, "SolverInterface_ptr")
+            //     .def("stats", [](std::shared_ptr<fatrop::spectool::SolverInterface>& self){return self.get()->stats();});
 
             py::class_<fatrop::spectool::Ocp>(m, "Ocp")
                 .def(py::init<>())
@@ -171,8 +179,8 @@ namespace fatropy
                 .def("all_variables", &fatrop::spectool::Ocp::all_variables)
                 .def("eval_at_initial", &fatrop::spectool::Ocp::eval_at_initial)
                 .def("solver", &fatrop::spectool::Ocp::solver, py::arg("solver name"), py::arg("opts_function") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
-                .def("subject_to", &fatrop::spectool::Ocp::subject_to);
-
+                .def("subject_to", &fatrop::spectool::Ocp::subject_to)
+                .def("get_solver", &fatrop::spectool::Ocp::get_solver);
             // .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
         }
     };

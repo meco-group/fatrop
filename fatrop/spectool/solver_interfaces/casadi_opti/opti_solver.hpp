@@ -18,6 +18,10 @@ namespace fatrop
             {
                 optss_ = opts;
             }
+            cs::Dict stats() 
+            {
+                return opti_function_.stats();
+            }
             cs::Function to_function(const std::string &name, const Ocp &ocp, std::vector<cs::MX> &gist_in, std::vector<cs::MX> &gist_out, const cs::Dict &opts)
             {
                 gist(ocp, gist_in, gist_out);
@@ -83,7 +87,8 @@ namespace fatrop
                 opti.minimize(J);
                 opti.solver("ipopt", optss_, opts);
                 auto all_vars = cs::MX::veccat({variables_ux});
-                return opti.to_function(name, {all_vars, cs::MX::veccat(p_stage), p_global}, {all_vars});
+                opti_function_ = opti.to_function(name, {all_vars, cs::MX::veccat(p_stage), p_global}, {all_vars});
+                return opti_function_;
             };
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
             {
@@ -108,6 +113,7 @@ namespace fatrop
                 out = {cs::MX::veccat(variables_v)};
             }
             cs::Dict optss_;
+            cs::Function opti_function_;
         };
     } // namespace spectrop
 } // namespace fatrop
