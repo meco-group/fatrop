@@ -222,6 +222,32 @@ namespace fatrop
             SolverFatrop().gist(*this, gist_in, gist_out);
             return cs::MX::veccat(gist_out);
         }
+    
+        void Ocp::subject_to(const cs::MX &expr)
+        {
+            auto vars = cs::MX::symvar(expr);
+            std::vector<uStage> dep_ustage_list;
+            // iterate over all uStages and check if they depend on the variables in expr
+            for (const auto &ustage : ustages_)
+            {
+                // auto ustage_vars = ustage.get_variables();
+                if(ustage.K() ==1 && ustage.get() -> is_evaluable(expr))
+                    dep_ustage_list.push_back(ustage);
+            }
+            // if only one ustage
+            if (dep_ustage_list.size() == 1)
+                // add to this ustage
+                {
+                    auto to = cs::MX::veccat(dep_ustage_list[0].all_vars());
+                    auto from = dep_ustage_list[0].at_t0(to);
+                    dep_ustage_list[0].subject_to(cs::MX::substitute(expr, from, to));
+                }
+            else
+            {
+                // if multiple uStages add to multi_ustage_constraints
+                get()->multi_ustage_constraints.push_back(expr);
+            }
+        }
         // void Ocp::set_initial(const cs::MX &var, const cs::MX &initial)
         // {
         //     bool column_mode = initial.size2() == 1;

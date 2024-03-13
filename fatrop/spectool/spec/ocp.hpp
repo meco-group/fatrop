@@ -45,6 +45,7 @@ namespace fatrop
             std::vector<std::pair<cs::MX, cs::MX>> initial_values;
             std::vector<std::pair<cs::MX, cs::MX>> parameter_values;
             std::string solver_name = "";
+            std::vector<cs::MX> multi_ustage_constraints;
 
         private:
             void add_to_ordering(const cs::MX &var);
@@ -70,6 +71,10 @@ namespace fatrop
             {
                 return get()->global_parammeter_syms_;
             }
+            const std::vector<cs::MX> &get_multi_ustage_constraints() const
+            {
+                return get()->multi_ustage_constraints;
+            }
             cs::Function to_function(const std::string& name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out) const;
             cs::MX at_t0(const cs::MX &expr) const { return ustages_.front().at_t0(expr); };
             cs::MX at_tf(const cs::MX &expr) const { return ustages_.back().at_tf(expr); };
@@ -79,6 +84,7 @@ namespace fatrop
             std::vector<cs::MX> eval_at_initial(const std::vector<cs::MX> &expr) const;
             cs::MX all_variables();
             void solver(const std::string &name, const cs::Dict &function_opts = casadi::Dict(), const cs::Dict &solver_opts = casadi::Dict()){get()->solver_name = name; solver_opts_ = solver_opts; function_opts_ = function_opts;};
+            void subject_to(const cs::MX &expr);
 
         protected:
             std::vector<uStage> ustages_;

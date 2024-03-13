@@ -67,6 +67,11 @@ namespace fatrop
                     if (ustages_quantities_[i].ng_eq())
                         opti.subject_to(cs::MX::substitute({ustages_quantities_[i].Gg_eq.second == 0}, from, to)[0]);
                 }
+                auto flat_variables_ux = cs::MX::veccat(variables_ux);
+                auto flat_gist_out = cs::MX::veccat(gist_out);
+                // add the constraints over multiple time steps
+                for(auto& constr: ocp.get_multi_ustage_constraints())
+                    opti.subject_to(cs::MX::substitute(constr, flat_gist_out,flat_variables_ux));
                 // add objective
                 cs::MX J = 0;
                 for (unsigned long i = 0; i < ustages_quantities_.size(); i++)

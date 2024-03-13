@@ -170,7 +170,8 @@ namespace fatropy
                 .def("set_initial", &fatrop::spectool::Ocp::set_initial)
                 .def("all_variables", &fatrop::spectool::Ocp::all_variables)
                 .def("eval_at_initial", &fatrop::spectool::Ocp::eval_at_initial)
-                .def("solver", &fatrop::spectool::Ocp::solver, py::arg("solver name"), py::arg("opts_function") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict());
+                .def("solver", &fatrop::spectool::Ocp::solver, py::arg("solver name"), py::arg("opts_function") = casadi::Dict(), py::arg("opts_fatrop") = casadi::Dict())
+                .def("subject_to", &fatrop::spectool::Ocp::subject_to);
 
             // .def("state", &fatrop::spectool::Ocp::state, py::arg("m") = 1, py::arg("n") = 1);
         }

@@ -57,6 +57,9 @@ namespace fatrop
         public:
             void transcribe(const Ocp &ocp_, const cs::Dict &opts)
             {
+                // check that there are no constraints over multiple timesteps
+                if (ocp_.get_multi_ustage_constraints().size() > 0)
+                    throw std::runtime_error("Fatrop solver does not support constraints over different time steps.");
                 int n_global_parameters_ = cs::MX::veccat(ocp_.get_global_parameters()).size1();
                 fatrop_impl = std::make_shared<UStageOCPImpl<FatropuStageEvalCasadi>>(UStageEvalBuilder::build(ocp_, opts), n_global_parameters_);
             }

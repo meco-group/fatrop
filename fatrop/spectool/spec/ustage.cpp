@@ -81,7 +81,10 @@ namespace fatrop
             {
                 state_syms_[state] = std::vector<cs::MX>(K_);
                 for (int k = 0; k < K_; k++)
+                {
                     state_syms_[state][k] = cs::MX::sym(state.name() + std::to_string(k), state.size1() * state.size2());
+                    all_eval_syms_.push_back(state_syms_[state][k]);
+                }
             }
             // state_initial_[state] = cs::DM::zeros(state.size1() * state.size2(), K_);
         }
@@ -101,7 +104,10 @@ namespace fatrop
             {
                 control_syms_[control] = std::vector<cs::MX>(K_);
                 for (int k = 0; k < K_; k++)
+                {
                     control_syms_[control][k] = cs::MX::sym(control.name() + std::to_string(k), control.size1() * control.size2());
+                    all_eval_syms_.push_back(control_syms_[control][k]);
+                }
             }
             // control_initial_[control] = cs::DM::zeros(control.size1() * control.size2(), K_);
         }
@@ -121,7 +127,10 @@ namespace fatrop
             {
                 hybrid_syms_[hybrid] = std::vector<cs::MX>(K_);
                 for (int k = 0; k < K_; k++)
+                {
                     hybrid_syms_[hybrid][k] = cs::MX::sym(hybrid.name() + std::to_string(k), hybrid.size1() * hybrid.size2());
+                    all_eval_syms_.push_back(hybrid_syms_[hybrid][k]);
+                }
             }
             has_hybrids = true;
             // automatic_initial_[automatic] = cs::DM::zeros(automatic.size1() * automatic.size2(), K_);
@@ -142,7 +151,10 @@ namespace fatrop
             {
                 control_parameter_syms_[control_parameter] = std::vector<cs::MX>(K_);
                 for (int k = 0; k < K_; k++)
+                {
                     control_parameter_syms_[control_parameter][k] = cs::MX::sym(control_parameter.name() + std::to_string(k), control_parameter.size1() * control_parameter.size2());
+                    all_eval_syms_.push_back(control_parameter_syms_[control_parameter][k]);
+                }
             }
             // control_parameter_vals_[control_parameter] = cs::DM::zeros(control_parameter.size1() * control_parameter.size2(), K_);
         }
@@ -155,6 +167,7 @@ namespace fatrop
                 if (ocp_.lock())
                     global_parameters_ = ocp_.lock()->order_vars(global_parameters_);
                 global_parameters_set_.insert(global_parameter);
+                all_eval_syms_.push_back(global_parameter);
             }
         }
         void uStageInternal::register_state(const std::vector<cs::MX> &states)
@@ -383,6 +396,23 @@ namespace fatrop
         const std::vector<cs::MX> &uStage::get_global_parameters() const
         {
             return get()->get_global_parameters();
+        }
+        std::vector<cs::MX> uStage::all_vars() const
+        {
+            std::vector<cs::MX> ret;
+            // get all control syms
+            for (auto &control : get()->get_controls(false))
+                ret.push_back(control);
+            // get all state syms
+            for (auto &state : get()->get_states(false))
+                ret.push_back(state);
+            // get all hybrid syms
+            for (auto &hybrid : get()->get_hybrids())
+                ret.push_back(hybrid);
+            // get all control parameter syms
+            for (auto &control_parameter : get()->get_control_parameters())
+                ret.push_back(control_parameter);
+            return ret;
         }
         void uStage::register_state(const std::vector<cs::MX> &states)
         {

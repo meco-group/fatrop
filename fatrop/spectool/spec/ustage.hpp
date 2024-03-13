@@ -61,6 +61,10 @@ namespace fatrop
             const uo_map_mx<Jacobian> &get_next_state_jacobians() const;
             const uo_map_mx<Hessian> &get_next_state_hessians() const;
             int K() const { return K_; };
+            bool is_evaluable(const cs::MX& expr)
+            {
+                return !cs::Function("helper_function", all_eval_syms_, {expr}, cs::Dict{{"allow_free",true}}).has_free();
+            }
 
         private:
             bool has_variable(const cs::MX &var) const;
@@ -109,6 +113,7 @@ namespace fatrop
             std::weak_ptr<OcpInternal> ocp_; // is only used for determining symbol type (control/state/hybrid/parameter) in automatic mode
             std::vector<cs::MX> global_parameters_;
             uo_set_mx global_parameters_set_;
+            std::vector<cs::MX> all_eval_syms_;
             bool auto_mode = false;
             bool has_hybrids = false;
             void set_dirty()
@@ -144,6 +149,7 @@ namespace fatrop
             const std::vector<cs::MX> &get_hybrids() const;
             const std::vector<cs::MX> &get_control_parameters() const;
             const std::vector<cs::MX> &get_global_parameters() const;
+            std::vector<cs::MX> all_vars() const; 
             uStage clone() const;
             void register_state(const std::vector<cs::MX> &states);
             void register_control(const std::vector<cs::MX> &controls);
