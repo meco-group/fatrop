@@ -33,12 +33,17 @@ namespace fatrop
             }
             cs::MX operator()(const cs::MX &expr)
             {
-                if(cs::Function("help", {x}, {expr}, cs::Dict({{"allow_free", true}})).has_free())
+                return operator()(std::vector<cs::MX>{expr})[0];
+            }
+            std::vector<cs::MX> operator()(const std::vector<cs::MX> &expr)
+            {
+                if(cs::Function("help", {x}, expr, cs::Dict({{"allow_free", true}})).has_free())
                 {
                     throw std::runtime_error("IntegratorRk4: expr has free variables");
                 }
-                return cs::MX::substitute(expr, x, x_next);
+                return cs::MX::substitute(expr, {x}, {x_next});
             }
+
             cs::MX dt;
             cs::MX x;
             cs::MX dx;

@@ -121,7 +121,9 @@ namespace fatropy
             py::class_<fatrop::spectool::Hessian>(m, "Hessian").def(py::init<casadi::MX, casadi::MX, casadi::MX, casadi::MX>());
 
             py::bind_map<fatrop::spectool::uo_map_mx_mx>(m, "uo_map_mx_mx");
-            py::class_<fatrop::spectool::IntegratorRk4>(m, "IntegratorRk4").def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX &>()).def("__call__", &fatrop::spectool::IntegratorRk4::operator());
+            py::class_<fatrop::spectool::IntegratorRk4>(m, "IntegratorRk4").def(py::init<const std::vector<std::pair<casadi::MX, casadi::MX>> &, const casadi::MX &>())
+            .def("__call__",py::overload_cast<const casadi::MX&>(&fatrop::spectool::IntegratorRk4::operator()))
+            .def("__call__",py::overload_cast<const std::vector<casadi::MX>&>(&fatrop::spectool::IntegratorRk4::operator()));
             py::enum_<fatrop::spectool::at>(m, "at")
                 .value("t0", fatrop::spectool::at::t0)
                 .value("mid", fatrop::spectool::at::mid)
