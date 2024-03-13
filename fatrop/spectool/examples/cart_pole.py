@@ -37,8 +37,8 @@ for x, xn, in zip(x, intg(x)):
 
 # Define the cost function
 h_pole = cart_pole_dynamics.l/2*cs.cos(theta_pole)
-stage.add_objective(-h_pole, sp.t0, sp.mid, sp.tf)
-stage.add_objective(dx_cart**2, sp.t0, sp.mid, sp.tf)
+stage.add_objective(-h_pole, sp.t0, sp.mid, sp.tf) # we want the pole to be upright
+stage.add_objective(dx_cart**2, sp.t0, sp.mid, sp.tf) # we want the cart to move as little as possible
 
 # Define the constraints
 stage.at_t0().subject_to(x_cart == x_cart_0)
