@@ -123,7 +123,12 @@ namespace fatropy
                 .value("mid", fatrop::spectool::at::mid)
                 .value("tf", fatrop::spectool::at::tf)
                 .export_values();
-            py::class_<fatrop::spectool::Stage>(m, "Stage").def("set_next", &fatrop::spectool::Stage::set_next).def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>).def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at, fatrop::spectool::at>).def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at, fatrop::spectool::at, fatrop::spectool::at>).def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at>).def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at, fatrop::spectool::at>).def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at, fatrop::spectool::at, fatrop::spectool::at>).def("at_t0", &fatrop::spectool::Stage::at_t0).def("at_tf", &fatrop::spectool::Stage::at_tf).def("at_mid", &fatrop::spectool::Stage::at_mid);
+            py::class_<fatrop::spectool::Stage>(m, "Stage").def("set_next", &fatrop::spectool::Stage::set_next).def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>).def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at, fatrop::spectool::at>).def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at, fatrop::spectool::at, fatrop::spectool::at>).def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at>).def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at, fatrop::spectool::at>).def("subject_to", &fatrop::spectool::Stage::subject_to<fatrop::spectool::at, fatrop::spectool::at, fatrop::spectool::at>)
+            .def("at_t0", py::overload_cast<const casadi::MX &>(&fatrop::spectool::Stage::at_t0, py::const_))
+            .def("at_tf", py::overload_cast<const casadi::MX &>(&fatrop::spectool::Stage::at_tf, py::const_))
+            .def("at_t0", py::overload_cast<>(&fatrop::spectool::Stage::at_t0, py::const_))
+            .def("at_tf", py::overload_cast<>(&fatrop::spectool::Stage::at_tf, py::const_))
+            .def("at_mid", &fatrop::spectool::Stage::at_mid);
 
             // def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>);
 

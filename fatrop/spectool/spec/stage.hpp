@@ -45,6 +45,8 @@ namespace fatrop
             uStage &at_t0() const;
             uStage &at_tf() const;
             uStage &at_mid() const;
+            cs::MX at_t0(const cs::MX &expr) const { return at_t0().at_t0(expr); };
+            cs::MX at_tf(const cs::MX &expr) const { return at_tf().at_t0(expr); };
 
             template <class F>
             void apply_at_single(F f, const cs::MX &expr, const at &type)
