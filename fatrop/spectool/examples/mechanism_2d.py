@@ -1,6 +1,9 @@
 import casadi as cs
 import numpy as np
 import lagrangian_dynamics as ld
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 class transform2d:
     def __init__(self, x:cs.MX, y:cs.MX, theta:cs.MX, dx:cs.MX = 0., dy:cs.MX =0., dtheta:cs.MX = 0.):
@@ -19,6 +22,9 @@ class transform2d:
         dy_ = dx*cs.sin(self.theta) + dy*cs.cos(self.theta) + self.dtheta*x*cs.cos(self.theta) - self.dtheta*y*cs.sin(self.theta) + self.dy
         dtheta_ = dtheta + self.dtheta
         return transform2d(x_, y_, theta_, dx_, dy_, dtheta_)
+    
+    def origin(self):
+        return cs.vertcat(self.x, self.y)
 
     def transform(self, other):
         return self.transformm(other.x, other.y, other.theta, other.dx, other.dy, other.dtheta)
@@ -82,5 +88,37 @@ class mechanism:
             V += link.mass * 9.81 * y
         return ld.get_ddq(q, qd, T, V, W)
     
-    def animate(self, q, qd):
-        pass
+    def animate(self, q_sym, q_vals):
+        # collect all symbols for left and right position of each link
+        no_links = len(self.links)
+        left = []
+        right = []
+        for link in self.links:
+            left.append(link.left.origin())
+            right.append(link.right.origin())
+        # make a casadi function that evaliates the left and right position of each link
+        f = cs.Function('f', [q_sym], [cs.horzcat(*left), cs.horzcat(*right)])
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, autoscale_on=False, xlim=(-1, 1), ylim=(-1, 1))
+        ax.set_aspect('equal')
+        ax.grid()
+
+        axs_link = [ax.plot([], [], 'r', lw=2)[0] for _ in range(no_links)]
+
+        def init():
+            for ax_link in axs_link:
+                ax_link.set_data([], []) 
+            return axs_link 
+
+        def animate(i):
+            lefts, rights = f(q_vals[:, i])
+            lefts = np.array(lefts)
+            rights = np.array(rights)
+            for j in range(no_links):
+                axs_link[j].set_data([lefts[0, j], rights[0, j]], [lefts[1, j], rights[1, j]])
+            return axs_link 
+
+        ani = animation.FuncAnimation(fig, animate, frames=q_vals.shape[1], init_func=init, blit=True)
+        plt.show()
+            

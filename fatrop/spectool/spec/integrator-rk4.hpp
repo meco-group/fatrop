@@ -25,10 +25,15 @@ namespace fatrop
                 x = cs::MX::veccat(x_vec);
                 dx = cs::MX::veccat(dx_vec);
                 // use RK4 scheme to get x_next
-                cs::MX k1 = dt * dx;
-                cs::MX k2 = dt * cs::MX::substitute(dx, x, x + 0.5 * k1);
-                cs::MX k3 = dt * cs::MX::substitute(dx, x, x + 0.5 * k2);
-                cs::MX k4 = dt * cs::MX::substitute(dx, x, x + k3);
+                auto f = cs::Function("f", {x}, {dx}, cs::Dict{{"allow_free", true}});
+                auto  k1 = dt * f(x)[0];
+                auto  k2 = dt * f(x + 0.5 * k1)[0];
+                auto  k3 = dt * f(x + 0.5 * k2)[0];
+                auto  k4 = dt * f(x + k3)[0];
+                // cs::MX k1 = dt * dx;
+                // cs::MX k2 = dt * cs::MX::substitute(dx, x, x + 0.5 * k1);
+                // cs::MX k3 = dt * cs::MX::substitute(dx, x, x + 0.5 * k2);
+                // cs::MX k4 = dt * cs::MX::substitute(dx, x, x + k3);
                 x_next = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6;
             }
             cs::MX operator()(const cs::MX &expr)

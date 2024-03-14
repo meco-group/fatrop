@@ -4,7 +4,7 @@ import fatropy.spectool as sp
 import cart_pole_dynamics
 
 # control grid parameters
-N = 50 # number of time steps
+N = 25 # number of time steps
 T = 2.0 # time horizon
 
 # Instantiate an Ocp 
@@ -28,12 +28,14 @@ theta_pole_0 = ocp.parameter()
 dtheta_pole_0 = ocp.parameter()
 
 # Define the system dynamics
-x_dot = cart_pole_dynamics.ode(*x, F)
+*x_dot, mechanism = cart_pole_dynamics.ode(*x, F)
 
 # take a runge kutta 4 integrator
 intg = sp.IntegratorRk4(list(zip(x, x_dot)), T/N)
-for x, xn, in zip(x, intg(x)):
-    stage.set_next(x, xn) 
+for xi, xn, in zip(x, intg(x)):
+    stage.set_next(xi, xn) 
+# for x, xn, in zip(x, [x + T/N * x_dot for x, x_dot in zip(x, x_dot)]):
+#     stage.set_next(x, xn) 
 
 # Define the cost function
 h_pole = cart_pole_dynamics.l/2*cs.cos(theta_pole)
@@ -51,10 +53,12 @@ stage.subject_to((-1. <= x_cart) <= 1., sp.t0, sp.mid, sp.tf)
 ocp.solver("fatrop", {'post_expand':True, 'jit':True}, {}) # fatrop/ipopt
 
 # put the solver inside a function
-func = ocp.to_function("cart_pole", [x_cart_0, dx_cart_0, theta_pole_0, dtheta_pole_0], [ocp.at_t0(F), ocp.sample(x_cart)[1], ocp.sample(theta_pole)[1]])
+func = ocp.to_function("cart_pole", [x_cart_0, dx_cart_0, theta_pole_0, dtheta_pole_0], [ocp.at_t0(F), ocp.sample(x_cart)[1], ocp.sample(theta_pole)[1], ocp.sample(cs.veccat(*x))[1]])
 
 # solve the ocp
-u0_sol, x_cart_sol, theta_pol_sol = func(0.0, 0.0, 0.1, 0.1)
-u0_sol, x_cart_sol, theta_pol_sol = func(0.0, 0.0, 0.1, 0.1)
+u0_sol, x_cart_sol, theta_pol_sol, x_sol = func(0.0, 0.0, 0.1, 0.1)
+u0_sol, x_cart_sol, theta_pol_sol, x_sol = func(0.0, 0.0, 0.1, 0.1)
 print(x_cart_sol)
-cart_pole_dynamics.animate(x_cart_sol, theta_pol_sol)
+print(x)
+
+mechanism.animate(cs.veccat(*x), x_sol)

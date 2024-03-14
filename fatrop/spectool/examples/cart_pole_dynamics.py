@@ -25,7 +25,7 @@ def ode(x_cart, dx_cart, theta_pole, dtheta_pole, F):
     # T = 0.5 * m_cart * dx_cart**2 + 0.5 * m_pole * (dx_cart + l/2 * dtheta_pole)**2
     # V = m_pole * g * l/2 * cs.cos(theta_pole)
     # L = T - V + W
-    return dx_cart, ddq[0], dtheta_pole, ddq[1]
+    return dx_cart, ddq[0], dtheta_pole, ddq[1], mechanism
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation

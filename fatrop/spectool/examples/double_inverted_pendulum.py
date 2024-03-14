@@ -24,7 +24,7 @@ theta_pole_0 = ocp.parameter(2)
 dtheta_pole_0 = ocp.parameter(2)
 
 # Define the system dynamics
-x_dot = double_inverted_pendulum_dynamics.ode(*x, F)
+*x_dot, mechanism = double_inverted_pendulum_dynamics.ode(*x, F)
 
 # take a runge kutta 4 integrator
 intg = sp.IntegratorRk4(list(zip(x, x_dot)), T/N)
@@ -48,4 +48,4 @@ func = ocp.to_function("double_pendulum", [theta_pole_0, dtheta_pole_0], [ocp.at
 
 # solve the ocp
 u0_sol, theta_pol_sol = func(np.array([0.1, 0.0]), np.array([0.0, 0.0]))
-double_inverted_pendulum_dynamics.animate(theta_pol_sol)
+mechanism.animate(theta_pole, theta_pol_sol)
