@@ -46,6 +46,15 @@ def ldl_solve(L:cs.MX, b:cs.MX):
     x[:,:] = b[:,:]
     y = subs_backward(L.T, subs_forward(L, x))
     return y
+def symmeterize(A):
+    m = A.shape[0]
+    n = A.shape[1]
+    assert(m == n)
+    for i in range(m):
+        for j in range(i-1):
+            A[i,j] = A[j,i]
+    return A
+
 
 def get_ddq(q, dq, T, V, W):
     print("warning: this Lagrangian dynamics implementation is not very efficient (slow function evaluation), it is only for illustrative purposes. Use a more dynamics efficient method for real problems.")
@@ -71,4 +80,18 @@ def get_ddq_jac(q, dq, u, T, V, W):
     uqdq = cs.vertcat(u, q, dq)
     ddq_dum = cs.MX.sym('ddq', ddq.shape[0], ddq.shape[1])
     jac =cs.substitute(ldl_solve(L_fact, cs.jacobian(b - A@ddq_dum, uqdq)), ddq_dum, ddq)
-    return ddq, jac
+
+    # g = A ddq - b = 0
+    # x = uqdq    y = ddq
+    # dydx = jac
+    lam = cs.MX.sym('lam', ddq.shape[0])
+    f = ddq_dum.T @ lam
+    mu = ldl_solve(L_fact, cs.gradient(f, ddq_dum))
+    z = cs.vertcat(uqdq, ddq_dum)
+    mu_dummy = cs.MX.sym('mu', mu.shape[0], mu.shape[1])
+    h_partial= cs.gradient(f, z) - (cs.jacobian(A@ddq_dum - b, z)).T@mu_dummy
+    hess_full = cs.jacobian(h_partial, z)
+    nx = uqdq.shape[0]
+    hess_full, h = cs.substitute([hess_full, h_partial[:nx]], [mu_dummy, ddq_dum], [mu, ddq])
+    hess = symmeterize(cs.horzcat(cs.MX.eye(nx), jac.T) @ hess_full @ cs.vertcat(cs.MX.eye(nx), jac))
+    return ddq, jac, (hess, h, lam)

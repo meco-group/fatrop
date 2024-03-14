@@ -19,7 +19,7 @@ def ode(x_cart, dx_cart, theta_pole, dtheta_pole, F):
     pole = r2d.link(revol, m_pole, l)
     mechanism = r2d.mechanism([cart, pole])
     W = F * cart.center.x
-    ddq, jac = mechanism.get_dynamics(W, q, dq, F)
+    ddq, _, _ = mechanism.get_dynamics(W, q, dq, F)
     
     # # # using Lagrangian dynamics
     # T = 0.5 * m_cart * dx_cart**2 + 0.5 * m_pole * (dx_cart + l/2 * dtheta_pole)**2
