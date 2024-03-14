@@ -14,10 +14,11 @@ namespace fatrop
             get()->terminal = std::make_unique<uStage>(ocp.new_ustage());
         }
 
-        void Stage::set_next(const cs::MX &state, const cs::MX &next_state)
+        // void Stage::set_next(const cs::MX &state, const cs::MX &next_state)
+        void Stage::set_next(const cs::MX &state, const cs::MX &next_state, const Jacobian & jacobian, const Hessian & hessian)
         {
-            at_t0().set_next(state, next_state);
-            at_mid().set_next(state, next_state);
+            at_t0().set_next(state, next_state, jacobian, hessian);
+            at_mid().set_next(state, next_state, jacobian, hessian);
             // add the variables to the terminal stage
             at_tf().get_internal()->add_variables({state});
         }

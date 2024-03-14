@@ -30,7 +30,8 @@ namespace fatrop
             Stage(Ocp &ocp, const int K);
 
         public:
-            void set_next(const cs::MX &state, const cs::MX &next_state);
+            void set_next(const cs::MX &state, const cs::MX &next_state, const Jacobian & jacobian = Jacobian{}, const Hessian & hessian = Hessian{});
+            // void set_next(const cs::MX &state, const cs::MX &next_state);
             std::pair<std::vector<int>, cs::MX> sample(const cs::MX &expr) const;
             template <class... args>
             void subject_to(const cs::MX &expr, args... argss)
