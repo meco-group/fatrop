@@ -1,7 +1,7 @@
 import casadi as cs
 import numpy as np
 import lagrangian_dynamics
-import mechanism_2d as m2d
+import robot2d as r2d
 
 
 m_cart = 1.0

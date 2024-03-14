@@ -1,7 +1,7 @@
 import casadi as cs
 import numpy as np
 import lagrangian_dynamics
-import mechanism_2d as m2d
+import robot2d as r2d
 
 
 m_cart = 1.0
@@ -13,11 +13,11 @@ I = m_pole * l**2 / 3
 def ode(theta_pole, dtheta_pole, F):
     q = cs.vertcat(theta_pole)
     dq = cs.vertcat(dtheta_pole)
-    revol1 = m2d.revolute(m2d.transform2d(0, 0, np.pi/2), theta_pole[0], dtheta_pole[0])
-    pole1 = m2d.link(revol1, m_pole, l)
-    revol2 = m2d.revolute(pole1.right, theta_pole[1], dtheta_pole[1])
-    pole2 = m2d.link(revol2, m_pole, l)
-    mechanism = m2d.mechanism([pole1, pole2])
+    revol1 = r2d.revolute(r2d.transform2d(0, 0, np.pi/2), theta_pole[0], dtheta_pole[0])
+    pole1 = r2d.link(revol1, m_pole, l)
+    revol2 = r2d.revolute(pole1.right, theta_pole[1], dtheta_pole[1])
+    pole2 = r2d.link(revol2, m_pole, l)
+    mechanism = r2d.mechanism([pole1, pole2])
     W = F * revol1.theta 
     ddq = mechanism.get_dynamics(W, q, dq)
     return dtheta_pole, ddq, mechanism
