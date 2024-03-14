@@ -1,44 +1,51 @@
 import numpy as np
 import casadi as cs
 
-def ldl_solve(A :cs.MX, b:cs.MX):
-    def lin_solve_func(A:cs.MX, b:cs.MX):
-        def subs_backward(U :cs.SX, y:cs.SX):
-            m = U.shape[0]
-            n = U.shape[1]
-            x = cs.SX.zeros(n)
-            x[:] = y[:]
-            assert(m ==n)
-            assert(y.shape[0] == m)
-            for i in range(n-1, -1, -1):
-                x[i] = x[i]/U[i,i]
-                x[:i] -= U[:i,i]*x[i]
-            return x
 
-        def subs_forward(L :cs.SX, y:cs.SX):
-            m = L.shape[0]
-            n = L.shape[1]
-            x = cs.SX.zeros(n)
-            x[:] = y[:]
-            assert(m ==n)
-            assert(y.shape[0] == m)
-            for i in range(n):
-                x[i] = x[i]/L[i,i]
-                x[i+1:] -= L[i+1:,i]*x[i]
-            return x
+def ldl_fact(A):
+    def lin_fact_func(A):
         m = A.shape[0]
-        n = A.shape[1]
-        assert(m == n)
-        assert(b.shape[0] == m)
-        A_sym = cs.SX.sym('A', m, n)
-        y_sym = cs.SX.sym('y', m)
+        A_sym = cs.SX.sym('A', m, m)
         L = cs.chol(A_sym).T
-        x = cs.SX.zeros(n)
-        x[:] = y_sym[:]
-        y =subs_backward(L.T, subs_forward(L, x))
-        f = cs.Function('linear_solve_cust', [A_sym, y_sym], [y])
+        f = cs.Function('ldl_fact_cust', [A_sym], [L])
         return f
-    return lin_solve_func(A, b)(A, b)
+    m = A.shape[0]
+    assert(m == A.shape[1])
+    return lin_fact_func(A)(A)
+
+
+def ldl_solve(L:cs.MX, b:cs.MX):
+    def subs_backward(U :cs.SX, y:cs.SX):
+        m = U.shape[0]
+        n = y.shape[1]
+        assert(m ==U.shape[1])
+        assert(y.shape[0] == m)
+        x = cs.MX.zeros(m, n)
+        x[:, :] = y[:, :]
+        for i in range(m-1, -1, -1):
+            x[i, :] = x[i, :]/U[i,i]
+            x[:i, :] -= U[:i,i]*x[i, :]
+        return x
+
+    def subs_forward(L :cs.SX, y:cs.SX):
+        m = L.shape[0]
+        n = y.shape[1]
+        assert(m == L.shape[1])
+        assert(y.shape[0] == m)
+        x = cs.MX.zeros(m, n)
+        x[:, :] = y[:, :]
+        for i in range(m):
+            x[i, :] = x[i, :]/L[i,i]
+            x[i+1:, :] -= L[i+1:,i]*x[i, :]
+        return x
+    m = L.shape[0]
+    n = b.shape[1]
+    assert(m == L.shape[1])
+    assert(b.shape[0] == m)
+    x = cs.MX.zeros(m, n)
+    x[:,:] = b[:,:]
+    y = subs_backward(L.T, subs_forward(L, x))
+    return y
 
 def get_ddq(q, dq, T, V, W):
     print("warning: this Lagrangian dynamics implementation is not very efficient (slow function evaluation), it is only for illustrative purposes. Use a more dynamics efficient method for real problems.")
@@ -49,5 +56,5 @@ def get_ddq(q, dq, T, V, W):
     dt_L_dq = time_der(cs.gradient(L, dq))
     A = dt_L_dq[1]
     b = cs.gradient(L, q) - dt_L_dq[0]@dq
-    ddq = ldl_solve(A, b)
+    ddq = ldl_solve(ldl_fact(A), b)
     return ddq
