@@ -69,7 +69,6 @@ def get_ddq_jac(q, dq, u, T, V, W):
     L_fact = ldl_fact(A)
     ddq = ldl_solve(L_fact, b)
     uqdq = cs.vertcat(u, q, dq)
-    # ddq_dum = cs.MX.sym('ddq', ddq.shape[0], ddq.shape[1])
-    # jac =cs.substitute(ldl_solve(L_fact, cs.jacobian(b - A@ddq_dum, uqdq)), ddq_dum, ddq)
-    jac = cs.jacobian(ddq, uqdq)
+    ddq_dum = cs.MX.sym('ddq', ddq.shape[0], ddq.shape[1])
+    jac =cs.substitute(ldl_solve(L_fact, cs.jacobian(b - A@ddq_dum, uqdq)), ddq_dum, ddq)
     return ddq, jac
