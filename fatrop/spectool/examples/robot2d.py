@@ -75,7 +75,7 @@ class link(rigid_body):
 class mechanism:
     def __init__(self, links):
         self.links = links
-    def get_dynamics(self, W, q, qd):
+    def get_dynamics(self, W, q, qd, U):
         T = 0
         V = 0
         for link in self.links:
@@ -86,7 +86,7 @@ class mechanism:
             dtheta = mass_center_link.dtheta
             T += 0.5 * link.mass * (dx**2 + dy**2) + 0.5 * link.inertia * dtheta**2
             V += link.mass * 9.81 * y
-        return ld.get_ddq(q, qd, T, V, W)
+        return ld.get_ddq_jac(q, qd, U, T, V, W)
     
     def animate(self, q_sym, q_vals):
         # collect all symbols for left and right position of each link

@@ -25,12 +25,16 @@ theta_pole_0 = ocp.parameter(2)
 dtheta_pole_0 = ocp.parameter(2)
 
 # Define the system dynamics
-x_dot, mechanism, _ = double_inverted_pendulum_dynamics.ode(*x, F)
+x_dot, mechanism, jac = double_inverted_pendulum_dynamics.ode(*x, F)
 
-# take a runge kutta 4 integrator
-intg = sp.IntegratorRk4(list(zip(x, x_dot)), T/N)
-for x, xn, in zip(x, intg(x)):
-    stage.set_next(x, xn) 
+# # take a runge kutta 4 integrator
+# intg = sp.IntegratorRk4(list(zip(x, x_dot)), T/N)
+# for x, xn, in zip(x, intg(x)):
+#     stage.set_next(x, xn) 
+# or a simple euler integrator with a custom Jacbian
+stage.set_next(theta_pole, theta_pole + T/N*x_dot[0])
+# stage.set_next(dtheta_pole, dtheta_pole + T/N*x_dot[1])
+stage.set_next(dtheta_pole, dtheta_pole + T/N*x_dot[1], jacobian=sp.Jacobian(cs.jacobian(dtheta_pole, cs.vcat(ux))+  T/N*jac, cs.vcat(ux)))
 
 # Define the cost function
 h_pole = double_inverted_pendulum_dynamics.l/2*(cs.cos(theta_pole[0]) + cs.cos(theta_pole[1]))

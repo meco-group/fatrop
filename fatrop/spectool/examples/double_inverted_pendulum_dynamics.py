@@ -19,8 +19,8 @@ def ode(theta_pole, dtheta_pole, F):
     pole2 = r2d.link(revol2, m_pole, l)
     mechanism = r2d.mechanism([pole1, pole2])
     W = F * revol1.theta 
-    ddq = mechanism.get_dynamics(W, q, dq)
-    return dtheta_pole, ddq, mechanism
+    ddq, jac = mechanism.get_dynamics(W, q, dq, F)
+    return [dtheta_pole, ddq], mechanism, jac
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation

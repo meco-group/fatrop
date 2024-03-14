@@ -13,13 +13,13 @@ I = m_pole * l**2 / 3
 def ode(x_cart, dx_cart, theta_pole, dtheta_pole, F):
     q = cs.vertcat(x_cart, theta_pole)
     dq = cs.vertcat(dx_cart, dtheta_pole)
-    prism = m2d.prismatic(m2d.zero_transform(), x_cart, dx_cart, 0, 0)
-    cart = m2d.link(prism, m_cart, 0)
-    revol = m2d.revolute(cart.center.transform(m2d.transform2d(0, 0, np.pi/2)), theta_pole, dtheta_pole)
-    pole = m2d.link(revol, m_pole, l)
-    mechanism = m2d.mechanism([cart, pole])
+    prism = r2d.prismatic(r2d.zero_transform(), x_cart, dx_cart, 0, 0)
+    cart = r2d.link(prism, m_cart, 0)
+    revol = r2d.revolute(cart.center.transform(r2d.transform2d(0, 0, np.pi/2)), theta_pole, dtheta_pole)
+    pole = r2d.link(revol, m_pole, l)
+    mechanism = r2d.mechanism([cart, pole])
     W = F * cart.center.x
-    ddq = mechanism.get_dynamics(W, q, dq)
+    ddq, jac = mechanism.get_dynamics(W, q, dq)
     
     # # # using Lagrangian dynamics
     # T = 0.5 * m_cart * dx_cart**2 + 0.5 * m_pole * (dx_cart + l/2 * dtheta_pole)**2

@@ -24,7 +24,7 @@ def ldl_solve(L:cs.MX, b:cs.MX):
         x[:, :] = y[:, :]
         for i in range(m-1, -1, -1):
             x[i, :] = x[i, :]/U[i,i]
-            x[:i, :] -= U[:i,i]*x[i, :]
+            x[:i, :] -= U[:i,i]@x[i, :]
         return x
 
     def subs_forward(L :cs.SX, y:cs.SX):
@@ -36,7 +36,7 @@ def ldl_solve(L:cs.MX, b:cs.MX):
         x[:, :] = y[:, :]
         for i in range(m):
             x[i, :] = x[i, :]/L[i,i]
-            x[i+1:, :] -= L[i+1:,i]*x[i, :]
+            x[i+1:, :] -= L[i+1:,i]@x[i, :]
         return x
     m = L.shape[0]
     n = b.shape[1]
@@ -58,3 +58,18 @@ def get_ddq(q, dq, T, V, W):
     b = cs.gradient(L, q) - dt_L_dq[0]@dq
     ddq = ldl_solve(ldl_fact(A), b)
     return ddq
+
+def get_ddq_jac(q, dq, u, T, V, W):
+    def time_der(expr):
+        return [cs.jacobian(expr, q), cs.jacobian(expr, dq)] #  @ [dq, ddq]
+    L = T - V + W
+    dt_L_dq = time_der(cs.gradient(L, dq))
+    A = dt_L_dq[1]
+    b = cs.gradient(L, q) - dt_L_dq[0]@dq
+    L_fact = ldl_fact(A)
+    ddq = ldl_solve(L_fact, b)
+    uqdq = cs.vertcat(u, q, dq)
+    # ddq_dum = cs.MX.sym('ddq', ddq.shape[0], ddq.shape[1])
+    # jac =cs.substitute(ldl_solve(L_fact, cs.jacobian(b - A@ddq_dum, uqdq)), ddq_dum, ddq)
+    jac = cs.jacobian(ddq, uqdq)
+    return ddq, jac
