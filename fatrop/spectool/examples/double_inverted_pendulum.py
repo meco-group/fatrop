@@ -2,6 +2,7 @@ import casadi as cs
 import numpy as np
 import fatropy.spectool as sp
 import double_inverted_pendulum_dynamics
+import robot2d as r2d
 
 # control grid parameters
 N = 50 # number of time steps
@@ -49,4 +50,4 @@ func = ocp.to_function("double_pendulum", [theta_pole_0, dtheta_pole_0], [ocp.at
 
 # solve the ocp
 u0_sol, theta_pol_sol = func(np.array([0.1, 0.0]), np.array([0.0, 0.0]))
-mechanism.animate(theta_pole, theta_pol_sol)
+r2d.animate(((mechanism, theta_pole, theta_pol_sol),))

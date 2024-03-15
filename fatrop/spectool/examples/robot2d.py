@@ -88,37 +88,51 @@ class mechanism:
             V += link.mass * 9.81 * y
         return ld.get_ddq_jac(q, qd, U, T, V, W)
     
-    def animate(self, q_sym, q_vals):
+def animate(mechs_qs_vals):
+    mechanisms, q_syms, q_valss = zip(*mechs_qs_vals)
+    print(mechanisms)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, autoscale_on=False, xlim=(-1, 1), ylim=(-1, 1))
+    ax.set_aspect('equal')
+    ax.grid()
+    axs_links = [None for _ in mechanisms]
+    fs = [None for _ in mechanisms]
+    offsets = [0 for _ in mechanisms]
+    pointers = []
+
+    for mechanism, q_sym, q_vals, i in zip(mechanisms, q_syms, q_valss, range(len(mechanisms))):
+        pointers += [i for _ in range(q_vals.shape[1])]
+        offsets[i] = 0 if i == 0 else offsets[i-1] + q_vals.shape[1]
         # collect all symbols for left and right position of each link
-        no_links = len(self.links)
+        no_links = len(mechanism.links)
         left = []
         right = []
-        for link in self.links:
+        for link in mechanism.links:
             left.append(link.left.origin())
             right.append(link.right.origin())
         # make a casadi function that evaliates the left and right position of each link
-        f = cs.Function('f', [q_sym], [cs.horzcat(*left), cs.horzcat(*right)])
+        print(q_sym)
+        fs[i] = cs.Function('f', [q_sym], [cs.horzcat(*left), cs.horzcat(*right)])
+        axs_links[i] = [ax.plot([], [], 'r', lw=2)[0] for _ in range(no_links)]
+    print(axs_links)
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, autoscale_on=False, xlim=(-1, 1), ylim=(-1, 1))
-        ax.set_aspect('equal')
-        ax.grid()
-
-        axs_link = [ax.plot([], [], 'r', lw=2)[0] for _ in range(no_links)]
-
-        def init():
-            for ax_link in axs_link:
+    def init():
+        for ax_linksi in axs_links:
+            for ax_link in ax_linksi:
                 ax_link.set_data([], []) 
-            return axs_link 
+        return [ax for axlinski in axs_links for ax in axlinski]
 
-        def animate(i):
-            lefts, rights = f(q_vals[:, i])
-            lefts = np.array(lefts)
-            rights = np.array(rights)
-            for j in range(no_links):
-                axs_link[j].set_data([lefts[0, j], rights[0, j]], [lefts[1, j], rights[1, j]])
-            return axs_link 
+    def animate(i):
+        # find the right mechanism
+        mechi = pointers[i]
+        mechanism = mechanisms[mechi]
+        lefts, rights = fs[mechi](q_valss[mechi][:, i-offsets[mechi]])
+        lefts = np.array(lefts)
+        rights = np.array(rights)
+        for j in range(len(mechanism.links)):
+            axs_links[mechi][j].set_data([lefts[0, j], rights[0, j]], [lefts[1, j], rights[1, j]])
+        return axs_links[mechi] 
 
-        ani = animation.FuncAnimation(fig, animate, frames=q_vals.shape[1], init_func=init, blit=True)
-        plt.show()
+    ani = animation.FuncAnimation(fig, animate, frames=sum([q_vals.shape[1] for q_vals in q_valss]), init_func=init, blit=True)
+    plt.show()
             

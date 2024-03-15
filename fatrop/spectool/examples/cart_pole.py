@@ -2,9 +2,10 @@ import casadi as cs
 import numpy as np
 import fatropy.spectool as sp
 import cart_pole_dynamics
+import robot2d as r2d
 
 # control grid parameters
-N = 25 # number of time steps
+N = 50 # number of time steps
 T = 2.0 # time horizon
 
 # Instantiate an Ocp 
@@ -57,8 +58,10 @@ func = ocp.to_function("cart_pole", [x_cart_0, dx_cart_0, theta_pole_0, dtheta_p
 
 # solve the ocp
 u0_sol, x_cart_sol, theta_pol_sol, x_sol = func(0.0, 0.0, 0.1, 0.1)
-u0_sol, x_cart_sol, theta_pol_sol, x_sol = func(0.0, 0.0, 0.1, 0.1)
+u0_sol, x_cart_sol, theta_pol_sol, x_sol = func(0.0, 0.0, 0.5, 0.1)
 print(x_cart_sol)
 print(x)
 
-mechanism.animate(cs.veccat(*x), x_sol)
+r2d.animate(((mechanism, cs.vcat(x), x_sol),))
+
+# mechanism.animate(cs.veccat(*x), x_sol)
