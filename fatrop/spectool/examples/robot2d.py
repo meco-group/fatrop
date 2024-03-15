@@ -63,7 +63,7 @@ class world(joint):
 
 class link(rigid_body):
     def __init__(self, left_joint:joint, mass:cs.MX, length:cs.MX):
-        inertia = mass * length**2 / 12
+        inertia = mass * np.abs(length)**2 / 12
         self.length = length
         self.left_joint = left_joint
         self.left = self.left_joint.pos.transform(transform2d(self.left_joint.x, self.left_joint.y, self.left_joint.theta, self.left_joint.dx, self.left_joint.dy, self.left_joint.dtheta))
@@ -111,10 +111,8 @@ def animate(mechs_qs_vals):
             left.append(link.left.origin())
             right.append(link.right.origin())
         # make a casadi function that evaliates the left and right position of each link
-        print(q_sym)
         fs[i] = cs.Function('f', [q_sym], [cs.horzcat(*left), cs.horzcat(*right)])
         axs_links[i] = [ax.plot([], [], 'r', lw=2)[0] for _ in range(no_links)]
-    print(axs_links)
 
     def init():
         for ax_linksi in axs_links:
