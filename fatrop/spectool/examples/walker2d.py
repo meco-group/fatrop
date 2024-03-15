@@ -5,7 +5,7 @@ import fatropy.spectool as sp
 import robot2d as r2d
 
 N = 50
-T = 2.
+T = .5
 ocp = sp.Ocp()
 
 stage_left = ocp.new_stage(N)
