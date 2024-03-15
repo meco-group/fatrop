@@ -55,11 +55,14 @@ for step in range(N_steps):
     # Define the cost function
     for stage in [stage_left, stage_right]:
         stage.add_objective(cs.sumsqr(qd), sp.t0, sp.mid, sp.tf)
-        stage.add_objective(cs.sumsqr(tau), sp.t0, sp.mid)
-    # no over-bending of knees
+        stage.add_objective(0.01*cs.sumsqr(tau), sp.t0, sp.mid)
+    # no over-bending of knee
     for stage in [stage_left, stage_right]:
         stage.subject_to(0. <= q[2], sp.mid)
         stage.subject_to(0. >= q[3], sp.mid)
+    # no torque in wrong direction from feet
+    stage_left.subject_to(tau[0]<0., sp.mid)
+    stage_right.subject_to(tau[1]>0., sp.mid)
 
 
 # Define the constraints
@@ -73,7 +76,6 @@ ocp.solver('fatrop', {"post_expand":True, "jit":False}, {})
 
 fun = ocp.to_function("fun", [], [ocp.sample(q)[1], stage_left.at_tf(foot_right.left.origin())])
 
-sol = fun()
 sol = fun()
 q_sol = sol['o0']
 r2d.animate([(all_mechanisms[i], q, q_sol[:, i*(N+1):(i+1)*(N+1)-1]) for i in range(2*N_steps)])
