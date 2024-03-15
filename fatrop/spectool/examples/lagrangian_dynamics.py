@@ -73,7 +73,7 @@ def get_ddq_jac(q, dq, u, T, V, W):
         return [cs.jacobian(expr, q), cs.jacobian(expr, dq)] #  @ [dq, ddq]
     L = T - V + W
     dt_L_dq = time_der(cs.gradient(L, dq))
-    A = dt_L_dq[1]
+    A = symmeterize(dt_L_dq[1])
     b = cs.gradient(L, q) - dt_L_dq[0]@dq
     L_fact = ldl_fact(A)
     ddq = ldl_solve(L_fact, b)
