@@ -69,6 +69,7 @@ def get_ddq(q, dq, T, V, W):
     return ddq
 
 def get_ddq_jac(q, dq, u, T, V, W):
+    print("warning: this Lagrangian dynamics implementation is not very efficient (slow function evaluation), it is only for illustrative purposes. Use a more dynamics efficient method for real problems.")
     def time_der(expr):
         return [cs.jacobian(expr, q), cs.jacobian(expr, dq)] #  @ [dq, ddq]
     L = T - V + W
