@@ -6,7 +6,7 @@ import robot2d as r2d
 from gauss_newton_hessian import gauss_newton_hessian
 
 N = 50
-T = 2.
+T = .5
 ocp = sp.Ocp()
 
 stage_left = ocp.new_stage(N)
@@ -60,6 +60,7 @@ stage_left.at_tf().subject_to(expr == 0., hessian = gauss_newton_hessian(expr, x
 # Define the cost function
 for stage in [stage_left, stage_right]:
     stage.add_objective(cs.sumsqr(qd), sp.t0, sp.mid, sp.tf)
+    stage.add_objective(1e-1*cs.sumsqr(tau), sp.t0, sp.mid)
 
 ocp.solver('fatrop', {"post_expand":True, "jit":False}, {})
 

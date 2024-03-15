@@ -53,6 +53,7 @@ stage_left.at_tf().subject_to(cs.sin(foot_right.left.theta) == 0.) # theta = 0. 
 # Define the cost function
 for stage in [stage_left, stage_right]:
     stage.add_objective(cs.sumsqr(qd), sp.t0, sp.mid, sp.tf)
+    stage.add_objective(1e-1*cs.sumsqr(tau), sp.t0, sp.mid)
 
 ocp.solver('fatrop', {"post_expand":True, "jit":False}, {"tol":1e-4, "mu_init":1e4})
 
