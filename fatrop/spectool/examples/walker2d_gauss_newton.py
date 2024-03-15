@@ -52,7 +52,6 @@ stage_left.at_tf().set_next(qd, qd)
 
 # transition constraints
 foot_right = links_left[-1]
-expr = foot_right.left.origin()
 expr = foot_right.left.origin() -[0.25, 0.0]
 stage_left.at_tf().subject_to(expr == 0., hessian = gauss_newton_hessian(expr, x))
 expr = cs.sin(foot_right.left.theta) # theta = 0. + k * pi
