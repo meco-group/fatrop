@@ -61,6 +61,7 @@ namespace fatrop
                     throw std::runtime_error("Fatrop solver does not support constraints over different time steps.");
                 int n_global_parameters_ = cs::MX::veccat(ocp_.get_global_parameters()).size1();
                 fatrop_impl = std::make_shared<UStageOCPImpl<FatropuStageEvalCasadi>>(UStageEvalBuilder::build(ocp_, opts), n_global_parameters_);
+                funct_opts = opts;
             }
             cs::Dict stats()
             {
@@ -102,21 +103,7 @@ namespace fatrop
                     else if (opt.second.is_bool())
                         app->set_option(opt.first, (bool)opt.second);
                 }
-                // C_api_userdata *userdata = new C_api_userdata(app);
-                // userdata->ref_count = 0;
-                // // cs::Importer importer("/home/lander/fatrop/fatrop/ocp/liboldcapi.so", "dll");
-                // auto filename = cs::temporary_file("capi", ".cpp");
-                // // write contens of std::string c_api_template to filename
-                // std::ofstream file(filename);
-                // file << c_api_template;
-                // file.close();
-                // cs::Importer importer(filename, "shell");
-                // reinterpret_cast<void (*)(C_api_userdata*)>(importer.get_function("set_user_data"))(userdata);
-                // auto func = cs::external("casadi_old_capi", importer);
-                // // cleanup the file
-                // std::remove(filename.c_str());
-                // app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
-                return FatropFunction(name, app, opts);
+                return FatropFunction(name, app, opts, funct_opts);
             };
             std::shared_ptr<fatrop::OCPApplication> app;
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
@@ -142,6 +129,7 @@ namespace fatrop
                 out = {cs::MX::veccat(variables_v)};
             }
             std::shared_ptr<UStageOCPImpl<FatropuStageEvalCasadi>> fatrop_impl;
+            cs::Dict funct_opts;
         };
     } // namespace spectrop
 } // namespace fatrop

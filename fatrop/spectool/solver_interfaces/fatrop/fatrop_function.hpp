@@ -84,11 +84,11 @@ namespace fatrop
                 app->set_initial(arg_initial_vars);
                 app->set_params(arg_global_parameters, arg_stage_parameters);
                 int ret = app->optimize();
-                if(error_on_fail_ && ret != 0)
-                    throw std::runtime_error("fatrop solver failed");
                 double *last_sol = ((VEC *)app->last_solution_primal())->pa;
                 if (res[0])
                     std::copy(last_sol, last_sol + n_vars, res[0]);
+                if(error_on_fail_ && ret != 0)
+                    throw std::runtime_error("fatrop solver failed");
                 return 0;
             }
             // destructor
@@ -105,26 +105,13 @@ namespace fatrop
             int n_vars;
             int n_stage_params;
             int n_global_params;
-            bool error_on_fail;
         };
 
         class FatropFunction : public cs::Function
         {
         public:
-            FatropFunction(const std::string&name,  const std::shared_ptr<fatrop::OCPApplication> app_, const cs::Dict &options)
+            FatropFunction(const std::string&name,  const std::shared_ptr<fatrop::OCPApplication> app_, const cs::Dict &options, const cs::Dict& funct_opts)
             {
-                // app_->build();
-                // go over the options and set
-                // for(auto opt : options)
-                // {
-                //     if(opt.second.is_double())
-                //     app_->set_option(opt.first, (double) opt.second);
-                //     else if (opt.second.is_int())
-                //     app_->set_option(opt.first, (int) opt.second);
-                //     else if (opt.second.is_bool())
-                //     app_->set_option(opt.first, (bool) opt.second);
-                // }
-                // cs::Callback::construct("FatropFunction");
                 if (!is_null())
                 {
                     casadi_error("Cannot create 'FatropFunction': Internal class already created");
@@ -132,8 +119,7 @@ namespace fatrop
                 auto ptr = new FatropFunctionInternal(std::string("FatropFunction_") + name, app_);
                 static_cast<cs::SharedObject *>(this)->own(ptr);
                 auto options_ = cs::Dict();
-                ptr -> error_on_fail = cs::get_from_dict(options_, "error_on_fail", true);
-                
+                ptr -> error_on_fail_ = cs::get_from_dict(funct_opts, "error_on_fail", true);
                 static_cast<cs::Function *>(this)->operator->()->casadi::FunctionInternal::construct(options_);
             }
 
