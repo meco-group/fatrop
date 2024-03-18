@@ -7,7 +7,9 @@ namespace fatrop
         FatropuStageEvalCasadi::FatropuStageEvalCasadi(const uStageQuantities &sq, const cs::Dict &opts, CasadiJitCache &eval_cache)
         {
             auto optss = opts;
-            bool expand = cs::get_from_dict(optss, "post_expand", true);
+            bool expand = cs::get_from_dict(optss, "expand", true);
+            // delete the expand option from the dictionary
+            optss.erase("expand");
             bool jit = cs::get_from_dict(optss, "jit", false);
             // we handle jit ourself
             optss["jit"] = false;
