@@ -13,13 +13,13 @@ namespace fatrop
             // allocate work vectors
             size_t sz_arg,
                 sz_res, sz_iw, sz_w;
-            sz_arg = func.n_in();
-            sz_res = func.n_out();
-            func.sz_work(sz_arg, sz_res, sz_iw, sz_w);
+            sz_arg = func_.n_in();
+            sz_res = func_.n_out();
+            func_.sz_work(sz_arg, sz_res, sz_iw, sz_w);
 #ifndef ENABLE_MULTITHREADING
             iw.resize(sz_iw);
             w.resize(sz_w);
-            bufout.resize(func.nnz_out(0));
+            bufout.resize(func_.nnz_out(0));
             bufdata.resize(sz_res > 0 ? sz_res : 1);
             resdata.resize(sz_res > 0 ? sz_res : 1);
             argdata.resize(sz_arg > 0 ? sz_arg : 1);
@@ -29,14 +29,14 @@ namespace fatrop
             {
                 iw[thread_i].resize(sz_iw);
                 w[thread_i].resize(sz_w);
-                bufout[thread_i].resize(func.nnz_out(0));
+                bufout[thread_i].resize(func_.nnz_out(0));
                 bufdata[thread_i].resize(sz_res > 0 ? sz_res : 1);
                 resdata[thread_i].resize(sz_res > 0 ? sz_res : 1);
                 argdata[thread_i].resize(sz_arg > 0 ? sz_arg : 1);
             }
 #endif
 
-            n_in = func.n_in();
+            n_in = func_.n_in();
             if (jit)
             {
                 // compute the function hash
