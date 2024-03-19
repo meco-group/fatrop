@@ -44,7 +44,7 @@ namespace fatrop
     struct NumberOption: public Option<T>
     {
     public:
-        // NumericOption operator=(const NumericOption &other) = default;
+        // DoubleOption operator=(const DoubleOption &other) = default;
         NumberOption(){};
         NumberOption(const std::string &name, const std::string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound); 
         static NumberOption<T> lower_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound);
@@ -58,7 +58,7 @@ namespace fatrop
         T upper_bound_;
     };
    // define Numeric option as Option<double>
-    typedef NumberOption<double> NumericOption;
+    typedef NumberOption<double> DoubleOption;
     typedef NumberOption<fatrop_int> IntegerOption;
     typedef Option<std::string> StringOption;
     typedef Option<bool> BooleanOption;
@@ -76,12 +76,12 @@ namespace fatrop
         void prebuilt_set(const std::string &option_name, T value);
 
     public:
-        void register_option(const NumericOption &option);
+        void register_option(const DoubleOption &option);
         void register_option(const IntegerOption &option);
         void register_option(const BooleanOption &option);
         void register_option(const StringOption &option);
         friend auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &;
-        std::map<std::string, NumericOption> numeric_options;
+        std::map<std::string, DoubleOption> numeric_options;
         std::map<std::string, IntegerOption> integer_options;
         std::map<std::string, BooleanOption> boolean_options;
         std::map<std::string, StringOption> string_options;

@@ -37,26 +37,26 @@ FatropAlg::FatropAlg(
       printer_(printer)
 {
 
-    fatropoptions_->register_option(NumericOption::lower_bounded("tol", "tolerance", &tol, 1e-8, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("acceptable_tol", "acceptable tolerance", &acceptable_tol, 1e-6, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("tol", "tolerance", &tol, 1e-8, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("acceptable_tol", "acceptable tolerance", &acceptable_tol, 1e-6, 0.0));
     fatropoptions_->register_option(IntegerOption::lower_bounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
     fatropoptions_->register_option(IntegerOption::lower_bounded("acceptable_iter", "acceptable iter", &acceptable_iter, 15, 0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("lammax", "lammax", &lammax, 1e3, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("mu_init", "mu_init", &mu0, 1e2, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("delta_w0", "delta_w0", &delta_w0, 1e-4, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("delta_wmin", "delta_wmin", &delta_wmin, 1e-20, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("kappa_wmin", "kappa_wmin", &kappa_wmin, 1.0 / 3.0, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("kappa_wplus", "kappa_wplus", &kappa_wplus, 8.0, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("kappa_wplusem", "kappa_wplusem", &kappa_wplusem, 100.0, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-6, 0.0));
-    fatropoptions_->register_option(NumericOption::lower_bounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("lammax", "lammax", &lammax, 1e3, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("mu_init", "mu_init", &mu0, 1e2, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("delta_w0", "delta_w0", &delta_w0, 1e-4, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("delta_wmin", "delta_wmin", &delta_wmin, 1e-20, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_wmin", "kappa_wmin", &kappa_wmin, 1.0 / 3.0, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_wplus", "kappa_wplus", &kappa_wplus, 8.0, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_wplusem", "kappa_wplusem", &kappa_wplusem, 100.0, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-6, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
     fatropoptions_->register_option(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
-    fatropoptions_->register_option(NumericOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
     fatropoptions_->register_option(BooleanOption("recalc_y", "recalc_y", &recalc_y, false));
-    fatropoptions_->register_option(NumericOption::lower_bounded("recalc_y_feas_tol", "recalc_y_feas_tol", &recalc_y_feas_tol, 1e-6, 0.0));
+    fatropoptions_->register_option(DoubleOption::lower_bounded("recalc_y_feas_tol", "recalc_y_feas_tol", &recalc_y_feas_tol, 1e-6, 0.0));
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
     fatropnlp->get_bounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);

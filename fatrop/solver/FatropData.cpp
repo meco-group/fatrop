@@ -134,13 +134,13 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     printer_(printer)
 {
     initialize();
-    params->register_option(NumericOption::lower_bounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
-    params->register_option(NumericOption::lower_bounded("smax", "smax", &smax, 100.0, 0.0));
-    params->register_option(NumericOption::lower_bounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
-    params->register_option(NumericOption::lower_bounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
-    params->register_option(NumericOption::lower_bounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
-    params->register_option(NumericOption::lower_bounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
-    params->register_option(NumericOption::lower_bounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
+    params->register_option(DoubleOption::lower_bounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
+    params->register_option(DoubleOption::lower_bounded("smax", "smax", &smax, 100.0, 0.0));
+    params->register_option(DoubleOption::lower_bounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
+    params->register_option(DoubleOption::lower_bounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
+    params->register_option(DoubleOption::lower_bounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
+    params->register_option(DoubleOption::lower_bounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
+    params->register_option(DoubleOption::lower_bounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
 }
 void FatropData::initialize()
 {

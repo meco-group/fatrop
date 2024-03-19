@@ -73,7 +73,7 @@ void NumberOption<T>::set(const T &new_value) const
 FatropOptions::FatropOptions()
 {
     register_option(IntegerOption::box_bounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
-    register_option(NumericOption::lower_bounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
+    register_option(DoubleOption::lower_bounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
 template <typename T>
 void FatropOptions::set(const string &option_name, T value) const
@@ -155,7 +155,7 @@ void FatropOptions::prebuilt_set(const string &option_name, T value)
         }
 }
 
-void FatropOptions::register_option(const NumericOption &option)
+void FatropOptions::register_option(const DoubleOption &option)
 {
     numeric_options[option.name_] = option;
     option.set_default();
