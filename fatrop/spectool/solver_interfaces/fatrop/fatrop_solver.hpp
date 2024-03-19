@@ -92,8 +92,6 @@ namespace fatrop
                 // C-api approach
                 // C_api
                 app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
-                app->build();
-                // go over the options and set
                 for (auto opt : opts)
                 {
                     if (opt.second.is_double())
@@ -103,6 +101,8 @@ namespace fatrop
                     else if (opt.second.is_bool())
                         app->set_option(opt.first, (bool)opt.second);
                 }
+                app->build();
+                // go over the options and set
                 return FatropFunction(name, app, opts, funct_opts);
             };
             std::shared_ptr<fatrop::OCPApplication> app;

@@ -100,6 +100,10 @@ FatropVecBF &NLPApplication::initial_guess_zU() const
 template <typename T>
 void NLPApplication::set_option(const string &option_name, T value)
 {
+    // check if application is built
+    if(dirty)
+    fatropoptions_->prebuilt_set(option_name, value);
+    else
     fatropoptions_->set(option_name, value);
 }
 template void NLPApplication::set_option<fatrop_int>(const string &, int);

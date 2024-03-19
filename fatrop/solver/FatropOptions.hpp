@@ -37,7 +37,7 @@ namespace fatrop
         static Option<T> un_bounded(const std::string &name, const std::string &description, T *value, T default_value);
         static Option<T> box_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound, T upper_bound);
         void set_default() const;
-        void set(const T &new_value);
+        void set(const T &new_value) const;
         std::string name_;
         std::string description_;
         T *value = NULL;
@@ -52,7 +52,7 @@ namespace fatrop
     {
         Option(){};
         Option(const std::string &name, const std::string &description, bool *value, bool default_value);
-        void set(const bool &new_value);
+        void set(const bool &new_value) const;
         void set_default() const;
         std::string name_;
         std::string description_;
@@ -74,16 +74,22 @@ namespace fatrop
         int maxiter = 1000; // TODO this value cannot be changed to a value larger than the one used for building the solver
         double kappa_d = 1e-5;
         template <typename T>
-        void set(const std::string &option_name, T value);
+        void set(const std::string &option_name, T value) const;
+        template <typename T>
+        void prebuilt_set(const std::string &option_name, T value);
 
     public:
         void register_option(const NumericOption &option);
         void register_option(const IntegerOption &option);
         void register_option(const BooleanOption &option);
+        void register_option(const StringOption &option);
         friend auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &;
         std::map<std::string, NumericOption> numeric_options;
         std::map<std::string, IntegerOption> integer_options;
         std::map<std::string, BooleanOption> boolean_options;
+        std::map<std::string, StringOption> string_options;
+        std::map<std::string, std::string> prebuilt_string;
+        std::map<std::string, double> prebuilt_double;
     };
 
 } // namespace fatrop

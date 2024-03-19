@@ -21,7 +21,7 @@ using namespace fatrop;
 using namespace std;
 
 Option<bool>::Option(const string &name, const string &description, bool *value, bool default_value) : name_(name), description_(description), value(value), default_value_(default_value){};
-void Option<bool>::set(const bool &new_value)
+void Option<bool>::set(const bool &new_value) const
 {
     *value = new_value;
 }
@@ -58,7 +58,7 @@ void Option<T>::set_default() const
     *value = default_value_;
 };
 template <typename T>
-void Option<T>::set(const T &new_value)
+void Option<T>::set(const T &new_value) const
 {
     // check if new value is in bounds
     if (lower_bound_inclusive_ && new_value < lower_bound_)
@@ -77,13 +77,13 @@ FatropOptions::FatropOptions()
     register_option(NumericOption::lower_bounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
 template <typename T>
-void FatropOptions::set(const string &option_name, T value)
+void FatropOptions::set(const string &option_name, T value) const
 {
     if (numeric_options.find(option_name) != numeric_options.end())
     {
         if constexpr (std::is_floating_point<T>::value)
         {
-            numeric_options[option_name].set(value);
+            numeric_options.at(option_name).set(value);
         }
         else
         {
@@ -94,13 +94,13 @@ void FatropOptions::set(const string &option_name, T value)
     {
         if constexpr (std::is_integral<T>::value)
         {
-            integer_options[option_name].set(value);
+            integer_options.at(option_name).set(value);
         }
         else if constexpr (std::is_floating_point<T>::value)
         {
             if ((int)value == value)
             {
-                integer_options[option_name].set((int)value);
+                integer_options.at(option_name).set((int)value);
             }
             else
             {
@@ -116,17 +116,17 @@ void FatropOptions::set(const string &option_name, T value)
     {
         if constexpr (std::is_same<T, bool>::value)
         {
-            boolean_options[option_name].set(value);
+            boolean_options.at(option_name).set(value);
         }
         else if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
         {
             if (value == 0)
             {
-                boolean_options[option_name].set(false);
+                boolean_options.at(option_name).set(false);
             }
             else if (value == 1)
             {
-                boolean_options[option_name].set(true);
+                boolean_options.at(option_name).set(true);
             }
             else
             {
@@ -143,22 +143,61 @@ void FatropOptions::set(const string &option_name, T value)
         throw std::runtime_error("Option " + option_name + " not found");
     }
 }
+template <typename T>
+void FatropOptions::prebuilt_set(const string &option_name, T value)
+{
+        if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
+        {
+            prebuilt_double[option_name] = value;
+        }
+        if constexpr (std::is_same<T, std::string>::value)
+        {
+            prebuilt_string[option_name] = value;
+        }
+}
 
 void FatropOptions::register_option(const NumericOption &option)
 {
     numeric_options[option.name_] = option;
     option.set_default();
+    // check if available in prebuilt options
+    if (prebuilt_double.find(option.name_) != prebuilt_double.end())
+    {
+        option.set(prebuilt_double[option.name_]);
+    }
 }
 void FatropOptions::register_option(const IntegerOption &option)
 {
     integer_options[option.name_] = option;
     option.set_default();
+    // check if available in prebuilt options
+    if (prebuilt_double.find(option.name_) != prebuilt_double.end())
+    {
+        option.set(prebuilt_double[option.name_]);
+    }
 }
 void FatropOptions::register_option(const BooleanOption &option)
 {
     boolean_options[option.name_] = option;
     option.set_default();
+    // check if available in prebuilt options
+    if (prebuilt_double.find(option.name_) != prebuilt_double.end())
+    {
+        option.set(prebuilt_double[option.name_]);
+    }
 }
+
+void FatropOptions::register_option(const StringOption &option)
+{
+    string_options[option.name_] = option;
+    option.set_default();
+    // check if available in prebuilt options
+    if (prebuilt_string.find(option.name_) != prebuilt_string.end())
+    {
+        option.set(prebuilt_string[option.name_]);
+    }
+}
+
 auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
 {
     os << "Numeric options :" << std::endl;
@@ -186,6 +225,10 @@ auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
 }
 template class fatrop::Option<fatrop_int>;
 template class fatrop::Option<double>;
-template void FatropOptions::set<double>(const string &, double);
-template void FatropOptions::set<fatrop_int>(const string &, int);
-template void FatropOptions::set<bool>(const string &, bool);
+template void FatropOptions::set<double>(const string &, double) const;
+template void FatropOptions::set<fatrop_int>(const string &, int) const;
+template void FatropOptions::set<bool>(const string &, bool) const;
+template void FatropOptions::prebuilt_set<double>(const string &, double);
+template void FatropOptions::prebuilt_set<int>(const string &, int);
+template void FatropOptions::prebuilt_set<bool>(const string &, bool);
+template void FatropOptions::prebuilt_set<std::string>(const string &, std::string);
