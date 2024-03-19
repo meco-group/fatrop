@@ -29,40 +29,37 @@ namespace fatrop
     struct Option
     {
     public:
-        // NumericOption operator=(const NumericOption &other) = default;
         Option(){};
-        Option(const std::string &name, const std::string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound); 
-        static Option<T> lower_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound);
-        static Option<T> upper_bounded(const std::string &name, const std::string &description, T *value, T default_value, T upper_bound);
-        static Option<T> un_bounded(const std::string &name, const std::string &description, T *value, T default_value);
-        static Option<T> box_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound, T upper_bound);
-        void set_default() const;
+        Option(const std::string &name, const std::string &description, T *value, T default_value);
         void set(const T &new_value) const;
+        void set_default() const;
         std::string name_;
         std::string description_;
         T *value = NULL;
         T default_value_;
+    };
+
+
+    template <typename T>
+    struct NumberOption: public Option<T>
+    {
+    public:
+        // NumericOption operator=(const NumericOption &other) = default;
+        NumberOption(){};
+        NumberOption(const std::string &name, const std::string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound); 
+        static NumberOption<T> lower_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound);
+        static NumberOption<T> upper_bounded(const std::string &name, const std::string &description, T *value, T default_value, T upper_bound);
+        static NumberOption<T> un_bounded(const std::string &name, const std::string &description, T *value, T default_value);
+        static NumberOption<T> box_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound, T upper_bound);
+        void set(const T &new_value) const;
         bool lower_bound_inclusive_;
         T lower_bound_;
         bool upper_bound_inclusive_;
         T upper_bound_;
     };
-    template <>
-    struct Option<bool>
-    {
-        Option(){};
-        Option(const std::string &name, const std::string &description, bool *value, bool default_value);
-        void set(const bool &new_value) const;
-        void set_default() const;
-        std::string name_;
-        std::string description_;
-        bool *value = NULL;
-        bool default_value_;
-    };
-
    // define Numeric option as Option<double>
-    typedef Option<double> NumericOption;
-    typedef Option<fatrop_int> IntegerOption;
+    typedef NumberOption<double> NumericOption;
+    typedef NumberOption<fatrop_int> IntegerOption;
     typedef Option<std::string> StringOption;
     typedef Option<bool> BooleanOption;
 

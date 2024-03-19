@@ -100,6 +100,8 @@ namespace fatrop
                         app->set_option(opt.first, (int)opt.second);
                     else if (opt.second.is_bool())
                         app->set_option(opt.first, (bool)opt.second);
+                    else if (opt.second.is_string())
+                        app->set_option(opt.first, (std::string)opt.second);
                 }
                 app->build();
                 // go over the options and set

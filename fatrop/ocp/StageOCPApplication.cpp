@@ -26,6 +26,7 @@
 #include "fatrop/ocp/OCPAbstract.hpp"
 #include "fatrop/json/json.h"
 #include "fatrop/auxiliary/Common.hpp"
+#include "fatrop/solver/NLPL1.hpp"
 using namespace fatrop;
 using namespace std;
 NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), dirty(true)
@@ -40,9 +41,19 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
 {
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
+    // check if prebuilt option "inequality_handling" is in prebuilt options
+    if (fatropoptions_->prebuilt_string.find("inequality_handling") == fatropoptions_->prebuilt_string.end())
+    {
+        fatropoptions_ ->prebuilt_set<std::string>("inequality_handling", "pd_ip");
+    }
+    if(fatropoptions_->prebuilt_string["inequality_handling"] == "L1_pen")
+    {
+        std::cout << "L1_pen" << std::endl;
+        nlp_ = std::make_shared<NLPL1>(nlp);
+    }
     AlgBuilder algbuilder;
     algbuilder.set_printer(printer_);
-    algbuilder.build_fatrop_algorithm_objects(nlp, fatropoptions_, fatropdata_, journaller_);
+    algbuilder.build_fatrop_algorithm_objects(nlp_, fatropoptions_, fatropdata_, journaller_);
     fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "prfatrop_fatrop_int level", &printer_->print_level(), 10));
     fatropalg_ = algbuilder.build_algorithm();
     dirty = false;
@@ -109,6 +120,7 @@ void NLPApplication::set_option(const string &option_name, T value)
 template void NLPApplication::set_option<fatrop_int>(const string &, int);
 template void NLPApplication::set_option<double>(const string &, double);
 template void NLPApplication::set_option<bool>(const string &, bool);
+template void NLPApplication::set_option<string>(const string &, string);
 
 void NLPApplication::set_initial(const FatropSolution &initial_guess) const
 {
