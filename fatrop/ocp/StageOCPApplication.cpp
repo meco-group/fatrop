@@ -185,14 +185,14 @@ void FatropSolution::set_dims(const NLPDims &dims)
 };
 void FatropSolution::set_solution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU)
 {
-    sol_primal.copyto(sol_primal_);
-    sol_dual.copyto(sol_dual_);
-    sol_zL.copyto(sol_zL_);
-    sol_zU.copyto(sol_zU_);
+    sol_primal.block(0, sol_primal_.size()).copyto(sol_primal_);
+    sol_dual.block(0, sol_dual_.size()).copyto(sol_dual_);
+    sol_zL.block(0, sol_zL_.size()).copyto(sol_zL_);
+    sol_zU.block(0,sol_zU_.size()).copyto(sol_zU_);
 };
 void FatropSolution::set_primal_solution(const FatropVecBF &sol)
 {
-    sol.copyto(sol_primal_);
+    sol.block(0, sol_primal_.size()).copyto(sol_primal_);
 }
 // StageOCPApplicationAbstract::StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp)
 // {
