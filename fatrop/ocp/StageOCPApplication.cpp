@@ -48,8 +48,7 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
     }
     if(fatropoptions_->prebuilt_string["inequality_handling"] == "L1_pen")
     {
-        std::cout << "L1_pen" << std::endl;
-        nlp_ = std::make_shared<NLPL1>(nlp);
+        nlp_ = std::make_shared<NLPL1>(nlp, fatropoptions_);
     }
     AlgBuilder algbuilder;
     algbuilder.set_printer(printer_);

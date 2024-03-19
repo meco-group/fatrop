@@ -344,7 +344,7 @@ int FatropOCP::initialize_dual(
     }
     return 0;
 }
-int FatropOCP::initialize_slacks(FatropVecBF &s_curr)
+int FatropOCP::initialize_slacks(double mu0, FatropVecBF &s_curr)
 {
     return OCPInitializer_.intialize_slack_variables(&ocpkktmemory_, s_curr);
 }

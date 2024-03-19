@@ -79,7 +79,7 @@ namespace fatrop
             FatropVecBF &x_scales,
             FatropVecBF &lam_scales,
             const FatropVecBF &grad_curr_x, const FatropVecBF& grad_curr_s) = 0;
-        virtual fatrop_int initialize_slacks(
+        virtual fatrop_int initialize_slacks(double mu0,
             FatropVecBF &s_curr) = 0;
         virtual fatrop_int initialize_dual(
             const FatropVecBF &grad_x,

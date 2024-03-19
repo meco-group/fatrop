@@ -1,12 +1,15 @@
 #pragma once
 #include "fatrop/templates/NLPAlg.hpp"
+#include "fatrop/solver/FatropOptions.hpp"
+#include <memory>
 namespace fatrop
 {
-    class FatropOCPResto : public FatropNLP
+    class NLPL1 : public FatropNLP
     {
     public:
-        FatropOCPResto(const std::shared_ptr<FatropOCP> &orig) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs), zl_dummy_(orig_dims_.nineqs), zu_dummy_(orig_dims_.nineqs), sigma_cache_(orig_dims_.nineqs * 3), gradb_cache_(orig_dims_.nineqs * 3)
+        NLPL1(const std::shared_ptr<FatropNLP> &orig, const std::shared_ptr<FatropOptions>& opts) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs), zl_dummy_(orig_dims_.nineqs), zu_dummy_(orig_dims_.nineqs), sigma_cache_(orig_dims_.nineqs * 3), gradb_cache_(orig_dims_.nineqs * 3)
         {
+            opts -> register_option(NumericOption::lower_bounded("L1_rho", "L1 penalty parameter", &rho, 1e4, 0.0));
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
             orig_->get_bounds(lower_v, upper_v);
@@ -32,12 +35,6 @@ namespace fatrop
             FatropVecBF slack_dummy_v = slack_dummy_[0];
             update_slack_vars(slack_vars, slack_dummy_v);
             orig_->eval_lag_hess(obj_scale, primal_vars, slack_dummy_v, lam);
-            // auto slacks_n = slack_vars.block(orig_dims_.nineqs, n_n);
-            // auto slacks_p = slack_vars.block(orig_dims_.nineqs + n_n, n_p);
-            // std::cout << "slacks_n "<< std::endl;
-            // slacks_n.print();
-            // std::cout << "slacks_p "<< std::endl;
-            // slacks_p.print();
             return 0;
         };
 
@@ -245,7 +242,7 @@ namespace fatrop
             orig_->get_initial_sol_guess(initial);
             return 0;
         }
-        std::shared_ptr<FatropOCP> orig_;
+        std::shared_ptr<FatropNLP> orig_;
         NLPDims orig_dims_;
         NLPDims this_dims_;
         FatropMemoryVecBF lower_, upper_;
