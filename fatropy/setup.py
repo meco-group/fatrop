@@ -142,7 +142,6 @@ setup(
     install_requires=[""],
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",
-    # packages=find_packages(),
     packages=["fatropy", "fatropy.spectool"],
     package_data=package_data
 )

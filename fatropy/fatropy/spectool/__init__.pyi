@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import typing
+from casadi import MX, Function
 __all__ = ['Hessian', 'IntegratorRk4', 'Jacobian', 'Ocp', 'SolverInterface', 'Stage', 'at', 'csDict', 'csGenericType', 'mid', 't0', 'tf', 'uStage', 'uo_map_mx_mx']
 
 
