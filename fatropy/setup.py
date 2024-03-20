@@ -136,12 +136,13 @@ setup(
     description="python bindings for fatrop",
     long_description="",
     ext_modules=[CMakeExtension("fatropy._fatropy", sourcedir="..")],
+    # ext_modules=[CMakeExtension("fatropy", sourcedir="..")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     install_requires=[""],
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",
     # packages=find_packages(),
-    packages=["fatropy"],
+    packages=["fatropy", "fatropy.spectool"],
     package_data=package_data
 )
