@@ -25,7 +25,7 @@ namespace fatrop
         handle = dlopen(&filename[0], RTLD_LAZY);
         if (handle == 0)
         {
-            printf("Cannot open f.so, error %s\n", dlerror());
+            printf("Cannot open dynamic library or shared object (%s), error %s\n", filename.c_str(), dlerror());
         }
     }
 
