@@ -305,16 +305,16 @@ fatrop_int OCPAdapter::eval_ineqs(
     fatrop_int K = OCP->K;
     // offsets
     fatrop_int *offs_ux = (fatrop_int *)OCP->aux.ux_offs.data();
-    fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
-    fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
+    // fatrop_int *offs_g = (fatrop_int *)OCP->aux.g_offs.data();
+    // fatrop_int *offs_dyn_eq = (fatrop_int *)OCP->aux.dyn_eq_offs.data();
     fatrop_int *offs_ineq = (fatrop_int *)OCP->aux.ineq_offs.data();
-    fatrop_int *offs_g_ineq = (fatrop_int *)OCP->aux.g_ineq_offs.data();
+    // fatrop_int *offs_g_ineq = (fatrop_int *)OCP->aux.g_ineq_offs.data();
     fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
     double *cv_p = ((VEC *)constraint_violation)->pa;
     OCPMACRO(fatrop_int *, nu, _p);
-    OCPMACRO(fatrop_int *, ng, _p);
+    // OCPMACRO(fatrop_int *, ng, _p);
     OCPMACRO(fatrop_int *, ng_ineq, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
@@ -327,10 +327,10 @@ fatrop_int OCPAdapter::eval_ineqs(
         if (ng_ineq_k > 0)
         {
             fatrop_int nu_k = nu_p[k];
-            fatrop_int ng_ineq_k = ng_ineq_p[k];
+            // fatrop_int ng_ineq_k = ng_ineq_p[k];
             fatrop_int offs_ux_k = offs_ux[k];
             fatrop_int offs_ineq_k = offs_ineq[k];
-            fatrop_int offs_g_ineq_k = offs_g_ineq[k];
+            // fatrop_int offs_g_ineq_k = offs_g_ineq[k];
             fatrop_int offs_stageparams_k = offs_stageparams_p[k];
             ocptempl->eval_gineq(
                 primal_data + offs_ux_k,
