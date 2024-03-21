@@ -24,4 +24,10 @@ build:
     - git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop
     - cd rockit
     - pip install .
-    - cd ../.. # return to fatrop root
+    - cd ../ # return to fatropy root
+
+    # test fatropy
+    - git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo.git
+    - cd tests/
+    - python ../fatrop_rockit_demo/tutorial.py # solve and generate code
+    - python example.py # solve using previously generated code
