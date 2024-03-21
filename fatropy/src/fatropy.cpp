@@ -2,11 +2,11 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include "fatrop/ocp/StageOCPApplication.hpp"
-#include "src/numpy.hpp"
+#include "numpy.hpp"
 #ifdef WITH_SPECTOOL
-#include "src/swig-bind.hpp"
-#include "src/specification.hpp"
-#include "src/expose-spectool.hpp"
+#include "swig-bind.hpp"
+#include "specification.hpp"
+#include "expose-spectool.hpp"
 #endif
 
 #include "fatrop/solver/AlgBuilder.hpp"
@@ -27,7 +27,7 @@ namespace fatropy
 {
 }
 
-PYBIND11_MODULE(fatropy, m)
+PYBIND11_MODULE(_fatropy, m)
 {
     using namespace fatropy;
     // wrap print_function_name

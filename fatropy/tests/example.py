@@ -1,7 +1,7 @@
 import fatropy
 import numpy as np
-rockit_generated_so = "foobar/casadi_codegen.so"
-rockit_generated_json = "foobar/casadi_codegen.json"
+rockit_generated_so = "code_gen/casadi_codegen.so"
+rockit_generated_json = "code_gen/casadi_codegen.json"
 ocp = fatropy.StageOCPApplicationFactory.from_rockit_interface(rockit_generated_so, rockit_generated_json)
 ocp.optimize()
 sol = ocp.last_solution()

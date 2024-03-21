@@ -4,7 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
@@ -123,6 +123,8 @@ class CMakeBuild(build_ext):
             ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
         )
 
+package_data = {"fatropy": ["*.pyi", "py.typed"]}
+
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
@@ -133,10 +135,13 @@ setup(
     author_email="lander.vanroye@kuleuven.be",
     description="python bindings for fatrop",
     long_description="",
-    ext_modules=[CMakeExtension("fatropy", sourcedir = "..")],
+    ext_modules=[CMakeExtension("fatropy._fatropy", sourcedir="..")],
+    # ext_modules=[CMakeExtension("fatropy", sourcedir="..")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     install_requires=[""],
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.7",
+    packages=["fatropy", "fatropy.spectool"],
+    package_data=package_data
 )
