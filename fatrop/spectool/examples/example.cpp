@@ -1,5 +1,5 @@
 #include "fatrop/spectool/spectool.hpp"
-#include "fatrop/ocp/StageOCPApplication.hpp"
+#include "fatrop/fatrop.hpp"
 // #include "fatropy/src/python_func_import.hpp"
 using namespace std;
 using namespace fatrop;
