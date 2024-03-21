@@ -342,7 +342,7 @@ int FatropOCP::initialize_dual(
         lsscaler_.scale_lam(dlam, 0);
         lsscaler_.restore_kkt(ocpkktmemory_);
     }
-    return 0;
+    return ret;
 }
 int FatropOCP::initialize_slacks(double mu0, FatropVecBF &s_curr)
 {
