@@ -31,7 +31,7 @@ namespace fatrop
             auto reti = std::vector<int>();
             int k = 0;
             auto ustages_ = std::array<const uStage*, 3>{&at_t0(), &at_mid(), &at_tf()};
-            for (auto i = 0; i < ustages_.size(); ++i)
+            for (size_t i = 0; i < ustages_.size(); ++i)
             {
                 const auto &ustage = ustages_[i];
                 {

@@ -118,7 +118,7 @@ namespace fatrop
             auto vars = cs::MX::symvar(expr);
             auto reti = std::vector<int>();
             int k = 0;
-            for (auto i = 0; i < get_ustages().size(); ++i)
+            for (size_t i = 0; i < get_ustages().size(); ++i)
             {
                 const auto &ustage = get_ustages()[i];
                 {

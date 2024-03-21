@@ -45,7 +45,7 @@ namespace fatrop
                         throw std::runtime_error("x_next and x must have the same size");
                     }
                     // iterate over elements and check if the same
-                    for (int i = 0; i < x_next_vec.size(); i++)
+                    for (size_t i = 0; i < x_next_vec.size(); i++)
                     {
                         if (x_next_vec[i].get() != x_vec[i].get())
                         {

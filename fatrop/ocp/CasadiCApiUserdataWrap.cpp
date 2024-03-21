@@ -26,7 +26,7 @@ namespace fatrop
             ret[count++] = j;
           }
         }
-        return std::move(ret);
+        return ret;
       }
     };
 
