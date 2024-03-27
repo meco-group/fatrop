@@ -26,7 +26,9 @@ namespace fatrop
             auto lam_g_equality = sq.lam_g_eq;
             auto lam_g_inequality = sq.lam_g_ineq;
             auto xp1 = sq.xp1;
+            auto obj_scale = cs::MX::sym("obj_scale");
             std::vector<cs::MX> ustage_syms{sq.u, sq.x, sq.p_stage, sq.p_global};
+            std::vector<cs::MX> os_ustage_syms{obj_scale, sq.u, sq.x, sq.p_stage, sq.p_global};
 
             auto dynamics_jac = sq.Gg_dyn;
             auto equality_jac = sq.Gg_eq;
@@ -35,16 +37,16 @@ namespace fatrop
             auto hess_lag_dyn = sq.hess_dyn;
             auto hess_lag_ineq = sq.hess_g_ineq;
             auto hess_lag_eq = sq.hess_g_eq;
-            auto hess_lag = std::pair<cs::MX, cs::MX>{hess_lag_obj.first + hess_lag_dyn.first + hess_lag_ineq.first + hess_lag_eq.first,
-                                                      hess_lag_obj.second + hess_lag_dyn.second + hess_lag_ineq.second + hess_lag_eq.second};
+            auto hess_lag = std::pair<cs::MX, cs::MX>{obj_scale*hess_lag_obj.first + hess_lag_dyn.first + hess_lag_ineq.first + hess_lag_eq.first,
+                                                      obj_scale*hess_lag_obj.second + hess_lag_dyn.second + hess_lag_ineq.second + hess_lag_eq.second};
 
             auto BAbt = cs::MX::horzcat({dynamics_jac.first, dynamics_jac.second}).T();
             auto Ggt_equality = cs::MX::horzcat({equality_jac.first, equality_jac.second}).T();
             auto Ggt_inequality = cs::MX::horzcat({inequality_jac.first, inequality_jac.second}).T();
             auto RSQrqt = cs::MX::horzcat({hess_lag.first, hess_lag.second}).T();
 
-            L_ = CasadiFEWrap(cs::Function("L", ustage_syms, {sq.L}, optss), expand, jit, jit_options_, eval_cache);
-            rq_ = CasadiFEWrap(cs::Function("rq", ustage_syms, {cs::MX::densify(hess_lag_obj.second)}, optss), expand, jit, jit_options_, eval_cache);
+            L_ = CasadiFEWrap(cs::Function("L", os_ustage_syms, {obj_scale*sq.L}, optss), expand, jit, jit_options_, eval_cache);
+            rq_ = CasadiFEWrap(cs::Function("rq", os_ustage_syms, {cs::MX::densify(obj_scale*hess_lag_obj.second)}, optss), expand, jit, jit_options_, eval_cache);
             b_ = CasadiFEWrap(cs::Function("b", {sq.x, xp1, sq.u, sq.p_stage, sq.p_global},
                                            {densify(dynamics_jac.second)}, optss),
                               expand, jit, jit_options_, eval_cache);
@@ -55,7 +57,7 @@ namespace fatrop
             g_equality_ = CasadiFEWrap(cs::Function("g_equality", ustage_syms, {cs::MX::densify(equality_jac.second)}, optss), expand, jit, jit_options_, eval_cache);
             Ggt_inequality_ = CasadiFEWrap(cs::Function("Ggt_inequality", ustage_syms, {cs::MX::densify(Ggt_inequality)}, optss), expand, jit, jit_options_, eval_cache);
             g_inequality_ = CasadiFEWrap(cs::Function("g_inequality", ustage_syms, {cs::MX::densify(inequality_jac.second)}, optss), expand, jit, jit_options_, eval_cache);
-            RSQrqt_ = CasadiFEWrap(cs::Function("RSQrqt", {sq.u, sq.x, lam_dynamics, lam_g_equality, lam_g_inequality, sq.p_stage, sq.p_global}, {cs::MX::densify(RSQrqt)}, optss), expand, jit, jit_options_, eval_cache);
+            RSQrqt_ = CasadiFEWrap(cs::Function("RSQrqt", {obj_scale, sq.u, sq.x, lam_dynamics, lam_g_equality, lam_g_inequality, sq.p_stage, sq.p_global}, {cs::MX::densify(RSQrqt)}, optss), expand, jit, jit_options_, eval_cache);
             Ub_ = sq.ub.nonzeros();
             Lb_ = sq.lb.nonzeros();
         }
@@ -121,14 +123,15 @@ namespace fatrop
             const double *global_params,
             MAT *res)
         {
-            const double *arg[7];
-            arg[0] = inputs_k;
-            arg[1] = states_k;
-            arg[2] = lam_dyn_k;
-            arg[3] = lam_eq_k;
-            arg[4] = lam_eq_ineq_k;
-            arg[5] = stage_params_k;
-            arg[6] = global_params;
+            const double *arg[8];
+            arg[0] = objective_scale;
+            arg[1] = inputs_k;
+            arg[2] = states_k;
+            arg[3] = lam_dyn_k;
+            arg[4] = lam_eq_k;
+            arg[5] = lam_eq_ineq_k;
+            arg[6] = stage_params_k;
+            arg[7] = global_params;
             RSQrqt_.eval(arg, res);
             return 0;
         };
@@ -218,11 +221,12 @@ namespace fatrop
             const double *global_params,
             double *res)
         {
-            const double *arg[4];
-            arg[0] = inputs_k;
-            arg[1] = states_k;
-            arg[2] = stage_params_k;
-            arg[3] = global_params;
+            const double *arg[5];
+            arg[0] = objective_scale;
+            arg[1] = inputs_k;
+            arg[2] = states_k;
+            arg[3] = stage_params_k;
+            arg[4] = global_params;
             rq_.eval(arg, res);
             return 0;
         }
@@ -234,11 +238,12 @@ namespace fatrop
             const double *global_params,
             double *res)
         {
-            const double *arg[4];
-            arg[0] = inputs_k;
-            arg[1] = states_k;
-            arg[2] = stage_params_k;
-            arg[3] = global_params;
+            const double *arg[5];
+            arg[0] = objective_scale;
+            arg[1] = inputs_k;
+            arg[2] = states_k;
+            arg[3] = stage_params_k;
+            arg[4] = global_params;
             L_.eval(arg, res);
             return 0;
         }
