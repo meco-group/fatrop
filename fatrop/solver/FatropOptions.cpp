@@ -61,13 +61,13 @@ void NumberOption<T>::set(const T &new_value) const
     // check if new value is in bounds
     if (lower_bound_inclusive_ && new_value < lower_bound_)
     {
-        throw runtime_error("Option " + this -> name_ + " is out of bounds");
+        throw runtime_error("Option " + this->name_ + " is out of bounds");
     }
     if (upper_bound_inclusive_ && new_value > upper_bound_)
     {
-        throw runtime_error("Option " + this -> name_ + " is out of bounds");
+        throw runtime_error("Option " + this->name_ + " is out of bounds");
     }
-    *(this -> value) = new_value;
+    *(this->value) = new_value;
 };
 
 FatropOptions::FatropOptions()
@@ -75,6 +75,27 @@ FatropOptions::FatropOptions()
     register_option(IntegerOption::box_bounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
     register_option(DoubleOption::lower_bounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
 };
+
+bool FatropOptions::has_option(const std::string &option_name) const
+{
+    if (numeric_options.find(option_name) != numeric_options.end())
+    {
+        return true;
+    }
+    if(integer_options.find(option_name) != integer_options.end())
+    {
+        return true;
+    }
+    if (boolean_options.find(option_name) != boolean_options.end())
+    {
+        return true;
+    }
+    if (string_options.find(option_name) != string_options.end())
+    {
+        return true;
+    }
+    return false;
+}
 template <typename T>
 void FatropOptions::set(const string &option_name, T value) const
 {
@@ -145,14 +166,14 @@ void FatropOptions::set(const string &option_name, T value) const
 template <typename T>
 void FatropOptions::prebuilt_set(const string &option_name, T value)
 {
-        if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
-        {
-            prebuilt_double[option_name] = value;
-        }
-        if constexpr (std::is_same<T, std::string>::value)
-        {
-            prebuilt_string[option_name] = value;
-        }
+    if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
+    {
+        prebuilt_double[option_name] = value;
+    }
+    if constexpr (std::is_same<T, std::string>::value)
+    {
+        prebuilt_string[option_name] = value;
+    }
 }
 
 void FatropOptions::register_option(const DoubleOption &option)

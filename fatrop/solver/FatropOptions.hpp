@@ -76,6 +76,7 @@ namespace fatrop
         void prebuilt_set(const std::string &option_name, T value);
 
     public:
+        bool has_option(const std::string &option_name) const;
         void register_option(const DoubleOption &option);
         void register_option(const IntegerOption &option);
         void register_option(const BooleanOption &option);
