@@ -91,7 +91,7 @@ namespace fatrop
                 // return FatropFunction(name, fatrop_impl, opts);
                 // C-api approach
                 // C_api
-                app = std::make_shared<fatrop::OCPApplication>(fatrop_impl);
+                app = std::make_shared<fatrop::OCPAbstractApplication>(fatrop_impl);
                 for (auto opt : opts)
                 {
                     if (opt.second.is_double())
@@ -107,7 +107,7 @@ namespace fatrop
                 // go over the options and set
                 return FatropFunction(name, app, opts, funct_opts);
             };
-            std::shared_ptr<fatrop::OCPApplication> app;
+            std::shared_ptr<fatrop::OCPAbstractApplication> app;
             void gist(const Ocp &ocp_, std::vector<cs::MX> &in, std::vector<cs::MX> &out)
             {
                 std::vector<cs::MX> variables_v;

@@ -14,7 +14,7 @@ namespace fatrop
         class FatropFunctionInternal : public cs::FunctionInternal
         {
         public:
-            FatropFunctionInternal(const std::string &name, const std::shared_ptr<fatrop::OCPApplication> &app_) : cs::FunctionInternal(name), app(app_)
+            FatropFunctionInternal(const std::string &name, const std::shared_ptr<fatrop::OCPAbstractApplication> &app_) : cs::FunctionInternal(name), app(app_)
             {
                 // cs::CallbackInternal::construct(name, cb);
                 fatrop::OCPDims dims = app->get_ocp_dims();
@@ -101,7 +101,7 @@ namespace fatrop
             std::vector<double> arg_initial_vars;
             std::vector<double> arg_stage_parameters;
             std::vector<double> arg_global_parameters;
-            std::shared_ptr<fatrop::OCPApplication> app;
+            std::shared_ptr<fatrop::OCPAbstractApplication> app;
             int n_vars;
             int n_stage_params;
             int n_global_params;
@@ -110,7 +110,7 @@ namespace fatrop
         class FatropFunction : public cs::Function
         {
         public:
-            FatropFunction(const std::string&name,  const std::shared_ptr<fatrop::OCPApplication> app_, const cs::Dict &options, const cs::Dict& funct_opts)
+            FatropFunction(const std::string&name,  const std::shared_ptr<fatrop::OCPAbstractApplication> app_, const cs::Dict &options, const cs::Dict& funct_opts)
             {
                 if (!is_null())
                 {

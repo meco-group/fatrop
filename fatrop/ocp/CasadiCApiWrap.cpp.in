@@ -12,18 +12,18 @@ static std::string c_api_template(R"(
 #endif
 // c++ stuff here
 // TODO: this can become part of the default fatrop API as well. It has no dependency on casadi.
-// forward declaration of OCPApplication
+// forward declaration of OCPAbstractApplication
 namespace fatrop
 {
-    class OCPApplication;
+    class OCPAbstractApplication;
     namespace spectool
     {
 
         struct C_api_userdata
         {
             // constructor
-            C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app);
-            const std::shared_ptr<fatrop::OCPApplication> app_;
+            C_api_userdata(const std::shared_ptr<fatrop::OCPAbstractApplication> &app);
+            const std::shared_ptr<fatrop::OCPAbstractApplication> app_;
             std::vector<std::vector<casadi_int>> sparsity_in;
             std::vector<std::vector<casadi_int>> sparsity_out;
             std::vector<double> arg_initial_vars;

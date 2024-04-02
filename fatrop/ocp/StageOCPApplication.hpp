@@ -106,28 +106,32 @@ namespace fatrop
         std::shared_ptr<FatropAlg> fatropalg_;
     };
 
-    // TODO move this class to a separate file
     class OCPApplication : public NLPApplication
     {
     public:
-        OCPApplication(const std::shared_ptr<OCPAbstract> &ocp);
-
-    public:
+        OCPApplication(const std::shared_ptr<OCP> &ocp);
+        OCPApplication();
         void build();
-
     public:
         using NLPApplication::set_initial;
         void set_initial(std::vector<double> &initial_u, std::vector<double> &initial_x);
         OCPDims get_ocp_dims();
+        std::shared_ptr<OCP> ocp_;
+    };
+
+    // TODO move this class to a separate file
+    class OCPAbstractApplication : public OCPApplication
+    {
+    public:
+        OCPAbstractApplication(const std::shared_ptr<OCPAbstract> &ocp);
         void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params);
 
-    private:
-        const std::shared_ptr<OCPAbstract> ocp_;
+    protected:
+        std::shared_ptr<OCPAdapter> adapter;
 
     protected:
         std::vector<double> &global_parameters();
         std::vector<double> &stage_parameters();
-        std::shared_ptr<OCPAdapter> adapter;
     };
 
     struct StageOCPSolution : public FatropSolution
@@ -175,7 +179,7 @@ namespace fatrop
     // {
     //     StageOCPApplicationAbstract(const shared_ptr<StageOCP> &ocp);
     // };
-    class StageOCPApplication : public OCPApplication
+    class StageOCPApplication : public OCPAbstractApplication
     {
     public:
         StageOCPApplication(const std::shared_ptr<StageOCP> &ocp);

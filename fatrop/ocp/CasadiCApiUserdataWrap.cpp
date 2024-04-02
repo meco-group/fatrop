@@ -30,7 +30,7 @@ namespace fatrop
       }
     };
 
-    C_api_userdata::C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app) : app_(app)
+    C_api_userdata::C_api_userdata(const std::shared_ptr<fatrop::OCPAbstractApplication> &app) : app_(app)
     {
       fatrop::OCPDims dims = app_->get_ocp_dims();
       n_vars = dims.n_u_tot + dims.n_x_tot;

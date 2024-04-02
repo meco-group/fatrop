@@ -138,41 +138,52 @@ const FatropOptions &NLPApplication::get_options() const
 }
 
 // TODO move this class to a separate file
-OCPApplication::OCPApplication(const shared_ptr<OCPAbstract> &ocp) : ocp_(ocp)
+OCPAbstractApplication::OCPAbstractApplication(const shared_ptr<OCPAbstract> &ocp) 
 {
+    adapter = make_shared<OCPAdapter>(ocp, fatropoptions_);
+    ocp_ = adapter;
 }
 
 void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
-    adapter = make_shared<OCPAdapter>(ocp_, fatropoptions_);
-    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(adapter));
+    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_));
     NLPApplication::build(nlp);
     dirty = false;
 }
-void OCPApplication::set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
+void OCPAbstractApplication::set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
 {
     adapter->set_parameters(stage_params, global_params);
 }
 
-vector<double> &OCPApplication::global_parameters()
+vector<double> &OCPAbstractApplication::global_parameters()
 {
     assert(!dirty);
     return adapter->get_global_parameters_vec();
 }
-vector<double> &OCPApplication::stage_parameters()
+vector<double> &OCPAbstractApplication::stage_parameters()
 {
     assert(!dirty);
     return adapter->get_stage_parameters_vec();
 }
+
+
+OCPApplication::OCPApplication(const std::shared_ptr<OCP> &ocp):ocp_(ocp)
+{
+
+}
+OCPApplication::OCPApplication():ocp_(nullptr)
+{
+
+}
 void OCPApplication::set_initial(vector<double> &initial_u, vector<double> &initial_x)
 {
     assert(!dirty);
-    adapter->set_initial_sol_guess(fatropdata_, initial_u, initial_x);
+    ocp_->set_initial_sol_guess(fatropdata_, initial_u, initial_x);
 }
 OCPDims OCPApplication::get_ocp_dims()
 {
-    return adapter->get_ocp_dims();
+    return ocp_->get_ocp_dims();
 }
 
 FatropSolution::FatropSolution(){};
@@ -251,7 +262,7 @@ void StageOCPSolution::evaluate(const StageExpressionEvaluatorBase &evaluator, v
 {
     evaluator.evaluate(sol_primal_, global_params, stage_params, result);
 }
-StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
+StageOCPApplication::StageOCPApplication(const shared_ptr<StageOCP> &ocp) : OCPAbstractApplication(ocp), nx_(ocp->nx_), nu_(ocp->nu_), n_stage_params_(ocp->n_stage_params_), K_(ocp->K_){};
 void StageOCPApplication::set_initial_u(const std::vector<double> &initial_guess_u) const
 {
     for (fatrop_int k = 0; k < K_ - 1; k++)
@@ -291,7 +302,7 @@ void StageOCPApplication::set_value(const std::string &setter_name, const std::v
 };
 void StageOCPApplication::build()
 {
-    OCPApplication::build();
+    OCPAbstractApplication::build();
     // allocate the last solution
     last_solution_.set_dims(get_ocp_dims());
     dirty = false;

@@ -13,15 +13,15 @@
 // forward declaration of OCPApplication
 namespace fatrop
 {
-  class OCPApplication;
+  class OCPAbstractApplication;
   namespace spectool
   {
 
     struct C_api_userdata
     {
       // constructor
-      C_api_userdata(const std::shared_ptr<fatrop::OCPApplication> &app);
-      const std::shared_ptr<fatrop::OCPApplication> app_;
+      C_api_userdata(const std::shared_ptr<fatrop::OCPAbstractApplication> &app);
+      const std::shared_ptr<fatrop::OCPAbstractApplication> app_;
       std::vector<std::vector<casadi_int_capi>> sparsity_in;
       std::vector<std::vector<casadi_int_capi>> sparsity_out;
       std::vector<double> arg_initial_vars;
