@@ -136,7 +136,9 @@ namespace fatropy
             .def("at_tf", py::overload_cast<const casadi::MX &>(&fatrop::spectool::Stage::at_tf, py::const_))
             .def("at_t0", py::overload_cast<>(&fatrop::spectool::Stage::at_t0, py::const_))
             .def("at_tf", py::overload_cast<>(&fatrop::spectool::Stage::at_tf, py::const_))
-            .def("at_mid", &fatrop::spectool::Stage::at_mid);
+            .def("at_mid", &fatrop::spectool::Stage::at_mid)
+            .def("sample", &fatrop::spectool::Stage::sample);
+
 
             // def("add_objective", &fatrop::spectool::Stage::add_objective<fatrop::spectool::at>);
 
