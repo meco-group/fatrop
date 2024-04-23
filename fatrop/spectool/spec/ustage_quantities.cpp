@@ -17,9 +17,9 @@ namespace fatrop
             uo_map_mx<Hessian> hessians;
             uo_map_mx<Jacobian> jacobians;
             std::vector<cs::MX> x_next;
-            if (next || ustage -> K()>1)
+            if (next || ustage->K() > 1)
             {
-                auto next_states = (ustage->K()==1)? next->get_states(true, ustage): ustage->get_states(true, prev);
+                auto next_states = (ustage->K() == 1) ? next->get_states(true, ustage) : ustage->get_states(true, prev);
                 for (auto &state : next_states)
                 {
                     try
@@ -123,7 +123,7 @@ namespace fatrop
             ret.hess_g_eq = generate_hessian(ux, ret.lam_g_eq, cs::MX(0.0), equality_constraints, hessians);
             ret.hess_g_ineq = generate_hessian(ux, ret.lam_g_ineq, cs::MX(0.0), inequality_constraints, hessians);
             ret.lb = cs::DM::veccat(lb_vec);
-            ret.ub = cs::DM::veccat(ub_vec);  
+            ret.ub = cs::DM::veccat(ub_vec);
             return ret;
         }
 
@@ -138,20 +138,34 @@ namespace fatrop
             }
             else
             {
-                // check if Jac has the right dimensions
                 if (jac.Jx.size1() != g.size1() || jac.Jx.size2() != x.size1())
                 {
                     throw std::runtime_error("Jacobian has wrong dimensions");
                 }
+                auto P = evalf(jacobian(jac.x, x));
+                cs::MX x_r;
+                cs::MX jac_r;
+                if (P.is_eye())
+                {
+                    x_r = x;
+                    jac_r = jac.Jx;
+                }
+                else
+                {
+                    x_r = mtimes(transpose(P), jac.x);
+                    jac_r = mtimes(jac.Jx, P);
+                }
+                auto perm_vec = P.sparsity().permutation_vector(true);
+                // check if Jac has the right dimensions
                 // check if all elements of x are the same as jac.x
                 for (int i = 0; i < jac.x.size1(); i++)
                 {
-                    if (!is_equal(x(i), jac.x(i), 1))
+                    if (!is_equal(x(i), jac.x(perm_vec.at(i)), 2))
                     {
                         throw std::runtime_error("x must be the same as in jac");
                     }
                 }
-                ret_G = jac.Jx;
+                ret_G = jac_r;
             }
             return {ret_G, g};
         }
@@ -177,21 +191,39 @@ namespace fatrop
                 {
                     throw std::runtime_error("Hessian has wrong dimensions");
                 }
-                // check if all elements of x are the same as hess.x
-                for (int i = 0; i < hess.x.size1(); i++)
+                // x.is_symbolic()
+                auto P = evalf(jacobian(hess.x, x));
+                cs::MX x_r;
+                cs::MX Hx_r;
+                cs::MX Hxx_r;
+                if (P.is_eye())
                 {
-                    if (!is_equal(x(i), hess.x(i), 1))
+                    x_r = x;
+                    Hx_r = hess.Hx;
+                    Hxx_r = hess.Hxx;
+                }
+                else
+                {
+                    x_r = mtimes(transpose(P), hess.x);
+                    Hx_r = mtimes(transpose(P), hess.Hx);
+                    Hxx_r = mtimes(transpose(P), mtimes(hess.Hxx, P));
+                }
+                auto perm_vec = P.sparsity().permutation_vector(true);
+                // check if all elements of x are the same as hess.x
+                for (int i = 0; i < x_r.size1(); i++)
+                {
+                    if (!is_equal(x(i), hess.x(perm_vec.at(i)), 2))
                     {
                         throw std::runtime_error("x must be the same as in hess");
                     }
                 }
                 // check if lam has the right dimensions
-                if(hess.lam.size()!= g.size())
+                if (hess.lam.size() != g.size())
                 {
                     throw std::runtime_error("lam has wrong dimensions");
                 }
-                ret_H = hess.Hxx;
-                ret_h = hess.Hx;
+                ret_H = Hxx_r;
+                ret_h = Hx_r;
                 lam = hess.lam;
             }
             return {ret_H, ret_h};
