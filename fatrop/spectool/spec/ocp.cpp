@@ -58,7 +58,7 @@ namespace fatrop
         void Ocp::add_ustage(const uStage &ustage)
         {
             // check if ustage is already registered
-            if(std::find(ustages_.begin(), ustages_.end(), ustage) != ustages_.end()) 
+            if (std::find(ustages_.begin(), ustages_.end(), ustage) != ustages_.end())
                 throw std::runtime_error("ustage is already registered, consider using uStage::clone()");
             ustages_.push_back(ustage);
         }
@@ -139,20 +139,20 @@ namespace fatrop
         {
             return ustages_;
         }
-        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out) const 
+        cs::Function Ocp::to_function(const std::string &name, const std::vector<cs::MX> &in, const std::vector<cs::MX> &out) const
         {
-            if(get()->solver_name == "")
+            if (get()->solver_name == "")
                 throw std::runtime_error("solver not set, use ocp.solver(\"fatrop\") or ocp.solver(\"ipopt\")");
-            if(get()->solver_name == "fatrop")
-                get() -> solver_ptr = std::make_shared<SolverFatrop>();
-            else if(get()-> solver_name == "ipopt")
-                get() -> solver_ptr = std::make_shared<SolverOpti>();
+            if (get()->solver_name == "fatrop")
+                get()->solver_ptr = std::make_shared<SolverFatrop>();
+            else if (get()->solver_name == "ipopt")
+                get()->solver_ptr = std::make_shared<SolverOpti>();
             else
                 throw std::runtime_error("solver not supported");
-            get()->solver_ptr -> transcribe(*this, function_opts_);
+            get()->solver_ptr->transcribe(*this, function_opts_);
             std::vector<cs::MX> gist_solver_in;
             std::vector<cs::MX> gist_solver_out;
-            auto fatrop_func = get()-> solver_ptr -> to_function(name, *this, gist_solver_in, gist_solver_out, solver_opts_);
+            auto fatrop_func = get()->solver_ptr->to_function(name, *this, gist_solver_in, gist_solver_out, solver_opts_);
             cs::MX vars = gist_solver_in[0];
             cs::MX initial_guess = gist_solver_in[0];
             auto helper0 = cs::Function("helper0", in, {vars}, cs::Dict{{"allow_free", true}});
@@ -174,6 +174,7 @@ namespace fatrop
         }
         std::vector<cs::MX> Ocp::eval_at_initial(const std::vector<cs::MX> &expr) const
         {
+            auto all_vars_ocp = all_variables();
             auto all_vars = cs::MX::symvar(veccat(expr));
             std::vector<cs::MX> from;
             std::vector<cs::MX> to;
@@ -186,13 +187,13 @@ namespace fatrop
 
                 if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var) || get()->is_control_parameter(var))
                     varr = sample(var).second;
+                else if (get()->is_global_parameter(var))
+                    varr = var;
+                else if (cs::Function("helper", {all_vars_ocp}, {var}, cs::Dict{{"allow_free", true}}).has_free())
+                    // check
+                    varr = var;
                 else
-                {
-                    if (get()->is_global_parameter(var))
-                        varr = var;
-                    else
-                        std::runtime_error("at eval_at_initial variable is not a state, control, hybrid or parameter");
-                }
+                    throw std::runtime_error("unrecognized variable at eval_at_initial");
                 if (value.size2() == 1)
                     valuee = cs::MX::repmat(value, 1, varr.size2());
                 else
@@ -214,14 +215,14 @@ namespace fatrop
         {
             return Stage(*this, K);
         }
-        cs::MX Ocp::all_variables()
+        cs::MX Ocp::all_variables() const
         {
             std::vector<cs::MX> gist_in;
             std::vector<cs::MX> gist_out;
             SolverFatrop().gist(*this, gist_in, gist_out);
             return cs::MX::veccat(gist_out);
         }
-    
+
         void Ocp::subject_to(const cs::MX &expr)
         {
             auto vars = cs::MX::symvar(expr);
@@ -230,17 +231,17 @@ namespace fatrop
             for (const auto &ustage : ustages_)
             {
                 // auto ustage_vars = ustage.get_variables();
-                if(ustage.K() ==1 && ustage.get() -> is_evaluable(expr))
+                if (ustage.K() == 1 && ustage.get()->is_evaluable(expr))
                     dep_ustage_list.push_back(ustage);
             }
             // if only one ustage
             if (dep_ustage_list.size() == 1)
-                // add to this ustage
-                {
-                    auto to = cs::MX::veccat(dep_ustage_list[0].all_vars());
-                    auto from = dep_ustage_list[0].at_t0(to);
-                    dep_ustage_list[0].subject_to(cs::MX::substitute(expr, from, to));
-                }
+            // add to this ustage
+            {
+                auto to = cs::MX::veccat(dep_ustage_list[0].all_vars());
+                auto from = dep_ustage_list[0].at_t0(to);
+                dep_ustage_list[0].subject_to(cs::MX::substitute(expr, from, to));
+            }
             else
             {
                 // if multiple uStages add to multi_ustage_constraints
