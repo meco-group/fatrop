@@ -189,8 +189,7 @@ namespace fatrop
                     varr = sample(var).second;
                 else if (get()->is_global_parameter(var))
                     varr = var;
-                else if (cs::Function("helper", {all_vars_ocp}, {var}, cs::Dict{{"allow_free", true}}).has_free())
-                    // check
+                else if (!cs::Function("helper", {all_vars_ocp}, {var}, cs::Dict{{"allow_free", true}}).has_free())
                     varr = var;
                 else
                     throw std::runtime_error("unrecognized variable at eval_at_initial");
