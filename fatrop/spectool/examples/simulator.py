@@ -20,4 +20,4 @@ class simulator:
             x_res.append(self.step(x_res[-1], u[i]))
         out_map = cs.Function('out_map', [self.x, self.u], out)
         u += [u[-1]] # to make the length of u equal to N
-        return [cs.horzcat(*outi)  for outi in zip(*[out_map(x_res[i], u[i]) for i in range(N)])]
+        return [cs.horzcat(*outi)  for outi in zip(*[out_map(x_res[i], u[i]) for i in range(N+1)])]
