@@ -100,18 +100,18 @@ class mechanism:
     def kinetic_energy(self):
         T = 0
         for link in self.links:
-            mass_center_link = link.mass_center
+            mass_center_link = link.center
             dx = mass_center_link.dx
             dy = mass_center_link.dy
-            dtheta = mass_center_link
-            T += 0.5 * link.mass * (dx**2 + dy**2) + 0.5 * link.inertia * dtheta**2
+            dtheta = mass_center_link.dtheta
+            T += 0.5 * link.mass * (dx*dx + dy*dy) + 0.5 * link.inertia * dtheta*dtheta
         return T
 
     @property
     def potential_energy(self):
         V = 0
         for link in self.links:
-            mass_center_link = link.mass_center
+            mass_center_link = link.center
             y = mass_center_link.y
             V += link.mass * 9.81 * y
         return V
