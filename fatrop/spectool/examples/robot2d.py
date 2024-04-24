@@ -87,6 +87,43 @@ class mechanism:
             T += 0.5 * link.mass * (dx**2 + dy**2) + 0.5 * link.inertia * dtheta**2
             V += link.mass * 9.81 * y
         return ld.get_ddq_jac(q, qd, U, T, V, W)
+
+    @property
+    def mass_total(self):
+        return sum([link.mass for link in self.links])
+
+    @property
+    def center_of_mass(self):
+        return sum([cs.vertcat(link.center.x, link.center.y)*link.mass for link in self.links]) / self.mass_total
+
+    @property
+    def kinetic_energy(self):
+        T = 0
+        for link in self.links:
+            mass_center_link = link.mass_center
+            dx = mass_center_link.dx
+            dy = mass_center_link.dy
+            dtheta = mass_center_link
+            T += 0.5 * link.mass * (dx**2 + dy**2) + 0.5 * link.inertia * dtheta**2
+        return T
+
+    @property
+    def potential_energy(self):
+        V = 0
+        for link in self.links:
+            mass_center_link = link.mass_center
+            y = mass_center_link.y
+            V += link.mass * 9.81 * y
+        return V
+
+    @property
+    def energy(self):
+        return self.kinetic_energy + self.potential_energy
+    
+
+
+
+
     
 def animate(mechs_qs_vals):
     mechanisms, q_syms, q_valss = zip(*mechs_qs_vals)
