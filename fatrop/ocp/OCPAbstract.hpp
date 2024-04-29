@@ -225,6 +225,30 @@ namespace fatrop
         /// @param uk: pointer to inputs of time step k
         /// @param k: time step
         virtual fatrop_int get_initial_uk(double *uk, const fatrop_int k) const = 0;
+
+        virtual fatrop_int full_eval_lag_hess(double objective_scale,
+                                        const double* primal_data,
+                                        const double* lam_data,
+                                        const double* stageparams_p,
+                                        const double* globalparams_p, MAT * RSQrqt_p) {
+            return 0;
+        }
+        virtual fatrop_int full_eval_constr_jac(const double* primal_data, const double* stageparams_p, const double* globalparams_p,
+            MAT* BAbt_p, MAT* Ggt_p, MAT* Ggt_ineq_p) {
+            return 0;
+        }
+        virtual fatrop_int full_eval_contr_viol(const double* primal_data, const double* stageparams_p, const double* globalparams_p,
+            double* cv_p) {
+            return 0;
+        }
+        virtual fatrop_int full_eval_obj_grad(double objective_scale, const double* primal_data, const double* stageparams_p, const double* globalparams_p,
+            double* grad_p) {
+            return 0;
+        }
+        virtual fatrop_int full_eval_obj(double objective_scale, const double* primal_data, const double* stageparams_p, const double* globalparams_p,
+            double* res) {
+            return 0;
+        }
     };
 };     // namespace fatrop
 #endif // OCPTEMPLATEINCLUDED

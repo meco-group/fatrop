@@ -99,7 +99,8 @@ namespace fatrop
         std::shared_ptr<FatropNLP> nlp_;
         bool dirty = true;
         std::shared_ptr<FatropPrinter> printer_;
-
+        friend class OcpSolverDriver;
+        
     private:
         const std::shared_ptr<OCPAbstract> ocp_;
         std::shared_ptr<Journaller> journaller_;
