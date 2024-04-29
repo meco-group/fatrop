@@ -255,7 +255,7 @@ struct FatropOcpCInterface
     void* user_data;
 };
 
-struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropOcpCInterface* ocp_interface);
+FATROP_SYMBOL_EXPORT struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropOcpCInterface* ocp_interface);
 
 FATROP_SYMBOL_EXPORT fatrop_int fatrop_ocp_c_solve(struct FatropOcpCSolver*);
 
