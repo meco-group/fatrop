@@ -46,8 +46,10 @@ else()
     
 endif()
 
-# add pybind11 for python bindings
-add_subdirectory(pybind11)
+if(WITH_PYTHON)
+    # add pybind11 for python bindings
+    add_subdirectory(pybind11)
+endif()
 
 if(WIN32)
     add_subdirectory(dlfcn-win32)
