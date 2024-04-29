@@ -61,6 +61,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 option(BUILD_DOCS "Build documentation" OFF)
+option(BUILD_EXECUTABLES "Build executables" ON)
 
 # TODO write this is a more modern way
 set(ENABLE_MULTITHREADING OFF CACHE BOOL "Enable multithreading")
