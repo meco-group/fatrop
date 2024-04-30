@@ -24,6 +24,21 @@
 extern "C" {
 #endif
 
+/* Symbol visibility in DLLs */
+#ifndef FATROP_SYMBOL_EXPORT
+#if defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
+#if defined(STATIC_LINKED)
+#define FATROP_SYMBOL_EXPORT
+#else
+#define FATROP_SYMBOL_EXPORT __declspec(dllexport)
+#endif
+#elif defined(__GNUC__) && defined(GCC_HASCLASSVISIBILITY)
+#define FATROP_SYMBOL_EXPORT __attribute__((visibility("default")))
+#else
+#define FATROP_SYMBOL_EXPORT
+#endif
+#endif
+
 #include <blasfeo.h>
 
 #define fatrop_int int
@@ -240,23 +255,21 @@ struct FatropOcpCInterface
     void* user_data;
 };
 
-struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropOcpCInterface* ocp_interface);
+FATROP_SYMBOL_EXPORT struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropOcpCInterface* ocp_interface);
 
-fatrop_int fatrop_ocp_c_solve(struct FatropOcpCSolver*);
+FATROP_SYMBOL_EXPORT fatrop_int fatrop_ocp_c_solve(struct FatropOcpCSolver*);
 
 /* -1 for not found, 0 for double, 1 for int, 2 for bool, 3 for string */
-int fatrop_ocp_c_option_type(const char* name);
-
-int fatrop_ocp_c_set_option_double(struct FatropOcpCSolver* s, const char* name, double val);
-int fatrop_ocp_c_set_option_bool(struct FatropOcpCSolver* s, const char* name, int val);
-int fatrop_ocp_c_set_option_int(struct FatropOcpCSolver* s, const char* name, int val);
-int fatrop_ocp_c_set_option_string(struct FatropOcpCSolver* s, const char* name, const char* val);
-const struct blasfeo_dvec* fatrop_ocp_c_get_primal(struct FatropOcpCSolver* s);
-const struct blasfeo_dvec* fatrop_ocp_c_get_dual(struct FatropOcpCSolver* s);
-const struct FatropOcpCDims* fatrop_ocp_c_get_dims(struct FatropOcpCSolver* s);
-const struct FatropOcpCStats* fatrop_ocp_c_get_stats(struct FatropOcpCSolver* s);
-
-void fatrop_ocp_c_destroy(struct FatropOcpCSolver*);
+FATROP_SYMBOL_EXPORT int fatrop_ocp_c_option_type(const char* name);
+FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_double(struct FatropOcpCSolver* s, const char* name, double val);
+FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_bool(struct FatropOcpCSolver* s, const char* name, int val);
+FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_int(struct FatropOcpCSolver* s, const char* name, int val);
+FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_string(struct FatropOcpCSolver* s, const char* name, const char* val);
+FATROP_SYMBOL_EXPORT const struct blasfeo_dvec* fatrop_ocp_c_get_primal(struct FatropOcpCSolver* s);
+FATROP_SYMBOL_EXPORT const struct blasfeo_dvec* fatrop_ocp_c_get_dual(struct FatropOcpCSolver* s);
+FATROP_SYMBOL_EXPORT const struct FatropOcpCDims* fatrop_ocp_c_get_dims(struct FatropOcpCSolver* s);
+FATROP_SYMBOL_EXPORT const struct FatropOcpCStats* fatrop_ocp_c_get_stats(struct FatropOcpCSolver* s);
+FATROP_SYMBOL_EXPORT void fatrop_ocp_c_destroy(struct FatropOcpCSolver*);
 
 #ifdef __cplusplus
 } // extern "C"
