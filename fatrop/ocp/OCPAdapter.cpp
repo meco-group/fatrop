@@ -75,6 +75,10 @@ fatrop_int OCPAdapter::eval_lag_hess(
     double *primal_data = primal_vars_p->pa;
     double *lam_data = lam_p->pa;
 
+    fatrop_int full_ret = ocptempl->full_eval_lag_hess(
+        obj_scale, primal_data, lam_data, stageparams_p, globalparams_p,
+        RSQrqt_p);
+    if (full_ret==2) return 0;
     // OCPMACRO(MAT *, BAbt, _p);
     // OCPMACRO(MAT *, Ggt, _p);
     // OCPMACRO(MAT *, Ggt_ineq, _p);
@@ -92,17 +96,21 @@ fatrop_int OCPAdapter::eval_lag_hess(
         fatrop_int offs_ineq_k = offs_ineq[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         // std::cout << "using exact Hess " << k << std::endl;
-        ocptempl->eval_RSQrqt(
-            &obj_scale,
-            primal_data + offs_ux_k,
-            primal_data + offs_ux_k + nu_k,
-            lam_data + offs_dyn_eq_k,
-            lam_data + offs_g_k,
-            lam_data + offs_ineq_k,
-            stageparams_p + offs_stageparams_k,
-            globalparams_p,
-            RSQrqt_p + k,
-            k);
+
+        if (full_ret==0)
+        {
+            ocptempl->eval_RSQrqt(
+                &obj_scale,
+                primal_data + offs_ux_k,
+                primal_data + offs_ux_k + nu_k,
+                lam_data + offs_dyn_eq_k,
+                lam_data + offs_g_k,
+                lam_data + offs_ineq_k,
+                stageparams_p + offs_stageparams_k,
+                globalparams_p,
+                RSQrqt_p + k,
+                k);
+        }
 
         if (k > 0)
         {
@@ -137,43 +145,51 @@ fatrop_int OCPAdapter::eval_constr_jac(
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
 
+    fatrop_int full_ret = ocptempl->full_eval_constr_jac(
+        primal_data, stageparams_p, globalparams_p,
+        BAbt_p, Ggt_p, Ggt_ineq_p);
+    if (full_ret==2) return 0;
+
+    if (full_ret==0)
+    {
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (fatrop_int k = 0; k < K - 1; k++)
-    {
-        fatrop_int nu_k = nu_p[k];
-        fatrop_int nu_kp1 = nu_p[k + 1];
-        fatrop_int offs_ux_k = offs_ux[k];
-        fatrop_int offs_ux_kp1 = offs_ux[k + 1];
-        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_BAbt(
-            primal_data + offs_ux_kp1 + nu_kp1,
-            primal_data + offs_ux_k,
-            primal_data + offs_ux_k + nu_k,
-            stageparams_p + offs_stageparams_k,
-            globalparams_p,
-            BAbt_p + k,
-            k);
-    }
-#ifdef ENABLE_MULTITHREADING
-#pragma omp parallel for
-#endif
-    for (fatrop_int k = 0; k < K; k++)
-    {
-        fatrop_int nu_k = nu_p[k];
-        fatrop_int ng_k = ng_p[k];
-        fatrop_int offs_ux_k = offs_ux[k];
-        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        if (ng_k > 0)
+        for (fatrop_int k = 0; k < K - 1; k++)
         {
-            ocptempl->eval_Ggt(
+            fatrop_int nu_k = nu_p[k];
+            fatrop_int nu_kp1 = nu_p[k + 1];
+            fatrop_int offs_ux_k = offs_ux[k];
+            fatrop_int offs_ux_kp1 = offs_ux[k + 1];
+            fatrop_int offs_stageparams_k = offs_stageparams_p[k];
+            ocptempl->eval_BAbt(
+                primal_data + offs_ux_kp1 + nu_kp1,
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
                 globalparams_p,
-                Ggt_p + k,
+                BAbt_p + k,
                 k);
+        }
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
+        for (fatrop_int k = 0; k < K; k++)
+        {
+            fatrop_int nu_k = nu_p[k];
+            fatrop_int ng_k = ng_p[k];
+            fatrop_int offs_ux_k = offs_ux[k];
+            fatrop_int offs_stageparams_k = offs_stageparams_p[k];
+            if (ng_k > 0)
+            {
+                ocptempl->eval_Ggt(
+                    primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
+                    stageparams_p + offs_stageparams_k,
+                    globalparams_p,
+                    Ggt_p + k,
+                    k);
+            }
         }
     }
     VEC *slack_vars_bf = (VEC *)slack_vars;
@@ -190,13 +206,16 @@ fatrop_int OCPAdapter::eval_constr_jac(
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
         if (ng_ineq_k > 0)
         {
-            ocptempl->eval_Ggt_ineq(
-                primal_data + offs_ux_k,
-                primal_data + offs_ux_k + nu_k,
-                stageparams_p + offs_stageparams_k,
-                globalparams_p,
-                Ggt_ineq_p + k,
-                k);
+            if (full_ret==0)
+            {
+                ocptempl->eval_Ggt_ineq(
+                    primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
+                    stageparams_p + offs_stageparams_k,
+                    globalparams_p,
+                    Ggt_ineq_p + k,
+                    k);
+            }
             // rewrite problem
             ROWAD(ng_ineq_k, -1.0, slack_vars_bf, offs_ineq_k, Ggt_ineq_p + k, nu_k + nx_k, 0);
         }
@@ -226,45 +245,53 @@ fatrop_int OCPAdapter::eval_contr_viol(
     OCPMACRO(fatrop_int *, ng_ineq, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
+
+    fatrop_int full_ret = ocptempl->full_eval_contr_viol(
+        primal_data, stageparams_p, globalparams_p,
+        cv_p);
+    if (full_ret==2) return 0;
+    if (full_ret==0)
+    {
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
-    for (fatrop_int k = 0; k < K - 1; k++)
-    {
-        fatrop_int nu_k = nu_p[k];
-        fatrop_int nu_kp1 = nu_p[k + 1];
-        fatrop_int offs_ux_k = offs_ux[k];
-        fatrop_int offs_ux_kp1 = offs_ux[k + 1];
-        fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
-        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_b(
-            primal_data + offs_ux_kp1 + nu_kp1,
-            primal_data + offs_ux_k,
-            primal_data + offs_ux_k + nu_k,
-            stageparams_p + offs_stageparams_k,
-            globalparams_p,
-            cv_p + offs_dyn_eq_k,
-            k);
-    }
-#ifdef ENABLE_MULTITHREADING
-#pragma omp parallel for
-#endif
-    for (fatrop_int k = 0; k < K; k++)
-    {
-        fatrop_int ng_k = ng_p[k];
-        if (ng_k > 0)
+        for (fatrop_int k = 0; k < K - 1; k++)
         {
             fatrop_int nu_k = nu_p[k];
+            fatrop_int nu_kp1 = nu_p[k + 1];
             fatrop_int offs_ux_k = offs_ux[k];
-            fatrop_int offs_g_k = offs_g[k];
+            fatrop_int offs_ux_kp1 = offs_ux[k + 1];
+            fatrop_int offs_dyn_eq_k = offs_dyn_eq[k];
             fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-            ocptempl->eval_g(
+            ocptempl->eval_b(
+                primal_data + offs_ux_kp1 + nu_kp1,
                 primal_data + offs_ux_k,
                 primal_data + offs_ux_k + nu_k,
                 stageparams_p + offs_stageparams_k,
                 globalparams_p,
-                cv_p + offs_g_k,
+                cv_p + offs_dyn_eq_k,
                 k);
+        }
+#ifdef ENABLE_MULTITHREADING
+#pragma omp parallel for
+#endif
+        for (fatrop_int k = 0; k < K; k++)
+        {
+            fatrop_int ng_k = ng_p[k];
+            if (ng_k > 0)
+            {
+                fatrop_int nu_k = nu_p[k];
+                fatrop_int offs_ux_k = offs_ux[k];
+                fatrop_int offs_g_k = offs_g[k];
+                fatrop_int offs_stageparams_k = offs_stageparams_p[k];
+                ocptempl->eval_g(
+                    primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
+                    stageparams_p + offs_stageparams_k,
+                    globalparams_p,
+                    cv_p + offs_g_k,
+                    k);
+            }
         }
     }
     VEC *cv_bf = (VEC *)constraint_violation;
@@ -283,13 +310,16 @@ fatrop_int OCPAdapter::eval_contr_viol(
             fatrop_int offs_ineq_k = offs_ineq[k];
             fatrop_int offs_g_ineq_k = offs_g_ineq[k];
             fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-            ocptempl->eval_gineq(
-                primal_data + offs_ux_k,
-                primal_data + offs_ux_k + nu_k,
-                stageparams_p + offs_stageparams_k,
-                globalparams_p,
-                cv_p + offs_g_ineq_k,
-                k);
+            if (full_ret==0)
+            {
+                ocptempl->eval_gineq(
+                    primal_data + offs_ux_k,
+                    primal_data + offs_ux_k + nu_k,
+                    stageparams_p + offs_stageparams_k,
+                    globalparams_p,
+                    cv_p + offs_g_ineq_k,
+                    k);
+            }
             // rewrite problem
             AXPY(ng_ineq_k, -1.0, slack_vars_bf, offs_ineq_k, cv_bf, offs_g_ineq_k, cv_bf, offs_g_ineq_k);
         }
@@ -362,6 +392,12 @@ fatrop_int OCPAdapter::eval_obj_grad(
     fatrop_int *offs_stageparams_p = (fatrop_int *)offs_stageparams.data();
     double *stageparams_p = (double *)stageparams.data();
     double *globalparams_p = (double *)globalparams.data();
+
+    fatrop_int full_ret = ocptempl->full_eval_obj_grad(
+        obj_scale,
+        primal_data, stageparams_p, globalparams_p,
+        grad_p);
+    if (full_ret==2) return 0;
 #ifdef ENABLE_MULTITHREADING
 #pragma omp parallel for
 #endif
@@ -371,14 +407,17 @@ fatrop_int OCPAdapter::eval_obj_grad(
         // fatrop_int nx_k = nx_p[k];
         fatrop_int offs_ux_k = offs_ux[k];
         fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        ocptempl->eval_rq(
-            &obj_scale,
-            primal_data + offs_ux_k,
-            primal_data + offs_ux_k + nu_k,
-            stageparams_p + offs_stageparams_k,
-            globalparams_p,
-            grad_p + offs_ux_k,
-            k);
+        if (full_ret==0)
+        {
+            ocptempl->eval_rq(
+                &obj_scale,
+                primal_data + offs_ux_k,
+                primal_data + offs_ux_k + nu_k,
+                stageparams_p + offs_stageparams_k,
+                globalparams_p,
+                grad_p + offs_ux_k,
+                k);
+        }
         // save result in grad buf
         // VECCP(nu_k + nx_k, gradient_p, offs_ux_k, gradbuf[k], 0);
         // blasfeo_print_dvec(nu_k + nx_k, gradbuf[k], 0);
@@ -401,24 +440,34 @@ fatrop_int OCPAdapter::eval_obj(
     OCPMACRO(fatrop_int *, nu, _p);
     SOLVERMACRO(VEC *, primal_vars, _p);
     double *primal_data = primal_vars_p->pa;
-    double restot = 0.0;
-    for (fatrop_int k = 0; k < K; k++)
+
+    fatrop_int full_ret = ocptempl->full_eval_obj(
+        obj_scale,
+        primal_data, stageparams_p, globalparams_p,
+        &res);
+    if (full_ret==2) return 0;
+    if (full_ret==0)
     {
-        fatrop_int nu_k = nu_p[k];
-        fatrop_int offs_ux_k = offs_ux[k];
-        fatrop_int offs_stageparams_k = offs_stageparams_p[k];
-        double resk = 0.0;
-        ocptempl->eval_L(
-            &obj_scale,
-            primal_data + offs_ux_k,
-            primal_data + offs_ux_k + nu_k,
-            stageparams_p + offs_stageparams_k,
-            globalparams_p,
-            &resk,
-            k);
-        restot += resk;
+        double restot = 0.0;
+        for (fatrop_int k = 0; k < K; k++)
+        {
+            fatrop_int nu_k = nu_p[k];
+            fatrop_int offs_ux_k = offs_ux[k];
+            fatrop_int offs_stageparams_k = offs_stageparams_p[k];
+            double resk = 0.0;
+            ocptempl->eval_L(
+                &obj_scale,
+                primal_data + offs_ux_k,
+                primal_data + offs_ux_k + nu_k,
+                stageparams_p + offs_stageparams_k,
+                globalparams_p,
+                &resk,
+                k);
+            restot += resk;
+        }
+        res = restot;
     }
-    res = restot;
+
     return 0;
 };
 
