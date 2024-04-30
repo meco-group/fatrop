@@ -111,14 +111,15 @@ else()
   target_link_libraries(fatrop m dl blasfeo) 
 endif (WIN32)
 
+if(BUILD_EXECUTABLES)
+  add_executable(RunFatrop executables/RunFatrop.cpp)
+  target_link_libraries(RunFatrop fatrop) 
 
-add_executable(RunFatrop executables/RunFatrop.cpp)
-target_link_libraries(RunFatrop fatrop) 
-
-target_include_directories(RunFatrop
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}
-)
+  target_include_directories(RunFatrop
+      PRIVATE
+          ${PROJECT_SOURCE_DIR}
+  )
+endif()
 
 target_include_directories(fatrop PUBLIC  
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>  
