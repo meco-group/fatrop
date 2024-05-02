@@ -373,14 +373,50 @@ namespace fatrop
         delete s;
     }
 
-
-    int fatrop_ocp_c_option_type(FatropOcpCSolver* s, const char* name) {
-        const FatropOptions& options = s->driver->app.get_options();
-        if (options.numeric_options.find(name)!=options.numeric_options.end()) return 0;
-        if (options.integer_options.find(name)!=options.integer_options.end()) return 1;
-        if (options.boolean_options.find(name)!=options.boolean_options.end()) return 2;
-        if (options.string_options.find(name)!=options.string_options.end()) return 3;
-
+    int fatrop_ocp_c_option_type(const char* name) {
+        std::string n = name;
+        if (n=="acceptable_tol") return 0;
+        if (n=="bound_frac") return 0;
+        if (n=="bound_push") return 0;
+        if (n=="bound_relax_factor") return 0;
+        if (n=="constr_viol_tol") return 0;
+        if (n=="delta") return 0;
+        if (n=="delta_c_stripe") return 0;
+        if (n=="delta_w0") return 0;
+        if (n=="delta_wmin") return 0;
+        if (n=="eta_phi") return 0;
+        if (n=="gamma_alpha") return 0;
+        if (n=="gamma_phi") return 0;
+        if (n=="gamma_theta") return 0;
+        if (n=="kappa_c") return 0;
+        if (n=="kappa_d") return 0;
+        if (n=="kappa_eta") return 0;
+        if (n=="kappa_mu") return 0;
+        if (n=="kappa_sigma") return 0;
+        if (n=="kappa_wmin") return 0;
+        if (n=="kappa_wplus") return 0;
+        if (n=="kappa_wplusem") return 0;
+        if (n=="lammax") return 0;
+        if (n=="mu_init") return 0;
+        if (n=="recalc_y_feas_tol") return 0;
+        if (n=="s_phi") return 0;
+        if (n=="s_theta") return 0;
+        if (n=="smax") return 0;
+        if (n=="theta_min") return 0;
+        if (n=="theta_mu") return 0;
+        if (n=="tol") return 0;
+        if (n=="warm_start_mult_bound_push") return 0;
+        if (n=="acceptable_iter") return 1;
+        if (n=="max_iter") return 1;
+        if (n=="max_soc") return 1;
+        if (n=="max_watchdog_steps") return 1;
+        if (n=="print_level") return 1;
+        if (n=="accept_every_trial_step") return 2;
+        if (n=="iterative_refinement") return 2;
+        if (n=="iterative_refinement_SOC") return 2;
+        if (n=="ls_scaling") return 2;
+        if (n=="recalc_y") return 2;
+        if (n=="warm_start_init_point") return 2;
         return -1;
     }
 
