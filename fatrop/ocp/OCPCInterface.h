@@ -260,7 +260,7 @@ FATROP_SYMBOL_EXPORT struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropO
 FATROP_SYMBOL_EXPORT fatrop_int fatrop_ocp_c_solve(struct FatropOcpCSolver*);
 
 /* -1 for not found, 0 for double, 1 for int, 2 for bool, 3 for string */
-FATROP_SYMBOL_EXPORT int fatrop_ocp_c_option_type(const char* name);
+FATROP_SYMBOL_EXPORT int fatrop_ocp_c_option_type(struct FatropOcpCSolver* s, const char* name);
 FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_double(struct FatropOcpCSolver* s, const char* name, double val);
 FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_bool(struct FatropOcpCSolver* s, const char* name, int val);
 FATROP_SYMBOL_EXPORT int fatrop_ocp_c_set_option_int(struct FatropOcpCSolver* s, const char* name, int val);

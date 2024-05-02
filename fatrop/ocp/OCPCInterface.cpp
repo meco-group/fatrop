@@ -374,8 +374,8 @@ namespace fatrop
     }
 
 
-    int fatrop_ocp_c_option_type(const char* name) {
-        FatropOptions options;
+    int fatrop_ocp_c_option_type(FatropOcpCSolver* s, const char* name) {
+        const FatropOptions& options = s->driver->app.get_options();
         if (options.numeric_options.find(name)!=options.numeric_options.end()) return 0;
         if (options.integer_options.find(name)!=options.integer_options.end()) return 1;
         if (options.boolean_options.find(name)!=options.boolean_options.end()) return 2;
