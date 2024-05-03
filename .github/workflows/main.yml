@@ -1,0 +1,55 @@
+name: Build and Test Fatropy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+  
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+  
+      - name: Cache pip dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+  
+      - name: Install virtualenv and activate
+        run: |
+          pip install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+
+      - name: Build and install Fatropy
+        run: |
+          git submodule update --init --recursive
+          sudo apt-get update && sudo apt-get install -y cmake
+          export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF"
+          cd fatropy
+          pip install .
+          
+      - name: Install Rockit and Rockit-Fatrop plugin
+        run: |
+          git clone https://gitlab.kuleuven.be/meco-software/rockit.git
+          git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop
+          cd rockit
+          pip install .
+
+      - name: Test Fatropy
+        run: |
+          git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo.git
+          python fatrop_rockit_demo/tutorial.py
+          python fatropy/tests/example.py
