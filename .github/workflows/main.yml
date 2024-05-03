@@ -34,10 +34,10 @@ jobs:
         git clone https://gitlab.kuleuven.be/u0110259/rockit_fatrop_plugin.git ./rockit/rockit/external/fatrop
         cd rockit
         pip install .
-        cd ../
     - name: Test Fatropy
       run: |
         git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo.git
-        cd tests/
+        pwd
+        cd fatropy/tests/
         python ../fatrop_rockit_demo/tutorial.py
         python example.py
