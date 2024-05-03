@@ -38,6 +38,6 @@ jobs:
       run: |
         git clone https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo.git
         pwd
-        cd fatropy/tests/
-        python ../fatrop_rockit_demo/tutorial.py
-        python example.py
+        ls
+        python fatrop_rockit_demo/tutorial.py
+        python tests/example.py
