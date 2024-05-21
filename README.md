@@ -56,6 +56,7 @@ At this moment Fatrop is mainly tested on Ubuntu Linux machines. There are two i
   - [Build and install Fatrop only](#build-and-install-fatrop-only)
   - [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface)
   - [Examples](#examples)
+- [Citing](#citing)
 - [Developers](#developers)
 
 ## Build and install Fatrop and Fatropy
@@ -109,6 +110,22 @@ https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_rockit_demo
 https://gitlab.kuleuven.be/robotgenskill/fatrop/fatrop_benchmarks
 
 Using Fatrop from C++: check file `fatrop/executables/RunFatrop.cpp`
+
+# Citing
+To cite Fatrop in your academic work, please use the following reference:
+
+```
+@inproceedings{vanroye2023fatrop,
+  title={Fatrop: A fast constrained optimal control problem solver for robot trajectory optimization and control},
+  author={Vanroye, Lander and Sathya, Ajay and De Schutter, Joris and Decr{\'e}, Wilm},
+  booktitle={2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages={10036--10043},
+  year={2023},
+  organization={IEEE}
+}
+```
+
+
 
 # Developers
 
