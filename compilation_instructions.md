@@ -31,4 +31,4 @@ Install casadi with python bindings from source (note that this will install cas
 Install fatropy with spectool from source:
 
     git clone https://github.com/meco-group/fatrop.git --recursive
-    export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF -DWITH_SPECTOOL=ON" && cd fatropy && python -m pip install .
+    export CMAKE_ARGS="-DBLASFEO_TARGET=X64_AUTOMATIC -DENABLE_MULTITHREADING=OFF -DWITH_SPECTOOL=ON" && cd fatrop/fatropy && python -m pip install .
