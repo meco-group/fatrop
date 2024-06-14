@@ -363,8 +363,12 @@ namespace fatrop
 
     int fatrop_ocp_c_solve(FatropOcpCSolver* s)
     {
-        s->driver->solve();
-        return 0;
+        try
+        {
+            return s->driver->solve();
+        } catch (std::exception& e) {
+            return -1;
+        }
     }
 
     void fatrop_ocp_c_destroy(FatropOcpCSolver* s)
