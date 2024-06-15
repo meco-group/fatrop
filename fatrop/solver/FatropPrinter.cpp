@@ -17,3 +17,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #include "fatrop/solver/FatropPrinter.hpp"
+#include <cstdarg>
+
+
+namespace fatrop
+{
+    int FatropPrinter::printf(const char *fmt, ...)
+    {
+        va_list args;
+        va_start(args, fmt);
+        int n = vsnprintf(&printf_buffer_.front(), printf_buffer_.size(), fmt, args);
+        if (n>printf_buffer_.size())
+        {
+            printf_buffer_.resize(n+1);
+            n = vsnprintf(&printf_buffer_.front(), printf_buffer_.size(), fmt, args);
+        }
+        if (n>=0)
+        {
+        stream_ << printf_buffer_.front() << std::flush;
+        }
+        va_end(args);
+        return n;
+    }
+
+} // namespace fatrop
