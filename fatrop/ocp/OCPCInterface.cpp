@@ -438,7 +438,7 @@ namespace fatrop
         {
             return s->driver->solve();
         } catch (std::exception& e) {
-            s->driver->printer()->level(1) << "Uncaght Exception: " << e.what() << std::endl;
+            s->driver->printer()->level(1) << "Uncaught Exception: " << e.what() << std::endl;
             return -1;
         }
     }
