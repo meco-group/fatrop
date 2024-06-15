@@ -318,24 +318,6 @@ namespace fatrop
         }
     };
 
-    /*class FatropOcpCPrinter : public FatropPrinter
-    {
-    public:
-        FatropPrinter(const int priority = 0, std::ostream &stream = std::cout) : priority_(priority), stream_(stream){};
-        std::ostream &
-        level(const int p)
-        {
-            if (p <= priority_)
-                return stream_;
-            return nullstream;
-        }
-        int &print_level() { return priority_; }
-
-    private:
-        int priority_;
-        std::ostream& stream_;
-    };
-*/
     class OcpSolverDriver
     {
     public:
