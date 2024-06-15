@@ -34,7 +34,7 @@ namespace fatrop
         }
         if (n>=0)
         {
-        stream_ << printf_buffer_.front() << std::flush;
+            stream_ << &printf_buffer_.front() << std::flush;
         }
         va_end(args);
         return n;
