@@ -287,8 +287,17 @@ namespace fatrop
         }
         std::streamsize xsputn(const char* s, std::streamsize num) override
         {
-            write(s, num);
-            return num;
+            // Delegate to write
+            // write uses 'int' instead of 'std::streamsize' so extra logic is needed
+            int max_chunk = std::numeric_limits<int>::max();
+            std::streamsize written = 0;
+            while (num>0) {
+                int chunk = static_cast<int>(std::min<std::streamsize>(num, max_chunk));
+                write(s + written, chunk);
+                written += chunk;
+                num -= chunk;
+            }
+            return written;
         }
         int sync() override {
             if (flush) flush();

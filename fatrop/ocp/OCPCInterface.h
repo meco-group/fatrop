@@ -111,7 +111,7 @@ typedef fatrop_int (*FatropOcpCFullEvalContrViol)(const double*, const double*, 
 typedef fatrop_int (*FatropOcpCFullEvalObjGrad)(double, const double*, const double*, const double*, double *, const struct FatropOcpCDims*, void*);
 typedef fatrop_int (*FatropOcpCFullEvalObj)(double, const double*, const double*, const double*, double *, const struct FatropOcpCDims*, void*);
 
-typedef void (*FatropOcpCWrite)(const char* msg, int64_t num);
+typedef void (*FatropOcpCWrite)(const char* msg, int num);
 typedef void (*FatropOcpCFlush)(void);
 
 
