@@ -690,7 +690,7 @@ void FatropData::evaluate_barrier_quantities(double mu)
     VEC *gradb_U_p = (VEC *)gradb_U;
     VEC *gradb_plus_p = (VEC *)gradb_plus;
     // VEC *lam_curr_p = (VEC *)lam_curr;
-    VEC* du_inf_curr_s_wo_z_p = (VEC*)du_inf_curr_s_wo_z;
+    VEC *du_inf_curr_s_wo_z_p = (VEC *)du_inf_curr_s_wo_z;
     // fatrop_int eqs_offset = n_eqs - n_ineqs;
     // compute simga_LU gradb_LU and gradbplus
 
@@ -724,7 +724,7 @@ void FatropData::evaluate_barrier_quantities(double mu)
             VECEL(sigma_U_p, i) = 0.0;
             VECEL(gradb_U_p, i) = 0.0;
         }
-        double grad_barrier_plusi = VECEL(du_inf_curr_s_wo_z_p,  i);
+        double grad_barrier_plusi = VECEL(du_inf_curr_s_wo_z_p, i);
         if (!(lower_bounded && upper_bounded))
         {
             grad_barrier_plusi += lower_bounded ? kappa_d * mu : -kappa_d * mu;
@@ -761,5 +761,25 @@ void FatropData::compute_delta_z()
 
 void FatropData::compute_primal_dual_residu()
 {
+}
+
+bool FatropData::small_step_size()
+{
+    double *x_curr_dp = ((VEC *)x_curr)->pa;
+    double *s_curr_dp = ((VEC *)s_curr)->pa;
+    double *delta_x_dp = ((VEC *)delta_x)->pa;
+    double *delta_s_dp = ((VEC *)delta_s)->pa;
+
+    for (int i = 0; i < s_curr.nels(); i++)
+    {
+        if (std::abs(delta_s_dp[i]) > 1e-12 * std::max(1.0, std::abs(s_curr_dp[i])))
+            return false;
+    }
+    for (int i = 0; i < x_curr.nels(); i++)
+    {
+        if (std::abs(delta_x_dp[i]) > 1e-12 * std::max(1.0, std::abs(x_curr_dp[i])))
+            return false;
+    }
+    return true;
 }
 // void FatropData::B

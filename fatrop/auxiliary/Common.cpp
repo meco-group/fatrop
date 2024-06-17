@@ -17,3 +17,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #include "fatrop/auxiliary/Common.hpp"
+#include <limits>
+#include <climits>
+#include <cstdlib>
+#include <algorithm>
+
+namespace fatrop
+{
+    bool CompareLessEqual(double lhs, double rhs)
+    {
+        double mach_eps = std::numeric_limits<double>::epsilon();
+        return (lhs - rhs <= 10. * mach_eps * std::max(std::abs(rhs), std::abs(lhs)));
+    }
+}
