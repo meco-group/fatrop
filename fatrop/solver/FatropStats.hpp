@@ -39,24 +39,24 @@ namespace fatrop
         int eval_obj_count = 0;
         int iterations_count = 0;
         int return_flag = 0;
-        void print()
+        void print(std::ostream& stream)
         {
-            std::cout << "---- stats ----" << std::endl;
-            std::cout << "compute_sd:     " << compute_sd_time << " s"<< std::endl;
-            std::cout << "duinf:          " << duinf_time << " s"<< std::endl;
-            std::cout << "initialization: " << initialization_time << " s  count: "<< iterations_count <<std::endl;
+            stream << "---- stats ----" << std::endl;
+            stream << "compute_sd:     " << compute_sd_time << " s"<< std::endl;
+            stream << "duinf:          " << duinf_time << " s"<< std::endl;
+            stream << "initialization: " << initialization_time << " s  count: "<< iterations_count <<std::endl;
             double time_FE = eval_hess_time + eval_jac_time + eval_cv_time + eval_grad_time + eval_obj_time ;
-            std::cout << "time_FE :       " << time_FE << " s"<< std::endl;
-            std::cout << "    eval hess:  " << eval_hess_time << " s  count: "<< eval_hess_count <<std::endl;
-            std::cout << "    eval jac:   " << eval_jac_time << " s  count: "<< eval_jac_count <<std::endl;
-            std::cout << "    eval cv:    " << eval_cv_time << " s  count: "<< eval_cv_count <<std::endl;
-            std::cout << "    eval grad:  " << eval_grad_time << " s  count: "<< eval_grad_count <<std::endl;
-            std::cout << "    eval obj:   " << eval_obj_time << " s  count: "<< eval_obj_count <<std::endl;
-            std::cout << "rest  :       " <<time_total -  time_FE - initialization_time - duinf_time - compute_sd_time<< " s"<< std::endl;
-            std::cout << "----- "<< std::endl;
-            std::cout << "time_w/o_FE : " << time_total - time_FE << " s" << std::endl;
-            std::cout << "time_FE :       " << time_FE << " s"<< std::endl;
-            std::cout << "time_total : " << time_total << " s  iterations: " << iterations_count << std::endl;
+            stream << "time_FE :       " << time_FE << " s"<< std::endl;
+            stream << "    eval hess:  " << eval_hess_time << " s  count: "<< eval_hess_count <<std::endl;
+            stream << "    eval jac:   " << eval_jac_time << " s  count: "<< eval_jac_count <<std::endl;
+            stream << "    eval cv:    " << eval_cv_time << " s  count: "<< eval_cv_count <<std::endl;
+            stream << "    eval grad:  " << eval_grad_time << " s  count: "<< eval_grad_count <<std::endl;
+            stream << "    eval obj:   " << eval_obj_time << " s  count: "<< eval_obj_count <<std::endl;
+            stream << "rest  :       " <<time_total -  time_FE - initialization_time - duinf_time - compute_sd_time<< " s"<< std::endl;
+            stream << "----- "<< std::endl;
+            stream << "time_w/o_FE : " << time_total - time_FE << " s" << std::endl;
+            stream << "time_FE :       " << time_FE << " s"<< std::endl;
+            stream << "time_total : " << time_total << " s  iterations: " << iterations_count << std::endl;
         }
     };
 } // namespace fatrop

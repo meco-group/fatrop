@@ -111,6 +111,9 @@ typedef fatrop_int (*FatropOcpCFullEvalContrViol)(const double*, const double*, 
 typedef fatrop_int (*FatropOcpCFullEvalObjGrad)(double, const double*, const double*, const double*, double *, const struct FatropOcpCDims*, void*);
 typedef fatrop_int (*FatropOcpCFullEvalObj)(double, const double*, const double*, const double*, double *, const struct FatropOcpCDims*, void*);
 
+typedef void (*FatropOcpCWrite)(const char* msg, int num);
+typedef void (*FatropOcpCFlush)(void);
+
 
 struct FatropOcpCInterface
 {
@@ -255,7 +258,15 @@ struct FatropOcpCInterface
     void* user_data;
 };
 
-FATROP_SYMBOL_EXPORT struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropOcpCInterface* ocp_interface);
+/* 
+    * @brief Create a new OCP solver
+    * @param ocp_interface: pointer to the OCP interface
+    * @param write: function pointer to write function (can be zero to indicate stdout)
+    * @param flush: function pointer to flush function (can be zero)
+    * @return pointer to the OCP solver
+    
+*/
+FATROP_SYMBOL_EXPORT struct FatropOcpCSolver* fatrop_ocp_c_create(struct FatropOcpCInterface* ocp_interface, FatropOcpCWrite write, FatropOcpCFlush flush);
 
 FATROP_SYMBOL_EXPORT fatrop_int fatrop_ocp_c_solve(struct FatropOcpCSolver*);
 
