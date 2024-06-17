@@ -286,7 +286,6 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
             alpha_primal *= 0.50;
         }
     }
-    assert(false);
     res.ls = 0;
     return res;
 };
