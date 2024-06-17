@@ -21,6 +21,7 @@
 #define FATROPPRINTERINCLUDED
 #include <iostream>
 #include <string>
+#include <vector>
 namespace fatrop
 {
     static std::ostream nullstream(nullptr);
@@ -40,7 +41,8 @@ namespace fatrop
     class FatropPrinter
     {
     public:
-        FatropPrinter(const int priority = 0, std::ostream &stream = std::cout) : priority_(priority), stream_(stream){};
+        FatropPrinter(const int priority = 0, std::ostream &stream = std::cout) : priority_(priority), stream_(stream),
+            printf_buffer_(256) {};
         std::ostream &
         level(const int p)
         {
@@ -50,9 +52,13 @@ namespace fatrop
         }
         int &print_level() { return priority_; }
 
+
+        int printf(const char *fmt, ...);
+
     private:
         int priority_;
         std::ostream& stream_;
+        std::vector<char> printf_buffer_;
     };
 
 } // namespace fatrop

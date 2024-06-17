@@ -221,7 +221,7 @@ fatrop_int FatropAlg::optimize()
             stats.return_flag = 0;
             if (printer_->print_level() > 0)
             {
-                stats.print();
+                stats.print(printer_->level(1));
             }
             fatropnlp_->finalize();
             return 0;

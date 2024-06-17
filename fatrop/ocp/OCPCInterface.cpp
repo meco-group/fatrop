@@ -266,13 +266,72 @@ namespace fatrop
         }
     };
 
+
+    // Stream buffer for std::cout like printing
+    class FatropOcpCStreambuf : public std::streambuf
+    {
+    public:
+        FatropOcpCStreambuf(FatropOcpCWrite write_cb,
+                            FatropOcpCFlush flush_cb) : write(write_cb), flush(flush_cb)
+    {
+    }
+    protected:
+        int_type overflow(int_type ch) override
+        {
+            if (ch != traits_type::eof())
+            {
+                char c = static_cast<char>(ch);
+                write(&c, 1);
+            }
+            return ch;
+        }
+        std::streamsize xsputn(const char* s, std::streamsize num) override
+        {
+            // Delegate to write
+            // write uses 'int' instead of 'std::streamsize' so extra logic is needed
+            int max_chunk = std::numeric_limits<int>::max();
+            std::streamsize written = 0;
+            while (num>0) {
+                int chunk = static_cast<int>(std::min<std::streamsize>(num, max_chunk));
+                write(s + written, chunk);
+                written += chunk;
+                num -= chunk;
+            }
+            return written;
+        }
+        int sync() override {
+            if (flush) flush();
+            return 0;
+        }
+    private:
+        FatropOcpCWrite write;
+        FatropOcpCFlush flush;
+    };
+
+    class FatropOcpCStream : public std::ostream {
+        protected:
+            FatropOcpCStreambuf buf;
+        public:
+            FatropOcpCStream(FatropOcpCWrite write_cb,
+                        FatropOcpCFlush flush_cb) : std::ostream(&buf), buf(write_cb, flush_cb)
+        {
+        }
+    };
+
     class OcpSolverDriver
     {
     public:
-        OcpSolverDriver(FatropOcpCInterface* ocp_interface) :
+        OcpSolverDriver(FatropOcpCInterface* ocp_interface,
+                        FatropOcpCWrite write,
+                        FatropOcpCFlush flush) :
+                stream(write, flush),
                 m(std::make_shared<FatropOcpCDimsMapping>(ocp_interface)),
                 app(m)
         {
+            if (write!=0)
+            {
+                app.printer_ = std::make_shared<FatropPrinter>(0, stream);
+            }
             app.build();
             const OCPKKTMemory& kktmem = std::dynamic_pointer_cast<FatropOCP>(app.nlp_)->ocpkktmemory_;
             m->s.nx = kktmem.nx.data();
@@ -295,15 +354,19 @@ namespace fatrop
         {
             return app.optimize();
         }
+        std::shared_ptr<FatropPrinter> printer() {
+            return app.printer_;
+        }
+        FatropOcpCStream stream;
         std::shared_ptr<FatropOcpCDimsMapping> m;
         FatropOcpCStats stats;
         OCPAbstractApplication app;
     };
 
-    FatropOcpCSolver* fatrop_ocp_c_create(FatropOcpCInterface* ocp_interface)
+    FatropOcpCSolver* fatrop_ocp_c_create(FatropOcpCInterface* ocp_interface, FatropOcpCWrite write, FatropOcpCFlush flush)
     {
         FatropOcpCSolver* ret = new FatropOcpCSolver();
-        ret->driver = new OcpSolverDriver(ocp_interface);
+        ret->driver = new OcpSolverDriver(ocp_interface, write, flush);
         return ret;
     }
 
@@ -313,6 +376,8 @@ namespace fatrop
         {
             s->driver->app.set_option(name, val);
         } catch (std::exception& e) {
+            s->driver->printer()->level(1) << "Error setting double option " << name << " to " << val << "." << std::endl;
+            s->driver->printer()->level(1) << e.what() << std::endl;
             return 1;
         }
         return 0;
@@ -324,6 +389,8 @@ namespace fatrop
         {
             s->driver->app.set_option(name, bool(val));
         } catch (std::exception& e) {
+            s->driver->printer()->level(1) << "Error setting bool option " << name << " to " << val << "." << std::endl;
+            s->driver->printer()->level(1) << e.what() << std::endl; 
             return 1;
         }
         return 0;
@@ -335,6 +402,8 @@ namespace fatrop
         {
             s->driver->app.set_option(name, int(val));
         } catch (std::exception& e) {
+            s->driver->printer()->level(1) << "Error setting int option " << name << " to " << val << "." << std::endl;
+            s->driver->printer()->level(1) << e.what() << std::endl;
             return 1;
         }
         return 0;
@@ -346,6 +415,8 @@ namespace fatrop
         {
             s->driver->app.set_option(name, std::string(val));
         } catch (std::exception& e) {
+            s->driver->printer()->level(1) << "Error setting string option " << name << " to " << val << "." << std::endl;
+            s->driver->printer()->level(1) << e.what() << std::endl;
             return 1;
         }
         return 0;
@@ -363,8 +434,13 @@ namespace fatrop
 
     int fatrop_ocp_c_solve(FatropOcpCSolver* s)
     {
-        s->driver->solve();
-        return 0;
+        try
+        {
+            return s->driver->solve();
+        } catch (std::exception& e) {
+            s->driver->printer()->level(1) << "Uncaught Exception: " << e.what() << std::endl;
+            return -1;
+        }
     }
 
     void fatrop_ocp_c_destroy(FatropOcpCSolver* s)
