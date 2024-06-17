@@ -28,6 +28,6 @@
 #define fatrop_int int
 namespace fatrop
 {
- 
+    bool CompareLessEqual(double lhs, double rhs);
 } // namespace fatrop
 #endif //  COMMONINCLUDED

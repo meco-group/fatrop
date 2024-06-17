@@ -78,6 +78,7 @@ namespace fatrop
         void compute_delta_z();
         void compute_primal_dual_residu();
         void init_bounds();
+        bool small_step_size();
 
 
         const NLPDims nlpdims;

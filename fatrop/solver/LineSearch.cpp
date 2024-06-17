@@ -19,6 +19,9 @@
 #include "fatrop/solver/LineSearch.hpp"
 using namespace fatrop;
 using namespace std;
+
+
+
 LineSearch::LineSearch(
     const shared_ptr<FatropOptions> &fatropparams,
     const shared_ptr<FatropNLP> &nlp,
@@ -166,8 +169,8 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
         if (filter_->is_acceptable(FilterData(0, obj_next, cv_next)))
         {
             // cout << filter_->GetSize() << endl;
-            bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent * pow(-lin_decr_curr, s_phi) > delta * pow(cv_curr, s_theta));
-            bool armijo = obj_next - obj_curr < eta_phi * alpha_primal_accent * lin_decr_curr;
+            bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent * pow(-lin_decr_curr, s_phi) >= delta * pow(cv_curr, s_theta));
+            bool armijo = CompareLessEqual(obj_next - obj_curr, eta_phi * alpha_primal_accent * lin_decr_curr);
             if (switch_cond && (cv_curr <= theta_min))
             {
                 // f-step
@@ -185,7 +188,7 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
             {
                 // h-step
                 // check sufficient decrease wrt current iterate
-                if ((cv_next < (1.0 - gamma_theta) * cv_curr) || (obj_next < obj_curr - gamma_phi * cv_curr))
+                if (CompareLessEqual(cv_next, (1.0 - gamma_theta) * cv_curr) || CompareLessEqual(obj_next, obj_curr - gamma_phi * cv_curr))
                 {
                     if (!switch_cond || !(armijo))
                     {
