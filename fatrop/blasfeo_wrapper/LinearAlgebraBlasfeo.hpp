@@ -93,7 +93,8 @@ extern "C"
 #if defined(BLASFEO_REF_API)
 #define TRSM_RLNN blasfeo_dtrsm_rlnn
 #else
-#define TRSM_RLNN fatrop_dtrsm_rlnn_alt
+void blasfeo_ref_dtrsm_rlnn_copy(int m, int n, double alpha, struct MAT *sA, int ai, int aj, struct MAT *sB, int bi, int bj, struct MAT *sD, int di, int dj);
+#define TRSM_RLNN blasfeo_ref_dtrsm_rlnn_copy
 #endif
 
 #ifndef __GNUC__

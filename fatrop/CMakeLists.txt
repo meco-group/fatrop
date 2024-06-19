@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.]]
 set(FATROP_INTERNAL
 blasfeo_wrapper/LinearAlgebraBlasfeo.hpp    blasfeo_wrapper/LinearAlgebraBlasfeo.cpp
+blasfeo_wrapper/blasfeo_ref.cpp
 function_evaluation/CasadiCodegen.hpp       function_evaluation/CasadiCodegen.cpp
 auxiliary/VectorUtils.hpp                   auxiliary/VectorUtils.cpp
 auxiliary/Common.hpp                        auxiliary/Common.cpp
