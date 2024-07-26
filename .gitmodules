@@ -4,6 +4,6 @@
 [submodule "external/dlfcn-win32"]
 	path = external/dlfcn-win32
 	url = https://github.com/dlfcn-win32/dlfcn-win32.git
-[submodule "external/pybind11"]
-	path = external/pybind11
-	url = https://github.com/pybind/pybind11.git
+[submodule "external/nanobind"]
+	path = external/nanobind
+	url = https://github.com/wjakob/nanobind.git
