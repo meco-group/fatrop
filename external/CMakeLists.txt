@@ -47,8 +47,8 @@ else()
 endif()
 
 if(WITH_PYTHON)
-    # add pybind11 for python bindings
-    add_subdirectory(pybind11)
+    # add nanobind for python bindings
+    add_subdirectory(nanobind)
 endif()
 
 if(WIN32)
