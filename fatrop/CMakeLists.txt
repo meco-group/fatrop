@@ -42,6 +42,7 @@ ocp/OCPLinearSolver.hpp                     ocp/OCPLinearSolver.cpp
 ocp/OCPLSRiccati.hpp                        ocp/OCPLSRiccati.cpp
 ocp/OCPNoScaling.hpp                        ocp/OCPNoScaling.cpp
 ocp/OCPScalingMethod.hpp                    ocp/OCPScalingMethod.cpp
+ocp/FatropOCPResto.hpp
 solver/AlgBuilder.hpp              
 solver/AlgStrategy.hpp                      solver/AlgStrategy.cpp
 solver/FatropAlg.hpp                        solver/FatropAlg.cpp
@@ -83,6 +84,7 @@ ocp/OCPLinearSolver.hpp
 ocp/OCPLSRiccati.hpp
 ocp/OCPNoScaling.hpp
 ocp/OCPScalingMethod.hpp
+ocp/FatropOCPResto.hpp
 solver/AlgorithmQuantities.hpp
 solver/AlgBuilder.hpp
 solver/AlgStrategy.hpp

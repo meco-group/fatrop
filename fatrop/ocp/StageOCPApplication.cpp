@@ -20,6 +20,7 @@
 #include "fatrop/solver/AlgBuilder.hpp"
 #include "fatrop/ocp/OCPAdapter.hpp"
 #include "fatrop/ocp/FatropOCP.hpp"
+#include "fatrop/ocp/FatropOCPResto.hpp"
 #include "fatrop/ocp/FatropOCPBuilder.hpp"
 #include "fatrop/ocp/StageOCP.hpp"
 #include "fatrop/solver/FatropAlg.hpp"
@@ -147,7 +148,8 @@ OCPAbstractApplication::OCPAbstractApplication(const shared_ptr<OCPAbstract> &oc
 void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
-    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_));
+    shared_ptr<FatropNLP> nlp(make_shared<FatropOCPResto>(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_), fatropoptions_));
+    // shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_));
     NLPApplication::build(nlp);
     dirty = false;
 }

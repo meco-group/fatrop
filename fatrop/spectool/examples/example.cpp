@@ -74,24 +74,24 @@ int main()
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
   // }
-  {
-    auto ss = Ocp();
-    auto x = ss.control(10);
-    auto ustage = uStage();
-    ustage.register_control({x});
-    ustage.add_objective(sum1(sin(x)));
-    ustage.subject_to(sumsqr(x) == 1.);
-    auto ustage_dup = ustage.clone();
-    ss.add_ustage(ustage);
-    ss.add_ustage(ustage_dup);
-    ss.solver("fatrop", {{"jit", true}});
-    std::cout <<cs::MX::evalf(cs::MX::substitute(sumsqr(x), x, cs::MX::ones(10))) << std::endl;
-    auto test_func = cs::Function("test", {x}, {x});
-    std::cout << test_func(cs::DM::ones(10)) << std::endl;
-    auto funcc = ss.to_function("example_dense", {}, {ustage.at_t0(x)});
-    std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
-    // std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
-  }
+  // {
+  //   auto ss = Ocp();
+  //   auto x = ss.control(10);
+  //   auto ustage = uStage();
+  //   ustage.register_control({x});
+  //   ustage.add_objective(sum1(sin(x)));
+  //   ustage.subject_to(sumsqr(x) == 1.);
+  //   auto ustage_dup = ustage.clone();
+  //   ss.add_ustage(ustage);
+  //   ss.add_ustage(ustage_dup);
+  //   ss.solver("fatrop", {{"jit", true}});
+  //   std::cout <<cs::MX::evalf(cs::MX::substitute(sumsqr(x), x, cs::MX::ones(10))) << std::endl;
+  //   auto test_func = cs::Function("test", {x}, {x});
+  //   std::cout << test_func(cs::DM::ones(10)) << std::endl;
+  //   auto funcc = ss.to_function("example_dense", {}, {ustage.at_t0(x)});
+  //   std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
+  //   // std::cout << funcc(std::vector<cs::DM>{}) << std::endl;
+  // }
   // {
   //   auto func = fatropy::get_func_from_py("example", "get_func");
   //   func(std::vector<cs::DM>{2.5});
