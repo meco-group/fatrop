@@ -9,8 +9,8 @@ namespace fatrop
     public:
         FatropOCPResto(const std::shared_ptr<FatropOCP> &orig, const std::shared_ptr<FatropOptions> &opts) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), x_start_(orig_dims_.nvars), s_start_(orig_dims_.nineqs), x_tmp_(orig_dims_.nvars), s_tmp_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs), zl_dummy_(orig_dims_.nineqs), zu_dummy_(orig_dims_.nineqs), sigma_cache_(orig_dims_.nineqs * 3), gradb_cache_(orig_dims_.nineqs * 3)
         {
-            opts->register_option(DoubleOption::lower_bounded("Resto L1_rho", "Resto L1 penalty parameter", &rho, 100.0, 0.0));
-            opts->register_option(DoubleOption::lower_bounded("Resto xi", "Resto xi parameter", &xi, 1., 0.0));
+            opts->register_option(DoubleOption::lower_bounded("Resto L1_rho", "Resto L1 penalty parameter", &rho, 1000.0, 0.0));
+            opts->register_option(DoubleOption::lower_bounded("Resto xi", "Resto xi parameter", &xi, .1, 0.0));
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
             orig_->get_bounds(lower_v, upper_v);
@@ -30,7 +30,7 @@ namespace fatrop
         virtual void pre_solve(const FatropVecBF &x_init, const FatropVecBF &s_init) override
         {
             x_init.copy(x_start_[0]);
-            s_init.copy(s_start_[0]);
+            s_init.block(0, orig_dims_.nineqs).copy(s_start_[0]);
         };
         virtual fatrop_int eval_lag_hess(
             double obj_scale,
@@ -43,7 +43,7 @@ namespace fatrop
             orig_->eval_lag_hess(0.0, primal_vars, slack_dummy_v, lam);
             // compute delta's
             axpby(xi, primal_vars, -xi, x_start_[0], x_tmp_[0]);
-            axpby(xi, slack_vars, -xi, s_start_[0], s_tmp_[0]);
+            axpby(xi, slack_vars.block(0, orig_dims_.nineqs), -xi, s_start_[0], s_tmp_[0]);
             // iterate over all RSQrq's
 
             {
@@ -107,7 +107,7 @@ namespace fatrop
         {
             // compute delta's
             axpby(xi, primal_vars, -xi, x_start_[0], gradient_x);
-            axpby(xi, slack_vars, -xi, s_start_[0], gradient_s);
+            axpby(xi, slack_vars.block(0, orig_dims_.nineqs), -xi, s_start_[0], gradient_s.block(0, orig_dims_.nineqs));
             gradient_s.block(orig_dims_.nineqs, n_n + n_p) = rho;
             return 0;
         };
@@ -119,7 +119,7 @@ namespace fatrop
         {
             // compute delta's
             axpby(1.0, primal_vars, -1.0, x_start_[0], x_tmp_[0]);
-            axpby(1.0, slack_vars, -1.0, s_start_[0], s_tmp_[0]);
+            axpby(1.0, slack_vars.block(0, orig_dims_.nineqs), -1.0, s_start_[0], s_tmp_[0]);
             res = 0.5*(sumsqr(x_tmp_[0]) + sumsqr(s_tmp_[0]));
             res += rho * sum(slack_vars.block(orig_dims_.nineqs, n_n + n_p));
             return 0;
