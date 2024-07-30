@@ -120,7 +120,7 @@ namespace fatrop
             // compute delta's
             axpby(1.0, primal_vars, -1.0, x_start_[0], x_tmp_[0]);
             axpby(1.0, slack_vars, -1.0, s_start_[0], s_tmp_[0]);
-            res = sumsqr(x_tmp_[0]) + sumsqr(s_tmp_[0]);
+            res = 0.5*(sumsqr(x_tmp_[0]) + sumsqr(s_tmp_[0]));
             res += rho * sum(slack_vars.block(orig_dims_.nineqs, n_n + n_p));
             return 0;
         };
@@ -185,9 +185,9 @@ namespace fatrop
             auto delta_s_or = delta_s.block(0, orig_dims_.nineqs);
             auto delta_n = delta_s.block(orig_dims_.nineqs, n_n);
             auto delta_p = delta_s.block(orig_dims_.nineqs + n_n, n_p);
-            update_sigma_gradb(inertia_correction_w + 0.5*xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, sigma_dummy_[0], gradb_dummy_[0]);
-            int ret = orig_->solve_pd_sys(inertia_correction_w + 0.5*xi, inertia_correction_c, ux, lam, delta_s.block(0, orig_dims_.nineqs), sigma_dummy_[0], gradb_dummy_[0]);
-            update_delta_snp(inertia_correction_w + 0.5*xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
+            update_sigma_gradb(inertia_correction_w + xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, sigma_dummy_[0], gradb_dummy_[0]);
+            int ret = orig_->solve_pd_sys(inertia_correction_w + xi, inertia_correction_c, ux, lam, delta_s.block(0, orig_dims_.nineqs), sigma_dummy_[0], gradb_dummy_[0]);
+            update_delta_snp(inertia_correction_w + xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
             return ret;
         };
         virtual fatrop_int solve_soc_rhs(
@@ -207,7 +207,7 @@ namespace fatrop
             auto delta_n = delta_s.block(orig_dims_.nineqs, n_n);
             auto delta_p = delta_s.block(orig_dims_.nineqs + n_n, n_p);
             int ret = orig_->solve_soc_rhs(ux, lam, delta_s.block(0, orig_dims_.nineqs), cosntraint_violation);
-            update_delta_snp(inertia_correction_w_cache + 0.5*xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
+            update_delta_snp(inertia_correction_w_cache + xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
             return ret;
         }
         virtual NLPDims get_nlp_dims() const override { return this_dims_; };
