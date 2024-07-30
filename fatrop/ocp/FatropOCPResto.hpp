@@ -29,8 +29,8 @@ namespace fatrop
         }
         virtual void pre_solve(const FatropVecBF &x_init, const FatropVecBF &s_init) override
         {
-            x_init.copy(x_start_[0]);
-            s_init.block(0, orig_dims_.nineqs).copy(s_start_[0]);
+            x_start_[0].copy(x_init);
+            s_start_[0].copy(s_init.block(0, orig_dims_.nineqs));
         };
         virtual fatrop_int eval_lag_hess(
             double obj_scale,
