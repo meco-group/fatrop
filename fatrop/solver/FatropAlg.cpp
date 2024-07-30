@@ -134,6 +134,7 @@ fatrop_int FatropAlg::optimize()
         }
     }
     fatropdata_->bound_slacks();
+    fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();

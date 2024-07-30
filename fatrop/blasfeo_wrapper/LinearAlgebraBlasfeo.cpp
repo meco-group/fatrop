@@ -262,6 +262,18 @@ namespace fatrop
         }
         return res;
     };
+    double sumsqr(const FatropVecBF &va)
+    {
+        VEC *va_p = (VEC *)va;
+        fatrop_int nels = va.nels();
+        fatrop_int offset = va.offset();
+        double res = 0.0;
+        for (fatrop_int i = offset; i < nels + offset; i++)
+        {
+            res += VECEL(va_p, i) * VECEL(va_p, i);
+        }
+        return res;
+    };
 } // namespace fatrop
 using namespace fatrop;
 FatropMatBF::FatropMatBF(const fatrop_int nrows, const fatrop_int ncols, const fatrop_int row_offset, const fatrop_int col_offset) : row_offset_(row_offset), col_offset_(col_offset), nrows_(nrows), ncols_(ncols)
@@ -427,7 +439,7 @@ void FatropVecBF::operator=(const FatropVec &fm)
         this->at(ai) = fm.get_el(ai);
     }
 }
-void FatropVecBF::copy(const FatropVecBF &fm)
+void FatropVecBF::copy(const FatropVecBF &fm) const
 {
     DBGASSERT(fm.nels() == nels());
     VEC *fm_p = (VEC *)fm;

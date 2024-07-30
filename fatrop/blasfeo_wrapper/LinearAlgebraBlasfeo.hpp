@@ -326,7 +326,7 @@ namespace fatrop
             blasfeo_dvecse(nels(), val, vec_, offset());
         }
 
-        void copy(const FatropVecBF &fm);
+        void copy(const FatropVecBF &fm) const;
         void copyto(std::vector<double> &dest) const;
         void operator=(const std::vector<double> &fm);
         /** \brief set data pointer*/
@@ -381,6 +381,7 @@ namespace fatrop
     double LinfScaled(const FatropVecBF &va, const FatropVecBF &scales);
     double minabs(const FatropVecBF &va);
     double L1(const FatropVecBF &va);
+    double sumsqr(const FatropVecBF &va);
 
     /** \brief this class is used for the allocation of a blasfeo vector, the dimsensions are set from a vector */
     class FatropMemoryVecBF

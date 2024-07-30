@@ -92,6 +92,7 @@ namespace fatrop
             FatropVecBF &upper) const = 0;
         virtual fatrop_int get_initial_sol_guess(
             FatropVecBF &initial) const = 0;
+        virtual void pre_solve(const FatropVecBF& x_init,const FatropVecBF& s_init){};
         // virtual fatrop_int GetDefaultParams(
         //     FatropOptions &params) const = 0;
         virtual fatrop_int Callback(FatropVecBF& primal_vars){return 0;};
