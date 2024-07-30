@@ -110,6 +110,7 @@ fatrop_int FatropAlg::optimize()
     double mu = mu0;
     double delta_w_last = 0.0;
     LineSearchInfo lsinfo;
+    fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
     eval_constr_jac(); // todo twice evaluation
     eval_obj_grad_curr();
     if (warm_start_init_point)
@@ -134,7 +135,6 @@ fatrop_int FatropAlg::optimize()
         }
     }
     fatropdata_->bound_slacks();
-    fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();
