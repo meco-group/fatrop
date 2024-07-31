@@ -28,7 +28,7 @@ LineSearch::LineSearch(
     const shared_ptr<FatropData> &fatropdata, const std::shared_ptr<FatropPrinter> &printer) : AlgStrategy(fatropparams),
                                                                                                fatropnlp_(nlp),
                                                                                                fatropdata_(fatropdata), printer_(printer){};
-inline fatrop_int LineSearch::eval_constr_viol_trial()
+fatrop_int LineSearch::eval_constr_viol_trial()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
