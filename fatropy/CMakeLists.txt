@@ -11,8 +11,8 @@ target_include_directories(_fatropy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../fatro
 # define (VERSION_INFO) here.
 target_compile_definitions(_fatropy
                            PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
-# if spectool 
-if(${WITH_SPECTOOL})
-add_library(python_func_import SHARED src/fatropy.cpp src/python_func_import.cpp)
-target_link_libraries(python_func_import PRIVATE fatrop pybind11::module pybind11::embed)
-endif()
+# # if spectool 
+# if(${WITH_SPECTOOL})
+# add_library(python_func_import SHARED src/fatropy.cpp src/python_func_import.cpp)
+# target_link_libraries(python_func_import PRIVATE fatrop pybind11::module pybind11::embed)
+# endif()
