@@ -136,6 +136,7 @@ fatrop_int FatropAlg::optimize()
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
+    fatropnlp_->update_mu(mu);
     for (iter_count_ = start_iter_; iter_count_ < maxiter; iter_count_++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
@@ -230,6 +231,7 @@ fatrop_int FatropAlg::optimize()
         while (!watch_dog_step && mu > mu_min && (fatropdata_->e_mu_curr(mu) <= kappa_eta * mu || (no_conse_small_sd == 2)))
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
+            fatropnlp_->update_mu(mu);
             filter_reseted = 0;
             filter_->reset();
             no_no_full_steps_bc_filter = 0;
@@ -508,7 +510,8 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
 {
     fatrop_int n_ineqs = fatropdata_->n_ineqs;
     // set mu_init of resto alg
-    resto_alg_->mu0 = std::max(mu, fatropdata_->constr_viol_max_curr());
+    mu = std::max(mu, fatropdata_->constr_viol_max_curr());
+    resto_alg_->mu0 = mu;
     // set the starting iteration number
     resto_alg_->start_iter_ = iter+1;
     // initialize primal variables
@@ -518,7 +521,7 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     // call initialize slacks from the resto nlp
     resto_alg_->fatropnlp_->initialize_slacks(mu, resto_alg_->fatropdata_->s_curr);
     // initialize equality multipliers
-    resto_alg_->fatropdata_->lam_init = 0.;
+    resto_alg_->fatropdata_->lam_curr = 0.;
     // initialize z0, zn and zp
     for (fatrop_int i = 0; i < n_ineqs; i++)
     {

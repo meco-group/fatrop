@@ -120,7 +120,7 @@ namespace fatrop
             // compute delta's
             axpby(1.0, primal_vars, -1.0, x_start_[0], x_tmp_[0]);
             axpby(1.0, slack_vars.block(0, orig_dims_.nineqs), -1.0, s_start_[0], s_tmp_[0]);
-            res = 0.5*(sumsqr(x_tmp_[0]) + sumsqr(s_tmp_[0]));
+            res = 0.5*xi*(sumsqr(x_tmp_[0]) + sumsqr(s_tmp_[0]));
             res += rho * sum(slack_vars.block(orig_dims_.nineqs, n_n + n_p));
             return 0;
         };
@@ -281,6 +281,11 @@ namespace fatrop
             orig_->get_initial_sol_guess(initial);
             return 0;
         }
+        virtual void update_mu(double mu) override
+        {
+            xi = std::sqrt(mu);
+            orig_->update_mu(mu);
+        };
         std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;
         NLPDims this_dims_;
