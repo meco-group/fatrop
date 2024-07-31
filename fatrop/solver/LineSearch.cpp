@@ -86,10 +86,10 @@ fatrop_int LineSearch::compute_second_order_correction(double alpha) const
 {
     axpy(alpha, fatropdata_->g_soc, fatropdata_->g_next, fatropdata_->g_soc);
     fatrop_int res = fatropnlp_->solve_soc_rhs(fatropdata_->delta_x, fatropdata_->lam_calc, fatropdata_->delta_s, fatropdata_->g_soc);
-    if (res != 0)
-    {
-        printer_->level(1) << "SolveSOC failed" << endl;
-    }
+    // if (res != 0)
+    // {
+    //     // printer_->level(1) << "SolveSOC failed" << endl;
+    // }
     return res;
 };
 
