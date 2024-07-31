@@ -232,7 +232,7 @@ int FatropOCP::solve_soc_rhs(
             // prepare next iteration
             error_prev = err_curr;
         }
-        printer_->level(1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
+        // printer_->level(-1) << "WARNING: max number of refinement iterations reached, error: " << err_curr << endl;
     };
 
     if (ls_scaling)
