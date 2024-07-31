@@ -64,6 +64,8 @@ namespace fatrop
         fatrop_int eval_dual_infeasiblity();
         fatrop_int perform_initializiation();
         fatrop_int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
+        fatrop_int start_resto_alg(double mu, int iter);
+        fatrop_int return_from_resto_alg(double mu);
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropOptions> fatropoptions_;
@@ -103,6 +105,10 @@ namespace fatrop
         double recalc_y_feas_tol;
         // bool first_try_watchdog;
         FatropStats stats;
+        bool resto_problem = false;
+        std::weak_ptr<FatropAlg> orig_;
+        std::shared_ptr<FatropAlg> resto_alg_;
+        fatrop_int start_iter_ = 0;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

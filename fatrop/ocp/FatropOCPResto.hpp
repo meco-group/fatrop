@@ -9,8 +9,8 @@ namespace fatrop
     public:
         FatropOCPResto(const std::shared_ptr<FatropOCP> &orig, const std::shared_ptr<FatropOptions> &opts) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), x_start_(orig_dims_.nvars), s_start_(orig_dims_.nineqs), x_tmp_(orig_dims_.nvars), s_tmp_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs), zl_dummy_(orig_dims_.nineqs), zu_dummy_(orig_dims_.nineqs), sigma_cache_(orig_dims_.nineqs * 3), gradb_cache_(orig_dims_.nineqs * 3)
         {
-            opts->register_option(DoubleOption::lower_bounded("Resto L1_rho", "Resto L1 penalty parameter", &rho, 1000.0, 0.0));
-            opts->register_option(DoubleOption::lower_bounded("Resto xi", "Resto xi parameter", &xi, .1, 0.0));
+            opts->register_option(DoubleOption::lower_bounded("Resto L1_rho", "Resto L1 penalty parameter", &rho, 1000., 0.0));
+            opts->register_option(DoubleOption::lower_bounded("Resto xi", "Resto xi parameter", &xi, 1., 0.0));
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
             orig_->get_bounds(lower_v, upper_v);
@@ -225,7 +225,7 @@ namespace fatrop
             auto s_curr_or = s_curr.block(0, orig_dims_.nineqs);
             auto n_curr = s_curr.block(orig_dims_.nineqs, n_n);
             auto p_curr = s_curr.block(orig_dims_.nineqs + n_n, n_p);
-            int ret = orig_->initialize_slacks(mu0, s_curr_or);
+            // int ret = orig_->initialize_slacks(mu0, s_curr_or);
             auto upper_v = upper_[0];
             auto lower_v = lower_[0];
             // set zero for now TODO use quadratic formula here
@@ -251,7 +251,7 @@ namespace fatrop
                 n_curr.at(i) = n_init;
                 p_curr.at(i) = viol + n_init;
             }
-            return ret;
+            return 0;
         }
         virtual fatrop_int initialize_dual(
             const FatropVecBF &grad_x,
@@ -261,7 +261,8 @@ namespace fatrop
             const FatropVecBF &zU) override
         {
             // todo check if this is correct
-            return orig_->initialize_dual(grad_x, grad_s, dlam, zL.block(0, orig_dims_.nineqs), zU.block(0, orig_dims_.nineqs));
+            // return orig_->initialize_dual(grad_x, grad_s, dlam, zL.block(0, orig_dims_.nineqs), zU.block(0, orig_dims_.nineqs));
+            return 0;
         };
         virtual fatrop_int get_bounds(
             FatropVecBF &lower,

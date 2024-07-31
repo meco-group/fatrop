@@ -185,6 +185,10 @@ void FatropOptions::register_option(const DoubleOption &option)
     {
         option.set(prebuilt_double[option.name_]);
     }
+    else
+    {
+        prebuilt_set(option.name_, option.default_value_);
+    }
 }
 void FatropOptions::register_option(const IntegerOption &option)
 {
@@ -195,6 +199,10 @@ void FatropOptions::register_option(const IntegerOption &option)
     {
         option.set(prebuilt_double[option.name_]);
     }
+    else
+    {
+        prebuilt_set(option.name_, option.default_value_);
+    }
 }
 void FatropOptions::register_option(const BooleanOption &option)
 {
@@ -204,6 +212,10 @@ void FatropOptions::register_option(const BooleanOption &option)
     if (prebuilt_double.find(option.name_) != prebuilt_double.end())
     {
         option.set(prebuilt_double[option.name_]);
+    }
+    else
+    {
+        prebuilt_set(option.name_, option.default_value_);
     }
 }
 
