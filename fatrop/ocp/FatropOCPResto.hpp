@@ -62,7 +62,7 @@ namespace fatrop
                     fatrop_int nx_k = nx_p[k];
                     fatrop_int offs_ux_k = offs_ux[k];
                     // add xi to RSQrq diagonal
-                    // DIARE(nx_k + nu_k, 0.5*xi, RSQrqt_p + k, 0, 0);
+                    DIARE(nx_k + nu_k, xi, RSQrqt_p + k, 0, 0);
                     // add gradient to rq
                     ROWAD(nu_k + nx_k, 1.0, x_tmp_p, offs_ux_k, RSQrqt_p+k, nu_k + nx_k, 0);
                 }
@@ -146,9 +146,9 @@ namespace fatrop
         {
             for (int i = 0; i < orig_dims_.nineqs; ++i)
             {
-                double sigma_updt = 1.0 / (1.0 / (sigma_s.at(i) + inertia) + 1.0 / (sigma_n.at(i) + inertia) + 1.0 / (sigma_p.at(i) + inertia));
+                double sigma_updt = 1.0 / (1.0 / (sigma_s.at(i) + inertia + xi) + 1.0 / (sigma_n.at(i) + inertia) + 1.0 / (sigma_p.at(i) + inertia));
                 sigma_update.at(i) = sigma_updt - inertia;
-                gradb_update.at(i) = ((gradb_s.at(i)) / (sigma_s.at(i) + inertia) - (gradb_n.at(i)) / (sigma_n.at(i) + inertia) + (gradb_p.at(i)) / (sigma_p.at(i) + inertia)) * sigma_updt;
+                gradb_update.at(i) = ((gradb_s.at(i)) / (sigma_s.at(i) + inertia + xi) - (gradb_n.at(i)) / (sigma_n.at(i) + inertia) + (gradb_p.at(i)) / (sigma_p.at(i) + inertia)) * sigma_updt;
             }
         }
         void update_delta_snp(double inertia, const FatropVecBF &sigma_s, const FatropVecBF &sigma_n, const FatropVecBF &sigma_p, const FatropVecBF &gradb_s, const FatropVecBF &gradb_n, const FatropVecBF &gradb_p, const FatropVecBF &lam_I, const FatropVecBF &delta_s, const FatropVecBF &delta_n, const FatropVecBF &delta_p)
@@ -156,7 +156,7 @@ namespace fatrop
             for (int i = 0; i < orig_dims_.nineqs; ++i)
             {
                 double lam_I_i = lam_I.at(i);
-                delta_s.at(i) = (-gradb_s.at(i) + lam_I_i) / (sigma_s.at(i) + inertia);
+                delta_s.at(i) = (-gradb_s.at(i) + lam_I_i) / (sigma_s.at(i) + inertia+xi);
                 delta_n.at(i) = (-gradb_n.at(i) - lam_I_i) / (sigma_n.at(i) + inertia);
                 delta_p.at(i) = (-gradb_p.at(i) + lam_I_i) / (sigma_p.at(i) + inertia);
             }
@@ -185,9 +185,9 @@ namespace fatrop
             auto delta_s_or = delta_s.block(0, orig_dims_.nineqs);
             auto delta_n = delta_s.block(orig_dims_.nineqs, n_n);
             auto delta_p = delta_s.block(orig_dims_.nineqs + n_n, n_p);
-            update_sigma_gradb(inertia_correction_w + xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, sigma_dummy_[0], gradb_dummy_[0]);
-            int ret = orig_->solve_pd_sys(inertia_correction_w + xi, inertia_correction_c, ux, lam, delta_s.block(0, orig_dims_.nineqs), sigma_dummy_[0], gradb_dummy_[0]);
-            update_delta_snp(inertia_correction_w + xi, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
+            update_sigma_gradb(inertia_correction_w, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, sigma_dummy_[0], gradb_dummy_[0]);
+            int ret = orig_->solve_pd_sys(inertia_correction_w, inertia_correction_c, ux, lam, delta_s.block(0, orig_dims_.nineqs), sigma_dummy_[0], gradb_dummy_[0]);
+            update_delta_snp(inertia_correction_w, sigma_s, sigma_n, sigma_p, gradb_s, gradb_n, gradb_p, lam_I, delta_s_or, delta_n, delta_p);
             return ret;
         };
         virtual fatrop_int solve_soc_rhs(
