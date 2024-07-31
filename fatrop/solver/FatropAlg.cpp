@@ -161,7 +161,7 @@ fatrop_int FatropAlg::optimize()
             bool reset_filter = (filter_reseted <= 5);
             if (reset_filter)
             {
-                printer_->level(1) << "resetted filter " << endl;
+                // printer_->level(1) << "resetted filter " << endl;
                 filter_reseted++;
                 filter_->reset();
                 no_no_full_steps_bc_filter = 0;
@@ -510,7 +510,7 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     // set mu_init of resto alg
     resto_alg_->mu0 = std::max(mu, fatropdata_->constr_viol_max_curr());
     // set the starting iteration number
-    resto_alg_->start_iter_ = iter;
+    resto_alg_->start_iter_ = iter+1;
     // initialize primal variables
     resto_alg_->fatropdata_->x_curr.copy(fatropdata_->x_curr);
     // initialize the first part of the slack variables
@@ -557,7 +557,7 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     perform_initializiation_dual();
     fatropdata_->modify_dual_bounds(mu);
     // update iteration number
-    start_iter_ = resto_alg_->iter_count_;
+    start_iter_ = resto_alg_->iter_count_ - 1;
     return 0;
 }
 bool FatropAlg::resto_stop_crit()
