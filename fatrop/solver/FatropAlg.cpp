@@ -544,6 +544,8 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     fatropdata_->maximum_step_size(alpha_primal, alpha_dual, std::max(1 - mu, 0.99));
     // update trial step
     fatropdata_->update_trial_step(alpha_primal, alpha_dual);
+    // augment filter
+    filter_->augment(FilterData(0, linesearch_->eval_obj_trial() + fatropdata_->eval_barrier_func_trial(mu), fatropdata_->constr_viol_sum_curr()));
     // evaluate some quantities before accepting the trial step
     linesearch_->eval_constr_viol_trial();
     // accept trial step
@@ -553,7 +555,6 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     fatropdata_->modify_dual_bounds(mu);
     // update iteration number
     start_iter_ = resto_alg_->stats.iterations_count;
-    // todo augment filter
     return 0;
 }
 bool FatropAlg::resto_stop_crit()
