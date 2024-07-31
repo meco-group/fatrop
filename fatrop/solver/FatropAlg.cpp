@@ -511,6 +511,8 @@ fatrop_int FatropAlg::solve_pd_sys(double inertia_correction_w, double inertia_c
 
 fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
 {
+    // augment filter with current iterate
+    filter_->augment(FilterData(0, fatropdata_->obj_curr + fatropdata_->eval_barrier_func_curr(mu), fatropdata_->constr_viol_sum_curr()));
     fatrop_int n_ineqs = fatropdata_->n_ineqs;
     // set mu_init of resto alg
     mu = std::max(mu, fatropdata_->constr_viol_max_curr());
@@ -552,7 +554,7 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     // update trial step
     fatropdata_->update_trial_step(alpha_primal, alpha_dual);
     // augment filter
-    filter_->augment(FilterData(0, linesearch_->eval_obj_trial() + fatropdata_->eval_barrier_func_trial(mu), fatropdata_->constr_viol_sum_curr()));
+    // filter_->augment(FilterData(0, linesearch_->eval_obj_trial() + fatropdata_->eval_barrier_func_trial(mu), fatropdata_->constr_viol_sum_curr()));
     // evaluate some quantities before accepting the trial step
     linesearch_->eval_constr_viol_trial();
     // accept trial step
