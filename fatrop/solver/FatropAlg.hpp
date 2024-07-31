@@ -47,7 +47,8 @@ namespace fatrop
             const std::shared_ptr<Filter> &filter,
             const std::shared_ptr<LineSearch> &linesearch,
             const std::shared_ptr<Journaller> &journaller, 
-            const std::shared_ptr<FatropPrinter> &printer);
+            const std::shared_ptr<FatropPrinter> &printer, 
+            const std::shared_ptr<FatropAlg>&orig_, const std::shared_ptr<FatropAlg>&resto_alg_, bool resto_problem);
         void initialize() ;
         void reset() ;
         void set_bounds(const std::vector<double> &lower, const std::vector<double> &upper) ;
@@ -62,7 +63,7 @@ namespace fatrop
         double eval_objective_curr();
         double eval_objective_trial();
         fatrop_int eval_dual_infeasiblity();
-        fatrop_int perform_initializiation();
+        fatrop_int perform_initializiation_dual();
         fatrop_int solve_pd_sys(double inertia_correction_w, double inertia_correction_c, double mu);
         fatrop_int start_resto_alg(double mu, int iter);
         fatrop_int return_from_resto_alg(double mu);
@@ -84,6 +85,10 @@ namespace fatrop
         double acceptable_tol;
         fatrop_int acceptable_iter;
         fatrop_int maxiter;
+        void set_resto_alg(const std::shared_ptr<FatropAlg> &resto_alg)
+        {
+            resto_alg_ = resto_alg;
+        };
 
     private:
         double lammax;
@@ -106,10 +111,11 @@ namespace fatrop
         double recalc_y_feas_tol;
         // bool first_try_watchdog;
         FatropStats stats;
-        bool resto_problem = false;
+        bool resto_problem_ = false;
         std::weak_ptr<FatropAlg> orig_;
         std::shared_ptr<FatropAlg> resto_alg_;
         fatrop_int start_iter_ = 0;
+        fatrop_int iter_count_ = 0;
     };
 } // namespace fatrop
 #endif // FATROPALGINCLUDED

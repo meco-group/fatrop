@@ -43,7 +43,7 @@ namespace fatrop
             const std::shared_ptr<FatropNLP> &nlp,
             const std::shared_ptr<FatropData> &fatropdata, const std::shared_ptr<FatropPrinter> &printer);
         virtual LineSearchInfo find_acceptable_trial_point(double mu, bool small_sd, bool from_backup) = 0;
-        inline fatrop_int eval_constr_viol_trial();
+        fatrop_int eval_constr_viol_trial();
         double eval_obj_trial();
         void reset();
         virtual fatrop_int update_trial_step(double alpha_pr, double alpha_du) const;

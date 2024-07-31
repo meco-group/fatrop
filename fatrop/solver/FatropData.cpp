@@ -162,7 +162,6 @@ fatrop_int FatropData::reset()
     VECSE(lam_curr.nels(), 0.0, (VEC *)lam_curr, 0);
     VECSE(s_curr.nels(), 0.0, (VEC *)s_curr, 0);
     x_curr.copy(x_initial);
-    reset_caches();
     return 0;
 }
 fatrop_int FatropData::reset_caches()
@@ -661,6 +660,7 @@ void FatropData::relax_bounds_var(double mu)
             double dist_lower = s_curr_v - loweri;
             if (dist_lower < mu * emach)
             {
+                std::cout << "dist lower " << dist_lower << std::endl;
                 printer_->level(1) << "slacks too small " << endl;
                 VECEL(s_lower_p, i) -= 1e-12 * max(1.0, std::abs(loweri));
             }
@@ -671,6 +671,7 @@ void FatropData::relax_bounds_var(double mu)
             double dist_upper = upperi - s_curr_v;
             if (dist_upper < mu * emach)
             {
+                std::cout << "dist upper " << dist_upper << std::endl;
                 printer_->level(1) << "slacks too small " << endl;
                 VECEL(s_upper_p, i) += 1e-12 * max(1.0, std::abs(upperi));
             }

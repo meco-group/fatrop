@@ -38,12 +38,13 @@ namespace fatrop
         double alpha_pr = 0.0;
         double alpha_du = 0.0;
         char type = 'x';
+        bool resto = false;
     };
     class Journaller
     {
     public:
         Journaller(const fatrop_int maxiter, const std::shared_ptr<FatropPrinter> &printer);
-        void print_iterations();
+        void print_iterations(bool no_header = false);
         void push();
         void reset();
         fatrop_int print_count = 0;
