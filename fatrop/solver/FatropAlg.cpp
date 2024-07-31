@@ -113,14 +113,14 @@ fatrop_int FatropAlg::optimize()
     fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
     eval_constr_jac(); // todo twice evaluation
     eval_obj_grad_curr();
-    if (warm_start_init_point)
+    if (!resto_alg_ && warm_start_init_point)
     {
         fatropnlp_->initialize_slacks(mu,
-            fatropdata_->s_curr);
+                                      fatropdata_->s_curr);
         fatropdata_->warmstart_dual();
         fatropdata_->bound_z();
     }
-    else
+    if (!resto_alg_ && !warm_start_init_point)
     {
         fatrop_int initialization_res = perform_initializiation();
         if (initialization_res == 0 && fatropdata_->delta_dual_max() < lammax)
@@ -134,7 +134,7 @@ fatrop_int FatropAlg::optimize()
             fatropdata_->lam_curr.SetConstant(0.0);
         }
     }
-    fatropdata_->bound_slacks();
+    if(!resto_alg_) fatropdata_->bound_slacks();
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();
@@ -143,7 +143,7 @@ fatrop_int FatropAlg::optimize()
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
-    for (fatrop_int i = 0; i < maxiter; i++)
+    for (fatrop_int i = start_iter_; i < maxiter; i++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
         // if (fatropdata_->LamLinfCurr() > 1e12)
@@ -287,7 +287,7 @@ fatrop_int FatropAlg::optimize()
         // cout << "norm delta_s " << Linf(fatropdata_->delta_s) << endl;
         // cout << "norm delta_x " << Linf(fatropdata_->delta_x) << endl;
         // cout << "norm delta_lam " << Linf(fatropdata_->lam_calc) << endl;
-        double stepsize = max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
+        // double stepsize = max(LinfScaled(fatropdata_->delta_x, fatropdata_->x_curr), LinfScaled(fatropdata_->delta_s, fatropdata_->s_curr));
         bool small_search_direction_curr = fatropdata_->small_step_size();
         lsinfo = linesearch_->find_acceptable_trial_point(mu, small_search_direction_curr || watch_dog_step, watch_dog_step);
         if (recalc_y && (deltac == 0.0) && (fatropdata_->constr_viol_max_curr() < recalc_y_feas_tol))
@@ -463,7 +463,7 @@ fatrop_int FatropAlg::perform_initializiation()
     blasfeo_timer timer;
     blasfeo_tic(&timer);
     fatrop_int res = fatropnlp_->initialize_slacks(mu0,
-        fatropdata_->s_curr);
+                                                   fatropdata_->s_curr);
     res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr_x,
         fatropdata_->grad_curr_s,
@@ -489,4 +489,53 @@ fatrop_int FatropAlg::solve_pd_sys(double inertia_correction_w, double inertia_c
     double el = blasfeo_toc(&timer);
     stats.compute_sd_time += el;
     return res;
+}
+
+fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
+{
+    fatrop_int n_ineqs = fatropdata_->n_ineqs;
+    // set mu_init of resto alg
+    resto_alg_-> mu0 = std::max(mu, fatropdata_->constr_viol_max_curr());
+    // set the starting iteration number
+    resto_alg_->start_iter_ = iter;
+    // initialize primal variables
+    resto_alg_->fatropdata_->x_curr.copy(fatropdata_->x_curr);
+    // initialize the first part of the slack variables
+    resto_alg_->fatropdata_->s_curr.copy(fatropdata_->s_curr.block(0, fatropdata_->n_ineqs));
+    // call initialize slacks from the resto nlp
+    resto_alg_->fatropnlp_->initialize_slacks(mu, resto_alg_->fatropdata_->s_curr);
+    // initialize equality multipliers
+    resto_alg_ -> fatropdata_->lam_init = 0.;
+    // initialize z0, zn and zp
+    for(fatrop_int i =0; i<n_ineqs; i++)
+    {
+        resto_alg_->fatropdata_->zL_curr.at(i) = std::min(1000., fatropdata_->zL_curr.at(i));
+        resto_alg_->fatropdata_->zU_curr.at(i) = std::min(1000., fatropdata_->zU_curr.at(i));
+        resto_alg_->fatropdata_->zL_curr.at(n_ineqs+i) = mu / fatropdata_->s_curr.at(n_ineqs+i);
+        resto_alg_->fatropdata_->zL_curr.at(2*n_ineqs+i) = mu / fatropdata_->s_curr.at(2*n_ineqs+i);
+    }
+    // call resto alg
+    return resto_alg_->optimize();
+}
+
+fatrop_int FatropAlg::return_from_resto_alg(double mu)
+{
+    // compute delta x
+    axpby(1.0, resto_alg_->fatropdata_->x_curr, -1.0, fatropdata_->x_curr, fatropdata_->delta_x);
+    // compute delta s
+    axpby(1.0, resto_alg_->fatropdata_->s_curr.block(0, fatropdata_->n_ineqs), -1.0, fatropdata_->s_curr, fatropdata_->delta_s);
+    // compute delta z
+    fatropdata_->compute_delta_z();
+    // compute maximum step size
+    double alpha_primal = 1.0;
+    double alpha_dual = 1.0;
+    fatropdata_->maximum_step_size(alpha_primal, alpha_dual, std::max(1-mu, 0.99));
+    // update trial step
+    fatropdata_->update_trial_step(alpha_primal, alpha_dual);
+    // accept trial step
+    fatropdata_->accept_trial_step();
+    fatropdata_->modify_dual_bounds(mu);
+    // update iteration number
+    start_iter_ = resto_alg_->stats.iterations_count;
+    return 0;
 }
