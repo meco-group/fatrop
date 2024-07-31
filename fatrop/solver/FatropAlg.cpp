@@ -123,18 +123,9 @@ fatrop_int FatropAlg::optimize()
     if (!resto_alg_ && !warm_start_init_point)
     {
         fatrop_int initialization_res = perform_initializiation();
-        if (initialization_res == 0 && fatropdata_->delta_dual_max() < lammax)
-        {
-            printer_->level(1) << "accepted lam " << endl;
-            fatropdata_->accept_dual_initializiaton();
-        }
-        else
-        {
-            printer_->level(1) << "rejected lam " << endl;
-            fatropdata_->lam_curr.SetConstant(0.0);
-        }
     }
-    if(!resto_alg_) fatropdata_->bound_slacks();
+    if (!resto_alg_)
+        fatropdata_->bound_slacks();
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
     double theta_max = 1e4 * fatropdata_->constr_viol_sum_curr();
@@ -471,6 +462,16 @@ fatrop_int FatropAlg::perform_initializiation()
         // fatropdata_->s_curr,
         fatropdata_->zL_curr,
         fatropdata_->zU_curr);
+    if (res == 0 && fatropdata_->delta_dual_max() < lammax)
+    {
+        printer_->level(1) << "accepted lam " << endl;
+        fatropdata_->accept_dual_initializiaton();
+    }
+    else
+    {
+        printer_->level(1) << "rejected lam " << endl;
+        fatropdata_->lam_curr.SetConstant(0.0);
+    }
     stats.initialization_time += blasfeo_toc(&timer);
     return res;
 }
@@ -495,7 +496,7 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
 {
     fatrop_int n_ineqs = fatropdata_->n_ineqs;
     // set mu_init of resto alg
-    resto_alg_-> mu0 = std::max(mu, fatropdata_->constr_viol_max_curr());
+    resto_alg_->mu0 = std::max(mu, fatropdata_->constr_viol_max_curr());
     // set the starting iteration number
     resto_alg_->start_iter_ = iter;
     // initialize primal variables
@@ -505,14 +506,14 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     // call initialize slacks from the resto nlp
     resto_alg_->fatropnlp_->initialize_slacks(mu, resto_alg_->fatropdata_->s_curr);
     // initialize equality multipliers
-    resto_alg_ -> fatropdata_->lam_init = 0.;
+    resto_alg_->fatropdata_->lam_init = 0.;
     // initialize z0, zn and zp
-    for(fatrop_int i =0; i<n_ineqs; i++)
+    for (fatrop_int i = 0; i < n_ineqs; i++)
     {
         resto_alg_->fatropdata_->zL_curr.at(i) = std::min(1000., fatropdata_->zL_curr.at(i));
         resto_alg_->fatropdata_->zU_curr.at(i) = std::min(1000., fatropdata_->zU_curr.at(i));
-        resto_alg_->fatropdata_->zL_curr.at(n_ineqs+i) = mu / fatropdata_->s_curr.at(n_ineqs+i);
-        resto_alg_->fatropdata_->zL_curr.at(2*n_ineqs+i) = mu / fatropdata_->s_curr.at(2*n_ineqs+i);
+        resto_alg_->fatropdata_->zL_curr.at(n_ineqs + i) = mu / fatropdata_->s_curr.at(n_ineqs + i);
+        resto_alg_->fatropdata_->zL_curr.at(2 * n_ineqs + i) = mu / fatropdata_->s_curr.at(2 * n_ineqs + i);
     }
     // call resto alg
     return resto_alg_->optimize();
@@ -529,13 +530,21 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     // compute maximum step size
     double alpha_primal = 1.0;
     double alpha_dual = 1.0;
-    fatropdata_->maximum_step_size(alpha_primal, alpha_dual, std::max(1-mu, 0.99));
+    fatropdata_->maximum_step_size(alpha_primal, alpha_dual, std::max(1 - mu, 0.99));
     // update trial step
     fatropdata_->update_trial_step(alpha_primal, alpha_dual);
+    // evaluate some quantities before accepting the trial step
+    eval_constr_viol_trial();
     // accept trial step
     fatropdata_->accept_trial_step();
+    // initialize equality multipliers
+    perform_initializiation();
     fatropdata_->modify_dual_bounds(mu);
     // update iteration number
     start_iter_ = resto_alg_->stats.iterations_count;
+    // todo augment filter
     return 0;
+}
+bool FatropAlg::resto_stop_crit()
+{
 }
