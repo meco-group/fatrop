@@ -79,6 +79,7 @@ void FatropAlg::reset()
     fatropnlp_->reset();
     linesearch_->reset();
     stats = FatropStats();
+    if(!resto_problem_) start_iter_ = 0;
 }
 void FatropAlg::set_bounds(const vector<double> &lower, const vector<double> &upper)
 {
