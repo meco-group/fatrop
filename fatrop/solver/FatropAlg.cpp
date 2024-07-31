@@ -189,6 +189,10 @@ fatrop_int FatropAlg::optimize()
         {
             no_acceptable_steps = 0;
         }
+        if(resto_alg_ && resto_stop_crit())
+        {
+            return 100;
+        }
 
         if (emu < tol || (no_acceptable_steps >= acceptable_iter) || ((no_conse_small_sd == 2) && (mu <= mu_min)))
         // if (emu < tol)
@@ -327,9 +331,16 @@ fatrop_int FatropAlg::optimize()
 
         if (ls == 0)
         {
-            printer_->level(1) << "error: restoration phase not implemented yet" << endl;
-            stats.return_flag = 1;
-            return 1;
+            // if already in resto phase: solver failed
+            if(resto_alg_) return 1;
+            // prepare for restoration phase
+            int resto_res = start_resto_alg(mu, i);
+            if(resto_res != 100) return 1;
+            else
+            {
+                return_from_resto_alg(mu);
+            }
+            i = start_iter_;
         }
         if (watch_dog_step || ls == 1)
         {
@@ -534,7 +545,7 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     // update trial step
     fatropdata_->update_trial_step(alpha_primal, alpha_dual);
     // evaluate some quantities before accepting the trial step
-    eval_constr_viol_trial();
+    linesearch_->eval_constr_viol_trial();
     // accept trial step
     fatropdata_->accept_trial_step();
     // initialize equality multipliers
@@ -547,4 +558,10 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
 }
 bool FatropAlg::resto_stop_crit()
 {
+    auto orig_p = orig_.lock();
+    // evaluate original's problem constraint violation of the current solution
+    orig_p->fatropnlp_->eval_constraint_viol(fatropdata_->x_curr, fatropdata_->s_curr, orig_p->fatropdata_->g_next);
+    double cv_i = orig_p->fatropdata_->constr_viol_sum_next();
+    // check if acceptable to original filter
+    return orig_p->filter_->is_acceptable(FilterData(0, std::numeric_limits<double>::infinity(), cv_i));
 }
