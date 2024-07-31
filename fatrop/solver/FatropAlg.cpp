@@ -512,8 +512,8 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     {
         resto_alg_->fatropdata_->zL_curr.at(i) = std::min(1000., fatropdata_->zL_curr.at(i));
         resto_alg_->fatropdata_->zU_curr.at(i) = std::min(1000., fatropdata_->zU_curr.at(i));
-        resto_alg_->fatropdata_->zL_curr.at(n_ineqs + i) = mu / fatropdata_->s_curr.at(n_ineqs + i);
-        resto_alg_->fatropdata_->zL_curr.at(2 * n_ineqs + i) = mu / fatropdata_->s_curr.at(2 * n_ineqs + i);
+        resto_alg_->fatropdata_->zL_curr.at(n_ineqs + i) = mu / resto_alg_->fatropdata_->s_curr.at(n_ineqs + i);
+        resto_alg_->fatropdata_->zL_curr.at(2 * n_ineqs + i) = mu / resto_alg_->fatropdata_->s_curr.at(2 * n_ineqs + i);
     }
     // call resto alg
     return resto_alg_->optimize();
