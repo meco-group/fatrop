@@ -98,6 +98,7 @@ namespace fatrop
         virtual fatrop_int Callback(FatropVecBF& primal_vars){return 0;};
         virtual void finalize(){};
         virtual void reset(){};
+        virtual void update_mu(double mu){};
     };
 } // namespace fatrop
 #endif // NLPINCLUDED
