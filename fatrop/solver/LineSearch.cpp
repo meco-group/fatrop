@@ -107,7 +107,7 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     fatrop_params_->register_option(DoubleOption::lower_bounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
     fatrop_params_->register_option(DoubleOption::lower_bounded("delta", "delta", &delta, 1.0, 0.0));
     fatrop_params_->register_option(DoubleOption::lower_bounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-8, 0.0));
+    fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-5, 0.0));
     fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
     fatrop_params_->register_option(DoubleOption::lower_bounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
     fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
