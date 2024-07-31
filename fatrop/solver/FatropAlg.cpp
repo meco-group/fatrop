@@ -27,14 +27,15 @@ FatropAlg::FatropAlg(
     const shared_ptr<Filter> &filter,
     const shared_ptr<LineSearch> &linesearch,
     const shared_ptr<Journaller> &journaller,
-    const shared_ptr<FatropPrinter> &printer)
+    const shared_ptr<FatropPrinter> &printer,
+    const shared_ptr<FatropAlg>&orig_, const shared_ptr<FatropAlg>&resto_alg_, bool resto_problem)
     : fatropnlp_(fatropnlp),
       fatropdata_(fatropdata),
       fatropoptions_(fatropparams),
       filter_(filter),
       linesearch_(linesearch),
       journaller_(journaller),
-      printer_(printer)
+      printer_(printer), orig_(orig_), resto_alg_(resto_alg_), resto_problem_(resto_problem)
 {
 
     fatropoptions_->register_option(DoubleOption::lower_bounded("tol", "tolerance", &tol, 1e-8, 0.0));
@@ -72,7 +73,8 @@ void FatropAlg::initialize()
 void FatropAlg::reset()
 {
     filter_->reset();
-    fatropdata_->reset();
+    if(!resto_problem_) fatropdata_->reset();
+    fatropdata_->reset_caches();
     journaller_->reset();
     fatropnlp_->reset();
     linesearch_->reset();
@@ -113,18 +115,18 @@ fatrop_int FatropAlg::optimize()
     fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
     eval_constr_jac(); // todo twice evaluation
     eval_obj_grad_curr();
-    if (!resto_alg_ && warm_start_init_point)
+    if(!resto_problem_) fatropnlp_->initialize_slacks(mu0,
+                                                   fatropdata_->s_curr);
+    if (!resto_problem_ && warm_start_init_point)
     {
-        fatropnlp_->initialize_slacks(mu,
-                                      fatropdata_->s_curr);
         fatropdata_->warmstart_dual();
         fatropdata_->bound_z();
     }
-    if (!resto_alg_ && !warm_start_init_point)
+    if (!resto_problem_ && !warm_start_init_point)
     {
-        fatrop_int initialization_res = perform_initializiation();
+        fatrop_int initialization_res = perform_initializiation_dual();
     }
-    if (!resto_alg_)
+    if (!resto_problem_)
         fatropdata_->bound_slacks();
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
@@ -134,7 +136,7 @@ fatrop_int FatropAlg::optimize()
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
-    for (fatrop_int i = start_iter_; i < maxiter; i++)
+    for (iter_count_ = start_iter_; iter_count_ < maxiter; iter_count_++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
         // if (fatropdata_->LamLinfCurr() > 1e12)
@@ -146,13 +148,14 @@ fatrop_int FatropAlg::optimize()
         eval_obj_grad_curr(); // needed for dual inf
         eval_dual_infeasiblity();
         IterationData &it_curr = journaller_->it_curr;
-        it_curr.iter = i;
+        it_curr.iter = iter_count_;
         it_curr.mu = mu;
         it_curr.objective = eval_objective_curr();
         it_curr.constraint_violation = fatropdata_->constr_viol_max_curr();
         it_curr.du_inf = fatropdata_->dual_inf_max_curr();
         it_curr.ls = ls;
         it_curr.reg = deltaw;
+        it_curr.resto = resto_problem_;
         if (no_no_full_steps_bc_filter >= 5)
         {
             bool reset_filter = (filter_reseted <= 5);
@@ -179,7 +182,7 @@ fatrop_int FatropAlg::optimize()
             }
         }
         journaller_->push();
-        journaller_->print_iterations();
+        journaller_->print_iterations(resto_problem_);
         double emu = fatropdata_->e_mu_curr(0.0);
         if (emu < acceptable_tol)
         {
@@ -189,7 +192,7 @@ fatrop_int FatropAlg::optimize()
         {
             no_acceptable_steps = 0;
         }
-        if(resto_alg_ && resto_stop_crit())
+        if(resto_problem_ && resto_stop_crit())
         {
             return 100;
         }
@@ -198,7 +201,7 @@ fatrop_int FatropAlg::optimize()
         // if (emu < tol)
         {
             double total_time = blasfeo_toc(&timer);
-            journaller_->print_iterations();
+            journaller_->print_iterations(resto_problem_);
             if (no_conse_small_sd == 2)
             {
                 printer_->level(1) << "WARNING fatrop returned bc of very small search direction" << endl;
@@ -213,7 +216,7 @@ fatrop_int FatropAlg::optimize()
             stats.eval_cv_time += linesearch_->eval_cv_time;
             stats.eval_obj_time += linesearch_->eval_obj_time;
             stats.time_total = total_time;
-            stats.iterations_count = i;
+            stats.iterations_count = iter_count_;
             stats.return_flag = 0;
             if (printer_->print_level() > 0)
             {
@@ -306,7 +309,7 @@ fatrop_int FatropAlg::optimize()
             if (ls == 1)
             {
                 // accept watchdog step -- continue
-                printer_->level(1) << "accepted watchdog step" << endl;
+                // printer_->level(1) << "accepted watchdog step" << endl;
                 watch_dog_step = false;
             }
             else
@@ -315,14 +318,14 @@ fatrop_int FatropAlg::optimize()
                 if (no_watch_dog_steps_taken >= max_watchdog_steps)
                 {
                     // reject watchdog step -- go back to x_k
-                    printer_->level(1) << "rejected watchdog step" << endl;
+                    // printer_->level(1) << "rejected watchdog step" << endl;
                     it_curr.type = 'x';
                     fatropdata_->restore_backup();
                     // delta_w_last = delta_w_last_backup;
                     watch_dog_step = false;
                     // todo make use of delta_x_backup and delta_s_backup
                     restore_watchdog_step = true;
-                    i--;
+                    iter_count_--;
                     continue;
                 };
                 it_curr.type = 'w';
@@ -332,15 +335,15 @@ fatrop_int FatropAlg::optimize()
         if (ls == 0)
         {
             // if already in resto phase: solver failed
-            if(resto_alg_) return 1;
+            if(resto_problem_) return 1;
             // prepare for restoration phase
-            int resto_res = start_resto_alg(mu, i);
+            int resto_res = start_resto_alg(mu, iter_count_);
             if(resto_res != 100) return 1;
             else
             {
                 return_from_resto_alg(mu);
             }
-            i = start_iter_;
+            iter_count_ = start_iter_ + 1;
         }
         if (watch_dog_step || ls == 1)
         {
@@ -376,7 +379,7 @@ fatrop_int FatropAlg::optimize()
         restore_watchdog_step = false;
         // if linesearch unsuccessful -> resto phase
     }
-    journaller_->print_iterations();
+    journaller_->print_iterations(resto_problem_);
     stats.return_flag = 1;
     return 1;
 }
@@ -460,13 +463,11 @@ fatrop_int FatropAlg::eval_dual_infeasiblity()
     stats.duinf_time += blasfeo_toc(&timer);
     return 0;
 }
-fatrop_int FatropAlg::perform_initializiation()
+fatrop_int FatropAlg::perform_initializiation_dual()
 {
     blasfeo_timer timer;
     blasfeo_tic(&timer);
-    fatrop_int res = fatropnlp_->initialize_slacks(mu0,
-                                                   fatropdata_->s_curr);
-    res = fatropnlp_->initialize_dual(
+    fatrop_int res = fatropnlp_->initialize_dual(
         fatropdata_->grad_curr_x,
         fatropdata_->grad_curr_s,
         fatropdata_->lam_calc,
@@ -475,12 +476,12 @@ fatrop_int FatropAlg::perform_initializiation()
         fatropdata_->zU_curr);
     if (res == 0 && fatropdata_->delta_dual_max() < lammax)
     {
-        printer_->level(1) << "accepted lam " << endl;
+        // printer_->level(1) << "accepted lam " << endl;
         fatropdata_->accept_dual_initializiaton();
     }
     else
     {
-        printer_->level(1) << "rejected lam " << endl;
+        // printer_->level(1) << "rejected lam " << endl;
         fatropdata_->lam_curr.SetConstant(0.0);
     }
     stats.initialization_time += blasfeo_toc(&timer);
@@ -513,7 +514,7 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     // initialize primal variables
     resto_alg_->fatropdata_->x_curr.copy(fatropdata_->x_curr);
     // initialize the first part of the slack variables
-    resto_alg_->fatropdata_->s_curr.copy(fatropdata_->s_curr.block(0, fatropdata_->n_ineqs));
+    resto_alg_->fatropdata_->s_curr.block(0, fatropdata_->n_ineqs).copy(fatropdata_->s_curr);
     // call initialize slacks from the resto nlp
     resto_alg_->fatropnlp_->initialize_slacks(mu, resto_alg_->fatropdata_->s_curr);
     // initialize equality multipliers
@@ -551,10 +552,12 @@ fatrop_int FatropAlg::return_from_resto_alg(double mu)
     // accept trial step
     fatropdata_->accept_trial_step();
     // initialize equality multipliers
-    perform_initializiation();
+    eval_constr_jac(); // todo twice evaluation
+    eval_obj_grad_curr();
+    perform_initializiation_dual();
     fatropdata_->modify_dual_bounds(mu);
     // update iteration number
-    start_iter_ = resto_alg_->stats.iterations_count;
+    start_iter_ = resto_alg_->iter_count_;
     return 0;
 }
 bool FatropAlg::resto_stop_crit()
@@ -564,5 +567,5 @@ bool FatropAlg::resto_stop_crit()
     orig_p->fatropnlp_->eval_constraint_viol(fatropdata_->x_curr, fatropdata_->s_curr, orig_p->fatropdata_->g_next);
     double cv_i = orig_p->fatropdata_->constr_viol_sum_next();
     // check if acceptable to original filter
-    return orig_p->filter_->is_acceptable(FilterData(0, std::numeric_limits<double>::infinity(), cv_i));
+    return orig_p->filter_->is_acceptable(FilterData(0, std::numeric_limits<double>::infinity(), 1.01*cv_i));
 }

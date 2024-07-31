@@ -38,7 +38,7 @@ NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()),
     }
 }
 
-void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
+void NLPApplication::build(const shared_ptr<FatropNLP> &nlp, const shared_ptr<FatropNLP> &nlp_resto)
 {
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
@@ -51,9 +51,10 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp)
     {
         nlp_ = std::make_shared<NLPL1>(nlp, fatropoptions_);
     }
+    std::shared_ptr<FatropData> fatropdata_resto;
     AlgBuilder algbuilder;
     algbuilder.set_printer(printer_);
-    algbuilder.build_fatrop_algorithm_objects(nlp_, fatropoptions_, fatropdata_, journaller_);
+    algbuilder.build_fatrop_algorithm_objects(nlp_, nlp_resto, fatropoptions_, fatropdata_, fatropdata_resto, journaller_);
     fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "prfatrop_fatrop_int level", &printer_->print_level(), 10));
     fatropalg_ = algbuilder.build_algorithm();
     dirty = false;
@@ -148,9 +149,9 @@ OCPAbstractApplication::OCPAbstractApplication(const shared_ptr<OCPAbstract> &oc
 void OCPApplication::build()
 {
     // keep the adapter around for accessing the parameters for samplers and parameter setters
-    shared_ptr<FatropNLP> nlp(make_shared<FatropOCPResto>(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_), fatropoptions_));
-    // shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_));
-    NLPApplication::build(nlp);
+    shared_ptr<FatropNLP> nlp_resto(make_shared<FatropOCPResto>(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_), fatropoptions_));
+    shared_ptr<FatropNLP> nlp(FatropOCPBuilder(ocp_, fatropoptions_, printer_).build(ocp_));
+    NLPApplication::build(nlp, nlp_resto);
     dirty = false;
 }
 void OCPAbstractApplication::set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params)
