@@ -233,6 +233,8 @@ fatrop_int FatropAlg::optimize()
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             fatropnlp_->update_mu(mu);
+            if(resto_alg_) fatropdata_->obj_curr = eval_objective_curr();
+            if(resto_alg_) eval_obj_grad_curr();
             filter_reseted = 0;
             filter_->reset();
             no_no_full_steps_bc_filter = 0;
