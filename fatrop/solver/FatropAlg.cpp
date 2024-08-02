@@ -128,7 +128,7 @@ fatrop_int FatropAlg::optimize()
     {
         perform_initializiation_dual();
     }
-    // if (!resto_problem_)
+    if (!resto_problem_)
         fatropdata_->bound_slacks();
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
@@ -523,7 +523,12 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     resto_alg_->fatropdata_->x_curr.copy(fatropdata_->x_curr);
     // initialize the first part of the slack variables
     resto_alg_->fatropdata_->s_curr.block(0, fatropdata_->n_ineqs).copy(fatropdata_->s_curr);
-    // call initialize slacks from the resto nlp
+    // set n and p variables to zero
+    resto_alg_->fatropdata_->s_curr.block(fatropdata_-> n_ineqs, 2*fatropdata_->n_ineqs) = 0.;
+    // evaluate the constraint jacobian of resto_alg
+    // the constraint jacobian is required for the slack initialization (todo: make this more efficient)
+    resto_alg_->eval_constr_jac();
+    // call initialize slecks from the resto nlp
     resto_alg_->fatropnlp_->initialize_slacks(mu, resto_alg_->fatropdata_->s_curr);
     // initialize equality multipliers
     resto_alg_->fatropdata_->lam_curr = 0.;

@@ -225,27 +225,12 @@ namespace fatrop
             auto s_curr_or = s_curr.block(0, orig_dims_.nineqs);
             auto n_curr = s_curr.block(orig_dims_.nineqs, n_n);
             auto p_curr = s_curr.block(orig_dims_.nineqs + n_n, n_p);
-            // int ret = orig_->initialize_slacks(mu0, s_curr_or);
-            auto upper_v = upper_[0];
-            auto lower_v = lower_[0];
-            // set zero for now TODO use quadratic formula here
+            FatropVecBF ineq_viol = s_tmp_[0];
+            int ret = orig_->initialize_slacks(mu0, ineq_viol);
             for (int i = 0; i < orig_dims_.nineqs; i++)
             {
-                double dist_L = lower_bounded_[i] ? s_curr_or.at(i) - lower_v.at(i) : 0.0;
-                double dist_U = upper_bounded_[i] ? upper_v.at(i) - s_curr_or.at(i) : 0.0;
                 double viol = 0.0;
-                double s_proj = s_curr_or.at(i);
-                if (lower_bounded_[i] && dist_L < 0.0)
-                {
-                    // std::cout << "lower" << std::endl;
-                    s_proj = s_curr_or.at(i) - dist_L;
-                }
-                if (upper_bounded_[i] && dist_U < 0.0)
-                {
-                    // std::cout << "upper" << std::endl;
-                    s_proj = s_curr_or.at(i) + dist_U;
-                }
-                viol = (s_curr_or.at(i) - s_proj);
+                viol = (ineq_viol.at(i));
                 double n_init = (mu0 - rho * viol) / (2 * rho) + std::sqrt(std::pow((mu0 - rho * viol) / (2 * rho), 2) + mu0 * viol / (2 * rho));
                 // if viol >>>> 0 -> n_init = 0 if viol <<< 0 n_init = viol
                 n_curr.at(i) = n_init;
@@ -285,6 +270,10 @@ namespace fatrop
         {
             xi = std::sqrt(mu);
             orig_->update_mu(mu);
+        };
+        virtual void reset() override
+        {
+            orig_->reset();
         };
         std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;
