@@ -111,9 +111,9 @@ namespace fatrop
         double recalc_y_feas_tol;
         // bool first_try_watchdog;
         FatropStats stats;
-        bool resto_problem_ = false;
         std::weak_ptr<FatropAlg> orig_;
         std::shared_ptr<FatropAlg> resto_alg_;
+        bool resto_problem_ = false;
         fatrop_int start_iter_ = 0;
         fatrop_int iter_count_ = 0;
     };
