@@ -111,6 +111,7 @@ fatrop_int FatropAlg::optimize()
     reset();
     const double mu_min = tol / 10;
     double mu = mu0;
+    fatropnlp_->update_mu(mu);
     double delta_w_last = 0.0;
     LineSearchInfo lsinfo;
     fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
@@ -127,7 +128,7 @@ fatrop_int FatropAlg::optimize()
     {
         fatrop_int initialization_res = perform_initializiation_dual();
     }
-    if (!resto_problem_)
+    // if (!resto_problem_)
         fatropdata_->bound_slacks();
     eval_constr_viol_curr();
     fatropdata_->theta_min = theta_min * MAX(1.0, fatropdata_->constr_viol_sum_curr());
@@ -137,7 +138,6 @@ fatrop_int FatropAlg::optimize()
     double deltaw = 0;
     double deltac = 0.0;
     bool watch_dog_step = false;
-    fatropnlp_->update_mu(mu);
     for (iter_count_ = start_iter_; iter_count_ < maxiter; iter_count_++)
     {
         fatropdata_->obj_curr = eval_objective_curr();
@@ -233,8 +233,8 @@ fatrop_int FatropAlg::optimize()
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             fatropnlp_->update_mu(mu);
-            if(resto_alg_) fatropdata_->obj_curr = eval_objective_curr();
-            if(resto_alg_) eval_obj_grad_curr();
+            if(resto_problem_) fatropdata_->obj_curr = eval_objective_curr();
+            if(resto_problem_) eval_obj_grad_curr();
             filter_reseted = 0;
             filter_->reset();
             no_no_full_steps_bc_filter = 0;
@@ -574,6 +574,8 @@ bool FatropAlg::resto_stop_crit()
     // evaluate original's problem constraint violation of the current solution
     orig_p->fatropnlp_->eval_constraint_viol(fatropdata_->x_curr, fatropdata_->s_curr, orig_p->fatropdata_->g_next);
     double cv_i = orig_p->fatropdata_->constr_viol_sum_next();
+    double obj_i = 0.0;
+    orig_p->fatropnlp_->eval_obj(fatropdata_->obj_scale, fatropdata_->x_curr, fatropdata_->s_curr, obj_i);
     // check if acceptable to original filter
-    return orig_p->filter_->is_acceptable(FilterData(0, std::numeric_limits<double>::infinity(), 1.01*cv_i));
+    return orig_p->filter_->is_acceptable(FilterData(0, obj_i, cv_i)) && cv_i < 0.9 * orig_p->fatropdata_->constr_viol_sum_curr();
 }
