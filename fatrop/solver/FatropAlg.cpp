@@ -126,7 +126,7 @@ fatrop_int FatropAlg::optimize()
     }
     if (!resto_problem_ && !warm_start_init_point)
     {
-        fatrop_int initialization_res = perform_initializiation_dual();
+        perform_initializiation_dual();
     }
     // if (!resto_problem_)
         fatropdata_->bound_slacks();
