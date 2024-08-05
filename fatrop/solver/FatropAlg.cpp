@@ -212,7 +212,6 @@ fatrop_int FatropAlg::optimize()
             {
                 printer_->level(1) << "WARNING fatrop returned acceptable tolerance" << endl;
             }
-            printer_->level(1) << "found solution" << endl;
             stats.eval_cv_count += linesearch_->eval_cv_count;
             stats.eval_obj_count += linesearch_->eval_obj_count;
             stats.eval_cv_time += linesearch_->eval_cv_time;
@@ -224,7 +223,8 @@ fatrop_int FatropAlg::optimize()
             {
                 stats.print(printer_->level(1));
             }
-            fatropnlp_->finalize();
+            if(resto_problem_) return 2;
+            printer_->level(1) << "found solution" << endl;
             return 0;
         }
         // update mu
@@ -343,7 +343,7 @@ fatrop_int FatropAlg::optimize()
             if(resto_problem_) return 1;
             // prepare for restoration phase
             int resto_res = start_resto_alg(mu, iter_count_);
-            if(resto_res != 100) return 1;
+            if(resto_res != 100){stats.return_flag =1;return 1;}
             else
             {
                 return_from_resto_alg(mu);
