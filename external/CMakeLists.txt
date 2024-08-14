@@ -43,12 +43,7 @@ else()
 
     # Set the path to the include directory
     set_target_properties(blasfeo PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${BLASFEO_INCLUDE_DIR})
-    
-endif()
 
-if(WITH_PYTHON)
-    # add pybind11 for python bindings
-    add_subdirectory(pybind11)
 endif()
 
 if(WIN32)
