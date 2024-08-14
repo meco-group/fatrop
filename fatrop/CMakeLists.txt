@@ -147,6 +147,8 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/fatrop/${incl}" # source directory
         PATTERN "*.h" # select C header files
 )
 endforeach()
+install(FILES fatrop.hpp
+        DESTINATION "include/fatrop/")
 
 set(INCLUDE_INSTALL_DIR "include")
 set(LIBRARY_INSTALL_DIR "lib")
