@@ -314,10 +314,7 @@ fatrop_int StageOCPApplication::optimize()
 {
     fatrop_int ret = NLPApplication::optimize();
     last_solution_.set_parameters(global_parameters(), stage_parameters());
-    if (ret == 0)
-    {
-        last_solution_.set_solution(last_solution_primal(), last_solution_dual(), last_solution_zL(), last_solution_zU());
-    }
+    last_solution_.set_solution(last_solution_primal(), last_solution_dual(), last_solution_zL(), last_solution_zU());
     return ret;
 }
 const StageOCPSolution &StageOCPApplication::last_solution() const
