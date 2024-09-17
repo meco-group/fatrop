@@ -24,7 +24,7 @@ namespace fatrop
                 {
                     try
                     {
-                        x_next.push_back(ustage->get_next_states().at(state));
+                        x_next.push_back(cs::MX::veccat({ustage->get_next_states().at(state)}));
                     }
                     catch (const std::exception &e)
                     {

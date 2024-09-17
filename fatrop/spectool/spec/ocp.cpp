@@ -186,15 +186,15 @@ namespace fatrop
                     throw std::runtime_error("initial value has wrong size");
 
                 if (get()->is_state(var) || get()->is_control(var) || get()->is_hybrid(var) || get()->is_control_parameter(var))
-                    varr = sample(var).second;
+                    varr = sample(cs::MX::veccat({var})).second;
                 else if (get()->is_global_parameter(var))
                     varr = var;
                 else if (!cs::Function("helper", {all_vars_ocp}, {var}, cs::Dict{{"allow_free", true}}).has_free())
                     varr = var;
                 else
                     throw std::runtime_error("unrecognized variable at eval_at_initial");
-                if (value.size2() == 1)
-                    valuee = cs::MX::repmat(value, 1, varr.size2());
+                if (value.numel() != varr.numel())
+                    valuee = cs::MX::repmat(cs::MX::veccat({value}), 1, varr.size2());
                 else
                     valuee = value;
                 from.push_back(varr);
