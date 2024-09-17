@@ -170,7 +170,7 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
         {
             // cout << filter_->GetSize() << endl;
             bool switch_cond = (lin_decr_curr < 0) && (alpha_primal_accent * pow(-lin_decr_curr, s_phi) >= delta * pow(cv_curr, s_theta));
-            bool armijo = CompareLessEqual(obj_next - obj_curr, eta_phi * alpha_primal_accent * lin_decr_curr);
+            bool armijo = CompareLessEqual(obj_next - obj_curr, eta_phi * alpha_primal_accent * lin_decr_curr, obj_next);
             if (switch_cond && (cv_curr <= theta_min))
             {
                 // f-step
@@ -188,7 +188,7 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
             {
                 // h-step
                 // check sufficient decrease wrt current iterate
-                if (CompareLessEqual(cv_next, (1.0 - gamma_theta) * cv_curr) || CompareLessEqual(obj_next, obj_curr - gamma_phi * cv_curr))
+                if (CompareLessEqual(cv_next, (1.0 - gamma_theta) * cv_curr, cv_curr) || CompareLessEqual(obj_next, obj_curr - gamma_phi * cv_curr, obj_curr))
                 {
                     if (!switch_cond || !(armijo))
                     {

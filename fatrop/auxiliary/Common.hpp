@@ -29,5 +29,6 @@
 namespace fatrop
 {
     bool CompareLessEqual(double lhs, double rhs);
+    bool CompareLessEqual(double lhs, double rhs, double ref);
 } // namespace fatrop
 #endif //  COMMONINCLUDED
