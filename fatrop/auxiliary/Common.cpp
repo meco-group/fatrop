@@ -29,4 +29,9 @@ namespace fatrop
         double mach_eps = std::numeric_limits<double>::epsilon();
         return (lhs - rhs <= 10. * mach_eps * std::max(std::abs(rhs), std::abs(lhs)));
     }
+    bool CompareLessEqual(double lhs, double rhs, double ref)
+    {
+        double mach_eps = std::numeric_limits<double>::epsilon();
+        return (lhs - rhs <= 10. * mach_eps * std::abs(ref));
+    }
 }
