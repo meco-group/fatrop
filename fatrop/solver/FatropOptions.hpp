@@ -22,6 +22,7 @@
 #include <map>
 #include <type_traits>
 #include <iostream>
+#include <vector>
 #include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
@@ -82,10 +83,10 @@ namespace fatrop
         void register_option(const BooleanOption &option);
         void register_option(const StringOption &option);
         friend auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &;
-        std::map<std::string, DoubleOption> numeric_options;
-        std::map<std::string, IntegerOption> integer_options;
-        std::map<std::string, BooleanOption> boolean_options;
-        std::map<std::string, StringOption> string_options;
+        std::map<std::string, std::vector<DoubleOption>> numeric_options;
+        std::map<std::string, std::vector<IntegerOption>> integer_options;
+        std::map<std::string, std::vector<BooleanOption>> boolean_options;
+        std::map<std::string, std::vector<StringOption>> string_options;
         std::map<std::string, std::string> prebuilt_string;
         std::map<std::string, double> prebuilt_double;
     };
