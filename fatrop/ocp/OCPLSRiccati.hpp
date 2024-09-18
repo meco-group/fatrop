@@ -186,6 +186,13 @@ namespace fatrop
         std::shared_ptr<FatropOptions> options_;
         std::shared_ptr<FatropPrinter> printer_;
         bool it_ref = true;
+        bool perturbed_mode = false;
+        double perturbed_mode_param = 1e-6;
+        int min_it_ref = 0;
+        int max_it_ref = 5;
+        double it_ref_acc = 1e-8;
+        double lu_fact_tol = 1e-5;
+        bool diagnostic = false;
     };
 };     // namespace
 #endif // OCPLSRICCATIINCLUDED

@@ -85,7 +85,14 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> 
                                                                                                                                       options_(options),
                                                                                                                                       printer_(printer)
 {
-    options_->register_option(BooleanOption("iterative_refinement", "iterative ref", &it_ref, true));
+    options_->register_option(BooleanOption("linsol_iterative_refinement", "iterative ref", &it_ref, true));
+    options_->register_option(BooleanOption("linsol_perturbed_mode", "linear solver perturbed mode", &perturbed_mode, false));
+    options_->register_option(BooleanOption("linsol_diagnostic", "linear solver diagnostic mode", &diagnostic, false));
+    options_->register_option(DoubleOption::lower_bounded("linsol_perturbed_mode_param", "linear solver perturbed mode param", &perturbed_mode_param, 1e-6, 0.));
+    options_->register_option(IntegerOption::lower_bounded("linsol_min_it_ref", "minimum number of iterative refinement steps", &min_it_ref, 0, 0));
+    options_->register_option(IntegerOption::lower_bounded("linsol_max_it_ref", "maximum number of iterative refinement steps", &max_it_ref, 5, 0));
+    options_->register_option(DoubleOption::lower_bounded("linsol_min_it_acc", "stopping criterion for iterative refinement procedure", &it_ref_acc, 1e-8, 0.));
+    options_->register_option(DoubleOption::lower_bounded("linsol_lu_fact_tol", "pivoting tolerance parameter for lu fact", &lu_fact_tol, 1e-5, 0.));
 };
 fatrop_int OCPLSRiccati::solve_pd_sys(
     OCPKKTMemory *OCP,
@@ -100,7 +107,9 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
     // lastused_.inertia_correction_c = inertia_correction_c;
     // lastused_.inertia_correction_w = inertia_correction_w;
     int ret;
-    if (inertia_correction_c == 0.0)
+    if (perturbed_mode)
+        ret = solve_pd_sys_degenerate(OCP, inertia_correction_w, perturbed_mode_param, ux, lam, delta_s, sigma_total, gradb_total);
+    else if (inertia_correction_c == 0.0)
     {
         ret = solve_pd_sys_normal(OCP, inertia_correction_w, ux, lam, delta_s, sigma_total, gradb_total);
     }
@@ -112,7 +121,6 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
         return ret;
     if (it_ref)
     {
-        const fatrop_int min_it_ref = 0;
         double err_curr = 0.0;
         get_rhs(
             OCP,
@@ -127,7 +135,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
         double max_norm = max(Linf(rhs_gradb2[0]), max(Linf(rhs_g_ineq2[0]), max(Linf(rhs_g2[0]), max(Linf(rhs_rq2[0]), Linf(rhs_b2[0])))));
         max_norm = (max_norm == 0.0) ? 1.0 : max_norm;
         double error_prev = -1.0;
-        for (fatrop_int i = 0; i < 5; i++)
+        for (fatrop_int i = 0; i < max_it_ref; i++)
         {
             // blasfeo_tic(&timer);
             compute_pd_sys_times_vec(
@@ -157,10 +165,11 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
             // cout << "residu g_ineq:  " << Linf(rhs_g_ineq[0]) / max_norm << "  ";
             // cout << "residu gradb:  " << Linf(rhs_gradb[0]) / max_norm  << "  "<<endl;
             err_curr = max(Linf(rhs_gradb[0]), max(Linf(rhs_g_ineq[0]), max(Linf(rhs_g[0]), max(Linf(rhs_rq[0]), Linf(rhs_b[0]))))) / max_norm;
-            // cout << "residu:  " << err_curr << endl;
+            if (diagnostic)
+                printer_->level(1) << "residu:  " << err_curr << endl;
             if (i >= min_it_ref)
             {
-                if (err_curr < 1e-6 || (error_prev > 0.0 && err_curr > 1.0 * error_prev))
+                if (err_curr < it_ref_acc || (error_prev > 0.0 && err_curr > 1 * error_prev))
                 {
                     if (err_curr > 1e-8)
                     {
@@ -172,7 +181,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys(
             // blasfeo_tic(&timer);
             solve_rhs(
                 OCP,
-                inertia_correction_w, inertia_correction_c,
+                inertia_correction_w, perturbed_mode ? perturbed_mode_param : inertia_correction_c,
                 ux_test[0],
                 lam_test[0],
                 delta_s_test[0],
@@ -526,7 +535,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
             // symmetric transformation, done a little different than in paper, in order to fuse LA operations
             // LU_FACT_TRANSPOSE(Ggtstripe[:gamma_k, nu+nx+1], nu max)
             // if(k==K-2) blasfeo_print_dmat(1, gamma_k, Ggt_stripe_p, nu+nx, 0);
-            LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k);
+            LU_FACT_transposed(gamma_k, nu + nx + 1, nu, rank_k, Ggt_stripe_p, Pl_p + k, Pr_p + k, lu_fact_tol);
 
             rho_p[k] = rank_k;
             if (gamma_k - rank_k > 0)
@@ -610,7 +619,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
         {
             GETR(gamma_I, nx + 1, Hh_p + 0, 0, 0, HhIt_p, 0, 0); // transposition may be avoided
             // HhIt[0].print();
-            LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p);
+            LU_FACT_transposed(gamma_I, nx + 1, nx, rankI, HhIt_p, PlI_p, PrI_p, lu_fact_tol);
             if (rankI < gamma_I)
                 return -2;
             // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from the implementation)
