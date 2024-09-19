@@ -30,19 +30,7 @@ if (BUILD_WITH_BLASFEO)
     add_subdirectory(blasfeo)
 
 else()
-    set(BLASFEO_INSTALL_DIR "/opt/blasfeo" CACHE PATH "Path to blasfeo installation directory")
-    # find_library(blasfeo NAMES blasfeo PATHS ${BLASFEO_INSTALL_DIR}/lib)
-
-    find_path(BLASFEO_INCLUDE_DIR NAMES "blasfeo.h" PATHS ${BLASFEO_INSTALL_DIR}/include)
-    find_library(BLASFEO_LIBRARY NAMES blasfeo HINTS ${BLASFEO_INSTALL_DIR}/lib)
-
-    # Create an imported static target for blasfeo
-    add_library(blasfeo STATIC IMPORTED GLOBAL)
-    # Set the path to the library file
-    set_target_properties(blasfeo PROPERTIES IMPORTED_LOCATION ${BLASFEO_LIBRARY})
-
-    # Set the path to the include directory
-    set_target_properties(blasfeo PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${BLASFEO_INCLUDE_DIR})
+    find_package(blasfeo REQUIRED)
 
 endif()
 
