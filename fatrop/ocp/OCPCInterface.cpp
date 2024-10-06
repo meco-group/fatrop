@@ -482,6 +482,7 @@ namespace fatrop
         if (n=="theta_mu") return 0;
         if (n=="tol") return 0;
         if (n=="warm_start_mult_bound_push") return 0;
+        if (n=="linsol_perturbed_mode_param") return 0;
         if (n=="acceptable_iter") return 1;
         if (n=="max_iter") return 1;
         if (n=="max_soc") return 1;
@@ -490,9 +491,16 @@ namespace fatrop
         if (n=="accept_every_trial_step") return 2;
         if (n=="iterative_refinement") return 2;
         if (n=="iterative_refinement_SOC") return 2;
+        if (n=="linsol_min_it_ref") return 2;
+        if (n=="linsol_max_it_ref") return 2;
+        if (n=="linsol_min_it_acc") return 2;
+        if (n=="linsol_lu_fact_tol") return 2;
         if (n=="ls_scaling") return 2;
         if (n=="recalc_y") return 2;
         if (n=="warm_start_init_point") return 2;
+        if (n=="linsol_iterative_refinement") return 2;
+        if (n=="linsol_perturbed_mode") return 2;
+        if (n=="linsol_diagnostic") return 2;
         return -1;
     }
 
