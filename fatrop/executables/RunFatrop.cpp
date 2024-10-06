@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         app.set_option("bound_push", 1e-7); // all *_bound_push variables
         app.set_option("warm_start_mult_bound_push", 1e-7); 
         app.set_option("accept_every_trial_step", false);
-        app.set_option("iterative_refinement", false); // fast_step_computation
+        app.set_option("linsol_iterative_refinement", false); // fast_step_computation
         app.set_option("warm_start_init_point", true);
         app.set_option("print_level", 0);
         // cout << app -> GetOptions();
