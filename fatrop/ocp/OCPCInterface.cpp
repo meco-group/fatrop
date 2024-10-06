@@ -489,8 +489,6 @@ namespace fatrop
         if (n=="max_watchdog_steps") return 1;
         if (n=="print_level") return 1;
         if (n=="accept_every_trial_step") return 2;
-        if (n=="iterative_refinement") return 2;
-        if (n=="iterative_refinement_SOC") return 2;
         if (n=="linsol_min_it_ref") return 2;
         if (n=="linsol_max_it_ref") return 2;
         if (n=="linsol_min_it_acc") return 2;
