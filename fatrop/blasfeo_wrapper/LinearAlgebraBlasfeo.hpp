@@ -124,6 +124,7 @@ void blasfeo_ref_dtrsm_rlnn_copy(int m, int n, double alpha, struct MAT *sA, int
 #include <iostream>
 extern "C"
 {
+#define NOMINMAX
 #include <blasfeo.h>
 }
 #include "fatrop/auxiliary/LinearAlgebra.hpp"
