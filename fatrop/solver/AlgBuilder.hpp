@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef ALBBUILDERINCLUDED
-#define ALBBUILDERINCLUDED
+#ifndef __fatrop_solver_AlgBuilder_hpp__
+#define __fatrop_solver_AlgBuilder_hpp__
 // #include "NLPAlg.hpp"
 #include "FatropAlg.hpp"
 #include "fatrop/auxiliary/Common.hpp"
@@ -73,4 +73,4 @@ namespace fatrop
     };
 };
 
-#endif // ALBBUILDERINCLUDED
+#endif // __fatrop_solver_AlgBuilder_hpp__

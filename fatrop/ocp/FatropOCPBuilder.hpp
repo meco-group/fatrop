@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPOCPBUILDERINCLUDED
-#define FATROPOCPBUILDERINCLUDED
+#ifndef __fatrop_ocp_FatropOCPBuilder_hpp__
+#define __fatrop_ocp_FatropOCPBuilder_hpp__
 #include "fatrop/ocp/OCP.hpp"
 #include "fatrop/ocp/FatropOCP.hpp"
 #include "fatrop/ocp/OCPAbstract.hpp"
@@ -49,4 +49,4 @@ namespace fatrop
     };
 }
 
-#endif // !OCPALGBUILDERINCLUDED
+#endif // __fatrop_ocp_FatropOCPBuilder_hpp__

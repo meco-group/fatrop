@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPPARAMSINCLUDED
-#define FATROPPARAMSINCLUDED
+#ifndef __fatrop_solver_FatropOptions_hpp__
+#define __fatrop_solver_FatropOptions_hpp__
 #include <string>
 #include <map>
 #include <type_traits>
@@ -92,4 +92,4 @@ namespace fatrop
     };
 
 } // namespace fatrop
-#endif // FatropOptions
+#endif // __fatrop_solver_FatropOptions_hpp__

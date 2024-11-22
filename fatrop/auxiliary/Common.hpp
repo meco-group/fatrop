@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef COMMONINCLUDED
-#define COMMONINCLUDED
+#ifndef __fatrop_auxiliary_common_hpp__
+#define __fatrop_auxiliary_common_hpp__
 #include <cassert>
 #if DEBUG
 #define DBGASSERT(assertion) assert(assertion);
@@ -31,4 +31,4 @@ namespace fatrop
     bool CompareLessEqual(double lhs, double rhs);
     bool CompareLessEqual(double lhs, double rhs, double ref);
 } // namespace fatrop
-#endif //  COMMONINCLUDED
+#endif //  __fatrop_auxiliary_common_hpp__

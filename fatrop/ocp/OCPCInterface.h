@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 
-#ifndef OCPCINTERFACEINCLUDED
-#define OCPCINTERFACEINCLUDED
+#ifndef __fatrop_ocp_OCPCInterface_hpp__
+#define __fatrop_ocp_OCPCInterface_hpp__
 
 #ifdef __cplusplus
 extern "C" {
@@ -286,4 +286,4 @@ FATROP_SYMBOL_EXPORT void fatrop_ocp_c_destroy(struct FatropOcpCSolver*);
 } // extern "C"
 #endif
 
-#endif // OCPCINTERFACEINCLUDED
+#endif // __fatrop_ocp_OCPAbstract_hpp__

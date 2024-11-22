@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef OCPALGINCLUDED
-#define OCPALGINCLUDED
+#ifndef __fatrop_ocp_FatropOCP_hpp__
+#define __fatrop_ocp_FatropOCP_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
 #include "OCPKKT.hpp"
@@ -158,4 +158,4 @@ namespace fatrop
         OCPLSScaler lsscaler_;
     };
 } // namespace fatrop
-#endif //  OCPALGINCLUDED
+#endif //  __fatrop_ocp_FatropOCP_hpp__

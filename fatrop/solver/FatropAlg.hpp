@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPALGINCLUDED
-#define FATROPALGINCLUDED
+#ifndef __fatrop_solver_FatropAlg_hpp__
+#define __fatrop_solver_FatropAlg_hpp__
 #include "fatrop/templates/NLPAlg.hpp"
 #include "FatropData.hpp"
 #include "Filter.hpp"
@@ -118,4 +118,4 @@ namespace fatrop
         fatrop_int iter_count_ = 0;
     };
 } // namespace fatrop
-#endif // FATROPALGINCLUDED
+#endif // __fatrop_solver_FatropAlg_hpp__

@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef LINESEARCHINCLUDED
-#define LINESEARCHINCLUDED
+#ifndef __fatrop_solver_LineSearch_hpp__
+#define __fatrop_solver_LineSearch_hpp__
 #include "AlgStrategy.hpp"
 #include "IterationData.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
@@ -83,4 +83,4 @@ namespace fatrop
         fatrop_int max_soc;
     };
 } // namespace fatrop
-#endif // LINESEARCHINCLUDED
+#endif // __fatrop_solver_LineSearch_hpp__

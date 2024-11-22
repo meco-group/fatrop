@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef OCPLSRICCATIINCLUDED
-#define OCPLSRICCATIINCLUDED
+#ifndef __fatrop_ocp_OCPLSRiccati_hpp__
+#define __fatrop_ocp_OCPLSRiccati_hpp__
 #include "OCPKKT.hpp"
 #include "OCPLinearSolver.hpp"
 #include "fatrop/solver/FatropPrinter.hpp"
@@ -195,4 +195,4 @@ namespace fatrop
         bool diagnostic = false;
     };
 };     // namespace
-#endif // OCPLSRICCATIINCLUDED
+#endif // __fatrop_ocp_OCPLSRiccati_hpp__

@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROP_BLASFEO_INCLUDED
-#define FATROP_BLASFEO_INCLUDED
+#ifndef __fatrop_blasfeo_wrapper_LinearAlgebraBlasfeo_hpp__
+#define __fatrop_blasfeo_wrapper_LinearAlgebraBlasfeo_hpp__
 
 // macros
 extern "C"
@@ -493,4 +493,4 @@ namespace fatrop
     void fatrop_dtrsv_unu(const fatrop_int m, const fatrop_int n, blasfeo_dmat *sA, const fatrop_int ai, const fatrop_int aj, blasfeo_dvec *sx, const fatrop_int xi, blasfeo_dvec *sz, const fatrop_int zi);
     void fatrop_dtrsv_utu(const fatrop_int m, blasfeo_dmat *sA, const fatrop_int ai, const fatrop_int aj, blasfeo_dvec *sx, const fatrop_int xi, blasfeo_dvec *sz, const fatrop_int zi);
 } // namespace fatrop
-#endif // FATROP_BLASFEO_INCLUDED
+#endif // __fatrop_blasfeo_wrapper_LinearAlgebraBlasfeo_hpp__

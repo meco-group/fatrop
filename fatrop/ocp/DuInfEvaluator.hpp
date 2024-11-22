@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef DUINFEVALINCLUDED
-#define DUINFEVALINCLUDED
+#ifndef __fatrop_function_evaluation_DuInfEvaluator_hpp__
+#define __fatrop_function_evaluation_DuInfEvaluator_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
 #include "fatrop/auxiliary/Common.hpp"
@@ -35,4 +35,4 @@ namespace fatrop
             FatropVecBF &du_inf);
     };
 }
-#endif //  DUINFEVALINCLUDED
+#endif //  __fatrop_function_evaluation_DuInfEvaluator_hpp__
