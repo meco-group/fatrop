@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPAUXILIARYINCLUDED
-#define FATROPAUXILIARYINCLUDED
+#ifndef __fatrop_auxiliary_VectorUtils_hpp__
+#define __fatrop_auxiliary_VectorUtils_hpp__
 #include <vector>
 #include "FatropVector.hpp"
 #include "fatrop/auxiliary/Common.hpp"
@@ -51,4 +51,4 @@ namespace fatrop
         return res;
     }
 };     // namespace fatrop
-#endif // FATROPAUXINCLUDED
+#endif // __fatrop_auxiliary_VectorUtils_hpp__

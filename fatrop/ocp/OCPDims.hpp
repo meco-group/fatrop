@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROP_OCPDIMS_INCLUDED
-#define FATROP_OCPDIMS_INCLUDED
+#ifndef __fatrop_ocp_OCPDims_hpp__
+#define __fatrop_ocp_OCPDims_hpp__
 #include "fatrop/auxiliary/FatropVector.hpp"
 #include "fatrop/auxiliary/Common.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
@@ -57,4 +57,4 @@ namespace fatrop
         const fatrop_int n_stage_params_tot;
     };
 } // namespace fatrop
-#endif // FATROP_OCPDIMS_INCLUDED
+#endif // __fatrop_ocp_OCPDims_hpp__

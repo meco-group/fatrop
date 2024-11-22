@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FILTERINCLUDED
-#define FILTERINCLUDED
+#ifndef __fatrop_solver_Filter_hpp__
+#define __fatrop_solver_Filter_hpp__
 #include "vector"
 #include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
@@ -51,4 +51,4 @@ namespace fatrop
     };
 } // namespace fatrop
 
-#endif // FILTERINCLUDED
+#endif // __fatrop_solver_Filter_hpp__

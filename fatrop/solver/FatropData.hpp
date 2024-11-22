@@ -18,8 +18,8 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 
 // solver data
-#ifndef FATROPDATAINCLUDED
-#define FATROPDATAINCLUDED
+#ifndef __fatrop_solver_FatropData_hpp__
+#define __fatrop_solver_FatropData_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
 #include "fatrop/auxiliary/Common.hpp"
@@ -185,4 +185,4 @@ namespace fatrop
         double warm_start_mult_bound_push;
     };
 }
-#endif // FATROPDATAINCLUDED
+#endif // __fatrop_solver_FatropData_hpp__

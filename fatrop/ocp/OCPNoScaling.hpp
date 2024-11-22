@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef NOSCALINGMETHODINCLUDED
-#define NOSCALINGMETHODINCLUDED
+#ifndef __fatrop_ocp_OCPNoScaling_hpp__
+#define __fatrop_ocp_OCPNoScaling_hpp__
 #include "fatrop/solver/FatropData.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
 #include "fatrop/solver/AlgStrategy.hpp"
@@ -39,4 +39,4 @@ namespace fatrop
     };
 
 } // namespace fatrop
-#endif // !SCALINGMETHODINCLUDED
+#endif // __fatrop_ocp_OCPNoScaling_hpp__

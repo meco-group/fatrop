@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROP_VECTOR_INCLUDED
-#define FATROP_VECTOR_INCLUDED
+#ifndef __fatrop_auxiliary_FatropVector_hpp__
+#define __fatrop_auxiliary_FatropVector_hpp__
 #include <vector>
 #include <assert.h>
 #include <utility>
@@ -140,4 +140,4 @@ namespace fatrop
     }
 } // namespace fatrop
 
-#endif // FATROP_VECTOR_INCLUDED
+#endif // __fatrop_auxiliary_FatropVector_hpp__

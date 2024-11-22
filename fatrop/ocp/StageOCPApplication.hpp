@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef BASICOCPAPPLICATIONINCLUDED
-#define BASICOCPAPPLICATIONINCLUDED
+#ifndef __fatrop_ocp_StageOCPApplication_hpp__
+#define __fatrop_ocp_StageOCPApplication_hpp__
 #include "fatrop/solver/FatropStats.hpp"
 #include "fatrop/solver/FatropAlg.hpp"
 #include "fatrop/ocp/StageOCPExpressions.hpp"
@@ -239,4 +239,4 @@ namespace fatrop
         static StageOCPApplication from_rockit_interface(const std::string &functions, const std::string &json_spec_file);
     };
 }
-#endif // BASICOCPAPPLICATIONINCLUDED
+#endif // __fatrop_ocp_StageOCPApplication_hpp__

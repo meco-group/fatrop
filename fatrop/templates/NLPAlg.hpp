@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef NLPINCLUDED
-#define NLPINCLUDED
+#ifndef __fatrop_templates_NLPAlg_hpp__
+#define __fatrop_templates_NLPAlg_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
@@ -101,4 +101,4 @@ namespace fatrop
         virtual void update_mu(double mu){};
     };
 } // namespace fatrop
-#endif // NLPINCLUDED
+#endif // __fatrop_templates_NLPAlg_hpp__
