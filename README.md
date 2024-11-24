@@ -36,7 +36,7 @@ The main features of the solver are:
 
 ## Disclaimer
 
-At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying Fatrop problems. An example is available in the **specification** branch, spectool/example.cpp.
+At this moment the easiest way to get specify fatrop problems is by using the [rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface. See [Install rockit with Fatropy interface](#install-rockit-with-fatropy-interface) for installation instructions. The fatrop-rockit-plugin is not very stable yet, and still under development. Apart form the rockit interface, we are working on a ocp specification framework, especially developed for specifying Fatrop problems.
 
 The spectool has several advantages over the rockit interface:
 - it supports fatrop problems in all its generality. For example: multi-stage problems are not supported by the fatrop-rockit-interface
