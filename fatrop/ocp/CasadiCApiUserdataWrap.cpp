@@ -2,6 +2,7 @@
 #include <math.h>
 #include "fatrop/ocp/StageOCPApplication.hpp"
 #include "fatrop/ocp/OCPDims.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 // c++ stuff here
 namespace fatrop
 {

@@ -23,6 +23,9 @@
 #include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
+    // forward declaration
+    class FatropOptions;
+
     class OCPLinearSolver
     {
     public:
@@ -69,6 +72,7 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb) = 0;
+        virtual void update_options(const FatropOptions &options) = 0;
     };
 
 } // namespace fatrop

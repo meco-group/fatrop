@@ -45,6 +45,11 @@ namespace fatrop
         {
             return filterdata_.size();
         }
+        void reserve(const fatrop_int size)
+        {
+            
+            filterdata_.reserve(size);
+        }
 
     private:
         std::vector<FilterData> filterdata_;

@@ -41,6 +41,8 @@ namespace fatrop
     class OCPAbstract;
     class OCPDims;
     class OCP;
+    class AlgBuilder;
+    class FatropOptionsRegistry;
     class FatropSolution
     {
     public:
@@ -104,6 +106,8 @@ namespace fatrop
         const std::shared_ptr<OCPAbstract> ocp_;
         std::shared_ptr<Journaller> journaller_;
         std::shared_ptr<FatropAlg> fatropalg_;
+        std::shared_ptr<AlgBuilder> algbuilder;
+        std::shared_ptr<FatropOptionsRegistry> options_registry;
     };
 
     class OCPApplication : public NLPApplication

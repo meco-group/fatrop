@@ -50,6 +50,7 @@ namespace fatrop
         virtual fatrop_int initialize_second_order_correction() const;
         virtual fatrop_int exit_second_order_correction() const;
         virtual fatrop_int compute_second_order_correction(double alpha) const;
+        virtual void update_options(const FatropOptions &options) = 0;
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropPrinter> printer_;
@@ -69,6 +70,7 @@ namespace fatrop
             const std::shared_ptr<Filter> &filter,
             const std::shared_ptr<Journaller> &journaller, const std::shared_ptr<FatropPrinter> &printer);
         void initialize();
+        void update_options(const FatropOptions &options) override;
         LineSearchInfo find_acceptable_trial_point(double mu, bool small_sd, bool from_backup);
         std::shared_ptr<Filter> filter_;
         std::shared_ptr<Journaller> journaller_;

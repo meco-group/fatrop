@@ -134,20 +134,14 @@ FatropData::FatropData(const NLPDims &nlpdims, const shared_ptr<FatropOptions> &
                                                                                                                                     printer_(printer)
 {
     initialize();
-    params->register_option(DoubleOption::lower_bounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", &warm_start_mult_bound_push, 1e-2, 0.0));
-    params->register_option(DoubleOption::lower_bounded("smax", "smax", &smax, 100.0, 0.0));
-    params->register_option(DoubleOption::lower_bounded("bound_push", "kappa1", &kappa1, 1e-2, 0.0));
-    params->register_option(DoubleOption::lower_bounded("bound_frac", "kappa2", &kappa2, 1e-2, 0.0));
-    params->register_option(DoubleOption::lower_bounded("kappa_sigma", "kappa_sigma", &kappa_sigma, 1e10, 0.0));
-    params->register_option(DoubleOption::lower_bounded("bound_relax_factor", "bound_relax_factor", &bound_relax_factor, 1e-8, 0.0));
-    params->register_option(DoubleOption::lower_bounded("constr_viol_tol", "constr_viol_tol", &constr_viol_tol, 1e-4, 0.0));
 }
 void FatropData::initialize()
 {
-    kappa_d = params->kappa_d;
+    // kappa_d = params->kappa_d;
 }
 fatrop_int FatropData::reset()
 {
+    init_bounds();
     VEC *lower_bound_p = (VEC *)s_lower;
     VEC *upper_bound_p = (VEC *)s_upper;
     VEC *zL_p = (VEC *)zL_curr;
@@ -615,7 +609,7 @@ void FatropData::set_bounds(const vector<double> &lowerin, const vector<double> 
 {
     s_lower_orig = lowerin;
     s_upper_orig = upperin;
-    init_bounds();
+    // init_bounds();
 }
 void FatropData::init_bounds()
 {
@@ -780,6 +774,18 @@ bool FatropData::small_step_size()
             return false;
     }
     return true;
+}
+void FatropData::update_options(const FatropOptions& options)
+{
+    warm_start_mult_bound_push = options.warm_start_mult_bound_push.get();
+    smax = options.smax.get();
+    kappa1 = options.bound_push.get();
+    kappa2 = options.bound_frac.get();
+    kappa_sigma = options.kappa_sigma.get();
+    bound_relax_factor = options.bound_relax_factor.get();
+    constr_viol_tol = options.constr_viol_tol.get();
+    kappa_d = options.kappa_d.get();
+
 }
 
 // void FatropData::B

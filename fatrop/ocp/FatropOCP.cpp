@@ -45,8 +45,6 @@ FatropOCP::FatropOCP(
                                                                                                                                       lam_test(nlpdims_.neqs, 1),
                                                                                                                                       delta_s_test(nlpdims_.nineqs, 1), lsscaler_(dims_)
 {
-    options_->register_option(BooleanOption("iterative_refinement_SOC", "Use iterative refinement for SOC", &it_ref, true));
-    options_->register_option(BooleanOption("ls_scaling", "Use automatic scaling for linear system", &ls_scaling, true));
 }
 int FatropOCP::eval_lag_hess(
     double obj_scale,
@@ -359,3 +357,9 @@ void FatropOCP::reset()
 {
     ocp_->reset();
 }
+void FatropOCP::update_options(const FatropOptions &options)
+{
+    it_ref = options.iterative_refinement_SOC.get();
+    ls_scaling = options.ls_scaling.get();
+    ls_ -> update_options(options);
+};
