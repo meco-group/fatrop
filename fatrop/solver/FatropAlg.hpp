@@ -90,6 +90,8 @@ namespace fatrop
             resto_alg_ = resto_alg;
         };
 
+        void update_options(const FatropOptions &options);
+
     private:
         double lammax;
         double mu0;

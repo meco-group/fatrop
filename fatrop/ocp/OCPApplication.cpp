@@ -11,7 +11,7 @@
 #include "fatrop/solver/NLPL1.hpp"
 using namespace fatrop;
 using namespace std;
-NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), dirty(true)
+NLPApplication::NLPApplication() : fatropoptions_(make_shared<FatropOptions>()), dirty(true), options_registry(make_shared<FatropOptionsRegistry>(*fatropoptions_.get()))
 {
     if (printer_ == nullptr)
     {
@@ -24,26 +24,33 @@ void NLPApplication::build(const shared_ptr<FatropNLP> &nlp, const shared_ptr<Fa
     // keep nlp around for getting nlpdims
     nlp_ = nlp;
     // check if prebuilt option "inequality_handling" is in prebuilt options
-    if (fatropoptions_->prebuilt_string.find("inequality_handling") == fatropoptions_->prebuilt_string.end())
+    if (fatropoptions_->inequality_handling.get() == "pd_ip")
     {
-        fatropoptions_ ->prebuilt_set<std::string>("inequality_handling", "pd_ip");
     }
-    if(fatropoptions_->prebuilt_string["inequality_handling"] == "L1_pen")
+    else if(fatropoptions_->inequality_handling.get() == "L1_pen")
     {
         nlp_ = std::make_shared<NLPL1>(nlp, fatropoptions_);
     }
+    else
+    {
+        throw std::runtime_error("Unknown inequality handling method: " + fatropoptions_->inequality_handling.get());
+    }
     std::shared_ptr<FatropData> fatropdata_resto;
-    AlgBuilder algbuilder;
-    algbuilder.set_printer(printer_);
-    algbuilder.build_fatrop_algorithm_objects(nlp_, nlp_resto, fatropoptions_, fatropdata_, fatropdata_resto, journaller_);
-    fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "prfatrop_fatrop_int level", &printer_->print_level(), 10));
-    fatropalg_ = algbuilder.build_algorithm();
+    algbuilder = std::make_shared<AlgBuilder>();
+    algbuilder -> set_printer(printer_);
+    algbuilder -> build_fatrop_algorithm_objects(nlp_, nlp_resto, fatropoptions_, fatropdata_, fatropdata_resto, journaller_);
+    printer_ -> print_level() = fatropoptions_->print_level.get();
+    // fatropoptions_->register_option(IntegerOption::un_bounded("print_level", "prfatrop_fatrop_int level", &printer_->print_level(), 10));
+    fatropalg_ = algbuilder -> build_algorithm();
     dirty = false;
 }
 
 fatrop_int NLPApplication::optimize() const
 {
     assert(!dirty);
+    // update options
+    algbuilder -> update_options(*fatropoptions_);
+    // solve optimization problem
     fatrop_int ret = fatropalg_->optimize();
     return ret;
 }
@@ -93,11 +100,7 @@ FatropVecBF &NLPApplication::initial_guess_zU() const
 template <typename T>
 void NLPApplication::set_option(const string &option_name, T value)
 {
-    // check if application is built
-    if(dirty)
-    fatropoptions_->prebuilt_set(option_name, value);
-    else
-    fatropoptions_->set(option_name, value);
+    options_registry->set(option_name, value);
 }
 template void NLPApplication::set_option<fatrop_int>(const string &, int);
 template void NLPApplication::set_option<double>(const string &, double);

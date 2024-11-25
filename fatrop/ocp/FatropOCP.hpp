@@ -117,6 +117,7 @@ namespace fatrop
         NLPDims get_nlp_dims() const override;
         void finalize() override;
         void reset() override;
+        void update_options(const FatropOptions& options) override;
 
     public:
         std::shared_ptr<OCP> ocp_;
