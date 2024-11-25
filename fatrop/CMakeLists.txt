@@ -27,6 +27,7 @@ auxiliary/FatropVector.hpp                  auxiliary/FatropVector.cpp
 auxiliary/LinearAlgebra.hpp                 auxiliary/LinearAlgebra.cpp
 function_evaluation/FunctionEvaluation.hpp  function_evaluation/FunctionEvaluation.cpp
 ocp/OCPAbstract.hpp                         ocp/OCPAbstract.cpp
+ocp/OCPApplication.hpp                      ocp/OCPApplication.cpp
 ocp/StageOCPApplication.hpp                 ocp/StageOCPApplication.cpp
 ocp/OCPAdapter.hpp                          ocp/OCPAdapter.cpp
 ocp/StageOCP.hpp                            ocp/StageOCP.cpp
