@@ -19,26 +19,26 @@
 #include "FatropOptions.hpp"
 using namespace fatrop;
 
-void OptionBase::set(const OptionValueVariant &value)
-{
-    switch (value.type)
-    {
-    case OptionType::INT:
-        set(*static_cast<int *>(value.value));
-        break;
-    case OptionType::DOUBLE:
-        set(*static_cast<double *>(value.value));
-        break;
-    case OptionType::BOOL:
-        set(*static_cast<bool *>(value.value));
-        break;
-    case OptionType::STRING:
-        set(std::string(static_cast<char *>(value.value)));
-        break;
-    default:
-        throw std::invalid_argument("Invalid type for option " + name);
-    }
-}
+// void OptionBase::set(const OptionValueVariant &value)
+// {
+//     switch (value.type)
+//     {
+//     case OptionType::INT:
+//         set(*static_cast<int *>(value.value));
+//         break;
+//     case OptionType::DOUBLE:
+//         set(*static_cast<double *>(value.value));
+//         break;
+//     case OptionType::BOOL:
+//         set(*static_cast<bool *>(value.value));
+//         break;
+//     case OptionType::STRING:
+//         set(std::string(static_cast<char *>(value.value)));
+//         break;
+//     default:
+//         throw std::invalid_argument("Invalid type for option " + name);
+//     }
+// }
 void BoolOption::set(const std::string &value)
 {
     if (value == "yes")
@@ -157,5 +157,5 @@ template void FatropOptionsRegistry::set<double>(const std::string &, double);
 template void FatropOptionsRegistry::set<bool>(const std::string &, bool);
 template void FatropOptionsRegistry::set<std::string>(const std::string &, std::string);
 template void FatropOptionsRegistry::set<const std::string&>(const std::string &, const std::string&);
-template void FatropOptionsRegistry::set<OptionValueVariant>(const std::string &, OptionValueVariant);
-template void FatropOptionsRegistry::set<const OptionValueVariant&>(const std::string &, const OptionValueVariant&);
+// template void FatropOptionsRegistry::set<OptionValueVariant>(const std::string &, OptionValueVariant);
+// template void FatropOptionsRegistry::set<const OptionValueVariant&>(const std::string &, const OptionValueVariant&);

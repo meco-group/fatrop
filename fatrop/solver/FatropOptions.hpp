@@ -39,8 +39,8 @@ namespace fatrop
         BOOL,   ///< Represents a boolean option.
         STRING  ///< Represents a string option.
     };
-    // forward declaration
-    struct OptionValueVariant;
+    // // forward declaration
+    // struct OptionValueVariant;
 
     /**
      * @class OptionBase
@@ -56,7 +56,7 @@ namespace fatrop
         virtual void set(double value) { throw std::invalid_argument("Invalid type for option " + name); };
         virtual void set(const std::string &value) { throw std::invalid_argument("Invalid type " + name); };
         virtual void set(bool value) { throw std::invalid_argument("Invalid type " + name); };
-        virtual void set(const OptionValueVariant &value);
+        // virtual void set(const OptionValueVariant &value);
         std::string name;
         std::string description;
     };
@@ -234,23 +234,23 @@ namespace fatrop
         DoubleOption resto_xi = DoubleOption::lower_bounded("resto_xi", "Resto xi parameter", 1., 0.0);
     };
 
-    /**
-     * @struct OptionValueVariant
-     *
-     * A structure used to hold a value of different types (int, double, string)
-     * and identify its type. This structure is used to pass values to options.
-     */
-    struct OptionValueVariant
-    {
-        OptionValueVariant(int value_in) : type(OptionType::INT), value(malloc(sizeof(int))) { *static_cast<int *>(value) = value_in; }
-        OptionValueVariant(double value_in) : type(OptionType::DOUBLE), value(malloc(sizeof(double))) { *static_cast<double *>(value) = value_in; }
-        OptionValueVariant(bool value_in) : type(OptionType::BOOL), value(malloc(sizeof(bool))) { *static_cast<bool *>(value) = value_in; }
-        OptionValueVariant(const std::string &value_in) : type(OptionType::STRING), value(malloc((value_in.size()+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in.c_str()); }
-        OptionValueVariant(const char *value_in) : type(OptionType::STRING), value(malloc((std::strlen(value_in)+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in); }
-        ~OptionValueVariant() { free(value); }
-        OptionType type;
-        void *value;
-    };
+    // /**
+    //  * @struct OptionValueVariant
+    //  *
+    //  * A structure used to hold a value of different types (int, double, string)
+    //  * and identify its type. This structure is used to pass values to options.
+    //  */
+    // struct OptionValueVariant
+    // {
+    //     OptionValueVariant(int value_in) : type(OptionType::INT), value(malloc(sizeof(int))) { *static_cast<int *>(value) = value_in; }
+    //     OptionValueVariant(double value_in) : type(OptionType::DOUBLE), value(malloc(sizeof(double))) { *static_cast<double *>(value) = value_in; }
+    //     OptionValueVariant(bool value_in) : type(OptionType::BOOL), value(malloc(sizeof(bool))) { *static_cast<bool *>(value) = value_in; }
+    //     OptionValueVariant(const std::string &value_in) : type(OptionType::STRING), value(malloc((value_in.size()+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in.c_str()); }
+    //     OptionValueVariant(const char *value_in) : type(OptionType::STRING), value(malloc((std::strlen(value_in)+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in); }
+    //     ~OptionValueVariant() { free(value); }
+    //     OptionType type;
+    //     void *value;
+    // };
 
     /**
      * @class FatropOptionsRegistry
