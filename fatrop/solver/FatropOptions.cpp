@@ -43,11 +43,11 @@ void BoolOption::set(const std::string &value)
 {
     if (value == "yes")
     {
-        Option<bool>::set(true);
+        Option<bool>::set_value(true);
     }
     else if (value == "no")
     {
-        Option<bool>::set(false);
+        Option<bool>::set_value(false);
     }
     else
     {
@@ -76,7 +76,7 @@ void NumericOption<T>::set(T value_in)
     {
         throw std::invalid_argument("Value out of bounds");
     }
-    Option<T>::set(value_in);
+    Option<T>::set_value(value_in);
 }
 // instantiate the template for int and double
 template class NumericOption<int>;
