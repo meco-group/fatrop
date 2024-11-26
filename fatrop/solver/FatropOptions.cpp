@@ -55,19 +55,19 @@ void BoolOption::set(const std::string &value)
     }
 }
 template <typename T>
-NumericOption<T> NumericOption<T>::lower_bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound)
+NumericOption<T> NumericOption<T>::lower_bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, bool requires_reinitialization)
 {
-    return NumericOption<T>(name, description, default_value, true, lower_bound, false, 0);
+    return NumericOption<T>(name, description, default_value, true, lower_bound, false, 0, requires_reinitialization);
 }
 template <typename T>
-NumericOption<T> NumericOption<T>::upper_bounded(const std::string &name, const std::string &description, const T &default_value, const T &upper_bound)
+NumericOption<T> NumericOption<T>::upper_bounded(const std::string &name, const std::string &description, const T &default_value, const T &upper_bound, bool requires_reinitialization)
 {
-    return NumericOption<T>(name, description, default_value, false, 0, true, upper_bound);
+    return NumericOption<T>(name, description, default_value, false, 0, true, upper_bound, requires_reinitialization);
 }
 template <typename T>
-NumericOption<T> NumericOption<T>::bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, const T &upper_bound)
+NumericOption<T> NumericOption<T>::bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, const T &upper_bound, bool requires_reinitialization)
 {
-    return NumericOption<T>(name, description, default_value, true, lower_bound, true, upper_bound);
+    return NumericOption<T>(name, description, default_value, true, lower_bound, true, upper_bound, requires_reinitialization);
 }
 template <typename T>
 void NumericOption<T>::set(T value_in)
