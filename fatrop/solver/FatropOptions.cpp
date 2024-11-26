@@ -29,6 +29,9 @@ void OptionBase::set(const OptionValueVariant &value)
     case OptionType::DOUBLE:
         set(*static_cast<double *>(value.value));
         break;
+    case OptionType::BOOL:
+        set(*static_cast<bool *>(value.value));
+        break;
     case OptionType::STRING:
         set(std::string(static_cast<char *>(value.value)));
         break;
