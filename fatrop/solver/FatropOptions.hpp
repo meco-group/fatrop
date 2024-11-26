@@ -262,8 +262,9 @@ namespace fatrop
     {
     public:
         FatropOptionsRegistry(FatropOptions &options);
-        void set(const std::string &name, const OptionValueVariant &value);
-
+        // T can be int, double, bool, string, or an OptionValueVariant
+        template <typename T>
+        void set(const std::string &name, T value);
     public:
         std::unordered_map<std::string, OptionBase *> options;
     };

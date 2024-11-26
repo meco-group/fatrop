@@ -141,7 +141,9 @@ FatropOptionsRegistry::FatropOptionsRegistry(FatropOptions &options)
         this->options[option->name] = option;
     }
 }
-void FatropOptionsRegistry::set(const std::string &name, const OptionValueVariant &value)
+
+template<typename T>
+void FatropOptionsRegistry::set(const std::string &name, T value)
 {
     if (options.find(name) == options.end())
     {
@@ -149,3 +151,11 @@ void FatropOptionsRegistry::set(const std::string &name, const OptionValueVarian
     }
     options[name]->set(value);
 }
+
+template void FatropOptionsRegistry::set<int>(const std::string &, int);
+template void FatropOptionsRegistry::set<double>(const std::string &, double);
+template void FatropOptionsRegistry::set<bool>(const std::string &, bool);
+template void FatropOptionsRegistry::set<std::string>(const std::string &, std::string);
+template void FatropOptionsRegistry::set<const std::string&>(const std::string &, const std::string&);
+template void FatropOptionsRegistry::set<OptionValueVariant>(const std::string &, OptionValueVariant);
+template void FatropOptionsRegistry::set<const OptionValueVariant&>(const std::string &, const OptionValueVariant&);
