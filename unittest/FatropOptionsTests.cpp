@@ -13,7 +13,7 @@ protected:
 
 // Test valid setting for IntOption
 TEST_F(OptionTests, TestSetIntOption) {
-    OptionValueVariant new_value(200);  // An int value to set
+    int new_value(200);  // An int value to set
     registry.set("max_iter", new_value);
 
     EXPECT_EQ(options.max_iter.get(), 200);  // Validate the value was set correctly
@@ -21,7 +21,7 @@ TEST_F(OptionTests, TestSetIntOption) {
 
 // Test valid setting for DoubleOption
 TEST_F(OptionTests, TestSetDoubleOption) {
-    OptionValueVariant new_value(1e-5);  // A double value to set
+    double new_value(1e-5);  // A double value to set
     registry.set("tol", new_value);
 
     EXPECT_EQ(options.tol.get(), 1e-5);  // Validate the value was set correctly
@@ -29,7 +29,7 @@ TEST_F(OptionTests, TestSetDoubleOption) {
 
 // Test valid setting for BoolOption with "yes"
 TEST_F(OptionTests, TestSetBoolOptionYes) {
-    OptionValueVariant new_value("yes");
+    std::string new_value("yes");
     registry.set("recalc_y", new_value);
 
     EXPECT_TRUE(options.recalc_y.get());  // Validate the boolean value was set to true
@@ -37,7 +37,7 @@ TEST_F(OptionTests, TestSetBoolOptionYes) {
 
 // Test valid setting for BoolOption with "no"
 TEST_F(OptionTests, TestSetBoolOptionNo) {
-    OptionValueVariant new_value("no");
+    std::string new_value("no");
     registry.set("recalc_y", new_value);
 
     EXPECT_FALSE(options.recalc_y.get());  // Validate the boolean value was set to false
@@ -45,35 +45,35 @@ TEST_F(OptionTests, TestSetBoolOptionNo) {
 
 // Test setting out-of-bounds value for IntOption (lower bound)
 TEST_F(OptionTests, TestSetIntOptionOutOfBoundsLower) {
-    OptionValueVariant new_value(-1);  // Invalid value (out of bounds for max_iter)
+    int new_value(-1);  // Invalid value (out of bounds for max_iter)
 
     EXPECT_THROW(registry.set("max_iter", new_value), std::invalid_argument);  // Should throw an exception
 }
 
 // Test setting out-of-bounds value for DoubleOption (lower bound)
 TEST_F(OptionTests, TestSetDoubleOptionOutOfBoundsLower) {
-    OptionValueVariant new_value(-1e-7);  // Invalid value (out of bounds for tol)
+    double new_value(-1e-7);  // Invalid value (out of bounds for tol)
 
     EXPECT_THROW(registry.set("tol", new_value), std::invalid_argument);  // Should throw an exception
 }
 
 // Test setting invalid type (wrong type, e.g. string for IntOption)
 TEST_F(OptionTests, TestSetInvalidTypeForIntOption) {
-    OptionValueVariant new_value("wrong type");  // Invalid type (string instead of int)
+    std::string new_value("wrong type");  // Invalid type (string instead of int)
 
     EXPECT_THROW(registry.set("max_iter", new_value), std::invalid_argument);  // Should throw an exception
 }
 
 // Test setting invalid string value for BoolOption
 TEST_F(OptionTests, TestSetInvalidStringForBoolOption) {
-    OptionValueVariant new_value("maybe");  // Invalid string for a boolean option
+    std::string new_value("maybe");  // Invalid string for a boolean option
 
     EXPECT_THROW(registry.set("recalc_y", new_value), std::invalid_argument);  // Should throw an exception
 }
 
 // Test setting value for an option that doesn't exist
 TEST_F(OptionTests, TestSetNonExistentOption) {
-    OptionValueVariant new_value(42);  // Arbitrary value
+    int new_value(42);  // Arbitrary value
 
     EXPECT_THROW(registry.set("non_existent_option", new_value), std::invalid_argument);  // Should throw an exception
 }
