@@ -50,7 +50,7 @@ namespace fatrop
     {
         OptionValueVariant(int value_in) : type(OptionType::INT), value(malloc(sizeof(int))) { *static_cast<int *>(value) = value_in; }
         OptionValueVariant(double value_in) : type(OptionType::DOUBLE), value(malloc(sizeof(double))) { *static_cast<double *>(value) = value_in; }
-        OptionValueVariant(bool value_in) : type(OptionType::BOOL), value(malloc(sizeof(bool))) { *static_cast<double *>(value) = value_in; }
+        OptionValueVariant(bool value_in) : type(OptionType::BOOL), value(malloc(sizeof(bool))) { *static_cast<bool *>(value) = value_in; }
         OptionValueVariant(const std::string &value_in) : type(OptionType::STRING), value(malloc((value_in.size()+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in.c_str()); }
         OptionValueVariant(const char *value_in) : type(OptionType::STRING), value(malloc((std::strlen(value_in)+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in); }
         ~OptionValueVariant() { free(value); }
@@ -96,7 +96,7 @@ namespace fatrop
          * @param default_value The default value of the option.
          */
         Option(const ::std::string &name, const std::string &description, const T &default_value) : OptionBase(name, description), value(default_value) {}
-        void set_value(T value) { this->value = value; }
+        void set_value(T value_in) { this->value = value_in; }
         const T &get() const { return value; }
 
     private:
