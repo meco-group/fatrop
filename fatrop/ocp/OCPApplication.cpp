@@ -106,6 +106,7 @@ template void NLPApplication::set_option<fatrop_int>(const string &, int);
 template void NLPApplication::set_option<double>(const string &, double);
 template void NLPApplication::set_option<bool>(const string &, bool);
 template void NLPApplication::set_option<string>(const string &, string);
+template void NLPApplication::set_option<const string&>(const string &, const string&);
 
 void NLPApplication::set_initial(const FatropSolution &initial_guess) const
 {
