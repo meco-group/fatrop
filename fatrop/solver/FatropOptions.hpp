@@ -96,7 +96,7 @@ namespace fatrop
          * @param default_value The default value of the option.
          */
         Option(const ::std::string &name, const std::string &description, const T &default_value) : OptionBase(name, description), value(default_value) {}
-        void set(T value) { this->value = value; }
+        void set_value(T value) { this->value = value; }
         const T &get() const { return value; }
 
     private:
@@ -112,7 +112,7 @@ namespace fatrop
     {
     public:
         BoolOption(const std::string &name, const std::string &description, bool default_value) : Option<bool>(name, description, default_value) {}
-        void set(bool value) { Option<bool>::set(value); }
+        void set(bool value) { Option<bool>::set_value(value); }
         void set(const std::string &value);
     };
 
