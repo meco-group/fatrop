@@ -52,6 +52,7 @@ void FatropAlg::initialize()
 void FatropAlg::reset()
 {
     filter_->reset();
+    fatropdata_->init_bounds();
     if (!resto_problem_)
         fatropdata_->reset();
     fatropdata_->reset_caches();
