@@ -16,260 +16,146 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#include "fatrop/solver/FatropOptions.hpp"
+#include "FatropOptions.hpp"
 using namespace fatrop;
-using namespace std;
 
-template <typename T>
-Option<T>::Option(const string &name, const string &description, T *value, T default_value) : name_(name), description_(description), value(value), default_value_(default_value){};
-template <typename T>
-void Option<T>::set(const T &new_value) const
+// void OptionBase::set(const OptionValueVariant &value)
+// {
+//     switch (value.type)
+//     {
+//     case OptionType::INT:
+//         set(*static_cast<int *>(value.value));
+//         break;
+//     case OptionType::DOUBLE:
+//         set(*static_cast<double *>(value.value));
+//         break;
+//     case OptionType::BOOL:
+//         set(*static_cast<bool *>(value.value));
+//         break;
+//     case OptionType::STRING:
+//         set(std::string(static_cast<char *>(value.value)));
+//         break;
+//     default:
+//         throw std::invalid_argument("Invalid type for option " + name);
+//     }
+// }
+void BoolOption::set(const std::string &value)
 {
-    *value = new_value;
-}
-template <typename T>
-void Option<T>::set_default() const
-{
-    *value = default_value_;
-}
-
-template <typename T>
-NumberOption<T>::NumberOption(const string &name, const string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound) : Option<T>(name, description, value, default_value), lower_bound_inclusive_(lower_bound_inclusive), lower_bound_(lower_bound), upper_bound_inclusive_(upper_bound_inclusive), upper_bound_(upper_bound){};
-template <typename T>
-NumberOption<T> NumberOption<T>::lower_bounded(const string &name, const string &description, T *value, T default_value, T lower_bound)
-{
-    return NumberOption<T>(name, description, value, default_value, true, lower_bound, false, 0.0);
-};
-template <typename T>
-NumberOption<T> NumberOption<T>::upper_bounded(const string &name, const string &description, T *value, T default_value, T upper_bound)
-{
-    return NumberOption<T>(name, description, value, default_value, false, 0.0, true, upper_bound);
-};
-template <typename T>
-NumberOption<T> NumberOption<T>::un_bounded(const string &name, const string &description, T *value, T default_value)
-{
-    return NumberOption<T>(name, description, value, default_value, false, 0.0, false, 0.0);
-};
-template <typename T>
-NumberOption<T> NumberOption<T>::box_bounded(const string &name, const string &description, T *value, T default_value, T lower_bound, T upper_bound)
-{
-    return NumberOption<T>(name, description, value, default_value, true, lower_bound, true, upper_bound);
-};
-template <typename T>
-void NumberOption<T>::set(const T &new_value) const
-{
-    // check if new value is in bounds
-    if (lower_bound_inclusive_ && new_value < lower_bound_)
+    if (value == "yes")
     {
-        throw runtime_error("Option " + this->name_ + " is out of bounds");
+        Option<bool>::set_value(true);
     }
-    if (upper_bound_inclusive_ && new_value > upper_bound_)
+    else if (value == "no")
     {
-        throw runtime_error("Option " + this->name_ + " is out of bounds");
-    }
-    *(this->value) = new_value;
-};
-
-FatropOptions::FatropOptions()
-{
-    register_option(IntegerOption::box_bounded("max_iter", "maximum number of iterations", &maxiter, 1000, 0, maxiter));
-    register_option(DoubleOption::lower_bounded("kappa_d", "kappa_d", &kappa_d, 1e-5, 0.0));
-};
-
-bool FatropOptions::has_option(const std::string &option_name) const
-{
-    if (numeric_options.find(option_name) != numeric_options.end())
-    {
-        return true;
-    }
-    if (integer_options.find(option_name) != integer_options.end())
-    {
-        return true;
-    }
-    if (boolean_options.find(option_name) != boolean_options.end())
-    {
-        return true;
-    }
-    if (string_options.find(option_name) != string_options.end())
-    {
-        return true;
-    }
-    return false;
-}
-template <typename T>
-void FatropOptions::set(const string &option_name, T value) const
-{
-    if (numeric_options.find(option_name) != numeric_options.end())
-    {
-        if constexpr (std::is_floating_point<T>::value)
-        {
-            for (auto &el : numeric_options.at(option_name))
-                el.set(value);
-        }
-        else
-        {
-            throw std::runtime_error("Option " + option_name + " of type double");
-        }
-    }
-    else if (integer_options.find(option_name) != integer_options.end())
-    {
-        if constexpr (std::is_integral<T>::value)
-        {
-            for (auto &el : integer_options.at(option_name))
-                el.set(value);
-        }
-        else if constexpr (std::is_floating_point<T>::value)
-        {
-            if ((int)value == value)
-            {
-                for (auto &el : integer_options.at(option_name))
-                    el.set(value);
-            }
-            else
-            {
-                throw std::runtime_error("Option " + option_name + " of type int");
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Option " + option_name + " of type int");
-        }
-    }
-    else if (boolean_options.find(option_name) != boolean_options.end())
-    {
-        if constexpr (std::is_same<T, bool>::value)
-        {
-            for (auto &el : boolean_options.at(option_name))
-                el.set(value);
-        }
-        else if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
-        {
-            if (value == 0)
-            {
-                for (auto &el : boolean_options.at(option_name))
-                    el.set(value);
-            }
-            else if (value == 1)
-            {
-                for (auto &el : boolean_options.at(option_name))
-                    el.set(value);
-            }
-            else
-            {
-                throw std::runtime_error("Option " + option_name + " of type bool can only convert integer value 0 or 1 to bool, got " + to_string(value));
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Option " + option_name + " of type bool");
-        }
+        Option<bool>::set_value(false);
     }
     else
     {
-        throw std::runtime_error("Option " + option_name + " not found");
+        throw std::invalid_argument("Invalid string value for boolean option, should be 'yes' or 'no'");
     }
 }
 template <typename T>
-void FatropOptions::prebuilt_set(const string &option_name, T value)
+NumericOption<T> NumericOption<T>::lower_bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, bool requires_reinitialization)
 {
-    if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
+    return NumericOption<T>(name, description, default_value, true, lower_bound, false, 0, requires_reinitialization);
+}
+template <typename T>
+NumericOption<T> NumericOption<T>::upper_bounded(const std::string &name, const std::string &description, const T &default_value, const T &upper_bound, bool requires_reinitialization)
+{
+    return NumericOption<T>(name, description, default_value, false, 0, true, upper_bound, requires_reinitialization);
+}
+template <typename T>
+NumericOption<T> NumericOption<T>::bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, const T &upper_bound, bool requires_reinitialization)
+{
+    return NumericOption<T>(name, description, default_value, true, lower_bound, true, upper_bound, requires_reinitialization);
+}
+template <typename T>
+void NumericOption<T>::set(T value_in)
+{
+    if ((is_lower_bounded && (value_in < lower_bound)) || (is_upper_bounded && (value_in > upper_bound)))
     {
-        prebuilt_double[option_name] = value;
+        throw std::invalid_argument("Value out of bounds");
     }
-    if constexpr (std::is_same<T, std::string>::value)
+    Option<T>::set_value(value_in);
+}
+// instantiate the template for int and double
+template class NumericOption<int>;
+template class NumericOption<double>;
+
+FatropOptionsRegistry::FatropOptionsRegistry(FatropOptions &options)
+{
+    // register all options
+    OptionBase *all_options[] = {
+        &options.max_iter,
+        &options.print_level,
+        &options.tol,
+        &options.acceptable_tol,
+        &options.max_watchdog_steps,
+        &options.acceptable_iter,
+        &options.lammax,
+        &options.mu_init,
+        &options.kappa_eta,
+        &options.kappa_mu,
+        &options.theta_mu,
+        &options.delta_w0,
+        &options.delta_wmin,
+        &options.kappa_wmin,
+        &options.kappa_wplus,
+        &options.kappa_wplusem,
+        &options.delta_c_stripe,
+        &options.kappa_c,
+        &options.warm_start_init_point,
+        &options.theta_min,
+        &options.recalc_y,
+        &options.recalc_y_feas_tol,
+        &options.inequality_handling,
+        &options.kappa_d,
+        &options.accept_every_trial_step,
+        &options.s_phi,
+        &options.delta,
+        &options.s_theta,
+        &options.gamma_theta,
+        &options.gamma_phi,
+        &options.eta_phi,
+        &options.gamma_alpha,
+        &options.max_soc,
+        &options.linsol_iterative_refinement,
+        &options.linsol_perturbed_mode,
+        &options.linsol_diagnostic,
+        &options.linsol_perturbed_mode_param,
+        &options.linsol_min_it_ref,
+        &options.linsol_max_it_ref,
+        &options.linsol_min_it_acc,
+        &options.linsol_lu_fact_tol,
+        &options.iterative_refinement_SOC,
+        &options.ls_scaling,
+        &options.warm_start_mult_bound_push,
+        &options.smax,
+        &options.bound_push,
+        &options.bound_frac,
+        &options.kappa_sigma,
+        &options.bound_relax_factor,
+        &options.constr_viol_tol};
+    for (auto option : all_options)
     {
-        prebuilt_string[option_name] = value;
+        this->options[option->name] = option;
     }
 }
 
-void FatropOptions::register_option(const DoubleOption &option)
+template<typename T>
+void FatropOptionsRegistry::set(const std::string &name, T value)
 {
-    numeric_options[option.name_].push_back(option);
-    option.set_default();
-    // check if available in prebuilt options
-    if (prebuilt_double.find(option.name_) != prebuilt_double.end())
+    if (options.find(name) == options.end())
     {
-        option.set(prebuilt_double[option.name_]);
+        throw std::invalid_argument("Option with name " + name + " not found");
     }
-    else
-    {
-        prebuilt_set(option.name_, option.default_value_);
-    }
-}
-void FatropOptions::register_option(const IntegerOption &option)
-{
-    integer_options[option.name_].push_back(option);
-    option.set_default();
-    // check if available in prebuilt options
-    if (prebuilt_double.find(option.name_) != prebuilt_double.end())
-    {
-        option.set(prebuilt_double[option.name_]);
-    }
-    else
-    {
-        prebuilt_set(option.name_, option.default_value_);
-    }
-}
-void FatropOptions::register_option(const BooleanOption &option)
-{
-    boolean_options[option.name_].push_back(option);
-    option.set_default();
-    // check if available in prebuilt options
-    if (prebuilt_double.find(option.name_) != prebuilt_double.end())
-    {
-        option.set(prebuilt_double[option.name_]);
-    }
-    else
-    {
-        prebuilt_set(option.name_, option.default_value_);
-    }
+    options[name]->set(value);
 }
 
-void FatropOptions::register_option(const StringOption &option)
-{
-    string_options[option.name_].push_back(option);
-    option.set_default();
-    // check if available in prebuilt options
-    if (prebuilt_string.find(option.name_) != prebuilt_string.end())
-    {
-        option.set(prebuilt_string[option.name_]);
-    }
-}
-
-auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
-{
-    os << "Numeric options :" << std::endl;
-    {
-        for (auto const &x : m.numeric_options)
-        {
-                os << "   " << x.first << " : " << *x.second.at(0).value << std::endl;
-        }
-    }
-    os << "Integer options :" << std::endl;
-    {
-        for (auto const &x : m.integer_options)
-        {
-                os << "   " << x.first << " : " << *x.second.at(0).value << std::endl;
-        }
-    }
-    os << "Boolean options :" << std::endl;
-    {
-        for (auto const &x : m.boolean_options)
-        {
-                os << "   " << x.first << " : " << *x.second.at(0).value << std::endl;
-        }
-    }
-    return os;
-}
-template class fatrop::NumberOption<fatrop_int>;
-template class fatrop::NumberOption<double>;
-template class fatrop::Option<std::string>;
-template class fatrop::Option<bool>;
-template void FatropOptions::set<double>(const string &, double) const;
-template void FatropOptions::set<fatrop_int>(const string &, int) const;
-template void FatropOptions::set<bool>(const string &, bool) const;
-template void FatropOptions::set<std::string>(const string &, std::string) const;
-template void FatropOptions::prebuilt_set<double>(const string &, double);
-template void FatropOptions::prebuilt_set<int>(const string &, int);
-template void FatropOptions::prebuilt_set<bool>(const string &, bool);
-template void FatropOptions::prebuilt_set<std::string>(const string &, std::string);
+template void FatropOptionsRegistry::set<int>(const std::string &, int);
+template void FatropOptionsRegistry::set<double>(const std::string &, double);
+template void FatropOptionsRegistry::set<bool>(const std::string &, bool);
+template void FatropOptionsRegistry::set<std::string>(const std::string &, std::string);
+template void FatropOptionsRegistry::set<const std::string&>(const std::string &, const std::string&);
+// template void FatropOptionsRegistry::set<OptionValueVariant>(const std::string &, OptionValueVariant);
+// template void FatropOptionsRegistry::set<const OptionValueVariant&>(const std::string &, const OptionValueVariant&);

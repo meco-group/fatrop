@@ -103,15 +103,6 @@ BackTrackingLineSearch::BackTrackingLineSearch(
     : LineSearch(fatropparams, nlp, fatropdata, printer), filter_(filter), journaller_(journaller)
 {
     initialize();
-    fatrop_params_->register_option(BooleanOption("accept_every_trial_step", "accept every trial step", &accept_every_trial_step, false));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("s_phi", "s_phi", &s_phi, 2.3, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("delta", "delta", &delta, 1.0, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("s_theta", "s_theta", &s_theta, 1.1, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_theta", "gamma_theta", &gamma_theta, 1e-5, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_phi", "gamma_phi", &gamma_phi, 1e-8, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("eta_phi", "eta_phi", &eta_phi, 1e-8, 0.0));
-    fatrop_params_->register_option(DoubleOption::lower_bounded("gamma_alpha", "gamma_alpha", &gamma_alpha, 0.05, 0.0));
-    fatrop_params_->register_option(IntegerOption::lower_bounded("max_soc", "max_soc", &max_soc, 2, 0));
 };
 void BackTrackingLineSearch::initialize()
 {
@@ -292,3 +283,16 @@ LineSearchInfo BackTrackingLineSearch::find_acceptable_trial_point(double mu, bo
     res.ls = 0;
     return res;
 };
+
+void BackTrackingLineSearch::update_options(const FatropOptions &options) 
+{
+  accept_every_trial_step = options.accept_every_trial_step.get();
+  s_phi = options.s_phi.get();
+  delta = options.delta.get();
+  s_theta = options.s_theta.get();
+  gamma_theta = options.gamma_theta.get();
+  gamma_phi = options.gamma_phi.get();
+  eta_phi = options.eta_phi.get();
+  gamma_alpha = options.gamma_alpha.get();
+  max_soc = options.max_soc.get();
+}

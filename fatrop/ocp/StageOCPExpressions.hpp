@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef BASICOCPSAMPLERSINCLUDED
-#define BASICOCPSAMPLERSINCLUDED
+#ifndef __fatrop_ocp_StageOCPExpressions_hpp__
+#define __fatrop_ocp_StageOCPExpressions_hpp__
 #include <memory>
 #include <vector>
 #include <fatrop/auxiliary/Common.hpp>
@@ -179,4 +179,4 @@ namespace fatrop
 
 } // namespace fatrop
 
-#endif //  BASICOCPSAMPLERSINCLUDED
+#endif //  __fatrop_ocp_StageOCPExpressions_hpp__

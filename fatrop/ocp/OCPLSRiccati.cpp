@@ -85,14 +85,6 @@ OCPLSRiccati::OCPLSRiccati(const OCPDims &dims, const shared_ptr<FatropOptions> 
                                                                                                                                       options_(options),
                                                                                                                                       printer_(printer)
 {
-    options_->register_option(BooleanOption("linsol_iterative_refinement", "iterative ref", &it_ref, true));
-    options_->register_option(BooleanOption("linsol_perturbed_mode", "linear solver perturbed mode", &perturbed_mode, false));
-    options_->register_option(BooleanOption("linsol_diagnostic", "linear solver diagnostic mode", &diagnostic, false));
-    options_->register_option(DoubleOption::lower_bounded("linsol_perturbed_mode_param", "linear solver perturbed mode param", &perturbed_mode_param, 1e-6, 0.));
-    options_->register_option(IntegerOption::lower_bounded("linsol_min_it_ref", "minimum number of iterative refinement steps", &min_it_ref, 0, 0));
-    options_->register_option(IntegerOption::lower_bounded("linsol_max_it_ref", "maximum number of iterative refinement steps", &max_it_ref, 5, 0));
-    options_->register_option(DoubleOption::lower_bounded("linsol_min_it_acc", "stopping criterion for iterative refinement procedure", &it_ref_acc, 1e-8, 0.));
-    options_->register_option(DoubleOption::lower_bounded("linsol_lu_fact_tol", "pivoting tolerance parameter for lu fact", &lu_fact_tol, 1e-5, 0.));
 };
 fatrop_int OCPLSRiccati::solve_pd_sys(
     OCPKKTMemory *OCP,
@@ -1729,3 +1721,15 @@ fatrop_int OCPLSRiccati::solve_rhs_degenerate(
     }
     return 0;
 };
+
+void OCPLSRiccati::update_options(const FatropOptions& options)
+{
+   it_ref = options.linsol_iterative_refinement.get();
+   perturbed_mode = options.linsol_perturbed_mode.get();
+   diagnostic = options.linsol_diagnostic.get();
+   perturbed_mode_param = options.linsol_perturbed_mode_param.get();
+   min_it_ref = options.linsol_min_it_ref.get();
+   max_it_ref = options.linsol_max_it_ref.get();
+   it_ref_acc = options.linsol_min_it_acc.get();
+   lu_fact_tol = options.linsol_lu_fact_tol.get();
+}

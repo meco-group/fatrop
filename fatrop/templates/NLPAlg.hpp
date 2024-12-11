@@ -16,12 +16,15 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef NLPINCLUDED
-#define NLPINCLUDED
-#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
+#ifndef __fatrop_templates_NLPAlg_hpp__
+#define __fatrop_templates_NLPAlg_hpp__
 #include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
+    // forward declarations
+    class FatropVecBF;
+    class FatropOptions;
+
     struct NLPDims
     {
         fatrop_int nvars;
@@ -99,6 +102,7 @@ namespace fatrop
         virtual void finalize(){};
         virtual void reset(){};
         virtual void update_mu(double mu){};
+        virtual void update_options(const FatropOptions& options) = 0;
     };
 } // namespace fatrop
-#endif // NLPINCLUDED
+#endif // __fatrop_templates_NLPAlg_hpp__

@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPITERATIONDATAINCLUDED
-#define FATROPITERATIONDATAINCLUDED
+#ifndef __fatrop_solver_IterationData_hpp__
+#define __fatrop_solver_IterationData_hpp__
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -53,4 +53,4 @@ namespace fatrop
         std::shared_ptr<FatropPrinter> printer_;
     };
 } // namespace fatrop
-#endif //  FATROPITERATIONDATAINCLUDED
+#endif //  __fatrop_solver_FatropPrinter_hpp__

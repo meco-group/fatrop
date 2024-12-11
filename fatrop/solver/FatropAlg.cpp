@@ -28,7 +28,7 @@ FatropAlg::FatropAlg(
     const shared_ptr<LineSearch> &linesearch,
     const shared_ptr<Journaller> &journaller,
     const shared_ptr<FatropPrinter> &printer,
-    const shared_ptr<FatropAlg>&orig_, const shared_ptr<FatropAlg>&resto_alg_, bool resto_problem)
+    const shared_ptr<FatropAlg> &orig_, const shared_ptr<FatropAlg> &resto_alg_, bool resto_problem)
     : fatropnlp_(fatropnlp),
       fatropdata_(fatropdata),
       fatropoptions_(fatropparams),
@@ -38,48 +38,30 @@ FatropAlg::FatropAlg(
       printer_(printer), orig_(orig_), resto_alg_(resto_alg_), resto_problem_(resto_problem)
 {
 
-    fatropoptions_->register_option(DoubleOption::lower_bounded("tol", "tolerance", &tol, 1e-8, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("acceptable_tol", "acceptable tolerance", &acceptable_tol, 1e-6, 0.0));
-    fatropoptions_->register_option(IntegerOption::lower_bounded("max_watchdog_steps", "maximum number of watchdog steps", &max_watchdog_steps, 4, 0));
-    fatropoptions_->register_option(IntegerOption::lower_bounded("acceptable_iter", "acceptable iter", &acceptable_iter, 15, 0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("lammax", "lammax", &lammax, 1e3, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("mu_init", "mu_init", &mu0, 1e2, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_eta", "kappa_eta", &kappa_eta, 10.0, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_mu", "kappa_mu", &kappa_mu, 0.2, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("theta_mu", "theta_mu", &theta_mu, 1.5, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("delta_w0", "delta_w0", &delta_w0, 1e-4, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("delta_wmin", "delta_wmin", &delta_wmin, 1e-20, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_wmin", "kappa_wmin", &kappa_wmin, 1.0 / 3.0, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_wplus", "kappa_wplus", &kappa_wplus, 8.0, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_wplusem", "kappa_wplusem", &kappa_wplusem, 100.0, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("delta_c_stripe", "delta_c_stripe", &delta_c_stripe, 1e-6, 0.0));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("kappa_c", "kappa_c", &kappa_c, 0.25, 0.0));
-    fatropoptions_->register_option(BooleanOption("warm_start_init_point", "warm_start_init_point", &warm_start_init_point, false));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("theta_min", "theta_min", &theta_min, 1e-4, 0.0));
-    fatropoptions_->register_option(BooleanOption("recalc_y", "recalc_y", &recalc_y, false));
-    fatropoptions_->register_option(DoubleOption::lower_bounded("recalc_y_feas_tol", "recalc_y_feas_tol", &recalc_y_feas_tol, 1e-6, 0.0));
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
     fatropnlp->get_bounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
-    fatropdata_->init_bounds();
 }
 void FatropAlg::initialize()
 {
-    maxiter = fatropoptions_->maxiter;
-    kappa_d = fatropoptions_->kappa_d;
+    // maxiter = fatropoptions_->max_iter;
+    // kappa_d = fatropoptions_->kappa_d;
     fatropdata_->initialize();
     linesearch_->initialize();
 }
 void FatropAlg::reset()
 {
     filter_->reset();
-    if(!resto_problem_) fatropdata_->reset();
+    fatropdata_->init_bounds();
+    if (!resto_problem_)
+        fatropdata_->reset();
     fatropdata_->reset_caches();
     journaller_->reset();
     fatropnlp_->reset();
     linesearch_->reset();
     stats = FatropStats();
-    if(!resto_problem_) start_iter_ = 0;
+    if (!resto_problem_)
+        start_iter_ = 0;
 }
 void FatropAlg::set_bounds(const vector<double> &lower, const vector<double> &upper)
 {
@@ -117,8 +99,9 @@ fatrop_int FatropAlg::optimize()
     fatropnlp_->pre_solve(fatropdata_->x_curr, fatropdata_->s_curr);
     eval_constr_jac(); // todo twice evaluation
     eval_obj_grad_curr();
-    if(!resto_problem_) fatropnlp_->initialize_slacks(mu0,
-                                                   fatropdata_->s_curr);
+    if (!resto_problem_)
+        fatropnlp_->initialize_slacks(mu0,
+                                      fatropdata_->s_curr);
     if (!resto_problem_ && warm_start_init_point)
     {
         fatropdata_->warmstart_dual();
@@ -194,7 +177,7 @@ fatrop_int FatropAlg::optimize()
         {
             no_acceptable_steps = 0;
         }
-        if(resto_problem_ && resto_stop_crit())
+        if (resto_problem_ && resto_stop_crit())
         {
             return 100;
         }
@@ -223,7 +206,8 @@ fatrop_int FatropAlg::optimize()
             {
                 stats.print(printer_->level(1));
             }
-            if(resto_problem_) return 2;
+            if (resto_problem_)
+                return 2;
             printer_->level(1) << "found solution" << endl;
             return 0;
         }
@@ -233,8 +217,10 @@ fatrop_int FatropAlg::optimize()
         {
             mu = MAX(mu_min, MIN(kappa_mu * mu, pow(mu, theta_mu)));
             fatropnlp_->update_mu(mu);
-            if(resto_problem_) fatropdata_->obj_curr = eval_objective_curr();
-            if(resto_problem_) eval_obj_grad_curr();
+            if (resto_problem_)
+                fatropdata_->obj_curr = eval_objective_curr();
+            if (resto_problem_)
+                eval_obj_grad_curr();
             filter_reseted = 0;
             filter_->reset();
             no_no_full_steps_bc_filter = 0;
@@ -340,10 +326,15 @@ fatrop_int FatropAlg::optimize()
         if (ls == 0)
         {
             // if already in resto phase: solver failed
-            if(resto_problem_) return 1;
+            if (resto_problem_)
+                return 1;
             // prepare for restoration phase
             int resto_res = start_resto_alg(mu, iter_count_);
-            if(resto_res != 100){stats.return_flag =1;return 1;}
+            if (resto_res != 100)
+            {
+                stats.return_flag = 1;
+                return 1;
+            }
             else
             {
                 return_from_resto_alg(mu);
@@ -518,13 +509,13 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     mu = std::max(mu, fatropdata_->constr_viol_max_curr());
     resto_alg_->mu0 = mu;
     // set the starting iteration number
-    resto_alg_->start_iter_ = iter+1;
+    resto_alg_->start_iter_ = iter + 1;
     // initialize primal variables
     resto_alg_->fatropdata_->x_curr.copy(fatropdata_->x_curr);
     // initialize the first part of the slack variables
     resto_alg_->fatropdata_->s_curr.block(0, fatropdata_->n_ineqs).copy(fatropdata_->s_curr);
     // set n and p variables to zero
-    resto_alg_->fatropdata_->s_curr.block(fatropdata_-> n_ineqs, 2*fatropdata_->n_ineqs) = 0.;
+    resto_alg_->fatropdata_->s_curr.block(fatropdata_->n_ineqs, 2 * fatropdata_->n_ineqs) = 0.;
     // evaluate the constraint jacobian of resto_alg
     // the constraint jacobian is required for the slack initialization (todo: make this more efficient)
     resto_alg_->eval_constr_jac();
@@ -543,6 +534,32 @@ fatrop_int FatropAlg::start_resto_alg(double mu, int iter)
     // call resto alg
     return resto_alg_->optimize();
 }
+
+void FatropAlg::update_options(const FatropOptions &options)
+{
+    maxiter = options.max_iter.get();
+    kappa_d = options.kappa_d.get();
+    tol = options.tol.get();
+    acceptable_tol = options.acceptable_tol.get();
+    max_watchdog_steps = options.max_watchdog_steps.get();
+    acceptable_iter = options.acceptable_iter.get();
+    lammax = options.lammax.get();
+    mu0 = options.mu_init.get();
+    kappa_eta = options.kappa_eta.get();
+    kappa_mu = options.kappa_mu.get();
+    theta_mu = options.theta_mu.get();
+    delta_w0 = options.delta_w0.get();
+    delta_wmin = options.delta_wmin.get();
+    kappa_wmin = options.kappa_wmin.get();
+    kappa_wplus = options.kappa_wplus.get();
+    kappa_wplusem = options.kappa_wplusem.get();
+    delta_c_stripe = options.delta_c_stripe.get();
+    kappa_c = options.kappa_c.get();
+    warm_start_init_point = options.warm_start_init_point.get();
+    theta_min = options.theta_min.get();
+    recalc_y = options.recalc_y.get();
+    recalc_y_feas_tol = options.recalc_y_feas_tol.get();
+};
 
 fatrop_int FatropAlg::return_from_resto_alg(double mu)
 {

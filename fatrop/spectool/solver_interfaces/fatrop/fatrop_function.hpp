@@ -6,6 +6,7 @@
 #include "fatrop/ocp/StageOCPApplication.hpp"
 #include "fatrop/ocp/OCPDims.hpp"
 #include "fatrop/ocp/CasadiCApiUserdataWrap.hpp"
+#include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"  
 namespace fatrop
 {
     namespace spectool

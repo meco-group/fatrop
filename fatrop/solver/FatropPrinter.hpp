@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 #define PRIORITY1 PrintPriority<1>()
-#ifndef FATROPPRINTERINCLUDED
-#define FATROPPRINTERINCLUDED
+#ifndef __fatrop_solver_FatropPrinter_hpp__
+#define __fatrop_solver_FatropPrinter_hpp__
 #include <iostream>
 #include <string>
 #include <vector>
@@ -62,4 +62,4 @@ namespace fatrop
     };
 
 } // namespace fatrop
-#endif //  FATROPITERATIONDATAINCLUDED
+#endif //  __fatrop_solver_FatropPrinter_hpp__

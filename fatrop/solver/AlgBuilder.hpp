@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef ALBBUILDERINCLUDED
-#define ALBBUILDERINCLUDED
+#ifndef __fatrop_solver_AlgBuilder_hpp__
+#define __fatrop_solver_AlgBuilder_hpp__
 // #include "NLPAlg.hpp"
 #include "FatropAlg.hpp"
 #include "fatrop/auxiliary/Common.hpp"
@@ -26,8 +26,8 @@ namespace fatrop
     class AlgBuilder
     {
     public:
-        void build_fatrop_algorithm_objects(const std::shared_ptr<FatropNLP> &nlp,const std::shared_ptr<FatropNLP> &nlp_resto,
-                                            const std::shared_ptr<FatropOptions> &fatropparams,
+        void build_fatrop_algorithm_objects(const std::shared_ptr<FatropNLP> &nlp, const std::shared_ptr<FatropNLP> &nlp_resto,
+                                            const std::shared_ptr<FatropOptions> &fatropoptions,
                                             std::shared_ptr<FatropData> &fatropdata, std::shared_ptr<FatropData> &fatropdata_resto,
                                             std::shared_ptr<Journaller> &journaller)
         {
@@ -35,15 +35,15 @@ namespace fatrop
             {
                 fatropprinter_ = std::make_shared<FatropPrinter>();
             }
-            fatropdata = std::make_shared<FatropData>(nlp->get_nlp_dims(), fatropparams, fatropprinter_);
-            fatropdata_resto = std::make_shared<FatropData>(nlp_resto->get_nlp_dims(), fatropparams, fatropprinter_);
-            journaller = std::make_shared<Journaller>(fatropparams->maxiter + 1, fatropprinter_);
+            fatropdata = std::make_shared<FatropData>(nlp->get_nlp_dims(), fatropoptions, fatropprinter_);
+            fatropdata_resto = std::make_shared<FatropData>(nlp_resto->get_nlp_dims(), fatropoptions, fatropprinter_);
+            journaller = std::make_shared<Journaller>(fatropoptions->max_iter.get() + 1, fatropprinter_);
             fatropdata_ = fatropdata; // keep this around for building the algorithm
             fatropdata_resto_ = fatropdata_resto;
             journaller_ = journaller;
             nlp_ = nlp;
             nlp_resto_ = nlp_resto;
-            fatropoptions_ = fatropparams;
+            fatropoptions_ = fatropoptions;
         }
         void set_printer(const std::shared_ptr<FatropPrinter> &printer)
         {
@@ -51,16 +51,30 @@ namespace fatrop
         }
         std::shared_ptr<FatropAlg> build_algorithm()
         {
-            // TODO unsafe if maxiter is changed during application
-            std::shared_ptr<Filter> filter = std::make_shared<Filter>(fatropoptions_->maxiter + 1);
-            std::shared_ptr<LineSearch> linesearch = std::make_shared<BackTrackingLineSearch>(fatropoptions_, nlp_, fatropdata_, filter, journaller_, fatropprinter_);
-            std::shared_ptr<Filter> filter_resto = std::make_shared<Filter>(fatropoptions_->maxiter + 1);
-            std::shared_ptr<LineSearch> linesearch_resto = std::make_shared<BackTrackingLineSearch>(fatropoptions_, nlp_resto_, fatropdata_resto_, filter_resto, journaller_, fatropprinter_);
-            std::shared_ptr<FatropAlg> orig_alg = std::make_shared<FatropAlg>(nlp_, fatropdata_, fatropoptions_, filter, linesearch, journaller_, fatropprinter_, nullptr, nullptr, false);
-            std::shared_ptr<FatropAlg> resto_alg = std::make_shared<FatropAlg>(nlp_resto_, fatropdata_resto_, fatropoptions_, filter_resto, linesearch_resto, journaller_, fatropprinter_, orig_alg, nullptr, true);
-            orig_alg-> set_resto_alg(resto_alg);
-            return orig_alg;
+            filter_ = std::make_shared<Filter>(fatropoptions_->max_iter.get() + 1);
+            linesearch_ = std::make_shared<BackTrackingLineSearch>(fatropoptions_, nlp_, fatropdata_, filter_, journaller_, fatropprinter_);
+            filter_resto_ = std::make_shared<Filter>(fatropoptions_->max_iter.get() + 1);
+            linesearch_resto_ = std::make_shared<BackTrackingLineSearch>(fatropoptions_, nlp_resto_, fatropdata_resto_, filter_resto_, journaller_, fatropprinter_);
+            orig_alg_ = std::make_shared<FatropAlg>(nlp_, fatropdata_, fatropoptions_, filter_, linesearch_, journaller_, fatropprinter_, nullptr, nullptr, false);
+            resto_alg_ = std::make_shared<FatropAlg>(nlp_resto_, fatropdata_resto_, fatropoptions_, filter_resto_, linesearch_resto_, journaller_, fatropprinter_, orig_alg_, nullptr, true);
+            orig_alg_->set_resto_alg(resto_alg_);
+            return orig_alg_;
         }
+
+        void update_options(const FatropOptions& options)
+        {
+            nlp_ -> update_options(options);
+            nlp_resto_ -> update_options(options);
+            fatropdata_ -> update_options(options);
+            fatropdata_resto_ -> update_options(options);
+            filter_ -> reserve(options.max_iter.get() + 1);
+            linesearch_ -> update_options(options);
+            filter_resto_ -> reserve(options.max_iter.get() + 1);
+            linesearch_resto_ -> update_options(options);
+            orig_alg_ -> update_options(options);
+            resto_alg_ -> update_options(options);
+            fatropprinter_ -> print_level() = options.print_level.get();
+        };
 
     private:
         std::shared_ptr<FatropNLP> nlp_;
@@ -70,7 +84,13 @@ namespace fatrop
         std::shared_ptr<FatropData> fatropdata_resto_;
         std::shared_ptr<Journaller> journaller_;
         std::shared_ptr<FatropPrinter> fatropprinter_;
+        std::shared_ptr<Filter> filter_;
+        std::shared_ptr<LineSearch> linesearch_;
+        std::shared_ptr<Filter> filter_resto_;
+        std::shared_ptr<LineSearch> linesearch_resto_;
+        std::shared_ptr<FatropAlg> orig_alg_;
+        std::shared_ptr<FatropAlg> resto_alg_;
     };
 };
 
-#endif // ALBBUILDERINCLUDED
+#endif // __fatrop_solver_AlgBuilder_hpp__

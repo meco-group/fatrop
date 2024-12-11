@@ -16,125 +16,11 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef BASICOCPAPPLICATIONINCLUDED
-#define BASICOCPAPPLICATIONINCLUDED
-#include "fatrop/solver/FatropStats.hpp"
-#include "fatrop/solver/FatropAlg.hpp"
-#include "fatrop/ocp/StageOCPExpressions.hpp"
-#include <map>
-#include <fstream>
-#include <sstream>
-#include <string>
-
+#ifndef __fatrop_ocp_StageOCPApplication_hpp__
+#define __fatrop_ocp_StageOCPApplication_hpp__
+#include "OCPApplication.hpp"
 namespace fatrop
 {
-    // forward declarations to hide the implementation details
-    class Journaller;
-    class FatropAlg;
-    class StageOCP;
-    class NLPDims;
-    class FatropVecBF;
-    class FatropNLP;
-    class FatropOptions;
-    class FatropData;
-    class OCPAdapter;
-    class FatropPrinter;
-    class OCPAbstract;
-    class OCPDims;
-    class OCP;
-    class FatropSolution
-    {
-    public:
-        // void GetPrimalSolution(vector<double> &result);
-        // defautl copy constructor
-        FatropSolution(const FatropSolution &other) = default;
-        const std::vector<double> &primal_solution() { return sol_primal_; };
-
-    protected:
-        FatropSolution();
-        void set_dims(const NLPDims &dims);
-        void set_primal_solution(const FatropVecBF &sol);
-        void set_solution(const FatropVecBF &sol_primal, const FatropVecBF &sol_dual, const FatropVecBF &sol_zL, const FatropVecBF &sol_zU);
-
-    protected:
-        std::vector<double> sol_primal_;
-        std::vector<double> sol_dual_;
-        std::vector<double> sol_zL_;
-        std::vector<double> sol_zU_;
-        friend class NLPApplication;
-    };
-    // TODO move this class to a separate file
-    class NLPApplication
-    {
-    public:
-        NLPApplication();
-
-    protected:
-        void build(const std::shared_ptr<FatropNLP> &nlp, const std::shared_ptr<FatropNLP> &nlp_resto);
-
-    public:
-        fatrop_int optimize() const;
-        // TODO: make this protected and use last_solution instead and choose other name
-        const FatropVecBF &last_solution_primal() const;
-        const FatropVecBF &last_solution_dual() const;
-        const FatropVecBF &last_solution_zL() const;
-        const FatropVecBF &last_solution_zU() const;
-        FatropVecBF &initial_guess_primal() const;
-        FatropVecBF &initial_guess_dual() const;
-        FatropVecBF &initial_guess_zL() const;
-        FatropVecBF &initial_guess_zU() const;
-        FatropStats get_stats() const;
-        NLPDims get_nlp_dims();
-        template <typename T>
-        void set_option(const std::string &option_name, T value);
-
-    public:
-        void set_initial(const FatropSolution &initial_guess) const;
-        void set_initial(const std::vector<double> &initial_guess_primal_) const;
-        const FatropOptions &get_options() const;
-
-    protected:
-        std::shared_ptr<FatropOptions> fatropoptions_;
-        std::shared_ptr<FatropData> fatropdata_;
-        std::shared_ptr<FatropNLP> nlp_;
-        bool dirty = true;
-        std::shared_ptr<FatropPrinter> printer_;
-        friend class OcpSolverDriver;
-        
-    private:
-        const std::shared_ptr<OCPAbstract> ocp_;
-        std::shared_ptr<Journaller> journaller_;
-        std::shared_ptr<FatropAlg> fatropalg_;
-    };
-
-    class OCPApplication : public NLPApplication
-    {
-    public:
-        OCPApplication(const std::shared_ptr<OCP> &ocp);
-        OCPApplication();
-        void build();
-    public:
-        using NLPApplication::set_initial;
-        void set_initial(std::vector<double> &initial_u, std::vector<double> &initial_x);
-        OCPDims get_ocp_dims();
-        std::shared_ptr<OCP> ocp_;
-    };
-
-    // TODO move this class to a separate file
-    class OCPAbstractApplication : public OCPApplication
-    {
-    public:
-        OCPAbstractApplication(const std::shared_ptr<OCPAbstract> &ocp);
-        void set_params(const std::vector<double> &global_params, const std::vector<double> &stage_params);
-
-    protected:
-        std::shared_ptr<OCPAdapter> adapter;
-
-    protected:
-        std::vector<double> &global_parameters();
-        std::vector<double> &stage_parameters();
-    };
-
     struct StageOCPSolution : public FatropSolution
     {
     public:
@@ -239,4 +125,4 @@ namespace fatrop
         static StageOCPApplication from_rockit_interface(const std::string &functions, const std::string &json_spec_file);
     };
 }
-#endif // BASICOCPAPPLICATIONINCLUDED
+#endif // __fatrop_ocp_StageOCPApplication_hpp__

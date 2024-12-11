@@ -16,80 +16,260 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPPARAMSINCLUDED
-#define FATROPPARAMSINCLUDED
-#include <string>
-#include <map>
-#include <type_traits>
+#ifndef __fatrop_solver_FatropOptions_hpp__
+#define __fatrop_solver_FatropOptions_hpp__
 #include <iostream>
-#include <vector>
-#include "fatrop/auxiliary/Common.hpp"
+#include <string>
+#include <limits>
+#include <unordered_map>
+#include <memory>
+#include <cstring>
+
 namespace fatrop
 {
-    template <typename T>
-    struct Option
+    /**
+     * @enum OptionType
+     *
+     * Enum that defines the different types of options supported by the system.
+     */
+    enum OptionType
+    {
+        INT,    ///< Represents an integer option.
+        DOUBLE, ///< Represents a double-precision floating-point option.
+        BOOL,   ///< Represents a boolean option.
+        STRING  ///< Represents a string option.
+    };
+    // // forward declaration
+    // struct OptionValueVariant;
+
+    /**
+     * @class OptionBase
+     *
+     * Base class for different option types. Provides a generic interface
+     * for managing option values of various types.
+     */
+    class OptionBase
     {
     public:
-        Option(){};
-        Option(const std::string &name, const std::string &description, T *value, T default_value);
-        void set(const T &new_value) const;
-        void set_default() const;
-        std::string name_;
-        std::string description_;
-        T *value = NULL;
-        T default_value_;
+        OptionBase(const std::string &name, const std::string &description, bool requires_reinitialization) : name(name), description(description), requires_reinitialization(requires_reinitialization) {}
+        virtual void set(int value) { throw std::invalid_argument("Invalid type for option " + name); };
+        virtual void set(double value) { throw std::invalid_argument("Invalid type for option " + name); };
+        virtual void set(const std::string &value) { throw std::invalid_argument("Invalid type " + name); };
+        virtual void set(bool value) { throw std::invalid_argument("Invalid type " + name); };
+        std::string name;               /// < The name of the option.
+        std::string description;        // < The description of the option.
+        bool requires_reinitialization; /// < wether changing the option requires reinitialization of the solver's algorithmic objects. Reinitialization can require dynamic memory allocation.
     };
 
-
+    /**
+     * @class Option<T>
+     *
+     * Templated class that holds a value of type T and provides methods
+     * to set and get that value. Inherits from OptionBase.
+     *
+     * @tparam T The type of the option (e.g., int, double, std::string).
+     */
     template <typename T>
-    struct NumberOption: public Option<T>
+    class Option : public OptionBase
     {
     public:
-        // DoubleOption operator=(const DoubleOption &other) = default;
-        NumberOption(){};
-        NumberOption(const std::string &name, const std::string &description, T *value, T default_value, bool lower_bound_inclusive, T lower_bound, bool upper_bound_inclusive, T upper_bound); 
-        static NumberOption<T> lower_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound);
-        static NumberOption<T> upper_bounded(const std::string &name, const std::string &description, T *value, T default_value, T upper_bound);
-        static NumberOption<T> un_bounded(const std::string &name, const std::string &description, T *value, T default_value);
-        static NumberOption<T> box_bounded(const std::string &name, const std::string &description, T *value, T default_value, T lower_bound, T upper_bound);
-        void set(const T &new_value) const;
-        bool lower_bound_inclusive_;
-        T lower_bound_;
-        bool upper_bound_inclusive_;
-        T upper_bound_;
+        /**
+         * @brief Constructor that initializes the option with a name, description, and default value.
+         * @param name The name of the option.
+         * @param description The description of the option.
+         * @param default_value The default value of the option.
+         */
+        Option(const ::std::string &name, const std::string &description, const T &default_value, bool requires_reinitialization) : OptionBase(name, description, requires_reinitialization), value(default_value) {}
+        void set_value(T value_in) { this->value = value_in; }
+        const T &get() const { return value; }
+
+    private:
+        T value;
     };
-   // define Numeric option as Option<double>
-    typedef NumberOption<double> DoubleOption;
-    typedef NumberOption<fatrop_int> IntegerOption;
+    /**
+     * @class BoolOption
+     *
+     * A subclass of Option<bool> for handling boolean options. Allows setting
+     * values using either a boolean or a string ("yes"/"no").
+     */
+    class BoolOption : public Option<bool>
+    {
+    public:
+        BoolOption(const std::string &name, const std::string &description, bool default_value, bool requires_reinitialization) : Option<bool>(name, description, default_value, requires_reinitialization) {}
+        void set(bool value) { Option<bool>::set_value(value); }
+        void set(const std::string &value);
+    };
+
+    /**
+     * @class NumericOption<T>
+     *
+     * A subclass of Option<T> that handles numeric options, such as int or double,
+     * with the ability to enforce lower and/or upper bounds.
+     *
+     * @tparam T The numeric type of the option (e.g., int, double).
+     */
+    template <typename T>
+    class NumericOption : public Option<T>
+    {
+    public:
+        /**
+         * @brief Creates a lower-bounded numeric option.
+         * @param name The name of the option.
+         * @param description The description of the option.
+         * @param default_value The default value of the option.
+         * @param lower_bound The lower bound for the option value.
+         * @return A new NumericOption with the lower bound.
+         */
+        static NumericOption<T> lower_bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, bool requires_reinitialization);
+        /**
+         * @brief Creates an upper-bounded numeric option.
+         * @param name The name of the option.
+         * @param description The description of the option.
+         * @param default_value The default value of the option.
+         * @param upper_bound The upper bound for the option value.
+         * @return A new NumericOption with the upper bound.
+         */
+        static NumericOption<T> upper_bounded(const std::string &name, const std::string &description, const T &default_value, const T &upper_bound, bool requires_reinitialization);
+        /**
+         * @brief Creates a bounded numeric option with both lower and upper bounds.
+         * @param name The name of the option.
+         * @param description The description of the option.
+         * @param default_value The default value of the option.
+         * @param lower_bound The lower bound for the option value.
+         * @param upper_bound The upper bound for the option value.
+         * @return A new NumericOption with both bounds.
+         */
+        static NumericOption<T> bounded(const std::string &name, const std::string &description, const T &default_value, const T &lower_bound, const T &upper_bound, bool requires_reinitialization);
+        void set(T value_in);
+
+    private:
+        /**
+         * @brief Constructor that initializes a numeric option with bounds.
+         * @param name The name of the option.
+         * @param description The description of the option.
+         * @param default_value The default value of the option.
+         * @param lower_bounded Whether the option has a lower bound.
+         * @param lower_bound The lower bound.
+         * @param upper_bounded Whether the option has an upper bound.
+         * @param upper_bound The upper bound.
+         */
+        NumericOption(const std::string &name, const std::string &description, const T &default_value, bool lower_bounded, const T &lower_bound, bool upper_bounded, const T &upper_bound, bool requires_reinitialization) : Option<T>(name, description, default_value, requires_reinitialization), is_lower_bounded(lower_bounded), lower_bound(lower_bound), is_upper_bounded(upper_bounded), upper_bound(upper_bound) {}
+        bool is_lower_bounded; ///< Whether the option has a lower bound.
+        T lower_bound;         ///< The lower bound for the option value.
+        bool is_upper_bounded; ///< Whether the option has an upper bound.
+        T upper_bound;         ///< The upper bound for the option value.
+    };
+
+    typedef NumericOption<int> IntOption;
+    typedef NumericOption<double> DoubleOption;
     typedef Option<std::string> StringOption;
-    typedef Option<bool> BooleanOption;
+    typedef BoolOption BoolOption;
 
-    class FatropOptions
+    /**
+     * @struct FatropOptions
+     *
+     * Contains the configuration settings for the system.
+     * It is optimized for fast look-up performance,
+     * as these options are accessed each time the Fatrop algorithm is executed.
+     */
+    struct FatropOptions
     {
-    public:
-        FatropOptions();
-        // the following options are shared between different algorithm components:
-        int maxiter = 1000; // TODO this value cannot be changed to a value larger than the one used for building the solver
-        double kappa_d = 1e-5;
-        template <typename T>
-        void set(const std::string &option_name, T value) const;
-        template <typename T>
-        void prebuilt_set(const std::string &option_name, T value);
-
-    public:
-        bool has_option(const std::string &option_name) const;
-        void register_option(const DoubleOption &option);
-        void register_option(const IntegerOption &option);
-        void register_option(const BooleanOption &option);
-        void register_option(const StringOption &option);
-        friend auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &;
-        std::map<std::string, std::vector<DoubleOption>> numeric_options;
-        std::map<std::string, std::vector<IntegerOption>> integer_options;
-        std::map<std::string, std::vector<BooleanOption>> boolean_options;
-        std::map<std::string, std::vector<StringOption>> string_options;
-        std::map<std::string, std::string> prebuilt_string;
-        std::map<std::string, double> prebuilt_double;
+        // print options
+        IntOption print_level = IntOption::lower_bounded("print_level", "fatrop print level", 10, 0, false);
+        // fatrop algorithm options
+        IntOption max_iter = IntOption::lower_bounded("max_iter", "maximum number of iterations", 1000, 0, true);
+        DoubleOption tol = DoubleOption::lower_bounded("tol", "tolerance", 1e-8, 0.0, false);
+        DoubleOption acceptable_tol = DoubleOption::lower_bounded("acceptable_tol", "acceptable tolerance", 1e-6, 0.0, false);
+        IntOption max_watchdog_steps = IntOption::lower_bounded("max_watchdog_steps", "maximum number of watchdog steps", 4, 0, false);
+        IntOption acceptable_iter = IntOption::lower_bounded("acceptable_iter", "acceptable iter", 15, 0, false);
+        DoubleOption lammax = DoubleOption::lower_bounded("lammax", "lammax", 1e3, 0.0, false);
+        DoubleOption mu_init = DoubleOption::lower_bounded("mu_init", "mu_init", 1e2, 0.0, false);
+        DoubleOption kappa_eta = DoubleOption::lower_bounded("kappa_eta", "kappa_eta", 10.0, 0.0, false);
+        DoubleOption kappa_mu = DoubleOption::lower_bounded("kappa_mu", "kappa_mu", 0.2, 0.0, false);
+        DoubleOption theta_mu = DoubleOption::lower_bounded("theta_mu", "theta_mu", 1.5, 0.0, false);
+        DoubleOption delta_w0 = DoubleOption::lower_bounded("delta_w0", "delta_w0", 1e-4, 0.0, false);
+        DoubleOption delta_wmin = DoubleOption::lower_bounded("delta_wmin", "delta_wmin", 1e-20, 0.0, false);
+        DoubleOption kappa_wmin = DoubleOption::lower_bounded("kappa_wmin", "kappa_wmin", 1.0 / 3.0, 0.0, false);
+        DoubleOption kappa_wplus = DoubleOption::lower_bounded("kappa_wplus", "kappa_wplus", 8.0, 0.0, false);
+        DoubleOption kappa_wplusem = DoubleOption::lower_bounded("kappa_wplusem", "kappa_wplusem", 100.0, 0.0, false);
+        DoubleOption delta_c_stripe = DoubleOption::lower_bounded("delta_c_stripe", "delta_c_stripe", 1e-6, 0.0, false);
+        DoubleOption kappa_c = DoubleOption::lower_bounded("kappa_c", "kappa_c", 0.25, 0.0, false);
+        BoolOption warm_start_init_point = BoolOption("warm_start_init_point", "warm_start_init_point", false, false);
+        DoubleOption theta_min = DoubleOption::lower_bounded("theta_min", "theta_min", 1e-4, 0.0, false);
+        BoolOption recalc_y = BoolOption("recalc_y", "recalc_y", false, false);
+        DoubleOption recalc_y_feas_tol = DoubleOption::lower_bounded("recalc_y_feas_tol", "recalc_y_feas_tol", 1e-6, 0.0, false);
+        StringOption inequality_handling = StringOption("inequality_handling", "inequality_handling", "pd_ip", true);
+        DoubleOption kappa_d = DoubleOption::lower_bounded("kappa_d", "kappa_d", 1e-5, 0.0, false);
+        // line search options
+        BoolOption accept_every_trial_step = BoolOption("accept_every_trial_step", "accept every trial step", false, false);
+        DoubleOption s_phi = DoubleOption::lower_bounded("s_phi", "s_phi", 2.3, 0.0, false);
+        DoubleOption delta = DoubleOption::lower_bounded("delta", "delta", 1.0, 0.0, false);
+        DoubleOption s_theta = DoubleOption::lower_bounded("s_theta", "s_theta", 1.1, 0.0, false);
+        DoubleOption gamma_theta = DoubleOption::lower_bounded("gamma_theta", "gamma_theta", 1e-5, 0.0, false);
+        DoubleOption gamma_phi = DoubleOption::lower_bounded("gamma_phi", "gamma_phi", 1e-8, 0.0, false);
+        DoubleOption eta_phi = DoubleOption::lower_bounded("eta_phi", "eta_phi", 1e-8, 0.0, false);
+        DoubleOption gamma_alpha = DoubleOption::lower_bounded("gamma_alpha", "gamma_alpha", 0.05, 0.0, false);
+        IntOption max_soc = IntOption::lower_bounded("max_soc", "max_soc", 2, 0, false);
+        // linear solver options
+        BoolOption linsol_iterative_refinement = BoolOption("linsol_iterative_refinement", "iterative ref", true, false);
+        BoolOption linsol_perturbed_mode = BoolOption("linsol_perturbed_mode", "linear solver perturbed mode", false, false);
+        BoolOption linsol_diagnostic = BoolOption("linsol_diagnostic", "linear solver diagnostic mode", false, false);
+        DoubleOption linsol_perturbed_mode_param = DoubleOption::lower_bounded("linsol_perturbed_mode_param", "linear solver perturbed mode param", 1e-6, 0., false);
+        IntOption linsol_min_it_ref = IntOption::lower_bounded("linsol_min_it_ref", "minimum number of iterative refinement steps", 0, 0, false);
+        IntOption linsol_max_it_ref = IntOption::lower_bounded("linsol_max_it_ref", "maximum number of iterative refinement steps", 5, 0, false);
+        DoubleOption linsol_min_it_acc = DoubleOption::lower_bounded("linsol_min_it_acc", "stopping criterion for iterative refinement procedure", 1e-8, 0., false);
+        DoubleOption linsol_lu_fact_tol = DoubleOption::lower_bounded("linsol_lu_fact_tol", "pivoting tolerance parameter for lu fact", 1e-5, 0., false);
+        BoolOption iterative_refinement_SOC = BoolOption("iterative_refinement_SOC", "Use iterative refinement for SOC", true, false);
+        BoolOption ls_scaling = BoolOption("ls_scaling", "Use automatic scaling for linear system", true, false);
+        // fatrop data options
+        DoubleOption warm_start_mult_bound_push = DoubleOption::lower_bounded("warm_start_mult_bound_push", "warm_start_mult_bound_push", 1e-2, 0.0, false);
+        DoubleOption smax = DoubleOption::lower_bounded("smax", "smax", 100.0, 0.0, false);
+        DoubleOption bound_push = DoubleOption::lower_bounded("bound_push", "kappa1", 1e-2, 0.0, false);
+        DoubleOption bound_frac = DoubleOption::lower_bounded("bound_frac", "kappa2", 1e-2, 0.0, false);
+        DoubleOption kappa_sigma = DoubleOption::lower_bounded("kappa_sigma", "kappa_sigma", 1e10, 0.0, false);
+        DoubleOption bound_relax_factor = DoubleOption::lower_bounded("bound_relax_factor", "bound_relax_factor", 1e-8, 0.0, false);
+        DoubleOption constr_viol_tol = DoubleOption::lower_bounded("constr_viol_tol", "constr_viol_tol", 1e-4, 0.0, false);
+        // restoration phase options
+        DoubleOption resto_rho = DoubleOption::lower_bounded("resto_rho", "Resto L1 penalty parameter", 1000., 0.0, false);
+        DoubleOption resto_xi = DoubleOption::lower_bounded("resto_xi", "Resto xi parameter", 1., 0.0, false);
     };
 
-} // namespace fatrop
-#endif // FatropOptions
+    // /**
+    //  * @struct OptionValueVariant
+    //  *
+    //  * A structure used to hold a value of different types (int, double, string)
+    //  * and identify its type. This structure is used to pass values to options.
+    //  */
+    // struct OptionValueVariant
+    // {
+    //     OptionValueVariant(int value_in) : type(OptionType::INT), value(malloc(sizeof(int))) { *static_cast<int *>(value) = value_in; }
+    //     OptionValueVariant(double value_in) : type(OptionType::DOUBLE), value(malloc(sizeof(double))) { *static_cast<double *>(value) = value_in; }
+    //     OptionValueVariant(bool value_in) : type(OptionType::BOOL), value(malloc(sizeof(bool))) { *static_cast<bool *>(value) = value_in; }
+    //     OptionValueVariant(const std::string &value_in) : type(OptionType::STRING), value(malloc((value_in.size()+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in.c_str()); }
+    //     OptionValueVariant(const char *value_in) : type(OptionType::STRING), value(malloc((std::strlen(value_in)+1)*sizeof(char))) { std::strcpy(static_cast<char *>(value), value_in); }
+    //     ~OptionValueVariant() { free(value); }
+    //     OptionType type;
+    //     void *value;
+    // };
+
+    /**
+     * @class FatropOptionsRegistry
+     *
+     * A class that manages a collection of options (FatropOptions).
+     * Provides a way to set option values dynamically.
+     */
+    class FatropOptionsRegistry
+    {
+    public:
+        FatropOptionsRegistry(FatropOptions &options);
+        // T can be int, double, bool, string, or an OptionValueVariant
+        template <typename T>
+        void set(const std::string &name, T value);
+
+    public:
+        std::unordered_map<std::string, OptionBase *> options;
+    };
+
+};
+
+#endif // __fatrop_solver_FatropOptions_hpp__

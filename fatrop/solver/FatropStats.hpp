@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPSTATSINCLUDED
-#define FATROPSTATSINCLUDED
+#ifndef __fatrop_solver_FatropStats_hpp__
+#define __fatrop_solver_FatropStats_hpp__
 #include <iostream>
 namespace fatrop
 {
@@ -60,4 +60,4 @@ namespace fatrop
         }
     };
 } // namespace fatrop
-#endif // FATROPSTATSINCLUDED
+#endif // __fatrop_solver_FatropStats_hpp__
