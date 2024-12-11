@@ -9,8 +9,6 @@ namespace fatrop
     public:
         FatropOCPResto(const std::shared_ptr<FatropOCP> &orig, const std::shared_ptr<FatropOptions> &opts) : orig_(orig), orig_dims_(orig->get_nlp_dims()), lower_(orig_dims_.nineqs), upper_(orig_dims_.nineqs), x_start_(orig_dims_.nvars), s_start_(orig_dims_.nineqs), x_tmp_(orig_dims_.nvars), s_tmp_(orig_dims_.nineqs), upper_bounded_(orig_dims_.nineqs), lower_bounded_(orig_dims_.nineqs), slack_dummy_(orig_dims_.nineqs), sigma_dummy_(orig_dims_.nineqs), gradb_dummy_(orig_dims_.nineqs), zl_dummy_(orig_dims_.nineqs), zu_dummy_(orig_dims_.nineqs), sigma_cache_(orig_dims_.nineqs * 3), gradb_cache_(orig_dims_.nineqs * 3)
         {
-            opts->register_option(DoubleOption::lower_bounded("resto_rho", "Resto L1 penalty parameter", &rho, 1000., 0.0));
-            opts->register_option(DoubleOption::lower_bounded("resto_xi", "Resto xi parameter", &xi, 1., 0.0));
             auto lower_v = lower_[0];
             auto upper_v = upper_[0];
             orig_->get_bounds(lower_v, upper_v);
@@ -274,6 +272,11 @@ namespace fatrop
         virtual void reset() override
         {
             orig_->reset();
+        };
+        void update_options(const FatropOptions &options) override
+        {
+            rho = options.resto_rho.get();
+            xi = options.resto_xi.get();
         };
         std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;

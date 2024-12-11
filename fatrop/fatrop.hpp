@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROP_INCLUDED
-#define FATROP_INCLUDED
+#ifndef __fatrop_fatrop_hpp__
+#define __fatrop_fatrop_hpp__
 #include "fatrop/ocp/StageOCPApplication.hpp"
 // #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 // #include "fatrop/ocp/OCPKKT.hpp"
@@ -36,4 +36,4 @@
 // #include "fatrop/ocp/FatropOCPBuilder.hpp"
 
 // #include "SparseSolvers/InterfaceMUMPS.hpp"
-#endif //FATROP_INCLUDED
+#endif //__fatrop_fatrop_hpp__

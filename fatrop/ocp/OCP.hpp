@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef OCPINCLUDED
-#define OCPINCLUDED
+#ifndef __fatrop_ocp_OCP_hpp__
+#define __fatrop_ocp_OCP_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPDims.hpp"
 #include "fatrop/ocp/OCPKKT.hpp"
@@ -79,4 +79,4 @@ namespace fatrop
         virtual void get_solution(const std::shared_ptr<FatropData> &fatropdata, std::vector<double> &u, std::vector<double> &x) = 0;
     };
 } // namespace fatrop
-#endif // OCPINCLUDED
+#endif // __fatrop_ocp_OCP_hpp__

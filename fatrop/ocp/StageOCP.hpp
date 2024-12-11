@@ -18,8 +18,8 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 
 // Basic OCP template: initial and terminal constraints eq constraints, Function evaluation provided by Casadi CodeGen
-#ifndef OCPTEMPLATEBASICINCLUDED
-#define OCPTEMPLATEBASICINCLUDED
+#ifndef __fatrop_ocp_StageOCP_hpp__
+#define __fatrop_ocp_StageOCP_hpp__
 #include "OCPAbstract.hpp"
 #include <string>
 #include <iostream>
@@ -404,7 +404,7 @@ namespace fatrop
         }
     };
 }
-#endif // OCPTEMPLATEBASICINCLUDED
+#endif // __fatrop_ocp_StageOCP_hpp__
 
     // class SingleStageOCPAbstract
     // {

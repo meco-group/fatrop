@@ -146,3 +146,13 @@ INSTALL(TARGETS ${INSTALL_TARGETS}
   RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
 )
 INSTALL(EXPORT fatropConfig NAMESPACE fatrop:: DESTINATION cmake)
+
+# create an option for compiling the tests
+option(BUILD_TESTS "Build tests" OFF)
+# if the option is set to ON, add the tests directory
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(unittest)
+endif()
+
+

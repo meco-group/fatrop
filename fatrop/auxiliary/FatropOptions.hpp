@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FATROPOPTIONSINCLUDED
-#define FATROPOPTIONSINCLUDED
+#ifndef __fatrop_auxiliary_fatropoptions_hpp__
+#define __fatrop_auxiliary_fatropoptions_hpp__
 #include <string>
 namespace fatrop
 {
@@ -65,4 +65,4 @@ namespace fatrop
         double upper_bound_;
     };
 } // namespace fatrop
-#endif
+#endif // __fatrop_auxiliary_fatropoptions_hpp__

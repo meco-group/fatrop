@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef OCPEVALUATORINCLUDED
-#define OCPEVALUATORINCLUDED
+#ifndef __fatrop_ocp_OCPAdapter_hpp__
+#define __fatrop_ocp_OCPAdapter_hpp__
 #include "OCPKKT.hpp"
 #include "OCPAbstract.hpp"
 #include "fatrop/solver/FatropData.hpp"
@@ -194,4 +194,4 @@ namespace fatrop
     };
 } // namespace fatrop
 
-#endif // OCPEVALUATORINCLUDED
+#endif // __fatrop_ocp_OCPAdapter_hpp__

@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef LINESEARCHINCLUDED
-#define LINESEARCHINCLUDED
+#ifndef __fatrop_solver_LineSearch_hpp__
+#define __fatrop_solver_LineSearch_hpp__
 #include "AlgStrategy.hpp"
 #include "IterationData.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
@@ -50,6 +50,7 @@ namespace fatrop
         virtual fatrop_int initialize_second_order_correction() const;
         virtual fatrop_int exit_second_order_correction() const;
         virtual fatrop_int compute_second_order_correction(double alpha) const;
+        virtual void update_options(const FatropOptions &options) = 0;
         std::shared_ptr<FatropNLP> fatropnlp_;
         std::shared_ptr<FatropData> fatropdata_;
         std::shared_ptr<FatropPrinter> printer_;
@@ -69,6 +70,7 @@ namespace fatrop
             const std::shared_ptr<Filter> &filter,
             const std::shared_ptr<Journaller> &journaller, const std::shared_ptr<FatropPrinter> &printer);
         void initialize();
+        void update_options(const FatropOptions &options) override;
         LineSearchInfo find_acceptable_trial_point(double mu, bool small_sd, bool from_backup);
         std::shared_ptr<Filter> filter_;
         std::shared_ptr<Journaller> journaller_;
@@ -83,4 +85,4 @@ namespace fatrop
         fatrop_int max_soc;
     };
 } // namespace fatrop
-#endif // LINESEARCHINCLUDED
+#endif // __fatrop_solver_LineSearch_hpp__

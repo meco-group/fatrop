@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef CASADICODEGENINCLUDED
-#define CASADICODEGENINCLUDED
+#ifndef __fatrop_function_evaluation_CasadiCodegen_hpp__
+#define __fatrop_function_evaluation_CasadiCodegen_hpp__
 #include <vector>
 #include <string>
 #include <memory>
@@ -101,4 +101,4 @@ namespace fatrop
 
 } // fatrop
 
-#endif // CASADICODEGENINCLUDED
+#endif // __fatrop_function_evaluation_CasadiCodegen_hpp__

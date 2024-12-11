@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef FUNCTIONEVALUATIONINCLUDED
-#define FUNCTIONEVALUATIONINCLUDED
+#ifndef __fatrop_function_evaluation_FunctionEvaluation_hpp__
+#define __fatrop_function_evaluation_FunctionEvaluation_hpp__
 #include <vector>
 #include <cstring>
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
@@ -57,4 +57,4 @@ namespace fatrop
         ~EvalBase(){};
     };
 };     // namespace fatrop
-#endif // FUNCTIONEVALUATIONINCLUDED
+#endif // __fatrop_function_evaluation_FunctionEvaluation_hpp__

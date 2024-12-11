@@ -18,8 +18,8 @@
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
 
 // solver data
-#ifndef FATROPDATAINCLUDED
-#define FATROPDATAINCLUDED
+#ifndef __fatrop_solver_FatropData_hpp__
+#define __fatrop_solver_FatropData_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "fatrop/templates/NLPAlg.hpp"
 #include "fatrop/auxiliary/Common.hpp"
@@ -79,6 +79,7 @@ namespace fatrop
         void compute_primal_dual_residu();
         void init_bounds();
         bool small_step_size();
+        void update_options(const FatropOptions &options);
 
 
         const NLPDims nlpdims;
@@ -185,4 +186,4 @@ namespace fatrop
         double warm_start_mult_bound_push;
     };
 }
-#endif // FATROPDATAINCLUDED
+#endif // __fatrop_solver_FatropData_hpp__

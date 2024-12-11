@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef DYNAMICLIBINCLUDED
-#define DYNAMICLIBINCLUDED
+#ifndef __fatrop_auxiliary_DynamicLib_hpp__
+#define __fatrop_auxiliary_DynamicLib_hpp__
 #include <dlfcn.h>
 #include <string>
 namespace fatrop
@@ -31,4 +31,4 @@ namespace fatrop
     };
 
 };     // namespace fatrop
-#endif // DYNAMICLIBINCLUDED
+#endif // __fatrop_auxiliary_DynamicLib_hpp__

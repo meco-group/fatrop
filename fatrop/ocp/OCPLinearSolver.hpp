@@ -16,13 +16,16 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Fatrop.  If not, see <http://www.gnu.org/licenses/>. */
-#ifndef NLPLSINCLUDED
-#define NLPLSINCLUDED
+#ifndef __fatrop_ocp_OCPLinearSolver_hpp__
+#define __fatrop_ocp_OCPLinearSolver_hpp__
 #include "fatrop/blasfeo_wrapper/LinearAlgebraBlasfeo.hpp"
 #include "OCPKKT.hpp"
 #include "fatrop/auxiliary/Common.hpp"
 namespace fatrop
 {
+    // forward declaration
+    class FatropOptions;
+
     class OCPLinearSolver
     {
     public:
@@ -69,7 +72,8 @@ namespace fatrop
             const FatropVecBF &rhs_g,
             const FatropVecBF &rhs_g_ineq,
             const FatropVecBF &rhs_gradb) = 0;
+        virtual void update_options(const FatropOptions &options) = 0;
     };
 
 } // namespace fatrop
-#endif //  NLPLSINCLUDED
+#endif //  __fatrop_ocp_OCPLinearSolver_hpp__
