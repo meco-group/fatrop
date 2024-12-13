@@ -41,6 +41,7 @@ FatropAlg::FatropAlg(
     initialize();
     fatropnlp_->get_initial_sol_guess(fatropdata_->x_initial);
     fatropnlp->get_bounds(fatropdata->s_lower_orig, fatropdata->s_upper_orig);
+    fatropdata_ ->init_bounds();
 }
 void FatropAlg::initialize()
 {
