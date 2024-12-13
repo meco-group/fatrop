@@ -609,7 +609,7 @@ void FatropData::set_bounds(const vector<double> &lowerin, const vector<double> 
 {
     s_lower_orig = lowerin;
     s_upper_orig = upperin;
-    // init_bounds();
+    init_bounds();
 }
 void FatropData::init_bounds()
 {
