@@ -277,6 +277,7 @@ namespace fatrop
         {
             rho = options.resto_rho.get();
             xi = options.resto_xi.get();
+            orig_->update_options(options);
         };
         std::shared_ptr<FatropOCP> orig_;
         NLPDims orig_dims_;
