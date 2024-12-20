@@ -29,11 +29,14 @@ include(GoogleTest)
 # Add the test executables
 add_executable(vector_test linear_algebra/vector_test.cpp)
 add_executable(matrix_test linear_algebra/matrix_test.cpp)
+add_executable(lu_factorization_test linear_algebra/lu_factorization_test.cpp)
 
 # Link the test executables with Google Test and other required libraries
-target_link_libraries(vector_test gtest gtest_main blasfeo)
-target_link_libraries(matrix_test gtest gtest_main blasfeo)
+target_link_libraries(vector_test gtest gtest_main blasfeo fatrop)
+target_link_libraries(matrix_test gtest gtest_main blasfeo fatrop)
+target_link_libraries(lu_factorization_test gtest gtest_main blasfeo fatrop)
 
 # Discover and add the tests
 gtest_discover_tests(vector_test)
 gtest_discover_tests(matrix_test)
+gtest_discover_tests(lu_factorization_test)

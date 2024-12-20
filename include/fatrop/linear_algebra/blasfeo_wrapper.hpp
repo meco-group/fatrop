@@ -121,7 +121,7 @@ namespace fatrop
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && ci >= 0 && cj >= 0 && "Indices must be non-negative");
-        fatrop_dbg_assert(ai + kmax <= sA->m && ci + kmax <= sC->m && "Row indices plus kmax must not exceed matrix dimensions");
+        fatrop_dbg_assert(aj + kmax <= sA->m && cj + kmax <= sC->m && "Row indices plus kmax must not exceed matrix dimensions");
         blasfeo_drowsw(kmax, sA, ai, aj, sC, ci, cj);
     }
 
@@ -129,7 +129,7 @@ namespace fatrop
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && ci >= 0 && cj >= 0 && "Indices must be non-negative");
-        fatrop_dbg_assert(aj + kmax <= sA->n && cj + kmax <= sC->n && "Column indices plus kmax must not exceed matrix dimensions");
+        fatrop_dbg_assert(ai + kmax <= sA->n && ci + kmax <= sC->n && "Column indices plus kmax must not exceed matrix dimensions");
         blasfeo_dcolsw(kmax, sA, ai, aj, sC, ci, cj);
     }
 

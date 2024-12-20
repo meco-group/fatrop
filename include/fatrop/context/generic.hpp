@@ -10,11 +10,13 @@ namespace fatrop
     typedef int Index;
 } // namespace fatrop
 
+
 // blasfeo types and functions
 #define VEC blasfeo_dvec
 #define VECEL BLASFEO_DVECEL
 #define MAT blasfeo_dmat
 #define MATEL BLASFEO_DMATEL
+
 
 // Vector-related BLASFEO definitions
 #define AXPBY fatrop::blasfeo_daxpby_debug
