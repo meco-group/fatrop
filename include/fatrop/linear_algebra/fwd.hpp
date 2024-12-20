@@ -48,6 +48,23 @@ namespace fatrop
     template <typename Derived>
     class VecOperationSpecialization;
 
+    // Matrix-related forward declarations
+    template <typename Derived>
+    class Mat;
+
+    template <typename Derived>
+    class MatrixBlock;
+
+    class MatrixAllocated;
+    template <typename Derived>
+    class MatView1D;
+
+    class MatRowView;
+    class MatColView;
+    class MatDiagonalView;
+    class MatrixNumeric;
+
+
 } // namespace fatrop
 
 #endif // __fatrop_fwd_hpp__

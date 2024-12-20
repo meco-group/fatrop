@@ -16,6 +16,7 @@ extern "C"
 {
 #include <blasfeo.h>
 }
+#include <iomanip>
 #include <cmath>
 
 #include "fatrop/common/exception.hpp"
@@ -203,7 +204,7 @@ namespace fatrop
         {
             for (Index i = 0; i < vec.m(); i++)
             {
-                os << vec[i] << " ";
+                os<< std::setw(12) << std::setprecision(4) << vec[i] << " ";
             }
             return os; // Return the stream to allow chaining (e.g., cout << obj1 <<
                        // obj2)
@@ -453,15 +454,16 @@ namespace fatrop
         VecNumeric(VecAllocated &vec, const Index m, const Index ai);
         VecNumeric(VecAllocated &vec);
         // blasfeo_dvecse
-        void operator=(const Scalar alpha);
+        VecNumeric& operator=(const Scalar alpha);
         // Assignment operators to handle various vector operations efficiently
         // by redirecting to blasfeo kernels
         // assignment from VecOperationSpecialization
         template <typename Derived>
-        void operator=(VecOperationSpecialization<Derived> &&vec_in);
+        VecNumeric& operator=(VecOperationSpecialization<Derived> &&vec_in);
         // assignment from general Vec expression
         template <typename Derived>
-        void operator=(const Vec<Derived> &vec_in);
+        VecNumeric& operator=(const Vec<Derived> &vec_in);
+        VecNumeric& operator=(const VecNumeric& vec_in){*this = *static_cast<const Vec<VecNumeric>*>(&vec_in); return *this;};
         /**
          * @brief Accessor for elements of the vector.
          */
@@ -545,17 +547,19 @@ namespace fatrop
         : vec_(vec), m_(m), ai_(ai) {};
     VecNumeric ::VecNumeric(VecAllocated &vec) : vec_(vec), m_(vec.m()), ai_(0) {};
     template <typename Derived>
-    void VecNumeric::operator=(const Vec<Derived> &vec_in)
+    VecNumeric& VecNumeric::operator=(const Vec<Derived> &vec_in)
     {
         fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
         for (Index i = 0; i < m(); i++)
         {
             this->operator()(i) = vec_in(i);
         }
+        return *this;
     }
-    void VecNumeric::operator=(const Scalar alpha)
+    VecNumeric& VecNumeric::operator=(const Scalar alpha)
     {
         VECSE(m(), alpha, &vec(), ai());
+        return *this;
     }
 
     Scalar &VecNumeric::operator()(const Index i) const

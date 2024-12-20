@@ -17,14 +17,16 @@ namespace fatrop
         : public VecOperationSpecialization<VecNumericPlusVecNumeric>
     {
     public:
-        VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {
+        VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b)
+        {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) + b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b);
-        VecNumeric& a() const { return a_; }
-        VecNumeric& b() const { return b_; }
+        VecNumeric &a() const { return a_; }
+        VecNumeric &b() const { return b_; }
+
     private:
         VecNumeric &a_;
         VecNumeric &b_;
@@ -45,8 +47,9 @@ namespace fatrop
         friend VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a);
         friend VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha);
         friend VecNumericTimesScalar operator-(VecNumeric &a);
-        VecNumeric& a() const { return a_; }
+        VecNumeric &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
+
     private:
         VecNumeric &a_;
         const Scalar alpha_;
@@ -66,17 +69,19 @@ namespace fatrop
                                                        const Scalar alpha,
                                                        VecNumeric &b,
                                                        const Scalar beta)
-            : a_(a), alpha_(alpha), b_(b), beta_(beta) {
+            : a_(a), alpha_(alpha), b_(b), beta_(beta)
+        {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return alpha_ * a_(i) + beta_ * b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericTimesScalarPlusVecNumericTimesScalar operator+(
             const VecNumericTimesScalar &a, const VecNumericTimesScalar &b);
-        VecNumeric& a() const { return a_; }
+        VecNumeric &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
-        VecNumeric& b() const { return b_; }
+        VecNumeric &b() const { return b_; }
         Scalar beta() const { return beta_; }
+
     private:
         VecNumeric &a_;
         const Scalar alpha_;
@@ -95,7 +100,8 @@ namespace fatrop
     public:
         VecNumericPlusVecNumericTimesScalar(VecNumeric &a, VecNumeric &b,
                                             const Scalar alpha)
-            : a_(a), b_(b), alpha_(alpha) {
+            : a_(a), b_(b), alpha_(alpha)
+        {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) + alpha_ * b_(i); }
@@ -104,9 +110,10 @@ namespace fatrop
             const VecNumericTimesScalar &a, VecNumeric &b);
         friend VecNumericPlusVecNumericTimesScalar operator+(
             VecNumeric &a, const VecNumericTimesScalar &b);
-        VecNumeric& a() const { return a_; }
-        VecNumeric& b() const { return b_; }
+        VecNumeric &a() const { return a_; }
+        VecNumeric &b() const { return b_; }
         Scalar alpha() const { return alpha_; }
+
     private:
         VecNumeric &a_;
         VecNumeric &b_;
@@ -122,14 +129,16 @@ namespace fatrop
         : public VecOperationSpecialization<VecNumericTimesVecNumeric>
     {
     public:
-        VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {
+        VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b)
+        {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) * b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b);
-        VecNumeric& a() const { return a_; }
-        VecNumeric& b() const { return b_; }
+        VecNumeric &a() const { return a_; }
+        VecNumeric &b() const { return b_; }
+
     private:
         VecNumeric &a_;
         VecNumeric &b_;
@@ -137,18 +146,19 @@ namespace fatrop
 
     // operator overloading for VecNumeric specializations - blasfeo kernels
     template <>
-    void VecNumeric::operator=(VecOperationSpecialization<VecNumericPlusVecNumeric>
-                                   &&vecnumericplusvecnumeric)
+    VecNumeric &VecNumeric::operator=(VecOperationSpecialization<VecNumericPlusVecNumeric>
+                                          &&vecnumericplusvecnumeric)
     {
         auto vv = vecnumericplusvecnumeric.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         VecNumeric &b = vv.b();
         AXPY(m_, 1.0, &a.vec(), a.ai(), &b.vec(), b.ai(), &this->vec(), this->ai());
+        return *this;
     }
 
     template <>
-    void VecNumeric::operator=(
+    VecNumeric &VecNumeric::operator=(
         VecOperationSpecialization<VecNumericTimesScalar> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
@@ -156,10 +166,11 @@ namespace fatrop
         VecNumeric &a = vv.a();
         Scalar alpha = vv.alpha();
         VECCPSC(m_, alpha, &a.vec(), a.ai(), &this->vec(), this->ai());
+        return *this;
     }
 
     template <>
-    void VecNumeric::operator=(
+    VecNumeric &VecNumeric::operator=(
         VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
             &&vecnumericplusvecnumerictimesscalar)
     {
@@ -169,10 +180,11 @@ namespace fatrop
         VecNumeric &b = vv.b();
         Scalar alpha = vv.alpha();
         AXPY(m_, alpha, &b.vec(), b.ai(), &a.vec(), a.ai(), &this->vec(), this->ai());
+        return *this;
     }
 
     template <>
-    void VecNumeric::operator=(
+    VecNumeric &VecNumeric::operator=(
         VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
             &&vecnumerictimesscalarplusvecnumerictimesscalar)
     {
@@ -184,17 +196,19 @@ namespace fatrop
         Scalar beta = vv.beta();
         AXPBY(m_, alpha, &a.vec(), a.ai(), beta, &b.vec(), b.ai(), &this->vec(),
               this->ai());
+        return *this;
     }
 
     template <>
-    void VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesVecNumeric>
-                                   &&vecnumerictimesscalar)
+    VecNumeric &VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesVecNumeric>
+                                          &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         VecNumeric &b = vv.b();
         VECMUL(m_, &b.vec(), b.ai(), &a.vec(), a.ai(), &this->vec(), this->ai());
+        return *this;
     }
 
     /**
