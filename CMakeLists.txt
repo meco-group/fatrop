@@ -13,6 +13,9 @@ find_package(blasfeo REQUIRED)
 # Add include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+# Add the examples directory
+add_subdirectory(examples)
+
 # Build tests if the option is enabled
 if(BUILD_TESTS)
   # Enable testing

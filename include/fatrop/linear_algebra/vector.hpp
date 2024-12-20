@@ -179,7 +179,7 @@ namespace fatrop
         {
             for (Index i = 0; i < vec.m(); i++)
             {
-                os << std::setw(12) << std::setprecision(4) << vec[i] << " ";
+                os << std::setw(12) << std::setprecision(4) << vec(i) << " ";
             }
             return os; // Return the stream to allow chaining (e.g., cout << obj1 <<
                        // obj2)

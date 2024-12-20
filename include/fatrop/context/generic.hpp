@@ -7,8 +7,8 @@
 // elementary types
 namespace fatrop
 {
-        typedef double Scalar;
-        typedef int Index;
+    typedef double Scalar;
+    typedef int Index;
 } // namespace fatrop
 
 // blasfeo types and functions

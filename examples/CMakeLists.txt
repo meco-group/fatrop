@@ -1,0 +1,2 @@
+add_executable(matrix_vector_example matrix_vector_example.cpp)
+target_link_libraries(matrix_vector_example PRIVATE blasfeo)
