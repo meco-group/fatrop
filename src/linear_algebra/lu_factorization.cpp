@@ -72,9 +72,13 @@ namespace fatrop
         }
         return max_indices;
     }
-    void LU_FACT_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
-                            PermutationMatrix &Pl, PermutationMatrix &Pr, double tol)
-    {
+void LU_FACT_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
+                        PermutationMatrix &Pl, PermutationMatrix &Pr, double tol)
+{
+    fatrop_dbg_assert(m >= 0 && "m must be non-negative");
+    fatrop_dbg_assert(n >= 0 && "n must be non-negative");
+    fatrop_dbg_assert(n_max >= 0 && "n_max must be non-negative");
+    fatrop_dbg_assert(tol >= 0 && "tolerance must be non-negative");
         At->use_dA = 0;
         Index minmn = std::min(m, n_max);
         Index j = 0;
@@ -104,10 +108,14 @@ namespace fatrop
         rank = j;
     }
     // B <= B + alpha*A^T (B is mxn)
-    void fatrop_gead_transposed(Index m, Index n, Scalar alpha, struct blasfeo_dmat *sA,
-                                Index offs_ai, Index offs_aj, struct blasfeo_dmat *sB,
-                                Index offs_bi, Index offs_bj)
-    {
+void fatrop_gead_transposed(Index m, Index n, Scalar alpha, MAT *sA,
+                            Index offs_ai, Index offs_aj, MAT *sB,
+                            Index offs_bi, Index offs_bj)
+{
+    fatrop_dbg_assert(m >= 0 && "m must be non-negative");
+    fatrop_dbg_assert(n >= 0 && "n must be non-negative");
+    fatrop_dbg_assert(offs_ai >= 0 && offs_aj >= 0 && "offsets must be non-negative");
+    fatrop_dbg_assert(offs_bi >= 0 && offs_bj >= 0 && "offsets must be non-negative");
         for (Index bj = 0; bj < n; bj++)
         {
             for (Index bi = 0; bi < m; bi++)
@@ -117,10 +125,15 @@ namespace fatrop
             }
         }
     }
-    void fatrop_dtrsv_unu(const Index m, const Index n, blasfeo_dmat *sA, const Index ai,
-                          const Index aj, blasfeo_dvec *sx, const Index xi, blasfeo_dvec *sz,
-                          const Index zi)
-    {
+void fatrop_dtrsv_unu(const Index m, const Index n, MAT *sA, const Index ai,
+                      const Index aj, VEC *sx, const Index xi, VEC *sz,
+                      const Index zi)
+{
+    fatrop_dbg_assert(m >= 0 && "m must be non-negative");
+    fatrop_dbg_assert(n >= 0 && "n must be non-negative");
+    fatrop_dbg_assert(ai >= 0 && aj >= 0 && "matrix indices must be non-negative");
+    fatrop_dbg_assert(xi >= 0 && zi >= 0 && "vector indices must be non-negative");
+    fatrop_dbg_assert(m <= n && "m must be less than or equal to n");
         for (Index i = m; i < n; i++)
         {
             VECEL(sz, zi + i) = VECEL(sx, xi + i);
@@ -136,9 +149,12 @@ namespace fatrop
         }
     }
 
-    void fatrop_dtrsv_utu(const Index m, blasfeo_dmat *sA, const Index ai, const Index aj,
-                          blasfeo_dvec *sx, const Index xi, blasfeo_dvec *sz, const Index zi)
-    {
+void fatrop_dtrsv_utu(const Index m, MAT *sA, const Index ai, const Index aj,
+                      VEC *sx, const Index xi, VEC *sz, const Index zi)
+{
+    fatrop_dbg_assert(m >= 0 && "m must be non-negative");
+    fatrop_dbg_assert(ai >= 0 && aj >= 0 && "matrix indices must be non-negative");
+    fatrop_dbg_assert(xi >= 0 && zi >= 0 && "vector indices must be non-negative");
         for (Index i = 0; i < m; i++)
         {
             Scalar res = VECEL(sx, xi + i);

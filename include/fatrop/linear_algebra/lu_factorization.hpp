@@ -112,8 +112,8 @@ namespace fatrop
      * @param offs_bi Row offset for matrix B.
      * @param offs_bj Column offset for matrix B.
      */
-    void fatrop_gead_transposed(Index m, Index n, Scalar alpha, struct blasfeo_dmat *sA,
-                                Index offs_ai, Index offs_aj, struct blasfeo_dmat *sB,
+    void fatrop_gead_transposed(Index m, Index n, Scalar alpha, MAT *sA,
+                                Index offs_ai, Index offs_aj, MAT *sB,
                                 Index offs_bi, Index offs_bj);
 
     /**
@@ -121,8 +121,8 @@ namespace fatrop
      * diagonal).
      *
      */
-    void fatrop_dtrsv_unu(const Index m, const Index n, blasfeo_dmat *sA, const Index ai,
-                          const Index aj, blasfeo_dvec *sx, const Index xi, blasfeo_dvec *sz,
+    void fatrop_dtrsv_unu(const Index m, const Index n, MAT *sA, const Index ai,
+                          const Index aj, VEC *sx, const Index xi, VEC *sz,
                           const Index zi);
 
     /**
@@ -130,8 +130,8 @@ namespace fatrop
      * diagonal).
      *
      */
-    void fatrop_dtrsv_utu(const Index m, blasfeo_dmat *sA, const Index ai, const Index aj,
-                          blasfeo_dvec *sx, const Index xi, blasfeo_dvec *sz, const Index zi);
+    void fatrop_dtrsv_utu(const Index m, MAT *sA, const Index ai, const Index aj,
+                          VEC *sx, const Index xi, VEC *sz, const Index zi);
 
 } // namespace fatrop
 

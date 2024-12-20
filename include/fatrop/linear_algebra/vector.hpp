@@ -12,11 +12,10 @@
  * Optimization).
  */
 
-#include "fatrop/context/context.hpp"
-#include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 #include <cmath>
 #include <iomanip>
-
+#include "fatrop/context/context.hpp"
+#include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 #include "fatrop/common/exception.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 
