@@ -12,6 +12,7 @@
  * Optimization).
  */
 
+#include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 #include <cmath>
 #include <iomanip>
@@ -136,7 +137,7 @@ namespace fatrop
             return VecMinusVec<Derived, Dep2>(a, b);
         }
 
-        friend VecTimesScalar<Derived> operator*(const Scalar alpha, Vec<Derived> &a)
+        friend VecTimesScalar<Derived> operator*(const Scalar alpha, const Vec<Derived> &a)
         {
             return VecTimesScalar<Derived>(a, alpha);
         }

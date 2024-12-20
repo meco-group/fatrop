@@ -6,5 +6,6 @@
 #define __fatrop_linear_algebra_linear_algebra_hpp__
 
 #include "vector.hpp"
+#include "matrix.hpp"
 
 #endif // __fatrop_linear_algebra_linear_algebra_hpp__

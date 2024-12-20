@@ -1,4 +1,3 @@
-#include "fatrop/context/generic.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include <cmath>
 #include <gtest/gtest.h>

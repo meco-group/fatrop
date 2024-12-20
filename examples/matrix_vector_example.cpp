@@ -14,7 +14,8 @@ int main() {
     cout << " A: \n" << A << endl;
     A.diagonal() = A.diagonal() + VecScalar(A.m(), 1);
     cout << " A: \n" << A << endl;
-    cout << " A diagonal: \n" << A.diagonal() << endl;
+    cout << " 5*A diagonal: \n" << 5.*A.diagonal() << endl;
+    cout << " - 1./A diagonal**2: \n" << -1. / (A.diagonal()*A.diagonal()) << endl;
     cout << " sum A diagonal: " << sum(A.diagonal()) << endl;
     A(2,2) = 10;
     cout << " A(1:, 1:) : \n" << A.block(4, 4, 1, 1) << endl;
