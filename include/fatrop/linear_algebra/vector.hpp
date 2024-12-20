@@ -503,7 +503,11 @@ namespace fatrop
          * @brief Move constructor for VecAllocated.
          */
         VecAllocated(VecAllocated &&other)
-            : VecNumeric(*this, other.m(), 0), vec_(other.vec()), m_(other.m()) {};
+            : VecNumeric(*this, other.m(), 0), vec_(other.vec()), m_(other.m())
+        {
+            // Nullify the moved-from object's vec_ to prevent double deletion
+            other.vec_.mem = nullptr;
+        }
         using VecNumeric::operator=;
         VEC &vec() { return vec_; }
         const VEC &vec() const { return vec_; }

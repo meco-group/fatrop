@@ -15,6 +15,7 @@ namespace fatrop
 #define VEC blasfeo_dvec
 #define VECEL BLASFEO_DVECEL
 
+// Vector-related BLASFEO definitions
 #define AXPBY fatrop::blasfeo_daxpby_debug
 #define AXPY fatrop::blasfeo_daxpy_debug
 #define VECSE fatrop::blasfeo_dvecse_debug
@@ -25,5 +26,11 @@ namespace fatrop
 
 #define ALLOCATE_VEC blasfeo_allocate_dvec
 #define FREE_VEC blasfeo_free_dvec
+
+// Matrix-related BLASFEO definitions
+#define MAT blasfeo_dmat
+#define MATEL BLASFEO_DMATEL
+#define ALLOCATE_MAT blasfeo_allocate_dmat
+#define FREE_MAT blasfeo_free_dmat
 
 #endif // __fatrop_context_generic_hpp__

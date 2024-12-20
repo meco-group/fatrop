@@ -257,6 +257,39 @@ TEST_F(VecTest, Assignment)
   }
 }
 
+TEST_F(VecTest, MoveConstructor)
+{
+  VecAllocated original{5};
+  for (Index i = 0; i < 5; ++i)
+  {
+    original[i] = i + 1;
+  }
+
+  VecAllocated moved(std::move(original));
+
+  // Check if the moved vector has the correct values
+  EXPECT_EQ(moved.m(), 5);
+  for (Index i = 0; i < 5; ++i)
+  {
+    EXPECT_EQ(moved[i], i + 1);
+  }
+
+  // Check if the original vector's internal pointer is nullified
+  EXPECT_EQ(original.vec().mem, nullptr);
+
+  // Accessing elements of the original vector should not cause a crash,
+  // but the behavior is undefined. We can't test for specific values here.
+
+  // Moving again from the moved vector should work
+  VecAllocated moved_again(std::move(moved));
+  EXPECT_EQ(moved_again.m(), 5);
+  for (Index i = 0; i < 5; ++i)
+  {
+    EXPECT_EQ(moved_again[i], i + 1);
+  }
+  EXPECT_EQ(moved.vec().mem, nullptr);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

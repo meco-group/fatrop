@@ -26,11 +26,14 @@ endif()
 # Add Google Test
 include(GoogleTest)
 
-# Add the test executable
+# Add the test executables
 add_executable(vector_test linear_algebra/vector_test.cpp)
+add_executable(matrix_test linear_algebra/matrix_test.cpp)
 
-# Link the test executable with Google Test and other required libraries
+# Link the test executables with Google Test and other required libraries
 target_link_libraries(vector_test gtest gtest_main blasfeo)
+target_link_libraries(matrix_test gtest gtest_main blasfeo)
 
 # Discover and add the tests
 gtest_discover_tests(vector_test)
+gtest_discover_tests(matrix_test)
