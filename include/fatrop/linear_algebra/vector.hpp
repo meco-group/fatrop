@@ -224,12 +224,16 @@ namespace fatrop
             : a(a), m_(m), ai_(ai) {};
         Scalar operator[](const Index i) const { return a[ai_ + i]; }
         Index m() const { return m_; }
+    private:
         const Vec<Dep1> &a;
         const Index m_;
         const Index ai_;
     };
 
     // Other vector operations are similarly defined below.
+    /**
+     * @brief Represents an element-wise conditional vector operation.
+     */
     template <typename IfElseOp, typename Dep1, typename Dep2>
     class VecIfElse : public Vec<VecIfElse<IfElseOp, Dep1, Dep2>>
     {
@@ -238,11 +242,15 @@ namespace fatrop
             : if_else_op(if_else_op), a(a), b(b) {}
         Scalar operator[](const Index i) const { return if_else_op[i] ? a[i] : b[i]; }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
         const IfElseOp &if_else_op;
     };
 
+    /**
+     * @brief Represents a vector filled with a single scalar value.
+     */
     class VecScalar : public Vec<VecScalar>
     {
     public:
@@ -250,10 +258,14 @@ namespace fatrop
             : m_(m), alpha(alpha) {};
         Scalar operator[](const Index i) const { return alpha; }
         Index m() const { return m_; }
+    private:
         const Index m_;
         const Scalar alpha;
     };
 
+    /**
+     * @brief Represents element-wise addition of two vectors.
+     */
     template <typename Dep1, typename Dep2>
     class VecPlusVec : public Vec<VecPlusVec<Dep1, Dep2>>
     {
@@ -261,10 +273,14 @@ namespace fatrop
         VecPlusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
         Scalar operator[](const Index i) const { return a[i] + b[i]; }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
     };
 
+    /**
+     * @brief Represents element-wise subtraction of two vectors.
+     */
     template <typename Dep1, typename Dep2>
     class VecMinusVec : public Vec<VecMinusVec<Dep1, Dep2>>
     {
@@ -272,10 +288,14 @@ namespace fatrop
         VecMinusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
         Scalar operator[](const Index i) const { return a[i] - b[i]; }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
     };
 
+    /**
+     * @brief Represents scalar multiplication of a vector.
+     */
     template <typename Dep1>
     class VecTimesScalar : public Vec<VecTimesScalar<Dep1>>
     {
@@ -284,10 +304,14 @@ namespace fatrop
             : a(a), alpha(alpha) {};
         Scalar operator[](const Index i) const { return alpha * a[i]; }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
         const Scalar alpha;
     };
 
+    /**
+     * @brief Represents element-wise multiplication of two vectors.
+     */
     template <typename Dep1, typename Dep2>
     class VecTimesVec : public Vec<VecTimesVec<Dep1, Dep2>>
     {
@@ -295,10 +319,14 @@ namespace fatrop
         VecTimesVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
         Scalar operator[](const Index i) const { return a[i] * b[i]; }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
     };
 
+    /**
+     * @brief Represents element-wise division of two vectors.
+     */
     template <typename Dep1, typename Dep2>
     class VecDivVec : public Vec<VecDivVec<Dep1, Dep2>>
     {
@@ -306,10 +334,14 @@ namespace fatrop
         VecDivVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
         Scalar operator[](const Index i) const { return a[i] / b[i]; }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
     };
 
+    /**
+     * @brief Represents scalar division by a vector.
+     */
     template <typename Dep1>
     class ScalarDivVec : public Vec<ScalarDivVec<Dep1>>
     {
@@ -317,10 +349,14 @@ namespace fatrop
         ScalarDivVec(const Scalar alpha, const Vec<Dep1> &a) : alpha(alpha), a(a) {};
         Scalar operator[](const Index i) const { return alpha / a[i]; }
         Index m() const { return a.m(); }
+    private:
         const Scalar alpha;
         const Vec<Dep1> &a;
     };
 
+    /**
+     * @brief Represents element-wise absolute value of a vector.
+     */
     template <typename Dep1>
     class VecAbs : public Vec<VecAbs<Dep1>>
     {
@@ -328,9 +364,13 @@ namespace fatrop
         VecAbs(const Vec<Dep1> &a) : a(a) {};
         Scalar operator[](const Index i) const { return std::abs(a[i]); }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
     };
 
+    /**
+     * @brief Represents element-wise natural logarithm of a vector.
+     */
     template <typename Dep1>
     class VecLog : public Vec<VecLog<Dep1>>
     {
@@ -338,9 +378,13 @@ namespace fatrop
         VecLog(const Vec<Dep1> &a) : a(a) {};
         Scalar operator[](const Index i) const { return std::log(a[i]); }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
     };
 
+    /**
+     * @brief Represents element-wise exponential of a vector.
+     */
     template <typename Dep1>
     class VecExp : public Vec<VecExp<Dep1>>
     {
@@ -348,9 +392,13 @@ namespace fatrop
         VecExp(const Vec<Dep1> &a) : a(a) {};
         Scalar operator[](const Index i) const { return std::exp(a[i]); }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
     };
 
+    /**
+     * @brief Represents element-wise sine of a vector.
+     */
     template <typename Dep1>
     class VecSin : public Vec<VecSin<Dep1>>
     {
@@ -358,9 +406,13 @@ namespace fatrop
         VecSin(const Vec<Dep1> &a) : a(a) {};
         Scalar operator[](const Index i) const { return std::sin(a[i]); }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
     };
 
+    /**
+     * @brief Represents element-wise cosine of a vector.
+     */
     template <typename Dep1>
     class VecCos : public Vec<VecCos<Dep1>>
     {
@@ -368,9 +420,13 @@ namespace fatrop
         VecCos(const Vec<Dep1> &a) : a(a) {};
         Scalar operator[](const Index i) const { return std::cos(a[i]); }
         Index m() const { return a.m(); }
+    private:
         const Vec<Dep1> &a;
     };
 
+    /**
+     * @brief Base class for vector operation specializations.
+     */
     template <typename Derived>
     class VecOperationSpecialization : public Vec<Derived>
     {
@@ -402,6 +458,9 @@ namespace fatrop
          * @brief Accessor for elements of the vector.
          */
         Scalar &operator[](const Index i) const;
+        /**
+         * @brief Creates a sub-vector (block) of the current vector.
+         */
         VecNumeric block(Index size, Index start) const
         {
             return VecNumeric(vec_, size, ai_ + start);
@@ -424,11 +483,17 @@ namespace fatrop
     class VecAllocated : public VecNumeric
     {
     public:
+        /**
+         * @brief Constructs a VecAllocated object with the given size.
+         */
         VecAllocated(const Index m) : VecNumeric(*this, m, 0), m_(m)
         {
             ALLOCATE_VEC(m, &vec_);
         }
         VecAllocated(VecAllocated & /*other*/) = delete;
+        /**
+         * @brief Move constructor for VecAllocated.
+         */
         VecAllocated(VecAllocated &&other)
             : VecNumeric(*this, other.m(), 0), vec_(other.vec()), m_(other.m()) {};
         using VecNumeric::operator=;
@@ -436,17 +501,26 @@ namespace fatrop
         const VEC &vec() const { return vec_; }
 
         Index m() const { return m_; }
+        /**
+         * @brief Accessor for mutable elements of the vector.
+         */
         Scalar &operator[](const Index i)
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
             return VECEL(&vec(), i);
         }
+        /**
+         * @brief Accessor for const elements of the vector.
+         */
         const Scalar &operator[](const Index i) const
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
             VEC veccp = vec();
             return VECEL(&vec(), i);
         }
+        /**
+         * @brief Destructor that frees the allocated vector memory.
+         */
         ~VecAllocated() { FREE_VEC(&vec()); }
 
     private:
