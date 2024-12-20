@@ -270,7 +270,9 @@ namespace fatrop
     class VecPlusVec : public Vec<VecPlusVec<Dep1, Dep2>>
     {
     public:
-        VecPlusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
+        VecPlusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for addition");
+        };
         Scalar operator[](const Index i) const { return a[i] + b[i]; }
         Index m() const { return a.m(); }
     private:
@@ -285,7 +287,9 @@ namespace fatrop
     class VecMinusVec : public Vec<VecMinusVec<Dep1, Dep2>>
     {
     public:
-        VecMinusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
+        VecMinusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for subtraction");
+        };
         Scalar operator[](const Index i) const { return a[i] - b[i]; }
         Index m() const { return a.m(); }
     private:
@@ -316,7 +320,9 @@ namespace fatrop
     class VecTimesVec : public Vec<VecTimesVec<Dep1, Dep2>>
     {
     public:
-        VecTimesVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
+        VecTimesVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for element-wise multiplication");
+        };
         Scalar operator[](const Index i) const { return a[i] * b[i]; }
         Index m() const { return a.m(); }
     private:
@@ -331,7 +337,9 @@ namespace fatrop
     class VecDivVec : public Vec<VecDivVec<Dep1, Dep2>>
     {
     public:
-        VecDivVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {};
+        VecDivVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for element-wise division");
+        };
         Scalar operator[](const Index i) const { return a[i] / b[i]; }
         Index m() const { return a.m(); }
     private:
@@ -535,6 +543,7 @@ namespace fatrop
     template <typename Derived>
     void VecNumeric::operator=(const Vec<Derived> &vec_in)
     {
+        fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
         for (Index i = 0; i < m(); i++)
         {
             this->operator[](i) = vec_in[i];

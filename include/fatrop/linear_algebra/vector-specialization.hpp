@@ -5,6 +5,7 @@
 #ifndef __fatrop_linear_algebra_vector_specialization_hpp__
 #define __fatrop_linear_algebra_vector_specialization_hpp__
 
+#include "fatrop/common/exception.hpp"
 
 namespace fatrop
 {
@@ -16,7 +17,9 @@ namespace fatrop
         : public VecOperationSpecialization<VecNumericPlusVecNumeric>
     {
     public:
-        VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {};
+        VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
+        };
         Scalar operator[](const Index i) const { return a_[i] + b_[i]; }
         Index m() const { return a_.m(); }
         friend VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b);
@@ -63,7 +66,9 @@ namespace fatrop
                                                        const Scalar alpha,
                                                        VecNumeric &b,
                                                        const Scalar beta)
-            : a_(a), alpha_(alpha), b_(b), beta_(beta) {};
+            : a_(a), alpha_(alpha), b_(b), beta_(beta) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
+        };
         Scalar operator[](const Index i) const { return alpha_ * a_[i] + beta_ * b_[i]; }
         Index m() const { return a_.m(); }
         friend VecNumericTimesScalarPlusVecNumericTimesScalar operator+(
@@ -90,7 +95,9 @@ namespace fatrop
     public:
         VecNumericPlusVecNumericTimesScalar(VecNumeric &a, VecNumeric &b,
                                             const Scalar alpha)
-            : a_(a), b_(b), alpha_(alpha) {};
+            : a_(a), b_(b), alpha_(alpha) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
+        };
         Scalar operator[](const Index i) const { return a_[i] + alpha_ * b_[i]; }
         Index m() const { return a_.m(); }
         friend VecNumericPlusVecNumericTimesScalar operator+(
@@ -115,7 +122,9 @@ namespace fatrop
         : public VecOperationSpecialization<VecNumericTimesVecNumeric>
     {
     public:
-        VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {};
+        VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
+        };
         Scalar operator[](const Index i) const { return a_[i] * b_[i]; }
         Index m() const { return a_.m(); }
         friend VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b);
@@ -132,6 +141,7 @@ namespace fatrop
                                    &&vecnumericplusvecnumeric)
     {
         auto vv = vecnumericplusvecnumeric.derived();
+        fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         VecNumeric &b = vv.b();
         AXPY(m_, 1.0, &a.vec(), a.ai(), &b.vec(), b.ai(), &this->vec(), this->ai());
@@ -142,6 +152,7 @@ namespace fatrop
         VecOperationSpecialization<VecNumericTimesScalar> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
+        fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         Scalar alpha = vv.alpha();
         VECCPSC(m_, alpha, &a.vec(), a.ai(), &this->vec(), this->ai());
@@ -153,6 +164,7 @@ namespace fatrop
             &&vecnumericplusvecnumerictimesscalar)
     {
         auto vv = vecnumericplusvecnumerictimesscalar.derived();
+        fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         VecNumeric &b = vv.b();
         Scalar alpha = vv.alpha();
@@ -165,6 +177,7 @@ namespace fatrop
             &&vecnumerictimesscalarplusvecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalarplusvecnumerictimesscalar.derived();
+        fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         Scalar alpha = vv.alpha();
         VecNumeric &b = vv.b();
@@ -178,6 +191,7 @@ namespace fatrop
                                    &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
+        fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
         VecNumeric &a = vv.a();
         VecNumeric &b = vv.b();
         VECMUL(m_, &b.vec(), b.ai(), &a.vec(), a.ai(), &this->vec(), this->ai());
