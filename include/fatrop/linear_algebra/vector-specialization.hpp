@@ -6,6 +6,12 @@
 #define __fatrop_linear_algebra_vector_specialization_hpp__
 
 #include "fatrop/common/exception.hpp"
+/**
+ * @file vector-specializations.hpp
+ * @brief implements specializations for redirecting vector assignment operations to blasfeo
+ * kernels. These specializations are not striclty necessary as their functionality is already
+ * included in "vector.hpp", but they might improve performance.
+ */
 
 namespace fatrop
 {
@@ -13,8 +19,7 @@ namespace fatrop
      * @class VecNumericPlusVecNumeric
      * @brief Represents the addition of two `VecNumeric` vectors.
      */
-    class VecNumericPlusVecNumeric
-        : public VecOperationSpecialization<VecNumericPlusVecNumeric>
+    class VecNumericPlusVecNumeric : public VecOperationSpecialization<VecNumericPlusVecNumeric>
     {
     public:
         VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b)
@@ -36,12 +41,10 @@ namespace fatrop
      * @class VecNumericTimesScalar
      * @brief Represents the scaling of a `VecNumeric` vector by a scalar.
      */
-    class VecNumericTimesScalar
-        : public VecOperationSpecialization<VecNumericTimesScalar>
+    class VecNumericTimesScalar : public VecOperationSpecialization<VecNumericTimesScalar>
     {
     public:
-        VecNumericTimesScalar(VecNumeric &a, const Scalar alpha)
-            : a_(a), alpha_(alpha) {};
+        VecNumericTimesScalar(VecNumeric &a, const Scalar alpha) : a_(a), alpha_(alpha) {};
         Scalar operator()(const Index i) const { return alpha_ * a_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a);
@@ -61,22 +64,19 @@ namespace fatrop
      */
 
     class VecNumericTimesScalarPlusVecNumericTimesScalar
-        : public VecOperationSpecialization<
-              VecNumericTimesScalarPlusVecNumericTimesScalar>
+        : public VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
     {
     public:
-        VecNumericTimesScalarPlusVecNumericTimesScalar(VecNumeric &a,
-                                                       const Scalar alpha,
-                                                       VecNumeric &b,
-                                                       const Scalar beta)
+        VecNumericTimesScalarPlusVecNumericTimesScalar(VecNumeric &a, const Scalar alpha,
+                                                       VecNumeric &b, const Scalar beta)
             : a_(a), alpha_(alpha), b_(b), beta_(beta)
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return alpha_ * a_(i) + beta_ * b_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericTimesScalarPlusVecNumericTimesScalar operator+(
-            const VecNumericTimesScalar &a, const VecNumericTimesScalar &b);
+        friend VecNumericTimesScalarPlusVecNumericTimesScalar
+        operator+(const VecNumericTimesScalar &a, const VecNumericTimesScalar &b);
         VecNumeric &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
         VecNumeric &b() const { return b_; }
@@ -98,18 +98,17 @@ namespace fatrop
         : public VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
     {
     public:
-        VecNumericPlusVecNumericTimesScalar(VecNumeric &a, VecNumeric &b,
-                                            const Scalar alpha)
+        VecNumericPlusVecNumericTimesScalar(VecNumeric &a, VecNumeric &b, const Scalar alpha)
             : a_(a), b_(b), alpha_(alpha)
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) + alpha_ * b_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericPlusVecNumericTimesScalar operator+(
-            const VecNumericTimesScalar &a, VecNumeric &b);
-        friend VecNumericPlusVecNumericTimesScalar operator+(
-            VecNumeric &a, const VecNumericTimesScalar &b);
+        friend VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
+                                                             VecNumeric &b);
+        friend VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a,
+                                                             const VecNumericTimesScalar &b);
         VecNumeric &a() const { return a_; }
         VecNumeric &b() const { return b_; }
         Scalar alpha() const { return alpha_; }
@@ -125,8 +124,7 @@ namespace fatrop
      * @brief Represents the element-wise multiplication of two `VecNumeric`
      * vectors.
      */
-    class VecNumericTimesVecNumeric
-        : public VecOperationSpecialization<VecNumericTimesVecNumeric>
+    class VecNumericTimesVecNumeric : public VecOperationSpecialization<VecNumericTimesVecNumeric>
     {
     public:
         VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b)
@@ -146,8 +144,8 @@ namespace fatrop
 
     // operator overloading for VecNumeric specializations - blasfeo kernels
     template <>
-    VecNumeric &VecNumeric::operator=(VecOperationSpecialization<VecNumericPlusVecNumeric>
-                                          &&vecnumericplusvecnumeric)
+    VecNumeric &VecNumeric::operator=(
+        VecOperationSpecialization<VecNumericPlusVecNumeric> &&vecnumericplusvecnumeric)
     {
         auto vv = vecnumericplusvecnumeric.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
@@ -158,8 +156,8 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &VecNumeric::operator=(
-        VecOperationSpecialization<VecNumericTimesScalar> &&vecnumerictimesscalar)
+    VecNumeric &
+    VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesScalar> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
@@ -170,9 +168,9 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &VecNumeric::operator=(
-        VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
-            &&vecnumericplusvecnumerictimesscalar)
+    VecNumeric &
+    VecNumeric::operator=(VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
+                              &&vecnumericplusvecnumerictimesscalar)
     {
         auto vv = vecnumericplusvecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
@@ -184,9 +182,9 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &VecNumeric::operator=(
-        VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
-            &&vecnumerictimesscalarplusvecnumerictimesscalar)
+    VecNumeric &
+    VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
+                              &&vecnumerictimesscalarplusvecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalarplusvecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
@@ -194,14 +192,13 @@ namespace fatrop
         Scalar alpha = vv.alpha();
         VecNumeric &b = vv.b();
         Scalar beta = vv.beta();
-        AXPBY(m_, alpha, &a.vec(), a.ai(), beta, &b.vec(), b.ai(), &this->vec(),
-              this->ai());
+        AXPBY(m_, alpha, &a.vec(), a.ai(), beta, &b.vec(), b.ai(), &this->vec(), this->ai());
         return *this;
     }
 
     template <>
-    VecNumeric &VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesVecNumeric>
-                                          &&vecnumerictimesscalar)
+    VecNumeric &VecNumeric::operator=(
+        VecOperationSpecialization<VecNumericTimesVecNumeric> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
@@ -214,8 +211,7 @@ namespace fatrop
     /**
      * @brief Addition operator for VecNumeric and VecNumericTimesScalar.
      */
-    VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a,
-                                                  const VecNumericTimesScalar &b)
+    VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a, const VecNumericTimesScalar &b)
     {
         return VecNumericPlusVecNumericTimesScalar(a, b.a(), b.alpha());
     }
@@ -223,8 +219,7 @@ namespace fatrop
     /**
      * @brief Addition operator for VecNumericTimesScalar and VecNumeric.
      */
-    VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
-                                                  VecNumeric &b)
+    VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a, VecNumeric &b)
     {
         return b + a;
     }
@@ -232,11 +227,10 @@ namespace fatrop
     /**
      * @brief Addition operator for two VecNumericTimesScalar objects.
      */
-    VecNumericTimesScalarPlusVecNumericTimesScalar operator+(
-        const VecNumericTimesScalar &a, const VecNumericTimesScalar &b)
+    VecNumericTimesScalarPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
+                                                             const VecNumericTimesScalar &b)
     {
-        return VecNumericTimesScalarPlusVecNumericTimesScalar(a.a(), a.alpha(), b.a(),
-                                                              b.alpha());
+        return VecNumericTimesScalarPlusVecNumericTimesScalar(a.a(), a.alpha(), b.a(), b.alpha());
     }
 
     /**
@@ -266,10 +260,7 @@ namespace fatrop
     /**
      * @brief Scalar multiplication operator for VecNumeric.
      */
-    VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha)
-    {
-        return alpha * a;
-    }
+    VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha) { return alpha * a; }
 
     /**
      * @brief Unary minus operator for VecNumeric.

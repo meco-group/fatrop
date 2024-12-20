@@ -10,15 +10,15 @@
 #include <string>
 
 // Define assertion macro
-#define fatrop_assert(condition)                                                  \
-    do                                                                            \
-    {                                                                             \
-        if (!(condition))                                                         \
-        {                                                                         \
-            std::cerr << "Assertion failed: " << #condition << "at: " << __FILE__ \
-                      << ":" << __LINE__ << "\n";                                 \
-            std::abort();                                                         \
-        }                                                                         \
+#define fatrop_assert(condition)                                                                   \
+    do                                                                                             \
+    {                                                                                              \
+        if (!(condition))                                                                          \
+        {                                                                                          \
+            std::cerr << "Assertion failed: " << #condition << "at: " << __FILE__ << ":"           \
+                      << __LINE__ << "\n";                                                         \
+            std::abort();                                                                          \
+        }                                                                                          \
     } while (0)
 
 // Define debug assertion macro

@@ -16,16 +16,15 @@ extern "C"
 {
 #include <blasfeo.h>
 }
-#include <iomanip>
 #include <cmath>
+#include <iomanip>
 
 #include "fatrop/common/exception.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 
 namespace fatrop
 {
-    template <typename Derived>
-    class Vec
+    template <typename Derived> class Vec
     {
     public:
         /**
@@ -101,8 +100,7 @@ namespace fatrop
             return std::sqrt(ret);
         }
 
-        template <typename Dep2>
-        friend Scalar dot(const Vec<Derived> &a, const Vec<Dep2> &b)
+        template <typename Dep2> friend Scalar dot(const Vec<Derived> &a, const Vec<Dep2> &b)
         {
             Scalar ret = 0;
             for (Index i = 0; i < a.m(); i++)
@@ -112,61 +110,41 @@ namespace fatrop
             return ret;
         }
 
-        friend VecAbs<Derived> abs(const Vec<Derived> &a)
-        {
-            return VecAbs<Derived>(a);
-        }
+        friend VecAbs<Derived> abs(const Vec<Derived> &a) { return VecAbs<Derived>(a); }
 
-        friend VecLog<Derived> log(const Vec<Derived> &a)
-        {
-            return VecLog<Derived>(a);
-        }
+        friend VecLog<Derived> log(const Vec<Derived> &a) { return VecLog<Derived>(a); }
 
-        friend VecExp<Derived> exp(const Vec<Derived> &a)
-        {
-            return VecExp<Derived>(a);
-        }
+        friend VecExp<Derived> exp(const Vec<Derived> &a) { return VecExp<Derived>(a); }
 
-        friend VecSin<Derived> sin(const Vec<Derived> &a)
-        {
-            return VecSin<Derived>(a);
-        }
+        friend VecSin<Derived> sin(const Vec<Derived> &a) { return VecSin<Derived>(a); }
 
-        friend VecCos<Derived> cos(const Vec<Derived> &a)
-        {
-            return VecCos<Derived>(a);
-        }
+        friend VecCos<Derived> cos(const Vec<Derived> &a) { return VecCos<Derived>(a); }
 
         template <typename IfElseOp, typename Dep2>
         friend VecIfElse<IfElseOp, Derived, Dep2> if_else(const IfElseOp &if_else_op,
-                                                          const Vec<Derived> &a,
-                                                          const Vec<Dep2> &b)
+                                                          const Vec<Derived> &a, const Vec<Dep2> &b)
         {
             return VecIfElse<IfElseOp, Derived, Dep2>(if_else_op, a, b);
         }
         // Operator overloading functions of Expressions
         template <typename Dep2>
-        friend VecPlusVec<Derived, Dep2> operator+(const Vec<Derived> &a,
-                                                   const Vec<Dep2> &b)
+        friend VecPlusVec<Derived, Dep2> operator+(const Vec<Derived> &a, const Vec<Dep2> &b)
         {
             return VecPlusVec<Derived, Dep2>(a, b);
         }
 
         template <typename Dep2>
-        friend VecMinusVec<Derived, Dep2> operator-(const Vec<Derived> &a,
-                                                    const Vec<Dep2> &b)
+        friend VecMinusVec<Derived, Dep2> operator-(const Vec<Derived> &a, const Vec<Dep2> &b)
         {
             return VecMinusVec<Derived, Dep2>(a, b);
         }
 
-        friend VecTimesScalar<Derived> operator*(const Scalar alpha,
-                                                 Vec<Derived> &a)
+        friend VecTimesScalar<Derived> operator*(const Scalar alpha, Vec<Derived> &a)
         {
             return VecTimesScalar<Derived>(a, alpha);
         }
 
-        friend VecTimesScalar<Derived> operator*(const Vec<Derived> &a,
-                                                 const Scalar alpha)
+        friend VecTimesScalar<Derived> operator*(const Vec<Derived> &a, const Scalar alpha)
         {
             return alpha * a;
         }
@@ -174,21 +152,18 @@ namespace fatrop
         friend VecTimesScalar<Derived> operator-(Vec<Derived> &a) { return -1. * a; }
 
         template <typename Dep2>
-        friend VecTimesVec<Derived, Dep2> operator*(const Vec<Derived> &a,
-                                                    const Vec<Dep2> &b)
+        friend VecTimesVec<Derived, Dep2> operator*(const Vec<Derived> &a, const Vec<Dep2> &b)
         {
             return VecTimesVec<Derived, Dep2>(a, b);
         }
 
         template <typename Dep2>
-        friend VecDivVec<Derived, Dep2> operator/(const Vec<Derived> &a,
-                                                  const Vec<Dep2> &b)
+        friend VecDivVec<Derived, Dep2> operator/(const Vec<Derived> &a, const Vec<Dep2> &b)
         {
             return VecDivVec<Derived, Dep2>(a, b);
         }
 
-        friend ScalarDivVec<Derived> operator/(const Scalar alpha,
-                                               const Vec<Derived> &a)
+        friend ScalarDivVec<Derived> operator/(const Scalar alpha, const Vec<Derived> &a)
         {
             return ScalarDivVec<Derived>(alpha, a);
         }
@@ -204,7 +179,7 @@ namespace fatrop
         {
             for (Index i = 0; i < vec.m(); i++)
             {
-                os<< std::setw(12) << std::setprecision(4) << vec[i] << " ";
+                os << std::setw(12) << std::setprecision(4) << vec[i] << " ";
             }
             return os; // Return the stream to allow chaining (e.g., cout << obj1 <<
                        // obj2)
@@ -217,14 +192,13 @@ namespace fatrop
      *
      * @tparam Dep1 Type of the parent vector.
      */
-    template <typename Dep1>
-    class VecBlock : public Vec<VecBlock<Dep1>>
+    template <typename Dep1> class VecBlock : public Vec<VecBlock<Dep1>>
     {
     public:
-        VecBlock(const Vec<Dep1> &a, const Index m, const Index ai)
-            : a(a), m_(m), ai_(ai) {};
+        VecBlock(const Vec<Dep1> &a, const Index m, const Index ai) : a(a), m_(m), ai_(ai) {};
         Scalar operator()(const Index i) const { return a(ai_ + i); }
         Index m() const { return m_; }
+
     private:
         const Vec<Dep1> &a;
         const Index m_;
@@ -240,9 +214,12 @@ namespace fatrop
     {
     public:
         VecIfElse(const IfElseOp &if_else_op, const Vec<Dep1> &a, const Vec<Dep2> &b)
-            : if_else_op(if_else_op), a(a), b(b) {}
+            : if_else_op(if_else_op), a(a), b(b)
+        {
+        }
         Scalar operator()(const Index i) const { return if_else_op(i) ? a(i) : b(i); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
@@ -255,10 +232,10 @@ namespace fatrop
     class VecScalar : public Vec<VecScalar>
     {
     public:
-        explicit VecScalar(const Index m, const Scalar alpha)
-            : m_(m), alpha(alpha) {};
+        explicit VecScalar(const Index m, const Scalar alpha) : m_(m), alpha(alpha) {};
         Scalar operator()(const Index i) const { return alpha; }
         Index m() const { return m_; }
+
     private:
         const Index m_;
         const Scalar alpha;
@@ -267,15 +244,16 @@ namespace fatrop
     /**
      * @brief Represents element-wise addition of two vectors.
      */
-    template <typename Dep1, typename Dep2>
-    class VecPlusVec : public Vec<VecPlusVec<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2> class VecPlusVec : public Vec<VecPlusVec<Dep1, Dep2>>
     {
     public:
-        VecPlusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
+        VecPlusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b)
+        {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for addition");
         };
         Scalar operator()(const Index i) const { return a(i) + b(i); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
@@ -284,15 +262,16 @@ namespace fatrop
     /**
      * @brief Represents element-wise subtraction of two vectors.
      */
-    template <typename Dep1, typename Dep2>
-    class VecMinusVec : public Vec<VecMinusVec<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2> class VecMinusVec : public Vec<VecMinusVec<Dep1, Dep2>>
     {
     public:
-        VecMinusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
+        VecMinusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b)
+        {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for subtraction");
         };
         Scalar operator()(const Index i) const { return a(i) - b(i); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
@@ -301,14 +280,13 @@ namespace fatrop
     /**
      * @brief Represents scalar multiplication of a vector.
      */
-    template <typename Dep1>
-    class VecTimesScalar : public Vec<VecTimesScalar<Dep1>>
+    template <typename Dep1> class VecTimesScalar : public Vec<VecTimesScalar<Dep1>>
     {
     public:
-        VecTimesScalar(const Vec<Dep1> &a, const Scalar alpha)
-            : a(a), alpha(alpha) {};
+        VecTimesScalar(const Vec<Dep1> &a, const Scalar alpha) : a(a), alpha(alpha) {};
         Scalar operator()(const Index i) const { return alpha * a(i); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
         const Scalar alpha;
@@ -317,15 +295,17 @@ namespace fatrop
     /**
      * @brief Represents element-wise multiplication of two vectors.
      */
-    template <typename Dep1, typename Dep2>
-    class VecTimesVec : public Vec<VecTimesVec<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2> class VecTimesVec : public Vec<VecTimesVec<Dep1, Dep2>>
     {
     public:
-        VecTimesVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
-            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for element-wise multiplication");
+        VecTimesVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b)
+        {
+            fatrop_dbg_assert(a.m() == b.m() &&
+                              "Vector sizes must match for element-wise multiplication");
         };
         Scalar operator()(const Index i) const { return a(i) * b(i); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
@@ -334,15 +314,17 @@ namespace fatrop
     /**
      * @brief Represents element-wise division of two vectors.
      */
-    template <typename Dep1, typename Dep2>
-    class VecDivVec : public Vec<VecDivVec<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2> class VecDivVec : public Vec<VecDivVec<Dep1, Dep2>>
     {
     public:
-        VecDivVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
-            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for element-wise division");
+        VecDivVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b)
+        {
+            fatrop_dbg_assert(a.m() == b.m() &&
+                              "Vector sizes must match for element-wise division");
         };
         Scalar operator()(const Index i) const { return a(i) / b(i); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
         const Vec<Dep2> &b;
@@ -351,13 +333,13 @@ namespace fatrop
     /**
      * @brief Represents scalar division by a vector.
      */
-    template <typename Dep1>
-    class ScalarDivVec : public Vec<ScalarDivVec<Dep1>>
+    template <typename Dep1> class ScalarDivVec : public Vec<ScalarDivVec<Dep1>>
     {
     public:
         ScalarDivVec(const Scalar alpha, const Vec<Dep1> &a) : alpha(alpha), a(a) {};
         Scalar operator()(const Index i) const { return alpha / a(i); }
         Index m() const { return a.m(); }
+
     private:
         const Scalar alpha;
         const Vec<Dep1> &a;
@@ -366,13 +348,13 @@ namespace fatrop
     /**
      * @brief Represents element-wise absolute value of a vector.
      */
-    template <typename Dep1>
-    class VecAbs : public Vec<VecAbs<Dep1>>
+    template <typename Dep1> class VecAbs : public Vec<VecAbs<Dep1>>
     {
     public:
         VecAbs(const Vec<Dep1> &a) : a(a) {};
         Scalar operator()(const Index i) const { return std::abs(a(i)); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
     };
@@ -380,13 +362,13 @@ namespace fatrop
     /**
      * @brief Represents element-wise natural logarithm of a vector.
      */
-    template <typename Dep1>
-    class VecLog : public Vec<VecLog<Dep1>>
+    template <typename Dep1> class VecLog : public Vec<VecLog<Dep1>>
     {
     public:
         VecLog(const Vec<Dep1> &a) : a(a) {};
         Scalar operator()(const Index i) const { return std::log(a(i)); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
     };
@@ -394,13 +376,13 @@ namespace fatrop
     /**
      * @brief Represents element-wise exponential of a vector.
      */
-    template <typename Dep1>
-    class VecExp : public Vec<VecExp<Dep1>>
+    template <typename Dep1> class VecExp : public Vec<VecExp<Dep1>>
     {
     public:
         VecExp(const Vec<Dep1> &a) : a(a) {};
         Scalar operator()(const Index i) const { return std::exp(a(i)); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
     };
@@ -408,13 +390,13 @@ namespace fatrop
     /**
      * @brief Represents element-wise sine of a vector.
      */
-    template <typename Dep1>
-    class VecSin : public Vec<VecSin<Dep1>>
+    template <typename Dep1> class VecSin : public Vec<VecSin<Dep1>>
     {
     public:
         VecSin(const Vec<Dep1> &a) : a(a) {};
         Scalar operator()(const Index i) const { return std::sin(a(i)); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
     };
@@ -422,13 +404,13 @@ namespace fatrop
     /**
      * @brief Represents element-wise cosine of a vector.
      */
-    template <typename Dep1>
-    class VecCos : public Vec<VecCos<Dep1>>
+    template <typename Dep1> class VecCos : public Vec<VecCos<Dep1>>
     {
     public:
         VecCos(const Vec<Dep1> &a) : a(a) {};
         Scalar operator()(const Index i) const { return std::cos(a(i)); }
         Index m() const { return a.m(); }
+
     private:
         const Vec<Dep1> &a;
     };
@@ -436,8 +418,7 @@ namespace fatrop
     /**
      * @brief Base class for vector operation specializations.
      */
-    template <typename Derived>
-    class VecOperationSpecialization : public Vec<Derived>
+    template <typename Derived> class VecOperationSpecialization : public Vec<Derived>
     {
     public:
         const Derived &derived() const { return static_cast<const Derived &>(*this); }
@@ -454,16 +435,19 @@ namespace fatrop
         VecNumeric(VecAllocated &vec, const Index m, const Index ai);
         VecNumeric(VecAllocated &vec);
         // blasfeo_dvecse
-        VecNumeric& operator=(const Scalar alpha);
+        VecNumeric &operator=(const Scalar alpha);
         // Assignment operators to handle various vector operations efficiently
         // by redirecting to blasfeo kernels
         // assignment from VecOperationSpecialization
         template <typename Derived>
-        VecNumeric& operator=(VecOperationSpecialization<Derived> &&vec_in);
+        VecNumeric &operator=(VecOperationSpecialization<Derived> &&vec_in);
         // assignment from general Vec expression
-        template <typename Derived>
-        VecNumeric& operator=(const Vec<Derived> &vec_in);
-        VecNumeric& operator=(const VecNumeric& vec_in){*this = *static_cast<const Vec<VecNumeric>*>(&vec_in); return *this;};
+        template <typename Derived> VecNumeric &operator=(const Vec<Derived> &vec_in);
+        VecNumeric &operator=(const VecNumeric &vec_in)
+        {
+            *this = *static_cast<const Vec<VecNumeric> *>(&vec_in);
+            return *this;
+        };
         /**
          * @brief Accessor for elements of the vector.
          */
@@ -496,10 +480,7 @@ namespace fatrop
         /**
          * @brief Constructs a VecAllocated object with the given size.
          */
-        VecAllocated(const Index m) : VecNumeric(*this, m, 0), m_(m)
-        {
-            ALLOCATE_VEC(m, &vec_);
-        }
+        VecAllocated(const Index m) : VecNumeric(*this, m, 0), m_(m) { ALLOCATE_VEC(m, &vec_); }
         VecAllocated(VecAllocated & /*other*/) = delete;
         /**
          * @brief Move constructor for VecAllocated.
@@ -546,8 +527,7 @@ namespace fatrop
     VecNumeric::VecNumeric(VecAllocated &vec, const Index m, const Index ai)
         : vec_(vec), m_(m), ai_(ai) {};
     VecNumeric ::VecNumeric(VecAllocated &vec) : vec_(vec), m_(vec.m()), ai_(0) {};
-    template <typename Derived>
-    VecNumeric& VecNumeric::operator=(const Vec<Derived> &vec_in)
+    template <typename Derived> VecNumeric &VecNumeric::operator=(const Vec<Derived> &vec_in)
     {
         fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
         for (Index i = 0; i < m(); i++)
@@ -556,7 +536,7 @@ namespace fatrop
         }
         return *this;
     }
-    VecNumeric& VecNumeric::operator=(const Scalar alpha)
+    VecNumeric &VecNumeric::operator=(const Scalar alpha)
     {
         VECSE(m(), alpha, &vec(), ai());
         return *this;
