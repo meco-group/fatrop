@@ -20,7 +20,7 @@ namespace fatrop
         VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
-        Scalar operator[](const Index i) const { return a_[i] + b_[i]; }
+        Scalar operator()(const Index i) const { return a_(i) + b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b);
         VecNumeric& a() const { return a_; }
@@ -40,7 +40,7 @@ namespace fatrop
     public:
         VecNumericTimesScalar(VecNumeric &a, const Scalar alpha)
             : a_(a), alpha_(alpha) {};
-        Scalar operator[](const Index i) const { return alpha_ * a_[i]; }
+        Scalar operator()(const Index i) const { return alpha_ * a_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a);
         friend VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha);
@@ -69,7 +69,7 @@ namespace fatrop
             : a_(a), alpha_(alpha), b_(b), beta_(beta) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
-        Scalar operator[](const Index i) const { return alpha_ * a_[i] + beta_ * b_[i]; }
+        Scalar operator()(const Index i) const { return alpha_ * a_(i) + beta_ * b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericTimesScalarPlusVecNumericTimesScalar operator+(
             const VecNumericTimesScalar &a, const VecNumericTimesScalar &b);
@@ -98,7 +98,7 @@ namespace fatrop
             : a_(a), b_(b), alpha_(alpha) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
-        Scalar operator[](const Index i) const { return a_[i] + alpha_ * b_[i]; }
+        Scalar operator()(const Index i) const { return a_(i) + alpha_ * b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericPlusVecNumericTimesScalar operator+(
             const VecNumericTimesScalar &a, VecNumeric &b);
@@ -125,7 +125,7 @@ namespace fatrop
         VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
-        Scalar operator[](const Index i) const { return a_[i] * b_[i]; }
+        Scalar operator()(const Index i) const { return a_(i) * b_(i); }
         Index m() const { return a_.m(); }
         friend VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b);
         VecNumeric& a() const { return a_; }

@@ -33,9 +33,9 @@ namespace fatrop
          * @param i Index of the element.
          * @return Scalar The value at index i.
          */
-        Scalar operator[](const Index i) const
+        Scalar operator()(const Index i) const
         {
-            return static_cast<const Derived *>(this)->operator[](i);
+            return static_cast<const Derived *>(this)->operator()(i);
         }
 
         /**
@@ -65,7 +65,7 @@ namespace fatrop
             Scalar ret = 0;
             for (Index i = 0; i < vec.m(); i++)
             {
-                ret += vec[i];
+                ret += vec(i);
             }
             return ret;
         }
@@ -75,7 +75,7 @@ namespace fatrop
             Scalar ret = 0;
             for (Index i = 0; i < vec.m(); i++)
             {
-                ret = std::max(ret, std::abs(vec[i]));
+                ret = std::max(ret, std::abs(vec(i)));
             }
             return ret;
         }
@@ -85,7 +85,7 @@ namespace fatrop
             Scalar ret = 0;
             for (Index i = 0; i < vec.m(); i++)
             {
-                ret += std::abs(vec[i]);
+                ret += std::abs(vec(i));
             }
             return ret;
         }
@@ -95,7 +95,7 @@ namespace fatrop
             Scalar ret = 0;
             for (Index i = 0; i < vec.m(); i++)
             {
-                ret += vec[i] * vec[i];
+                ret += vec(i) * vec(i);
             }
             return std::sqrt(ret);
         }
@@ -106,7 +106,7 @@ namespace fatrop
             Scalar ret = 0;
             for (Index i = 0; i < a.m(); i++)
             {
-                ret += a[i] * b[i];
+                ret += a(i) * b(i);
             }
             return ret;
         }
@@ -222,7 +222,7 @@ namespace fatrop
     public:
         VecBlock(const Vec<Dep1> &a, const Index m, const Index ai)
             : a(a), m_(m), ai_(ai) {};
-        Scalar operator[](const Index i) const { return a[ai_ + i]; }
+        Scalar operator()(const Index i) const { return a(ai_ + i); }
         Index m() const { return m_; }
     private:
         const Vec<Dep1> &a;
@@ -240,7 +240,7 @@ namespace fatrop
     public:
         VecIfElse(const IfElseOp &if_else_op, const Vec<Dep1> &a, const Vec<Dep2> &b)
             : if_else_op(if_else_op), a(a), b(b) {}
-        Scalar operator[](const Index i) const { return if_else_op[i] ? a[i] : b[i]; }
+        Scalar operator()(const Index i) const { return if_else_op(i) ? a(i) : b(i); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -256,7 +256,7 @@ namespace fatrop
     public:
         explicit VecScalar(const Index m, const Scalar alpha)
             : m_(m), alpha(alpha) {};
-        Scalar operator[](const Index i) const { return alpha; }
+        Scalar operator()(const Index i) const { return alpha; }
         Index m() const { return m_; }
     private:
         const Index m_;
@@ -273,7 +273,7 @@ namespace fatrop
         VecPlusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for addition");
         };
-        Scalar operator[](const Index i) const { return a[i] + b[i]; }
+        Scalar operator()(const Index i) const { return a(i) + b(i); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -290,7 +290,7 @@ namespace fatrop
         VecMinusVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for subtraction");
         };
-        Scalar operator[](const Index i) const { return a[i] - b[i]; }
+        Scalar operator()(const Index i) const { return a(i) - b(i); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -306,7 +306,7 @@ namespace fatrop
     public:
         VecTimesScalar(const Vec<Dep1> &a, const Scalar alpha)
             : a(a), alpha(alpha) {};
-        Scalar operator[](const Index i) const { return alpha * a[i]; }
+        Scalar operator()(const Index i) const { return alpha * a(i); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -323,7 +323,7 @@ namespace fatrop
         VecTimesVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for element-wise multiplication");
         };
-        Scalar operator[](const Index i) const { return a[i] * b[i]; }
+        Scalar operator()(const Index i) const { return a(i) * b(i); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -340,7 +340,7 @@ namespace fatrop
         VecDivVec(const Vec<Dep1> &a, const Vec<Dep2> &b) : a(a), b(b) {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for element-wise division");
         };
-        Scalar operator[](const Index i) const { return a[i] / b[i]; }
+        Scalar operator()(const Index i) const { return a(i) / b(i); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -355,7 +355,7 @@ namespace fatrop
     {
     public:
         ScalarDivVec(const Scalar alpha, const Vec<Dep1> &a) : alpha(alpha), a(a) {};
-        Scalar operator[](const Index i) const { return alpha / a[i]; }
+        Scalar operator()(const Index i) const { return alpha / a(i); }
         Index m() const { return a.m(); }
     private:
         const Scalar alpha;
@@ -370,7 +370,7 @@ namespace fatrop
     {
     public:
         VecAbs(const Vec<Dep1> &a) : a(a) {};
-        Scalar operator[](const Index i) const { return std::abs(a[i]); }
+        Scalar operator()(const Index i) const { return std::abs(a(i)); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -384,7 +384,7 @@ namespace fatrop
     {
     public:
         VecLog(const Vec<Dep1> &a) : a(a) {};
-        Scalar operator[](const Index i) const { return std::log(a[i]); }
+        Scalar operator()(const Index i) const { return std::log(a(i)); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -398,7 +398,7 @@ namespace fatrop
     {
     public:
         VecExp(const Vec<Dep1> &a) : a(a) {};
-        Scalar operator[](const Index i) const { return std::exp(a[i]); }
+        Scalar operator()(const Index i) const { return std::exp(a(i)); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -412,7 +412,7 @@ namespace fatrop
     {
     public:
         VecSin(const Vec<Dep1> &a) : a(a) {};
-        Scalar operator[](const Index i) const { return std::sin(a[i]); }
+        Scalar operator()(const Index i) const { return std::sin(a(i)); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -426,7 +426,7 @@ namespace fatrop
     {
     public:
         VecCos(const Vec<Dep1> &a) : a(a) {};
-        Scalar operator[](const Index i) const { return std::cos(a[i]); }
+        Scalar operator()(const Index i) const { return std::cos(a(i)); }
         Index m() const { return a.m(); }
     private:
         const Vec<Dep1> &a;
@@ -465,7 +465,7 @@ namespace fatrop
         /**
          * @brief Accessor for elements of the vector.
          */
-        Scalar &operator[](const Index i) const;
+        Scalar &operator()(const Index i) const;
         /**
          * @brief Creates a sub-vector (block) of the current vector.
          */
@@ -516,7 +516,7 @@ namespace fatrop
         /**
          * @brief Accessor for mutable elements of the vector.
          */
-        Scalar &operator[](const Index i)
+        Scalar &operator()(const Index i)
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
             return VECEL(&vec(), i);
@@ -524,7 +524,7 @@ namespace fatrop
         /**
          * @brief Accessor for const elements of the vector.
          */
-        const Scalar &operator[](const Index i) const
+        const Scalar &operator()(const Index i) const
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
             VEC veccp = vec();
@@ -550,7 +550,7 @@ namespace fatrop
         fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
         for (Index i = 0; i < m(); i++)
         {
-            this->operator[](i) = vec_in[i];
+            this->operator()(i) = vec_in(i);
         }
     }
     void VecNumeric::operator=(const Scalar alpha)
@@ -558,10 +558,10 @@ namespace fatrop
         VECSE(m(), alpha, &vec(), ai());
     }
 
-    Scalar &VecNumeric::operator[](const Index i) const
+    Scalar &VecNumeric::operator()(const Index i) const
     {
         fatrop_dbg_assert(i >= 0 && i < m_);
-        return vec_[ai() + i];
+        return vec_(ai() + i);
     }
     VEC &VecNumeric::vec() { return vec_.vec(); }
     Index VecNumeric::m() const { return m_; }
