@@ -12,10 +12,7 @@
  * Optimization).
  */
 
-extern "C"
-{
-#include <blasfeo.h>
-}
+#include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 #include <cmath>
 #include <iomanip>
 

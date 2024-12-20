@@ -322,11 +322,7 @@ namespace fatrop
          * @param mat_in The matrix to copy from.
          * @return MatrixNumeric& Reference to the modified matrix.
          */
-        MatrixNumeric &operator=(const MatrixNumeric &mat_in)
-        {
-            *this = *static_cast<const Mat<MatrixNumeric> *>(&mat_in);
-            return *this;
-        };
+        MatrixNumeric &operator=(const MatrixNumeric &mat_in);
 
     private:
         MatrixAllocated &mat_;
@@ -428,13 +424,7 @@ namespace fatrop
     }
     MatrixNumeric &MatrixNumeric::operator=(const Scalar alpha)
     {
-        for (Index i = 0; i < m_; i++)
-        {
-            for (Index j = 0; j < n_; j++)
-            {
-                (*this)(i, j) = alpha;
-            }
-        }
+        GESE(m(), n(), alpha, &this->mat_.mat(), ai_, aj_);
         return *this;
     }
 
@@ -451,6 +441,13 @@ namespace fatrop
         }
         return *this;
     }
+    MatrixNumeric &MatrixNumeric::operator=(const MatrixNumeric &mat_in)
+    {
+        fatrop_dbg_assert((*this).m() == mat_in.m() && (*this).n() == mat_in.n());
+        GECP((*this).m(), (*this).n(), &mat_.mat(), ai_, aj_, &mat_in.mat_.mat(), mat_in.ai_,
+             mat_in.aj_);
+        return *this;
+    };
 
     // Implementation of MatrixAllocated methods
     MatrixAllocated::MatrixAllocated(const Index m, const Index n)

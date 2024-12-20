@@ -2,7 +2,6 @@
 #define __fatrop_context_generic_hpp__
 
 #include "fatrop/common/exception.hpp"
-#include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 
 // elementary types
 namespace fatrop
