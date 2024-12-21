@@ -551,6 +551,6 @@ namespace fatrop
 } // namespace fatrop
 
 // add specializations
-#include "vector-specialization.hpp"
+#include "vector_specialization.hpp"
 
 #endif // __fatrop_linear_algebra_vector_hpp__

@@ -7,7 +7,7 @@
 
 #include "fatrop/common/exception.hpp"
 /**
- * @file vector-specializations.hpp
+ * @file vector_specializations.hpp
  * @brief implements specializations for redirecting vector assignment operations to blasfeo
  * kernels. These specializations are not striclty necessary as their functionality is already
  * included in "vector.hpp", but they might improve performance.
