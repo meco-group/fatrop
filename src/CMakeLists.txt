@@ -1,7 +1,9 @@
 # Define source files for the fatrop library
 set(FATROP_SOURCES
     linear_algebra/lu_factorization.cpp
-    # Add other source files here
+    linear_algebra/vector.cpp
+    ocp/jacobian.cpp
+    ocp/hessian.cpp
 )
 
 # Create the fatrop shared library

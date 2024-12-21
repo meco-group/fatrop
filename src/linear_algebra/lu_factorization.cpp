@@ -2,7 +2,6 @@
 // Copyright (c) Lander Vanroye, KU Leuven
 //
 
-#include "fatrop/linear_algebra/lu_factorization.hpp"
 #include "fatrop/common/exception.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include <algorithm>
