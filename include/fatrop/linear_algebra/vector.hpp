@@ -429,17 +429,17 @@ namespace fatrop
     class VecNumeric : public Vec<VecNumeric>
     {
     public:
-        VecNumeric(VecAllocated &vec, const Index m, const Index ai);
-        VecNumeric(VecAllocated &vec);
+        inline VecNumeric(VecAllocated &vec, const Index m, const Index ai);
+        inline VecNumeric(VecAllocated &vec);
         // blasfeo_dvecse
-        VecNumeric &operator=(const Scalar alpha);
+        inline VecNumeric &operator=(const Scalar alpha);
         // Assignment operators to handle various vector operations efficiently
         // by redirecting to blasfeo kernels
         // assignment from VecOperationSpecialization
         template <typename Derived>
-        VecNumeric &operator=(VecOperationSpecialization<Derived> &&vec_in);
+        inline VecNumeric &operator=(VecOperationSpecialization<Derived> &&vec_in);
         // assignment from general Vec expression
-        template <typename Derived> VecNumeric &operator=(const Vec<Derived> &vec_in);
+        template <typename Derived> inline VecNumeric &operator=(const Vec<Derived> &vec_in);
         VecNumeric &operator=(const VecNumeric &vec_in)
         {
             *this = *static_cast<const Vec<VecNumeric> *>(&vec_in);
@@ -448,7 +448,7 @@ namespace fatrop
         /**
          * @brief Accessor for elements of the vector.
          */
-        Scalar &operator()(const Index i) const;
+        inline Scalar &operator()(const Index i) const;
         /**
          * @brief Creates a sub-vector (block) of the current vector.
          */
@@ -456,9 +456,9 @@ namespace fatrop
         {
             return VecNumeric(vec_, size, ai_ + start);
         }
-        VEC &vec();
-        Index m() const;
-        Index ai() const;
+        inline VEC &vec();
+        inline Index m() const;
+        inline Index ai() const;
 
     private:
         VecAllocated &vec_;
@@ -524,7 +524,7 @@ namespace fatrop
     VecNumeric::VecNumeric(VecAllocated &vec, const Index m, const Index ai)
         : vec_(vec), m_(m), ai_(ai) {};
     VecNumeric ::VecNumeric(VecAllocated &vec) : vec_(vec), m_(vec.m()), ai_(0) {};
-    template <typename Derived> VecNumeric &VecNumeric::operator=(const Vec<Derived> &vec_in)
+    template <typename Derived> inline VecNumeric &VecNumeric::operator=(const Vec<Derived> &vec_in)
     {
         fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
         for (Index i = 0; i < m(); i++)

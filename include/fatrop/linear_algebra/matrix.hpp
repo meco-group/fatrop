@@ -10,9 +10,8 @@
  * computations using BLASFEO
  */
 
-
-#include "fatrop/context/context.hpp"
 #include "fatrop/common/exception.hpp"
+#include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
@@ -170,9 +169,9 @@ namespace fatrop
          */
         MatRowView(MatrixNumeric &mat, const Index row) : mat_(mat), row_(row) {}
 
-        Scalar operator()(const Index i) const;
-        Scalar &operator()(const Index i);
-        Index m() const;
+        inline Scalar operator()(const Index i) const;
+        inline Scalar &operator()(const Index i);
+        inline Index m() const;
 
         using MatView1D<MatRowView>::operator=;
 
@@ -196,9 +195,9 @@ namespace fatrop
          */
         MatColView(MatrixNumeric &mat, const Index col) : mat_(mat), col_(col) {}
 
-        Scalar operator()(const Index i) const;
-        Scalar &operator()(const Index i);
-        Index m() const;
+        inline Scalar operator()(const Index i) const;
+        inline Scalar &operator()(const Index i);
+        inline Index m() const;
 
         using MatView1D<MatColView>::operator=;
 
@@ -221,9 +220,9 @@ namespace fatrop
          */
         MatDiagonalView(MatrixNumeric &mat) : mat_(mat) {}
 
-        Scalar operator()(const Index i) const;
-        Scalar &operator()(const Index i);
-        Index m() const;
+        inline Scalar operator()(const Index i) const;
+        inline Scalar &operator()(const Index i);
+        inline Index m() const;
 
         using MatView1D<MatDiagonalView>::operator=;
 
@@ -258,7 +257,7 @@ namespace fatrop
          * @param j Column index of the element.
          * @return Scalar& Reference to the value at position (i, j).
          */
-        Scalar &operator()(const Index i, const Index j) const;
+        inline Scalar &operator()(const Index i, const Index j) const;
 
         Index m() const { return m_; }
         Index n() const { return n_; }
@@ -307,7 +306,7 @@ namespace fatrop
          * @param alpha The scalar value to assign.
          * @return MatrixNumeric& Reference to the modified matrix.
          */
-        MatrixNumeric &operator=(const Scalar alpha);
+        inline MatrixNumeric &operator=(const Scalar alpha);
 
         /**
          * @brief Assigns values from another matrix to this matrix.
@@ -316,7 +315,7 @@ namespace fatrop
          * @param mat_in The matrix to assign from.
          * @return MatrixNumeric& Reference to the modified matrix.
          */
-        template <typename Derived> MatrixNumeric &operator=(const Mat<Derived> &mat_in);
+        template <typename Derived> inline MatrixNumeric &operator=(const Mat<Derived> &mat_in);
 
         /**
          * @brief Copy assignment operator.
@@ -324,7 +323,7 @@ namespace fatrop
          * @param mat_in The matrix to copy from.
          * @return MatrixNumeric& Reference to the modified matrix.
          */
-        MatrixNumeric &operator=(const MatrixNumeric &mat_in);
+        inline MatrixNumeric &operator=(const MatrixNumeric &mat_in);
 
     private:
         MatrixAllocated &mat_;
@@ -348,7 +347,7 @@ namespace fatrop
          * @param m Number of rows.
          * @param n Number of columns.
          */
-        MatrixAllocated(const Index m, const Index n);
+        inline MatrixAllocated(const Index m, const Index n);
 
         /**
          * @brief Deleted copy constructor to prevent unintended copies.
@@ -360,7 +359,7 @@ namespace fatrop
          *
          * @param other The MatrixAllocated object to move from.
          */
-        MatrixAllocated(MatrixAllocated &&other);
+        inline MatrixAllocated(MatrixAllocated &&other);
 
         /**
          * @brief Gets a reference to the underlying BLASFEO matrix.
@@ -385,7 +384,7 @@ namespace fatrop
          * @param j Column index of the element.
          * @return Scalar& Reference to the value at position (i, j).
          */
-        Scalar &operator()(const Index i, const Index j);
+        inline Scalar &operator()(const Index i, const Index j);
 
         /**
          * @brief Accesses the element at the given row and column (const version).
@@ -394,12 +393,12 @@ namespace fatrop
          * @param j Column index of the element.
          * @return const Scalar& Const reference to the value at position (i, j).
          */
-        const Scalar &operator()(const Index i, const Index j) const;
+        inline const Scalar &operator()(const Index i, const Index j) const;
 
         /**
          * @brief Destructor that frees the allocated matrix memory.
          */
-        ~MatrixAllocated();
+        inline ~MatrixAllocated();
 
     private:
         MAT mat_;

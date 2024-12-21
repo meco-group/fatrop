@@ -28,7 +28,7 @@ namespace fatrop
         };
         Scalar operator()(const Index i) const { return a_(i) + b_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b);
+        friend inline VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b);
         VecNumeric &a() const { return a_; }
         VecNumeric &b() const { return b_; }
 
@@ -47,9 +47,9 @@ namespace fatrop
         VecNumericTimesScalar(VecNumeric &a, const Scalar alpha) : a_(a), alpha_(alpha) {};
         Scalar operator()(const Index i) const { return alpha_ * a_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a);
-        friend VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha);
-        friend VecNumericTimesScalar operator-(VecNumeric &a);
+        friend inline VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a);
+        friend inline VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha);
+        friend inline VecNumericTimesScalar operator-(VecNumeric &a);
         VecNumeric &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
 
@@ -75,7 +75,7 @@ namespace fatrop
         };
         Scalar operator()(const Index i) const { return alpha_ * a_(i) + beta_ * b_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericTimesScalarPlusVecNumericTimesScalar
+        friend inline VecNumericTimesScalarPlusVecNumericTimesScalar
         operator+(const VecNumericTimesScalar &a, const VecNumericTimesScalar &b);
         VecNumeric &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
@@ -105,9 +105,9 @@ namespace fatrop
         };
         Scalar operator()(const Index i) const { return a_(i) + alpha_ * b_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
+        friend inline VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
                                                              VecNumeric &b);
-        friend VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a,
+        friend inline VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a,
                                                              const VecNumericTimesScalar &b);
         VecNumeric &a() const { return a_; }
         VecNumeric &b() const { return b_; }
@@ -133,7 +133,7 @@ namespace fatrop
         };
         Scalar operator()(const Index i) const { return a_(i) * b_(i); }
         Index m() const { return a_.m(); }
-        friend VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b);
+        friend inline VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b);
         VecNumeric &a() const { return a_; }
         VecNumeric &b() const { return b_; }
 
@@ -144,7 +144,7 @@ namespace fatrop
 
     // operator overloading for VecNumeric specializations - blasfeo kernels
     template <>
-    VecNumeric &VecNumeric::operator=(
+    inline VecNumeric &VecNumeric::operator=(
         VecOperationSpecialization<VecNumericPlusVecNumeric> &&vecnumericplusvecnumeric)
     {
         auto vv = vecnumericplusvecnumeric.derived();
@@ -156,7 +156,7 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &
+    inline VecNumeric &
     VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesScalar> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
@@ -168,7 +168,7 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &
+    inline VecNumeric &
     VecNumeric::operator=(VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
                               &&vecnumericplusvecnumerictimesscalar)
     {
@@ -182,7 +182,7 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &
+    inline VecNumeric &
     VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
                               &&vecnumerictimesscalarplusvecnumerictimesscalar)
     {
@@ -197,7 +197,7 @@ namespace fatrop
     }
 
     template <>
-    VecNumeric &VecNumeric::operator=(
+    inline VecNumeric &VecNumeric::operator=(
         VecOperationSpecialization<VecNumericTimesVecNumeric> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
