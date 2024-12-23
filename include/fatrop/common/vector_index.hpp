@@ -7,7 +7,7 @@
  * @brief Defines classes and functionality for efficient index vector manipulation.
  * 
  * This file contains template classes for index vectors, including VecIndex, VecIndexBlock,
- * IndexVecView, and VecIndexAllocated. These classes provide a flexible and efficient way
+ * VecIndexView, and VecIndexAllocated. These classes provide a flexible and efficient way
  * to work with vectors of indices, supporting operations like sub-block extraction,
  * element access, and size queries.
  */
@@ -149,17 +149,17 @@ namespace fatrop
      * @tparam Index The index type used in the vector.
      */
     template <typename Index>
-    class IndexVecView: public VecIndex<IndexVecView<Index>, Index>
+    class VecIndexView: public VecIndex<VecIndexView<Index>, Index>
     {
     public:
         /**
-         * @brief Constructs an IndexVecView.
+         * @brief Constructs an VecIndexView.
          * 
          * @param vec Reference to the VecIndexAllocated object.
          * @param start Starting index of the view.
          * @param size Size of the view.
          */
-        IndexVecView(VecIndexAllocated<Index>& vec, const Index start, const Index size):  vec_(vec), ai_(start), m_(size) {};
+        VecIndexView(VecIndexAllocated<Index>& vec, const Index start, const Index size):  vec_(vec), ai_(start), m_(size) {};
         
         inline Index operator[](const Index i) const;
         inline Index m() const;
@@ -169,11 +169,11 @@ namespace fatrop
          * 
          * @param start Starting index within this view.
          * @param size Size of the new block.
-         * @return IndexVecView<Index> A new view representing the sub-block.
+         * @return VecIndexView<Index> A new view representing the sub-block.
          */
-        IndexVecView<Index> block(Index start, Index size) const
+        VecIndexView<Index> block(Index start, Index size) const
         {
-            return IndexVecView<Index>(vec_, ai_ + start, size);
+            return VecIndexView<Index>(vec_, ai_ + start, size);
         }
         
         /**
@@ -181,10 +181,10 @@ namespace fatrop
          * 
          * @tparam Derived The type of the input vector.
          * @param vec_in The input vector to assign from.
-         * @return IndexVecView<Index>& Reference to this object.
+         * @return VecIndexView<Index>& Reference to this object.
          */
         template <typename Derived>
-        IndexVecView<Index>& operator=(const VecIndex<Derived, Index> &vec_in)
+        VecIndexView<Index>& operator=(const VecIndex<Derived, Index> &vec_in)
         {
             fatrop_dbg_assert(this->m() == vec_in.m() &&
                               "Vectors must be same size for assignment");
@@ -196,14 +196,14 @@ namespace fatrop
         }
         
         /**
-         * @brief Assignment operator from another IndexVecView.
+         * @brief Assignment operator from another VecIndexView.
          * 
-         * @param vec_in The input IndexVecView to assign from.
-         * @return IndexVecView<Index>& Reference to this object.
+         * @param vec_in The input VecIndexView to assign from.
+         * @return VecIndexView<Index>& Reference to this object.
          */
-        IndexVecView<Index>& operator=(const IndexVecView& vec_in)
+        VecIndexView<Index>& operator=(const VecIndexView& vec_in)
         {
-            return *this = static_cast<const VecIndex<IndexVecView<Index>, Index>&>(vec_in);
+            return *this = static_cast<const VecIndex<VecIndexView<Index>, Index>&>(vec_in);
         }
         
         VecIndexAllocated<Index>& vec_;  ///< Reference to the underlying VecIndexAllocated
@@ -215,12 +215,12 @@ namespace fatrop
      * @brief An allocated vector of indices that also provides a view interface.
      * 
      * This class combines the functionality of std::vector with the interface
-     * provided by IndexVecView.
+     * provided by VecIndexView.
      * 
      * @tparam Index The index type used in the vector.
      */
     template <typename Index>
-    class VecIndexAllocated : public IndexVecView<Index>,
+    class VecIndexAllocated : public VecIndexView<Index>,
                               public std::vector<Index>
     {
     public:
@@ -229,14 +229,14 @@ namespace fatrop
          * 
          * @param vec The vector to move from.
          */
-        VecIndexAllocated(std::vector<Index>&& vec): IndexVecView<Index>(*this, 0, vec.size()), std::vector<Index>(std::move(vec)) {};
+        VecIndexAllocated(std::vector<Index>&& vec): VecIndexView<Index>(*this, 0, vec.size()), std::vector<Index>(std::move(vec)) {};
         
         /**
          * @brief Constructs a VecIndexAllocated from a const reference to an std::vector.
          * 
          * @param vec The vector to copy from.
          */
-        VecIndexAllocated(const std::vector<Index>& vec): IndexVecView<Index>(*this, 0, vec.size()), std::vector<Index>(vec) {};
+        VecIndexAllocated(const std::vector<Index>& vec): VecIndexView<Index>(*this, 0, vec.size()), std::vector<Index>(vec) {};
         
         using std::vector<Index>::operator[];
         
@@ -250,9 +250,9 @@ namespace fatrop
     // implementation
 
     template <typename Index>
-        Index IndexVecView<Index>::operator[](const Index i) const { return vec_[i+ai_]; }
+        Index VecIndexView<Index>::operator[](const Index i) const { return vec_[i+ai_]; }
     template <typename Index>
-        Index IndexVecView<Index>::m() const { return m_; }
+        Index VecIndexView<Index>::m() const { return m_; }
 } // namespace fatrop
 
 #endif //__fatrop_common_index_vector__

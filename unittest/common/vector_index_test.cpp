@@ -53,13 +53,13 @@ TYPED_TEST(VecIndexTest, VecIndexBlockTest) {
     EXPECT_EQ(nested_block[1], 4);
 }
 
-// Test fixture for IndexVecView
+// Test fixture for VecIndexView
 template <typename T>
 class IndexVecViewTest : public ::testing::Test {
 protected:
     std::vector<T> test_data = {1, 2, 3, 4, 5};
     VecIndexAllocated<T> vec_index_allocated;
-    IndexVecView<T> index_vec_view;
+    VecIndexView<T> index_vec_view;
 
     IndexVecViewTest() : vec_index_allocated(test_data), index_vec_view(vec_index_allocated, 1, 3) {}
 };
