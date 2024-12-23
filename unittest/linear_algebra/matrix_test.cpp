@@ -9,7 +9,7 @@ namespace fatrop
     TEST(MatrixTest, Creation)
     {
         EXPECT_NO_THROW({
-            MatrixAllocated mat(3, 4);
+            MatRealAllocated mat(3, 4);
             EXPECT_EQ(mat.m(), 3);
             EXPECT_EQ(mat.n(), 4);
         });
@@ -17,7 +17,7 @@ namespace fatrop
 
     TEST(MatrixTest, ElementAccess)
     {
-        MatrixAllocated mat(2, 2);
+        MatRealAllocated mat(2, 2);
         EXPECT_NO_THROW({
             mat(0, 0) = 1.0;
             mat(0, 1) = 2.0;
@@ -33,14 +33,14 @@ namespace fatrop
 
     TEST(MatrixTest, MoveConstructor)
     {
-        MatrixAllocated mat1(2, 2);
+        MatRealAllocated mat1(2, 2);
         mat1(0, 0) = 1.0;
         mat1(0, 1) = 2.0;
         mat1(1, 0) = 3.0;
         mat1(1, 1) = 4.0;
 
         EXPECT_NO_THROW({
-            MatrixAllocated mat2(std::move(mat1));
+            MatRealAllocated mat2(std::move(mat1));
             EXPECT_EQ(mat2.m(), 2);
             EXPECT_EQ(mat2.n(), 2);
             EXPECT_DOUBLE_EQ(mat2(0, 0), 1.0);
@@ -52,7 +52,7 @@ namespace fatrop
 
     TEST(Matrix1DViewTest, RowView)
     {
-        MatrixAllocated mat(3, 4);
+        MatRealAllocated mat(3, 4);
         for (Index i = 0; i < 3; ++i)
             for (Index j = 0; j < 4; ++j)
                 mat(i, j) = i * 4 + j;
@@ -63,7 +63,7 @@ namespace fatrop
             EXPECT_DOUBLE_EQ(row1(j), mat(1, j));
 
         // Test assignment
-        row1 = VecScalar(4, 5.0);
+        row1 = VecRealScalar(4, 5.0);
         for (Index j = 0; j < 4; ++j)
             EXPECT_DOUBLE_EQ(mat(1, j), 5.0);
 
@@ -76,7 +76,7 @@ namespace fatrop
 
     TEST(Matrix1DViewTest, ColumnView)
     {
-        MatrixAllocated mat(3, 4);
+        MatRealAllocated mat(3, 4);
         for (Index i = 0; i < 3; ++i)
             for (Index j = 0; j < 4; ++j)
                 mat(i, j) = i * 4 + j;
@@ -87,7 +87,7 @@ namespace fatrop
             EXPECT_DOUBLE_EQ(col2(i), mat(i, 2));
 
         // Test assignment
-        col2 = VecScalar(3, 7.0);
+        col2 = VecRealScalar(3, 7.0);
         for (Index i = 0; i < 3; ++i)
             EXPECT_DOUBLE_EQ(mat(i, 2), 7.0);
 
@@ -100,7 +100,7 @@ namespace fatrop
 
     TEST(Matrix1DViewTest, DiagonalView)
     {
-        MatrixAllocated mat(3, 3);
+        MatRealAllocated mat(3, 3);
         for (Index i = 0; i < 3; ++i)
             for (Index j = 0; j < 3; ++j)
                 mat(i, j) = i * 3 + j;
@@ -111,7 +111,7 @@ namespace fatrop
             EXPECT_DOUBLE_EQ(diag(i), mat(i, i));
 
         // Test assignment
-        diag = VecScalar(3, 9.0);
+        diag = VecRealScalar(3, 9.0);
         for (Index i = 0; i < 3; ++i)
             EXPECT_DOUBLE_EQ(mat(i, i), 9.0);
 
@@ -124,8 +124,8 @@ namespace fatrop
 
     TEST(Matrix1DViewTest, ViewAssignment)
     {
-        MatrixAllocated mat1(3, 4);
-        MatrixAllocated mat2(3, 4);
+        MatRealAllocated mat1(3, 4);
+        MatRealAllocated mat2(3, 4);
         for (Index i = 0; i < 3; ++i)
             for (Index j = 0; j < 4; ++j)
             {
@@ -146,7 +146,7 @@ namespace fatrop
             EXPECT_DOUBLE_EQ(mat1(i, 2), mat2(i, 1));
 
         // Test diagonal assignment
-        MatrixAllocated mat3(3, 3);
+        MatRealAllocated mat3(3, 3);
         for (Index i = 0; i < 3; ++i)
             mat3.diagonal()(i) = mat2.row(1)(i);
         for (Index i = 0; i < 3; ++i)
@@ -155,7 +155,7 @@ namespace fatrop
 
     // TEST(Matrix1DViewTest, OutOfBoundsAccess)
     // {
-    //     MatrixAllocated mat(3, 4);
+    //     MatRealAllocated mat(3, 4);
 
     //     EXPECT_THROW(mat.row(3), std::exception);
     //     EXPECT_THROW(mat.col(4), std::exception);
@@ -166,8 +166,8 @@ namespace fatrop
 
     TEST(Matrix1DViewTest, ViewToViewAssignment)
     {
-        MatrixAllocated mat1(3, 4);
-        MatrixAllocated mat2(3, 4);
+        MatRealAllocated mat1(3, 4);
+        MatRealAllocated mat2(3, 4);
 
         for (Index i = 0; i < 3; ++i)
             for (Index j = 0; j < 4; ++j)
@@ -189,7 +189,7 @@ namespace fatrop
             EXPECT_DOUBLE_EQ(mat1(i, 2), mat2(i, 1));
 
         // Diagonal to diagonal assignment
-        MatrixAllocated mat3(3, 3);
+        MatRealAllocated mat3(3, 3);
         for (Index i = 0; i < 3; ++i)
             mat3.diagonal()(i) = mat2.diagonal()(i);
         for (Index i = 0; i < 3; ++i)
@@ -198,7 +198,7 @@ namespace fatrop
 
     TEST(Matrix1DViewTest, DifferentViewTypeAssignment)
     {
-        MatrixAllocated mat(3, 3);
+        MatRealAllocated mat(3, 3);
         for (Index i = 0; i < 3; ++i)
             for (Index j = 0; j < 3; ++j)
                 mat(i, j) = i * 3 + j;
@@ -225,7 +225,7 @@ namespace fatrop
     TEST(MatrixNumericTest, Creation)
     {
         EXPECT_NO_THROW({
-            MatrixAllocated mat(3, 4);
+            MatRealAllocated mat(3, 4);
             EXPECT_EQ(mat.m(), 3);
             EXPECT_EQ(mat.n(), 4);
         });
@@ -233,7 +233,7 @@ namespace fatrop
 
     TEST(MatrixNumericTest, ElementAccess)
     {
-        MatrixAllocated mat(2, 2);
+        MatRealAllocated mat(2, 2);
         EXPECT_NO_THROW({
             mat(0, 0) = 1.0;
             mat(0, 1) = 2.0;
@@ -249,7 +249,7 @@ namespace fatrop
 
     TEST(MatrixNumericTest, BlockFunctionality)
     {
-        MatrixAllocated mat(4, 4);
+        MatRealAllocated mat(4, 4);
         for (Index i = 0; i < 4; ++i)
             for (Index j = 0; j < 4; ++j)
                 mat(i, j) = i * 4 + j;
@@ -269,8 +269,8 @@ namespace fatrop
 
     TEST(MatrixNumericTest, BlockAssignment)
     {
-        MatrixAllocated mat1(4, 4);
-        MatrixAllocated mat2(2, 2);
+        MatRealAllocated mat1(4, 4);
+        MatRealAllocated mat2(2, 2);
 
         for (Index i = 0; i < 4; ++i)
             for (Index j = 0; j < 4; ++j)
@@ -290,7 +290,7 @@ namespace fatrop
 
     TEST(MatrixNumericTest, ScalarAssignment)
     {
-        MatrixAllocated mat(3, 3);
+        MatRealAllocated mat(3, 3);
         mat = 5.0;
 
         for (Index i = 0; i < 3; ++i)

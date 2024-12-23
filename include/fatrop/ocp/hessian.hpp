@@ -64,7 +64,7 @@ namespace fatrop
          *   hess[:nu, nu:nu+nx] = hess[nu:nu+nx, :nu]^T is reserved for control-state "skew"
          *   hess[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatrixAllocated> hess;
+        std::vector<MatRealAllocated> hess;
     };
 } // namespace fatrop
 

@@ -7,8 +7,8 @@ using namespace fatrop;
 class VecTest : public ::testing::Test
 {
 protected:
-    VecAllocated vec1{5};
-    VecAllocated vec2{5};
+    VecRealAllocated vec1{5};
+    VecRealAllocated vec2{5};
 
     void SetUp() override
     {
@@ -62,7 +62,7 @@ TEST_F(VecTest, NormL2)
 
 TEST_F(VecTest, DotProduct) { EXPECT_EQ(dot(vec1, vec2), 110); }
 
-TEST_F(VecTest, VecNumericPlusVecNumeric)
+TEST_F(VecTest, VecRealPlusVecReal)
 {
     auto result = vec1 + vec2;
     for (Index i = 0; i < 5; ++i)
@@ -80,7 +80,7 @@ TEST_F(VecTest, VectorSubtraction)
     }
 }
 
-TEST_F(VecTest, VecNumericTimesScalar)
+TEST_F(VecTest, VecRealTimesScalar)
 {
     auto result = 2 * vec1;
     for (Index i = 0; i < 5; ++i)
@@ -107,7 +107,7 @@ TEST_F(VecTest, VecNumericPlusVecNumericTimesScalar)
     }
 }
 
-TEST_F(VecTest, VecNumericTimesVecNumeric)
+TEST_F(VecTest, VecRealTimesVecReal)
 {
     auto result = vec1 * vec2;
     for (Index i = 0; i < 5; ++i)
@@ -127,7 +127,7 @@ TEST_F(VecTest, VectorDivision)
 
 TEST_F(VecTest, AbsoluteValue)
 {
-    VecAllocated vec_neg{5};
+    VecRealAllocated vec_neg{5};
     for (Index i = 0; i < 5; ++i)
     {
         vec_neg(i) = -1 * (i + 1);
@@ -187,7 +187,7 @@ TEST_F(VecTest, Block)
 
 TEST_F(VecTest, IfElse)
 {
-    VecAllocated condition{5};
+    VecRealAllocated condition{5};
     for (Index i = 0; i < 5; ++i)
     {
         condition(i) = (i % 2 == 0) ? 1 : 0;
@@ -199,9 +199,9 @@ TEST_F(VecTest, IfElse)
     }
 }
 
-TEST_F(VecTest, VecScalar)
+TEST_F(VecTest, VecRealScalar)
 {
-    VecScalar scalar_vec(5, 3.0);
+    VecRealScalar scalar_vec(5, 3.0);
     EXPECT_EQ(scalar_vec.m(), 5);
     for (Index i = 0; i < 5; ++i)
     {
@@ -218,7 +218,7 @@ TEST_F(VecTest, Negation)
     }
 }
 
-TEST_F(VecTest, ScalarDivVec)
+TEST_F(VecTest, ScalarDivVecReal)
 {
     auto result = 10.0 / vec1;
     for (Index i = 0; i < 5; ++i)
@@ -229,8 +229,8 @@ TEST_F(VecTest, ScalarDivVec)
 
 TEST_F(VecTest, Assignment)
 {
-    VecAllocated vec3{5};
-    vec3 = vec1 + vec2; // Use an expression that returns a Vec<Derived>
+    VecRealAllocated vec3{5};
+    vec3 = vec1 + vec2; // Use an expression that returns a VecReal<Derived>
     for (Index i = 0; i < 5; ++i)
     {
         EXPECT_EQ(vec3(i), vec1(i) + vec2(i));
@@ -242,7 +242,7 @@ TEST_F(VecTest, Assignment)
         EXPECT_EQ(vec3(i), 3.0);
     }
 
-    // Test assignment from different Vec expressions
+    // Test assignment from different VecReal expressions
     vec3 = 2.0 * vec1;
     for (Index i = 0; i < 5; ++i)
     {
@@ -258,13 +258,13 @@ TEST_F(VecTest, Assignment)
 
 TEST_F(VecTest, MoveConstructor)
 {
-    VecAllocated original{5};
+    VecRealAllocated original{5};
     for (Index i = 0; i < 5; ++i)
     {
         original(i) = i + 1;
     }
 
-    VecAllocated moved(std::move(original));
+    VecRealAllocated moved(std::move(original));
 
     // Check if the moved vector has the correct values
     EXPECT_EQ(moved.m(), 5);
@@ -280,7 +280,7 @@ TEST_F(VecTest, MoveConstructor)
     // but the behavior is undefined. We can't test for specific values here.
 
     // Moving again from the moved vector should work
-    VecAllocated moved_again(std::move(moved));
+    VecRealAllocated moved_again(std::move(moved));
     EXPECT_EQ(moved_again.m(), 5);
     for (Index i = 0; i < 5; ++i)
     {

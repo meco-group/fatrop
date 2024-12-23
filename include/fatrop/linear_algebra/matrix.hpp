@@ -23,12 +23,12 @@ namespace fatrop
 {
 
     /**
-     * @class Mat
+     * @class MatReal
      * @brief Base class for matrix operations.
      *
      * @tparam Derived The derived class implementing specific matrix behavior.
      */
-    template <typename Derived> class Mat
+    template <typename Derived> class MatReal
     {
     public:
         /**
@@ -64,7 +64,7 @@ namespace fatrop
          * @param mat The matrix to print.
          * @return std::ostream& The updated output stream.
          */
-        friend std::ostream &operator<<(std::ostream &os, const Mat<Derived> &mat)
+        friend std::ostream &operator<<(std::ostream &os, const MatReal<Derived> &mat)
         {
             for (Index i = 0; i < mat.m(); i++)
             {
@@ -79,12 +79,12 @@ namespace fatrop
     };
 
     /**
-     * @class MatView1D
+     * @class MatRealView1D
      * @brief Represents a 1D view of a matrix (e.g., row, column, or diagonal).
      *
      * @tparam Derived The derived class implementing specific view behavior.
      */
-    template <typename Derived> class MatView1D : public Vec<MatView1D<Derived>>
+    template <typename Derived> class MatRealView1D : public VecReal<MatRealView1D<Derived>>
     {
     public:
         /**
@@ -118,11 +118,11 @@ namespace fatrop
          *
          * @param size Size of the block.
          * @param start Starting index of the block.
-         * @return VecBlock<MatView1D<Derived>> The sub-view.
+         * @return VecRealBlock<MatRealView1D<Derived>> The sub-view.
          */
-        VecBlock<MatView1D<Derived>> block(const Index size, const Index start) const
+        VecRealBlock<MatRealView1D<Derived>> block(const Index size, const Index start) const
         {
-            return VecBlock<MatView1D<Derived>>(*this, size, start);
+            return VecRealBlock<MatRealView1D<Derived>>(*this, size, start);
         }
 
         /**
@@ -131,7 +131,7 @@ namespace fatrop
          * @tparam OtherDerived The type of the other vector.
          * @param other The vector to assign from.
          */
-        template <typename OtherDerived> void operator=(const Vec<OtherDerived> &other)
+        template <typename OtherDerived> void operator=(const VecReal<OtherDerived> &other)
         {
             fatrop_dbg_assert(m() == other.m() && "Vectors must be same size for assignment");
             for (Index i = 0; i < m(); i++)
@@ -155,90 +155,90 @@ namespace fatrop
     };
 
     /**
-     * @class MatRowView
+     * @class MatRealRowView
      * @brief Represents a view of a single row in a matrix.
      */
-    class MatRowView : public MatView1D<MatRowView>
+    class MatRealRowView : public MatRealView1D<MatRealRowView>
     {
     public:
         /**
-         * @brief Constructs a MatRowView object.
+         * @brief Constructs a MatRealRowView object.
          *
          * @param mat Reference to the matrix.
          * @param row Index of the row to view.
          */
-        MatRowView(MatrixNumeric &mat, const Index row) : mat_(mat), row_(row) {}
+        MatRealRowView(MatRealView &mat, const Index row) : mat_(mat), row_(row) {}
 
         inline Scalar operator()(const Index i) const;
         inline Scalar &operator()(const Index i);
         inline Index m() const;
 
-        using MatView1D<MatRowView>::operator=;
+        using MatRealView1D<MatRealRowView>::operator=;
 
     private:
-        MatrixNumeric &mat_;
+        MatRealView &mat_;
         const Index row_;
     };
 
     /**
-     * @class MatColView
+     * @class MatRealColView
      * @brief Represents a view of a single column in a matrix.
      */
-    class MatColView : public MatView1D<MatColView>
+    class MatRealColView : public MatRealView1D<MatRealColView>
     {
     public:
         /**
-         * @brief Constructs a MatColView object.
+         * @brief Constructs a MatRealColView object.
          *
          * @param mat Reference to the matrix.
          * @param col Index of the column to view.
          */
-        MatColView(MatrixNumeric &mat, const Index col) : mat_(mat), col_(col) {}
+        MatRealColView(MatRealView &mat, const Index col) : mat_(mat), col_(col) {}
 
         inline Scalar operator()(const Index i) const;
         inline Scalar &operator()(const Index i);
         inline Index m() const;
 
-        using MatView1D<MatColView>::operator=;
+        using MatRealView1D<MatRealColView>::operator=;
 
     private:
-        MatrixNumeric &mat_;
+        MatRealView &mat_;
         const Index col_;
     };
 
     /**
-     * @class MatDiagonalView
+     * @class MatRealDiagonalView
      * @brief Represents a view of the diagonal of a matrix.
      */
-    class MatDiagonalView : public MatView1D<MatDiagonalView>
+    class MatRealDiagonalView : public MatRealView1D<MatRealDiagonalView>
     {
     public:
         /**
-         * @brief Constructs a MatDiagonalView object.
+         * @brief Constructs a MatRealDiagonalView object.
          *
          * @param mat Reference to the matrix.
          */
-        MatDiagonalView(MatrixNumeric &mat) : mat_(mat) {}
+        MatRealDiagonalView(MatRealView &mat) : mat_(mat) {}
 
         inline Scalar operator()(const Index i) const;
         inline Scalar &operator()(const Index i);
         inline Index m() const;
 
-        using MatView1D<MatDiagonalView>::operator=;
+        using MatRealView1D<MatRealDiagonalView>::operator=;
 
     private:
-        MatrixNumeric &mat_;
+        MatRealView &mat_;
     };
 
     /**
-     * @class MatrixNumeric
+     * @class MatRealView
      * @brief Represents a numeric matrix with efficient operations.
      */
-    class MatrixNumeric : public Mat<MatrixNumeric>
+    class MatRealView : public MatReal<MatRealView>
     {
     public:
         /**
-         * @brief Constructs a MatrixNumeric object.
+         * @brief Constructs a MatRealView object.
          *
          * @param mat Reference to the allocated matrix.
          * @param m Number of rows.
@@ -246,7 +246,7 @@ namespace fatrop
          * @param ai Row offset.
          * @param aj Column offset.
          */
-        MatrixNumeric(MatrixAllocated &mat, const Index m, const Index n, const Index ai,
+        MatRealView(MatRealAllocated &mat, const Index m, const Index n, const Index ai,
                       const Index aj)
             : mat_(mat), m_(m), n_(n), ai_(ai), aj_(aj) {};
 
@@ -266,24 +266,24 @@ namespace fatrop
          * @brief Creates a view of a specific row.
          *
          * @param row Index of the row to view.
-         * @return MatRowView The row view.
+         * @return MatRealRowView The row view.
          */
-        MatRowView row(const Index row) { return MatRowView(*this, row); }
+        MatRealRowView row(const Index row) { return MatRealRowView(*this, row); }
 
         /**
          * @brief Creates a view of a specific column.
          *
          * @param col Index of the column to view.
-         * @return MatColView The column view.
+         * @return MatRealColView The column view.
          */
-        MatColView col(const Index col) { return MatColView(*this, col); }
+        MatRealColView col(const Index col) { return MatRealColView(*this, col); }
 
         /**
          * @brief Creates a view of the matrix diagonal.
          *
-         * @return MatDiagonalView The diagonal view.
+         * @return MatRealDiagonalView The diagonal view.
          */
-        MatDiagonalView diagonal() { return MatDiagonalView(*this); }
+        MatRealDiagonalView diagonal() { return MatRealDiagonalView(*this); }
 
         /**
          * @brief Creates a sub-matrix (block) of the current matrix.
@@ -292,41 +292,41 @@ namespace fatrop
          * @param cols Number of columns in the block.
          * @param row_start Starting row index of the block.
          * @param col_start Starting column index of the block.
-         * @return MatrixNumeric The sub-matrix.
+         * @return MatRealView The sub-matrix.
          */
-        MatrixNumeric block(const Index rows, const Index cols, const Index row_start,
+        MatRealView block(const Index rows, const Index cols, const Index row_start,
                             const Index col_start) const
         {
-            return MatrixNumeric(mat_, rows, cols, ai_ + row_start, aj_ + col_start);
+            return MatRealView(mat_, rows, cols, ai_ + row_start, aj_ + col_start);
         }
 
         /**
          * @brief Assigns a scalar value to all elements of the matrix.
          *
          * @param alpha The scalar value to assign.
-         * @return MatrixNumeric& Reference to the modified matrix.
+         * @return MatRealView& Reference to the modified matrix.
          */
-        inline MatrixNumeric &operator=(const Scalar alpha);
+        inline MatRealView &operator=(const Scalar alpha);
 
         /**
          * @brief Assigns values from another matrix to this matrix.
          *
          * @tparam Derived The type of the other matrix.
          * @param mat_in The matrix to assign from.
-         * @return MatrixNumeric& Reference to the modified matrix.
+         * @return MatRealView& Reference to the modified matrix.
          */
-        template <typename Derived> inline MatrixNumeric &operator=(const Mat<Derived> &mat_in);
+        template <typename Derived> inline MatRealView &operator=(const MatReal<Derived> &mat_in);
 
         /**
          * @brief Copy assignment operator.
          *
          * @param mat_in The matrix to copy from.
-         * @return MatrixNumeric& Reference to the modified matrix.
+         * @return MatRealView& Reference to the modified matrix.
          */
-        inline MatrixNumeric &operator=(const MatrixNumeric &mat_in);
+        inline MatRealView &operator=(const MatRealView &mat_in);
 
     private:
-        MatrixAllocated &mat_;
+        MatRealAllocated &mat_;
         const Index m_;
         const Index n_;
         const Index ai_;
@@ -334,32 +334,32 @@ namespace fatrop
     };
 
     /**
-     * @class MatrixAllocated
+     * @class MatRealAllocated
      * @brief Manages the memory associated with a matrix, providing
      *        allocation and deallocation using BLASFEO functions.
      */
-    class MatrixAllocated : public MatrixNumeric
+    class MatRealAllocated : public MatRealView
     {
     public:
         /**
-         * @brief Constructs a MatrixAllocated object.
+         * @brief Constructs a MatRealAllocated object.
          *
          * @param m Number of rows.
          * @param n Number of columns.
          */
-        inline MatrixAllocated(const Index m, const Index n);
+        inline MatRealAllocated(const Index m, const Index n);
 
         /**
          * @brief Deleted copy constructor to prevent unintended copies.
          */
-        MatrixAllocated(MatrixAllocated &other) = delete;
+        MatRealAllocated(MatRealAllocated &other) = delete;
 
         /**
-         * @brief Move constructor for MatrixAllocated.
+         * @brief Move constructor for MatRealAllocated.
          *
-         * @param other The MatrixAllocated object to move from.
+         * @param other The MatRealAllocated object to move from.
          */
-        inline MatrixAllocated(MatrixAllocated &&other);
+        inline MatRealAllocated(MatRealAllocated &&other);
 
         /**
          * @brief Gets a reference to the underlying BLASFEO matrix.
@@ -375,7 +375,7 @@ namespace fatrop
          */
         const MAT &mat() const { return mat_; }
 
-        using MatrixNumeric::operator=;
+        using MatRealView::operator=;
 
         /**
          * @brief Accesses the element at the given row and column.
@@ -398,38 +398,38 @@ namespace fatrop
         /**
          * @brief Destructor that frees the allocated matrix memory.
          */
-        inline ~MatrixAllocated();
+        inline ~MatRealAllocated();
 
     private:
         MAT mat_;
     };
-    // Implementation of MatRowView
-    Scalar MatRowView::operator()(const Index i) const { return mat_(row_, i); }
-    Scalar &MatRowView::operator()(const Index i) { return mat_(row_, i); }
-    Index MatRowView::m() const { return mat_.n(); }
+    // Implementation of MatRealRowView
+    Scalar MatRealRowView::operator()(const Index i) const { return mat_(row_, i); }
+    Scalar &MatRealRowView::operator()(const Index i) { return mat_(row_, i); }
+    Index MatRealRowView::m() const { return mat_.n(); }
 
     // Implementation of MatrixColumnView
-    Scalar MatColView::operator()(const Index i) const { return mat_(i, col_); }
-    Scalar &MatColView::operator()(const Index i) { return mat_(i, col_); }
-    Index MatColView::m() const { return mat_.m(); }
+    Scalar MatRealColView::operator()(const Index i) const { return mat_(i, col_); }
+    Scalar &MatRealColView::operator()(const Index i) { return mat_(i, col_); }
+    Index MatRealColView::m() const { return mat_.m(); }
 
     // Implementation of MatrixDiagonaView
-    Scalar MatDiagonalView::operator()(const Index i) const { return mat_(i, i); }
-    Scalar &MatDiagonalView::operator()(const Index i) { return mat_(i, i); }
-    Index MatDiagonalView::m() const { return std::min(mat_.m(), mat_.n()); }
+    Scalar MatRealDiagonalView::operator()(const Index i) const { return mat_(i, i); }
+    Scalar &MatRealDiagonalView::operator()(const Index i) { return mat_(i, i); }
+    Index MatRealDiagonalView::m() const { return std::min(mat_.m(), mat_.n()); }
 
-    // Implementation of MatrixNumeric
-    Scalar &MatrixNumeric::operator()(const Index i, const Index j) const
+    // Implementation of MatRealView
+    Scalar &MatRealView::operator()(const Index i, const Index j) const
     {
         return mat_(i + ai_, j + aj_);
     }
-    MatrixNumeric &MatrixNumeric::operator=(const Scalar alpha)
+    MatRealView &MatRealView::operator=(const Scalar alpha)
     {
         GESE(m(), n(), alpha, &this->mat_.mat(), ai_, aj_);
         return *this;
     }
 
-    template <typename Derived> MatrixNumeric &MatrixNumeric::operator=(const Mat<Derived> &mat_in)
+    template <typename Derived> MatRealView &MatRealView::operator=(const MatReal<Derived> &mat_in)
     {
         fatrop_dbg_assert((*this).m() == mat_in.m());
         fatrop_dbg_assert((*this).n() == mat_in.n());
@@ -442,7 +442,7 @@ namespace fatrop
         }
         return *this;
     }
-    MatrixNumeric &MatrixNumeric::operator=(const MatrixNumeric &mat_in)
+    MatRealView &MatRealView::operator=(const MatRealView &mat_in)
     {
         fatrop_dbg_assert((*this).m() == mat_in.m() && (*this).n() == mat_in.n());
         GECP((*this).m(), (*this).n(), &mat_.mat(), ai_, aj_, &mat_in.mat_.mat(), mat_in.ai_,
@@ -450,33 +450,33 @@ namespace fatrop
         return *this;
     };
 
-    // Implementation of MatrixAllocated methods
-    MatrixAllocated::MatrixAllocated(const Index m, const Index n)
-        : MatrixNumeric(*this, m, n, 0, 0), mat_()
+    // Implementation of MatRealAllocated methods
+    MatRealAllocated::MatRealAllocated(const Index m, const Index n)
+        : MatRealView(*this, m, n, 0, 0), mat_()
     {
         ALLOCATE_MAT(m, n, &mat_);
     }
 
-    MatrixAllocated::MatrixAllocated(MatrixAllocated &&other)
-        : MatrixNumeric(*this, other.m(), other.n(), 0, 0), mat_(other.mat_)
+    MatRealAllocated::MatRealAllocated(MatRealAllocated &&other)
+        : MatRealView(*this, other.m(), other.n(), 0, 0), mat_(other.mat_)
     {
         // Nullify the moved-from object's mat_ to prevent double deletion
         other.mat_.mem = nullptr;
     }
 
-    Scalar &MatrixAllocated::operator()(const Index i, const Index j)
+    Scalar &MatRealAllocated::operator()(const Index i, const Index j)
     {
         fatrop_dbg_assert(i >= 0 && i < m() && j >= 0 && j < n());
         return MATEL(&mat_, i, j);
     }
 
-    const Scalar &MatrixAllocated::operator()(const Index i, const Index j) const
+    const Scalar &MatRealAllocated::operator()(const Index i, const Index j) const
     {
         fatrop_dbg_assert(i >= 0 && i < m() && j >= 0 && j < n());
         return MATEL(&mat_, i, j);
     }
 
-    MatrixAllocated::~MatrixAllocated() { FREE_MAT(&mat()); }
+    MatRealAllocated::~MatRealAllocated() { FREE_MAT(&mat()); }
 
 } // namespace fatrop
 

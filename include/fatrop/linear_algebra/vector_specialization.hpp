@@ -16,256 +16,256 @@
 namespace fatrop
 {
     /**
-     * @class VecNumericPlusVecNumeric
-     * @brief Represents the addition of two `VecNumeric` vectors.
+     * @class VecRealViewPlusVecRealView
+     * @brief Represents the addition of two `VecRealView` vectors.
      */
-    class VecNumericPlusVecNumeric : public VecOperationSpecialization<VecNumericPlusVecNumeric>
+    class VecRealViewPlusVecRealView : public VecOperationSpecialization<VecRealViewPlusVecRealView>
     {
     public:
-        VecNumericPlusVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b)
+        VecRealViewPlusVecRealView(VecRealView &a, VecRealView &b) : a_(a), b_(b)
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) + b_(i); }
         Index m() const { return a_.m(); }
-        friend inline VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b);
-        VecNumeric &a() const { return a_; }
-        VecNumeric &b() const { return b_; }
+        friend inline VecRealViewPlusVecRealView operator+(VecRealView &a, VecRealView &b);
+        VecRealView &a() const { return a_; }
+        VecRealView &b() const { return b_; }
 
     private:
-        VecNumeric &a_;
-        VecNumeric &b_;
+        VecRealView &a_;
+        VecRealView &b_;
     };
 
     /**
-     * @class VecNumericTimesScalar
-     * @brief Represents the scaling of a `VecNumeric` vector by a scalar.
+     * @class VecRealViewTimesScalar
+     * @brief Represents the scaling of a `VecRealView` vector by a scalar.
      */
-    class VecNumericTimesScalar : public VecOperationSpecialization<VecNumericTimesScalar>
+    class VecRealViewTimesScalar : public VecOperationSpecialization<VecRealViewTimesScalar>
     {
     public:
-        VecNumericTimesScalar(VecNumeric &a, const Scalar alpha) : a_(a), alpha_(alpha) {};
+        VecRealViewTimesScalar(VecRealView &a, const Scalar alpha) : a_(a), alpha_(alpha) {};
         Scalar operator()(const Index i) const { return alpha_ * a_(i); }
         Index m() const { return a_.m(); }
-        friend inline VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a);
-        friend inline VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha);
-        friend inline VecNumericTimesScalar operator-(VecNumeric &a);
-        VecNumeric &a() const { return a_; }
+        friend inline VecRealViewTimesScalar operator*(const Scalar alpha, VecRealView &a);
+        friend inline VecRealViewTimesScalar operator*(VecRealView &a, const Scalar alpha);
+        friend inline VecRealViewTimesScalar operator-(VecRealView &a);
+        VecRealView &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
 
     private:
-        VecNumeric &a_;
+        VecRealView &a_;
         const Scalar alpha_;
     };
 
     /**
-     * @class VecNumericTimesScalarPlusVecNumericTimesScalar
-     * @brief Represents a linear combination of two scaled `VecNumeric` vectors.
+     * @class VecRealViewTimesScalarPlusVecRealViewTimesScalar
+     * @brief Represents a linear combination of two scaled `VecRealView` vectors.
      */
 
-    class VecNumericTimesScalarPlusVecNumericTimesScalar
-        : public VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
+    class VecRealViewTimesScalarPlusVecRealViewTimesScalar
+        : public VecOperationSpecialization<VecRealViewTimesScalarPlusVecRealViewTimesScalar>
     {
     public:
-        VecNumericTimesScalarPlusVecNumericTimesScalar(VecNumeric &a, const Scalar alpha,
-                                                       VecNumeric &b, const Scalar beta)
+        VecRealViewTimesScalarPlusVecRealViewTimesScalar(VecRealView &a, const Scalar alpha,
+                                                       VecRealView &b, const Scalar beta)
             : a_(a), alpha_(alpha), b_(b), beta_(beta)
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return alpha_ * a_(i) + beta_ * b_(i); }
         Index m() const { return a_.m(); }
-        friend inline VecNumericTimesScalarPlusVecNumericTimesScalar
-        operator+(const VecNumericTimesScalar &a, const VecNumericTimesScalar &b);
-        VecNumeric &a() const { return a_; }
+        friend inline VecRealViewTimesScalarPlusVecRealViewTimesScalar
+        operator+(const VecRealViewTimesScalar &a, const VecRealViewTimesScalar &b);
+        VecRealView &a() const { return a_; }
         Scalar alpha() const { return alpha_; }
-        VecNumeric &b() const { return b_; }
+        VecRealView &b() const { return b_; }
         Scalar beta() const { return beta_; }
 
     private:
-        VecNumeric &a_;
+        VecRealView &a_;
         const Scalar alpha_;
-        VecNumeric &b_;
+        VecRealView &b_;
         const Scalar beta_;
     };
 
     /**
-     * @class VecNumericPlusVecNumericTimesScalar
-     * @brief Represents the addition of a `VecNumeric` vector and a scaled
-     * `VecNumeric` vector.
+     * @class VecRealViewPlusVecRealViewTimesScalar
+     * @brief Represents the addition of a `VecRealView` vector and a scaled
+     * `VecRealView` vector.
      */
-    class VecNumericPlusVecNumericTimesScalar
-        : public VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
+    class VecRealViewPlusVecRealViewTimesScalar
+        : public VecOperationSpecialization<VecRealViewPlusVecRealViewTimesScalar>
     {
     public:
-        VecNumericPlusVecNumericTimesScalar(VecNumeric &a, VecNumeric &b, const Scalar alpha)
+        VecRealViewPlusVecRealViewTimesScalar(VecRealView &a, VecRealView &b, const Scalar alpha)
             : a_(a), b_(b), alpha_(alpha)
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) + alpha_ * b_(i); }
         Index m() const { return a_.m(); }
-        friend inline VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
-                                                             VecNumeric &b);
-        friend inline VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a,
-                                                             const VecNumericTimesScalar &b);
-        VecNumeric &a() const { return a_; }
-        VecNumeric &b() const { return b_; }
+        friend inline VecRealViewPlusVecRealViewTimesScalar operator+(const VecRealViewTimesScalar &a,
+                                                             VecRealView &b);
+        friend inline VecRealViewPlusVecRealViewTimesScalar operator+(VecRealView &a,
+                                                             const VecRealViewTimesScalar &b);
+        VecRealView &a() const { return a_; }
+        VecRealView &b() const { return b_; }
         Scalar alpha() const { return alpha_; }
 
     private:
-        VecNumeric &a_;
-        VecNumeric &b_;
+        VecRealView &a_;
+        VecRealView &b_;
         const Scalar alpha_;
     };
 
     /**
-     * @class VecNumericTimesVecNumeric
-     * @brief Represents the element-wise multiplication of two `VecNumeric`
+     * @class VecRealViewTimesVecRealView
+     * @brief Represents the element-wise multiplication of two `VecRealView`
      * vectors.
      */
-    class VecNumericTimesVecNumeric : public VecOperationSpecialization<VecNumericTimesVecNumeric>
+    class VecRealViewTimesVecRealView : public VecOperationSpecialization<VecRealViewTimesVecRealView>
     {
     public:
-        VecNumericTimesVecNumeric(VecNumeric &a, VecNumeric &b) : a_(a), b_(b)
+        VecRealViewTimesVecRealView(VecRealView &a, VecRealView &b) : a_(a), b_(b)
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match");
         };
         Scalar operator()(const Index i) const { return a_(i) * b_(i); }
         Index m() const { return a_.m(); }
-        friend inline VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b);
-        VecNumeric &a() const { return a_; }
-        VecNumeric &b() const { return b_; }
+        friend inline VecRealViewTimesVecRealView operator*(VecRealView &a, VecRealView &b);
+        VecRealView &a() const { return a_; }
+        VecRealView &b() const { return b_; }
 
     private:
-        VecNumeric &a_;
-        VecNumeric &b_;
+        VecRealView &a_;
+        VecRealView &b_;
     };
 
-    // operator overloading for VecNumeric specializations - blasfeo kernels
+    // operator overloading for VecRealView specializations - blasfeo kernels
     template <>
-    inline VecNumeric &VecNumeric::operator=(
-        VecOperationSpecialization<VecNumericPlusVecNumeric> &&vecnumericplusvecnumeric)
+    inline VecRealView &VecRealView::operator=(
+        VecOperationSpecialization<VecRealViewPlusVecRealView> &&vecnumericplusvecnumeric)
     {
         auto vv = vecnumericplusvecnumeric.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
-        VecNumeric &a = vv.a();
-        VecNumeric &b = vv.b();
+        VecRealView &a = vv.a();
+        VecRealView &b = vv.b();
         AXPY(m_, 1.0, &a.vec(), a.ai(), &b.vec(), b.ai(), &this->vec(), this->ai());
         return *this;
     }
 
     template <>
-    inline VecNumeric &
-    VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesScalar> &&vecnumerictimesscalar)
+    inline VecRealView &
+    VecRealView::operator=(VecOperationSpecialization<VecRealViewTimesScalar> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
-        VecNumeric &a = vv.a();
+        VecRealView &a = vv.a();
         Scalar alpha = vv.alpha();
         VECCPSC(m_, alpha, &a.vec(), a.ai(), &this->vec(), this->ai());
         return *this;
     }
 
     template <>
-    inline VecNumeric &
-    VecNumeric::operator=(VecOperationSpecialization<VecNumericPlusVecNumericTimesScalar>
+    inline VecRealView &
+    VecRealView::operator=(VecOperationSpecialization<VecRealViewPlusVecRealViewTimesScalar>
                               &&vecnumericplusvecnumerictimesscalar)
     {
         auto vv = vecnumericplusvecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
-        VecNumeric &a = vv.a();
-        VecNumeric &b = vv.b();
+        VecRealView &a = vv.a();
+        VecRealView &b = vv.b();
         Scalar alpha = vv.alpha();
         AXPY(m_, alpha, &b.vec(), b.ai(), &a.vec(), a.ai(), &this->vec(), this->ai());
         return *this;
     }
 
     template <>
-    inline VecNumeric &
-    VecNumeric::operator=(VecOperationSpecialization<VecNumericTimesScalarPlusVecNumericTimesScalar>
+    inline VecRealView &
+    VecRealView::operator=(VecOperationSpecialization<VecRealViewTimesScalarPlusVecRealViewTimesScalar>
                               &&vecnumerictimesscalarplusvecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalarplusvecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
-        VecNumeric &a = vv.a();
+        VecRealView &a = vv.a();
         Scalar alpha = vv.alpha();
-        VecNumeric &b = vv.b();
+        VecRealView &b = vv.b();
         Scalar beta = vv.beta();
         AXPBY(m_, alpha, &a.vec(), a.ai(), beta, &b.vec(), b.ai(), &this->vec(), this->ai());
         return *this;
     }
 
     template <>
-    inline VecNumeric &VecNumeric::operator=(
-        VecOperationSpecialization<VecNumericTimesVecNumeric> &&vecnumerictimesscalar)
+    inline VecRealView &VecRealView::operator=(
+        VecOperationSpecialization<VecRealViewTimesVecRealView> &&vecnumerictimesscalar)
     {
         auto vv = vecnumerictimesscalar.derived();
         fatrop_dbg_assert(this->m() == vv.a().m() && "Vector sizes must match");
-        VecNumeric &a = vv.a();
-        VecNumeric &b = vv.b();
+        VecRealView &a = vv.a();
+        VecRealView &b = vv.b();
         VECMUL(m_, &b.vec(), b.ai(), &a.vec(), a.ai(), &this->vec(), this->ai());
         return *this;
     }
 
     /**
-     * @brief Addition operator for VecNumeric and VecNumericTimesScalar.
+     * @brief Addition operator for VecRealView and VecRealViewTimesScalar.
      */
-    VecNumericPlusVecNumericTimesScalar operator+(VecNumeric &a, const VecNumericTimesScalar &b)
+    VecRealViewPlusVecRealViewTimesScalar operator+(VecRealView &a, const VecRealViewTimesScalar &b)
     {
-        return VecNumericPlusVecNumericTimesScalar(a, b.a(), b.alpha());
+        return VecRealViewPlusVecRealViewTimesScalar(a, b.a(), b.alpha());
     }
 
     /**
-     * @brief Addition operator for VecNumericTimesScalar and VecNumeric.
+     * @brief Addition operator for VecRealViewTimesScalar and VecRealView.
      */
-    VecNumericPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a, VecNumeric &b)
+    VecRealViewPlusVecRealViewTimesScalar operator+(const VecRealViewTimesScalar &a, VecRealView &b)
     {
         return b + a;
     }
 
     /**
-     * @brief Addition operator for two VecNumericTimesScalar objects.
+     * @brief Addition operator for two VecRealViewTimesScalar objects.
      */
-    VecNumericTimesScalarPlusVecNumericTimesScalar operator+(const VecNumericTimesScalar &a,
-                                                             const VecNumericTimesScalar &b)
+    VecRealViewTimesScalarPlusVecRealViewTimesScalar operator+(const VecRealViewTimesScalar &a,
+                                                             const VecRealViewTimesScalar &b)
     {
-        return VecNumericTimesScalarPlusVecNumericTimesScalar(a.a(), a.alpha(), b.a(), b.alpha());
+        return VecRealViewTimesScalarPlusVecRealViewTimesScalar(a.a(), a.alpha(), b.a(), b.alpha());
     }
 
     /**
-     * @brief Element-wise multiplication operator for two VecNumeric objects.
+     * @brief Element-wise multiplication operator for two VecRealView objects.
      */
-    VecNumericTimesVecNumeric operator*(VecNumeric &a, VecNumeric &b)
+    VecRealViewTimesVecRealView operator*(VecRealView &a, VecRealView &b)
     {
-        return VecNumericTimesVecNumeric(a, b);
+        return VecRealViewTimesVecRealView(a, b);
     }
 
     /**
-     * @brief Addition operator for two VecNumeric objects.
+     * @brief Addition operator for two VecRealView objects.
      */
-    VecNumericPlusVecNumeric operator+(VecNumeric &a, VecNumeric &b)
+    VecRealViewPlusVecRealView operator+(VecRealView &a, VecRealView &b)
     {
-        return VecNumericPlusVecNumeric(a, b);
+        return VecRealViewPlusVecRealView(a, b);
     }
 
     /**
-     * @brief Scalar multiplication operator for VecNumeric.
+     * @brief Scalar multiplication operator for VecRealView.
      */
-    VecNumericTimesScalar operator*(const Scalar alpha, VecNumeric &a)
+    VecRealViewTimesScalar operator*(const Scalar alpha, VecRealView &a)
     {
-        return VecNumericTimesScalar(a, alpha);
+        return VecRealViewTimesScalar(a, alpha);
     }
 
     /**
-     * @brief Scalar multiplication operator for VecNumeric.
+     * @brief Scalar multiplication operator for VecRealView.
      */
-    VecNumericTimesScalar operator*(VecNumeric &a, const Scalar alpha) { return alpha * a; }
+    VecRealViewTimesScalar operator*(VecRealView &a, const Scalar alpha) { return alpha * a; }
 
     /**
-     * @brief Unary minus operator for VecNumeric.
+     * @brief Unary minus operator for VecRealView.
      */
-    VecNumericTimesScalar operator-(VecNumeric &a) { return -1. * a; }
+    VecRealViewTimesScalar operator-(VecRealView &a) { return -1. * a; }
 
 } // namespace fatrop
 

@@ -3,8 +3,8 @@
 
 namespace fatrop::test
 {
-    using fatrop::MatrixAllocated;
-    using fatrop::VecAllocated;
+    using fatrop::MatRealAllocated;
+    using fatrop::VecRealAllocated;
 
     TEST(PermutationMatrixTest, Constructor)
     {
@@ -30,14 +30,14 @@ namespace fatrop::test
         perm[2] = 1;
         const Index perm_result[] = {2, 0, 1};
 
-        MatrixAllocated matrix(size, size);
+        MatRealAllocated matrix(size, size);
         for (Index i = 0; i < size; ++i)
             for (Index j = 0; j < size; ++j)
                 matrix(i, j) = i * size + j + 1;
 
         perm.apply_on_rows(size, &matrix.mat());
 
-        VecAllocated row(size);
+        VecRealAllocated row(size);
         for (Index i = 0; i < size; ++i)
         {
             row = matrix.row(i);
@@ -60,7 +60,7 @@ namespace fatrop::test
         perm[1] = 0;
         perm[2] = 1;
 
-        MatrixAllocated matrix(size, size);
+        MatRealAllocated matrix(size, size);
         for (Index i = 0; i < size; ++i)
             for (Index j = 0; j < size; ++j)
                 matrix(i, j) = i * size + j + 1;
@@ -89,7 +89,7 @@ namespace fatrop::test
         perm[1] = 0;
         perm[2] = 1;
 
-        VecAllocated vector(size);
+        VecRealAllocated vector(size);
         for (Index i = 0; i < size; ++i)
             vector(i) = i + 1;
 
@@ -113,7 +113,7 @@ namespace fatrop::test
         perm[1] = 0;
         perm[2] = 1;
 
-        VecAllocated vector(size);
+        VecRealAllocated vector(size);
         for (Index i = 0; i < size; ++i)
             vector(i) = i + 1;
 
@@ -139,7 +139,7 @@ namespace fatrop::test
         perm[3] = 0;
         perm[4] = 1;
 
-        VecAllocated vector(size);
+        VecRealAllocated vector(size);
         for (Index i = 0; i < size; ++i)
             vector(i) = i + 1;
 
@@ -178,8 +178,8 @@ namespace fatrop::test
         const Index n = 5;
         const Index n_max = 5;
         Index rank;
-        MatrixAllocated A(m, n);
-        MatrixAllocated At(n, m);
+        MatRealAllocated A(m, n);
+        MatRealAllocated At(n, m);
         PermutationMatrix Pl(m);
         PermutationMatrix Pr(n);
 
@@ -197,8 +197,8 @@ namespace fatrop::test
         LU_FACT_transposed(m, n, n_max, rank, &At.mat(), Pl, Pr);
 
         // Extract L and U from At
-        MatrixAllocated L(m, m);
-        MatrixAllocated U(m, n);
+        MatRealAllocated L(m, m);
+        MatRealAllocated U(m, n);
         for (Index i = 0; i < m; ++i)
         {
             for (Index j = 0; j < n; ++j)
@@ -218,9 +218,9 @@ namespace fatrop::test
         }
 
         // Check if A = Pl * L * U * Pr^T
-        MatrixAllocated temp1(m, n);
-        MatrixAllocated temp2(m, n);
-        MatrixAllocated result(m, n);
+        MatRealAllocated temp1(m, n);
+        MatRealAllocated temp2(m, n);
+        MatRealAllocated result(m, n);
 
         // Compute L * U
         for (Index i = 0; i < m; ++i)
@@ -259,8 +259,8 @@ namespace fatrop::test
     {
         const Index m = 3;
         const Index n = 4;
-        MatrixAllocated A(n, m); // Note: A is transposed
-        MatrixAllocated B(m, n);
+        MatRealAllocated A(n, m); // Note: A is transposed
+        MatRealAllocated B(m, n);
         Scalar alpha = 2.0;
 
         // Initialize A and B
@@ -289,9 +289,9 @@ namespace fatrop::test
     TEST(LinearAlgebraTest, fatrop_dtrsv_unu)
     {
         const Index m = 3;
-        MatrixAllocated A(m, m);
-        VecAllocated b(m);
-        VecAllocated x(m);
+        MatRealAllocated A(m, m);
+        VecRealAllocated b(m);
+        VecRealAllocated x(m);
 
         // Initialize A as upper triangular
         for (Index i = 0; i < m; ++i)
@@ -311,7 +311,7 @@ namespace fatrop::test
         fatrop_dtrsv_unu(m, m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
 
         // Check if Ax = b
-        VecAllocated Ax(m);
+        VecRealAllocated Ax(m);
         for (Index i = 0; i < m; ++i)
         {
             for (Index j = i; j < m; ++j)
@@ -325,9 +325,9 @@ namespace fatrop::test
     TEST(LinearAlgebraTest, fatrop_dtrsv_utu)
     {
         const Index m = 3;
-        MatrixAllocated A(m, m);
-        VecAllocated b(m);
-        VecAllocated x(m);
+        MatRealAllocated A(m, m);
+        VecRealAllocated b(m);
+        VecRealAllocated x(m);
 
         // Initialize A as upper triangular with unit diagonal
         for (Index i = 0; i < m; ++i)
@@ -352,7 +352,7 @@ namespace fatrop::test
         fatrop_dtrsv_utu(m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
 
         // Check if A^T x = b
-        VecAllocated Ax(m);
+        VecRealAllocated Ax(m);
         for (Index i = 0; i < m; ++i)
         {
             for (Index j = i; j < m; ++j)

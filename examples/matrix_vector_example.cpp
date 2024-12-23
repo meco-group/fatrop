@@ -6,13 +6,13 @@
 using namespace fatrop;
 using namespace std;
 int main() {
-    MatrixAllocated A(5, 5);
-    MatrixAllocated B(5, 5);
+    MatRealAllocated A(5, 5);
+    MatRealAllocated B(5, 5);
     A = 1.;
     cout << " A: \n" << A << endl;
-    A.diagonal() = VecScalar(A.m(), 2);
+    A.diagonal() = VecRealScalar(A.m(), 2);
     cout << " A: \n" << A << endl;
-    A.diagonal() = A.diagonal() + VecScalar(A.m(), 1);
+    A.diagonal() = A.diagonal() + VecRealScalar(A.m(), 1);
     cout << " A: \n" << A << endl;
     cout << " 5*A diagonal: \n" << 5.*A.diagonal() << endl;
     cout << " - 1./A diagonal**2: \n" << -1. / (A.diagonal()*A.diagonal()) << endl;

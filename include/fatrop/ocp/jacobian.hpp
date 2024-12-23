@@ -62,7 +62,7 @@ namespace fatrop
          *  jac_dyn[:nu, :] is reserved for control Jacobian blocks, while jac_dyn[nu:nu+nx, :] is
          * reserved for state Jacobian blocks. jac_dyn[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatrixAllocated> jac_dyn;
+        std::vector<MatRealAllocated> jac_dyn;
 
         /**
          * @brief Constraint Jacobian of path equality constraints. Similar to jac_dyn, it also has
@@ -76,7 +76,7 @@ namespace fatrop
          *  jac_eq[:nu, :] is reserved for control Jacobian blocks, while jac_eq[nu:nu+nx, :] is
          * reserved for state Jacobian blocks. jac_eq[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatrixAllocated> jac_eq;
+        std::vector<MatRealAllocated> jac_eq;
 
         /**
          * @brief Constraint Jacobian of path inequality constraints. Similar to jac_dyn, it also
@@ -90,7 +90,7 @@ namespace fatrop
          * jac_ineq[:nu, :] is reserved for control Jacobian blocks, while jac_ineq[nu:nu+nx, :] is
          * reserved for state Jacobian blocks. jac_ineq[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatrixAllocated> jac_ineq;
+        std::vector<MatRealAllocated> jac_ineq;
     };
 } // namespace fatrop
 
