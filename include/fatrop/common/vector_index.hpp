@@ -159,7 +159,8 @@ namespace fatrop
          * @param start Starting index of the view.
          * @param size Size of the view.
          */
-        VecIndexView(VecIndexAllocated<Index>& vec, const Index start, const Index size):  vec_(vec), ai_(start), m_(size) {};
+        VecIndexView(std::vector<Index>& vec, const Index start, const Index size):  vec_(vec), ai_(start), m_(size) {};
+        VecIndexView(std::vector<Index>& vec): VecIndexView(vec, 0, vec.size()) {};
         
         inline Index operator[](const Index i) const;
         inline Index m() const;
@@ -206,47 +207,11 @@ namespace fatrop
             return *this = static_cast<const VecIndex<VecIndexView<Index>, Index>&>(vec_in);
         }
         
-        VecIndexAllocated<Index>& vec_;  ///< Reference to the underlying VecIndexAllocated
+        std::vector<Index> & vec_;  ///< Reference to the underlying VecIndexAllocated
         Index ai_;                       ///< Starting index of this view
         Index m_;                        ///< Size of this view
     };
 
-    /**
-     * @brief An allocated vector of indices that also provides a view interface.
-     * 
-     * This class combines the functionality of std::vector with the interface
-     * provided by VecIndexView.
-     * 
-     * @tparam Index The index type used in the vector.
-     */
-    template <typename Index>
-    class VecIndexAllocated : public VecIndexView<Index>,
-                              public std::vector<Index>
-    {
-    public:
-        /**
-         * @brief Constructs a VecIndexAllocated from an rvalue std::vector.
-         * 
-         * @param vec The vector to move from.
-         */
-        VecIndexAllocated(std::vector<Index>&& vec): VecIndexView<Index>(*this, 0, vec.size()), std::vector<Index>(std::move(vec)) {};
-        
-        /**
-         * @brief Constructs a VecIndexAllocated from a const reference to an std::vector.
-         * 
-         * @param vec The vector to copy from.
-         */
-        VecIndexAllocated(const std::vector<Index>& vec): VecIndexView<Index>(*this, 0, vec.size()), std::vector<Index>(vec) {};
-        
-        using std::vector<Index>::operator[];
-        
-        /**
-         * @brief Returns the size of the vector.
-         * 
-         * @return Index The number of elements in the vector.
-         */
-        Index m() const { return this->size(); }
-    };
     // implementation
 
     template <typename Index>
