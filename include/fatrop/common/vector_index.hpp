@@ -94,6 +94,16 @@ namespace fatrop
             }
             return ret;
         }
+
+        operator std::vector<Index>() const
+        {
+            std::vector<Index> ret(m());
+            for (Index i = 0; i < m(); i++)
+            {
+                ret[i] = (*this)[i];
+            }
+            return ret;
+        }
     };
 
     /**
@@ -159,10 +169,36 @@ namespace fatrop
          * @param start Starting index of the view.
          * @param size Size of the view.
          */
-        VecIndexView(std::vector<Index>& vec, const Index start, const Index size):  vec_(vec), ai_(start), m_(size) {};
-        VecIndexView(std::vector<Index>& vec): VecIndexView(vec, 0, vec.size()) {};
+        /**
+         * @brief Constructs a VecIndexView with specified start and size.
+         * 
+         * @param vec Reference to the underlying vector.
+         * @param start Starting index of the view in the underlying vector.
+         * @param size Number of elements in the view.
+         */
+        VecIndexView(const std::vector<Index>& vec, const Index start, const Index size):  vec_(vec), ai_(start), m_(size) {};
+
+        /**
+         * @brief Constructs a VecIndexView representing the entire underlying vector.
+         * 
+         * @param vec Reference to the underlying vector.
+         */
+        VecIndexView(const std::vector<Index>& vec): VecIndexView(vec, 0, vec.size()) {};
+
         
+        /**
+         * @brief Accesses an element in the view.
+         * 
+         * @param i Index within the view.
+         * @return Index The value at the specified index.
+         */
         inline Index operator[](const Index i) const;
+
+        /**
+         * @brief Returns the size of the view.
+         * 
+         * @return Index The number of elements in the view.
+         */
         inline Index m() const;
         
         /**
@@ -177,37 +213,7 @@ namespace fatrop
             return VecIndexView<Index>(vec_, ai_ + start, size);
         }
         
-        /**
-         * @brief Assignment operator from another VecIndex.
-         * 
-         * @tparam Derived The type of the input vector.
-         * @param vec_in The input vector to assign from.
-         * @return VecIndexView<Index>& Reference to this object.
-         */
-        template <typename Derived>
-        VecIndexView<Index>& operator=(const VecIndex<Derived, Index> &vec_in)
-        {
-            fatrop_dbg_assert(this->m() == vec_in.m() &&
-                              "Vectors must be same size for assignment");
-            for (Index i = 0; i < m(); i++)
-            {
-                vec_[ai_ + i] = vec_in[i];
-            }
-            return *this;
-        }
-        
-        /**
-         * @brief Assignment operator from another VecIndexView.
-         * 
-         * @param vec_in The input VecIndexView to assign from.
-         * @return VecIndexView<Index>& Reference to this object.
-         */
-        VecIndexView<Index>& operator=(const VecIndexView& vec_in)
-        {
-            return *this = static_cast<const VecIndex<VecIndexView<Index>, Index>&>(vec_in);
-        }
-        
-        std::vector<Index> & vec_;  ///< Reference to the underlying VecIndexAllocated
+        const std::vector<Index> & vec_;  ///< Reference to the underlying VecIndexAllocated
         Index ai_;                       ///< Starting index of this view
         Index m_;                        ///< Size of this view
     };
@@ -215,9 +221,25 @@ namespace fatrop
     // implementation
 
     template <typename Index>
-        Index VecIndexView<Index>::operator[](const Index i) const { return vec_[i+ai_]; }
+    /**
+     * @brief Accesses an element in the view.
+     * 
+     * This method provides the implementation for the operator[] declared in the class.
+     * 
+     * @param i Index within the view.
+     * @return Index The value at the specified index.
+     */
+    Index VecIndexView<Index>::operator[](const Index i) const { return vec_[i+ai_]; }
+
     template <typename Index>
-        Index VecIndexView<Index>::m() const { return m_; }
+    /**
+     * @brief Returns the size of the view.
+     * 
+     * This method provides the implementation for the m() function declared in the class.
+     * 
+     * @return Index The number of elements in the view.
+     */
+    Index VecIndexView<Index>::m() const { return m_; }
 } // namespace fatrop
 
 #endif //__fatrop_common_index_vector__

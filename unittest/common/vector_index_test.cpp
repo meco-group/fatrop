@@ -8,7 +8,7 @@ using namespace fatrop;
 template <typename T>
 class VecIndexTest : public ::testing::Test {
 protected:
-    std::vector<T> test_data = {1, 2, 3, 4, 5};
+    const std::vector<T> test_data = {1, 2, 3, 4, 5};
     VecIndexView<T> vec_index_view;
 
     VecIndexTest() : vec_index_view(test_data) {}
@@ -79,13 +79,33 @@ TYPED_TEST(IndexVecViewTest, Block) {
     EXPECT_EQ(block[1], 4);
 }
 
-TYPED_TEST(IndexVecViewTest, AssignmentOperator) {
-    std::vector<TypeParam> new_data = {10, 20, 30};
-    VecIndexView<TypeParam> new_vec(new_data);
-    this->index_vec_view = new_vec;
-    EXPECT_EQ(this->index_vec_view[0], 10);
-    EXPECT_EQ(this->index_vec_view[1], 20);
-    EXPECT_EQ(this->index_vec_view[2], 30);
+TYPED_TEST(VecIndexTest, FullVectorConstructor) {
+    VecIndexView<TypeParam> full_view(this->test_data);
+    EXPECT_EQ(full_view.m(), 5);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(full_view[i], this->test_data[i]);
+    }
+}
+
+TYPED_TEST(VecIndexTest, ConversionToStdVector) {
+    std::vector<TypeParam> converted = this->vec_index_view;
+    EXPECT_EQ(converted.size(), 5);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(converted[i], this->test_data[i]);
+    }
+}
+
+TYPED_TEST(VecIndexTest, EmptyVector) {
+    std::vector<TypeParam> empty_data;
+    VecIndexView<TypeParam> empty_view(empty_data);
+    EXPECT_EQ(empty_view.m(), 0);
+}
+
+// Note: This test assumes that the VecIndexView class doesn't perform bounds checking.
+// If it does, you may need to modify this test or remove it.
+TYPED_TEST(VecIndexTest, OutOfBoundsAccess) {
+    EXPECT_NO_THROW(this->vec_index_view[4]); // Last valid index
+    EXPECT_NO_THROW(this->vec_index_view[5]); // Out of bounds
 }
 
 int main(int argc, char **argv) {
