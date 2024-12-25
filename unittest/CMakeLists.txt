@@ -31,15 +31,18 @@ add_executable(vector_test linear_algebra/vector_test.cpp)
 add_executable(matrix_test linear_algebra/matrix_test.cpp)
 add_executable(lu_factorization_test linear_algebra/lu_factorization_test.cpp)
 add_executable(ocp_test ocp/ocp_test.cpp)
+add_executable(problem_info_test ocp/problem_info_test.cpp)
 
 # Link the test executables with Google Test and other required libraries
 target_link_libraries(vector_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(matrix_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(lu_factorization_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(ocp_test gtest gtest_main blasfeo fatrop)
+target_link_libraries(problem_info_test gtest gtest_main blasfeo fatrop)
 
 # Discover and add the tests
 gtest_discover_tests(vector_test)
 gtest_discover_tests(matrix_test)
 gtest_discover_tests(lu_factorization_test)
 gtest_discover_tests(ocp_test)
+gtest_discover_tests(problem_info_test)
