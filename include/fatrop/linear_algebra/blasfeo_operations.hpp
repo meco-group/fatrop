@@ -17,6 +17,7 @@
 namespace fatrop
 {
 
+
     static inline void axpby(int m, Scalar alpha, const VecRealView &x, int xi, Scalar beta,
                              const VecRealView &y, int yi, VecRealView &z, int zi)
     {

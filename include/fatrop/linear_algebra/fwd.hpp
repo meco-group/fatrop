@@ -40,6 +40,7 @@ namespace fatrop
 
     class MatRealAllocated;
     template <typename Derived> class MatRealView1D;
+    template <typename Dep1> class MatRealTranspose;
 
     class MatRealRowView;
     class MatRealColView;

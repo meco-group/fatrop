@@ -57,6 +57,11 @@ namespace fatrop
          */
         Index n() const { return static_cast<const Derived *>(this)->n(); }
 
+        friend MatRealTranspose<Derived> transpose(const MatReal<Derived> &dep)
+        {
+            return MatRealTranspose<Derived>(dep);
+        }
+
         /**
          * @brief Overloads the << operator for printing the matrix elements.
          *
@@ -76,6 +81,18 @@ namespace fatrop
             }
             return os;
         }
+    };
+
+    template <typename Dep1> class MatRealTranspose : public MatReal<MatRealTranspose<Dep1>>
+    {
+    public:
+        MatRealTranspose(const MatReal<Dep1> &dep) : dep_(dep) {}
+        Scalar operator()(const Index i, const Index j) const { return dep_(j, i); }
+        Index m() const { return dep_.n(); }
+        Index n() const { return dep_.m(); }
+
+    private:
+        const MatReal<Dep1> &dep_;
     };
 
     /**
@@ -451,8 +468,8 @@ namespace fatrop
     MatRealView &MatRealView::operator=(const MatRealView &mat_in)
     {
         fatrop_dbg_assert((*this).m() == mat_in.m() && (*this).n() == mat_in.n());
-        GECP((*this).m(), (*this).n(), &mat_.mat(), ai_, aj_, &mat_in.mat_.mat(), mat_in.ai_,
-             mat_in.aj_);
+        GECP((*this).m(), (*this).n(), const_cast<MAT *>(&mat_in.mat()), mat_in.ai_, mat_in.aj_,
+             &mat_.mat(), ai_, aj_);
         return *this;
     };
 
@@ -461,6 +478,7 @@ namespace fatrop
         : MatRealView(*this, m, n, 0, 0), mat_()
     {
         ALLOCATE_MAT(m, n, &mat_);
+        GESE(m, n, 0.0, &mat_, 0, 0);
     }
 
     MatRealAllocated::MatRealAllocated(MatRealAllocated &&other)
@@ -473,13 +491,13 @@ namespace fatrop
     Scalar &MatRealAllocated::operator()(const Index i, const Index j)
     {
         fatrop_dbg_assert(i >= 0 && i < m() && j >= 0 && j < n());
-        return MATEL(&mat_, i, j);
+        return blasfeo_matel_wrap(&mat_, i, j);
     }
 
     const Scalar &MatRealAllocated::operator()(const Index i, const Index j) const
     {
         fatrop_dbg_assert(i >= 0 && i < m() && j >= 0 && j < n());
-        return MATEL(&mat_, i, j);
+        return blasfeo_matel_wrap(&mat_, i, j);
     }
 
     MatRealAllocated::~MatRealAllocated() { FREE_MAT(&mat()); }

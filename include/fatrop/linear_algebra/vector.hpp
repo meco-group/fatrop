@@ -476,7 +476,7 @@ namespace fatrop
         /**
          * @brief Constructs a VecRealAllocated object with the given size.
          */
-        VecRealAllocated(const Index m) : VecRealView(*this, m, 0), m_(m) { ALLOCATE_VEC(m, &vec_); }
+        VecRealAllocated(const Index m) : VecRealView(*this, m, 0), m_(m) { ALLOCATE_VEC(m, &vec_); VECSE(m, 0., &vec_, 0); }
         VecRealAllocated(VecRealAllocated & /*other*/) = delete;
         /**
          * @brief Move constructor for VecRealAllocated.
@@ -498,7 +498,7 @@ namespace fatrop
         Scalar &operator()(const Index i)
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
-            return VECEL(&vec(), i);
+            return blasfeo_vecel_wrap(&vec(), i);
         }
         /**
          * @brief Accessor for const elements of the vector.
@@ -507,7 +507,7 @@ namespace fatrop
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
             VEC veccp = vec();
-            return VECEL(&vec(), i);
+            return blasfeo_vecel_wrap(&vec(), i);
         }
         /**
          * @brief Destructor that frees the allocated vector memory.

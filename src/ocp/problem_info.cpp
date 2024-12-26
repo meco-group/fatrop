@@ -14,9 +14,9 @@ namespace fatrop
         {
             Index K = std::distance(begin, end) + 1;
             out[0] = 0;
-            std::partial_sum(begin, end, out + 1);
+            std::partial_sum(begin, end-1, out + 1);
             // add the offset to each element
-            std::transform(out, out + K, out, [offset](Index x) { return x + offset; });
+            std::transform(out, out + K -1, out, [offset](Index x) { return x + offset; });
         }
     }
 }
@@ -25,6 +25,16 @@ ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims)
       offsets_g_eq_path(dims.K), offsets_g_eq_slack(dims.K)
 {
     using namespace internal;
+    // compute the number of primal variables
+    number_of_primal_variables =
+        std::accumulate(dims.number_of_states.begin(), dims.number_of_states.end(), 0) +
+        std::accumulate(dims.number_of_controls.begin(), dims.number_of_controls.end(), 0);
+    // compute the number of slack variables
+    number_of_slack_variables = std::accumulate(dims.number_of_ineq_constraints.begin(),
+                                                dims.number_of_ineq_constraints.end(), 0);
+    // compute the number of equality constraints
+    number_of_eq_constraints = std::accumulate(dims.number_of_states.begin() +1, dims.number_of_states.end(), 0) + std::accumulate(dims.number_of_eq_constraints.begin(),
+                                               dims.number_of_eq_constraints.end(), 0)  + std::accumulate(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(), 0);
     // set up the offsets for the primal variables
     // the number of variables per stage is the sum of the number of states and controls
     std::vector<Index> number_of_variables_per_stage(dims.K);

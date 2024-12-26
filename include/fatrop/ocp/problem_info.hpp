@@ -29,6 +29,15 @@ namespace fatrop
         /// The dimensions of the OCP
         const OcpDims dims;
 
+        // Number of primal variables
+        Index number_of_primal_variables;
+
+        // Number of slack variables
+        Index number_of_slack_variables;
+
+        // Number of equality constraints
+        Index number_of_eq_constraints; 
+
         /// Offset for the primal variables in the overall variable vector
         Index offset_primal;
 
