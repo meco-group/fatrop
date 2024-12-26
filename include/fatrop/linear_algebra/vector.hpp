@@ -1,7 +1,6 @@
 //
 // Copyright (c) 2024 Lander Vanroye, KU Leuven
 //
-
 #ifndef __fatrop_linear_algebra_vector_hpp__
 #define __fatrop_linear_algebra_vector_hpp__
 
@@ -456,6 +455,7 @@ namespace fatrop
             return VecRealView(vec_, size, ai_ + start);
         }
         inline VEC &vec();
+        inline const VEC &vec() const;
         inline Index m() const;
         inline Index ai() const;
 
@@ -544,6 +544,7 @@ namespace fatrop
         return vec_(ai() + i);
     }
     VEC &VecRealView::vec() { return vec_.vec(); }
+    const VEC &VecRealView::vec() const { return vec_.vec(); }
     Index VecRealView::m() const { return m_; }
     Index VecRealView::ai() const { return ai_; }
 

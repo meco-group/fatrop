@@ -7,6 +7,7 @@
 
 #include "vector.hpp"
 #include "matrix.hpp"
+#include "blasfeo_operations.hpp"
 #include "lu_factorization.hpp"
 
 #endif // __fatrop_linear_algebra_linear_algebra_hpp__

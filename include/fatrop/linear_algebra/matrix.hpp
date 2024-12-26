@@ -1,6 +1,6 @@
+//
 // Copyright (c) 2024 Lander Vanroye, KU Leuven
 //
-
 #ifndef __fatrop_linear_algebra_matrix_hpp__
 #define __fatrop_linear_algebra_matrix_hpp__
 
@@ -247,7 +247,7 @@ namespace fatrop
          * @param aj Column offset.
          */
         MatRealView(MatRealAllocated &mat, const Index m, const Index n, const Index ai,
-                      const Index aj)
+                    const Index aj)
             : mat_(mat), m_(m), n_(n), ai_(ai), aj_(aj) {};
 
         /**
@@ -261,6 +261,10 @@ namespace fatrop
 
         Index m() const { return m_; }
         Index n() const { return n_; }
+        Index ai() const { return ai_; }
+        Index aj() const { return aj_; }
+        inline MAT &mat();
+        inline const MAT &mat() const;
 
         /**
          * @brief Creates a view of a specific row.
@@ -295,7 +299,7 @@ namespace fatrop
          * @return MatRealView The sub-matrix.
          */
         MatRealView block(const Index rows, const Index cols, const Index row_start,
-                            const Index col_start) const
+                          const Index col_start) const
         {
             return MatRealView(mat_, rows, cols, ai_ + row_start, aj_ + col_start);
         }
@@ -419,6 +423,8 @@ namespace fatrop
     Index MatRealDiagonalView::m() const { return std::min(mat_.m(), mat_.n()); }
 
     // Implementation of MatRealView
+    MAT &MatRealView::mat() { return mat_.mat(); }
+    const MAT &MatRealView::mat() const { return mat_.mat(); }
     Scalar &MatRealView::operator()(const Index i, const Index j) const
     {
         return mat_(i + ai_, j + aj_);

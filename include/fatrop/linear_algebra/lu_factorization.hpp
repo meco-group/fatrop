@@ -96,7 +96,7 @@ namespace fatrop
      *
      * @note Ensure \( At \), \( Pl_p \), and \( Pr_p \) are allocated before use.
      */
-    void LU_FACT_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
+    void lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
                             PermutationMatrix &Pl, PermutationMatrix &Pr, double tol = 1e-5);
 
     /**

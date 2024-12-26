@@ -7,18 +7,19 @@
 
 #include <exception>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 
 // Custom exception class
-class FatropException : public std::exception {
+class FatropException : public std::exception
+{
 public:
-    FatropException(const std::string& condition, const char* file, int line)
-        : message_("Assertion failed: " + condition + " at: " + file + ":" + std::to_string(line)) {}
-
-    const char* what() const noexcept override {
-        return message_.c_str();
+    FatropException(const std::string &condition, const char *file, int line)
+        : message_("Assertion failed: " + condition + " at: " + file + ":" + std::to_string(line))
+    {
     }
+
+    const char *what() const noexcept override { return message_.c_str(); }
 
 private:
     std::string message_;
@@ -31,8 +32,22 @@ private:
         if (!(condition))                                                                          \
         {                                                                                          \
             std::ostringstream oss;                                                                \
-            oss << "Assertion failed: " << #condition << " at: " << __FILE__ << ":"                \
-                << __LINE__ << "\n";                                                               \
+            oss << "Assertion failed: " << #condition << " at: " << __FILE__ << ":" << __LINE__    \
+                << "\n";                                                                           \
+            std::cerr << oss.str();                                                                \
+            throw FatropException(#condition, __FILE__, __LINE__);                                 \
+        }                                                                                          \
+    } while (0)
+
+#define fatrop_assert_msg(condition, message)                                                      \
+    do                                                                                             \
+    {                                                                                              \
+        if (!(condition))                                                                          \
+        {                                                                                          \
+            std::ostringstream oss;                                                                \
+            oss << "Assertion failed: " << #condition << " at: " << __FILE__ << ":" << __LINE__    \
+                << "\n"                                                                            \
+                << message << "\n";                                                                \
             std::cerr << oss.str();                                                                \
             throw FatropException(#condition, __FILE__, __LINE__);                                 \
         }                                                                                          \

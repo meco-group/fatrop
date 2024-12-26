@@ -172,7 +172,7 @@ namespace fatrop::test
         }
     }
 
-    TEST(LUFactorizationTest, LU_FACT_transposed)
+    TEST(LUFactorizationTest, transposedLUFactorization)
     {
         const Index m = 5;
         const Index n = 5;
@@ -194,7 +194,7 @@ namespace fatrop::test
         }
 
         // Compute LU factorization
-        LU_FACT_transposed(m, n, n_max, rank, &At.mat(), Pl, Pr);
+        lu_fact_transposed(m, n, n_max, rank, &At.mat(), Pl, Pr);
 
         // Extract L and U from At
         MatRealAllocated L(m, m);

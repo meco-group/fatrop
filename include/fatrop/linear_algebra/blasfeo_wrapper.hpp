@@ -1,179 +1,187 @@
+//
+// Copyright (c) Lander Vanroye, KU Leuven
+//
 #ifndef __fatrop_linear_algebra_blasfeo_wrapper_hpp__
 #define __fatrop_linear_algebra_blasfeo_wrapper_hpp__
+
+/**
+ * @file blasfeo_wrapper.hpp
+ * @brief The functions in this file wrap the blasfeo functions. The wrapping adds two things not
+ * provided by blasfeo by default (1) bound checking (in debug mode), and (2) correct constness, we
+ * use const_casts to this end*/
 
 #include "fatrop/common/exception.hpp"
 extern "C"
 {
 #include <blasfeo.h>
 }
+#include "fatrop/context/context.hpp"
 
 namespace fatrop
 {
-    static inline void blasfeo_daxpby_debug(int m, double alpha, blasfeo_dvec *x, int xi,
-                                            double beta, blasfeo_dvec *y, int yi, blasfeo_dvec *z,
-                                            int zi)
+    static inline void blasfeo_axpby_wrap(int m, Scalar alpha, const VEC *x, int xi, Scalar beta,
+                                          const VEC *y, int yi, VEC *z, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && zi >= 0 && "Vector indices must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m && yi + m <= y->m && zi + m <= z->m &&
                           "Vector indices plus size must not exceed vector dimensions");
-        blasfeo_daxpby(m, alpha, x, xi, beta, y, yi, z, zi);
+        AXPBY(m, alpha, const_cast<VEC *>(x), xi, beta, const_cast<VEC *>(y), yi, z, zi);
     }
 
-    static inline void blasfeo_daxpy_debug(int m, double alpha, blasfeo_dvec *x, int xi,
-                                           blasfeo_dvec *y, int yi, blasfeo_dvec *z, int zi)
+    static inline void blasfeo_axpy_wrap(int m, Scalar alpha, const VEC *x, int xi, const VEC *y,
+                                         int yi, VEC *z, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && zi >= 0 && "Vector indices must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m && yi + m <= y->m && zi + m <= z->m &&
                           "Vector indices plus size must not exceed vector dimensions");
-        blasfeo_daxpy(m, alpha, x, xi, y, yi, z, zi);
+        AXPY(m, alpha, const_cast<VEC *>(x), xi, const_cast<VEC *>(y), yi, z, zi);
     }
 
-    static inline void blasfeo_dvecse_debug(int m, double alpha, blasfeo_dvec *x, int xi)
+    static inline void blasfeo_vecse_wrap(int m, Scalar alpha, VEC *x, int xi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && "Vector index must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m &&
                           "Vector index plus size must not exceed vector dimension");
-        blasfeo_dvecse(m, alpha, x, xi);
+        VECSE(m, alpha, x, xi);
     }
 
-    static inline void blasfeo_dvecsc_debug(int m, double alpha, blasfeo_dvec *x, int xi)
+    static inline void blasfeo_vecsc_wrap(int m, Scalar alpha, VEC *x, int xi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && "Vector index must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m &&
                           "Vector index plus size must not exceed vector dimension");
-        blasfeo_dvecsc(m, alpha, x, xi);
+        VECSC(m, alpha, x, xi);
     }
 
-    static inline void blasfeo_dveccpsc_debug(int m, double alpha, blasfeo_dvec *x, int xi,
-                                              blasfeo_dvec *y, int yi)
+    static inline void blasfeo_veccpsc_wrap(int m, Scalar alpha, const VEC *x, int xi, VEC *y,
+                                            int yi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && "Vector indices must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m && yi + m <= y->m &&
                           "Vector indices plus size must not exceed vector dimensions");
-        blasfeo_dveccpsc(m, alpha, x, xi, y, yi);
+        VECCPSC(m, alpha, const_cast<VEC *>(x), xi, y, yi);
     }
 
-    static inline void blasfeo_dveccp_debug(int m, blasfeo_dvec *x, int xi, blasfeo_dvec *y, int yi)
+    static inline void blasfeo_veccp_wrap(int m, const VEC *x, int xi, VEC *y, int yi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && "Vector indices must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m && yi + m <= y->m &&
                           "Vector indices plus size must not exceed vector dimensions");
-        blasfeo_dveccp(m, x, xi, y, yi);
+        VECCP(m, const_cast<VEC *>(x), xi, y, yi);
     }
 
-    static inline void blasfeo_dvecmul_debug(int m, blasfeo_dvec *x, int xi, blasfeo_dvec *y,
-                                             int yi, blasfeo_dvec *z, int zi)
+    static inline void blasfeo_vecmul_wrap(int m, const VEC *x, int xi, const VEC *y, int yi,
+                                           VEC *z, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && zi >= 0 && "Vector indices must be non-negative");
         fatrop_dbg_assert(xi + m <= x->m && yi + m <= y->m && zi + m <= z->m &&
                           "Vector indices plus size must not exceed vector dimensions");
-        blasfeo_dvecmul(m, x, xi, y, yi, z, zi);
+        VECMUL(m, const_cast<VEC *>(x), xi, const_cast<VEC *>(y), yi, z, zi);
     }
 
-    static inline void blasfeo_drowpe_debug(int kmax, int *ipiv, blasfeo_dmat *sA)
+    static inline void blasfeo_rowpe_wrap(int kmax, int *ipiv, MAT *sA)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
-        blasfeo_drowpe(kmax, ipiv, sA);
+        ROWPE(kmax, ipiv, sA);
     }
 
-    static inline void blasfeo_dvecpe_debug(int kmax, int *ipiv, blasfeo_dvec *sx, int xi)
-    {
-        fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
-        fatrop_dbg_assert(xi >= 0 && "xi must be non-negative");
-        fatrop_dbg_assert(xi + kmax <= sx->m && "xi + kmax must not exceed vector dimension");
-        blasfeo_dvecpe(kmax, ipiv, sx, xi);
-    }
-
-    static inline void blasfeo_dvecpei_debug(int kmax, int *ipiv, blasfeo_dvec *sx, int xi)
+    static inline void blasfeo_vecpe_wrap(int kmax, int *ipiv, VEC *sx, int xi)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(xi >= 0 && "xi must be non-negative");
         fatrop_dbg_assert(xi + kmax <= sx->m && "xi + kmax must not exceed vector dimension");
-        blasfeo_dvecpei(kmax, ipiv, sx, xi);
+        VECPE(kmax, ipiv, sx, xi);
     }
 
-    static inline void blasfeo_drowpei_debug(int kmax, int *ipiv, blasfeo_dmat *sA)
+    static inline void blasfeo_vecpei_wrap(int kmax, int *ipiv, VEC *sx, int xi)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
-        blasfeo_drowpei(kmax, ipiv, sA);
+        fatrop_dbg_assert(xi >= 0 && "xi must be non-negative");
+        fatrop_dbg_assert(xi + kmax <= sx->m && "xi + kmax must not exceed vector dimension");
+        VECPEI(kmax, ipiv, sx, xi);
     }
 
-    static inline void blasfeo_dcolpe_debug(int kmax, int *ipiv, blasfeo_dmat *sA)
+    static inline void blasfeo_rowpei_wrap(int kmax, int *ipiv, MAT *sA)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
-        blasfeo_dcolpe(kmax, ipiv, sA);
+        ROWPEI(kmax, ipiv, sA);
     }
 
-    static inline void blasfeo_dcolpei_debug(int kmax, int *ipiv, blasfeo_dmat *sA)
+    static inline void blasfeo_colpe_wrap(int kmax, int *ipiv, MAT *sA)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
-        blasfeo_dcolpei(kmax, ipiv, sA);
+        COLPE(kmax, ipiv, sA);
     }
 
-    static inline void blasfeo_drowsw_debug(int kmax, blasfeo_dmat *sA, int ai, int aj,
-                                            blasfeo_dmat *sC, int ci, int cj)
+    static inline void blasfeo_colpei_wrap(int kmax, int *ipiv, MAT *sA)
+    {
+        fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
+        COLPEI(kmax, ipiv, sA);
+    }
+
+    static inline void blasfeo_rowsw_wrap(int kmax, MAT *sA, int ai, int aj, MAT *sC, int ci,
+                                          int cj)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && ci >= 0 && cj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(aj + kmax <= sA->m && cj + kmax <= sC->m &&
                           "Row indices plus kmax must not exceed matrix dimensions");
-        blasfeo_drowsw(kmax, sA, ai, aj, sC, ci, cj);
+        ROWSW(kmax, sA, ai, aj, sC, ci, cj);
     }
 
-    static inline void blasfeo_dcolsw_debug(int kmax, blasfeo_dmat *sA, int ai, int aj,
-                                            blasfeo_dmat *sC, int ci, int cj)
+    static inline void blasfeo_colsw_wrap(int kmax, MAT *sA, int ai, int aj, MAT *sC, int ci,
+                                          int cj)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && ci >= 0 && cj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(ai + kmax <= sA->n && ci + kmax <= sC->n &&
                           "Column indices plus kmax must not exceed matrix dimensions");
-        blasfeo_dcolsw(kmax, sA, ai, aj, sC, ci, cj);
+        COLSW(kmax, sA, ai, aj, sC, ci, cj);
     }
 
-    static inline void blasfeo_dgead_debug(int m, int n, double alpha, blasfeo_dmat *sA, int ai,
-                                           int aj, blasfeo_dmat *sB, int bi, int bj)
+    static inline void blasfeo_gead_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai, int aj,
+                                         MAT *sB, int bi, int bj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && bi + m <= sB->m &&
                           bj + n <= sB->n && "Submatrix must fit within matrix dimensions");
-        blasfeo_dgead(m, n, alpha, sA, ai, aj, sB, bi, bj);
+        GEAD(m, n, alpha, const_cast<MAT *>(sA), ai, aj, sB, bi, bj);
     }
 
-    static inline void blasfeo_dgecp_debug(int m, int n, blasfeo_dmat *sA, int ai, int aj,
-                                           blasfeo_dmat *sB, int bi, int bj)
+    static inline void blasfeo_gecp_wrap(int m, int n, const MAT *sA, int ai, int aj, MAT *sB,
+                                         int bi, int bj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && bi + m <= sB->m &&
                           bj + n <= sB->n && "Submatrix must fit within matrix dimensions");
-        blasfeo_dgecp(m, n, sA, ai, aj, sB, bi, bj);
+        GECP(m, n, const_cast<MAT *>(sA), ai, aj, sB, bi, bj);
     }
 
-    static inline void blasfeo_dgesc_debug(int m, int n, double alpha, blasfeo_dmat *sA, int ai,
-                                           int aj)
+    static inline void blasfeo_gesc_wrap(int m, int n, Scalar alpha, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n &&
                           "Submatrix must fit within matrix dimensions");
-        blasfeo_dgesc(m, n, alpha, sA, ai, aj);
+        GESC(m, n, alpha, sA, ai, aj);
     }
 
-    static inline void blasfeo_dtrsm_rltn_debug(int m, int n, double alpha, blasfeo_dmat *sA,
-                                                int ai, int aj, blasfeo_dmat *sB, int bi, int bj,
-                                                blasfeo_dmat *sD, int di, int dj)
+    static inline void blasfeo_trsm_rltn_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai,
+                                              int aj, const MAT *sB, int bi, int bj, MAT *sD,
+                                              int di, int dj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && di >= 0 && dj >= 0 &&
@@ -181,13 +189,14 @@ namespace fatrop
         fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && bi + m <= sB->m &&
                           bj + n <= sB->n && di + m <= sD->m && dj + n <= sD->n &&
                           "Submatrices must fit within matrix dimensions");
-        blasfeo_dtrsm_rltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj);
+        TRSM_RLTN(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, sD, di,
+                  dj);
     }
 
-    static inline void blasfeo_dgemm_nt_debug(int m, int n, int k, double alpha, blasfeo_dmat *sA,
-                                              int ai, int aj, blasfeo_dmat *sB, int bi, int bj,
-                                              double beta, blasfeo_dmat *sC, int ci, int cj,
-                                              blasfeo_dmat *sD, int di, int dj)
+    static inline void blasfeo_gemm_nt_wrap(int m, int n, int k, Scalar alpha, const MAT *sA,
+                                            int ai, int aj, const MAT *sB, int bi, int bj,
+                                            Scalar beta, const MAT *sC, int ci, int cj, MAT *sD,
+                                            int di, int dj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && k > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && ci >= 0 && cj >= 0 &&
@@ -196,13 +205,14 @@ namespace fatrop
                           bj + k <= sB->n && ci + m <= sC->m && cj + n <= sC->n &&
                           di + m <= sD->m && dj + n <= sD->n &&
                           "Submatrices must fit within matrix dimensions");
-        blasfeo_dgemm_nt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj);
+        GEMM_NT(m, n, k, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, beta,
+                const_cast<MAT *>(sC), ci, cj, sD, di, dj);
     }
 
-    static inline void blasfeo_dsyrk_ln_mn_debug(int m, int n, int k, double alpha,
-                                                 blasfeo_dmat *sA, int ai, int aj, blasfeo_dmat *sB,
-                                                 int bi, int bj, double beta, blasfeo_dmat *sC,
-                                                 int ci, int cj, blasfeo_dmat *sD, int di, int dj)
+    static inline void blasfeo_syrk_ln_mn_wrap(int m, int n, int k, Scalar alpha, const MAT *sA,
+                                               int ai, int aj, const MAT *sB, int bi, int bj,
+                                               Scalar beta, const MAT *sC, int ci, int cj, MAT *sD,
+                                               int di, int dj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && k > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && ci >= 0 && cj >= 0 &&
@@ -211,13 +221,13 @@ namespace fatrop
                           bj + k <= sB->n && ci + m <= sC->m && cj + n <= sC->n &&
                           di + m <= sD->m && dj + n <= sD->n &&
                           "Submatrices must fit within matrix dimensions");
-        blasfeo_dsyrk_ln_mn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj);
+        SYRK_LN_MN(m, n, k, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj,
+                   beta, const_cast<MAT *>(sC), ci, cj, sD, di, dj);
     }
 
-    static inline void blasfeo_dsyrk_ln_debug(int m, int k, double alpha, blasfeo_dmat *sA, int ai,
-                                              int aj, blasfeo_dmat *sB, int bi, int bj, double beta,
-                                              blasfeo_dmat *sC, int ci, int cj, blasfeo_dmat *sD,
-                                              int di, int dj)
+    static inline void blasfeo_syrk_ln_wrap(int m, int k, Scalar alpha, const MAT *sA, int ai,
+                                            int aj, const MAT *sB, int bi, int bj, Scalar beta,
+                                            const MAT *sC, int ci, int cj, MAT *sD, int di, int dj)
     {
         fatrop_dbg_assert(m > 0 && k > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && ci >= 0 && cj >= 0 &&
@@ -226,74 +236,74 @@ namespace fatrop
                           bj + k <= sB->n && ci + m <= sC->m && cj + m <= sC->n &&
                           di + m <= sD->m && dj + m <= sD->n &&
                           "Submatrices must fit within matrix dimensions");
-        blasfeo_dsyrk_ln(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj);
+        SYRK_LN(m, k, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, beta,
+                const_cast<MAT *>(sC), ci, cj, sD, di, dj);
     }
 
-    static inline void blasfeo_dgetr_debug(int m, int n, blasfeo_dmat *sA, int ai, int aj,
-                                           blasfeo_dmat *sB, int bi, int bj)
+    static inline void blasfeo_getr_wrap(int m, int n, const MAT *sA, int ai, int aj, MAT *sB,
+                                         int bi, int bj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && bi + n <= sB->m &&
                           bj + m <= sB->n && "Submatrices must fit within matrix dimensions");
-        blasfeo_dgetr(m, n, sA, ai, aj, sB, bi, bj);
+        GETR(m, n, const_cast<MAT *>(sA), ai, aj, sB, bi, bj);
     }
 
-    static inline void blasfeo_dtrtr_l_debug(int m, blasfeo_dmat *sA, int ai, int aj,
-                                             blasfeo_dmat *sB, int bi, int bj)
+    static inline void blasfeo_trtr_l_wrap(int m, const MAT *sA, int ai, int aj, MAT *sB, int bi,
+                                           int bj)
     {
         fatrop_dbg_assert(m > 0 && "Matrix dimension must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && bi + m <= sB->m &&
                           bj + m <= sB->n && "Submatrices must fit within matrix dimensions");
-        blasfeo_dtrtr_l(m, sA, ai, aj, sB, bi, bj);
+        TRTR_L(m, const_cast<MAT *>(sA), ai, aj, sB, bi, bj);
     }
 
-    static inline void blasfeo_dpotrf_l_mn_debug(int m, int n, blasfeo_dmat *sC, int ci, int cj,
-                                                 blasfeo_dmat *sD, int di, int dj)
+    static inline void blasfeo_potrf_l_mn_wrap(int m, int n, MAT *sC, int ci, int cj, MAT *sD,
+                                               int di, int dj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ci >= 0 && cj >= 0 && di >= 0 && dj >= 0 &&
                           "Indices must be non-negative");
         fatrop_dbg_assert(ci + m <= sC->m && cj + n <= sC->n && di + m <= sD->m &&
                           dj + n <= sD->n && "Submatrices must fit within matrix dimensions");
-        blasfeo_dpotrf_l_mn(m, n, sC, ci, cj, sD, di, dj);
+        POTRF_L_MN(m, n, sC, ci, cj, sD, di, dj);
     }
 
-    static inline void blasfeo_drowex_debug(int kmax, double alpha, blasfeo_dmat *sA, int ai,
-                                            int aj, blasfeo_dvec *sx, int xi)
+    static inline void blasfeo_rowex_wrap(int kmax, Scalar alpha, const MAT *sA, int ai, int aj,
+                                          VEC *sx, int xi)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(ai < sA->m && aj + kmax <= sA->n && xi + kmax <= sx->m &&
                           "Indices and kmax must fit within matrix and vector dimensions");
-        blasfeo_drowex(kmax, alpha, sA, ai, aj, sx, xi);
+        ROWEX(kmax, alpha, const_cast<MAT *>(sA), ai, aj, sx, xi);
     }
 
-    static inline void blasfeo_drowin_debug(int kmax, double alpha, blasfeo_dvec *sx, int xi,
-                                            blasfeo_dmat *sA, int ai, int aj)
+    static inline void blasfeo_rowin_wrap(int kmax, Scalar alpha, const VEC *sx, int xi, MAT *sA,
+                                          int ai, int aj)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(xi >= 0 && ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(xi + kmax <= sx->m && ai < sA->m && aj + kmax <= sA->n &&
                           "Indices and kmax must fit within vector and matrix dimensions");
-        blasfeo_drowin(kmax, alpha, sx, xi, sA, ai, aj);
+        ROWIN(kmax, alpha, const_cast<VEC *>(sx), xi, sA, ai, aj);
     }
 
-    static inline void blasfeo_dcolin_debug(int kmax, blasfeo_dvec *sx, int xi, blasfeo_dmat *sA,
-                                            int ai, int aj)
+    static inline void blasfeo_colin_wrap(int kmax, const VEC *sx, int xi, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(xi >= 0 && ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(xi + kmax <= sx->m && ai + kmax <= sA->m && aj < sA->n &&
                           "Indices and kmax must fit within vector and matrix dimensions");
-        blasfeo_dcolin(kmax, sx, xi, sA, ai, aj);
+        COLIN(kmax, const_cast<VEC *>(sx), xi, sA, ai, aj);
     }
 
-    static inline void blasfeo_dtrsv_ltn_debug(int m, blasfeo_dmat *sA, int ai, int aj,
-                                               blasfeo_dvec *sx, int xi, blasfeo_dvec *sz, int zi)
+    static inline void blasfeo_trsv_ltn_wrap(int m, const MAT *sA, int ai, int aj, const VEC *sx,
+                                             int xi, VEC *sz, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Matrix dimension must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && zi >= 0 &&
@@ -301,11 +311,11 @@ namespace fatrop
         fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && xi + m <= sx->m &&
                           zi + m <= sz->m &&
                           "Indices and m must fit within matrix and vector dimensions");
-        blasfeo_dtrsv_ltn(m, sA, ai, aj, sx, xi, sz, zi);
+        TRSV_LTN(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
     }
 
-    static inline void blasfeo_dtrsv_lnn_debug(int m, blasfeo_dmat *sA, int ai, int aj,
-                                               blasfeo_dvec *sx, int xi, blasfeo_dvec *sz, int zi)
+    static inline void blasfeo_trsv_lnn_wrap(int m, const MAT *sA, int ai, int aj, const VEC *sx,
+                                             int xi, VEC *sz, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Matrix dimension must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && zi >= 0 &&
@@ -313,11 +323,11 @@ namespace fatrop
         fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && xi + m <= sx->m &&
                           zi + m <= sz->m &&
                           "Indices and m must fit within matrix and vector dimensions");
-        blasfeo_dtrsv_lnn(m, sA, ai, aj, sx, xi, sz, zi);
+        TRSV_LNN(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
     }
 
-    static inline void blasfeo_dtrsv_utn_debug(int m, blasfeo_dmat *sA, int ai, int aj,
-                                               blasfeo_dvec *sx, int xi, blasfeo_dvec *sz, int zi)
+    static inline void blasfeo_trsv_utn_wrap(int m, const MAT *sA, int ai, int aj, const VEC *sx,
+                                             int xi, VEC *sz, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Matrix dimension must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && zi >= 0 &&
@@ -325,12 +335,12 @@ namespace fatrop
         fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && xi + m <= sx->m &&
                           zi + m <= sz->m &&
                           "Indices and m must fit within matrix and vector dimensions");
-        blasfeo_dtrsv_utn(m, sA, ai, aj, sx, xi, sz, zi);
+        TRSV_UTN(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
     }
 
-    static inline void blasfeo_dgemv_t_debug(int m, int n, double alpha, blasfeo_dmat *sA, int ai,
-                                             int aj, blasfeo_dvec *sx, int xi, double beta,
-                                             blasfeo_dvec *sy, int yi, blasfeo_dvec *sz, int zi)
+    static inline void blasfeo_gemv_t_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai,
+                                           int aj, const VEC *sx, int xi, Scalar beta,
+                                           const VEC *sy, int yi, VEC *sz, int zi)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && yi >= 0 && zi >= 0 &&
@@ -338,12 +348,13 @@ namespace fatrop
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && xi + n <= sx->m &&
                           yi + m <= sy->m && zi + m <= sz->m &&
                           "Indices and dimensions must fit within matrix and vector dimensions");
-        blasfeo_dgemv_t(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi);
+        GEMV_T(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, beta,
+               const_cast<VEC *>(sy), yi, sz, zi);
     }
 
-    static inline void blasfeo_dgemv_n_debug(int m, int n, double alpha, blasfeo_dmat *sA, int ai,
-                                             int aj, blasfeo_dvec *sx, int xi, double beta,
-                                             blasfeo_dvec *sy, int yi, blasfeo_dvec *sz, int zi)
+    static inline void blasfeo_gemv_n_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai,
+                                           int aj, const VEC *sx, int xi, Scalar beta,
+                                           const VEC *sy, int yi, VEC *sz, int zi)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && yi >= 0 && zi >= 0 &&
@@ -351,94 +362,90 @@ namespace fatrop
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && xi + n <= sx->m &&
                           yi + m <= sy->m && zi + m <= sz->m &&
                           "Indices and dimensions must fit within matrix and vector dimensions");
-        blasfeo_dgemv_n(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi);
+        GEMV_N(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, beta,
+               const_cast<VEC *>(sy), yi, sz, zi);
     }
 
-    static inline void blasfeo_pack_dmat_debug(int m, int n, double *A, int lda, blasfeo_dmat *sA,
-                                               int ai, int aj)
+    static inline void blasfeo_pack_mat_wrap(int m, int n, Scalar *A, int lda, MAT *sA, int ai,
+                                             int aj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(lda >= m && "lda must be greater than or equal to m");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n &&
                           "Indices and dimensions must fit within matrix dimensions");
-        blasfeo_pack_dmat(m, n, A, lda, sA, ai, aj);
+        PACK_MAT(m, n, A, lda, sA, ai, aj);
     }
 
-    static inline void blasfeo_unpack_dvec_debug(int m, blasfeo_dvec *sx, int xi, double *x,
-                                                 int incx)
+    static inline void blasfeo_unpack_vec_wrap(int m, const VEC *sx, int xi, Scalar *x, int incx)
     {
         fatrop_dbg_assert(m > 0 && "Vector dimension must be positive");
         fatrop_dbg_assert(xi >= 0 && "Index must be non-negative");
         fatrop_dbg_assert(xi + m <= sx->m &&
                           "Index and dimension must fit within vector dimension");
         fatrop_dbg_assert(incx != 0 && "incx must not be zero");
-        blasfeo_unpack_dvec(m, sx, xi, x, incx);
+        UNPACK_VEC(m, const_cast<VEC *>(sx), xi, x, incx);
     }
 
-    static inline void blasfeo_pack_dvec_debug(int m, double *x, int incx, blasfeo_dvec *sx, int xi)
+    static inline void blasfeo_pack_vec_wrap(int m, Scalar *x, int incx, VEC *sx, int xi)
     {
         fatrop_dbg_assert(m > 0 && "Vector dimension must be positive");
         fatrop_dbg_assert(xi >= 0 && "Index must be non-negative");
         fatrop_dbg_assert(xi + m <= sx->m &&
                           "Index and dimension must fit within vector dimension");
         fatrop_dbg_assert(incx != 0 && "incx must not be zero");
-        blasfeo_pack_dvec(m, x, incx, sx, xi);
+        PACK_VEC(m, x, incx, sx, xi);
     }
 
-    static inline double blasfeo_ddot_debug(int m, blasfeo_dvec *sx, int xi, blasfeo_dvec *sy,
-                                            int yi)
+    static inline Scalar blasfeo_dot_wrap(int m, const VEC *sx, int xi, const VEC *sy, int yi)
     {
         fatrop_dbg_assert(m > 0 && "Vector dimension must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(xi + m <= sx->m && yi + m <= sy->m &&
                           "Indices and dimension must fit within vector dimensions");
-        return blasfeo_ddot(m, sx, xi, sy, yi);
+        return DOT(m, const_cast<VEC *>(sx), xi, const_cast<VEC *>(sy), yi);
     }
 
-    static inline void blasfeo_dgese_debug(int m, int n, double alpha, blasfeo_dmat *sA, int ai,
-                                           int aj)
+    static inline void blasfeo_gese_wrap(int m, int n, Scalar alpha, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n &&
                           "Submatrix must fit within matrix dimensions");
-        blasfeo_dgese(m, n, alpha, sA, ai, aj);
+        GESE(m, n, alpha, sA, ai, aj);
     }
 
-    static inline void blasfeo_ddiare_debug(int kmax, double alpha, blasfeo_dmat *sA, int ai,
-                                            int aj)
+    static inline void blasfeo_diare_wrap(int kmax, Scalar alpha, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(ai + kmax <= sA->m && aj + kmax <= sA->n &&
                           "Submatrix must fit within matrix dimensions");
-        blasfeo_ddiare(kmax, alpha, sA, ai, aj);
+        DIARE(kmax, alpha, sA, ai, aj);
     }
 
-    static inline void blasfeo_dcolsc_debug(int kmax, double alpha, blasfeo_dmat *sA, int ai,
-                                            int aj)
+    static inline void blasfeo_colsc_wrap(int kmax, Scalar alpha, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax > 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && "Indices must be non-negative");
         fatrop_dbg_assert(ai + kmax <= sA->m && aj < sA->n &&
                           "Column must fit within matrix dimensions");
-        blasfeo_dcolsc(kmax, alpha, sA, ai, aj);
+        COLSC(kmax, alpha, sA, ai, aj);
     }
 
-    static inline void blasfeo_dvecmulacc_debug(int m, blasfeo_dvec *sx, int xi, blasfeo_dvec *sy,
-                                                int yi, blasfeo_dvec *sz, int zi)
+    static inline void blasfeo_vecmulacc_wrap(int m, const VEC *sx, int xi, const VEC *sy, int yi,
+                                              VEC *sz, int zi)
     {
         fatrop_dbg_assert(m > 0 && "Vector size must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && zi >= 0 && "Vector indices must be non-negative");
         fatrop_dbg_assert(xi + m <= sx->m && yi + m <= sy->m && zi + m <= sz->m &&
                           "Vector indices plus size must not exceed vector dimensions");
-        blasfeo_dvecmulacc(m, sx, xi, sy, yi, sz, zi);
+        VECMULACC(m, const_cast<VEC *>(sx), xi, const_cast<VEC *>(sy), yi, sz, zi);
     }
 
-    static inline void blasfeo_dger_debug(int m, int n, double alpha, blasfeo_dvec *sx, int xi,
-                                          blasfeo_dvec *sy, int yi, blasfeo_dmat *sC, int ci,
-                                          int cj, blasfeo_dmat *sD, int di, int dj)
+    static inline void blasfeo_ger_wrap(int m, int n, Scalar alpha, const VEC *sx, int xi,
+                                        const VEC *sy, int yi, const MAT *sC, int ci, int cj,
+                                        MAT *sD, int di, int dj)
     {
         fatrop_dbg_assert(m > 0 && n > 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(xi >= 0 && yi >= 0 && ci >= 0 && cj >= 0 && di >= 0 && dj >= 0 &&
@@ -447,7 +454,8 @@ namespace fatrop
                           "Vector indices plus size must not exceed vector dimensions");
         fatrop_dbg_assert(ci + m <= sC->m && cj + n <= sC->n && di + m <= sD->m &&
                           dj + n <= sD->n && "Submatrices must fit within matrix dimensions");
-        blasfeo_dger(m, n, alpha, sx, xi, sy, yi, sC, ci, cj, sD, di, dj);
+        GER(m, n, alpha, const_cast<VEC *>(sx), xi, const_cast<VEC *>(sy), yi,
+            const_cast<MAT *>(sC), ci, cj, sD, di, dj);
     }
 
 }

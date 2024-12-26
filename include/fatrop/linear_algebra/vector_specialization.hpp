@@ -1,7 +1,6 @@
 //
 // Copyright (c) Lander Vanroye, KU Leuven
 //
-
 #ifndef __fatrop_linear_algebra_vector_specialization_hpp__
 #define __fatrop_linear_algebra_vector_specialization_hpp__
 
