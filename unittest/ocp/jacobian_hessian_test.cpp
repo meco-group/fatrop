@@ -141,6 +141,19 @@ protected:
         }
     };
 };
+
+TEST_F(JacobianTestOperations, TestInOut)
+{
+    // put mult as rhs
+    jacobian.set_rhs(info, mult);
+    VecRealAllocated out = VecRealAllocated(info.number_of_eq_constraints);
+    // get mult back from rhs -> out
+    jacobian.get_rhs(info, out);
+    for (Index i = 0; i < info.number_of_eq_constraints; ++i)
+    {
+        EXPECT_NEAR(out(i), mult(i), 1e-10);
+    }
+}
 // check Jacobian if full matrix @ x == jacobian.apply_on_right(x)
 TEST_F(JacobianTestOperations, ApplyOnRightTestt)
 {
@@ -212,6 +225,18 @@ protected:
         }
     };
 };
+TEST_F(HessianTestOperations, TestInOut)
+{
+    // put x as rhs
+    hessian.set_rhs(info, x);
+    VecRealAllocated out = VecRealAllocated(info.number_of_eq_constraints);
+    // get x back from rhs -> out
+    hessian.get_rhs(info, out);
+    for (Index i = 0; i < info.number_of_primal_variables; ++i)
+    {
+        EXPECT_NEAR(out(i), x(i), 1e-10);
+    }
+}
 // check Hessian if full matrix @ x == hessian.apply_on_right(x)
 TEST_F(HessianTestOperations, ApplyOnRightTest)
 {
