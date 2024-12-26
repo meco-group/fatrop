@@ -5,10 +5,11 @@
 #ifndef __fatrop_ocp_jacobian_hpp__
 #define __fatrop_ocp_jacobian_hpp__
 
-#include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/nlp/jacobian.hpp"
-#include "fatrop/ocp/dims.hpp"
-#include "fatrop/ocp/type.hpp"
+#include "fatrop/linear_algebra/fwd.hpp"
+#include "fatrop/ocp/fwd.hpp"
+#include "fatrop/linear_algebra/matrix.hpp"
+#include <vector>
 
 /**
  * @file jacobian.hpp
@@ -16,16 +17,13 @@
  *
  * This file contains the specialization of the Jacobian structure template
  * for Optimal Control Problems (OCPs). It represents the constraint Jacobian
- * of the Karush-Kuhn-Tucker (KKT) system, which is crucial for solving OCPs.
+ * of the Karush-Kuhn-Tucker (KKT) system.
  *
- * Optimal Control Problems involve finding a control strategy that optimizes
- * a performance criterion subject to dynamic constraints and other path constraints.
- * The Jacobian structure defined here is tailored to efficiently handle the
- * specific sparsity patterns and block structures that arise in OCPs.
  */
 
 namespace fatrop
 {
+    typedef ProblemInfo<OcpType> OcpInfo;
     /**
      * @brief Specialization of the Jacobian structure for Optimal Control Problems.
      *
@@ -59,13 +57,13 @@ namespace fatrop
          *   nu[k]: number of control inputs at time step k
          *   nx[k]: number of states at time step k
          *   nx[k+1]: number of states at time step k+1
-         *  jac_dyn[:nu, :] is reserved for control Jacobian blocks, while jac_dyn[nu:nu+nx, :] is
-         * reserved for state Jacobian blocks. jac_dyn[-1, :] is reserved for the right-hand side.
+         *  BAbt[:nu, :] is reserved for control Jacobian blocks, while BAbt[nu:nu+nx, :] is
+         * reserved for state Jacobian blocks. BAbt[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatRealAllocated> jac_dyn;
+        std::vector<MatRealAllocated> BAbt;
 
         /**
-         * @brief Constraint Jacobian of path equality constraints. Similar to jac_dyn, it also has
+         * @brief Constraint Jacobian of path equality constraints. Similar to BAbt, it also has
          * an additional row for the right-hand side.
          *
          * Matrix dimensions: (nu[k] + nx[k]) x ng[k]
@@ -73,13 +71,13 @@ namespace fatrop
          *   nx[k]: number of states at time step k
          *   nu[k]: number of control inputs at time step k
          *   ng[k]: number of equality constraints at time step k
-         *  jac_eq[:nu, :] is reserved for control Jacobian blocks, while jac_eq[nu:nu+nx, :] is
-         * reserved for state Jacobian blocks. jac_eq[-1, :] is reserved for the right-hand side.
+         *  Gg_eqt[:nu, :] is reserved for control Jacobian blocks, while Gg_eqt[nu:nu+nx, :] is
+         * reserved for state Jacobian blocks. Gg_eqt[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatRealAllocated> jac_eq;
+        std::vector<MatRealAllocated> Gg_eqt;
 
         /**
-         * @brief Constraint Jacobian of path inequality constraints. Similar to jac_dyn, it also
+         * @brief Constraint Jacobian of path inequality constraints. Similar to BAbt, it also
          * has an additional row for the right-hand side.
          *
          * Matrix dimensions: (nu[k] + nx[k] + 1) x ng_ineq[k]
@@ -87,10 +85,15 @@ namespace fatrop
          *   nx[k]: number of states at time step k
          *   nu[k]: number of control inputs at time step k
          *   ng_ineq[k]: number of inequality constraints at time step k
-         * jac_ineq[:nu, :] is reserved for control Jacobian blocks, while jac_ineq[nu:nu+nx, :] is
-         * reserved for state Jacobian blocks. jac_ineq[-1, :] is reserved for the right-hand side.
+         * Gg_ineqt[:nu, :] is reserved for control Jacobian blocks, while Gg_ineqt[nu:nu+nx, :] is
+         * reserved for state Jacobian blocks. Gg_ineqt[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatRealAllocated> jac_ineq;
+        std::vector<MatRealAllocated> Gg_ineqt;
+
+        void apply_on_right(const OcpInfo& info, const VecRealView &x, VecRealView &out) const;
+        void transpose_apply_on_right(const OcpInfo& info, const VecRealView &mult_eq, VecRealView &out) const;
+        void get_rhs(const OcpInfo& info, VecRealView &rhs) const;
+        void set_rhs(const OcpInfo& info, const VecRealView &rhs);
     };
 } // namespace fatrop
 

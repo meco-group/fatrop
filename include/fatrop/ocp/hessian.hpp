@@ -5,10 +5,11 @@
 #ifndef __fatrop_ocp_hessian_hpp__
 #define __fatrop_ocp_hessian_hpp__
 
-#include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/nlp/hessian.hpp"
-#include "fatrop/ocp/dims.hpp"
-#include "fatrop/ocp/type.hpp"
+#include "fatrop/linear_algebra/fwd.hpp"
+#include "fatrop/ocp/fwd.hpp"
+#include "fatrop/linear_algebra/matrix.hpp"
+#include <vector>
 
 /**
  * @file hessian.hpp
@@ -16,16 +17,13 @@
  *
  * This file contains the specialization of the hessian structure template
  * for Optimal Control Problems (OCPs). It represents the constraint Hessian
- * of the Karush-Kuhn-Tucker (KKT) system, which is crucial for solving OCPs.
+ * of the Karush-Kuhn-Tucker (KKT) system.
  *
- * Optimal Control Problems involve finding a control strategy that optimizes
- * a performance criterion subject to dynamic constraints and other path constraints.
- * The Hessian structure defined here is tailored to efficiently handle the
- * specific sparsity patterns and block structures that arise in OCPs.
  */
 
 namespace fatrop
 {
+    typedef ProblemInfo<OcpType> OcpInfo;
     /**
      * @brief Specialization of the Hessian structure for Optimal Control Problems.
      *
@@ -59,12 +57,16 @@ namespace fatrop
          *   nu[k]: number of control inputs at time step k
          *   nx[k]: number of states at time step k
          *   nx[k+1]: number of states at time step k+1
-         *   hess[:nu, :nu] is reserved for control-control Hessian blocks,
-         *   hess[nu:nu+nx, nu:nu+nx] is reserved for state-state Hessian blocks,
-         *   hess[:nu, nu:nu+nx] = hess[nu:nu+nx, :nu]^T is reserved for control-state "skew"
-         *   hess[-1, :] is reserved for the right-hand side.
+         *   RSQrqt[:nu, :nu] is reserved for control-control Hessian blocks,
+         *   RSQrqt[nu:nu+nx, nu:nu+nx] is reserved for state-state Hessian blocks,
+         *   RSQrqt[:nu, nu:nu+nx] = RSQrqt[nu:nu+nx, :nu]^T is reserved for control-state "skew"
+         *   RSQrqt[-1, :] is reserved for the right-hand side.
          */
-        std::vector<MatRealAllocated> hess;
+        std::vector<MatRealAllocated> RSQrqt;
+
+        void apply_on_right(const OcpInfo& info, const VecRealView& x, VecRealView& out) const;
+        void get_rhs(const OcpInfo& info, VecRealView& out) const;
+        void set_rhs(const OcpInfo& info, const VecRealView& in);
     };
 } // namespace fatrop
 
