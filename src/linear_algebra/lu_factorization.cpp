@@ -71,7 +71,7 @@ namespace fatrop
         }
         return max_indices;
     }
-    void lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
+    void fatrop_lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
                             PermutationMatrix &Pl, PermutationMatrix &Pr, double tol)
     {
         fatrop_dbg_assert(m >= 0 && "m must be non-negative");
@@ -123,7 +123,7 @@ namespace fatrop
             }
         }
     }
-    void fatrop_dtrsv_unu(const Index m, const Index n, MAT *sA, const Index ai, const Index aj,
+    void fatrop_trsv_unu(const Index m, const Index n, MAT *sA, const Index ai, const Index aj,
                           VEC *sx, const Index xi, VEC *sz, const Index zi)
     {
         fatrop_dbg_assert(m >= 0 && "m must be non-negative");
@@ -146,7 +146,7 @@ namespace fatrop
         }
     }
 
-    void fatrop_dtrsv_utu(const Index m, MAT *sA, const Index ai, const Index aj, VEC *sx,
+    void fatrop_trsv_utu(const Index m, MAT *sA, const Index ai, const Index aj, VEC *sx,
                           const Index xi, VEC *sz, const Index zi)
     {
         fatrop_dbg_assert(m >= 0 && "m must be non-negative");

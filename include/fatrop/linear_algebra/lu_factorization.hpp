@@ -96,7 +96,7 @@ namespace fatrop
      *
      * @note Ensure \( At \), \( Pl_p \), and \( Pr_p \) are allocated before use.
      */
-    void lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
+    void fatrop_lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
                             PermutationMatrix &Pl, PermutationMatrix &Pr, double tol = 1e-5);
 
     /**
@@ -121,7 +121,7 @@ namespace fatrop
      * diagonal).
      *
      */
-    void fatrop_dtrsv_unu(const Index m, const Index n, MAT *sA, const Index ai,
+    void fatrop_trsv_unu(const Index m, const Index n, MAT *sA, const Index ai,
                           const Index aj, VEC *sx, const Index xi, VEC *sz,
                           const Index zi);
 
@@ -130,7 +130,7 @@ namespace fatrop
      * diagonal).
      *
      */
-    void fatrop_dtrsv_utu(const Index m, MAT *sA, const Index ai, const Index aj,
+    void fatrop_trsv_utu(const Index m, MAT *sA, const Index ai, const Index aj,
                           VEC *sx, const Index xi, VEC *sz, const Index zi);
 
 } // namespace fatrop

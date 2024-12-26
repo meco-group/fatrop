@@ -11,12 +11,12 @@
 
 #include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
+#include "fatrop/linear_algebra/lu_factorization.hpp"
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 
 namespace fatrop
 {
-
 
     static inline void axpby(int m, Scalar alpha, const VecRealView &x, int xi, Scalar beta,
                              const VecRealView &y, int yi, VecRealView &z, int zi)
@@ -129,7 +129,7 @@ namespace fatrop
         blasfeo_trsm_rltn_wrap(m, n, alpha, &A.mat(), A.ai() + ai, A.aj() + aj, &B.mat(),
                                B.ai() + bi, B.aj() + bj, &D.mat(), D.ai() + di, D.aj() + dj);
     }
-    
+
     static inline void trsm_rlnn(int m, int n, Scalar alpha, const MatRealView &A, int ai, int aj,
                                  const MatRealView &B, int bi, int bj, MatRealView &D, int di,
                                  int dj)
@@ -289,6 +289,37 @@ namespace fatrop
     {
         blasfeo_ger_wrap(m, n, alpha, &sx.vec(), sx.ai() + xi, &sy.vec(), sy.ai() + yi, &sC.mat(),
                          sC.ai() + ci, sC.aj() + cj, &sD.mat(), sD.ai() + di, sD.aj() + dj);
+    }
+
+    static inline void gead_transposed(int m, int n, Scalar alpha, const MatRealView &A, int ai,
+                                       int aj, MatRealView &B, int bi, int bj)
+    {
+        fatrop_gead_transposed(m, n, alpha, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
+                               &B.mat(), B.ai() + bi, B.aj() + bj);
+    }
+
+    static inline void trsv_unu(int m, int n, const MatRealView &A, int ai, int aj,
+                                 const VecRealView &x, int xi, VecRealView &z, int zi)
+    {
+        fatrop_trsv_unu(m, n, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
+                         const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
+    }
+
+    static inline void trsv_utu(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
+                                 int xi, VecRealView &z, int zi)
+    {
+        fatrop_trsv_utu(m, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
+                         const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
+    }
+
+    // void fatrop_lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank,
+    // MAT *At, PermutationMatrix &Pl, PermutationMatrix &Pr, double tol = 1e-5);
+
+    static inline void lu_fact_transposed(const Index m, const Index n, const Index n_max,
+                                          Index &rank, const MatRealView &At, PermutationMatrix &Pl,
+                                          PermutationMatrix &Pr, double tol = 1e-5)
+    {
+        fatrop_lu_fact_transposed(m, n, n_max, rank, const_cast<MAT *>(&At.mat()), Pl, Pr, tol);
     }
 }
 

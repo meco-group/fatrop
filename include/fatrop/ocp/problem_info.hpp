@@ -113,6 +113,8 @@ namespace fatrop
          * and L<=s<=U.
          */
         std::vector<Index> offsets_g_eq_slack;
+
+        std::vector<Index> number_of_stage_variables;
     };
 } // namespace fatrop
 

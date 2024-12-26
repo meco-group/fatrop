@@ -194,7 +194,7 @@ namespace fatrop::test
         }
 
         // Compute LU factorization
-        lu_fact_transposed(m, n, n_max, rank, &At.mat(), Pl, Pr);
+        fatrop_lu_fact_transposed(m, n, n_max, rank, &At.mat(), Pl, Pr);
 
         // Extract L and U from At
         MatRealAllocated L(m, m);
@@ -272,7 +272,7 @@ namespace fatrop::test
             for (Index j = 0; j < n; ++j)
                 B(i, j) = i * n + j + 1;
 
-        // Call gead_transposed
+        // Call fatrop_gead_transposed
         fatrop_gead_transposed(m, n, alpha, &A.mat(), 0, 0, &B.mat(), 0, 0);
 
         // Check results
@@ -286,7 +286,7 @@ namespace fatrop::test
         }
     }
 
-    TEST(LinearAlgebraTest, fatrop_dtrsv_unu)
+    TEST(LinearAlgebraTest, fatrop_trsv_unu)
     {
         const Index m = 3;
         MatRealAllocated A(m, m);
@@ -308,7 +308,7 @@ namespace fatrop::test
 
 
         // Call dtrsv_unu
-        fatrop_dtrsv_unu(m, m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
+        fatrop_trsv_unu(m, m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
 
         // Check if Ax = b
         VecRealAllocated Ax(m);
@@ -322,7 +322,7 @@ namespace fatrop::test
             EXPECT_NEAR(b(i), Ax(i), 1e-10);
     }
 
-    TEST(LinearAlgebraTest, fatrop_dtrsv_utu)
+    TEST(LinearAlgebraTest, fatrop_trsv_utu)
     {
         const Index m = 3;
         MatRealAllocated A(m, m);
@@ -349,7 +349,7 @@ namespace fatrop::test
 
 
         // Call dtrsv_utu
-        fatrop_dtrsv_utu(m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
+        fatrop_trsv_utu(m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
 
         // Check if A^T x = b
         VecRealAllocated Ax(m);
