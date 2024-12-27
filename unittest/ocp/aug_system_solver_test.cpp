@@ -132,8 +132,8 @@ protected:
         {
             rhs_g(i) = 1.0 * i;
         }
-        hessian.set_rhs(info, rhs_x);
-        jacobian.set_rhs(info, rhs_g);
+        // hessian.set_rhs(info, rhs_x);
+        // jacobian.set_rhs(info, rhs_g);
     };
 };
 

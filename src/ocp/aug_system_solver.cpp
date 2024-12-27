@@ -156,6 +156,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
             // AL[-1,:] <- AL[-1,:] + p_kp1^T
             gead(1, nxp1, 1.0, Ppt[k + 1], nxp1, 0, AL[0], nx + nu, 0);
             // RSQrqt_stripe <- AL[BA] + RSQrqt
+            rowin(nu + nx, 1.0, f, offset_u, hessian.RSQrqt[k], nu + nx, 0);
             syrk_ln_mn(nu + nx + 1, nu + nx, nxp1, 1.0, AL[0], 0, 0, jacobian.BAbt[k], 0, 0, 1.0,
                        hessian.RSQrqt[k], 0, 0, RSQrqt_tilde[k], 0, 0);
             //// inequalities
