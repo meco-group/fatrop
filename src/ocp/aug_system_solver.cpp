@@ -607,7 +607,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
         }
         else
         {
-            trsv_lnn(nx, LlIt[0], 0, 0, v_LlIt[0], 0, v_LlIt[0], 0);
+            trsv_lnn(nx, LlIt[0], 0, 0, v_Ppt[0], 0, v_LlIt[0], 0);
         }
     }
     {
