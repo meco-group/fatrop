@@ -18,6 +18,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <cstring>
 
 namespace fatrop
 {
@@ -414,7 +415,7 @@ namespace fatrop
          * @param j Column index of the element.
          * @return const Scalar& Const reference to the value at position (i, j).
          */
-        inline const Scalar &operator()(const Index i, const Index j) const;
+        inline Scalar operator()(const Index i, const Index j) const;
 
         /**
          * @brief Destructor that frees the allocated matrix memory.
@@ -478,7 +479,8 @@ namespace fatrop
         : MatRealView(*this, m, n, 0, 0), mat_()
     {
         ALLOCATE_MAT(m, n, &mat_);
-        GESE(m, n, 0.0, &mat_, 0, 0);
+        // zero out
+        std::memset(mat_.mem, 0, mat_.memsize*sizeof(char));
     }
 
     MatRealAllocated::MatRealAllocated(MatRealAllocated &&other)
@@ -494,13 +496,13 @@ namespace fatrop
         return blasfeo_matel_wrap(&mat_, i, j);
     }
 
-    const Scalar &MatRealAllocated::operator()(const Index i, const Index j) const
+    Scalar MatRealAllocated::operator()(const Index i, const Index j) const
     {
         fatrop_dbg_assert(i >= 0 && i < m() && j >= 0 && j < n());
         return blasfeo_matel_wrap(&mat_, i, j);
     }
 
-    MatRealAllocated::~MatRealAllocated() { FREE_MAT(&mat()); }
+    MatRealAllocated::~MatRealAllocated() { if(mat_.mem != nullptr) FREE_MAT(&mat()); }
 
 } // namespace fatrop
 

@@ -21,7 +21,7 @@ namespace fatrop
 {
     static inline Scalar& blasfeo_matel_wrap(MAT* A, const int ai, const int aj)
     {
-        fatrop_dbg_assert(ai < A->m && aj <= A->n);
+        fatrop_dbg_assert(ai < A->m && aj < A->n);
         return MATEL(A, ai, aj);
     }
     static inline Scalar& blasfeo_vecel_wrap(VEC* A, const int ai)
@@ -30,12 +30,12 @@ namespace fatrop
         return VECEL(A, ai);
     }
 
-    static inline const Scalar& blasfeo_matel_wrap(const MAT* A, const int ai, const int aj)
+    static inline Scalar blasfeo_matel_wrap(const MAT* A, const int ai, const int aj)
     {
-        fatrop_dbg_assert(ai < A->m && aj <= A->n);
+        fatrop_dbg_assert(ai < A->m && aj < A->n);
         return MATEL(A, ai, aj);
     }
-    static inline const Scalar& blasfeo_vecel_wrap(const VEC* A, const int ai)
+    static inline Scalar blasfeo_vecel_wrap(const VEC* A, const int ai)
     {
         fatrop_dbg_assert(ai < A->m);
         return VECEL(A, ai);
@@ -380,7 +380,7 @@ namespace fatrop
         fatrop_dbg_assert(m >= 0 && n >= 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && yi >= 0 && zi >= 0 &&
                           "Indices must be non-negative");
-        fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && xi + n <= sx->m &&
+        fatrop_dbg_assert(ai + m <= sA->m && aj + n <= sA->n && xi + m <= sx->m &&
                           yi + n <= sy->m && zi + n <= sz->m &&
                           "Indices and dimensions must fit within matrix and vector dimensions");
         GEMV_T(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, beta,

@@ -10,12 +10,13 @@
  * computations using BLASFEO
  */
 
-#include <cmath>
-#include <iomanip>
+#include "fatrop/common/exception.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
-#include "fatrop/common/exception.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
+#include <cmath>
+#include <iomanip>
+#include <cstring>
 
 namespace fatrop
 {
@@ -95,7 +96,8 @@ namespace fatrop
             return std::sqrt(ret);
         }
 
-        template <typename Dep2> friend Scalar dot(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        template <typename Dep2>
+        friend Scalar dot(const VecReal<Derived> &a, const VecReal<Dep2> &b)
         {
             Scalar ret = 0;
             for (Index i = 0; i < a.m(); i++)
@@ -116,20 +118,22 @@ namespace fatrop
         friend VecRealCos<Derived> cos(const VecReal<Derived> &a) { return VecRealCos<Derived>(a); }
 
         template <typename IfElseOp, typename Dep2>
-        friend VecRealIfElse<IfElseOp, Derived, Dep2> if_else(const IfElseOp &if_else_op,
-                                                          const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        friend VecRealIfElse<IfElseOp, Derived, Dep2>
+        if_else(const IfElseOp &if_else_op, const VecReal<Derived> &a, const VecReal<Dep2> &b)
         {
             return VecRealIfElse<IfElseOp, Derived, Dep2>(if_else_op, a, b);
         }
         // Operator overloading functions of Expressions
         template <typename Dep2>
-        friend VecRealPlusVecReal<Derived, Dep2> operator+(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        friend VecRealPlusVecReal<Derived, Dep2> operator+(const VecReal<Derived> &a,
+                                                           const VecReal<Dep2> &b)
         {
             return VecRealPlusVecReal<Derived, Dep2>(a, b);
         }
 
         template <typename Dep2>
-        friend VecRealMinusVecReal<Derived, Dep2> operator-(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        friend VecRealMinusVecReal<Derived, Dep2> operator-(const VecReal<Derived> &a,
+                                                            const VecReal<Dep2> &b)
         {
             return VecRealMinusVecReal<Derived, Dep2>(a, b);
         }
@@ -147,13 +151,15 @@ namespace fatrop
         friend VecRealTimesScalar<Derived> operator-(VecReal<Derived> &a) { return -1. * a; }
 
         template <typename Dep2>
-        friend VecRealTimesVecReal<Derived, Dep2> operator*(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        friend VecRealTimesVecReal<Derived, Dep2> operator*(const VecReal<Derived> &a,
+                                                            const VecReal<Dep2> &b)
         {
             return VecRealTimesVecReal<Derived, Dep2>(a, b);
         }
 
         template <typename Dep2>
-        friend VecRealDivVecReal<Derived, Dep2> operator/(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        friend VecRealDivVecReal<Derived, Dep2> operator/(const VecReal<Derived> &a,
+                                                          const VecReal<Dep2> &b)
         {
             return VecRealDivVecReal<Derived, Dep2>(a, b);
         }
@@ -190,7 +196,8 @@ namespace fatrop
     template <typename Dep1> class VecRealBlock : public VecReal<VecRealBlock<Dep1>>
     {
     public:
-        VecRealBlock(const VecReal<Dep1> &a, const Index m, const Index ai) : a(a), m_(m), ai_(ai) {};
+        VecRealBlock(const VecReal<Dep1> &a, const Index m, const Index ai)
+            : a(a), m_(m), ai_(ai) {};
         Scalar operator()(const Index i) const { return a(ai_ + i); }
         Index m() const { return m_; }
 
@@ -239,7 +246,8 @@ namespace fatrop
     /**
      * @brief Represents element-wise addition of two vectors.
      */
-    template <typename Dep1, typename Dep2> class VecRealPlusVecReal : public VecReal<VecRealPlusVecReal<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2>
+    class VecRealPlusVecReal : public VecReal<VecRealPlusVecReal<Dep1, Dep2>>
     {
     public:
         VecRealPlusVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a), b(b)
@@ -257,7 +265,8 @@ namespace fatrop
     /**
      * @brief Represents element-wise subtraction of two vectors.
      */
-    template <typename Dep1, typename Dep2> class VecRealMinusVecReal : public VecReal<VecRealMinusVecReal<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2>
+    class VecRealMinusVecReal : public VecReal<VecRealMinusVecReal<Dep1, Dep2>>
     {
     public:
         VecRealMinusVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a), b(b)
@@ -290,7 +299,8 @@ namespace fatrop
     /**
      * @brief Represents element-wise multiplication of two vectors.
      */
-    template <typename Dep1, typename Dep2> class VecRealTimesVecReal : public VecReal<VecRealTimesVecReal<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2>
+    class VecRealTimesVecReal : public VecReal<VecRealTimesVecReal<Dep1, Dep2>>
     {
     public:
         VecRealTimesVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a), b(b)
@@ -309,7 +319,8 @@ namespace fatrop
     /**
      * @brief Represents element-wise division of two vectors.
      */
-    template <typename Dep1, typename Dep2> class VecRealDivVecReal : public VecReal<VecRealDivVecReal<Dep1, Dep2>>
+    template <typename Dep1, typename Dep2>
+    class VecRealDivVecReal : public VecReal<VecRealDivVecReal<Dep1, Dep2>>
     {
     public:
         VecRealDivVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a), b(b)
@@ -476,7 +487,11 @@ namespace fatrop
         /**
          * @brief Constructs a VecRealAllocated object with the given size.
          */
-        VecRealAllocated(const Index m) : VecRealView(*this, m, 0), m_(m) { ALLOCATE_VEC(m, &vec_); VECSE(m, 0., &vec_, 0); }
+        VecRealAllocated(const Index m) : VecRealView(*this, m, 0), m_(m)
+        {
+            ALLOCATE_VEC(m, &vec_);
+            std::memset(vec_.mem, 0, vec_.memsize * sizeof(char));
+        }
         VecRealAllocated(VecRealAllocated & /*other*/) = delete;
         /**
          * @brief Move constructor for VecRealAllocated.
@@ -503,7 +518,7 @@ namespace fatrop
         /**
          * @brief Accessor for const elements of the vector.
          */
-        const Scalar &operator()(const Index i) const
+        Scalar operator()(const Index i) const
         {
             fatrop_dbg_assert(i >= 0 && i < m_);
             VEC veccp = vec();
@@ -512,7 +527,7 @@ namespace fatrop
         /**
          * @brief Destructor that frees the allocated vector memory.
          */
-        ~VecRealAllocated() { FREE_VEC(&vec()); }
+        ~VecRealAllocated() { if(vec_.mem != nullptr) FREE_VEC(&vec()); }
 
     private:
         VEC vec_;
@@ -523,7 +538,8 @@ namespace fatrop
     VecRealView::VecRealView(VecRealAllocated &vec, const Index m, const Index ai)
         : vec_(vec), m_(m), ai_(ai) {};
     VecRealView ::VecRealView(VecRealAllocated &vec) : vec_(vec), m_(vec.m()), ai_(0) {};
-    template <typename Derived> inline VecRealView &VecRealView::operator=(const VecReal<Derived> &vec_in)
+    template <typename Derived>
+    inline VecRealView &VecRealView::operator=(const VecReal<Derived> &vec_in)
     {
         fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
         for (Index i = 0; i < m(); i++)
