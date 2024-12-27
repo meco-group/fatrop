@@ -204,10 +204,12 @@ namespace fatrop
                                               int aj, const MAT *sB, int bi, int bj, MAT *sD,
                                               int di, int dj)
     {
+        // D <= alpha * B * A^{-T} , with A lower triangular employing explicit inverse of diagonal
+        // B and D mxn, A nxn
         fatrop_dbg_assert(m >= 0 && n >= 0 && "Matrix dimensions must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && di >= 0 && dj >= 0 &&
                           "Indices must be non-negative");
-        fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && bi + m <= sB->m &&
+        fatrop_dbg_assert(ai + n <= sA->m && aj + n <= sA->n && bi + m <= sB->m &&
                           bj + n <= sB->n && di + m <= sD->m && dj + n <= sD->n &&
                           "Submatrices must fit within matrix dimensions");
         TRSM_RLTN(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, sD, di,

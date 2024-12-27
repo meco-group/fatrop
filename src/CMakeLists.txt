@@ -2,6 +2,7 @@
 set(FATROP_SOURCES
     linear_algebra/lu_factorization.cpp
     linear_algebra/vector.cpp
+    ocp/aug_system_solver.cpp
     ocp/dims.cpp
     ocp/jacobian.cpp
     ocp/hessian.cpp

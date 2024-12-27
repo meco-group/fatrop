@@ -6,6 +6,7 @@ OcpDims::OcpDims(int K, const std::vector<Index> &nu, const std::vector<Index> &
     : K(K), number_of_controls(nu), number_of_states(nx), number_of_eq_constraints(ng),
       number_of_ineq_constraints(ng_ineq)
 {
+  check_problem_dimensions();
 }
 
 OcpDims::OcpDims(int K, std::vector<Index> &&nu, std::vector<Index> &&nx, std::vector<Index> &&ng,
@@ -13,6 +14,7 @@ OcpDims::OcpDims(int K, std::vector<Index> &&nu, std::vector<Index> &&nx, std::v
     : K(K), number_of_controls(std::move(nu)), number_of_states(std::move(nx)),
       number_of_eq_constraints(std::move(ng)), number_of_ineq_constraints(std::move(ng_ineq))
 {
+  check_problem_dimensions();
 }
 void OcpDims::check_problem_dimensions() const {
     // check if the number of controls, states, and constraints are of the correct size
@@ -26,7 +28,7 @@ void OcpDims::check_problem_dimensions() const {
         fatrop_assert_msg(number_of_states[i] >= 0, "The number of states must be non-negative.");
         fatrop_assert_msg(number_of_eq_constraints[i] >= 0, "The number of equality constraints must be non-negative.");
         fatrop_assert_msg(number_of_ineq_constraints[i] >= 0, "The number of inequality constraints must be non-negative.");
-        fatrop_assert_msg(number_of_eq_constraints[i] + number_of_ineq_constraints[i] <= number_of_states[i] + number_of_controls[i],
-                          "The number of constraints exceeds the number of variables.");
+        fatrop_assert_msg(number_of_eq_constraints[i] <= number_of_states[i] + number_of_controls[i],
+                          "The number of eq constraints exceeds the number of variables.");
     }
 }

@@ -37,12 +37,12 @@ ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims)
                                                dims.number_of_eq_constraints.end(), 0)  + std::accumulate(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(), 0);
     // set up the offsets for the primal variables
     // the number of variables per stage is the sum of the number of states and controls
-    std::vector<Index> number_of_variables_per_stage(dims.K);
+    number_of_stage_variables.resize(dims.K);
     std::transform(dims.number_of_states.begin(), dims.number_of_states.end(),
-                   dims.number_of_controls.begin(), number_of_variables_per_stage.begin(),
+                   dims.number_of_controls.begin(), number_of_stage_variables.begin(),
                    std::plus<Index>());
     offset_primal = 0;
-    compute_offsets(number_of_variables_per_stage.begin(), number_of_variables_per_stage.end(),
+    compute_offsets(number_of_stage_variables.begin(), number_of_stage_variables.end(),
                     offset_primal, offsets_primal_u.begin());
     // the offsets for the states for a stage is the sum of the offsets for the control + the number
     // of controls
