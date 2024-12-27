@@ -143,7 +143,7 @@ TEST_F(AugSystemSolverTest, TestSolve)
     D_s = 10.;
     VecRealAllocated rhs_s(info.number_of_slack_variables);
     rhs_s = rhs_g.block(info.number_of_slack_variables, info.offset_g_eq_slack);
-    Index ret = solver.solve(info, jacobian, hessian, D_s, rhs_s, x, mult);
+    Index ret = solver.solve(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_TRUE(ret == LinsolReturnFlag::SUCCESS);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
     jacobian.apply_on_right(info, x, jac_x);
@@ -175,9 +175,9 @@ TEST_F(AugSystemSolverTest, TestSolveRhs)
     D_s = 10.;
     VecRealAllocated rhs_s(info.number_of_slack_variables);
     rhs_s = rhs_g.block(info.number_of_slack_variables, info.offset_g_eq_slack);
-    Index ret = solver.solve(info, jacobian, hessian, D_s, rhs_s, x, mult);
+    Index ret = solver.solve(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_TRUE(ret == LinsolReturnFlag::SUCCESS);
-    solver.solve_rhs(info, jacobian, hessian, D_s, rhs_x, rhs_g, rhs_s, x, mult);
+    solver.solve_rhs(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
     jacobian.apply_on_right(info, x, jac_x);
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);

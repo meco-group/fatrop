@@ -112,9 +112,9 @@ OcpAugSystemSolver::OcpAugSystemSolver(const ProblemInfo<OcpType> &info)
 };
 
 LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
-                                           const Jacobian<OcpType> &jacobian,
-                                           const Hessian<OcpType> &hessian, const VecRealView &D_s,
-                                           const VecRealView &rhs_s, VecRealView &x,
+                                           Jacobian<OcpType> &jacobian, Hessian<OcpType> &hessian,
+                                           const VecRealView &D_s, const VecRealView &f,
+                                           const VecRealView &g, VecRealView &x,
                                            VecRealView &eq_mult)
 {
     MatRealView *RSQrq_hat_curr_p;
@@ -126,14 +126,20 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
         const Index nx = info.dims.number_of_states[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
-        const Index offs_ineq_k = info.offsets_slack[k];
+        const Index offset_ineq_k = info.offsets_slack[k];
+        const Index offset_u = info.offsets_primal_u[k];
+        const Index offset_eq_dyn = info.offsets_g_eq_dyn[k];
+        const Index offset_eq_path = info.offsets_g_eq_path[k];
+        const Index offset_eq_slack = info.offsets_g_eq_slack[k];
         //////// SUBSDYN
         Index gamma_k;
         if (k == info.dims.K - 1)
         {
             gamma_k = ng;
             gamma[k] = gamma_k;
+            rowin(ng, 1.0, g, offset_eq_path, jacobian.Gg_eqt[k], nu + nx, 0);
             gecp(nx + nu + 1, ng, jacobian.Gg_eqt[k], 0, 0, Ggt_stripe[0], 0, 0);
+            rowin(nu + nx, 1.0, f, offset_u, hessian.RSQrqt[k], nu + nx, 0);
             gecp(nx + nu + 1, nu + nx, hessian.RSQrqt[k], 0, 0, RSQrqt_tilde[k], 0, 0);
         }
         else
@@ -144,6 +150,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
                 return LinsolReturnFlag::NOFULL_RANK;
             gamma_k = Hp1_size + ng;
             // AL <- [BAb]^T_k P_kp1
+            rowin(nxp1, 1.0, g, offset_eq_dyn, jacobian.BAbt[k], nu + nx, 0);
             gemm_nt(nu + nx + 1, nxp1, nxp1, 1.0, jacobian.BAbt[k], 0, 0, Ppt[k + 1], 0, 0, 0.0,
                     AL[0], 0, 0, AL[0], 0, 0);
             // AL[-1,:] <- AL[-1,:] + p_kp1^T
@@ -160,6 +167,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
                 if (ng > 0)
                 {
                     // Ggt_stripe  <- Ggt_k
+                    rowin(ng, 1.0, g, offset_eq_path, jacobian.Gg_eqt[k], nu + nx, 0);
                     gecp(nu + nx + 1, ng, jacobian.Gg_eqt[k], 0, 0, Ggt_stripe[0], 0, 0);
                 }
                 // if Hkp1 nonempty
@@ -184,11 +192,12 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
         {
             if (ng_ineq > 0)
             {
+                rowin(ng_ineq, 1.0, g, offset_eq_slack, jacobian.Gg_ineqt[k], nu + nx, 0);
                 gecp(nu + nx, ng_ineq, jacobian.Gg_ineqt[k], 0, 0, Ggt_ineq_temp[0], 0, 0);
                 for (Index i = 0; i < ng_ineq; i++)
                 {
-                    Scalar scaling_factor = 1.0 / D_s(offs_ineq_k + i);
-                    Scalar grad_barrier = rhs_s(offs_ineq_k + i);
+                    Scalar scaling_factor = 1.0 / D_s(offset_ineq_k + i);
+                    Scalar grad_barrier = g(offset_eq_slack + i);
                     colsc(nu + nx, scaling_factor, Ggt_ineq_temp[0], 0, i);
                     Ggt_ineq_temp[0](nu + nx, i) = scaling_factor * grad_barrier;
                 }
@@ -425,8 +434,8 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
         }
         if (ng_ineq > 0)
         {
-            gemv_t(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, x, offs, 1.0, rhs_s,
-                   offs_slack, eq_mult, offs_eq_ineq);
+            gemv_t(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, x, offs, 1.0, g,
+                   offs_eq_ineq, eq_mult, offs_eq_ineq);
             eq_mult.block(ng_ineq, offs_eq_ineq) =
                 eq_mult.block(ng_ineq, offs_eq_ineq) / D_s.block(ng_ineq, offs_slack);
         }
@@ -456,9 +465,9 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
 LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
                                                const Jacobian<OcpType> &jacobian,
                                                const Hessian<OcpType> &hessian,
-                                               const VecRealView &D_s, const VecRealView &rhs_x,
-                                               const VecRealView &rhs_eq, const VecRealView &rhs_s,
-                                               VecRealView &x, VecRealView &eq_mult)
+                                               const VecRealView &D_s, const VecRealView &f,
+                                               const VecRealView &g, VecRealView &x,
+                                               VecRealView &eq_mult)
 {
     VecRealView *v_RSQrq_hat_curr_p;
     Index rank_k;
@@ -470,7 +479,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
         const Index nx = info.dims.number_of_states[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
-        const Index offs_ineq_k = info.offsets_slack[k];
+        const Index offset_ineq_k = info.offsets_slack[k];
         const Index offs_g_ineq_k = info.offsets_g_eq_slack[k];
         const Index offs_dyn_k = info.offsets_g_eq_dyn[k];
         const Index offs_g_k = info.offsets_g_eq_path[k];
@@ -481,28 +490,28 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
         {
             gamma_k = ng;
             gamma[k] = gamma_k;
-            veccp(ng, rhs_eq, offs_g_k, v_Ggt_stripe[0], 0);
-            veccp(nu + nx, rhs_x, offs, v_RSQrqt_tilde[k], 0);
+            veccp(ng, g, offs_g_k, v_Ggt_stripe[0], 0);
+            veccp(nu + nx, f, offs, v_RSQrqt_tilde[k], 0);
         }
         else
         {
             const Index nxp1 = info.dims.number_of_states[k + 1];
             const Index Hp1_size = gamma[k + 1] - rho[k + 1];
             gamma_k = Hp1_size + ng;
-            gemv_n(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, rhs_eq, offs_dyn_k, 0.0, v_AL[0], 0, v_AL[0],
+            gemv_n(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, g, offs_dyn_k, 0.0, v_AL[0], 0, v_AL[0],
                    0);
             axpy(nxp1, 1.0, v_Ppt[k + 1], 0, v_AL[0], 0, v_AL[0], 0);
-            gemv_n(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, v_AL[0], 0, 1.0, rhs_x, offs,
+            gemv_n(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, v_AL[0], 0, 1.0, f, offs,
                    v_RSQrqt_tilde[k], 0);
             if (gamma_k > 0)
             {
                 if (ng > 0)
                 {
-                    veccp(ng, rhs_eq, offs_g_k, v_Ggt_stripe[0], 0);
+                    veccp(ng, g, offs_g_k, v_Ggt_stripe[0], 0);
                 }
                 if (Hp1_size > 0)
                 {
-                    gemv_n(Hp1_size, nxp1, 1.0, Hh[k + 1], 0, 0, rhs_eq, offs_dyn_k, 0.0,
+                    gemv_n(Hp1_size, nxp1, 1.0, Hh[k + 1], 0, 0, g, offs_dyn_k, 0.0,
                            v_Ggt_stripe[0], ng, v_Ggt_stripe[0], ng);
                     axpy(Hp1_size, 1.0, v_Hh[k + 1], 0, v_Ggt_stripe[0], ng, v_Ggt_stripe[0], ng);
                 }
@@ -517,8 +526,8 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
         {
             for (Index i = 0; i < ng_ineq; i++)
             {
-                Scalar scaling_factor = D_s(offs_ineq_k + i);
-                Scalar grad_barrier = rhs_s(offs_ineq_k + i);
+                Scalar scaling_factor = D_s(offset_ineq_k + i);
+                Scalar grad_barrier = g(offs_g_ineq_k + i);
                 v_Ggt_ineq_temp[0](i) = grad_barrier / scaling_factor;
             }
             gemv_n(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, v_Ggt_ineq_temp[0], 0, 1.0,
@@ -665,8 +674,8 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
         }
         if (ng_ineq > 0)
         {
-            gemv_t(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, x, offs, 1.0, rhs_s,
-                   offs_slack, eq_mult, offs_eq_ineq);
+            gemv_t(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, x, offs, 1.0, g,
+                   offs_eq_ineq, eq_mult, offs_eq_ineq);
             eq_mult.block(ng_ineq, offs_eq_ineq) =
                 eq_mult.block(ng_ineq, offs_eq_ineq) / D_s.block(ng_ineq, offs_slack);
         }
@@ -679,7 +688,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
             const Index offs_g_kp1 = info.offsets_g_eq_path[k + 1];
             const Index offs_dyn_k = info.offsets_g_eq_dyn[k];
             const Index gammamrho_kp1 = gamma[k + 1] - rho[k + 1];
-            veccp(nxp1, rhs_eq, offs_dyn_k, x, offsxp1);
+            veccp(nxp1, g, offs_dyn_k, x, offsxp1);
             gemv_t(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, x, offs, 1.0, x, offsxp1, x,
                    offsxp1);
             veccp(nxp1, v_Ppt[k + 1], 0, eq_mult, offs_dyn_k);

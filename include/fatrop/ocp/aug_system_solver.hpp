@@ -65,14 +65,14 @@ namespace fatrop
     {
     public:
         OcpAugSystemSolver(const ProblemInfo<OcpType> &info);
-        LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, const Jacobian<OcpType> &jacobian,
-                               const Hessian<OcpType> &hessian, const VecRealView &D_s,
-                               const VecRealView &rhs_s, VecRealView &x, VecRealView &eq_mult);
-        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
-                                   const Jacobian<OcpType> &jacobian,
+        LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
+                               Hessian<OcpType> &hessian, const VecRealView &D_s,
+                               const VecRealView &f, const VecRealView &g, VecRealView &x,
+                               VecRealView &eq_mult);
+        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info, const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_s,
-                                   const VecRealView &rhs_x, const VecRealView &rhs_eq,
-                                   const VecRealView &rhs_s, VecRealView &x, VecRealView &eq_mult);
+                                   const VecRealView &f, const VecRealView &g, VecRealView &x,
+                                   VecRealView &eq_mult);
 
     private:
         // temporaries, pre-allocated during construction to avoid allocation during
