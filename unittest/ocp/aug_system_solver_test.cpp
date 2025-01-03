@@ -18,9 +18,9 @@ class AugSystemSolverTest : public ::testing::Test
 {
 protected:
     // Create OcpDims object
-    int K = 5;                                    // Number of stages
+    int K = 5;                                     // Number of stages
     std::vector<Index> nx = {20, 2, 2, 4, 2};      // State dimensions for each stage
-    std::vector<Index> nu = {1, 4, 4, 10, 0};     // Input dimensions for each stage
+    std::vector<Index> nu = {1, 4, 4, 10, 0};      // Input dimensions for each stage
     std::vector<Index> ng = {5, 0, 6, 10, 0};      // Equality constraints for each stage
     std::vector<Index> ng_ineq = {0, 5, 10, 0, 0}; // Inequality constraints for each stage
 
@@ -38,6 +38,8 @@ protected:
     VecRealAllocated mult = VecRealAllocated(info.number_of_eq_constraints);
     VecRealAllocated rhs_x = VecRealAllocated(info.number_of_primal_variables);
     VecRealAllocated rhs_g = VecRealAllocated(info.number_of_eq_constraints);
+    VecRealAllocated D_x = VecRealAllocated(info.number_of_primal_variables);
+    VecRealAllocated D_s = VecRealAllocated(info.number_of_slack_variables);
     MatRealAllocated full_kkt_matrix =
         MatRealAllocated(info.number_of_primal_variables + info.number_of_eq_constraints,
                          info.number_of_primal_variables + info.number_of_eq_constraints);
@@ -51,10 +53,10 @@ protected:
         {
             Index nu = info.dims.number_of_controls[k];
             Index nx = info.dims.number_of_states[k];
-            Index nx_next = info.dims.number_of_states[k + 1];
+            // Index nx_next = info.dims.number_of_states[k + 1];
             if (k < info.dims.K - 1)
             {
-                jacobian.BAbt[k] = 1.0 * (k + 1);
+                jacobian.BAbt[k] = .01 * (k + 1);
                 jacobian.BAbt[k].diagonal() = 2.0 * (k + 1);
             }
             jacobian.Gg_eqt[k] = 0.1 * (k + 1);
@@ -126,12 +128,18 @@ protected:
         for (Index i = 0; i < info.number_of_primal_variables; ++i)
         {
             rhs_x(i) = 1.0 * i;
+            D_x = 1.0 * (i + 0.1);
         }
         // fill the mult vector with random values
         for (Index i = 0; i < info.number_of_eq_constraints; ++i)
         {
             rhs_g(i) = 1.0 * i;
         }
+        for (Index i = 0; i < info.number_of_slack_variables; ++i)
+        {
+            D_s(i) = 1.0 * (i + 0.1);
+        }
+
         // hessian.set_rhs(info, rhs_x);
         // jacobian.set_rhs(info, rhs_g);
     };
@@ -139,23 +147,21 @@ protected:
 
 TEST_F(AugSystemSolverTest, TestSolve)
 {
-    VecRealAllocated D_s(info.number_of_slack_variables);
-    D_s = 10.;
-    VecRealAllocated rhs_s(info.number_of_slack_variables);
-    rhs_s = rhs_g.block(info.number_of_slack_variables, info.offset_g_eq_slack);
-    Index ret = solver.solve(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
-    EXPECT_TRUE(ret == LinsolReturnFlag::SUCCESS);
+    Index ret = solver.solve(info, jacobian, hessian, D_x, D_s, rhs_x, rhs_g, x, mult);
+    EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
     jacobian.apply_on_right(info, x, jac_x);
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);
     rhs_gg = 0.;
     rhs_gg = rhs_gg + rhs_g + jac_x;
-    rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) = rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) - D_s*mult.block(info.number_of_slack_variables, info.offset_g_eq_slack);
+    rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) =
+        rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) -
+        D_s * mult.block(info.number_of_slack_variables, info.offset_g_eq_slack);
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;
     hessian.apply_on_right(info, x, tmp);
-    grad = grad + tmp;
+    grad = grad + tmp + D_x * x;
     jacobian.transpose_apply_on_right(info, mult, tmp);
     grad = grad + tmp;
     grad = grad + rhs_x;
@@ -171,11 +177,7 @@ TEST_F(AugSystemSolverTest, TestSolve)
 
 TEST_F(AugSystemSolverTest, TestSolveRhs)
 {
-    VecRealAllocated D_s(info.number_of_slack_variables);
-    D_s = 10.;
-    VecRealAllocated rhs_s(info.number_of_slack_variables);
-    rhs_s = rhs_g.block(info.number_of_slack_variables, info.offset_g_eq_slack);
-    Index ret = solver.solve(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
+    Index ret = solver.solve(info, jacobian, hessian, D_x, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_TRUE(ret == LinsolReturnFlag::SUCCESS);
     solver.solve_rhs(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
@@ -183,12 +185,14 @@ TEST_F(AugSystemSolverTest, TestSolveRhs)
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);
     rhs_gg = 0.;
     rhs_gg = rhs_gg + rhs_g + jac_x;
-    rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) = rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) - D_s*mult.block(info.number_of_slack_variables, info.offset_g_eq_slack);
+    rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) =
+        rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) -
+        D_s * mult.block(info.number_of_slack_variables, info.offset_g_eq_slack);
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;
     hessian.apply_on_right(info, x, tmp);
-    grad = grad + tmp;
+    grad = grad + tmp + D_x * x;
     jacobian.transpose_apply_on_right(info, mult, tmp);
     grad = grad + tmp;
     grad = grad + rhs_x;

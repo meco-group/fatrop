@@ -17,7 +17,7 @@ namespace fatrop
         SUCCESS = 0,     // success
         INDEFINITE = 1,  // reduced Hessian is indefinite, no descent direction found
         NOFULL_RANK = 2, // Jacobian is (numerically) not full row rank
-        UNKNOWN = 2      // Jacobian is (numerically) not full row rank
+        UNKNOWN = 3      // unknown flag
     };
 
     /**
@@ -29,9 +29,9 @@ namespace fatrop
      *
      * \f[
      * \begin{bmatrix}
-     *     H & A_e^T & A_i^T \\
-     *     A_e & -D_e & 0 \\
-     *     A_i & 0 & -D_i
+     *     H + D_x & A_e^T &  A_i^T \\
+     *     A_e     & -D_e  &  0     \\
+     *     A_i     & 0     & -D_i
      * \end{bmatrix}
      * \begin{bmatrix}
      *     x \\
@@ -66,10 +66,15 @@ namespace fatrop
     public:
         OcpAugSystemSolver(const ProblemInfo<OcpType> &info);
         LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
-                               Hessian<OcpType> &hessian, const VecRealView &D_s,
-                               const VecRealView &f, const VecRealView &g, VecRealView &x,
-                               VecRealView &eq_mult);
-        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info, const Jacobian<OcpType> &jacobian,
+                               Hessian<OcpType> &hessian, const VecRealView &D_x,
+                               const VecRealView &D_s, const VecRealView &f, const VecRealView &g,
+                               VecRealView &x, VecRealView &eq_mult);
+        // LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
+        //                        Hessian<OcpType> &hessian, const VecRealView &D_eq,
+        //                        const VecRealView &D_s, const VecRealView &f, const VecRealView
+        //                        &g, VecRealView &x, VecRealView &eq_mult);
+        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
+                                   const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
                                    VecRealView &eq_mult);

@@ -271,6 +271,12 @@ namespace fatrop
         blasfeo_diare_wrap(kmax, alpha, &sA.mat(), sA.ai() + ai, sA.aj() + aj);
     }
 
+    static inline void diaad(int kmax, Scalar alpha, const VecRealView &sx, int xi, MatRealView &sA,
+                             int ai, int aj)
+    {
+        blasfeo_diaad_wrap(kmax, alpha, &sx.vec(), sx.ai() + xi, &sA.mat(), sA.ai() + ai, sA.aj() + aj);
+    }
+
     static inline void colsc(int kmax, Scalar alpha, MatRealView &sA, int ai, int aj)
     {
         blasfeo_colsc_wrap(kmax, alpha, &sA.mat(), sA.ai() + ai, sA.aj() + aj);
@@ -299,17 +305,17 @@ namespace fatrop
     }
 
     static inline void trsv_unu(int m, int n, const MatRealView &A, int ai, int aj,
-                                 const VecRealView &x, int xi, VecRealView &z, int zi)
+                                const VecRealView &x, int xi, VecRealView &z, int zi)
     {
         fatrop_trsv_unu(m, n, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
-                         const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
+                        const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
     }
 
     static inline void trsv_utu(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
-                                 int xi, VecRealView &z, int zi)
+                                int xi, VecRealView &z, int zi)
     {
         fatrop_trsv_utu(m, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
-                         const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
+                        const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
     }
 
     // void fatrop_lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank,

@@ -19,23 +19,23 @@ extern "C"
 
 namespace fatrop
 {
-    static inline Scalar& blasfeo_matel_wrap(MAT* A, const int ai, const int aj)
+    static inline Scalar &blasfeo_matel_wrap(MAT *A, const int ai, const int aj)
     {
         fatrop_dbg_assert(ai < A->m && aj < A->n);
         return MATEL(A, ai, aj);
     }
-    static inline Scalar& blasfeo_vecel_wrap(VEC* A, const int ai)
+    static inline Scalar &blasfeo_vecel_wrap(VEC *A, const int ai)
     {
         fatrop_dbg_assert(ai < A->m);
         return VECEL(A, ai);
     }
 
-    static inline Scalar blasfeo_matel_wrap(const MAT* A, const int ai, const int aj)
+    static inline Scalar blasfeo_matel_wrap(const MAT *A, const int ai, const int aj)
     {
         fatrop_dbg_assert(ai < A->m && aj < A->n);
         return MATEL(A, ai, aj);
     }
-    static inline Scalar blasfeo_vecel_wrap(const VEC* A, const int ai)
+    static inline Scalar blasfeo_vecel_wrap(const VEC *A, const int ai)
     {
         fatrop_dbg_assert(ai < A->m);
         return VECEL(A, ai);
@@ -459,6 +459,17 @@ namespace fatrop
         fatrop_dbg_assert(ai + kmax <= sA->m && aj + kmax <= sA->n &&
                           "Submatrix must fit within matrix dimensions");
         DIARE(kmax, alpha, sA, ai, aj);
+    }
+
+    static inline void blasfeo_diaad_wrap(int kmax, Scalar alpha, const VEC *sx, int xi, MAT *sA,
+                                          int ai, int aj)
+    {
+        fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
+        fatrop_dbg_assert(ai >= 0 && aj >= 0 && xi >= 0 && "Indices must be non-negative");
+        fatrop_dbg_assert(xi + kmax <= sx -> m && "Subvector must fit within vector dimensions");
+        fatrop_dbg_assert(ai + kmax <= sA->m && aj + kmax <= sA->n &&
+                          "Submatrix must fit within matrix dimensions");
+        DIAAD(kmax, alpha, const_cast<VEC *>(sx), xi, sA, ai, aj);
     }
 
     static inline void blasfeo_colsc_wrap(int kmax, Scalar alpha, MAT *sA, int ai, int aj)

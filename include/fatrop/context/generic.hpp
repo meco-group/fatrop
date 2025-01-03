@@ -32,6 +32,7 @@ namespace fatrop
 
 #define ALLOCATE_VEC blasfeo_allocate_dvec
 #define FREE_VEC blasfeo_free_dvec
+#define MEMSIZE_VEC blasfeo_memsize_dvec
 
 // Matrix-related BLASFEO definitions
 #define ROWPE blasfeo_drowpe
@@ -62,6 +63,7 @@ namespace fatrop
 #define GEMV_N blasfeo_dgemv_n
 #define GESE blasfeo_dgese
 #define DIARE blasfeo_ddiare
+#define DIAAD blasfeo_ddiaad
 #define COLSC blasfeo_dcolsc
 #define VECMULACC blasfeo_dvecmulacc
 #define GER blasfeo_dger
@@ -73,5 +75,6 @@ namespace fatrop
 
 #define ALLOCATE_MAT blasfeo_allocate_dmat
 #define FREE_MAT blasfeo_free_dmat
+#define MEMSIZE_MAT blasfeo_memsize_dmat
 
 #endif // __fatrop_context_generic_hpp__
