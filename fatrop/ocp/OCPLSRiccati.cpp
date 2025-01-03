@@ -533,6 +533,7 @@ fatrop_int OCPLSRiccati::solve_pd_sys_normal(
             if (gamma_k - rank_k > 0)
             {
                 // transfer eq's to next stage
+                if(gamma_k - rank_k > nx) return -1;
                 GETR(nx + 1, gamma_k - rank_k, Ggt_stripe_p, nu, rank_k, Hh_p + k, 0, 0);
             }
             if (rank_k > 0)
