@@ -18,11 +18,12 @@ class AugSystemSolverTest : public ::testing::Test
 {
 protected:
     // Create OcpDims object
-    int K = 5;                                     // Number of stages
-    std::vector<Index> nx = {20, 2, 2, 4, 2};      // State dimensions for each stage
-    std::vector<Index> nu = {1, 4, 4, 10, 0};      // Input dimensions for each stage
-    std::vector<Index> ng = {5, 0, 6, 10, 0};      // Equality constraints for each stage
-    std::vector<Index> ng_ineq = {0, 5, 10, 0, 0}; // Inequality constraints for each stage
+    int K = 10;                                               // Number of stages
+    std::vector<Index> nx = {20, 4, 4,  4, 2, 2, 0, 1, 10, 5}; // State dimensions for each stage
+    std::vector<Index> nu = {1,  4, 2, 10, 0, 3, 4,  1, 10, 0}; // Input dimensions for each stage
+    std::vector<Index> ng = {19, 4, 3,  0, 2, 0, 1, 0, 1,  5};  // Equality constraints for each stage
+    std::vector<Index> ng_ineq = {0, 5, 10, 0, 0,
+                                  0, 0, 0,  0, 0}; // Inequality constraints for each stage
 
     OcpDims dims{K, nu, nx, ng, ng_ineq};
 
@@ -56,7 +57,7 @@ protected:
             // Index nx_next = info.dims.number_of_states[k + 1];
             if (k < info.dims.K - 1)
             {
-                jacobian.BAbt[k] = .01 * (k + 1);
+                jacobian.BAbt[k] = .001 * (k + 1);
                 jacobian.BAbt[k].diagonal() = 2.0 * (k + 1);
             }
             jacobian.Gg_eqt[k] = 0.1 * (k + 1);
