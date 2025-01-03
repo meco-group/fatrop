@@ -22,9 +22,9 @@ protected:
     int K = 10;                                                   // Number of stages
     std::vector<Index> nx = {20, 10, 10, 10, 10, 2, 0, 1, 10, 5}; // State dimensions for each stage
     std::vector<Index> nu = {1, 4, 2, 10, 1, 30, 4, 1, 10, 0};    // Input dimensions for each stage
-    std::vector<Index> ng = {19, 0, 3, 3, 4, 0, 1, 0, 1, 5}; // Equality constraints for each stage
+    std::vector<Index> ng = {9, 3, 4, 3, 4, 0, 1, 0, 1, 5}; // Equality constraints for each stage
     std::vector<Index> ng_ineq = {0, 5, 10, 0,   0,
-                                  0, 0, 0,  100, 0}; // Inequality constraints for each stage
+                                  0, 0, 0,  10, 0}; // Inequality constraints for each stage
 
     OcpDims dims{K, nu, nx, ng, ng_ineq};
 
@@ -42,6 +42,7 @@ protected:
     VecRealAllocated rhs_g = VecRealAllocated(info.number_of_eq_constraints);
     VecRealAllocated D_x = VecRealAllocated(info.number_of_primal_variables);
     VecRealAllocated D_s = VecRealAllocated(info.number_of_slack_variables);
+    VecRealAllocated D_eq = VecRealAllocated(info.number_of_g_eq_path);
     MatRealAllocated full_kkt_matrix =
         MatRealAllocated(info.number_of_primal_variables + info.number_of_eq_constraints,
                          info.number_of_primal_variables + info.number_of_eq_constraints);
@@ -137,6 +138,11 @@ protected:
         {
             rhs_g(i) = 1.0 * i;
         }
+
+        for (Index i = 0; i < info.number_of_g_eq_path; ++i)
+        {
+            D_eq(i) = 1.0 * (i+1);
+        }
         for (Index i = 0; i < info.number_of_slack_variables; ++i)
         {
             D_s(i) = 1.0 * (i + 0.1);
@@ -187,6 +193,39 @@ TEST_F(AugSystemSolverTest, TestSolveRhs)
     rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) =
         rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) -
         D_s * mult.block(info.number_of_slack_variables, info.offset_g_eq_slack);
+    VecRealAllocated grad(info.number_of_primal_variables);
+    VecRealAllocated tmp(info.number_of_primal_variables);
+    grad = 0;
+    hessian.apply_on_right(info, x, tmp);
+    grad = grad + tmp + D_x * x;
+    jacobian.transpose_apply_on_right(info, mult, tmp);
+    grad = grad + tmp;
+    grad = grad + rhs_x;
+    for (Index i = 0; i < info.number_of_eq_constraints; ++i)
+    {
+        EXPECT_NEAR(rhs_gg(i), 0, 1e-5);
+    }
+    for (Index i = 0; i < info.number_of_primal_variables; ++i)
+    {
+        EXPECT_NEAR(grad(i), 0, 1e-5);
+    }
+}
+
+TEST_F(AugSystemSolverTest, TestSolveDegen)
+{
+    Index ret = solver.solve(info, jacobian, hessian, D_x, D_eq, D_s, rhs_x, rhs_g, x, mult);
+    EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
+    VecRealAllocated jac_x(info.number_of_eq_constraints);
+    jacobian.apply_on_right(info, x, jac_x);
+    VecRealAllocated rhs_gg(info.number_of_eq_constraints);
+    rhs_gg = 0.;
+    rhs_gg = rhs_gg + rhs_g + jac_x;
+    rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) =
+        rhs_gg.block(info.number_of_slack_variables, info.offset_g_eq_slack) -
+        D_s * mult.block(info.number_of_slack_variables, info.offset_g_eq_slack);
+    rhs_gg.block(info.number_of_g_eq_path, info.offset_g_eq_path) =
+        rhs_gg.block(info.number_of_g_eq_path, info.offset_g_eq_path) -
+        D_eq * mult.block(info.number_of_g_eq_path, info.offset_g_eq_path);
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;

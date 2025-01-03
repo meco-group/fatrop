@@ -194,13 +194,11 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
             if (ng_ineq > 0)
             {
                 rowin(ng_ineq, 1.0, g, offset_eq_slack, jacobian.Gg_ineqt[k], nu + nx, 0);
-                gecp(nu + nx, ng_ineq, jacobian.Gg_ineqt[k], 0, 0, Ggt_ineq_temp[0], 0, 0);
+                gecp(nu + nx + 1, ng_ineq, jacobian.Gg_ineqt[k], 0, 0, Ggt_ineq_temp[0], 0, 0);
                 for (Index i = 0; i < ng_ineq; i++)
                 {
                     Scalar scaling_factor = 1.0 / D_s(offset_ineq_k + i);
-                    Scalar grad_barrier = g(offset_eq_slack + i);
-                    colsc(nu + nx, scaling_factor, Ggt_ineq_temp[0], 0, i);
-                    Ggt_ineq_temp[0](nu + nx, i) = scaling_factor * grad_barrier;
+                    colsc(nu + nx + 1, scaling_factor, Ggt_ineq_temp[0], 0, i);
                 }
                 // add the penalty
                 syrk_ln_mn(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp[0], 0, 0,
@@ -467,6 +465,168 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
     }
     return LinsolReturnFlag::SUCCESS;
 }
+LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
+                                           Jacobian<OcpType> &jacobian, Hessian<OcpType> &hessian,
+                                           const VecRealView &D_x, const VecRealView &D_eq,
+                                           const VecRealView &D_s, const VecRealView &f,
+                                           const VecRealView &g, VecRealView &x,
+                                           VecRealView &eq_mult)
+{
+    MatRealView *RSQrq_hat_curr_p;
+    for (Index k = info.dims.K - 1; k >= 0; --k)
+    {
+        const Index nu = info.dims.number_of_controls[k];
+        const Index nx = info.dims.number_of_states[k];
+        const Index ng = info.dims.number_of_eq_constraints[k];
+        const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
+        const Index offs_ineq_k = info.offsets_slack[k];
+        const Index offset_u = info.offsets_primal_u[k];
+        const Index offset_eq_k = info.offsets_eq[k];
+        const Index offset_g_eq_k = info.offsets_g_eq_path[k];
+        const Index offset_g_ineq_k = info.offsets_g_eq_slack[k];
+        // const fatrop_int offs_g_ineq_k = offs_g_ineq_p[k];
+        //////// SUBSDYN
+        if (k == info.dims.K - 1)
+        {
+            rowin(nu + nx, 1.0, f, offset_u, hessian.RSQrqt[k], nu + nx, 0);
+            gecp(nx + nu + 1, nu + nx, hessian.RSQrqt[k], 0, 0, RSQrqt_tilde[k], 0, 0);
+        }
+        else
+        {
+            const Index offset_eq_dyn = info.offsets_g_eq_dyn[k];
+            const Index nxp1 = info.dims.number_of_states[k + 1];
+            // AL <- [BAb]^T_k P_kp1
+            rowin(nxp1, 1.0, g, offset_eq_dyn, jacobian.BAbt[k], nu + nx, 0);
+            gemm_nt(nu + nx + 1, nxp1, nxp1, 1.0, jacobian.BAbt[k], 0, 0, Ppt[k + 1], 0, 0, 0.0,
+                    AL[0], 0, 0, AL[0], 0, 0);
+            // AL[-1,:] <- AL[-1,:] + p_kp1^T
+            gead(1, nxp1, 1.0, Ppt[k + 1], nxp1, 0, AL[0], nx + nu, 0);
+            // RSQrqt_stripe <- AL[BA] + RSQrqt
+            rowin(nu + nx, 1.0, f, offset_u, hessian.RSQrqt[k], nu + nx, 0);
+            syrk_ln_mn(nu + nx + 1, nu + nx, nxp1, 1.0, AL[0], 0, 0, jacobian.BAbt[k], 0, 0, 1.0,
+                       hessian.RSQrqt[k], 0, 0, RSQrqt_tilde[k], 0, 0);
+        }
+        // equality penalty
+        {
+            rowin(ng, 1.0, g, offset_g_eq_k, jacobian.Gg_eqt[k], nu + nx, 0);
+            gecp(nu + nx + 1, ng, jacobian.Gg_eqt[k], 0, 0, Ggt_stripe[0], 0, 0);
+            for (Index i = 0; i < ng; i++)
+            {
+                Scalar scaling_factor = 1.0 / D_eq(offset_eq_k + i);
+                colsc(nu + nx + 1, scaling_factor, Ggt_stripe[0], 0, i);
+            }
+            // add the penalty
+            syrk_ln_mn(nu + nx + 1, nu + nx, ng, 1.0, Ggt_stripe[0], 0, 0, jacobian.Gg_eqt[k], 0, 0,
+                       1.0, RSQrqt_tilde[k], 0, 0, RSQrqt_tilde[k], 0, 0);
+        }
+        // inequalities + inertia correction
+        {
+            if (ng_ineq > 0)
+            {
+                rowin(ng_ineq, 1.0, g, offset_g_ineq_k, jacobian.Gg_ineqt[k], nu + nx, 0);
+                gecp(nu + nx + 1, ng_ineq, jacobian.Gg_ineqt[k], 0, 0, Ggt_ineq_temp[0], 0, 0);
+                for (Index i = 0; i < ng_ineq; i++)
+                {
+                    Scalar scaling_factor = 1.0 / D_s(offs_ineq_k + i);
+                    colsc(nu + nx + 1, scaling_factor, Ggt_ineq_temp[0], 0, i);
+                }
+                // add the penalty
+                syrk_ln_mn(nu + nx + 1, nu + nx, ng_ineq, 1.0, Ggt_ineq_temp[0], 0, 0,
+                           jacobian.Gg_ineqt[k], 0, 0, 1.0, RSQrqt_tilde[k], 0, 0, RSQrqt_tilde[k],
+                           0, 0);
+            }
+            // inertia correction
+            diaad(nu + nx, 1.0, D_x, offset_u, RSQrqt_tilde[k], 0, 0);
+        }
+
+        //////// TRANSFORM_AND_SUBSEQ
+        {
+            RSQrq_hat_curr_p = &RSQrqt_tilde[k];
+        }
+        //////// SCHUR
+        {
+            // DLlt_k = [chol(R_hatk); Llk@chol(R_hatk)^-T]
+            potrf_l_mn(nu + nx + 1, nu, *RSQrq_hat_curr_p, 0, 0, Llt[k], 0, 0);
+            if (!check_reg(nu, &Llt[k].mat(), 0, 0))
+                return LinsolReturnFlag::INDEFINITE;
+            // Pp_k = Qq_hatk - L_k^T @ Ll_k
+            // SYRK_LN_MN(nx+1, nx, nu-rank_k, -1.0,Llt_p+k, nu-rank_k,0, Llt_p+k, nu-rank_k,0, 1.0,
+            // RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
+            gecp(nx + 1, nu, Llt[k], nu, 0, Llt_shift[0], 0,
+                 0); // needless operation because feature not implemented yet
+            syrk_ln_mn(nx + 1, nx, nu, -1.0, Llt_shift[0], 0, 0, Llt_shift[0], 0, 0, 1.0,
+                       *RSQrq_hat_curr_p, nu, nu, Ppt[k], 0, 0);
+        }
+        trtr_l(nx, Ppt[k], 0, 0, Ppt[k], 0, 0);
+    }
+    //////// FIRST_STAGE
+    {
+        const Index nx = info.dims.number_of_states[0];
+        {
+            potrf_l_mn(nx + 1, nx, Ppt[0], 0, 0, LlIt[0], 0, 0);
+            if (!check_reg(nx, &LlIt[0].mat(), 0, 0))
+                return LinsolReturnFlag::INDEFINITE;
+        }
+    }
+    ////// FORWARD_SUBSTITUTION:
+    // first stage
+    {
+        const Index nx = info.dims.number_of_states[0];
+        const Index nu = info.dims.number_of_controls[0];
+        const Index offs_x = info.offsets_primal_x[0];
+        // calculate xIb
+        rowex(nx, -1.0, LlIt[0], nx, 0, x, offs_x);
+        // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
+        trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, x, offs_x);
+    }
+    for (Index k = 0; k < info.dims.K; k++)
+    {
+        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_controls[k];
+        const Index offs = info.offsets_primal_u[k];
+        const Index offs_x = info.offsets_primal_x[k];
+        rowex(nu, -1.0, Llt[k], nu + nx, 0, x, offs);
+        gemv_t(nx, nu, -1.0, Llt[k], nu, 0, x, offs_x, 1.0, x, offs, x, offs);
+        trsv_ltn(nu, Llt[k], 0, 0, x, offs, x, offs);
+        if (k != info.dims.K - 1)
+        {
+            const Index nxp1 = info.dims.number_of_states[k + 1];
+            const Index nup1 = info.dims.number_of_controls[k + 1];
+            const Index offs_x_p1 = info.offsets_primal_x[k + 1];
+            const Index offs_dyn_eq_k = info.offsets_g_eq_dyn[k];
+            // calculate xkp1
+            rowex(nxp1, 1.0, jacobian.BAbt[k], nu + nx, 0, x, offs_x_p1);
+            gemv_t(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, x, offs, 1.0, x, offs_x_p1, x,
+                   offs_x_p1);
+            // calculate lam_dyn xp1
+            rowex(nxp1, 1.0, Ppt[k + 1], nxp1, 0, eq_mult, offs_dyn_eq_k);
+            gemv_t(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, x, offs_x_p1, 1.0, eq_mult, offs_dyn_eq_k,
+                   eq_mult, offs_dyn_eq_k);
+        }
+        const Index ng = info.dims.number_of_eq_constraints[k];
+        const Index offs_g_eq_k = info.offsets_g_eq_path[k];
+        const Index offs_eq_k = info.offsets_eq[k];
+        if (ng > 0)
+        {
+            gemv_t(nu + nx, ng, 1.0, jacobian.Gg_eqt[k], 0, 0, x, offs, 1.0, g, offs_g_eq_k,
+                   eq_mult, offs_g_eq_k);
+            eq_mult.block(ng, offs_g_eq_k) =
+                eq_mult.block(ng, offs_g_eq_k) / D_eq.block(ng, offs_eq_k);
+        }
+        const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
+        const Index offs_slack = info.offsets_slack[k];
+        const Index offs_eq_ineq = info.offsets_g_eq_slack[k];
+        if (ng_ineq > 0)
+        {
+            gemv_t(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, x, offs, 1.0, g, offs_eq_ineq,
+                   eq_mult, offs_eq_ineq);
+            eq_mult.block(ng_ineq, offs_eq_ineq) =
+                eq_mult.block(ng_ineq, offs_eq_ineq) / D_s.block(ng_ineq, offs_slack);
+        }
+    }
+    return LinsolReturnFlag::SUCCESS;
+}
+
 LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
                                                const Jacobian<OcpType> &jacobian,
                                                const Hessian<OcpType> &hessian,

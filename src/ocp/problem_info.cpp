@@ -14,9 +14,9 @@ namespace fatrop
         {
             Index K = std::distance(begin, end) + 1;
             out[0] = 0;
-            std::partial_sum(begin, end-1, out + 1);
+            std::partial_sum(begin, end - 1, out + 1);
             // add the offset to each element
-            std::transform(out, out + K -1, out, [offset](Index x) { return x + offset; });
+            std::transform(out, out + K - 1, out, [offset](Index x) { return x + offset; });
         }
     }
 }
@@ -33,8 +33,12 @@ ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims)
     number_of_slack_variables = std::accumulate(dims.number_of_ineq_constraints.begin(),
                                                 dims.number_of_ineq_constraints.end(), 0);
     // compute the number of equality constraints
-    number_of_eq_constraints = std::accumulate(dims.number_of_states.begin() +1, dims.number_of_states.end(), 0) + std::accumulate(dims.number_of_eq_constraints.begin(),
-                                               dims.number_of_eq_constraints.end(), 0)  + std::accumulate(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(), 0);
+    number_of_eq_constraints =
+        std::accumulate(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0) +
+        std::accumulate(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(),
+                        0) +
+        std::accumulate(dims.number_of_ineq_constraints.begin(),
+                        dims.number_of_ineq_constraints.end(), 0);
     // set up the offsets for the primal variables
     // the number of variables per stage is the sum of the number of states and controls
     number_of_stage_variables.resize(dims.K);
@@ -53,6 +57,9 @@ ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims)
     offsets_slack = std::vector<Index>(dims.K, 0);
     compute_offsets(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(),
                     offset_slack, offsets_slack.begin());
+    offsets_eq = std::vector<Index>(dims.K, 0);
+    compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(), 0,
+                    offsets_eq.begin());
     // compute the number of (dyn, path, slack)-equality constraints
     number_of_g_eq_dyn =
         std::accumulate(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0);

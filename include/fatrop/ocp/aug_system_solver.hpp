@@ -69,10 +69,11 @@ namespace fatrop
                                Hessian<OcpType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_s, const VecRealView &f, const VecRealView &g,
                                VecRealView &x, VecRealView &eq_mult);
-        // LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
-        //                        Hessian<OcpType> &hessian, const VecRealView &D_eq,
-        //                        const VecRealView &D_s, const VecRealView &f, const VecRealView
-        //                        &g, VecRealView &x, VecRealView &eq_mult);
+        LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
+                               Hessian<OcpType> &hessian, const VecRealView &D_x,
+                               const VecRealView &D_eq, const VecRealView &D_s,
+                               const VecRealView &f, const VecRealView &g, VecRealView &x,
+                               VecRealView &eq_mult);
         LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
                                    const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_s,
