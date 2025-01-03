@@ -17,10 +17,10 @@ TEST(JacobianTest, ConstructorTest)
 {
     // Create OcpDims object
     int K = 5;                                       // Number of stages
-    std::vector<Index> nx = {2, 2, 2, 2, 2, 2};      // State dimensions for each stage
+    std::vector<Index> nx = {2, 2, 2, 2, 2};      // State dimensions for each stage
     std::vector<Index> nu = {1, 1, 1, 1, 1};         // Input dimensions for each stage
-    std::vector<Index> ng = {1, 0, 0, 0, 0, 2};      // Equality constraints for each stage
-    std::vector<Index> ng_ineq = {1, 0, 0, 2, 0, 0}; // Inequality constraints for each stage
+    std::vector<Index> ng = {1, 0, 0, 0, 2};      // Equality constraints for each stage
+    std::vector<Index> ng_ineq = {1, 0, 2, 0, 0}; // Inequality constraints for each stage
 
     OcpDims dims(K, nx, nu, ng, ng_ineq);
 
@@ -32,10 +32,10 @@ TEST(HessianTest, ConstructorTest)
 {
     // Create OcpDims object
     int K = 5;                                       // Number of stages
-    std::vector<Index> nx = {2, 2, 2, 2, 2, 2};      // State dimensions for each stage
+    std::vector<Index> nx = {2, 2, 2, 2, 2};      // State dimensions for each stage
     std::vector<Index> nu = {1, 1, 1, 1, 1};         // Input dimensions for each stage
-    std::vector<Index> ng = {1, 0, 0, 0, 0, 2};      // Equality constraints for each stage
-    std::vector<Index> ng_ineq = {1, 0, 0, 2, 0, 0}; // Inequality constraints for each stage
+    std::vector<Index> ng = {1, 0, 0, 0, 2};      // Equality constraints for each stage
+    std::vector<Index> ng_ineq = {1, 0, 2, 0, 0}; // Inequality constraints for each stage
 
     OcpDims dims(K, nx, nu, ng, ng_ineq);
 
