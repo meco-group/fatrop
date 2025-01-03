@@ -16,9 +16,9 @@
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
-#include <cstring>
 
 namespace fatrop
 {
@@ -383,6 +383,12 @@ namespace fatrop
          */
         inline MatRealAllocated(MatRealAllocated &&other);
 
+        template <typename Derived>
+        MatRealAllocated(const MatReal<Derived> &mat_in) : MatRealAllocated(mat_in.m(), mat_in.n())
+        {
+            (*this) = mat_in;
+        }
+
         /**
          * @brief Gets a reference to the underlying BLASFEO matrix.
          *
@@ -480,7 +486,7 @@ namespace fatrop
     {
         ALLOCATE_MAT(m, n, &mat_);
         // zero out
-        std::memset(mat_.mem, 0, mat_.memsize*sizeof(char));
+        std::memset(mat_.mem, 0, mat_.memsize * sizeof(char));
     }
 
     MatRealAllocated::MatRealAllocated(MatRealAllocated &&other)
@@ -502,7 +508,11 @@ namespace fatrop
         return blasfeo_matel_wrap(&mat_, i, j);
     }
 
-    MatRealAllocated::~MatRealAllocated() { if(mat_.mem != nullptr) FREE_MAT(&mat()); }
+    MatRealAllocated::~MatRealAllocated()
+    {
+        if (mat_.mem != nullptr)
+            FREE_MAT(&mat());
+    }
 
 } // namespace fatrop
 

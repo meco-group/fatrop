@@ -9,6 +9,7 @@
 #include "fatrop/ocp/jacobian.hpp"
 #include "fatrop/ocp/problem_info.hpp"
 #include "fatrop/ocp/type.hpp"
+#include "../random_matrix.hpp"
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -18,12 +19,12 @@ class AugSystemSolverTest : public ::testing::Test
 {
 protected:
     // Create OcpDims object
-    int K = 10;                                               // Number of stages
-    std::vector<Index> nx = {20, 4, 4,  4, 2, 2, 0, 1, 10, 5}; // State dimensions for each stage
-    std::vector<Index> nu = {1,  4, 2, 10, 0, 3, 4,  1, 10, 0}; // Input dimensions for each stage
-    std::vector<Index> ng = {19, 4, 3,  0, 2, 0, 1, 0, 1,  5};  // Equality constraints for each stage
-    std::vector<Index> ng_ineq = {0, 5, 10, 0, 0,
-                                  0, 0, 0,  0, 0}; // Inequality constraints for each stage
+    int K = 10;                                                   // Number of stages
+    std::vector<Index> nx = {20, 10, 10, 10, 10, 2, 0, 1, 10, 5}; // State dimensions for each stage
+    std::vector<Index> nu = {1, 4, 2, 10, 1, 30, 4, 1, 10, 0};    // Input dimensions for each stage
+    std::vector<Index> ng = {19, 0, 3, 3, 4, 0, 1, 0, 1, 5}; // Equality constraints for each stage
+    std::vector<Index> ng_ineq = {0, 5, 10, 0,   0,
+                                  0, 0, 0,  100, 0}; // Inequality constraints for each stage
 
     OcpDims dims{K, nu, nx, ng, ng_ineq};
 
@@ -54,23 +55,23 @@ protected:
         {
             Index nu = info.dims.number_of_controls[k];
             Index nx = info.dims.number_of_states[k];
-            // Index nx_next = info.dims.number_of_states[k + 1];
             if (k < info.dims.K - 1)
             {
-                jacobian.BAbt[k] = .001 * (k + 1);
-                jacobian.BAbt[k].diagonal() = 2.0 * (k + 1);
+                Index nx_next = info.dims.number_of_states[k + 1];
+                jacobian.BAbt[k].block(nu + nx, nx_next, 0, 0) =
+                    ::test::random_matrix(nu + nx, nx_next);
             }
-            jacobian.Gg_eqt[k] = 0.1 * (k + 1);
-            jacobian.Gg_eqt[k].diagonal() = 4.0 * (k + 1);
-            jacobian.Gg_ineqt[k] = .02 * (k + 1);
-            jacobian.Gg_ineqt[k].diagonal() = 6.0 * (k + 1);
+            jacobian.Gg_eqt[k].block(nu + nx, info.dims.number_of_eq_constraints[k], 0, 0) =
+                ::test::random_matrix(nu + nx, info.dims.number_of_eq_constraints[k]);
+            jacobian.Gg_ineqt[k].block(nu + nx, info.dims.number_of_ineq_constraints[k], 0, 0) =
+                ::test::random_matrix(nu + nx, info.dims.number_of_ineq_constraints[k]);
         }
         // fill the Hessian with random values
         for (Index k = 0; k < dims.K; ++k)
         {
-            hessian.RSQrqt[k].diagonal() = 2.0 * (k + 1);
-            hessian.RSQrqt[k](0, 1) = 1e-2;
-            hessian.RSQrqt[k](1, 0) = 1e-2;
+            Index nu = info.dims.number_of_controls[k];
+            Index nx = info.dims.number_of_states[k];
+            hessian.RSQrqt[k].block(nu + nx, nu + nx, 0, 0) = ::test::random_spd_matrix(nu + nx);
         }
         // add dynamics constraints
         for (Index k = 0; k < info.dims.K - 1; ++k)
@@ -140,9 +141,6 @@ protected:
         {
             D_s(i) = 1.0 * (i + 0.1);
         }
-
-        // hessian.set_rhs(info, rhs_x);
-        // jacobian.set_rhs(info, rhs_g);
     };
 };
 
@@ -168,11 +166,11 @@ TEST_F(AugSystemSolverTest, TestSolve)
     grad = grad + rhs_x;
     for (Index i = 0; i < info.number_of_eq_constraints; ++i)
     {
-        EXPECT_NEAR(rhs_gg(i), 0, 1e-6);
+        EXPECT_NEAR(rhs_gg(i), 0, 1e-5);
     }
     for (Index i = 0; i < info.number_of_primal_variables; ++i)
     {
-        EXPECT_NEAR(grad(i), 0, 1e-6);
+        EXPECT_NEAR(grad(i), 0, 1e-5);
     }
 }
 
@@ -199,10 +197,10 @@ TEST_F(AugSystemSolverTest, TestSolveRhs)
     grad = grad + rhs_x;
     for (Index i = 0; i < info.number_of_eq_constraints; ++i)
     {
-        EXPECT_NEAR(rhs_gg(i), 0, 1e-6);
+        EXPECT_NEAR(rhs_gg(i), 0, 1e-5);
     }
     for (Index i = 0; i < info.number_of_primal_variables; ++i)
     {
-        EXPECT_NEAR(grad(i), 0, 1e-6);
+        EXPECT_NEAR(grad(i), 0, 1e-5);
     }
 }
