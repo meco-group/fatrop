@@ -12,12 +12,16 @@
 
 namespace fatrop
 {
+    /**
+     * @enum LinsolReturnFlag
+     * @brief Enumeration of possible return flags for the linear solver.
+     */
     enum LinsolReturnFlag
     {
-        SUCCESS = 0,     // success
-        INDEFINITE = 1,  // reduced Hessian is indefinite, no descent direction found
-        NOFULL_RANK = 2, // Jacobian is (numerically) not full row rank
-        UNKNOWN = 3      // unknown flag
+        SUCCESS = 0,     ///< The solver successfully found a solution.
+        INDEFINITE = 1,  ///< The reduced Hessian is indefinite; no descent direction found.
+        NOFULL_RANK = 2, ///< The Jacobian is (numerically) not full row rank.
+        UNKNOWN = 3      ///< An unknown error occurred during the solving process.
     };
 
     /**
@@ -53,36 +57,94 @@ namespace fatrop
      * - \f$ A_e \f$ is the Jacobian matrix of equality constraints.
      * - \f$ A_d \f$ is the Jacobian matrix of dynamics constraints.
      * - \f$ A_i \f$ is the Jacobian matrix of inequality constraints.
-     * - \f$ D_e \f$ and \f$ D_i \f$ are small diagonal regularization matrices for equality and
-     * inequality constraints, respectively.
+     * - \f$ D_x \f$, \f$ D_e \f$, and \f$ D_i \f$ are diagonal regularization matrices for primal variables,
+     *   equality constraints, and inequality constraints, respectively.
      * - \f$ x \f$ represents the primal variables.
-     * - \f$ \lambda_e \f$ and \f$ \lambda_i \f$ are the Lagrange multipliers for equality and
-     * inequality constraints.
-     * - \f$ f, g_e, g_i \f$ are the corresponding residual vectors.
+     * - \f$ \lambda_e \f$, \f$ \lambda_d \f$, and \f$ \lambda_i \f$ are the Lagrange multipliers for equality,
+     *   dynamics, and inequality constraints, respectively.
+     * - \f$ f, g_e, g_d, g_i \f$ are the corresponding residual vectors.
      *
-     * ### Notes:
-     * - When \f$ D_e = 0 \f$, the normal solve method should be used.
-     * - When \f$ D_e > 0 \f$, the `solve` method which accepts the D_e argument should be employed
-     * to handle regularization.
+     * The solver uses various numerical techniques, including LU factorization and iterative refinement,
+     * to efficiently solve this system while handling potential numerical issues.
      */
     class OcpAugSystemSolver
     {
     public:
+        /**
+         * @brief Constructs an OcpAugSystemSolver object.
+         * @param info Problem information for the optimal control problem.
+         */
         OcpAugSystemSolver(const ProblemInfo<OcpType> &info);
+
+        /**
+         * @brief Solves the augmented system without path equality constraint regularization.
+         * @param info Problem information.
+         * @param jacobian Jacobian of the constraints.
+         * @param hessian Hessian of the Lagrangian.
+         * @param D_x Diagonal regularization for primal variables.
+         * @param D_s Diagonal regularization for slack variables.
+         * @param f Gradient of the objective function.
+         * @param g Constraint residuals.
+         * @param x [out] Solution vector for primal variables.
+         * @param eq_mult [out] Solution vector for equality constraint multipliers.
+         * @return Status flag indicating the outcome of the solve operation.
+         */
         LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
                                Hessian<OcpType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_s, const VecRealView &f, const VecRealView &g,
                                VecRealView &x, VecRealView &eq_mult);
+
+        /**
+         * @brief Solves the augmented system with path equality constraint regularization.
+         * @param info Problem information.
+         * @param jacobian Jacobian of the constraints.
+         * @param hessian Hessian of the Lagrangian.
+         * @param D_x Diagonal regularization for primal variables.
+         * @param D_eq Diagonal regularization for equality constraints.
+         * @param D_s Diagonal regularization for slack variables.
+         * @param f Gradient of the objective function.
+         * @param g Constraint residuals.
+         * @param x [out] Solution vector for primal variables.
+         * @param eq_mult [out] Solution vector for equality constraint multipliers.
+         * @return Status flag indicating the outcome of the solve operation.
+         */
         LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
                                Hessian<OcpType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_eq, const VecRealView &D_s,
                                const VecRealView &f, const VecRealView &g, VecRealView &x,
                                VecRealView &eq_mult);
+
+        /**
+         * @brief Solves the system for a new right-hand side without path equality constraint regularization.
+         * @param info Problem information.
+         * @param jacobian Jacobian of the constraints.
+         * @param hessian Hessian of the Lagrangian.
+         * @param D_s Diagonal regularization for slack variables.
+         * @param f Gradient of the objective function.
+         * @param g Constraint residuals.
+         * @param x [out] Solution vector for primal variables.
+         * @param eq_mult [out] Solution vector for equality constraint multipliers.
+         * @return Status flag indicating the outcome of the solve operation.
+         */
         LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
                                    const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
                                    VecRealView &eq_mult);
+
+        /**
+         * @brief Solves the system for a new right-hand side with path equality constraint regularization.
+         * @param info Problem information.
+         * @param jacobian Jacobian of the constraints.
+         * @param hessian Hessian of the Lagrangian.
+         * @param D_eq Diagonal regularization for equality constraints.
+         * @param D_s Diagonal regularization for slack variables.
+         * @param f Gradient of the objective function.
+         * @param g Constraint residuals.
+         * @param x [out] Solution vector for primal variables.
+         * @param eq_mult [out] Solution vector for equality constraint multipliers.
+         * @return Status flag indicating the outcome of the solve operation.
+         */
         LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
                                    const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_eq,
