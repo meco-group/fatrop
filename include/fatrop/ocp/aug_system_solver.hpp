@@ -29,18 +29,21 @@ namespace fatrop
      *
      * \f[
      * \begin{bmatrix}
-     *     H + D_x & A_e^T &  A_i^T \\
-     *     A_e     & -D_e  &  0     \\
-     *     A_i     & 0     & -D_i
+     *     H + D_x & A_e^T &  A_d^T &  A_i^T \\
+     *     A_e     & -D_e  &  0     &  0     \\
+     *     A_d     & 0     &  0     &  0     \\
+     *     A_i     & 0     &  0     &  -D_i
      * \end{bmatrix}
      * \begin{bmatrix}
      *     x \\
      *     \lambda_e \\
+     *     \lambda_d \\
      *     \lambda_i
      * \end{bmatrix} =
      * -\begin{bmatrix}
      *     f \\
      *     g_e \\
+     *     g_d \\
      *     g_i
      * \end{bmatrix}
      * \f]
@@ -48,6 +51,7 @@ namespace fatrop
      * where:
      * - \f$ H \f$ is the Lagrangian Hessian matrix.
      * - \f$ A_e \f$ is the Jacobian matrix of equality constraints.
+     * - \f$ A_d \f$ is the Jacobian matrix of dynamics constraints.
      * - \f$ A_i \f$ is the Jacobian matrix of inequality constraints.
      * - \f$ D_e \f$ and \f$ D_i \f$ are small diagonal regularization matrices for equality and
      * inequality constraints, respectively.
@@ -58,8 +62,8 @@ namespace fatrop
      *
      * ### Notes:
      * - When \f$ D_e = 0 \f$, the normal solve method should be used.
-     * - When \f$ D_e > 0 \f$, the `solve_jac_reg` method should be employed to handle
-     * regularization.
+     * - When \f$ D_e > 0 \f$, the `solve` method which accepts the D_e argument should be employed
+     * to handle regularization.
      */
     class OcpAugSystemSolver
     {
@@ -79,6 +83,11 @@ namespace fatrop
                                    const Hessian<OcpType> &hessian, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
                                    VecRealView &eq_mult);
+        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
+                                   const Jacobian<OcpType> &jacobian,
+                                   const Hessian<OcpType> &hessian, const VecRealView &D_eq,
+                                   const VecRealView &D_s, const VecRealView &f,
+                                   const VecRealView &g, VecRealView &x, VecRealView &eq_mult);
 
     private:
         // temporaries, pre-allocated during construction to avoid allocation during

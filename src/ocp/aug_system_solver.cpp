@@ -864,3 +864,138 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
     }
     return LinsolReturnFlag::SUCCESS;
 }
+LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
+                                               const Jacobian<OcpType> &jacobian,
+                                               const Hessian<OcpType> &hessian,
+                                               const VecRealView &D_eq, const VecRealView &D_s,
+                                               const VecRealView &f, const VecRealView &g,
+                                               VecRealView &x, VecRealView &eq_mult)
+{
+    VecRealView *v_RSQrq_hat_curr_p;
+    for (Index k = info.dims.K - 1; k >= 0; --k)
+    {
+        const Index offs_ux_k = info.offsets_primal_u[k];
+        const Index nu = info.dims.number_of_controls[k];
+        const Index nx = info.dims.number_of_states[k];
+        const Index ng = info.dims.number_of_eq_constraints[k];
+        const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
+        const Index offs_g_dyn = info.offsets_g_eq_dyn[k];
+        const Index offs_g_eq = info.offsets_g_eq_path[k];
+        const Index offs_ge_eq_ineq = info.offsets_g_eq_slack[k];
+        //     //////// SUBSDYN
+        if (k == info.dims.K - 1)
+        {
+            veccp(nu + nx, f, offs_ux_k, v_RSQrqt_tilde[k], 0);
+        }
+        else
+        {
+            const Index nxp1 = info.dims.number_of_states[k + 1];
+            gemv_n(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, g, offs_g_dyn, 0.0, v_AL[0], 0, v_AL[0], 0);
+            axpy(nxp1, 1.0, v_Ppt[k + 1], 0, v_AL[0], 0, v_AL[0], 0);
+            gemv_n(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, v_AL[0], 0, 1.0, f, offs_ux_k,
+                   v_RSQrqt_tilde[k], 0);
+        }
+        if (ng > 0)
+        {
+            const Index offs_eq_k = info.offsets_eq[k];
+            for (Index i = 0; i < ng; i++)
+            {
+                Scalar scaling_factor = D_eq(offs_eq_k + i);
+                v_Ggt_stripe[0](i) = g(offs_g_eq + i) / scaling_factor;
+            }
+            gemv_n(nu + nx, ng, 1.0, jacobian.Gg_eqt[k], 0, 0, v_Ggt_stripe[0], 0, 1.0,
+                   v_RSQrqt_tilde[k], 0, v_RSQrqt_tilde[k], 0);
+        }
+        if (ng_ineq > 0)
+        {
+            const Index offs_ineq_k = info.offsets_slack[k];
+            for (Index i = 0; i < ng_ineq; i++)
+            {
+                Scalar scaling_factor = D_s(offs_ineq_k + i);
+                v_Ggt_ineq_temp[0](i) = g(offs_ge_eq_ineq + i) / scaling_factor;
+            }
+            gemv_n(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, v_Ggt_ineq_temp[0], 0, 1.0,
+                   v_RSQrqt_tilde[k], 0, v_RSQrqt_tilde[k], 0);
+        }
+        {
+            v_RSQrq_hat_curr_p = &v_RSQrqt_tilde[k];
+        }
+        {
+            trsv_lnn(nu, Llt[k], 0, 0, *v_RSQrq_hat_curr_p, 0, v_Llt[k], 0);
+            veccp(nu, v_Llt[k], 0, v_Llt_shift[0], 0);
+            gemv_n(nx, nu, -1.0, Llt[k], nu, 0, v_Llt_shift[0], 0, 1.0, v_RSQrqt_tilde[k], nu,
+                   v_Ppt[k], 0);
+        }
+    }
+    {
+        const Index nx = info.dims.number_of_states[0];
+        {
+            trsv_lnn(nx, LlIt[0], 0, 0, v_Ppt[0], 0, v_LlIt[0], 0);
+        }
+    }
+    {
+        const Index nx = info.dims.number_of_states[0];
+        const Index nu = info.dims.number_of_controls[0];
+        const Index offs_x = info.offsets_primal_x[0];
+        veccpsc(nx, -1.0, v_LlIt[0], 0, x, offs_x);
+        trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, x, offs_x);
+    }
+    for (Index k = 0; k < info.dims.K; k++)
+    {
+        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_controls[k];
+        const Index offs = info.offsets_primal_u[k];
+        const Index offs_x = info.offsets_primal_x[k];
+        const Index offs_dyn_eq_k = info.offsets_g_eq_dyn[k];
+        veccpsc(nu, -1.0, v_Llt[k], 0, x, offs);
+        gemv_t(nx, nu, -1.0, Llt[k], nu, 0, x, offs_x, 1.0, x, offs, x, offs);
+        trsv_ltn(nu, Llt[k], 0, 0, x, offs, x, offs);
+        if (k != info.dims.K - 1)
+        {
+            const Index nxp1 = info.dims.number_of_states[k + 1];
+            const Index offsp1 = info.offsets_primal_u[k + 1];
+            const Index offs_x_p1 = info.offsets_primal_x[k + 1];
+            veccp(nxp1, g, offs_dyn_eq_k, x, offs_x_p1);
+            gemv_t(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, x, offs, 1.0, x, offs_x_p1, x,
+                   offs_x_p1);
+            veccp(nxp1, v_Ppt[k + 1], 0, eq_mult, offs_dyn_eq_k);
+            gemv_t(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, x, offs_x_p1, 1.0, eq_mult,
+                   offs_dyn_eq_k, eq_mult, offs_dyn_eq_k);
+        }
+    }
+    // // calculate lam_eq xk
+    for (Index k = 0; k < info.dims.K; k++)
+    {
+        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_controls[k];
+        const Index ng = info.dims.number_of_eq_constraints[k];
+        const Index offs = info.offsets_primal_u[k];
+        const Index offs_g_k = info.offsets_g_eq_path[k];
+        const Index offs_eq = info.offsets_eq[k];
+        if (ng > 0)
+        {
+            gemv_t(nu + nx, ng, 1.0, jacobian.Gg_eqt[k], 0, 0, x, offs, 1.0, g, offs_g_k,
+                   eq_mult, offs_g_k);
+            eq_mult.block(ng, offs_g_k) =
+                eq_mult.block(ng, offs_g_k) / D_eq.block(ng, offs_eq);
+        }
+    }
+
+    for (Index k = 0; k < info.dims.K; k++)
+    {
+        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_controls[k];
+        const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
+        const Index offs = info.offsets_primal_u[k];
+        const Index offs_gineq_k = info.offsets_g_eq_slack[k];
+        const Index offs_slack = info.offsets_slack[k];
+        if (ng_ineq > 0)
+        {
+            gemv_t(nu + nx, ng_ineq, 1.0, jacobian.Gg_ineqt[k], 0, 0, x, offs, 1.0, g, offs_gineq_k,
+                   eq_mult, offs_gineq_k);
+            eq_mult.block(ng_ineq, offs_gineq_k) =
+                eq_mult.block(ng_ineq, offs_gineq_k) / D_s.block(ng_ineq, offs_slack);
+        }
+    }
+    return LinsolReturnFlag::SUCCESS;
+}
