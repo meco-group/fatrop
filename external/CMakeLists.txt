@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with Fatrop.  If not, see <http://www.gnu.org/licenses/>.]]
 
 option(BUILD_WITH_BLASFEO "Build BLASFEO with cmake from git submodule" ON)
+option(BUILD_WITH_DLFCN_WIN32 "Build dlfcn-win32 with cmake from git submodule (on Windows)" ON)
 
 if (BUILD_WITH_BLASFEO)
     message(STATUS "using BLASFEO with cmake from git submodule.")
@@ -46,6 +47,8 @@ else()
 
 endif()
 
-if(WIN32)
+if(WIN32 AND BUILD_WITH_DLFCN_WIN32)
     add_subdirectory(dlfcn-win32)
-endif(WIN32)
+else()
+    find_package(dlfcn-win32 REQUIRED)
+endif()
