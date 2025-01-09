@@ -155,7 +155,7 @@ TEST_F(AugSystemSolverTest, TestSolve)
     Index ret = solver.solve(info, jacobian, hessian, D_x, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
-    jacobian.apply_on_right(info, x, jac_x);
+    jacobian.apply_on_right(info, x, 0.0, jac_x, jac_x);
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);
     rhs_gg = 0.;
     rhs_gg = rhs_gg + rhs_g + jac_x;
@@ -165,9 +165,9 @@ TEST_F(AugSystemSolverTest, TestSolve)
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;
-    hessian.apply_on_right(info, x, tmp);
+    hessian.apply_on_right(info, x, 0.0, tmp, tmp);
     grad = grad + tmp + D_x * x;
-    jacobian.transpose_apply_on_right(info, mult, tmp);
+    jacobian.transpose_apply_on_right(info, mult, 0.0, tmp, tmp);
     grad = grad + tmp;
     grad = grad + rhs_x;
     for (Index i = 0; i < info.number_of_eq_constraints; ++i)
@@ -186,7 +186,7 @@ TEST_F(AugSystemSolverTest, TestSolveRhs)
     EXPECT_TRUE(ret == LinsolReturnFlag::SUCCESS);
     solver.solve_rhs(info, jacobian, hessian, D_s, rhs_x, rhs_g, x, mult);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
-    jacobian.apply_on_right(info, x, jac_x);
+    jacobian.apply_on_right(info, x, 0.0, jac_x, jac_x);
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);
     rhs_gg = 0.;
     rhs_gg = rhs_gg + rhs_g + jac_x;
@@ -196,9 +196,9 @@ TEST_F(AugSystemSolverTest, TestSolveRhs)
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;
-    hessian.apply_on_right(info, x, tmp);
+    hessian.apply_on_right(info, x, 0.0, tmp, tmp);
     grad = grad + tmp + D_x * x;
-    jacobian.transpose_apply_on_right(info, mult, tmp);
+    jacobian.transpose_apply_on_right(info, mult, 0.0, tmp, tmp);
     grad = grad + tmp;
     grad = grad + rhs_x;
     for (Index i = 0; i < info.number_of_eq_constraints; ++i)
@@ -216,7 +216,7 @@ TEST_F(AugSystemSolverTest, TestSolveDegen)
     Index ret = solver.solve(info, jacobian, hessian, D_x, D_eq, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
-    jacobian.apply_on_right(info, x, jac_x);
+    jacobian.apply_on_right(info, x, 0.0, jac_x, jac_x);
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);
     rhs_gg = 0.;
     rhs_gg = rhs_gg + rhs_g + jac_x;
@@ -229,9 +229,9 @@ TEST_F(AugSystemSolverTest, TestSolveDegen)
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;
-    hessian.apply_on_right(info, x, tmp);
+    hessian.apply_on_right(info, x, 0.0, tmp, tmp);
     grad = grad + tmp + D_x * x;
-    jacobian.transpose_apply_on_right(info, mult, tmp);
+    jacobian.transpose_apply_on_right(info, mult, 0.0, tmp, tmp);
     grad = grad + tmp;
     grad = grad + rhs_x;
     for (Index i = 0; i < info.number_of_eq_constraints; ++i)
@@ -251,7 +251,7 @@ TEST_F(AugSystemSolverTest, TestSolveDegenRhs)
     ret = solver.solve_rhs(info, jacobian, hessian, D_eq, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     VecRealAllocated jac_x(info.number_of_eq_constraints);
-    jacobian.apply_on_right(info, x, jac_x);
+    jacobian.apply_on_right(info, x, 0.0, jac_x, jac_x);
     VecRealAllocated rhs_gg(info.number_of_eq_constraints);
     rhs_gg = 0.;
     rhs_gg = rhs_gg + rhs_g + jac_x;
@@ -264,9 +264,9 @@ TEST_F(AugSystemSolverTest, TestSolveDegenRhs)
     VecRealAllocated grad(info.number_of_primal_variables);
     VecRealAllocated tmp(info.number_of_primal_variables);
     grad = 0;
-    hessian.apply_on_right(info, x, tmp);
+    hessian.apply_on_right(info, x, 0.0, tmp, tmp);
     grad = grad + tmp + D_x * x;
-    jacobian.transpose_apply_on_right(info, mult, tmp);
+    jacobian.transpose_apply_on_right(info, mult, 0.0, tmp, tmp);
     grad = grad + tmp;
     grad = grad + rhs_x;
     for (Index i = 0; i < info.number_of_eq_constraints; ++i)

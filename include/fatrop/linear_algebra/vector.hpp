@@ -492,6 +492,11 @@ namespace fatrop
             ALLOCATE_VEC(m, &vec_);
             std::memset(vec_.mem, 0, vec_.memsize * sizeof(char));
         }
+        template <typename Derived> VecRealAllocated(const VecReal<Derived> &vec)
+            : VecRealAllocated(vec.m()) 
+        {
+            *this = vec;
+        }
         VecRealAllocated(VecRealAllocated & /*other*/) = delete;
         /**
          * @brief Move constructor for VecRealAllocated.

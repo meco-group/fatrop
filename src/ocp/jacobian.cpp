@@ -27,8 +27,8 @@ Jacobian<OcpType>::Jacobian(const OcpDims &dims)
         Gg_ineqt.emplace_back(dims.number_of_states[k] + dims.number_of_controls[k] + 1,
                               dims.number_of_ineq_constraints[k]);
 };
-void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x,
-                                       VecRealView &out) const
+void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x, Scalar alpha,
+                                       const VecRealView &y, VecRealView &out) const
 {
     // dynamics constraints BA*ux - x_next
     for (Index k = 0; k < info.dims.K - 1; ++k)
@@ -40,7 +40,7 @@ void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x
         Index offset_x_next = info.offsets_primal_x[k + 1];
         Index offset_dyn_eq = info.offsets_g_eq_dyn[k];
         // apply out[offs:offs+nx] =  BAbt.T @ x[offs:offs+nu+nx] - x_next[offs:offs+nx]
-        gemv_t(nu + nx, nx_next, 1.0, BAbt[k], 0, 0, x, offset_ux, 0.0, out, offset_dyn_eq, out,
+        gemv_t(nu + nx, nx_next, 1.0, BAbt[k], 0, 0, x, offset_ux, alpha, y, offset_dyn_eq, out,
                offset_dyn_eq);
         axpy(nx_next, -1.0, x, offset_x_next, out, offset_dyn_eq, out, offset_dyn_eq);
     }
@@ -53,7 +53,7 @@ void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x
         Index offset_ux = info.offsets_primal_u[k];
         Index offset_g_eq = info.offsets_g_eq_path[k];
         // apply out[offs:offs+ng] =  Gg_eqt.T @ x[offs:offs+nu+nx]
-        gemv_t(nu + nx, ng, 1.0, Gg_eqt[k], 0, 0, x, offset_ux, 0.0, out, offset_g_eq, out,
+        gemv_t(nu + nx, ng, 1.0, Gg_eqt[k], 0, 0, x, offset_ux, alpha, y, offset_g_eq, out,
                offset_g_eq);
     }
     // slack equality path constraints Gg_ineqt @ x
@@ -65,16 +65,17 @@ void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x
         Index offset_ux = info.offsets_primal_u[k];
         Index offset_g_ineq = info.offsets_g_eq_slack[k];
         // apply out[offs:offs+ng_ineq] =  Gg_ineqt.T @ x[offs:offs+nu+nx]
-        gemv_t(nu + nx, ng_ineq, 1.0, Gg_ineqt[k], 0, 0, x, offset_ux, 0.0, out, offset_g_ineq, out,
+        gemv_t(nu + nx, ng_ineq, 1.0, Gg_ineqt[k], 0, 0, x, offset_ux, alpha, y, offset_g_ineq, out,
                offset_g_ineq);
     }
 };
 void Jacobian<OcpType>::transpose_apply_on_right(const OcpInfo &info, const VecRealView &mult_eq,
+                                                 Scalar alpha, const VecRealView &y,
                                                  VecRealView &out) const
 {
     // set the output to zero, we will add the contributions
     // dynamics constraints'contributions [BA.T ; 0; -I] @ mult_eq
-    out.block(info.number_of_primal_variables, 0) = 0.0;
+    out.block(info.number_of_primal_variables, 0) = alpha*y;
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
         Index nu = info.dims.number_of_controls[k];

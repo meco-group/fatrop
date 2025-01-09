@@ -17,7 +17,7 @@ Hessian<OcpType>::Hessian(const OcpDims &dims)
         RSQrqt.emplace_back(dims.number_of_states[k] + dims.number_of_controls[k] + 1,
                             dims.number_of_states[k] + dims.number_of_controls[k]);
 };
-void Hessian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x,
+void Hessian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x, Scalar alpha, const VecRealView& y,
                                       VecRealView &out) const
 {
     for (Index k = 0; k < info.dims.K; ++k)
@@ -28,7 +28,7 @@ void Hessian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x,
         // get the offsets of the current variables in x, and out
         Index offset_ux = info.offsets_primal_u[k];
         // apply out[offs:offs+nu+nx] =  RSQ @ x[offs:offs+nu+nx]
-        gemv_t(nu + nx, nu + nx, 1.0, RSQrqt[k], 0, 0, x, offset_ux, 0.0, out, offset_ux, out,
+        gemv_t(nu + nx, nu + nx, 1.0, RSQrqt[k], 0, 0, x, offset_ux, alpha, y, offset_ux, out,
                offset_ux);
     }
 };

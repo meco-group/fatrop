@@ -90,8 +90,8 @@ namespace fatrop
          */
         std::vector<MatRealAllocated> Gg_ineqt;
 
-        void apply_on_right(const OcpInfo& info, const VecRealView &x, VecRealView &out) const;
-        void transpose_apply_on_right(const OcpInfo& info, const VecRealView &mult_eq, VecRealView &out) const;
+        void apply_on_right(const OcpInfo& info, const VecRealView &x, Scalar alpha, const VecRealView& y, VecRealView &out) const;
+        void transpose_apply_on_right(const OcpInfo& info, const VecRealView &mult_eq, Scalar alpha, const VecRealView& y, VecRealView &out) const;
         void get_rhs(const OcpInfo& info, VecRealView &rhs) const;
         void set_rhs(const OcpInfo& info, const VecRealView &rhs);
     };

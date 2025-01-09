@@ -158,7 +158,7 @@ TEST_F(JacobianTestOperations, TestInOut)
 TEST_F(JacobianTestOperations, ApplyOnRightTestt)
 {
     VecRealAllocated out = VecRealAllocated(info.number_of_eq_constraints);
-    jacobian.apply_on_right(info, x, out);
+    jacobian.apply_on_right(info, x, 0.0, out, out);
     VecRealAllocated full_matrix_x(info.number_of_eq_constraints);
     gemv_n(info.number_of_eq_constraints, info.number_of_primal_variables, 1.0, full_matrix, 0, 0,
            x, 0, 0.0, full_matrix_x, 0, full_matrix_x, 0);
@@ -171,7 +171,7 @@ TEST_F(JacobianTestOperations, ApplyOnRightTestt)
 TEST_F(JacobianTestOperations, TransposeApplyOnRightTest)
 {
     VecRealAllocated out = VecRealAllocated(info.number_of_primal_variables);
-    jacobian.transpose_apply_on_right(info, mult, out);
+    jacobian.transpose_apply_on_right(info, mult, 0.0, out, out);
     VecRealAllocated full_matrix_t_mult(info.number_of_primal_variables);
     gemv_t(info.number_of_eq_constraints, info.number_of_primal_variables, 1.0, full_matrix, 0, 0,
            mult, 0, 0.0, full_matrix_t_mult, 0, full_matrix_t_mult, 0);
@@ -241,7 +241,7 @@ TEST_F(HessianTestOperations, TestInOut)
 TEST_F(HessianTestOperations, ApplyOnRightTest)
 {
     VecRealAllocated out = VecRealAllocated(info.number_of_primal_variables);
-    hessian.apply_on_right(info, x, out);
+    hessian.apply_on_right(info, x, 0.0, out, out);
     VecRealAllocated full_matrix_x(info.number_of_primal_variables);
     gemv_n(info.number_of_primal_variables, info.number_of_primal_variables, 1.0, full_matrix, 0, 0,
            x, 0, 0.0, full_matrix_x, 0, full_matrix_x, 0);
