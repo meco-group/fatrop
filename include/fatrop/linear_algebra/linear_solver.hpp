@@ -13,13 +13,10 @@
 
 namespace fatrop
 {
-    template <typename Derived, typename LsType>
-    class LinearSolver
+    template <typename Derived, typename LsType> class LinearSolver
     {
-        public:
-        LinearSolver(const Index m) : m_(m), x_(m_), residual_(m_), tmp_(m_)
-        {
-        }
+    public:
+        LinearSolver(const Index m) : m_(m), x_(m_), residual_(m_), tmp_(m_) {}
         Derived &derived() { return *static_cast<Derived *>(this); }
         // solve without iterative refinement
         LinsolReturnFlag solve_once(LinearSystem<LsType> &ls, VecRealView &x)
@@ -46,13 +43,14 @@ namespace fatrop
             // "accept" x_
             veccp(m_, x_, 0, x, 0);
             Scalar res_prev = std::numeric_limits<Scalar>::max();
+            ls.get_rhs(tmp_);
+            const Scalar b_norm = norm_inf(tmp_);
             for (Index i = 0; i < max_it_ref; i++)
             {
                 // compute residual residual = Ax + b
-                ls.get_rhs(tmp_);
                 ls.apply_on_right(x_, 1.0, tmp_, residual_);
                 // compute residual inf norm
-                const Scalar res_norm = norm_inf(residual_);
+                const Scalar res_norm = norm_inf(residual_) / std::min(b_norm, 1.0);
                 if (res_norm >= res_prev)
                 {
                     return LinsolReturnFlag::ITREF_INCREASE;
@@ -72,9 +70,10 @@ namespace fatrop
                 }
                 ls.set_rhs(residual_);
                 // solve
-                solve_rhs(ls, tmp_);
+                solve_rhs(ls, x_);
                 // update x
-                axpy(m_, 1.0, tmp_, 0, x_, 0, x_, 0);
+                axpy(m_, 1.0, x_, 0, x, 0, x_, 0);
+                res_prev = res_norm;
             }
             return LinsolReturnFlag::UNKNOWN;
         }
@@ -82,7 +81,7 @@ namespace fatrop
     protected:
         const Index m_;
         Index min_it_ref = 0;
-        Index max_it_ref = 5;
+        Index max_it_ref = 10;
         Scalar tol_ = 1e-8;
         VecRealAllocated x_;
         VecRealAllocated residual_;

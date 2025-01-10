@@ -15,6 +15,7 @@
 #include "fatrop/ocp/type.hpp"
 #include <gtest/gtest.h>
 #include <vector>
+#include "fatrop/common/exception.hpp"
 
 using namespace fatrop;
 
@@ -26,12 +27,13 @@ protected:
     std::vector<Index> nx = {20, 10, 10, 10, 10, 2, 0, 1, 10, 5}; // State dimensions for each stage
     std::vector<Index> nu = {1, 4, 2, 10, 1, 30, 4, 1, 10, 0};    // Input dimensions for each stage
     // std::vector<Index> ng = std::vector<Index>(K, 0);      // Equality constraints for each stage
-    // std::vector<Index> ng_ineq = std::vector<Index>(K, 1); // Inequality constraints for each stage
+    // std::vector<Index> ng_ineq = std::vector<Index>(K, 1); // Inequality constraints for each
+    // stage
     std::vector<Index> ng = {9, 3, 4, 3, 4, 0, 1, 0, 1, 5}; // Equality constraints for each
 
     // std::vector<Index> ng = {9, 3, 4, 3, 4, 0, 1, 0, 1, 5}; // Equality constraints for each
-    std::vector<Index> ng_ineq = {0, 5, 10, 0,   0,
-      0, 0, 0,  10, 0}; // Inequality constraints for each stage
+    std::vector<Index> ng_ineq = {0, 5, 10, 0,  0,
+                                  0, 0, 0,  10, 0}; // Inequality constraints for each stage
 
     OcpDims dims{K, nu, nx, ng, ng_ineq};
 
@@ -159,32 +161,30 @@ protected:
         {
             D_eq(i) = 1.0 * (i + 1);
         }
-        sl = 1.;
-        su = 1.;
-        zl = 1.;
-        zu = 1.;
-        rhs_cl = 1.;
-        rhs_cu = 1.;
-        D_i = 0;
+        for (Index i = 0; i < info.number_of_slack_variables; ++i)
+        {
+            sl(i) = 1. + 0.1 * i;
+            su(i) = 1. + 0.2 * i;
+            zl(i) = 1. + 0.3 * i;
+            zu(i) = 1. + 0.4 * i;
+            rhs_cl(i) = 1. + 0.5 * i;
+            rhs_cu(i) = 1. + 0.6 * i;
+            D_i(i) =  1.0 + 0.7 * i;
+        }
     };
 };
 
 TEST_F(PdTest, TestSolve)
 {
-    // rhs_x = 0;
-    // rhs_g.block(info.number_of_g_eq_dyn, info.offset_g_eq_dyn) = 0;
-    // rhs_g.block(info.number_of_slack_variables, info.offset_g_eq_slack) = 0;
-    // rhs_cl = 0;
-    // rhs_cu = 0;
     LinearSystem<PdSystemType<OcpType>> ls(info, jacobian, hessian, D_x, false, D_eq, D_i, sl, su,
                                            zl, zu, rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu);
     VecRealAllocated x_full(ls.m());
+    VecRealAllocated rhs_save(ls.m());
     VecRealAllocated tmp(ls.m());
-    LinsolReturnFlag ret = pd_solver.solve_once(ls, x_full);
+    ls.get_rhs(rhs_save);
+    LinsolReturnFlag ret = pd_solver.solve(ls, x_full);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
-    ls.get_rhs(tmp);
-    // std::cout << "rhs = " << tmp << std::endl;
-    ls.apply_on_right(x_full, 1.0, tmp, tmp);
-    // std::cout << "rhs + Kx = " << tmp << std::endl;
-    std::cout << " linf norm = " << norm_inf(tmp) << std::endl;
+    ls.set_rhs(rhs_save);
+    ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
+    EXPECT_NEAR(norm_inf(tmp), 0, 1e-6);
 }
