@@ -116,6 +116,12 @@ namespace fatrop
         std::vector<Index> offsets_g_eq_slack;
 
         std::vector<Index> number_of_stage_variables;
+
+        Index pd_orig_offset_primal;
+        Index pd_orig_offset_slack;
+        Index pd_orig_offset_mult;
+        Index pd_orig_offset_zl;
+        Index pd_orig_offset_zu;
     };
 } // namespace fatrop
 

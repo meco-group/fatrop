@@ -6,6 +6,8 @@ set(FATROP_SOURCES
     ocp/dims.cpp
     ocp/jacobian.cpp
     ocp/hessian.cpp
+    ocp/pd_system_orig.cpp
+    ocp/pd_solver_orig.cpp
     ocp/problem_info.cpp
 )
 

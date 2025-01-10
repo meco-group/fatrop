@@ -33,6 +33,7 @@ add_executable(lu_factorization_test linear_algebra/lu_factorization_test.cpp)
 add_executable(jacobian_hessian_test ocp/jacobian_hessian_test.cpp)
 add_executable(aug_system_solver_test ocp/aug_system_solver_test.cpp)
 add_executable(problem_info_test ocp/problem_info_test.cpp)
+add_executable(pd_system_solver_test ocp/pd_system_solver_test.cpp)
 
 # Link the test executables with Google Test and other required libraries
 target_link_libraries(vector_test gtest gtest_main blasfeo fatrop)
@@ -41,6 +42,7 @@ target_link_libraries(lu_factorization_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(jacobian_hessian_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(aug_system_solver_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(problem_info_test gtest gtest_main blasfeo fatrop)
+target_link_libraries(pd_system_solver_test gtest gtest_main blasfeo fatrop)
 
 # Discover and add the tests
 gtest_discover_tests(vector_test)
@@ -49,3 +51,4 @@ gtest_discover_tests(lu_factorization_test)
 gtest_discover_tests(jacobian_hessian_test)
 gtest_discover_tests(aug_system_solver_test)
 gtest_discover_tests(problem_info_test)
+gtest_discover_tests(pd_system_solver_test)

@@ -15,6 +15,9 @@ namespace fatrop
     template <> struct Jacobian<OcpType>;
     template <typename T> struct Hessian;
     template <> struct Hessian<OcpType>;
+    template <typename T> struct PdSolverOrig;
+    template <> class PdSolverOrig<OcpType>;
+    class OcpAugSystemSolver;
 } // namespace fatrop
 
 #endif // __fatrop_ocp_fwd_hpp__

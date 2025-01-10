@@ -20,7 +20,7 @@ namespace fatrop
         }
     }
 }
-ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims, const std::vector<bool>& lower_bounded, const std::vector<bool>& upper_bounded)
+ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims)
     : dims(dims), offsets_primal_u(dims.K), offsets_primal_x(dims.K), offsets_g_eq_dyn(dims.K - 1),
       offsets_g_eq_path(dims.K), offsets_g_eq_slack(dims.K)
 {
@@ -78,4 +78,9 @@ ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims, const std::vector<bool>& 
                     offset_g_eq_path, offsets_g_eq_path.begin());
     compute_offsets(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(),
                     offset_g_eq_slack, offsets_g_eq_slack.begin());
+    pd_orig_offset_primal = 0;
+    pd_orig_offset_slack = pd_orig_offset_primal + number_of_primal_variables;
+    pd_orig_offset_mult = pd_orig_offset_slack + number_of_slack_variables;
+    pd_orig_offset_zl = pd_orig_offset_mult + number_of_eq_constraints;
+    pd_orig_offset_zu = pd_orig_offset_zl + number_of_slack_variables;
 }

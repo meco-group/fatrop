@@ -8,21 +8,11 @@
 #include "fatrop/linear_algebra/lu_factorization.hpp"
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/ocp/fwd.hpp"
+#include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 #include <vector>
 
 namespace fatrop
 {
-    /**
-     * @enum LinsolReturnFlag
-     * @brief Enumeration of possible return flags for the linear solver.
-     */
-    enum LinsolReturnFlag
-    {
-        SUCCESS = 0,     ///< The solver successfully found a solution.
-        INDEFINITE = 1,  ///< The reduced Hessian is indefinite; no descent direction found.
-        NOFULL_RANK = 2, ///< The Jacobian is (numerically) not full row rank.
-        UNKNOWN = 3      ///< An unknown error occurred during the solving process.
-    };
 
     /**
      * @class OcpAugSystemSolver
