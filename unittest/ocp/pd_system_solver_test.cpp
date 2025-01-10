@@ -188,3 +188,18 @@ TEST_F(PdTest, TestSolve)
     ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
     EXPECT_NEAR(norm_inf(tmp), 0, 1e-6);
 }
+
+TEST_F(PdTest, TestSolveDegen)
+{
+    LinearSystem<PdSystemType<OcpType>> ls(info, jacobian, hessian, D_x, true, D_eq, D_i, sl, su,
+                                           zl, zu, rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu);
+    VecRealAllocated x_full(ls.m());
+    VecRealAllocated rhs_save(ls.m());
+    VecRealAllocated tmp(ls.m());
+    ls.get_rhs(rhs_save);
+    LinsolReturnFlag ret = pd_solver.solve(ls, x_full);
+    EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
+    ls.set_rhs(rhs_save);
+    ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
+    EXPECT_NEAR(norm_inf(tmp), 0, 1e-6);
+}
