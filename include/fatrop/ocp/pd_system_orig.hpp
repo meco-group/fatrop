@@ -6,7 +6,7 @@
 #include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
-#include "fatrop/nlp/pd_system_orig.hpp"
+#include "fatrop/ip_algorithm/pd_system_orig.hpp"
 #include "fatrop/ocp/fwd.hpp"
 #include "fatrop/ocp/type.hpp"
 

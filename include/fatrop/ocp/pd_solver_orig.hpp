@@ -7,7 +7,7 @@
 // Primal-Dual System (PD System)
 
 #include "fatrop/linear_algebra/fwd.hpp"
-#include "fatrop/nlp/pd_solver_orig.hpp"
+#include "fatrop/ip_algorithm/pd_solver_orig.hpp"
 #include "fatrop/ocp/fwd.hpp"
 #include "fatrop/ocp/pd_system_orig.hpp"
 #include "fatrop/ocp/type.hpp"

@@ -159,7 +159,7 @@ protected:
 
         for (Index i = 0; i < info.number_of_g_eq_path; ++i)
         {
-            D_eq(i) = 1.0 * (i + 1);
+            D_eq(i) = 1e-8 * (i + 1);
         }
         for (Index i = 0; i < info.number_of_slack_variables; ++i)
         {

@@ -2,8 +2,8 @@
 // Copyright (C) 2024 Lander Vanroye, KU Leuven
 //
 
-#ifndef __fatrop_nlp_pd_system_orig__
-#define __fatrop_nlp_pd_system_orig__
+#ifndef __fatrop_ip_algorithm_pd_system_orig__
+#define __fatrop_ip_algorithm_pd_system_orig__
 
 #include "fatrop/linear_algebra/linear_system.hpp"
 #include "fatrop/nlp/fwd.hpp"
@@ -46,4 +46,4 @@ namespace fatrop
     };
 } // namespace fatrop
 
-#endif //__fatrop_nlp_pd_system_orig__
+#endif //__fatrop_ip_algorithm_pd_system_orig__

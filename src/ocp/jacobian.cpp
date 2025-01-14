@@ -76,7 +76,7 @@ void Jacobian<OcpType>::transpose_apply_on_right(const OcpInfo &info, const VecR
 {
     // set the output to zero, we will add the contributions
     // dynamics constraints'contributions [BA.T ; 0; -I] @ mult_eq
-    out.block(info.number_of_primal_variables, 0) = alpha*y;
+    out = alpha*y;
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
         Index nu = info.dims.number_of_controls[k];
