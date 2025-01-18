@@ -15,8 +15,8 @@
 #include "fatrop/linear_algebra/blasfeo_wrapper.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include <cmath>
-#include <iomanip>
 #include <cstring>
+#include <iomanip>
 
 namespace fatrop
 {
@@ -469,6 +469,8 @@ namespace fatrop
         inline const VEC &vec() const;
         inline Index m() const;
         inline Index ai() const;
+        Scalar *data() { return m() > 0 ? &this->operator()(0) : nullptr; }
+        const Scalar *data() const { return m() > 0 ? &this->operator()(0) : nullptr; }
 
     private:
         VecRealAllocated &vec_;
@@ -492,8 +494,8 @@ namespace fatrop
             ALLOCATE_VEC(m, &vec_);
             std::memset(vec_.mem, 0, vec_.memsize * sizeof(char));
         }
-        template <typename Derived> VecRealAllocated(const VecReal<Derived> &vec)
-            : VecRealAllocated(vec.m()) 
+        template <typename Derived>
+        VecRealAllocated(const VecReal<Derived> &vec) : VecRealAllocated(vec.m())
         {
             *this = vec;
         }
@@ -532,7 +534,11 @@ namespace fatrop
         /**
          * @brief Destructor that frees the allocated vector memory.
          */
-        ~VecRealAllocated() { if(vec_.mem != nullptr) FREE_VEC(&vec()); }
+        ~VecRealAllocated()
+        {
+            if (vec_.mem != nullptr)
+                FREE_VEC(&vec());
+        }
 
     private:
         VEC vec_;

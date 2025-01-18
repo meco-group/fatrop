@@ -1,42 +1,26 @@
+
 //
 // Copyright (C) 2024 Lander Vanroye, KU Leuven
 //
 
-#ifndef __fatrop_ocp_abstract_hpp__
-#define __fatrop_ocp_abstract_hpp__
+#ifndef __fatrop_ocp_eval_hpp__
+#define __fatrop_ocp_eval_hpp__
 
 #include "fatrop/context/context.hpp"
-#include "fatrop/ocp/ocp_eval.hpp"
 
 /**
- * @file ocp_abstract.hpp
- * @brief Defines the abstract base class for Optimal Control Problems (OCPs).
- *
- * This file contains the abstract base class OcpAbstract, which provides
- * the interface for defining and solving Optimal Control Problems (OCPs).
- * It includes methods for evaluating dynamics, constraints, objective functions,
- * and their derivatives, as well as methods for retrieving problem dimensions
- * and initial guesses.
+ * @file ocp_eval.hpp
  */
 
 namespace fatrop
 {
-    // tag for OcpAbstract
-    struct OcpAbstractDynamic
-    {
-    };
     /**
      * @brief Abstract base class for Optimal Control Problems.
-     *
-     * This class defines the interface for Optimal Control Problems (OCPs).
-     * It provides methods for evaluating dynamics, constraints, objective functions,
-     * and their derivatives. It also includes methods for retrieving problem
-     * dimensions, initial guesses, and bounds.
-     *
      * Derived classes should implement these methods to define specific OCPs.
+     * An important specialization class is with the OcpAbstractDynamic tag, which provides an
+     * interface using dynamic polymorphism.
      */
-
-    template <> class OcpAbstractTpl<OcpAbstractDynamic>
+    template <typename OcpAbstractTag> class OcpAbstractTpl
     {
     public:
         /**
@@ -44,21 +28,21 @@ namespace fatrop
          * @param k Time step
          * @return Number of states
          */
-        virtual Index get_nx(const Index k) const = 0;
+        Index get_nx(const Index k) const;
 
         /**
          * @brief Get the number of inputs for a given time step.
          * @param k Time step
          * @return Number of inputs
          */
-        virtual Index get_nu(const Index k) const = 0;
+        Index get_nu(const Index k) const;
 
         /**
          * @brief Get the number of equality constraints for a given time step.
          * @param k Time step
          * @return Number of equality constraints
          */
-        virtual Index get_ng(const Index k) const = 0;
+        Index get_ng(const Index k) const;
 
         /**
         /**
@@ -66,13 +50,13 @@ namespace fatrop
          * @param k Time step
          * @return Number of inequality constraints
          */
-        virtual Index get_ng_ineq(const Index k) const = 0;
+        Index get_ng_ineq(const Index k) const;
 
         /**
          * @brief Get the horizon length of the OCP.
          * @return Horizon length
          */
-        virtual Index get_horizon_length() const = 0;
+        Index get_horizon_length() const;
         /**
          * @brief Evaluate the discretized dynamics.
          *
@@ -90,8 +74,8 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_BAbt(const Scalar *states_kp1, const Scalar *inputs_k,
-                                const Scalar *states_k, MAT *res, const Index k) = 0;
+        Index eval_BAbt(const Scalar *states_kp1, const Scalar *inputs_k, const Scalar *states_k,
+                        MAT *res, const Index k);
 
         /**
          * @brief Evaluate the stagewise Lagrangian Hessian.
@@ -115,10 +99,9 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_RSQrqt(const Scalar *objective_scale, const Scalar *inputs_k,
-                                  const Scalar *states_k, const Scalar *lam_dyn_k,
-                                  const Scalar *lam_eq_k, const Scalar *lam_eq_ineq_k, MAT *res,
-                                  const Index k) = 0;
+        Index eval_RSQrqt(const Scalar *objective_scale, const Scalar *inputs_k,
+                          const Scalar *states_k, const Scalar *lam_dyn_k, const Scalar *lam_eq_k,
+                          const Scalar *lam_eq_ineq_k, MAT *res, const Index k);
 
         /**
          * @brief Evaluate the stagewise equality constraints Jacobian.
@@ -136,8 +119,7 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_Ggt(const Scalar *inputs_k, const Scalar *states_k, MAT *res,
-                               const Index k) = 0;
+        Index eval_Ggt(const Scalar *inputs_k, const Scalar *states_k, MAT *res, const Index k);
 
         /**
          * @brief Evaluate the stagewise inequality constraints Jacobian.
@@ -155,8 +137,8 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_Ggt_ineq(const Scalar *inputs_k, const Scalar *states_k, MAT *res,
-                                    const Index k) = 0;
+        Index eval_Ggt_ineq(const Scalar *inputs_k, const Scalar *states_k, MAT *res,
+                            const Index k);
         /**
          * @brief Evaluate the dynamics constraint violation.
          *
@@ -169,8 +151,8 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k,
-                             const Scalar *states_k, Scalar *res, const Index k) = 0;
+        Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k, const Scalar *states_k,
+                     Scalar *res, const Index k);
 
         /**
          * @brief Evaluate the equality constraint violation.
@@ -183,8 +165,7 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_g(const Scalar *inputs_k, const Scalar *states_k, Scalar *res,
-                             const Index k) = 0;
+        Index eval_g(const Scalar *inputs_k, const Scalar *states_k, Scalar *res, const Index k);
 
         /**
          * @brief Evaluate the inequality constraint violation.
@@ -197,8 +178,8 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_gineq(const Scalar *inputs_k, const Scalar *states_k, Scalar *res,
-                                 const Index k) = 0;
+        Index eval_gineq(const Scalar *inputs_k, const Scalar *states_k, Scalar *res,
+                         const Index k);
 
         /**
          * @brief Evaluate the gradient of the objective function.
@@ -213,8 +194,8 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_rq(const Scalar *objective_scale, const Scalar *inputs_k,
-                              const Scalar *states_k, Scalar *res, const Index k) = 0;
+        Index eval_rq(const Scalar *objective_scale, const Scalar *inputs_k, const Scalar *states_k,
+                      Scalar *res, const Index k);
 
         /**
          * @brief Evaluate the objective function value.
@@ -226,8 +207,8 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index eval_L(const Scalar *objective_scale, const Scalar *inputs_k,
-                             const Scalar *states_k, Scalar *res, const Index k) = 0;
+        Index eval_L(const Scalar *objective_scale, const Scalar *inputs_k, const Scalar *states_k,
+                     Scalar *res, const Index k);
 
         /**
          * @brief Get the bounds of the inequalities at a given stage.
@@ -237,7 +218,7 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const = 0;
+        Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const;
 
         /**
          * @brief Get the default initial guess for the states of a given stage.
@@ -246,7 +227,7 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index get_initial_xk(Scalar *xk, const Index k) const = 0;
+        Index get_initial_xk(Scalar *xk, const Index k) const;
 
         /**
          * @brief Get the default initial guess for the inputs of a given stage.
@@ -255,18 +236,9 @@ namespace fatrop
          * @param k Time step
          * @return Status code
          */
-        virtual Index get_initial_uk(Scalar *uk, const Index k) const = 0;
-
-        /**
-         * @brief Virtual destructor for OcpAbstract.
-         *
-         * This virtual destructor ensures proper cleanup of derived classes.
-         */
-        virtual ~OcpAbstractTpl() = default;
+        Index get_initial_uk(Scalar *uk, const Index k) const;
     };
-
-    typedef OcpAbstractTpl<OcpAbstractDynamic> OcpAbstract;
 
 } // namespace fatrop
 
-#endif //__fatrop_ocp_abstract_hpp__
+#endif //__fatrop_ocp_eval_hpp__
