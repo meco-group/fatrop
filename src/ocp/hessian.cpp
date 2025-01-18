@@ -58,3 +58,18 @@ void Hessian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &in)
         rowin(nu + nx, 1.0, in, offset_ux, RSQrqt[k], nu + nx, 0);
     }
 };
+// make printable
+namespace fatrop
+{
+
+    std::ostream &operator<<(std::ostream &os, const Hessian<OcpType> &hess)
+    {
+        os << "Hessian<OcpType> object with horizon length " << hess.RSQrqt.size();
+        for (int k = 0; k < hess.RSQrqt.size(); ++k)
+        {
+            os << "\n ----- Stage " << k << ": -----\n";
+            os << "RSQrq:\n" << transpose(hess.RSQrqt[k]) << "\n";
+        }
+        return os;
+    }
+}

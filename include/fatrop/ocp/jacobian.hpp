@@ -94,6 +94,8 @@ namespace fatrop
         void transpose_apply_on_right(const OcpInfo& info, const VecRealView &mult_eq, Scalar alpha, const VecRealView& y, VecRealView &out) const;
         void get_rhs(const OcpInfo& info, VecRealView &rhs) const;
         void set_rhs(const OcpInfo& info, const VecRealView &rhs);
+        // make printable 
+        friend std::ostream &operator<<(std::ostream &os, const Jacobian &jac);
     };
 } // namespace fatrop
 

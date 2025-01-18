@@ -30,7 +30,7 @@ Jacobian<OcpType>::Jacobian(const OcpDims &dims)
 void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x, Scalar alpha,
                                        const VecRealView &y, VecRealView &out) const
 {
-    out = alpha*y;
+    out = alpha * y;
     // dynamics constraints BA*ux - x_next
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
@@ -76,7 +76,7 @@ void Jacobian<OcpType>::transpose_apply_on_right(const OcpInfo &info, const VecR
 {
     // set the output to zero, we will add the contributions
     // dynamics constraints'contributions [BA.T ; 0; -I] @ mult_eq
-    out = alpha*y;
+    out = alpha * y;
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
         Index nu = info.dims.number_of_controls[k];
@@ -182,3 +182,21 @@ void Jacobian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &rhs)
         rowin(ng_ineq, 1.0, rhs, offset_eq_ineq, Gg_ineqt[k], nu + nx, 0);
     }
 };
+
+// make printable
+namespace fatrop
+{
+    std::ostream &operator<<(std::ostream &os, const Jacobian<OcpType> &jac)
+    {
+        os << "Jacobian<OcpType> object with horizon length " << jac.Gg_eqt.size();
+        for (int k = 0; k < jac.Gg_eqt.size(); ++k)
+        {
+            os << "\n ----- Stage " << k << ": -----\n";
+            os << "Gg_eq:\n" << transpose(jac.Gg_eqt[k]) << "\n";
+            os << "Gg_ineq:\n" << transpose(jac.Gg_ineqt[k]) << "\n";
+            if (k < jac.BAbt.size())
+                os << "BAb:\n" << transpose(jac.BAbt[k]) << "\n";
+        }
+        return os;
+    }
+}
