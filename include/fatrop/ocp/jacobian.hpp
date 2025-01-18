@@ -43,7 +43,7 @@ namespace fatrop
          *
          * @param dims The dimensions of the OCP, used to allocate appropriate memory.
          */
-        Jacobian(const OcpDims &dims);
+        Jacobian(const ProblemDims<OcpType> &dims);
 
         /**
          * @brief Constraint Jacobian of the dynamics.

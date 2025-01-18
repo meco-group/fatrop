@@ -20,7 +20,7 @@ namespace fatrop
         }
     }
 }
-ProblemInfo<OcpType>::ProblemInfo(const OcpDims &dims)
+ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     : dims(dims), offsets_primal_u(dims.K), offsets_primal_x(dims.K), offsets_g_eq_dyn(dims.K - 1),
       offsets_g_eq_path(dims.K), offsets_g_eq_slack(dims.K)
 {

@@ -29,7 +29,7 @@ namespace fatrop
     public:
         NlpOcpTpl(const OcpAbstractSp &ocp);
         const NlpDims &nlp_dims() const override { return nlp_dims_; }
-        const OcpDims &ocp_dims() const { return ocp_dims_; }
+        const ProblemDims<OcpType> &problem_dims() const { return ocp_dims_; }
         Index eval_lag_hess(const OcpInfo &info, const Scalar objective_scale,
                             const VecRealView &primal_x, const VecRealView &primal_s,
                             const VecRealView &lam, Hessian<OcpType> &hess) override;
@@ -46,7 +46,7 @@ namespace fatrop
 
     private:
         const OcpAbstractSp ocp_;
-        OcpDims ocp_dims_;
+        ProblemDims<OcpType> ocp_dims_;
         NlpDims nlp_dims_;
     };
 

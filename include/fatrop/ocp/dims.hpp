@@ -6,6 +6,8 @@
 #define __fatrop_ocp_dims_hpp__
 
 #include "fatrop/context/context.hpp"
+#include "fatrop/nlp/dims.hpp"
+#include "fatrop/ocp/type.hpp"
 #include <vector>
 
 namespace fatrop
@@ -16,10 +18,11 @@ namespace fatrop
      * This structure holds the dimensions of various components in an OCP,
      * including the number of states, controls, and constraints for each stage.
      */
-    struct OcpDims
+    template <>
+    struct ProblemDims<OcpType>
     {
         /**
-         * @brief Constructs an OcpDims object (lvalue reference version).
+         * @brief Constructs an ProblemDims object (lvalue reference version).
          *
          * @param K Number of stages / time steps in the Ocp. This means that there are K state
          * vectors, and K-1 control vectors used in the dynamics.
@@ -28,11 +31,11 @@ namespace fatrop
          * @param ng Vector of number of equality constraints for each stage.
          * @param ng_ineq Vector of number of inequality constraints for each stage.
          */
-        OcpDims(int K, const std::vector<Index> &nu, const std::vector<Index> &nx,
+        ProblemDims(int K, const std::vector<Index> &nu, const std::vector<Index> &nx,
                 const std::vector<Index> &ng, const std::vector<Index> &ng_ineq);
 
         /**
-         * @brief Constructs an OcpDims object (rvalue reference version).
+         * @brief Constructs an ProblemDims object (rvalue reference version).
          *
          * @param k Number of stages in the OCP.
          * @param nu Vector of number of controls for each stage.
@@ -40,7 +43,7 @@ namespace fatrop
          * @param ng Vector of number of equality constraints for each stage.
          * @param ng_ineq Vector of number of inequality constraints for each stage.
          */
-        OcpDims(int K, std::vector<Index> &&nu, std::vector<Index> &&nx, std::vector<Index> &&ng,
+        ProblemDims(int K, std::vector<Index> &&nu, std::vector<Index> &&nx, std::vector<Index> &&ng,
                 std::vector<Index> &&ng_ineq);
         void check_problem_dimensions() const;
 

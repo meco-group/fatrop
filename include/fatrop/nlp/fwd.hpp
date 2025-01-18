@@ -11,6 +11,7 @@ namespace fatrop
     template <typename T> struct ProblemInfo;
     template <typename T> struct Jacobian;
     template <typename T> struct Hessian;
+    template <typename T> struct ProblemDims;
 } // namespace fatrop
 
 #endif // __fatrop_nlp_fwd_hpp__

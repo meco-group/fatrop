@@ -17,7 +17,7 @@ class NlpOcpTest : public ::testing::Test
 protected:
     OcpTestSp ocp = std::make_shared<OcpTestProblem>();
     NlpOcp nlp_ocp = NlpOcp(ocp);
-    ProblemInfo<OcpType> ocp_info = ProblemInfo<OcpType>(nlp_ocp.ocp_dims());
+    ProblemInfo<OcpType> ocp_info = ProblemInfo<OcpType>(nlp_ocp.problem_dims());
     VecRealAllocated primal_x = VecRealAllocated(nlp_ocp.nlp_dims().number_of_variables);
     VecRealAllocated primal_s = VecRealAllocated(nlp_ocp.nlp_dims().number_of_ineq_constraints);
     VecRealAllocated mult = VecRealAllocated(nlp_ocp.nlp_dims().number_of_eq_constraints);
@@ -28,21 +28,21 @@ protected:
 
 TEST_F(NlpOcpTest, CheckProblemDimensions)
 {
-    EXPECT_EQ(nlp_ocp.ocp_dims().K, 100);
-    EXPECT_EQ(nlp_ocp.ocp_dims().number_of_states[0], 4);
-    EXPECT_EQ(nlp_ocp.ocp_dims().number_of_controls[0], 2);
-    EXPECT_EQ(nlp_ocp.ocp_dims().number_of_controls[99], 0);
+    EXPECT_EQ(nlp_ocp.problem_dims().K, 100);
+    EXPECT_EQ(nlp_ocp.problem_dims().number_of_states[0], 4);
+    EXPECT_EQ(nlp_ocp.problem_dims().number_of_controls[0], 2);
+    EXPECT_EQ(nlp_ocp.problem_dims().number_of_controls[99], 0);
 }
 
 TEST_F(NlpOcpTest, TestJacobian)
 {
-    Jacobian<OcpType> jac(nlp_ocp.ocp_dims());
+    Jacobian<OcpType> jac(nlp_ocp.problem_dims());
     EXPECT_NO_THROW(nlp_ocp.eval_constr_jac(ocp_info, primal_x, primal_s, jac));
 }
 
 TEST_F(NlpOcpTest, TestLagrangianHessian)
 {
-    Hessian<OcpType> hess(nlp_ocp.ocp_dims());
+    Hessian<OcpType> hess(nlp_ocp.problem_dims());
     Scalar objective_scale = 1.0;
     EXPECT_NO_THROW(nlp_ocp.eval_lag_hess(ocp_info, objective_scale, primal_x, primal_s, mult, hess));
     // Add more specific checks here if needed

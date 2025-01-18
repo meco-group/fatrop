@@ -22,7 +22,7 @@ TEST(JacobianTest, ConstructorTest)
     std::vector<Index> ng = {1, 0, 0, 0, 2};      // Equality constraints for each stage
     std::vector<Index> ng_ineq = {1, 0, 2, 0, 0}; // Inequality constraints for each stage
 
-    OcpDims dims(K, nx, nu, ng, ng_ineq);
+    ProblemDims<OcpType> dims(K, nx, nu, ng, ng_ineq);
 
     // Check if Jacobian object can be constructed without throwing an exception
     EXPECT_NO_THROW({ Jacobian<OcpType> jacobian(dims); });
@@ -37,7 +37,7 @@ TEST(HessianTest, ConstructorTest)
     std::vector<Index> ng = {1, 0, 0, 0, 2};      // Equality constraints for each stage
     std::vector<Index> ng_ineq = {1, 0, 2, 0, 0}; // Inequality constraints for each stage
 
-    OcpDims dims(K, nx, nu, ng, ng_ineq);
+    ProblemDims<OcpType> dims(K, nx, nu, ng, ng_ineq);
 
     // Check if Hessian object can be constructed without throwing an exception
     EXPECT_NO_THROW({ Hessian<OcpType> hessian(dims); });
@@ -70,7 +70,7 @@ protected:
     std::vector<Index> ng = {1, 0, 5, 0, 2};      // Equality constraints for each stage
     std::vector<Index> ng_ineq = {1, 0, 3, 0, 0}; // Inequality constraints for each stage
 
-    OcpDims dims{K, nu, nx, ng, ng_ineq};
+    ProblemDims<OcpType> dims{K, nu, nx, ng, ng_ineq};
 
     ProblemInfo<OcpType> info{dims};
     // Create Jacobian object
@@ -191,7 +191,7 @@ protected:
     std::vector<Index> ng = {1, 0, 5, 0, 2};      // Equality constraints for each stage
     std::vector<Index> ng_ineq = {1, 0, 3, 0, 0}; // Inequality constraints for each stage
 
-    OcpDims dims{K, nu, nx, ng, ng_ineq};
+    ProblemDims<OcpType> dims{K, nu, nx, ng, ng_ineq};
 
     ProblemInfo<OcpType> info{dims};
     // Create Hessian object

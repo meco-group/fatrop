@@ -24,10 +24,10 @@ namespace fatrop
          *
          * @param dims The dimensions of the OCP
          */
-        ProblemInfo(const OcpDims &dims);
+        ProblemInfo(const ProblemDims<OcpType> &dims);
 
         /// The dimensions of the OCP
-        const OcpDims dims;
+        const ProblemDims<OcpType> dims;
 
         // Number of primal variables
         Index number_of_primal_variables;

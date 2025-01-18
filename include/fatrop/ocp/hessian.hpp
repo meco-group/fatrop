@@ -43,7 +43,7 @@ namespace fatrop
          *
          * @param dims The dimensions of the OCP, used to allocate appropriate memory.
          */
-        Hessian(const OcpDims &dims);
+        Hessian(const ProblemDims<OcpType> &dims);
 
         /**
          * @brief Constraint Hessian of the dynamics.

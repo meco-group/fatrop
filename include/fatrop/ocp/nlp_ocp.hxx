@@ -16,7 +16,7 @@ namespace fatrop
     {
         template <typename OcpAbstractTag> struct NlpOcpAuxiliary
         {
-            static OcpDims get_ocp_dims(const OcpAbstractTpl<OcpAbstractTag> &ocp)
+            static ProblemDims<OcpType> get_ocp_dims(const OcpAbstractTpl<OcpAbstractTag> &ocp)
             {
                 const Index K = ocp.get_horizon_length();
                 std::vector<Index> nu(K), nx(K), ng(K), ng_ineq(K);
@@ -27,9 +27,9 @@ namespace fatrop
                     ng[k] = ocp.get_ng(k);
                     ng_ineq[k] = ocp.get_ng_ineq(k);
                 }
-                return OcpDims(K, nu, nx, ng, ng_ineq);
+                return ProblemDims<OcpType>(K, nu, nx, ng, ng_ineq);
             }
-            static NlpDims get_nlp_dims(const OcpDims &ocp_dims)
+            static NlpDims get_nlp_dims(const ProblemDims<OcpType> &ocp_dims)
             {
                 Index number_of_variables = 0;
                 Index number_of_eq_constraints = 0;

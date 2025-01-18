@@ -8,7 +8,7 @@
 #include "fatrop/ocp/problem_info.hpp"
 using namespace fatrop;
 
-Jacobian<OcpType>::Jacobian(const OcpDims &dims)
+Jacobian<OcpType>::Jacobian(const ProblemDims<OcpType> &dims)
 {
     // reserve memory for the Jacobian matrices
     BAbt.reserve(dims.K - 1);

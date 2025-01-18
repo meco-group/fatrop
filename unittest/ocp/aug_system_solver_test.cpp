@@ -26,7 +26,7 @@ protected:
     std::vector<Index> ng_ineq = {0, 5, 10, 0,   0,
                                   0, 0, 0,  10, 0}; // Inequality constraints for each stage
 
-    OcpDims dims{K, nu, nx, ng, ng_ineq};
+    ProblemDims<OcpType> dims{K, nu, nx, ng, ng_ineq};
 
     ProblemInfo<OcpType> info{dims};
     // Create Jacobian object

@@ -14,6 +14,7 @@ namespace fatrop
     {
     public:
         virtual const NlpDims &nlp_dims() const = 0;
+        virtual const ProblemDims<ProblemType> &problem_dims() const = 0;
         virtual Index eval_lag_hess(const ProblemInfo<ProblemType> &info, const Scalar objective_scale,
                                     const VecRealView &primal_x, const VecRealView &primal_s,
                                     const VecRealView &lam, Hessian<ProblemType> &hess) = 0;

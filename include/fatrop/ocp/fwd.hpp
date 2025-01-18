@@ -8,7 +8,9 @@
 namespace fatrop
 {
     class OcpType;
-    struct OcpDims;
+    template <typename T> struct ProblemDims; 
+    template<>
+    struct ProblemDims<OcpType>;
     template <typename T> struct ProblemInfo;
     template <> struct ProblemInfo<OcpType>;
     template <typename T> struct Jacobian;
