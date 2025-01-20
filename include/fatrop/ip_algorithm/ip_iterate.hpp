@@ -9,9 +9,10 @@
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/hessian.hpp"
 #include "fatrop/nlp/jacobian.hpp"
-#include "fatrop/nlp/nlp.hpp"
+#include "fatrop/nlp/fwd.hpp"
 #include <memory>
 #include <vector>
+#include <utility>
 
 namespace fatrop
 {
@@ -45,8 +46,8 @@ namespace fatrop
         const VecRealView &delta_dual_eq() const { return delta_dual_eq_; }
         VecRealView &delta_dual_bounds_l() { return delta_dual_bounds_l_; }
         const VecRealView &delta_dual_bounds_l() const { return delta_dual_bounds_l_; }
-        VecRealView &delta_dual_bounds_z() { return delta_dual_bounds_z_; }
-        const VecRealView &delta_dual_bounds_z() const { return delta_dual_bounds_z_; }
+        VecRealView &delta_dual_bounds_u() { return delta_dual_bounds_u_; }
+        const VecRealView &delta_dual_bounds_u() const { return delta_dual_bounds_u_; }
 
         Scalar obj_value();
         Scalar barrier_value();
@@ -66,6 +67,9 @@ namespace fatrop
         void set_mu(Scalar value);
         Scalar linear_decrease_objective();
         Scalar linear_decrease_barrier();
+        std::pair<Scalar, Scalar> maximum_step_size(const Scalar tau);
+
+        Index number_of_bounds() const { return number_of_bounds_; }
 
         Hessian<ProblemType> &hessian();
         Jacobian<ProblemType> &jacobian();
@@ -85,13 +89,13 @@ namespace fatrop
         VecRealAllocated
             delta_dual_bounds_l_; ///< Dual search direction of the lower bound constraints.
         VecRealAllocated
-            delta_dual_bounds_z_; ///< Dual search direction of the upper bound constraints.
+            delta_dual_bounds_u_; ///< Dual search direction of the upper bound constraints.
         // Evaluated quantities
-        Scalar obj_value_;                    ///< Objective value of the NLP.
-        Scalar barrier_value_;                ///< Value of the barrier.
-        VecRealAllocated obj_gradient_x_;     ///< Gradient of the objective function.
-        VecRealAllocated obj_gradient_s_;     ///< Gradient of the objective function.
-        VecRealAllocated constr_viol_;        ///< Residual of the equality constraints.
+        Scalar obj_value_;                      ///< Objective value of the NLP.
+        Scalar barrier_value_;                  ///< Value of the barrier.
+        VecRealAllocated obj_gradient_x_;       ///< Gradient of the objective function.
+        VecRealAllocated obj_gradient_s_;       ///< Gradient of the objective function.
+        VecRealAllocated constr_viol_;          ///< Residual of the equality constraints.
         VecRealAllocated dual_infeasibility_x_; ///< Residual of the equality constraints.
         VecRealAllocated dual_infeasibility_s_; ///< Residual of the equality constraints.
         // Derived quantities

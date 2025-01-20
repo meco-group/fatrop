@@ -6,6 +6,7 @@
 #define __fatrop_ip_algorithm_ip_iterate_hxx__
 
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include <algorithm>
 #include <cmath>
 namespace fatrop
 {
@@ -137,7 +138,9 @@ namespace fatrop
         if (!dual_infeasibility_s_evaluated_)
         {
             // by convention of the solver dual bounds are zero when not bounded
-            dual_infeasibility_s_ = -1.*dual_eq_.block(info.number_of_slack_variables, info.offset_g_eq_slack) + dual_bounds_u_ - dual_bounds_l_;
+            dual_infeasibility_s_ =
+                -1. * dual_eq_.block(info.number_of_slack_variables, info.offset_g_eq_slack) +
+                dual_bounds_u_ - dual_bounds_l_;
             dual_infeasibility_s_evaluated_ = true;
         }
         return dual_infeasibility_s_;
@@ -232,6 +235,34 @@ namespace fatrop
         }
         return linear_decrease_barrier_;
     }
+
+    template <typename ProblemType>
+    std::pair<Scalar, Scalar> IpIterate<ProblemType>::maximum_step_size(const Scalar tau)
+    {
+        Scalar alpha_max_pr = 1.;
+        Scalar alpha_max_du = 1.;
+        for (Index i = 0; i < primal_s_.m(); i++)
+        {
+            Scalar delta_si = delta_primal_s_(i);
+            if (lower_bounded_[i])
+            {
+                Scalar delta_zi = delta_dual_bounds_l_(i);
+                if (delta_si < 0)
+                    alpha_max_pr = std::min(alpha_max_pr, -tau * delta_lower_(i) / delta_si);
+                if (delta_zi < 0)
+                    alpha_max_du = std::min(alpha_max_du, -tau * dual_bounds_l_(i) / delta_zi);
+            }
+            if (upper_bounded_[i])
+            {
+                Scalar delta_zi = delta_dual_bounds_u_(i);
+                if (delta_si > 0)
+                    alpha_max_pr = std::min(alpha_max_pr, tau * delta_upper_(i) / delta_si);
+                if (delta_zi < 0)
+                    alpha_max_du = std::min(alpha_max_du, -tau * dual_bounds_u_(i) / delta_zi);
+            }
+        }
+        return {alpha_max_pr, alpha_max_du};
+    }
     template <typename ProblemType>
     IpIterate<ProblemType>::IpIterate(const NlpSp &nlp)
         : info(nlp->problem_dims()), primal_x_(nlp->nlp_dims().number_of_variables),
@@ -243,7 +274,7 @@ namespace fatrop
           delta_primal_s_(nlp->nlp_dims().number_of_ineq_constraints),
           delta_dual_eq_(nlp->nlp_dims().number_of_eq_constraints),
           delta_dual_bounds_l_(nlp->nlp_dims().number_of_ineq_constraints),
-          delta_dual_bounds_z_(nlp->nlp_dims().number_of_ineq_constraints),
+          delta_dual_bounds_u_(nlp->nlp_dims().number_of_ineq_constraints),
           obj_gradient_x_(nlp->nlp_dims().number_of_variables),
           obj_gradient_s_(nlp->nlp_dims().number_of_ineq_constraints),
           constr_viol_(nlp->nlp_dims().number_of_eq_constraints),
