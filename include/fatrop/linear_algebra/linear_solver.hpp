@@ -16,19 +16,19 @@ namespace fatrop
     template <typename Derived, typename LsType> class LinearSolver
     {
     public:
-        LinearSolver(const Index m) : m_(m), x_(m_), residual_(m_), tmp_(m_) {}
+        LinearSolver(const Index m) : m_(m), x(m), x_(m_), residual_(m_), tmp_(m_) {}
         Derived &derived() { return *static_cast<Derived *>(this); }
         // solve without iterative refinement
-        LinsolReturnFlag solve_once(LinearSystem<LsType> &ls, VecRealView &x)
+        LinsolReturnFlag solve_once(LinearSystem<LsType> &ls, VecRealView &x_in)
         {
-            return derived().solve_once_impl(ls, x);
+            return derived().solve_once_impl(ls, x_in);
         }
-        void solve_rhs(LinearSystem<LsType> &ls, VecRealView &x)
+        void solve_rhs(LinearSystem<LsType> &ls, VecRealView &x_in)
         {
-            return derived().solve_rhs_impl(ls, x);
+            return derived().solve_rhs_impl(ls, x_in);
         }
         // solve with iterative refinement
-        LinsolReturnFlag solve(LinearSystem<LsType> &ls, VecRealView &x)
+        LinsolReturnFlag solve_in_place(LinearSystem<LsType> &ls)
         {
             // reset x
             vecse(m_, 0.0, x_, 0);
@@ -53,6 +53,7 @@ namespace fatrop
                 const Scalar res_norm = norm_inf(residual_) / std::min(b_norm, 1.0);
                 if (res_norm >= res_prev)
                 {
+                    ls.set_rhs(x);
                     return LinsolReturnFlag::ITREF_INCREASE;
                 }
                 else
@@ -62,10 +63,12 @@ namespace fatrop
                 }
                 if (res_norm < tol_ && i >= min_it_ref)
                 {
+                    ls.set_rhs(x);
                     return LinsolReturnFlag::SUCCESS;
                 }
                 if (i == max_it_ref - 1)
                 {
+                    ls.set_rhs(x);
                     return LinsolReturnFlag::ITREF_MAX_ITER;
                 }
                 ls.set_rhs(residual_);
@@ -75,6 +78,7 @@ namespace fatrop
                 axpy(m_, 1.0, x_, 0, x, 0, x_, 0);
                 res_prev = res_norm;
             }
+            ls.set_rhs(x);
             return LinsolReturnFlag::UNKNOWN;
         }
 
@@ -83,6 +87,7 @@ namespace fatrop
         Index min_it_ref = 0;
         Index max_it_ref = 10;
         Scalar tol_ = 1e-8;
+        VecRealAllocated x;
         VecRealAllocated x_;
         VecRealAllocated residual_;
         VecRealAllocated tmp_;

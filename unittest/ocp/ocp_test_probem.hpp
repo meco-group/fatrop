@@ -72,9 +72,9 @@ namespace fatrop::test
             blasfeo_matel_wrap(res, 0, 2) = dt_ / m_;
             blasfeo_matel_wrap(res, 1, 3) = dt_ / m_;
 
-            blasfeo_diare_wrap(4, 1.0, res, 0, 0);
-            blasfeo_matel_wrap(res, 2, 0) = dt_;
-            blasfeo_matel_wrap(res, 3, 1) = dt_;
+            blasfeo_diare_wrap(4, 1.0, res, 2, 0);
+            blasfeo_matel_wrap(res, 4, 0) = dt_;
+            blasfeo_matel_wrap(res, 5, 1) = dt_;
             return 0;
         }
         virtual Index eval_RSQrqt(const Scalar *objective_scale, const Scalar *inputs_k,
@@ -112,10 +112,10 @@ namespace fatrop::test
         virtual Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k,
                              const Scalar *states_k, Scalar *res, const Index k)
         {
-            res[0] = states_kp1[0] - states_k[0] - dt_ * states_k[2];
-            res[1] = states_kp1[1] - states_k[1] - dt_ * states_k[3];
-            res[2] = states_kp1[2] - states_k[2] - dt_ * inputs_k[0] / m_;
-            res[3] = states_kp1[3] - states_k[3] - dt_ * inputs_k[1] / m_;
+            res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2];
+            res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3];
+            res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_;
+            res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_;
             return 0;
         }
 
@@ -155,8 +155,8 @@ namespace fatrop::test
             }
             else
             {
-                res[0] = objective_scale[0] * inputs_k[0];
-                res[1] = objective_scale[0] * inputs_k[1];
+                res[0] = 2 * objective_scale[0] * inputs_k[0];
+                res[1] = 2 * objective_scale[0] * inputs_k[1];
                 res[2] = 0.;
                 res[3] = 0.;
                 res[4] = 0.;

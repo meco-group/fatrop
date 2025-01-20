@@ -182,7 +182,8 @@ TEST_F(PdTest, TestSolve)
     VecRealAllocated rhs_save(ls.m());
     VecRealAllocated tmp(ls.m());
     ls.get_rhs(rhs_save);
-    LinsolReturnFlag ret = pd_solver.solve(ls, x_full);
+    LinsolReturnFlag ret = pd_solver.solve_in_place(ls);
+    ls.get_rhs(x_full);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     ls.set_rhs(rhs_save);
     ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
@@ -197,7 +198,8 @@ TEST_F(PdTest, TestSolveDegen)
     VecRealAllocated rhs_save(ls.m());
     VecRealAllocated tmp(ls.m());
     ls.get_rhs(rhs_save);
-    LinsolReturnFlag ret = pd_solver.solve(ls, x_full);
+    LinsolReturnFlag ret = pd_solver.solve_in_place(ls);
+    ls.get_rhs(x_full);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     ls.set_rhs(rhs_save);
     ls.apply_on_right(x_full, 1.0, rhs_save, tmp);

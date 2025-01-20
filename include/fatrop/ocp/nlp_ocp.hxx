@@ -74,7 +74,7 @@ namespace fatrop
         {
             const Scalar *inputs_k = primal_x_p + info.offsets_primal_u[k];
             const Scalar *states_k = primal_x_p + info.offsets_primal_x[k];
-            const Scalar *lam_dyn_k = lam_p + info.offsets_g_eq_dyn[k];
+            const Scalar *lam_dyn_k = (k!= info.dims.K-1) ? lam_p + info.offsets_g_eq_dyn[k] : nullptr;
             const Scalar *lam_eq_k = lam_p + info.offsets_g_eq_path[k];
             const Scalar *lam_eq_ineq_k = lam_p + info.offsets_g_eq_slack[k];
             ocp_->eval_RSQrqt(&objective_scale, inputs_k, states_k, lam_dyn_k, lam_eq_k,

@@ -51,18 +51,18 @@ namespace fatrop
 
         Scalar obj_value();
         Scalar barrier_value();
-        VecRealView &obj_gradient_x();
-        VecRealView &obj_gradient_s();
-        VecRealView &constr_viol();
-        VecRealView &dual_infeasibility_x();
-        VecRealView &dual_infeasibility_s();
-        VecRealView &barrier_gradient();
+        const VecRealView &obj_gradient_x();
+        const VecRealView &obj_gradient_s();
+        const VecRealView &constr_viol();
+        const VecRealView &dual_infeasibility_x();
+        const VecRealView &dual_infeasibility_s();
+        const VecRealView &barrier_gradient();
         // // s - L when lower bounded else 1.
-        VecRealView &delta_lower();
+        const VecRealView &delta_lower();
         // // U - s when upper bounded else 1.
-        VecRealView &delta_upper();
-        VecRealView &complementarity_l();
-        VecRealView &complementarity_u();
+        const VecRealView &delta_upper();
+        const VecRealView &complementarity_l();
+        const VecRealView &complementarity_u();
         Scalar mu() { return mu_; };
         void set_mu(Scalar value);
         Scalar linear_decrease_objective();
@@ -139,7 +139,6 @@ namespace fatrop
         bool complementarity_u_evaluated_ = false;
         Scalar kappa_d_ = 1e-5;
         Index number_of_bounds_ = 0;
-        bool is_initialized_ = false;
     };
 } // namespace fatrop
 

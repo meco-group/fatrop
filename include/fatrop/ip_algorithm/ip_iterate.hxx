@@ -29,8 +29,6 @@ namespace fatrop
             single_lower_bounded_[i] = single_bounded && lower_bounded_[i];
             single_upper_bounded_[i] = single_bounded && upper_bounded_[i];
         }
-
-        is_initialized_ = true;
     }
     template <typename ProblemType> void IpIterate<ProblemType>::reset_evaluated_quantities()
     {
@@ -53,7 +51,6 @@ namespace fatrop
 
     template <typename ProblemType> Scalar IpIterate<ProblemType>::obj_value()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!obj_value_evaluated_)
         {
             Index status =
@@ -66,7 +63,6 @@ namespace fatrop
 
     template <typename ProblemType> Scalar IpIterate<ProblemType>::barrier_value()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!barrier_value_evaluated_)
         {
             barrier_value_ = sum(if_else(lower_bounded_, -1. * log(delta_lower()),
@@ -81,9 +77,8 @@ namespace fatrop
         }
         return barrier_value_;
     }
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::obj_gradient_x()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::obj_gradient_x()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!obj_gradient_evaluated_)
         {
             Index status = nlp_->eval_objective_gradient(info, objective_scale, primal_x_,
@@ -94,9 +89,8 @@ namespace fatrop
         }
         return obj_gradient_x_;
     }
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::obj_gradient_s()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::obj_gradient_s()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!obj_gradient_evaluated_)
         {
             Index status = nlp_->eval_objective_gradient(info, objective_scale, primal_x_,
@@ -107,9 +101,8 @@ namespace fatrop
         }
         return obj_gradient_s_;
     }
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::constr_viol()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::constr_viol()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!constr_viol_evaluated_)
         {
             Index status =
@@ -119,9 +112,8 @@ namespace fatrop
         }
         return constr_viol_;
     }
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::dual_infeasibility_x()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::dual_infeasibility_x()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!dual_infeasibility_x_evaluated_)
         {
             dual_infeasibility_x_.block(dual_infeasibility_x_.m(), 0) = obj_gradient_x();
@@ -132,9 +124,8 @@ namespace fatrop
         return dual_infeasibility_x_;
     }
 
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::dual_infeasibility_s()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::dual_infeasibility_s()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!dual_infeasibility_s_evaluated_)
         {
             // by convention of the solver dual bounds are zero when not bounded
@@ -146,9 +137,8 @@ namespace fatrop
         return dual_infeasibility_s_;
     }
 
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::barrier_gradient()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::barrier_gradient()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!barrier_gradient_evaluated_)
         {
             const Index m = primal_s_.m();
@@ -163,9 +153,8 @@ namespace fatrop
         }
         return barrier_gradient_;
     }
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::delta_lower()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::delta_lower()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!delta_lower_evaluated_)
         {
             delta_lower_ = if_else(lower_bounded_, delta_primal_s() - lower_bounds_,
@@ -174,9 +163,8 @@ namespace fatrop
         }
         return delta_lower_;
     }
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::delta_upper()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::delta_upper()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!delta_upper_evaluated_)
         {
             delta_upper_ = if_else(upper_bounded_, upper_bounds_ - delta_primal_s(),
@@ -186,9 +174,8 @@ namespace fatrop
         return delta_upper_;
     }
 
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::complementarity_l()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::complementarity_l()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!complementarity_l_evaluated_)
         {
             complementarity_l_ = dual_bounds_l_ * delta_lower();
@@ -197,9 +184,8 @@ namespace fatrop
         return complementarity_l_;
     }
 
-    template <typename ProblemType> VecRealView &IpIterate<ProblemType>::complementarity_u()
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::complementarity_u()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!complementarity_u_evaluated_)
         {
             complementarity_u_ = dual_bounds_u_ * delta_upper();
@@ -216,7 +202,6 @@ namespace fatrop
     };
     template <typename ProblemType> Scalar IpIterate<ProblemType>::linear_decrease_objective()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!linear_decrease_objective_evaluated_)
         {
             linear_decrease_objective_ = dot(obj_gradient_x(), delta_primal_x());
@@ -227,7 +212,6 @@ namespace fatrop
     }
     template <typename ProblemType> Scalar IpIterate<ProblemType>::linear_decrease_barrier()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!linear_decrease_barrier_evaluated_)
         {
             linear_decrease_barrier_ = dot(barrier_gradient(), delta_primal_s());
@@ -293,7 +277,6 @@ namespace fatrop
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!hessian_evaluated_)
         {
             Index status = nlp_->eval_lag_hess(info, objective_scale, primal_x_, primal_s_,
@@ -305,7 +288,6 @@ namespace fatrop
     }
     template <typename ProblemType> Jacobian<ProblemType> &IpIterate<ProblemType>::jacobian()
     {
-        fatrop_dbg_assert(is_initialized_);
         if (!jacobian_evaluated_)
         {
             Index status = nlp_->eval_constr_jac(info, primal_x_, primal_s_, jacobian_);
