@@ -187,10 +187,10 @@ TEST_F(VecTest, Block)
 
 TEST_F(VecTest, IfElse)
 {
-    VecRealAllocated condition{5};
+    std::vector<bool> condition(5);
     for (Index i = 0; i < 5; ++i)
     {
-        condition(i) = (i % 2 == 0) ? 1 : 0;
+        condition[i] = (i % 2 == 0) ? 1 : 0;
     }
     auto result = if_else(condition, vec1, vec2);
     for (Index i = 0; i < 5; ++i)

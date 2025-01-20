@@ -219,7 +219,7 @@ namespace fatrop
             : if_else_op(if_else_op), a(a), b(b)
         {
         }
-        Scalar operator()(const Index i) const { return if_else_op(i) ? a(i) : b(i); }
+        Scalar operator()(const Index i) const { return if_else_op[i] ? a(i) : b(i); }
         Index m() const { return a.m(); }
 
     private:

@@ -67,9 +67,9 @@ namespace fatrop
                                                    const VecRealView &primal_s,
                                                    const VecRealView &lam, Hessian<OcpType> &hess)
     {
-        const Scalar * primal_x_p = primal_x.data();
-        const Scalar * primal_s_p = primal_s.data();
-        const Scalar * lam_p = lam.data();
+        const Scalar *primal_x_p = primal_x.data();
+        const Scalar *primal_s_p = primal_s.data();
+        const Scalar *lam_p = lam.data();
         for (Index k = 0; k < info.dims.K; k++)
         {
             const Scalar *inputs_k = primal_x_p + info.offsets_primal_u[k];
@@ -88,7 +88,7 @@ namespace fatrop
     NlpOcpTpl<OcpAbstractTag>::eval_constr_jac(const OcpInfo &info, const VecRealView &primal_x,
                                                const VecRealView &primal_s, Jacobian<OcpType> &jac)
     {
-        const Scalar * primal_x_p = primal_x.data();
+        const Scalar *primal_x_p = primal_x.data();
         for (Index k = 0; k < info.dims.K; k++)
         {
             const Scalar *inputs_k = primal_x_p + info.offsets_primal_u[k];
@@ -110,8 +110,8 @@ namespace fatrop
                                                                const VecRealView &primal_s,
                                                                VecRealView &res)
     {
-        const Scalar * primal_x_p = primal_x.data();
-        Scalar * res_p = res.data();
+        const Scalar *primal_x_p = primal_x.data();
+        Scalar *res_p = res.data();
         for (Index k = 0; k < info.dims.K; k++)
         {
             const Scalar *inputs_k = primal_x_p + info.offsets_primal_u[k];
@@ -139,8 +139,8 @@ namespace fatrop
                                                              VecRealView &grad_s)
     {
         grad_s.block(info.number_of_g_eq_slack, 0) = 0;
-        const Scalar * primal_x_p = primal_x.data();
-        Scalar * grad_x_p = grad_x.data();
+        const Scalar *primal_x_p = primal_x.data();
+        Scalar *grad_x_p = grad_x.data();
         for (Index k = 0; k < info.dims.K; k++)
         {
             const Scalar *inputs_k = primal_x_p + info.offsets_primal_u[k];
@@ -158,7 +158,7 @@ namespace fatrop
                                                     const VecRealView &primal_s, Scalar &res)
     {
         res = 0;
-        const Scalar * primal_x_p = primal_x.data();
+        const Scalar *primal_x_p = primal_x.data();
         for (Index k = 0; k < info.dims.K; k++)
         {
             Scalar ret = 0;
@@ -166,6 +166,22 @@ namespace fatrop
             const Scalar *states_k = primal_x_p + info.offsets_primal_x[k];
             ocp_->eval_L(&objective_scale, inputs_k, states_k, &ret, k);
             res += ret;
+        }
+        return 0;
+    }
+    template <typename OcpAbstractTag>
+    Index NlpOcpTpl<OcpAbstractTag>::get_bounds(const OcpInfo &info, VecRealView &lower_bounds,
+                                                VecRealView &upper_bounds)
+    {
+        if (info.number_of_slack_variables == 0)
+            return 0;
+        Scalar *lower_bounds_p = lower_bounds.data();
+        Scalar *upper_bounds_p = upper_bounds.data();
+        for (Index k = 0; k < info.dims.K; k++)
+        {
+            Scalar *lower_bounds_k = lower_bounds_p + info.offsets_slack[k];
+            Scalar *upper_bounds_k = upper_bounds_p + info.offsets_slack[k];
+            ocp_->get_bounds(lower_bounds_k, upper_bounds_k, k);
         }
         return 0;
     }
