@@ -1,14 +1,14 @@
-#include "fatrop/linear_algebra/linear_algebra.hpp"
-#include "fatrop/ocp/ocp_abstract.hpp"
+#include "../random_matrix.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
+#include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/nlp/dims.hpp"
 #include "fatrop/ocp/aug_system_solver.hpp"
 #include "fatrop/ocp/hessian.hpp"
 #include "fatrop/ocp/jacobian.hpp"
 #include "fatrop/ocp/nlp_ocp.hpp"
+#include "fatrop/ocp/ocp_abstract.hpp"
 #include "fatrop/ocp/pd_solver_orig.hpp"
 #include "fatrop/ocp/pd_system_orig.hpp"
-#include "../random_matrix.hpp"
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -58,7 +58,7 @@ public:
         }
     };
 
-    virtual Index get_ng_ineq(const Index k) const { return 0; };
+    virtual Index get_ng_ineq(const Index k) const { return k == K_ - 1 ? 0 : 1; };
     virtual Index get_horizon_length() const { return K_; };
     virtual Index eval_BAbt(const Scalar *states_kp1, const Scalar *inputs_k,
                             const Scalar *states_k, MAT *res, const Index k)
@@ -114,6 +114,11 @@ public:
     virtual Index eval_Ggt_ineq(const Scalar *inputs_k, const Scalar *states_k, MAT *res,
                                 const Index k)
     {
+        if (k == K_ - 1)
+            return 0;
+        // set zero
+        blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
+        blasfeo_matel_wrap(res, 0, 0) = 1.0;
         return 0;
     };
     virtual Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k, const Scalar *states_k,
@@ -147,6 +152,9 @@ public:
     virtual Index eval_gineq(const Scalar *inputs_k, const Scalar *states_k, Scalar *res,
                              const Index k)
     {
+        if (k == K_ - 1)
+            return 0;
+        res[0] = inputs_k[0];
         return 0;
     };
     virtual Index eval_rq(const Scalar *objective_scale, const Scalar *inputs_k,
@@ -184,9 +192,31 @@ public:
         }
         return 0;
     }
-    virtual Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const { return 0; }
-    virtual Index get_initial_xk(Scalar *xk, const Index k) const { return 0; };
-    virtual Index get_initial_uk(Scalar *uk, const Index k) const { return 0; };
+    virtual Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const
+    {
+        if (k == K_ - 1)
+            return 0;
+        lower[0] = -0.5;
+        upper[0] = 0.5;
+        return 0;
+    }
+
+    virtual Index get_initial_xk(Scalar *xk, const Index k) const
+    {
+        xk[0] = 0.0;
+        xk[1] = 0.0;
+        xk[2] = 0.0;
+        xk[3] = 0.0;
+        return 0;
+    };
+    virtual Index get_initial_uk(Scalar *uk, const Index k) const
+    {
+        if (k == K_ - 1)
+            return 0;
+        uk[0] = 0.0;
+        uk[1] = 0.0;
+        return 0;
+    };
     virtual ~OcpTest() = default;
 
 private:
@@ -195,27 +225,20 @@ private:
     const Scalar dt_ = 0.05;
 };
 
-
-
 class OcpImplExampleTest : public ::testing::Test
 {
 protected:
     OcpImplExampleTest()
-        : ocp(std::make_shared<OcpTest>()),
-          nlp(std::make_shared<NlpOcp>(ocp)),
-          info(nlp->problem_dims()),
-          data(nlp),
-          D_x(info.number_of_primal_variables),
-          D_eq(info.number_of_g_eq_path),
-          D_i(info.number_of_slack_variables),
-          aug_solver(std::make_shared<OcpAugSystemSolver>(info)),
-          solver(info, aug_solver),
-          rhs_x(info.number_of_primal_variables),
-          rhs_s(info.number_of_slack_variables),
-          rhs_g(info.number_of_eq_constraints),
-          rhs_cl(info.number_of_slack_variables),
+        : ocp(std::make_shared<OcpTest>()), nlp(std::make_shared<NlpOcp>(ocp)),
+          info(nlp->problem_dims()), data(nlp), D_x(info.number_of_primal_variables),
+          D_eq(info.number_of_g_eq_path), D_i(info.number_of_slack_variables),
+          aug_solver(std::make_shared<OcpAugSystemSolver>(info)), solver(info, aug_solver),
+          rhs_x(info.number_of_primal_variables), rhs_s(info.number_of_slack_variables),
+          rhs_g(info.number_of_eq_constraints), rhs_cl(info.number_of_slack_variables),
           rhs_cu(info.number_of_slack_variables)
     {
+        data.current_iterate().dual_bounds_l() = 1.;
+        data.current_iterate().dual_bounds_u() = 1.;
     }
 
     std::shared_ptr<OcpTest> ocp;
@@ -241,19 +264,21 @@ TEST_F(OcpImplExampleTest, SolveLinearSystem)
 
 TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
 {
-
     rhs_x.block(rhs_x.m(), 0) = data.current_iterate().dual_infeasibility_x();
     rhs_s.block(rhs_s.m(), 0) = data.current_iterate().dual_infeasibility_s();
     rhs_g.block(rhs_g.m(), 0) = data.current_iterate().constr_viol();
-    rhs_cl.block(rhs_cl.m(), 0) = data.current_iterate().dual_bounds_l();
-    rhs_cu.block(rhs_cu.m(), 0) = data.current_iterate().dual_bounds_u();
+    rhs_cl.block(rhs_cl.m(), 0) =
+        data.current_iterate().delta_lower() * data.current_iterate().dual_bounds_l();
+    rhs_cu.block(rhs_cu.m(), 0) =
+        data.current_iterate().delta_upper() * data.current_iterate().dual_bounds_u();
     LinearSystem<PdSystemType<OcpType>> ls(
         info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, false, D_eq,
         D_i, data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
         data.current_iterate().dual_bounds_l(), data.current_iterate().dual_bounds_u(), rhs_x,
         rhs_s, rhs_g, rhs_cl, rhs_cu);
 
-    solver.solve_in_place(ls);
+    LinsolReturnFlag ret = solver.solve_in_place(ls);
+    EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
 
     Scalar alpha = 1.0;
     Scalar alpha_z = 1.0;
@@ -268,6 +293,17 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
     EXPECT_LT(norm_inf(data.trial_iterate().dual_infeasibility_x()), 1e-6);
     EXPECT_LT(norm_inf(data.trial_iterate().dual_infeasibility_s()), 1e-6);
     EXPECT_LT(norm_inf(data.trial_iterate().constr_viol()), 1e-6);
+    // the complementarity constraints are nonlinear so we test the linearized version
+    EXPECT_LT(
+        norm_inf(data.current_iterate().delta_lower() * data.current_iterate().dual_bounds_l() +
+                 data.current_iterate().delta_lower() * rhs_cl +
+                 data.current_iterate().dual_bounds_l() * rhs_s),
+        1e-6);
+    EXPECT_LT(
+        norm_inf(data.current_iterate().delta_upper() * data.current_iterate().dual_bounds_u() +
+                 data.current_iterate().delta_upper() * rhs_cu +
+                 -1. * data.current_iterate().dual_bounds_u() * rhs_s),
+        1e-6);
 }
 
 int main(int argc, char **argv)

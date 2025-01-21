@@ -19,8 +19,8 @@ namespace fatrop
         // set the bound flags
         for (Index i = 0; i < lower_bounds_.m(); i++)
         {
-            lower_bounded_[i] = isinf(lower_bounds_(i));
-            upper_bounded_[i] = isinf(upper_bounds_(i));
+            lower_bounded_[i] = !isinf(lower_bounds_(i));
+            upper_bounded_[i] = !isinf(upper_bounds_(i));
             if (lower_bounded_[i])
                 number_of_bounds_++;
             if (upper_bounded_[i])
@@ -157,7 +157,7 @@ namespace fatrop
     {
         if (!delta_lower_evaluated_)
         {
-            delta_lower_ = if_else(lower_bounded_, delta_primal_s() - lower_bounds_,
+            delta_lower_ = if_else(lower_bounded_, primal_s() - lower_bounds_,
                                    VecRealScalar(lower_bounds_.m(), 1.));
             delta_lower_evaluated_ = true;
         }
@@ -167,7 +167,7 @@ namespace fatrop
     {
         if (!delta_upper_evaluated_)
         {
-            delta_upper_ = if_else(upper_bounded_, upper_bounds_ - delta_primal_s(),
+            delta_upper_ = if_else(upper_bounded_, upper_bounds_ - primal_s(),
                                    VecRealScalar(upper_bounds_.m(), 1.));
             delta_upper_evaluated_ = true;
         }
@@ -272,8 +272,11 @@ namespace fatrop
           hessian_(nlp->problem_dims()), lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
-          upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints)
+          upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
+          single_lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
+          single_upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints)
     {
+        initialize();
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
     {
