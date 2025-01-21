@@ -10,7 +10,7 @@ using namespace fatrop;
 // constraints:
 //  at k = 0: x = 0, y = 0, vx = 0, vy = 0
 //  at k = K: x = 1, y = 1, vx = 0, vy = 0
-class OcpTest : public OcpAbstract
+class OcpTestWithIneqs : public OcpAbstract
 {
 public:
     virtual Index get_nx(const Index k) const { return 4; }
@@ -175,7 +175,7 @@ public:
     virtual Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const { return 0; }
     virtual Index get_initial_xk(Scalar *xk, const Index k) const { return 0; };
     virtual Index get_initial_uk(Scalar *uk, const Index k) const { return 0; };
-    virtual ~OcpTest() = default;
+    virtual ~OcpTestWithIneqs() = default;
 
 private:
     const Index K_ = 100;

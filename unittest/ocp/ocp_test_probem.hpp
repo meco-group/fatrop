@@ -50,7 +50,7 @@ namespace fatrop::test
             }
         };
 
-        virtual Index get_ng_ineq(const Index k) const { return 0; };
+        virtual Index get_ng_ineq(const Index k) const { return k == K_ - 1 ? 0 : 2; };
         virtual Index get_horizon_length() const { return K_; };
         virtual Index eval_BAbt(const Scalar *states_kp1, const Scalar *inputs_k,
                                 const Scalar *states_k, MAT *res, const Index k)
@@ -99,7 +99,7 @@ namespace fatrop::test
             // set zero
             blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
             if (k == 0)
-                blasfeo_diare_wrap(4, 1.0, res, 0, 0);
+                blasfeo_diare_wrap(4, 1.0, res, 2, 0);
             if (k == K_ - 1)
                 blasfeo_diare_wrap(4, 1.0, res, 0, 0);
             return 0;
@@ -107,15 +107,21 @@ namespace fatrop::test
         virtual Index eval_Ggt_ineq(const Scalar *inputs_k, const Scalar *states_k, MAT *res,
                                     const Index k)
         {
+            if (k == K_ - 1)
+                return 0;
+            // set zero
+            blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
+            blasfeo_matel_wrap(res, 0, 0) = 1.0;
+            blasfeo_matel_wrap(res, 1, 1) = 1.0;
             return 0;
         };
         virtual Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k,
                              const Scalar *states_k, Scalar *res, const Index k)
         {
-            res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2];
-            res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3];
-            res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_;
-            res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_;
+            res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2] + 0.01 * k;
+            res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3] + 0.02 * k;
+            res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_ + 0.03 * k;
+            res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_ + 0.04 * k;
             return 0;
         }
 
@@ -124,23 +130,27 @@ namespace fatrop::test
         {
             if (k == 0)
             {
-                res[0] = states_k[0];
-                res[1] = states_k[1];
-                res[2] = states_k[2];
+                res[0] = states_k[0] + 0.04;
+                res[1] = states_k[1] + 0.02;
+                res[2] = states_k[2] + 0.01;
                 res[3] = states_k[3];
             }
             else if (k == K_ - 1)
             {
                 res[0] = states_k[0] - 1.0;
-                res[1] = states_k[1] - 1.0;
-                res[2] = states_k[2];
-                res[3] = states_k[3];
+                res[1] = states_k[1] - 2.0;
+                res[2] = states_k[2] - 3.0;
+                res[3] = states_k[3] - 4.0;
             }
             return 0;
         };
         virtual Index eval_gineq(const Scalar *inputs_k, const Scalar *states_k, Scalar *res,
                                  const Index k)
         {
+            if (k == K_ - 1)
+                return 0;
+            res[0] = inputs_k[0];
+            res[1] = inputs_k[1];
             return 0;
         };
         virtual Index eval_rq(const Scalar *objective_scale, const Scalar *inputs_k,
@@ -155,13 +165,13 @@ namespace fatrop::test
             }
             else
             {
-                res[0] = 2 * objective_scale[0] * inputs_k[0];
-                res[1] = 2 * objective_scale[0] * inputs_k[1];
-                res[2] = 0.;
-                res[3] = 0.;
-                res[4] = 0.;
-                res[5] = 0.;
-                res[6] = 0.;
+                res[0] = 2 * objective_scale[0] * inputs_k[0] + 0.05 * k;
+                res[1] = 2 * objective_scale[0] * inputs_k[1] + 0.06 * k;
+                res[2] = 0. + 0.07 * k;
+                res[3] = 0. + 0.08 * k;
+                res[4] = 0. + 0.09 * k;
+                res[5] = 0. + 0.10 * k;
+                res[6] = 0. + 0.11 * k;
             }
             return 0;
         }
@@ -178,9 +188,31 @@ namespace fatrop::test
             }
             return 0;
         }
-        virtual Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const { return 0; }
-        virtual Index get_initial_xk(Scalar *xk, const Index k) const { return 0; };
-        virtual Index get_initial_uk(Scalar *uk, const Index k) const { return 0; };
+        virtual Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const
+        {
+            if (k == K_ - 1)
+                return 0;
+            lower[0] = -0.5 - 0.1 * k;
+            upper[0] = 0.6 + 0.1 * k;
+            return 0;
+        }
+
+        virtual Index get_initial_xk(Scalar *xk, const Index k) const
+        {
+            xk[0] = 0.01 * k;
+            xk[1] = 0.02 * k;
+            xk[2] = 0.03 * k;
+            xk[3] = 0.04 * k;
+            return 0;
+        };
+        virtual Index get_initial_uk(Scalar *uk, const Index k) const
+        {
+            if (k == K_ - 1)
+                return 0;
+            uk[0] = 0.05 * k;
+            uk[1] = 0.06 * k;
+            return 0;
+        };
         virtual ~OcpTestProblem() = default;
 
     private:
@@ -188,5 +220,6 @@ namespace fatrop::test
         const Scalar m_ = 1.0;
         const Scalar dt_ = 0.05;
     };
+
 } // namespace fatrop::test
 #endif // __fatrop_unittest_ocp_ocp_test_hpp__
