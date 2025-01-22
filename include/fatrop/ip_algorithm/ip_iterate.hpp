@@ -7,12 +7,12 @@
 
 #include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
+#include "fatrop/nlp/fwd.hpp"
 #include "fatrop/nlp/hessian.hpp"
 #include "fatrop/nlp/jacobian.hpp"
-#include "fatrop/nlp/fwd.hpp"
 #include <memory>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace fatrop
 {
@@ -28,26 +28,29 @@ namespace fatrop
         void initialize();
         void reset_evaluated_quantities();
 
-        VecRealView &primal_x() { return primal_x_; }
         const VecRealView &primal_x() const { return primal_x_; }
-        VecRealView &primal_s() { return primal_s_; }
         const VecRealView &primal_s() const { return primal_s_; }
-        VecRealView &dual_eq() { return dual_eq_; }
         const VecRealView &dual_eq() const { return dual_eq_; }
-        VecRealView &dual_bounds_l() { return dual_bounds_l_; }
         const VecRealView &dual_bounds_l() const { return dual_bounds_l_; }
-        VecRealView &dual_bounds_u() { return dual_bounds_u_; }
         const VecRealView &dual_bounds_u() const { return dual_bounds_u_; }
-        VecRealView &delta_primal_x() { return delta_primal_x_; }
         const VecRealView &delta_primal_x() const { return delta_primal_x_; }
-        VecRealView &delta_primal_s() { return delta_primal_s_; }
         const VecRealView &delta_primal_s() const { return delta_primal_s_; }
-        VecRealView &delta_dual_eq() { return delta_dual_eq_; }
         const VecRealView &delta_dual_eq() const { return delta_dual_eq_; }
-        VecRealView &delta_dual_bounds_l() { return delta_dual_bounds_l_; }
         const VecRealView &delta_dual_bounds_l() const { return delta_dual_bounds_l_; }
-        VecRealView &delta_dual_bounds_u() { return delta_dual_bounds_u_; }
         const VecRealView &delta_dual_bounds_u() const { return delta_dual_bounds_u_; }
+
+        template <typename Derived> void set_primal_x(const VecReal<Derived> &primal_x);
+        template <typename Derived> void set_primal_s(const VecReal<Derived> &primal_s);
+        template <typename Derived> void set_dual_eq(const VecReal<Derived> &dual_eq);
+        template <typename Derived> void set_dual_bounds_l(const VecReal<Derived> &dual_bounds_l);
+        template <typename Derived> void set_dual_bounds_u(const VecReal<Derived> &dual_bounds_u);
+        template <typename Derived> void set_delta_primal_x(const VecReal<Derived> &delta_primal_x);
+        template <typename Derived> void set_delta_primal_s(const VecReal<Derived> &delta_primal_s);
+        template <typename Derived> void set_delta_dual_eq(const VecReal<Derived> &delta_dual_eq);
+        template <typename Derived>
+        void set_delta_dual_bounds_l(const VecReal<Derived> &delta_dual_bounds_l);
+        template <typename Derived>
+        void set_delta_dual_bounds_u(const VecReal<Derived> &delta_dual_bounds_u);
 
         Scalar obj_value();
         Scalar barrier_value();
@@ -141,5 +144,79 @@ namespace fatrop
         Index number_of_bounds_ = 0;
     };
 } // namespace fatrop
+// implementation
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_primal_x(const VecReal<Derived> &primal_x)
+{
+    reset_evaluated_quantities();
+    primal_x_ = primal_x;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_primal_s(const VecReal<Derived> &primal_s)
+{
+    reset_evaluated_quantities();
+    primal_s_ = primal_s;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_dual_eq(const VecReal<Derived> &dual_eq)
+{
+    dual_infeasibility_s_evaluated_ = false;
+    dual_infeasibility_x_evaluated_ = false;
+    dual_eq_ = dual_eq;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_dual_bounds_l(const VecReal<Derived> &dual_bounds_l)
+{
+    complementarity_l_evaluated_ = false;
+    dual_infeasibility_s_evaluated_ = false;
+    dual_bounds_l_ = dual_bounds_l;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &dual_bounds_u)
+{
+    complementarity_u_evaluated_ = false;
+    dual_infeasibility_s_evaluated_ = false;
+    dual_bounds_u_ = dual_bounds_u;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_delta_primal_x(const VecReal<Derived> &delta_primal_x)
+{
+    linear_decrease_objective_evaluated_ = false;
+    delta_primal_x_ = delta_primal_x;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_delta_primal_s(const VecReal<Derived> &delta_primal_s)
+{
+    linear_decrease_barrier_evaluated_ = false;
+    linear_decrease_objective_evaluated_ = false;
+    delta_primal_s_ = delta_primal_s;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_delta_dual_eq(const VecReal<Derived> &delta_dual_eq)
+{
+    delta_dual_eq_ = delta_dual_eq;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_delta_dual_bounds_l(
+    const VecReal<Derived> &delta_dual_bounds_l)
+{
+    delta_dual_bounds_l_ = delta_dual_bounds_l;
+}
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_delta_dual_bounds_u(
+    const VecReal<Derived> &delta_dual_bounds_u)
+{
+    delta_dual_bounds_u_ = delta_dual_bounds_u;
+}
 
 #endif //__fatrop_algorithm_ip_iterate_hpp__

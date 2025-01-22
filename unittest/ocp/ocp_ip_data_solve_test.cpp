@@ -1,5 +1,4 @@
 #include "../random_matrix.hpp"
-#include "ocp_test_probem.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/nlp/dims.hpp"
@@ -10,6 +9,7 @@
 #include "fatrop/ocp/ocp_abstract.hpp"
 #include "fatrop/ocp/pd_solver_orig.hpp"
 #include "fatrop/ocp/pd_system_orig.hpp"
+#include "ocp_test_probem.hpp"
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -36,8 +36,8 @@ protected:
           rhs_g(info.number_of_eq_constraints), rhs_cl(info.number_of_slack_variables),
           rhs_cu(info.number_of_slack_variables)
     {
-        data.current_iterate().dual_bounds_l() = 1.;
-        data.current_iterate().dual_bounds_u() = 1.;
+        data.current_iterate().set_dual_bounds_l(VecRealScalar(data.current_iterate().dual_bounds_l().m(), 1));
+        data.current_iterate().set_dual_bounds_u(VecRealScalar(data.current_iterate().dual_bounds_l().m(), 1));
     }
 
     std::shared_ptr<OcpTestProblem> ocp;
@@ -81,13 +81,13 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
 
     Scalar alpha = 1.0;
     Scalar alpha_z = 1.0;
-    data.trial_iterate().primal_x() = data.current_iterate().primal_x() + alpha * rhs_x;
-    data.trial_iterate().primal_s() = data.current_iterate().primal_s() + alpha * rhs_s;
-    data.trial_iterate().dual_eq() = data.current_iterate().dual_eq() + alpha * rhs_g;
-    data.trial_iterate().dual_bounds_l() =
-        data.current_iterate().dual_bounds_l() + alpha_z * rhs_cl;
-    data.trial_iterate().dual_bounds_u() =
-        data.current_iterate().dual_bounds_u() + alpha_z * rhs_cu;
+    data.trial_iterate().set_primal_x(data.current_iterate().primal_x() + alpha * rhs_x);
+    data.trial_iterate().set_primal_s(data.current_iterate().primal_s() + alpha * rhs_s);
+    data.trial_iterate().set_dual_eq(data.current_iterate().dual_eq() + alpha * rhs_g);
+    data.trial_iterate().set_dual_bounds_l(data.current_iterate().dual_bounds_l() +
+                                           alpha_z * rhs_cl);
+    data.trial_iterate().set_dual_bounds_u(data.current_iterate().dual_bounds_u() +
+                                           alpha_z * rhs_cu);
 
     EXPECT_LT(norm_inf(data.trial_iterate().dual_infeasibility_x()), 1e-6);
     EXPECT_LT(norm_inf(data.trial_iterate().dual_infeasibility_s()), 1e-6);
