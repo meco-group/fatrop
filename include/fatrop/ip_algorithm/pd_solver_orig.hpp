@@ -5,7 +5,7 @@
 #ifndef __fatrop_ip_algorithm_pd_solver_orig__
 #define __fatrop_ip_algorithm_pd_solver_orig__
 
-#include "fatrop/linear_algebra/linear_solver.hxx"
+#include "fatrop/linear_algebra/linear_solver.hpp"
 #include "fatrop/ip_algorithm/pd_system_orig.hpp"
 #include "fatrop/nlp/fwd.hpp"
 

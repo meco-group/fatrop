@@ -3,10 +3,14 @@
 //
 
 #include "fatrop/ocp/pd_solver_orig.hpp"
+#include "fatrop/linear_algebra/linear_solver.hxx"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/ocp/aug_system_solver.hpp"
 #include "fatrop/ocp/problem_info.hpp"
 using namespace fatrop;
+
+// instantiate the template class
+template class LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>;
 
 PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
                                     const std::shared_ptr<OcpAugSystemSolver> &aug_system_solver)

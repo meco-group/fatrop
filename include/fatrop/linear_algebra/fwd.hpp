@@ -47,6 +47,8 @@ namespace fatrop
     class MatRealDiagonalView;
     class MatRealView;
 
+    template<typename LsType> class LinearSystem;
+
 } // namespace fatrop
 
 #endif // __fatrop_fwd_hpp__
