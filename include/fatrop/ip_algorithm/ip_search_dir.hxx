@@ -2,6 +2,7 @@
 
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include <cmath>
 
 namespace fatrop
 {
@@ -21,6 +22,11 @@ namespace fatrop
     {
     }
     template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
+    void IpSearchDirImpl<ProblemType, LinearSystemType, LinearSolverDerived>::reset()
+    {
+        delta_w_last_ = 0.;
+    }
+    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
     LinsolReturnFlag
     IpSearchDirImpl<ProblemType, LinearSystemType, LinearSolverDerived>::compute_search_dir()
     {
@@ -35,12 +41,70 @@ namespace fatrop
         Di_ = 0.;
         Deq_ = 0.;
 
-        LinearSystem<LinearSystemType> ls(
-            curr_it.info(), curr_it.jacobian(), curr_it.hessian(), Dx_, false, Deq_, Di_,
-            curr_it.delta_lower(), curr_it.delta_upper(), curr_it.dual_bounds_l(),
-            curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
+        Scalar delta_w = 0.;
+        Scalar delta_c = 0.;
+        bool perturbed_eq = false;
+        Scalar mu = curr_it.mu();
 
-        LinsolReturnFlag ret = linear_solver_->solve_in_place(ls);
+        bool solved = false;
+        bool first_try_delta_w = true;
+        LinsolReturnFlag ret;
+        while (!solved)
+        {
+            bool update_delta_w = false;
+            bool update_delta_c = false;
+            Dx_ = delta_w;
+            Deq_ = delta_c;
+            LinearSystem<LinearSystemType> ls(
+                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), Dx_, perturbed_eq, Deq_, Di_,
+                curr_it.delta_lower(), curr_it.delta_upper(), curr_it.dual_bounds_l(),
+                curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
+            ret = linear_solver_->solve_in_place(ls);
+            switch (ret)
+            {
+            case (LinsolReturnFlag::SUCCESS):
+                solved = true;
+                break;
+            case (LinsolReturnFlag::ITREF_MAX_ITER):
+                solved = true;
+                break;
+            case (LinsolReturnFlag::ITREF_INCREASE):
+                solved = true;
+                break;
+            case (LinsolReturnFlag::INDEFINITE):
+                update_delta_w = true;
+                solved = false;
+                break;
+            case (LinsolReturnFlag::NOFULL_RANK):
+                update_delta_c = true;
+                perturbed_eq = true;
+                solved = false;
+                break;
+            }
+
+            if (update_delta_w)
+            {
+                if (first_try_delta_w)
+                {
+                    delta_w = (delta_w_last_ == 0.)
+                                  ? delta_w0_
+                                  : std::max(delta_w_last_ * kappa_wmin_, delta_wmin_);
+                    first_try_delta_w = false;
+                }
+                else
+                {
+                    delta_w =
+                        (delta_w_last_ == 0.) ? kappa_wplusem_ * delta_w : kappa_wplus_ * delta_w;
+                }
+            }
+            if (update_delta_c)
+            {
+                delta_c = delta_c_stripe_ * pow(mu, kappa_c_);
+            }
+
+            if (delta_w > 0)
+                delta_w_last_ = delta_w;
+        }
 
         curr_it.set_delta_primal_x(rhs_x_);
         curr_it.set_delta_primal_s(rhs_s_);

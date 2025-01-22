@@ -15,6 +15,7 @@ namespace fatrop
     class IpSearchDirBase
     {
     public:
+        virtual void reset() = 0;
         virtual LinsolReturnFlag compute_search_dir() = 0;
     };
 
@@ -30,6 +31,7 @@ namespace fatrop
 
     public:
         IpSearchDirImpl(const IpDataSp &ipdata, const LinearSolverSp &linear_solver);
+        void reset() override;
         LinsolReturnFlag compute_search_dir() override;
 
     private:
@@ -44,6 +46,14 @@ namespace fatrop
         VecRealAllocated Di_;
         VecRealAllocated Ds_;
         VecRealAllocated Deq_;
+        Scalar delta_w_last_ = 0.;
+        Scalar delta_w0_ = 1e-4;
+        Scalar delta_wmin_ = 1e-20;
+        Scalar kappa_wmin_ = 1. / 3.;
+        Scalar kappa_wplus_ = 8.;
+        Scalar kappa_wplusem_ = 100.;
+        Scalar kappa_c_ = 0.25;
+        Scalar delta_c_stripe_ = 1e-6;
     };
 } // namespace fatrop
 
