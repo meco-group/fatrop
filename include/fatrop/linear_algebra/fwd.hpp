@@ -48,6 +48,7 @@ namespace fatrop
     class MatRealView;
 
     template<typename LsType> class LinearSystem;
+    template<typename Derived, typename LsType> class LinearSolver;
 
 } // namespace fatrop
 

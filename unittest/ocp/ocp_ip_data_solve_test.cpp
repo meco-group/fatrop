@@ -36,8 +36,10 @@ protected:
           rhs_g(info.number_of_eq_constraints), rhs_cl(info.number_of_slack_variables),
           rhs_cu(info.number_of_slack_variables)
     {
-        data.current_iterate().set_dual_bounds_l(VecRealScalar(data.current_iterate().dual_bounds_l().m(), 1));
-        data.current_iterate().set_dual_bounds_u(VecRealScalar(data.current_iterate().dual_bounds_l().m(), 1));
+        data.current_iterate().set_dual_bounds_l(
+            VecRealScalar(data.current_iterate().dual_bounds_l().m(), 1));
+        data.current_iterate().set_dual_bounds_u(
+            VecRealScalar(data.current_iterate().dual_bounds_l().m(), 1));
     }
 
     std::shared_ptr<OcpTestProblem> ocp;

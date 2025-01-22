@@ -15,7 +15,7 @@ namespace fatrop
         // reset evaluated quantities
         reset_evaluated_quantities();
         // set the bounds
-        nlp_->get_bounds(info, lower_bounds_, upper_bounds_);
+        nlp_->get_bounds(info_, lower_bounds_, upper_bounds_);
         // set the bound flags
         for (Index i = 0; i < lower_bounds_.m(); i++)
         {
@@ -54,7 +54,7 @@ namespace fatrop
         if (!obj_value_evaluated_)
         {
             Index status =
-                nlp_->eval_objective(info, objective_scale, primal_x_, primal_s_, obj_value_);
+                nlp_->eval_objective(info_, objective_scale, primal_x_, primal_s_, obj_value_);
             fatrop_assert_msg(status == 0, "Error in evaluating the objective function.");
             obj_value_evaluated_ = true;
         }
@@ -81,7 +81,7 @@ namespace fatrop
     {
         if (!obj_gradient_evaluated_)
         {
-            Index status = nlp_->eval_objective_gradient(info, objective_scale, primal_x_,
+            Index status = nlp_->eval_objective_gradient(info_, objective_scale, primal_x_,
                                                          obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
                               "Error in evaluating the gradient of the objective function.");
@@ -93,7 +93,7 @@ namespace fatrop
     {
         if (!obj_gradient_evaluated_)
         {
-            Index status = nlp_->eval_objective_gradient(info, objective_scale, primal_x_,
+            Index status = nlp_->eval_objective_gradient(info_, objective_scale, primal_x_,
                                                          obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
                               "Error in evaluating the gradient of the objective function.");
@@ -106,7 +106,7 @@ namespace fatrop
         if (!constr_viol_evaluated_)
         {
             Index status =
-                nlp_->eval_constraint_violation(info, primal_x_, primal_s_, constr_viol_);
+                nlp_->eval_constraint_violation(info_, primal_x_, primal_s_, constr_viol_);
             fatrop_assert_msg(status == 0, "Error in evaluating the constraint violation.");
             constr_viol_evaluated_ = true;
         }
@@ -117,7 +117,7 @@ namespace fatrop
         if (!dual_infeasibility_x_evaluated_)
         {
             dual_infeasibility_x_.block(dual_infeasibility_x_.m(), 0) = obj_gradient_x();
-            jacobian().transpose_apply_on_right(info, dual_eq_, 1.0, dual_infeasibility_x_,
+            jacobian().transpose_apply_on_right(info_, dual_eq_, 1.0, dual_infeasibility_x_,
                                                 dual_infeasibility_x_);
             dual_infeasibility_x_evaluated_ = true;
         }
@@ -130,7 +130,7 @@ namespace fatrop
         {
             // by convention of the solver dual bounds are zero when not bounded
             dual_infeasibility_s_ =
-                -1. * dual_eq_.block(info.number_of_slack_variables, info.offset_g_eq_slack) +
+                -1. * dual_eq_.block(info_.number_of_slack_variables, info_.offset_g_eq_slack) +
                 dual_bounds_u_ - dual_bounds_l_;
             dual_infeasibility_s_evaluated_ = true;
         }
@@ -249,7 +249,7 @@ namespace fatrop
     }
     template <typename ProblemType>
     IpIterate<ProblemType>::IpIterate(const NlpSp &nlp)
-        : info(nlp->problem_dims()), primal_x_(nlp->nlp_dims().number_of_variables),
+        : info_(nlp->problem_dims()), primal_x_(nlp->nlp_dims().number_of_variables),
           primal_s_(nlp->nlp_dims().number_of_ineq_constraints),
           dual_eq_(nlp->nlp_dims().number_of_eq_constraints),
           dual_bounds_l_(nlp->nlp_dims().number_of_ineq_constraints),
@@ -282,7 +282,7 @@ namespace fatrop
     {
         if (!hessian_evaluated_)
         {
-            Index status = nlp_->eval_lag_hess(info, objective_scale, primal_x_, primal_s_,
+            Index status = nlp_->eval_lag_hess(info_, objective_scale, primal_x_, primal_s_,
                                                dual_eq_, hessian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
             hessian_evaluated_ = true;
@@ -293,7 +293,7 @@ namespace fatrop
     {
         if (!jacobian_evaluated_)
         {
-            Index status = nlp_->eval_constr_jac(info, primal_x_, primal_s_, jacobian_);
+            Index status = nlp_->eval_constr_jac(info_, primal_x_, primal_s_, jacobian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Jacobian of the constraints.");
             jacobian_evaluated_ = true;
         }

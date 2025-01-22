@@ -8,6 +8,7 @@ set(FATROP_SOURCES
     ocp/hessian.cpp
     ocp/ip_data.cpp
     ocp/ip_iterate.cpp
+    ocp/ip_search_dir.cpp
     ocp/nlp_ocp.cpp
     ocp/pd_system_orig.cpp
     ocp/pd_solver_orig.cpp

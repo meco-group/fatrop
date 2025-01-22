@@ -23,10 +23,12 @@ namespace fatrop
 
     public:
         // Problem information
-        ProblemInfo<ProblemType> info; ///< Information about the NLP.
         Scalar objective_scale = 1.;   ///< Scaling factor for the objective function.
         void initialize();
         void reset_evaluated_quantities();
+
+        const ProblemInfo<ProblemType> &info() const { return info_; }
+        const NlpSp &nlp() const { return nlp_; }
 
         const VecRealView &primal_x() const { return primal_x_; }
         const VecRealView &primal_s() const { return primal_s_; }
@@ -78,6 +80,7 @@ namespace fatrop
         Jacobian<ProblemType> &jacobian();
 
     private:
+        const ProblemInfo<ProblemType> info_; ///< Information about the NLP.
         NlpSp nlp_;
         // Iteration point
         VecRealAllocated primal_x_;      ///< Primal variables of the NLP.
