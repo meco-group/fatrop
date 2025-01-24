@@ -72,6 +72,7 @@ namespace fatrop
         void set_mu(Scalar value);
         Scalar linear_decrease_objective();
         Scalar linear_decrease_barrier();
+        Scalar e_mu(Scalar mu);
         std::pair<Scalar, Scalar> maximum_step_size(const Scalar tau);
 
         Index number_of_bounds() const { return number_of_bounds_; }
@@ -145,6 +146,7 @@ namespace fatrop
         bool complementarity_u_evaluated_ = false;
         Scalar kappa_d_ = 1e-5;
         Index number_of_bounds_ = 0;
+        Scalar smax_ = 100.;
     };
 } // namespace fatrop
 // implementation

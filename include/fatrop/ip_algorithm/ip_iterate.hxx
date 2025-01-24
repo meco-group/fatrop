@@ -17,6 +17,7 @@ namespace fatrop
         // set the bounds
         nlp_->get_bounds(info_, lower_bounds_, upper_bounds_);
         // set the bound flags
+        number_of_bounds_ = 0;
         for (Index i = 0; i < lower_bounds_.m(); i++)
         {
             lower_bounded_[i] = !isinf(lower_bounds_(i));
@@ -112,7 +113,8 @@ namespace fatrop
         }
         return constr_viol_;
     }
-    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::dual_infeasibility_x()
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::dual_infeasibility_x()
     {
         if (!dual_infeasibility_x_evaluated_)
         {
@@ -124,7 +126,8 @@ namespace fatrop
         return dual_infeasibility_x_;
     }
 
-    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::dual_infeasibility_s()
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::dual_infeasibility_s()
     {
         if (!dual_infeasibility_s_evaluated_)
         {
@@ -218,6 +221,37 @@ namespace fatrop
             linear_decrease_barrier_evaluated_ = true;
         }
         return linear_decrease_barrier_;
+    }
+
+    template <typename ProblemType> Scalar IpIterate<ProblemType>::e_mu(Scalar mu)
+    {
+        Scalar zl1 = norm_l1(dual_bounds_l()) + norm_l1(dual_bounds_u());
+        Index number_of_eq_constraints = nlp()->nlp_dims().number_of_eq_constraints;
+        Index number_of_dual_vars = number_of_bounds_ + number_of_eq_constraints;
+        Scalar lam_mean = (zl1 + norm_l1(dual_eq())) / (number_of_dual_vars);
+        Scalar z_mean = zl1 / number_of_bounds_;
+        Scalar constraint_violation = norm_inf(constr_viol());
+        Scalar dual_infeasibility_x_linf = norm_inf(dual_infeasibility_x());
+        Scalar dual_infeasibility_s_linf = norm_inf(dual_infeasibility_s());
+        Scalar dual_infeasibility_linf = std::max(dual_infeasibility_x_linf, dual_infeasibility_s_linf);
+        Scalar complementarity_l_linf = norm_inf(complementarity_l());
+        Scalar complementarity_u_linf = norm_inf(complementarity_u());
+        Scalar complementarity_linf = std::max(complementarity_l_linf, complementarity_u_linf);
+        Scalar res = 0.;
+        Scalar sd = 0.;
+        Scalar sc = 0.;
+        if (lam_mean > smax_)
+        {
+            sd = lam_mean / smax_;
+            dual_infeasibility_linf = dual_infeasibility_linf / sd;
+        }
+        if (z_mean > smax_)
+        {
+            sc = z_mean / smax_;
+            complementarity_linf = complementarity_linf / sc;
+        }
+        res = std::max({constraint_violation, dual_infeasibility_linf, complementarity_linf});
+        return res;
     }
 
     template <typename ProblemType>

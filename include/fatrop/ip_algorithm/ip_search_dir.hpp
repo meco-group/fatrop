@@ -17,6 +17,8 @@ namespace fatrop
     public:
         virtual void reset() = 0;
         virtual LinsolReturnFlag compute_search_dir() = 0;
+    protected:
+        virtual ~IpSearchDirBase() = default;
     };
 
     template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>

@@ -6,6 +6,7 @@ set(FATROP_SOURCES
     ocp/dims.cpp
     ocp/jacobian.cpp
     ocp/hessian.cpp
+    ocp/ip_convergence_check.cpp
     ocp/ip_data.cpp
     ocp/ip_iterate.cpp
     ocp/ip_search_dir.cpp
