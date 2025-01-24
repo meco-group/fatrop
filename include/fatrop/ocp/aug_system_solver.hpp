@@ -5,6 +5,7 @@
 #ifndef __fatrop_ocp_aug_system_solver_hpp__
 #define __fatrop_ocp_aug_system_solver_hpp__
 #include "fatrop/context/context.hpp"
+#include "fatrop/nlp/aug_system_solver.hpp"
 #include "fatrop/linear_algebra/lu_factorization.hpp"
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/ocp/fwd.hpp"
@@ -15,7 +16,7 @@ namespace fatrop
 {
 
     /**
-     * @class OcpAugSystemSolver
+     * @class AugSystemSolver<OcpType>
      * @brief Solves a system of equations for optimal control problems with augmented system
      * structure.
      *
@@ -57,14 +58,15 @@ namespace fatrop
      * The solver uses various numerical techniques, including LU factorization and iterative refinement,
      * to efficiently solve this system while handling potential numerical issues.
      */
-    class OcpAugSystemSolver
+    template<>
+    class AugSystemSolver<OcpType>
     {
     public:
         /**
-         * @brief Constructs an OcpAugSystemSolver object.
+         * @brief Constructs an AugSystemSolver<OcpType> object.
          * @param info Problem information for the optimal control problem.
          */
-        OcpAugSystemSolver(const ProblemInfo<OcpType> &info);
+        AugSystemSolver<OcpType>(const ProblemInfo<OcpType> &info);
 
         /**
          * @brief Solves the augmented system without path equality constraint regularization.

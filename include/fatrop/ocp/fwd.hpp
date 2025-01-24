@@ -8,9 +8,8 @@
 namespace fatrop
 {
     class OcpType;
-    template <typename T> struct ProblemDims; 
-    template<>
-    struct ProblemDims<OcpType>;
+    template <typename T> struct ProblemDims;
+    template <> struct ProblemDims<OcpType>;
     template <typename T> struct ProblemInfo;
     template <> struct ProblemInfo<OcpType>;
     template <typename T> struct Jacobian;
@@ -19,7 +18,8 @@ namespace fatrop
     template <> struct Hessian<OcpType>;
     template <typename T> struct PdSolverOrig;
     template <> class PdSolverOrig<OcpType>;
-    class OcpAugSystemSolver;
+    template <typename ProblemType> class AugSystemSolver;
+    class AugSystemSolver<OcpType>;
 } // namespace fatrop
 
 #endif // __fatrop_ocp_fwd_hpp__

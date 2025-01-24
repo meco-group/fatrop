@@ -30,8 +30,8 @@ protected:
     OcpImplExampleTest()
         : ocp(std::make_shared<OcpTestProblem>()), nlp(std::make_shared<NlpOcp>(ocp)),
           info(nlp->problem_dims()), data(nlp), D_x(info.number_of_primal_variables),
-          D_eq(info.number_of_g_eq_path), D_i(info.number_of_slack_variables),
-          aug_solver(std::make_shared<OcpAugSystemSolver>(info)), solver(info, aug_solver),
+          D_eq(info.number_of_eq_constraints),
+          aug_solver(std::make_shared<AugSystemSolver<OcpType>>(info)), solver(info, aug_solver),
           rhs_x(info.number_of_primal_variables), rhs_s(info.number_of_slack_variables),
           rhs_g(info.number_of_eq_constraints), rhs_cl(info.number_of_slack_variables),
           rhs_cu(info.number_of_slack_variables)
@@ -46,8 +46,8 @@ protected:
     std::shared_ptr<NlpOcp> nlp;
     ProblemInfo<OcpType> info;
     IpData<OcpType> data;
-    VecRealAllocated D_x, D_eq, D_i;
-    std::shared_ptr<OcpAugSystemSolver> aug_solver;
+    VecRealAllocated D_x, D_eq;
+    std::shared_ptr<AugSystemSolver<OcpType>> aug_solver;
     PdSolverOrig<OcpType> solver;
     VecRealAllocated rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu;
 };
@@ -56,7 +56,7 @@ TEST_F(OcpImplExampleTest, SolveLinearSystem)
 {
     LinearSystem<PdSystemType<OcpType>> ls(
         info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, false, D_eq,
-        D_i, data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
+        data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
         data.current_iterate().dual_bounds_l(), data.current_iterate().dual_bounds_u(), rhs_x,
         rhs_s, rhs_g, rhs_cl, rhs_cu);
 
@@ -74,7 +74,7 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
         data.current_iterate().delta_upper() * data.current_iterate().dual_bounds_u();
     LinearSystem<PdSystemType<OcpType>> ls(
         info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, false, D_eq,
-        D_i, data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
+        data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
         data.current_iterate().dual_bounds_l(), data.current_iterate().dual_bounds_u(), rhs_x,
         rhs_s, rhs_g, rhs_cl, rhs_cu);
 

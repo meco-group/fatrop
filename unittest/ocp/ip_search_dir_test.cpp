@@ -33,7 +33,7 @@ protected:
           info(nlp->problem_dims()), data(std::make_shared<IpData<OcpType>>(nlp)),
           D_x(info.number_of_primal_variables), D_eq(info.number_of_g_eq_path),
           D_i(info.number_of_slack_variables),
-          aug_solver(std::make_shared<OcpAugSystemSolver>(info)),
+          aug_solver(std::make_shared<AugSystemSolver<OcpType>>(info)),
           solver(std::make_shared<PdSolverOrig<OcpType>>(info, aug_solver)),
           search_dir(data, solver)
     {
@@ -48,7 +48,7 @@ protected:
     ProblemInfo<OcpType> info;
     std::shared_ptr<IpData<OcpType>> data;
     VecRealAllocated D_x, D_eq, D_i;
-    std::shared_ptr<OcpAugSystemSolver> aug_solver;
+    std::shared_ptr<AugSystemSolver<OcpType>> aug_solver;
     std::shared_ptr<PdSolverOrig<OcpType>> solver;
     IpSearchDirImpl<OcpType, PdSystemType<OcpType>, PdSolverOrig<OcpType>> search_dir;
 };

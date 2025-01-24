@@ -20,7 +20,7 @@ bool check_reg(const Index m, MAT *sA, const Index ai, const Index aj)
     return true;
 }
 
-OcpAugSystemSolver::OcpAugSystemSolver(const ProblemInfo<OcpType> &info)
+AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
 {
     Index max_number_of_controls =
         *std::max_element(info.dims.number_of_controls.begin(), info.dims.number_of_controls.end());
@@ -111,7 +111,7 @@ OcpAugSystemSolver::OcpAugSystemSolver(const ProblemInfo<OcpType> &info)
     rho.resize(info.dims.K);
 };
 
-LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
+LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &info,
                                            Jacobian<OcpType> &jacobian, Hessian<OcpType> &hessian,
                                            const VecRealView &D_x, const VecRealView &D_s,
                                            const VecRealView &f, const VecRealView &g,
@@ -465,7 +465,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
     }
     return LinsolReturnFlag::SUCCESS;
 }
-LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
+LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &info,
                                            Jacobian<OcpType> &jacobian, Hessian<OcpType> &hessian,
                                            const VecRealView &D_x, const VecRealView &D_eq,
                                            const VecRealView &D_s, const VecRealView &f,
@@ -627,7 +627,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve(const ProblemInfo<OcpType> &info,
     return LinsolReturnFlag::SUCCESS;
 }
 
-LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
+LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> &info,
                                                const Jacobian<OcpType> &jacobian,
                                                const Hessian<OcpType> &hessian,
                                                const VecRealView &D_s, const VecRealView &f,
@@ -864,7 +864,7 @@ LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
     }
     return LinsolReturnFlag::SUCCESS;
 }
-LinsolReturnFlag OcpAugSystemSolver::solve_rhs(const ProblemInfo<OcpType> &info,
+LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> &info,
                                                const Jacobian<OcpType> &jacobian,
                                                const Hessian<OcpType> &hessian,
                                                const VecRealView &D_eq, const VecRealView &D_s,

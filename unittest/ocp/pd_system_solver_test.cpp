@@ -57,13 +57,12 @@ protected:
     VecRealAllocated rhs_g = VecRealAllocated(info.number_of_eq_constraints);
     VecRealAllocated rhs_s = VecRealAllocated(info.number_of_slack_variables);
     VecRealAllocated D_x = VecRealAllocated(info.number_of_primal_variables);
-    VecRealAllocated D_i = VecRealAllocated(info.number_of_slack_variables);
-    VecRealAllocated D_eq = VecRealAllocated(info.number_of_g_eq_path);
+    VecRealAllocated D_eq = VecRealAllocated(info.number_of_eq_constraints);
     MatRealAllocated full_kkt_matrix =
         MatRealAllocated(info.number_of_primal_variables + info.number_of_eq_constraints,
                          info.number_of_primal_variables + info.number_of_eq_constraints);
     // LinearSystem<PdSystemType<OcpType>> lss{info};
-    std::shared_ptr<OcpAugSystemSolver> solver = std::make_shared<OcpAugSystemSolver>(info);
+    std::shared_ptr<AugSystemSolver<OcpType>> solver = std::make_shared<AugSystemSolver<OcpType>>(info);
     PdSolverOrig<OcpType> pd_solver = PdSolverOrig<OcpType>(info, solver);
     void SetUp()
     {
@@ -155,12 +154,9 @@ protected:
         for (Index i = 0; i < info.number_of_eq_constraints; ++i)
         {
             rhs_g(i) = 1.0 * i;
-        }
-
-        for (Index i = 0; i < info.number_of_g_eq_path; ++i)
-        {
             D_eq(i) = 1e-8 * (i + 1);
         }
+
         for (Index i = 0; i < info.number_of_slack_variables; ++i)
         {
             sl(i) = 1. + 0.1 * i;
@@ -169,14 +165,13 @@ protected:
             zu(i) = 1. + 0.4 * i;
             rhs_cl(i) = 1. + 0.5 * i;
             rhs_cu(i) = 1. + 0.6 * i;
-            D_i(i) =  1.0 + 0.7 * i;
         }
     };
 };
 
 TEST_F(PdTest, TestSolve)
 {
-    LinearSystem<PdSystemType<OcpType>> ls(info, jacobian, hessian, D_x, false, D_eq, D_i, sl, su,
+    LinearSystem<PdSystemType<OcpType>> ls(info, jacobian, hessian, D_x, false, D_eq, sl, su,
                                            zl, zu, rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu);
     VecRealAllocated x_full(ls.m());
     VecRealAllocated rhs_save(ls.m());
@@ -192,7 +187,7 @@ TEST_F(PdTest, TestSolve)
 
 TEST_F(PdTest, TestSolveDegen)
 {
-    LinearSystem<PdSystemType<OcpType>> ls(info, jacobian, hessian, D_x, true, D_eq, D_i, sl, su,
+    LinearSystem<PdSystemType<OcpType>> ls(info, jacobian, hessian, D_x, true, D_eq, sl, su,
                                            zl, zu, rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu);
     VecRealAllocated x_full(ls.m());
     VecRealAllocated rhs_save(ls.m());

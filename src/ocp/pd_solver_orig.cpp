@@ -13,7 +13,7 @@ using namespace fatrop;
 template class LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>;
 
 PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
-                                    const std::shared_ptr<OcpAugSystemSolver> &aug_system_solver)
+                                    const std::shared_ptr<AugSystemSolver<OcpType>> &aug_system_solver)
     : LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>(
           LinearSystem<PdSystemType<OcpType>>::m(info)),
       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),
@@ -30,7 +30,7 @@ void PdSolverOrig<OcpType>::reduce(LinearSystem<PdSystemType<OcpType>> &ls)
         1. / (ls.D_x_.block(ls.info_.number_of_slack_variables, ls.info_.offset_slack) +
               1. / ls.Sl_i_ * ls.Zl_i_ + 1. / ls.Su_i_ * ls.Zu_i_);
     ss_ = ls.rhs_f_s_ + 1. / ls.Sl_i_ * ls.rhs_cl_ - 1. / ls.Su_i_ * ls.rhs_cu_;
-    D_ii_ = sigma_inverse_ + ls.D_i_;
+    D_ii_ = sigma_inverse_ + ls.D_e_.block(ls.info_.number_of_g_eq_slack, ls.info_.offset_g_eq_slack);
     g_ii_ = gi + sigma_inverse_ * ss_;
 
     gg_.block(ls.info_.number_of_g_eq_path, ls.info_.offset_g_eq_path) =
@@ -93,7 +93,7 @@ LinsolReturnFlag PdSolverOrig<OcpType>::solve_once_impl(LinearSystem<PdSystemTyp
     //    [ A_i         0       0     -D_ii ] [ λ_i ] = [ -g_ii]
     //    with D_ii = \Sigma^{-1} + D_i
     //         g_ii =  g_i + \Sigma{-1} ss
-    //  This system is in the Augmented system form and can be solved by OcpAugSystemSolver
+    //  This system is in the Augmented system form and can be solved by AugSystemSolver<OcpType>
     // call aug_system_solver to solve the system
     reduce(ls);
     LinsolReturnFlag ret;

@@ -46,7 +46,7 @@ protected:
     MatRealAllocated full_kkt_matrix =
         MatRealAllocated(info.number_of_primal_variables + info.number_of_eq_constraints,
                          info.number_of_primal_variables + info.number_of_eq_constraints);
-    OcpAugSystemSolver solver = OcpAugSystemSolver(info);
+    AugSystemSolver<OcpType> solver = AugSystemSolver<OcpType>(info);
     void SetUp()
     {
         x = 0;

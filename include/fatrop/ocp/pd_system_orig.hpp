@@ -19,7 +19,7 @@
 //    [    0     D_x          0      0    -I      -I     I  ] [ s   ] = [ -f_s ]
 //    [ A_e       0        -D_e      0     0       0     0  ] [ λ_e ] = [ -g_e ]
 //    [ A_d       0          0       0     0       0     0  ] [ λ_d ] = [ -g_d ]
-//    [ A_i      -I          0       0     0     -D_i    0  ] [ λ_i ] = [ -g_i ]
+//    [ A_i      -I          0       0     0     -D_e    0  ] [ λ_i ] = [ -g_i ]
 //    [   0     Zl_i         0       0     0     Sl_i    0  ] [ zl  ] = [ -cl  ]
 //    [   0    -Zu_i         0       0     0      0    Su_i ] [ zu  ] = [ -cu  ]
 //    Here, sl and su are the lower and upper bound distance, i.e. sl = s - l and su = u - l.
@@ -48,7 +48,7 @@ namespace fatrop
         // constructor
         LinearSystem(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jac,
                      Hessian<OcpType> &hess, const VecRealView &D_x, bool inertia_e,
-                     const VecRealView &D_e, const VecRealView &D_i, const VecRealView &Sl_i,
+                     const VecRealView &D_e, const VecRealView &Sl_i,
                      const VecRealView &Su_i, const VecRealView &Zl_i, const VecRealView &Zu_i,
                      VecRealView &rhs_f_x, VecRealView &rhs_f_s, VecRealView &rhs_g,
                      VecRealView &rhs_cl, VecRealView &rhs_cu);
@@ -92,7 +92,6 @@ namespace fatrop
         const VecRealView &D_x_;
         bool inertia_e_;
         const VecRealView &D_e_;
-        const VecRealView &D_i_;
         const VecRealView &Sl_i_;
         const VecRealView &Su_i_;
         const VecRealView &Zl_i_;

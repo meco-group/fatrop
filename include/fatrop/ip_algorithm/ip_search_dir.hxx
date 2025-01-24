@@ -16,7 +16,6 @@ namespace fatrop
           rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Dx_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
-          Di_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Ds_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Deq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints)
     {
@@ -38,7 +37,6 @@ namespace fatrop
         rhs_cu_.block(rhs_cu_.m(), 0) = curr_it.delta_upper() * curr_it.dual_bounds_u();
 
         Dx_ = 0.;
-        Di_ = 0.;
         Deq_ = 0.;
 
         Scalar delta_w = 0.;
@@ -56,7 +54,7 @@ namespace fatrop
             Dx_ = delta_w;
             Deq_ = delta_c;
             LinearSystem<LinearSystemType> ls(
-                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), Dx_, perturbed_eq, Deq_, Di_,
+                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), Dx_, perturbed_eq, Deq_,
                 curr_it.delta_lower(), curr_it.delta_upper(), curr_it.dual_bounds_l(),
                 curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
             ret = linear_solver_->solve_in_place(ls);
