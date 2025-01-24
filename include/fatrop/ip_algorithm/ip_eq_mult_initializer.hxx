@@ -8,11 +8,13 @@
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/pd_system_orig.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
+#include "fatrop/ip_algorithm/pd_solver_orig.hpp"
+#include "fatrop/ip_algorithm/pd_system_orig.hpp"
 
 namespace fatrop
 {
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
-    IpEqMultInitializer<ProblemType, LinearSystemType, LinearSolverDerived>::IpEqMultInitializer(
+    template <typename ProblemType>
+    IpEqMultInitializer<ProblemType>::IpEqMultInitializer(
         const IpDataSp &ipdata, const PdSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
@@ -28,9 +30,9 @@ namespace fatrop
     {
     }
 
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
+    template <typename ProblemType>
     void
-    IpEqMultInitializer<ProblemType, LinearSystemType, LinearSolverDerived>::initialize_eq_mult()
+    IpEqMultInitializer<ProblemType>::initialize_eq_mult()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         curr_it.set_dual_eq(VecRealScalar(curr_it.dual_eq().m(), 0.));
@@ -47,7 +49,7 @@ namespace fatrop
 
         bool solved = false;
         bool first_try_delta_w = true;
-        LinearSystem<LinearSystemType> ls(
+        LinearSystem<PdSystemType<ProblemType>> ls(
             curr_it.info(), curr_it.jacobian(), curr_it.zero_hessian(), Dx_, false, Deq_, dummy_s_,
             dummy_s_, dummy_z_, dummy_z_, rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
         LinsolReturnFlag ret = linear_solver_->solve_in_place(ls);

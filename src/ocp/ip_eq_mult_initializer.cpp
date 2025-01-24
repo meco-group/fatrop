@@ -8,4 +8,4 @@
 
 using namespace fatrop;
 
-template class IpEqMultInitializer<OcpType, PdSystemType<OcpType>, PdSolverOrig<OcpType>>; 
+template class IpEqMultInitializer<OcpType>; 

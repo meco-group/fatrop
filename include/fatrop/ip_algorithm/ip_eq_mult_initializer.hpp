@@ -6,13 +6,14 @@
 #define __fatrop_ip_algorithm_ip_eq_mult_initializer_hpp__
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
+
 #include "fatrop/nlp/fwd.hpp"
 #include <memory>
 
 namespace fatrop
 {
 
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
+    template <typename ProblemType>
     class IpEqMultInitializer
     {
         typedef std::shared_ptr<PdSolverOrig<ProblemType>> PdSolverSp;

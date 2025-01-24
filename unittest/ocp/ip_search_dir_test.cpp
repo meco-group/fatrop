@@ -50,7 +50,7 @@ protected:
     VecRealAllocated D_x, D_eq, D_i;
     std::shared_ptr<AugSystemSolver<OcpType>> aug_solver;
     std::shared_ptr<PdSolverOrig<OcpType>> solver;
-    IpSearchDirImpl<OcpType, PdSystemType<OcpType>, PdSolverOrig<OcpType>> search_dir;
+    IpSearchDirImpl<OcpType> search_dir;
 };
 
 TEST_F(IpSearchDirTest, SolveLinearSystem) { EXPECT_NO_THROW(search_dir.compute_search_dir()); }

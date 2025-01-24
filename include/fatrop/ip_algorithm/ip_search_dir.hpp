@@ -21,14 +21,14 @@ namespace fatrop
         virtual ~IpSearchDirBase() = default;
     };
 
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
+    template <typename ProblemType>
     class IpSearchDirImpl : public IpSearchDirBase
     {
         typedef IpIterate<ProblemType> IpIterateType;
         typedef std::shared_ptr<IpIterateType> IpIterateSp;
         typedef IpData<ProblemType> IpDataType;
         typedef std::shared_ptr<IpDataType> IpDataSp;
-        typedef LinearSolver<LinearSolverDerived, LinearSystemType> LinearSolverType;
+        typedef LinearSolver<PdSolverOrig<ProblemType>, PdSystemType<ProblemType>> LinearSolverType;
         typedef std::shared_ptr<LinearSolverType> LinearSolverSp;
 
     public:

@@ -6,8 +6,8 @@
 
 namespace fatrop
 {
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
-    IpSearchDirImpl<ProblemType, LinearSystemType, LinearSolverDerived>::IpSearchDirImpl(
+    template <typename ProblemType>
+    IpSearchDirImpl<ProblemType>::IpSearchDirImpl(
         const IpDataSp &ipdata, const LinearSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
@@ -21,14 +21,14 @@ namespace fatrop
           Deq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints)
     {
     }
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
-    void IpSearchDirImpl<ProblemType, LinearSystemType, LinearSolverDerived>::reset()
+    template <typename ProblemType>
+    void IpSearchDirImpl<ProblemType>::reset()
     {
         delta_w_last_ = 0.;
     }
-    template <typename ProblemType, typename LinearSystemType, typename LinearSolverDerived>
+    template <typename ProblemType>
     LinsolReturnFlag
-    IpSearchDirImpl<ProblemType, LinearSystemType, LinearSolverDerived>::compute_search_dir()
+    IpSearchDirImpl<ProblemType>::compute_search_dir()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         rhs_x_.block(rhs_x_.m(), 0) = curr_it.dual_infeasibility_x();
@@ -54,7 +54,7 @@ namespace fatrop
             bool update_delta_c = false;
             Dx_ = delta_w;
             Deq_ = delta_c;
-            LinearSystem<LinearSystemType> ls(
+            LinearSystem<PdSystemType<ProblemType>> ls(
                 curr_it.info(), curr_it.jacobian(), curr_it.hessian(), Dx_, perturbed_eq, Deq_,
                 curr_it.delta_lower(), curr_it.delta_upper(), curr_it.dual_bounds_l(),
                 curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
