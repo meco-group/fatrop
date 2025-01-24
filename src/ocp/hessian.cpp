@@ -17,8 +17,8 @@ Hessian<OcpType>::Hessian(const ProblemDims<OcpType> &dims)
         RSQrqt.emplace_back(dims.number_of_states[k] + dims.number_of_controls[k] + 1,
                             dims.number_of_states[k] + dims.number_of_controls[k]);
 };
-void Hessian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x, Scalar alpha, const VecRealView& y,
-                                      VecRealView &out) const
+void Hessian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x, Scalar alpha,
+                                      const VecRealView &y, VecRealView &out) const
 {
     for (Index k = 0; k < info.dims.K; ++k)
     {
@@ -45,7 +45,7 @@ void Hessian<OcpType>::get_rhs(const OcpInfo &info, VecRealView &out) const
         rowex(nu + nx, 1.0, RSQrqt[k], nu + nx, 0, out, offset_ux);
     }
 };
-void Hessian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &in) 
+void Hessian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &in)
 {
     for (Index k = 0; k < info.dims.K; ++k)
     {
@@ -58,6 +58,11 @@ void Hessian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &in)
         rowin(nu + nx, 1.0, in, offset_ux, RSQrqt[k], nu + nx, 0);
     }
 };
+void Hessian<OcpType>::set_zero()
+{
+    for (auto &RSQ : RSQrqt)
+        gese(RSQ.m(), RSQ.n(), 0.0, RSQ, 0, 0);
+}
 // make printable
 namespace fatrop
 {

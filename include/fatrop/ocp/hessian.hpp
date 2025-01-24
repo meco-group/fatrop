@@ -63,10 +63,10 @@ namespace fatrop
          *   RSQrqt[-1, :] is reserved for the right-hand side.
          */
         std::vector<MatRealAllocated> RSQrqt;
-
         void apply_on_right(const OcpInfo& info, const VecRealView& x, Scalar alpha, const VecRealView& y, VecRealView& out) const;
         void get_rhs(const OcpInfo& info, VecRealView& out) const;
         void set_rhs(const OcpInfo& info, const VecRealView& in);
+        void set_zero();
         // make printable
         friend std::ostream& operator<<(std::ostream& os, const Hessian<OcpType>& hess);
     };

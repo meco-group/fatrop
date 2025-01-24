@@ -233,7 +233,8 @@ namespace fatrop
         Scalar constraint_violation = norm_inf(constr_viol());
         Scalar dual_infeasibility_x_linf = norm_inf(dual_infeasibility_x());
         Scalar dual_infeasibility_s_linf = norm_inf(dual_infeasibility_s());
-        Scalar dual_infeasibility_linf = std::max(dual_infeasibility_x_linf, dual_infeasibility_s_linf);
+        Scalar dual_infeasibility_linf =
+            std::max(dual_infeasibility_x_linf, dual_infeasibility_s_linf);
         Scalar complementarity_l_linf = norm_inf(complementarity_l());
         Scalar complementarity_u_linf = norm_inf(complementarity_u());
         Scalar complementarity_linf = std::max(complementarity_l_linf, complementarity_u_linf);
@@ -321,6 +322,12 @@ namespace fatrop
             fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
             hessian_evaluated_ = true;
         }
+        return hessian_;
+    }
+    template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::zero_hessian()
+    {
+        hessian_.set_zero();
+        hessian_evaluated_ = false;
         return hessian_;
     }
     template <typename ProblemType> Jacobian<ProblemType> &IpIterate<ProblemType>::jacobian()

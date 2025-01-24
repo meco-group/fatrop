@@ -78,6 +78,7 @@ namespace fatrop
         Index number_of_bounds() const { return number_of_bounds_; }
 
         Hessian<ProblemType> &hessian();
+        Hessian<ProblemType> &zero_hessian();
         Jacobian<ProblemType> &jacobian();
 
     private:

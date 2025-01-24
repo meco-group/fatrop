@@ -16,6 +16,7 @@ namespace fatrop
         void apply_on_right(const ProblemInfo<ProblemType>& info, const VecRealView& x, Scalar alpha, const VecRealView& y, VecRealView& out) const;
         void get_rhs(const ProblemInfo<ProblemType>& info, VecRealView& out) const;
         void set_rhs(const ProblemInfo<ProblemType>& info, const VecRealView& in);
+        void set_zero();
     };
 } // namespace fatrop
 
