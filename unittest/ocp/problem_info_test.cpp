@@ -35,7 +35,7 @@ TEST_F(ProblemInfoTest, ConstructorAndOffsets)
             EXPECT_EQ(problem_info.offsets_primal_x, std::vector<Index>({2, 9, 18}));
 
             // // Test slack offsets
-            EXPECT_EQ(problem_info.offset_slack, 0);
+            EXPECT_EQ(problem_info.offset_slack, 24);
             EXPECT_EQ(problem_info.offsets_slack, std::vector<Index>({0, 6, 13}));
 
             // // Test equality constraint numbers

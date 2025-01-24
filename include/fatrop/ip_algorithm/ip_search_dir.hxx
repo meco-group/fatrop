@@ -15,7 +15,8 @@ namespace fatrop
           rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          Dx_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
+          Dx_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables +
+              ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Ds_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Deq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints)
     {

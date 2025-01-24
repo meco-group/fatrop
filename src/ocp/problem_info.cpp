@@ -53,10 +53,10 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     std::transform(offsets_primal_u.begin(), offsets_primal_u.end(),
                    dims.number_of_controls.begin(), offsets_primal_x.begin(), std::plus<Index>());
     // set up the offsets for the slack variables
-    offset_slack = 0;
+    offset_slack = number_of_primal_variables;
     offsets_slack = std::vector<Index>(dims.K, 0);
     compute_offsets(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(),
-                    offset_slack, offsets_slack.begin());
+                    0, offsets_slack.begin());
     offsets_eq = std::vector<Index>(dims.K, 0);
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(), 0,
                     offsets_eq.begin());

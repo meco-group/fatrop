@@ -29,7 +29,7 @@ class OcpImplExampleTest : public ::testing::Test
 protected:
     OcpImplExampleTest()
         : ocp(std::make_shared<OcpTestProblem>()), nlp(std::make_shared<NlpOcp>(ocp)),
-          info(nlp->problem_dims()), data(nlp), D_x(info.number_of_primal_variables),
+          info(nlp->problem_dims()), data(nlp), D_x(info.number_of_primal_variables + info.number_of_slack_variables),
           D_eq(info.number_of_eq_constraints),
           aug_solver(std::make_shared<AugSystemSolver<OcpType>>(info)), solver(info, aug_solver),
           rhs_x(info.number_of_primal_variables), rhs_s(info.number_of_slack_variables),

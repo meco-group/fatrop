@@ -56,7 +56,7 @@ protected:
     VecRealAllocated rhs_x = VecRealAllocated(info.number_of_primal_variables);
     VecRealAllocated rhs_g = VecRealAllocated(info.number_of_eq_constraints);
     VecRealAllocated rhs_s = VecRealAllocated(info.number_of_slack_variables);
-    VecRealAllocated D_x = VecRealAllocated(info.number_of_primal_variables);
+    VecRealAllocated D_x = VecRealAllocated(info.number_of_primal_variables + info.number_of_slack_variables);
     VecRealAllocated D_eq = VecRealAllocated(info.number_of_eq_constraints);
     MatRealAllocated full_kkt_matrix =
         MatRealAllocated(info.number_of_primal_variables + info.number_of_eq_constraints,
