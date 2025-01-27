@@ -30,8 +30,6 @@ namespace fatrop
         const VecRealView viol_s = ipdata_->current_iterate().constr_viol_ineq();
         const VecRealView lower_bounds = ipdata_->current_iterate().lower_bounds();
         const VecRealView upper_bounds = ipdata_->current_iterate().upper_bounds();
-        const VecRealView delta_lower = ipdata_->current_iterate().delta_lower();
-        const VecRealView delta_upper = ipdata_->current_iterate().delta_upper();
         const std::vector<bool> lower_bounded = ipdata_->current_iterate().lower_bounded();
         const std::vector<bool> upper_bounded = ipdata_->current_iterate().upper_bounded();
         auto double_bounded = [&](Index i) { return lower_bounded[i] && upper_bounded[i]; };

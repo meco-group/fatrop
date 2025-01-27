@@ -6,23 +6,23 @@
 #define __fatrop_ip_algorithm_ip_eq_mult_initializer_hxx__
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
-#include "fatrop/ip_algorithm/pd_system_orig.hpp"
-#include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 #include "fatrop/ip_algorithm/pd_solver_orig.hpp"
 #include "fatrop/ip_algorithm/pd_system_orig.hpp"
+#include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 
 namespace fatrop
 {
     template <typename ProblemType>
-    IpEqMultInitializer<ProblemType>::IpEqMultInitializer(
-        const IpDataSp &ipdata, const PdSolverSp &linear_solver)
+    IpEqMultInitializer<ProblemType>::IpEqMultInitializer(const IpDataSp &ipdata,
+                                                          const PdSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
           rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          Dx_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
+          Dx_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables +
+              ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Ds_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           Deq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           dummy_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
@@ -30,9 +30,7 @@ namespace fatrop
     {
     }
 
-    template <typename ProblemType>
-    void
-    IpEqMultInitializer<ProblemType>::initialize_eq_mult()
+    template <typename ProblemType> void IpEqMultInitializer<ProblemType>::initialize_eq_mult()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         curr_it.set_dual_eq(VecRealScalar(curr_it.dual_eq().m(), 0.));

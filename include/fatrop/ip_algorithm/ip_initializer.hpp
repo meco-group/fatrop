@@ -4,6 +4,7 @@
 
 #ifndef __fatrop_ip_algorithm_ip_initializer_hpp__
 #define __fatrop_ip_algorithm_ip_initializer_hpp__
+#include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include <memory>
 namespace fatrop
@@ -25,6 +26,7 @@ namespace fatrop
     public:
         IpInitializer(const IpDataSp ipdata, const IpEqMultInitializerSp &eq_mult_initializer);
         void initialize() override;
+
     private:
         void initialize_slacks();
         IpDataSp ipdata_;

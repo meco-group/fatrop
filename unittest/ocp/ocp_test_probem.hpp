@@ -3,6 +3,7 @@
 
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/ocp/ocp_abstract.hpp"
+#include <limits>   
 
 // example problem 2D point mass
 // states: [x, y, vx, vy]
@@ -194,6 +195,8 @@ namespace fatrop::test
                 return 0;
             lower[0] = -0.5 - 0.1 * k;
             upper[0] = 0.6 + 0.1 * k;
+            lower[1] = -0.75 - 0.1 * k;
+            upper[1] = std::numeric_limits<Scalar>::infinity();
             return 0;
         }
 
