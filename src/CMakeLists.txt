@@ -9,6 +9,7 @@ set(FATROP_SOURCES
     ocp/ip_convergence_check.cpp
     ocp/ip_data.cpp
     ocp/ip_eq_mult_initializer.cpp
+    ocp/ip_initializer.cpp
     ocp/ip_iterate.cpp
     ocp/ip_search_dir.cpp
     ocp/nlp_ocp.cpp

@@ -23,7 +23,7 @@ namespace fatrop
 
     public:
         // Problem information
-        Scalar objective_scale = 1.;   ///< Scaling factor for the objective function.
+        Scalar objective_scale = 1.; ///< Scaling factor for the objective function.
         void initialize();
         void reset_evaluated_quantities();
 
@@ -40,6 +40,10 @@ namespace fatrop
         const VecRealView &delta_dual_eq() const { return delta_dual_eq_; }
         const VecRealView &delta_dual_bounds_l() const { return delta_dual_bounds_l_; }
         const VecRealView &delta_dual_bounds_u() const { return delta_dual_bounds_u_; }
+        const VecRealView &lower_bounds() const { return lower_bounds_; };
+        const VecRealView &upper_bounds() const { return upper_bounds_; };
+        const std::vector<bool> &lower_bounded() const { return lower_bounded_; };
+        const std::vector<bool> &upper_bounded() const { return upper_bounded_; };
 
         template <typename Derived> void set_primal_x(const VecReal<Derived> &primal_x);
         template <typename Derived> void set_primal_s(const VecReal<Derived> &primal_s);
@@ -59,6 +63,8 @@ namespace fatrop
         const VecRealView &obj_gradient_x();
         const VecRealView &obj_gradient_s();
         const VecRealView &constr_viol();
+        const VecRealView 
+        constr_viol_ineq(); // note that this requires specialization for the ProblemType
         const VecRealView &dual_infeasibility_x();
         const VecRealView &dual_infeasibility_s();
         const VecRealView &barrier_gradient();

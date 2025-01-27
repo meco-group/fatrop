@@ -237,6 +237,24 @@ TEST_F(VecTest, ScalarDivVecReal)
     }
 }
 
+TEST_F(VecTest, MinOperation)
+{
+    auto result = min(vec1, vec2);
+    for (Index i = 0; i < 5; ++i)
+    {
+        EXPECT_EQ(result(i), vec1(i));
+    }
+}
+
+TEST_F(VecTest, MaxOperation)
+{
+    auto result = max(vec1, vec2);
+    for (Index i = 0; i < 5; ++i)
+    {
+        EXPECT_EQ(result(i), vec2(i));
+    }
+}
+
 TEST_F(VecTest, Assignment)
 {
     VecRealAllocated vec3{5};
