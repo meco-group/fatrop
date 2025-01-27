@@ -20,6 +20,12 @@ namespace fatrop
     class IpSearchDirBase;
     template <typename ProblemType>
     class IpSearchDirImpl;
+    template <typename ProblemType>
+    class IpNlpOrig;
+    template <typename ProblemType>
+    class IpAlgorithm;
+    class IpFilterData;
+    class IpFilter;
 
 } // namespace fatrop
 
