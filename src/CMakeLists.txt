@@ -6,6 +6,7 @@ set(FATROP_SOURCES
     ocp/dims.cpp
     ocp/jacobian.cpp
     ocp/hessian.cpp
+    ocp/ip_algorithm.cpp
     ocp/ip_convergence_check.cpp
     ocp/ip_data.cpp
     ocp/ip_eq_mult_initializer.cpp
@@ -17,6 +18,7 @@ set(FATROP_SOURCES
     ocp/pd_system_orig.cpp
     ocp/pd_solver_orig.cpp
     ocp/problem_info.cpp
+    ip_algorithm/ip_filter.cpp
 )
 
 # Create the fatrop shared library

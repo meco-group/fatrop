@@ -39,6 +39,7 @@ add_executable(nlp_ocp_test ocp/nlp_ocp_test.cpp)
 add_executable(ocp_ip_data_solve_test ocp/ocp_ip_data_solve_test.cpp)
 add_executable(ip_search_dir_test ocp/ip_search_dir_test.cpp)
 add_executable(ip_initializer_test ip_algorithm/ip_initializer_test.cpp)
+add_executable(ip_filter_test ip_algorithm/ip_filter_test.cpp)
 
 # Link the test executables with Google Test and other required libraries
 target_link_libraries(vector_test gtest gtest_main blasfeo fatrop)
@@ -53,6 +54,7 @@ target_link_libraries(nlp_ocp_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(ocp_ip_data_solve_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(ip_search_dir_test gtest gtest_main blasfeo fatrop)
 target_link_libraries(ip_initializer_test gtest gtest_main blasfeo fatrop)
+target_link_libraries(ip_filter_test gtest gtest_main blasfeo fatrop)
 
 # Discover and add the tests
 gtest_discover_tests(vector_test)
@@ -67,3 +69,4 @@ gtest_discover_tests(nlp_ocp_test)
 gtest_discover_tests(ocp_ip_data_solve_test)
 gtest_discover_tests(ip_search_dir_test)
 gtest_discover_tests(ip_initializer_test)
+gtest_discover_tests(ip_filter_test)

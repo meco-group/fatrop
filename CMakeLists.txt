@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(fatrop)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Option to build tests (default is ON)
