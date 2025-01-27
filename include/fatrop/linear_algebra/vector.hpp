@@ -130,6 +130,18 @@ namespace fatrop
 
         friend VecRealCos<Derived> cos(const VecReal<Derived> &a) { return VecRealCos<Derived>(a); }
 
+        template <typename Dep2>
+        friend VecRealMin<Derived, Dep2> min(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        {
+            return VecRealMin<Derived, Dep2>(a, b);
+        }
+
+        template <typename Dep2>
+        friend VecRealMax<Derived, Dep2> max(const VecReal<Derived> &a, const VecReal<Dep2> &b)
+        {
+            return VecRealMax<Derived, Dep2>(a, b);
+        }
+
         template <typename IfElseOp, typename Dep2>
         friend VecRealIfElse<IfElseOp, Derived, Dep2>
         if_else(const IfElseOp &if_else_op, const VecReal<Derived> &a, const VecReal<Dep2> &b)
@@ -240,6 +252,45 @@ namespace fatrop
         const VecReal<Dep2> &b;
         const IfElseOp &if_else_op;
     };
+
+    /**
+     * @brief Represents element-wise minimum of two vectors.
+     */
+    template <typename Dep1, typename Dep2>
+    class VecRealMin : public VecReal<VecRealMin<Dep1, Dep2>>
+    {
+    public:
+        VecRealMin(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a), b(b)
+        {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for min operation");
+        }
+        Scalar operator()(const Index i) const { return std::min(a(i), b(i)); }
+        Index m() const { return a.m(); }
+
+    private:
+        const VecReal<Dep1> &a;
+        const VecReal<Dep2> &b;
+    };
+
+    /**
+     * @brief Represents element-wise maximum of two vectors.
+     */
+    template <typename Dep1, typename Dep2>
+    class VecRealMax : public VecReal<VecRealMax<Dep1, Dep2>>
+    {
+    public:
+        VecRealMax(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a), b(b)
+        {
+            fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for max operation");
+        }
+        Scalar operator()(const Index i) const { return std::max(a(i), b(i)); }
+        Index m() const { return a.m(); }
+
+    private:
+        const VecReal<Dep1> &a;
+        const VecReal<Dep2> &b;
+    };
+
     // specialization for std::vector<bool>
     template <typename Dep1, typename Dep2>
     class VecRealIfElse<std::vector<bool>, Dep1, Dep2>
