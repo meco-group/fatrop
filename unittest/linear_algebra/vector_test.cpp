@@ -199,6 +199,16 @@ TEST_F(VecTest, IfElse)
     }
 }
 
+TEST_F(VecTest, IfElseLambda)
+{
+    auto condition = [](Index i) { return i % 2 == 0; };
+    auto result = if_else(condition, vec1, vec2);
+    for (Index i = 0; i < 5; ++i)
+    {
+        EXPECT_EQ(result(i), (i % 2 == 0) ? vec1(i) : vec2(i));
+    }
+}
+
 TEST_F(VecTest, VecRealScalar)
 {
     VecRealScalar scalar_vec(5, 3.0);

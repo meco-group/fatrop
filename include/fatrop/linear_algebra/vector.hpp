@@ -17,6 +17,7 @@
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <vector>
 
 namespace fatrop
 {
@@ -51,6 +52,18 @@ namespace fatrop
         VecRealBlock<Derived> block(Index size, Index start) const
         {
             return VecRealBlock<Derived>(*static_cast<const Derived *>(this), size, start);
+        }
+
+        bool is_zero() const
+        {
+            for (Index i = 0; i < m(); i++)
+            {
+                if ((*this)(i) != 0.)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // Various mathematical operations defined as friend functions
@@ -219,13 +232,32 @@ namespace fatrop
             : if_else_op(if_else_op), a(a), b(b)
         {
         }
-        Scalar operator()(const Index i) const { return if_else_op[i] ? a(i) : b(i); }
+        Scalar operator()(const Index i) const { return if_else_op(i) ? a(i) : b(i); }
         Index m() const { return a.m(); }
 
     private:
         const VecReal<Dep1> &a;
         const VecReal<Dep2> &b;
         const IfElseOp &if_else_op;
+    };
+    // specialization for std::vector<bool>
+    template <typename Dep1, typename Dep2>
+    class VecRealIfElse<std::vector<bool>, Dep1, Dep2>
+        : public VecReal<VecRealIfElse<std::vector<bool>, Dep1, Dep2>>
+    {
+    public:
+        VecRealIfElse(const std::vector<bool> &if_else_op, const VecReal<Dep1> &a,
+                      const VecReal<Dep2> &b)
+            : if_else_op(if_else_op), a(a), b(b)
+        {
+        }
+        Scalar operator()(const Index i) const { return if_else_op[i] ? a(i) : b(i); }
+        Index m() const { return a.m(); }
+
+    private:
+        const VecReal<Dep1> &a;
+        const VecReal<Dep2> &b;
+        const std::vector<bool> &if_else_op;
     };
 
     /**
