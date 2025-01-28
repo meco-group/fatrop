@@ -309,7 +309,9 @@ namespace fatrop
           lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
           single_lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
-          single_upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints)
+          single_upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
+          Dx_(nlp->nlp_dims().number_of_variables + nlp->nlp_dims().number_of_ineq_constraints),
+          De_(nlp->nlp_dims().number_of_eq_constraints)
     {
         initialize();
     }

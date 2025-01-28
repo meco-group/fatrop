@@ -299,6 +299,42 @@ namespace fatrop
         void set_mu(Scalar value);
 
         /**
+         * @brief Returns the primal inertia correction vector Dx_.
+         * @return Constant reference to the Dx_ vector.
+         */
+        const VecRealView &Dx() const { return Dx_; }
+
+        /**
+         * @brief Returns the equality inertia correction vector De_.
+         * @return Constant reference to the De_ vector.
+         */
+        const VecRealView &De() const { return De_; }
+
+        /**
+         * @brief Returns the flag indicating if De_ is zero.
+         * @return The value of De_is_zero_.
+         */
+        bool De_is_zero() const { return De_is_zero_; }
+
+        /**
+         * @brief Sets the primal inertia correction vector Dx_.
+         * @param Dx The new Dx_ vector.
+         */
+        template <typename Derived> void set_Dx(const VecReal<Derived> &Dx);
+
+        /**
+         * @brief Sets the equality inertia correction vector De_.
+         * @param De The new De_ vector.
+         */
+        template <typename Derived> void set_De(const VecReal<Derived> &De);
+
+        /**
+         * @brief Sets the flag indicating if De_ is zero.
+         * @param value The new value for De_is_zero_.
+         */
+        void set_De_is_zero(bool value);
+
+        /**
          * @brief Computes the linear decrease in the objective function.
          * @return The linear decrease in the objective function.
          */
@@ -395,6 +431,11 @@ namespace fatrop
                                                  ///< lower bounded.
         std::vector<bool> single_upper_bounded_; ///< Boolean vector indicating if the variables are
                                                  ///< upper bounded.
+        // Vector quantities related to solving for the search direction
+        VecRealAllocated Dx_; ///< primal inertia correction vector
+        VecRealAllocated De_; ///< equality inertia correction vector
+        bool De_is_zero_ = false;
+
         // Flags to track which quantities have already been evaluated
         bool obj_value_evaluated_ = false;      ///< Flag for objective value evaluation
         bool obj_gradient_evaluated_ = false;   ///< Flag for objective gradient (x) evaluation
@@ -497,6 +538,26 @@ void fatrop::IpIterate<ProblemType>::set_delta_dual_bounds_u(
     const VecReal<Derived> &delta_dual_bounds_u)
 {
     delta_dual_bounds_u_ = delta_dual_bounds_u;
+}
+
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_Dx(const VecReal<Derived> &Dx)
+{
+    Dx_ = Dx;
+}
+
+template <typename ProblemType>
+template <typename Derived>
+void fatrop::IpIterate<ProblemType>::set_De(const VecReal<Derived> &De)
+{
+    De_ = De;
+}
+
+template <typename ProblemType>
+void fatrop::IpIterate<ProblemType>::set_De_is_zero(bool value)
+{
+    De_is_zero_ = value;
 }
 
 #endif //__fatrop_algorithm_ip_iterate_hpp__

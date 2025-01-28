@@ -11,12 +11,12 @@
 using namespace fatrop;
 LinearSystem<PdSystemType<OcpType>>::LinearSystem(
     const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jac, Hessian<OcpType> &hess,
-    const VecRealView &D_x, bool inertia_e, const VecRealView &D_e, const VecRealView &Sl_i,
+    const VecRealView &D_x, bool De_is_zero, const VecRealView &D_e, const VecRealView &Sl_i,
     const VecRealView &Su_i, const VecRealView &Zl_i, const VecRealView &Zu_i, VecRealView &rhs_f_x,
     VecRealView &rhs_f_s, VecRealView &rhs_g, VecRealView &rhs_cl, VecRealView &rhs_cu)
     : info_(info), m_(info.number_of_primal_variables + 3 * info.number_of_slack_variables +
                       info.number_of_eq_constraints),
-      jac_(jac), hess_(hess), D_x_(D_x), inertia_e_(inertia_e), D_e_(D_e), Sl_i_(Sl_i), Su_i_(Su_i),
+      jac_(jac), hess_(hess), D_x_(D_x), De_is_zero_(De_is_zero), D_e_(D_e), Sl_i_(Sl_i), Su_i_(Su_i),
       Zl_i_(Zl_i), Zu_i_(Zu_i), rhs_f_x_(rhs_f_x), rhs_f_s_(rhs_f_s), rhs_g_(rhs_g),
       rhs_cl_(rhs_cl), rhs_cu_(rhs_cu)
 {
@@ -90,7 +90,7 @@ void LinearSystem<PdSystemType<OcpType>>::apply_on_right(const VecRealView &x, S
     // out_mult_ineq += -I @ s
     out_mult_ineq = out_mult_ineq - x_slack;
     // out_mult_eq += -D_e @ lam_e
-    if (inertia_e_)
+    if (!De_is_zero_)
         out_mult_eq =
             out_mult_eq - D_e_.block(info_.number_of_g_eq_path, info_.offset_g_eq_path) * mult_eq;
     // out_mult_ineq = -D_i @ lam_i

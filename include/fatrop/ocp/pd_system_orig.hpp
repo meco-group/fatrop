@@ -47,7 +47,7 @@ namespace fatrop
     public:
         // constructor
         LinearSystem(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jac,
-                     Hessian<OcpType> &hess, const VecRealView &D_x, bool inertia_e,
+                     Hessian<OcpType> &hess, const VecRealView &D_x, bool D_e_is_zero,
                      const VecRealView &D_e, const VecRealView &Sl_i,
                      const VecRealView &Su_i, const VecRealView &Zl_i, const VecRealView &Zu_i,
                      VecRealView &rhs_f_x, VecRealView &rhs_f_s, VecRealView &rhs_g,
@@ -90,7 +90,7 @@ namespace fatrop
         Jacobian<OcpType> &jac_;
         Hessian<OcpType> &hess_;
         const VecRealView &D_x_;
-        bool inertia_e_;
+        bool De_is_zero_;
         const VecRealView &D_e_;
         const VecRealView &Sl_i_;
         const VecRealView &Su_i_;

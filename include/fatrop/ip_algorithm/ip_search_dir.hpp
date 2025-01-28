@@ -44,9 +44,6 @@ namespace fatrop
         VecRealAllocated rhs_g_;
         VecRealAllocated rhs_cl_;
         VecRealAllocated rhs_cu_;
-        VecRealAllocated Dx_;
-        VecRealAllocated Ds_;
-        VecRealAllocated Deq_;
         Scalar delta_w_last_ = 0.;
         Scalar delta_w0_ = 1e-4;
         Scalar delta_wmin_ = 1e-20;
