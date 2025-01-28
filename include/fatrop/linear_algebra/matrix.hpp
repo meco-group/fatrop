@@ -423,6 +423,12 @@ namespace fatrop
          */
         inline Scalar operator()(const Index i, const Index j) const;
 
+        MatRealAllocated &operator=(const MatRealAllocated &other)
+        {
+            static_cast<MatRealView &>(*this) = static_cast<const MatRealView &>(other);
+            return *this;
+        };
+
         /**
          * @brief Destructor that frees the allocated matrix memory.
          */

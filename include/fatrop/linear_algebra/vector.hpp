@@ -582,7 +582,7 @@ namespace fatrop
         {
             *this = vec;
         }
-        VecRealAllocated(VecRealAllocated & /*other*/) = delete;
+        VecRealAllocated(const VecRealAllocated & other ) = delete;
         /**
          * @brief Move constructor for VecRealAllocated.
          */
@@ -614,6 +614,12 @@ namespace fatrop
             VEC veccp = vec();
             return blasfeo_vecel_wrap(&vec(), i);
         }
+
+        VecRealAllocated& operator=(const VecRealAllocated & other) 
+        {
+            static_cast<VecRealView&>(*this) = static_cast<const VecRealView&>(other);
+            return *this;
+        };
         /**
          * @brief Destructor that frees the allocated vector memory.
          */
