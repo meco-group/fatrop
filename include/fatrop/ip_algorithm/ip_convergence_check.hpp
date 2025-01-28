@@ -10,10 +10,19 @@
 #include <memory>
 namespace fatrop
 {
+    enum class IpConvergenceStatus
+    {
+        Continue,
+        Converged,
+        Converged_to_acceptable_point,
+        Max_iter_exceeded
+    };
+
     class IpConvergenceCheckBase
     {
     public:
-        virtual bool converged() const = 0;
+        virtual IpConvergenceStatus check_converged() = 0;
+        virtual bool check_acceptable() const = 0;
 
     protected:
         virtual ~IpConvergenceCheckBase() = default;
@@ -22,13 +31,20 @@ namespace fatrop
     template <typename ProblemType> class IpConvergenceCheck : public IpConvergenceCheckBase
     {
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
+
     public:
         IpConvergenceCheck(const IpDataSp &ipdata);
-        bool converged() const override;
+        IpConvergenceStatus check_converged() override;
+        void reset();
+        bool check_acceptable() const;
 
     private:
         IpDataSp ipdata_;
         Scalar tol_ = 1e-8;
+        Scalar tol_acceptable_ = 1e-6;
+        Index acceptable_counter_ = 0;
+        Index acceptable_iter_ = 15;
+        Index max_iter_ = 1000;
     };
 
 } // namespace fatrop

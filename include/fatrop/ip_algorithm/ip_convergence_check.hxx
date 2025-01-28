@@ -19,9 +19,34 @@ namespace fatrop
     {
     }
 
-    template <typename ProblemType> bool IpConvergenceCheck<ProblemType>::converged() const
+    template <typename ProblemType> void IpConvergenceCheck<ProblemType>::reset()
     {
-        return (ipdata_->current_iterate().e_mu(0.) <= tol_);
+        acceptable_counter_ = 0;
+    }
+
+    template <typename ProblemType> bool IpConvergenceCheck<ProblemType>::check_acceptable() const
+    {
+        return (ipdata_->current_iterate().e_mu(0.) <= tol_acceptable_);
+    }
+
+    template <typename ProblemType>
+    IpConvergenceStatus IpConvergenceCheck<ProblemType>::check_converged() 
+    {
+        if (ipdata_->current_iterate().e_mu(0.) <= tol_)
+            return IpConvergenceStatus::Converged;
+        if (check_acceptable())
+        {
+            acceptable_counter_++;
+            if (acceptable_counter_ >= acceptable_iter_)
+                return IpConvergenceStatus::Converged_to_acceptable_point;
+        }
+        else
+        {
+            acceptable_counter_ = 0;
+        }
+        if (ipdata_->iteration_number() >= max_iter_)
+            return IpConvergenceStatus::Max_iter_exceeded;
+        return IpConvergenceStatus::Continue;
     }
 
 } // namespace fatrop
