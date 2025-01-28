@@ -27,6 +27,8 @@ namespace fatrop
 
         // solve with iterative refinement
         LinsolReturnFlag solve_in_place(LinearSystem<LsType> &ls);
+        LinsolReturnFlag solve_in_place_rhs(LinearSystem<LsType> &ls);
+        LinsolReturnFlag apply_iterative_refinement(LinearSystem<LsType> &ls);
 
     protected:
         const Index m_;
