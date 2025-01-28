@@ -8,6 +8,7 @@
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/linear_algebra/linear_system.hpp"
 #include "linear_solver.hpp"
+#include <limits> // for std::numeric_limits
 
 namespace fatrop
 {
