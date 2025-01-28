@@ -22,10 +22,29 @@ namespace fatrop
     }
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()
     {
+        // switch trial and current iterate
         Iterate *tmp = &current_iterate();
         current_iterate_ = trial_iterate_;
         trial_iterate_ = tmp;
         trial_iterate_->reset_evaluated_quantities();
+        validate_current_iterate();
+    }
+
+    template <typename ProblemType> void IpData<ProblemType>::backup_current_iterate()
+    {
+        // switch current and stored iterate
+        Iterate *tmp = &current_iterate();
+        current_iterate_ = stored_iterate_;
+        stored_iterate_ = tmp;
+        invalidate_current_iterate();
+    }
+
+    template <typename ProblemType> void IpData<ProblemType>::restore_current_iterate()
+    {
+        // switch current and stored iterate
+        Iterate *tmp = &current_iterate();
+        current_iterate_ = stored_iterate_;
+        stored_iterate_ = tmp;
     }
 
 } // namespace fatrop

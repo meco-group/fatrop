@@ -16,75 +16,336 @@
 
 namespace fatrop
 {
+    /**
+     * @brief Represents an iterate in the Interior Point (IP) algorithm for a given problem type.
+     *
+     * This class encapsulates the state and operations related to a single iteration
+     * in the IP algorithm, including primal and dual variables, search directions,
+     * and various computed quantities.
+     *
+     * @tparam ProblemType The type of problem being solved.
+     */
     template <typename ProblemType> struct IpIterate
     {
         typedef std::shared_ptr<Nlp<ProblemType>> NlpSp;
+
+        /**
+         * @brief Constructs an IpIterate object.
+         * @param nlp Shared pointer to the NLP problem.
+         */
         IpIterate(const NlpSp &nlp);
 
     public:
         // Problem information
         Scalar objective_scale = 1.; ///< Scaling factor for the objective function.
+
+        /**
+         * @brief Initializes the IpIterate object.
+         */
         void initialize();
+
+        /**
+         * @brief Resets all evaluated quantities, marking them as not computed.
+         */
         void reset_evaluated_quantities();
 
+        /**
+         * @brief Returns the problem information.
+         * @return Constant reference to the ProblemInfo object.
+         */
         const ProblemInfo<ProblemType> &info() const { return info_; }
+
+        /**
+         * @brief Returns the NLP problem.
+         * @return Constant reference to the NLP shared pointer.
+         */
         const NlpSp &nlp() const { return nlp_; }
 
+        /**
+         * @brief Returns the primal variables x.
+         * @return Constant reference to the primal x vector.
+         */
         const VecRealView &primal_x() const { return primal_x_; }
+
+        /**
+         * @brief Returns the primal slack variables s.
+         * @return Constant reference to the primal s vector.
+         */
         const VecRealView &primal_s() const { return primal_s_; }
+
+        /**
+         * @brief Returns the dual variables for equality constraints.
+         * @return Constant reference to the dual equality vector.
+         */
         const VecRealView &dual_eq() const { return dual_eq_; }
+
+        /**
+         * @brief Returns the dual variables for lower bound constraints.
+         * @return Constant reference to the dual lower bounds vector.
+         */
         const VecRealView &dual_bounds_l() const { return dual_bounds_l_; }
+
+        /**
+         * @brief Returns the dual variables for upper bound constraints.
+         * @return Constant reference to the dual upper bounds vector.
+         */
         const VecRealView &dual_bounds_u() const { return dual_bounds_u_; }
+
+        /**
+         * @brief Returns the search direction for primal variables x.
+         * @return Constant reference to the delta primal x vector.
+         */
         const VecRealView &delta_primal_x() const { return delta_primal_x_; }
+
+        /**
+         * @brief Returns the search direction for primal slack variables s.
+         * @return Constant reference to the delta primal s vector.
+         */
         const VecRealView &delta_primal_s() const { return delta_primal_s_; }
+
+        /**
+         * @brief Returns the search direction for dual equality variables.
+         * @return Constant reference to the delta dual equality vector.
+         */
         const VecRealView &delta_dual_eq() const { return delta_dual_eq_; }
+
+        /**
+         * @brief Returns the search direction for dual lower bound variables.
+         * @return Constant reference to the delta dual lower bounds vector.
+         */
         const VecRealView &delta_dual_bounds_l() const { return delta_dual_bounds_l_; }
+
+        /**
+         * @brief Returns the search direction for dual upper bound variables.
+         * @return Constant reference to the delta dual upper bounds vector.
+         */
         const VecRealView &delta_dual_bounds_u() const { return delta_dual_bounds_u_; }
+
+        /**
+         * @brief Returns the lower bounds of the variables.
+         * @return Constant reference to the lower bounds vector.
+         */
         const VecRealView &lower_bounds() const { return lower_bounds_; };
+
+        /**
+         * @brief Returns the upper bounds of the variables.
+         * @return Constant reference to the upper bounds vector.
+         */
         const VecRealView &upper_bounds() const { return upper_bounds_; };
+
+        /**
+         * @brief Returns a boolean vector indicating which variables are lower bounded.
+         * @return Constant reference to the lower bounded boolean vector.
+         */
         const std::vector<bool> &lower_bounded() const { return lower_bounded_; };
+
+        /**
+         * @brief Returns a boolean vector indicating which variables are upper bounded.
+         * @return Constant reference to the upper bounded boolean vector.
+         */
         const std::vector<bool> &upper_bounded() const { return upper_bounded_; };
 
+        /**
+         * @brief Sets the primal variables x.
+         * @param primal_x The new primal x vector.
+         */
         template <typename Derived> void set_primal_x(const VecReal<Derived> &primal_x);
+
+        /**
+         * @brief Sets the primal slack variables s.
+         * @param primal_s The new primal s vector.
+         */
         template <typename Derived> void set_primal_s(const VecReal<Derived> &primal_s);
+
+        /**
+         * @brief Sets the dual variables for equality constraints.
+         * @param dual_eq The new dual equality vector.
+         */
         template <typename Derived> void set_dual_eq(const VecReal<Derived> &dual_eq);
+
+        /**
+         * @brief Sets the dual variables for lower bound constraints.
+         * @param dual_bounds_l The new dual lower bounds vector.
+         */
         template <typename Derived> void set_dual_bounds_l(const VecReal<Derived> &dual_bounds_l);
+
+        /**
+         * @brief Sets the dual variables for upper bound constraints.
+         * @param dual_bounds_u The new dual upper bounds vector.
+         */
         template <typename Derived> void set_dual_bounds_u(const VecReal<Derived> &dual_bounds_u);
+
+        /**
+         * @brief Sets the search direction for primal variables x.
+         * @param delta_primal_x The new delta primal x vector.
+         */
         template <typename Derived> void set_delta_primal_x(const VecReal<Derived> &delta_primal_x);
+
+        /**
+         * @brief Sets the search direction for primal slack variables s.
+         * @param delta_primal_s The new delta primal s vector.
+         */
         template <typename Derived> void set_delta_primal_s(const VecReal<Derived> &delta_primal_s);
+
+        /**
+         * @brief Sets the search direction for dual equality variables.
+         * @param delta_dual_eq The new delta dual equality vector.
+         */
         template <typename Derived> void set_delta_dual_eq(const VecReal<Derived> &delta_dual_eq);
+
+        /**
+         * @brief Sets the search direction for dual lower bound variables.
+         * @param delta_dual_bounds_l The new delta dual lower bounds vector.
+         */
         template <typename Derived>
         void set_delta_dual_bounds_l(const VecReal<Derived> &delta_dual_bounds_l);
+
+        /**
+         * @brief Sets the search direction for dual upper bound variables.
+         * @param delta_dual_bounds_u The new delta dual upper bounds vector.
+         */
         template <typename Derived>
         void set_delta_dual_bounds_u(const VecReal<Derived> &delta_dual_bounds_u);
 
+        /**
+         * @brief Computes and returns the objective function value.
+         * @return The objective function value.
+         */
         Scalar obj_value();
+
+        /**
+         * @brief Computes and returns the barrier function value.
+         * @return The barrier function value.
+         */
         Scalar barrier_value();
+
+        /**
+         * @brief Returns the gradient of the objective function with respect to x.
+         * @return Constant reference to the objective gradient w.r.t. x.
+         */
         const VecRealView &obj_gradient_x();
+
+        /**
+         * @brief Returns the gradient of the objective function with respect to s.
+         * @return Constant reference to the objective gradient w.r.t. s.
+         */
         const VecRealView &obj_gradient_s();
+
+        /**
+         * @brief Computes and returns the constraint violation vector.
+         * @return Constant reference to the constraint violation vector.
+         */
         const VecRealView &constr_viol();
-        const VecRealView 
-        constr_viol_ineq(); // note that this requires specialization for the ProblemType
+
+        /**
+         * @brief Computes and returns the inequality constraint violation vector.
+         * @return Constant reference to the inequality constraint violation vector.
+         * @note This requires specialization for the ProblemType.
+         */
+        const VecRealView constr_viol_ineq();
+
+        /**
+         * @brief Computes and returns the dual infeasibility with respect to x.
+         * @return Constant reference to the dual infeasibility w.r.t. x.
+         */
         const VecRealView &dual_infeasibility_x();
+
+        /**
+         * @brief Computes and returns the dual infeasibility with respect to s.
+         * @return Constant reference to the dual infeasibility w.r.t. s.
+         */
         const VecRealView &dual_infeasibility_s();
+
+        /**
+         * @brief Computes and returns the gradient of the barrier function.
+         * @return Constant reference to the barrier function gradient.
+         */
         const VecRealView &barrier_gradient();
-        // // s - L when lower bounded else 1.
+
+        /**
+         * @brief Computes and returns s - L when lower bounded, else 1.
+         * @return Constant reference to the delta_lower vector.
+         */
         const VecRealView &delta_lower();
-        // // U - s when upper bounded else 1.
+
+        /**
+         * @brief Computes and returns U - s when upper bounded, else 1.
+         * @return Constant reference to the delta_upper vector.
+         */
         const VecRealView &delta_upper();
+
+        /**
+         * @brief Computes and returns the complementarity for lower bounds.
+         * @return Constant reference to the complementarity vector for lower bounds.
+         */
         const VecRealView &complementarity_l();
+
+        /**
+         * @brief Computes and returns the complementarity for upper bounds.
+         * @return Constant reference to the complementarity vector for upper bounds.
+         */
         const VecRealView &complementarity_u();
+
+        /**
+         * @brief Returns the current value of mu (barrier parameter).
+         * @return The current value of mu.
+         */
         Scalar mu() { return mu_; };
+
+        /**
+         * @brief Sets the value of mu (barrier parameter).
+         * @param value The new value for mu.
+         */
         void set_mu(Scalar value);
+
+        /**
+         * @brief Computes the linear decrease in the objective function.
+         * @return The linear decrease in the objective function.
+         */
         Scalar linear_decrease_objective();
+
+        /**
+         * @brief Computes the linear decrease in the barrier function.
+         * @return The linear decrease in the barrier function.
+         */
         Scalar linear_decrease_barrier();
+
+        /**
+         * @brief Computes the error for a given mu value.
+         * @param mu The mu value to compute the error for.
+         * @return The computed error.
+         */
         Scalar e_mu(Scalar mu);
+
+        /**
+         * @brief Computes the maximum step size.
+         * @param tau The fraction-to-the-boundary parameter.
+         * @return A pair of Scalars representing the maximum primal and dual step sizes.
+         */
         std::pair<Scalar, Scalar> maximum_step_size(const Scalar tau);
 
+        /**
+         * @brief Returns the number of bounds in the problem.
+         * @return The number of bounds.
+         */
         Index number_of_bounds() const { return number_of_bounds_; }
 
+        /**
+         * @brief Returns a reference to the Hessian of the problem.
+         * @return Reference to the Hessian.
+         */
         Hessian<ProblemType> &hessian();
+
+        /**
+         * @brief Returns a reference to a zero Hessian.
+         * @return Reference to a zero Hessian.
+         */
         Hessian<ProblemType> &zero_hessian();
+
+        /**
+         * @brief Returns a reference to the Jacobian of the problem.
+         * @return Reference to the Jacobian.
+         */
         Jacobian<ProblemType> &jacobian();
 
     private:
@@ -134,26 +395,33 @@ namespace fatrop
                                                  ///< lower bounded.
         std::vector<bool> single_upper_bounded_; ///< Boolean vector indicating if the variables are
                                                  ///< upper bounded.
-        // booleans to keep track of which quantities have already been evaluated
-        bool obj_value_evaluated_ = false;
-        bool obj_gradient_evaluated_ = false;
-        bool obj_gradient_evaluated_s_ = false;
-        bool constr_viol_evaluated_ = false;
-        bool dual_infeasibility_x_evaluated_ = false;
-        bool dual_infeasibility_s_evaluated_ = false;
-        bool jacobian_evaluated_ = false;
-        bool hessian_evaluated_ = false;
-        bool barrier_value_evaluated_ = false;
-        bool barrier_gradient_evaluated_ = false;
-        bool delta_lower_evaluated_ = false;
-        bool delta_upper_evaluated_ = false;
-        bool linear_decrease_objective_evaluated_ = false;
-        bool linear_decrease_barrier_evaluated_ = false;
-        bool complementarity_l_evaluated_ = false;
-        bool complementarity_u_evaluated_ = false;
-        Scalar kappa_d_ = 1e-5;
-        Index number_of_bounds_ = 0;
-        Scalar smax_ = 100.;
+        // Flags to track which quantities have already been evaluated
+        bool obj_value_evaluated_ = false;      ///< Flag for objective value evaluation
+        bool obj_gradient_evaluated_ = false;   ///< Flag for objective gradient (x) evaluation
+        bool obj_gradient_evaluated_s_ = false; ///< Flag for objective gradient (s) evaluation
+        bool constr_viol_evaluated_ = false;    ///< Flag for constraint violation evaluation
+        bool dual_infeasibility_x_evaluated_ =
+            false; ///< Flag for dual infeasibility (x) evaluation
+        bool dual_infeasibility_s_evaluated_ =
+            false;                                ///< Flag for dual infeasibility (s) evaluation
+        bool jacobian_evaluated_ = false;         ///< Flag for Jacobian evaluation
+        bool hessian_evaluated_ = false;          ///< Flag for Hessian evaluation
+        bool barrier_value_evaluated_ = false;    ///< Flag for barrier value evaluation
+        bool barrier_gradient_evaluated_ = false; ///< Flag for barrier gradient evaluation
+        bool delta_lower_evaluated_ = false;      ///< Flag for delta_lower evaluation
+        bool delta_upper_evaluated_ = false;      ///< Flag for delta_upper evaluation
+        bool linear_decrease_objective_evaluated_ =
+            false; ///< Flag for linear decrease in objective evaluation
+        bool linear_decrease_barrier_evaluated_ =
+            false; ///< Flag for linear decrease in barrier evaluation
+        bool complementarity_l_evaluated_ =
+            false; ///< Flag for lower bound complementarity evaluation
+        bool complementarity_u_evaluated_ =
+            false; ///< Flag for upper bound complementarity evaluation
+
+        Scalar kappa_d_ = 1e-5;      ///< Fraction-to-the-boundary parameter
+        Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
+        Scalar smax_ = 100.;         ///< Maximum allowed slack variable value
     };
 } // namespace fatrop
 // implementation
