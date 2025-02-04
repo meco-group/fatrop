@@ -68,6 +68,9 @@ namespace fatrop
         case (LinsolReturnFlag::NOFULL_RANK):
             solved = false;
             break;
+        case (LinsolReturnFlag::UNKNOWN):
+            fatrop_assert_msg(false, "Unexpected return flag from linear solver");
+            break;
         }
         if (solved && norm_inf(curr_it.delta_dual_eq()) < lam_max_)
             curr_it.set_dual_eq(rhs_g_);

@@ -8,4 +8,4 @@
 
 using namespace fatrop;
 // explicit template instantiation
-template class IpSearchDirImpl<OcpType>; 
+template class fatrop::IpSearchDirImpl<OcpType>; 

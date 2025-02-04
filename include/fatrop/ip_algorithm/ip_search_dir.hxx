@@ -74,6 +74,9 @@ namespace fatrop
                 update_delta_c = true;
                 solved = false;
                 break;
+            case (LinsolReturnFlag::UNKNOWN):
+                fatrop_assert_msg(false, "Unexpected return flag from linear solver");
+                break;
             }
 
             if (update_delta_w)

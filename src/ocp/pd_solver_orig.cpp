@@ -10,7 +10,7 @@
 using namespace fatrop;
 
 // instantiate the template class
-template class LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>;
+template class fatrop::LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>;
 
 PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
                                     const std::shared_ptr<AugSystemSolver<OcpType>> &aug_system_solver)

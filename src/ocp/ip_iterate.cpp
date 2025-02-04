@@ -8,4 +8,4 @@ using namespace fatrop;
 // specializations
 template <> const VecRealView IpIterate<OcpType>::constr_viol_ineq() { return constr_viol().block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack); }
 // explicit template instantiation
-template class IpIterate<OcpType>;
+template class fatrop::IpIterate<OcpType>;

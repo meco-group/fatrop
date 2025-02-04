@@ -20,6 +20,11 @@ namespace fatrop
         trial_iterate_->set_mu(mu);
         mu_ = mu;
     }
+
+    template <typename ProblemType> void IpData<ProblemType>::reset()
+    {
+        validate_current_iterate();
+    }
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()
     {
         // switch trial and current iterate
@@ -45,6 +50,7 @@ namespace fatrop
         Iterate *tmp = &current_iterate();
         current_iterate_ = stored_iterate_;
         stored_iterate_ = tmp;
+        validate_current_iterate();
     }
 
 } // namespace fatrop

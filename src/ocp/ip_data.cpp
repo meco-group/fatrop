@@ -7,4 +7,4 @@
 
 using namespace fatrop;
 // explicit template instantiation
-template class IpData<OcpType>; 
+template class fatrop::IpData<OcpType>; 

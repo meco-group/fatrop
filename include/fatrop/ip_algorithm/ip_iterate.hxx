@@ -20,8 +20,8 @@ namespace fatrop
         number_of_bounds_ = 0;
         for (Index i = 0; i < lower_bounds_.m(); i++)
         {
-            lower_bounded_[i] = !isinf(lower_bounds_(i));
-            upper_bounded_[i] = !isinf(upper_bounds_(i));
+            lower_bounded_[i] = !std::isinf(lower_bounds_(i));
+            upper_bounded_[i] = !std::isinf(upper_bounds_(i));
             if (lower_bounded_[i])
                 number_of_bounds_++;
             if (upper_bounded_[i])
@@ -207,8 +207,8 @@ namespace fatrop
     {
         if (!linear_decrease_objective_evaluated_)
         {
-            linear_decrease_objective_ = dot(obj_gradient_x(), delta_primal_x());
-            +dot(obj_gradient_s(), delta_primal_s());
+            linear_decrease_objective_ =
+                dot(obj_gradient_x(), delta_primal_x()) + dot(obj_gradient_s(), delta_primal_s());
             linear_decrease_objective_evaluated_ = true;
         }
         return linear_decrease_objective_;

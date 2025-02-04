@@ -30,6 +30,8 @@ namespace fatrop
          */
         IpData(const NlpSp &nlp);
 
+        void reset();
+
         /**
          * @brief Accept the trial iterate as the new current iterate.
          *

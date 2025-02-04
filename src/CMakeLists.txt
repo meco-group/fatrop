@@ -12,12 +12,14 @@ set(FATROP_SOURCES
     ocp/ip_eq_mult_initializer.cpp
     ocp/ip_initializer.cpp
     ocp/ip_iterate.cpp
+    ocp/ip_linesearch.cpp
     ocp/ip_nlp_orig.cpp
     ocp/ip_search_dir.cpp
     ocp/nlp_ocp.cpp
     ocp/pd_system_orig.cpp
     ocp/pd_solver_orig.cpp
     ocp/problem_info.cpp
+    ip_algorithm/ip_utils.cpp
     ip_algorithm/ip_filter.cpp
 )
 

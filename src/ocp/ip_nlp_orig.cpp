@@ -3,4 +3,4 @@
 
 using namespace fatrop;
 
-template class IpNlpOrig<OcpType>;
+template class fatrop::IpNlpOrig<OcpType>;

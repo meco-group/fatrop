@@ -36,7 +36,7 @@ namespace fatrop
         IpConvergenceCheck(const IpDataSp &ipdata);
         IpConvergenceStatus check_converged() override;
         void reset();
-        bool check_acceptable() const;
+        bool check_acceptable() const override;
 
     private:
         IpDataSp ipdata_;

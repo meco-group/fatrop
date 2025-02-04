@@ -61,7 +61,6 @@ namespace fatrop
         virtual Index get_ng(const Index k) const = 0;
 
         /**
-        /**
          * @brief Get the number of inequality constraints for a given time step.
          * @param k Time step
          * @return Number of inequality constraints

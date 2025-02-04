@@ -290,7 +290,7 @@ namespace fatrop
          * @brief Returns the current value of mu (barrier parameter).
          * @return The current value of mu.
          */
-        Scalar mu() { return mu_; };
+        Scalar mu() const { return mu_; };
 
         /**
          * @brief Sets the value of mu (barrier parameter).
@@ -352,6 +352,8 @@ namespace fatrop
          * @return The computed error.
          */
         Scalar e_mu(Scalar mu);
+
+        Scalar tau() const { return std::max(mu(), 1-0.99); }
 
         /**
          * @brief Computes the maximum step size.
