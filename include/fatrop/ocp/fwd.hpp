@@ -20,6 +20,8 @@ namespace fatrop
     template <> class PdSolverOrig<OcpType>;
     template <typename ProblemType> class AugSystemSolver;
     template <> class AugSystemSolver<OcpType>;
+    template <typename ProblemType> class PdSystemOrig;
+    template <> class PdSystemOrig<OcpType>;
 } // namespace fatrop
 
 #endif // __fatrop_ocp_fwd_hpp__

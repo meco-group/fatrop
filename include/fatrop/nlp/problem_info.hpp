@@ -8,9 +8,9 @@
 namespace fatrop
 {
     template<typename ProblemType>
-    struct ProblemInfo
-    {
-    };
+    struct ProblemInfo;
+    // {
+    // };
 
 } // namespace fatrop
 
