@@ -75,6 +75,11 @@ namespace fatrop
         if (solved && norm_inf(curr_it.delta_dual_eq()) < lam_max_)
             curr_it.set_dual_eq(rhs_g_);
     }
+
+    template <typename ProblemType> void IpEqMultInitializer<ProblemType>::reset()
+    {
+        // Empty implementation
+    }
 } // namespace fatrop
 
 #endif // __fatrop_ip_algorithm_ip_eq_mult_initializer_hxx__

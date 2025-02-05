@@ -20,6 +20,9 @@ namespace fatrop
         virtual void find_acceptable_trial_point() = 0;
         virtual void reset() = 0;
         virtual void reset_linesearch() = 0;
+
+    protected:
+        virtual ~IpLineSearchBase() = default;
     };
 
     template <typename ProblemType> class IpLinesearch : public IpLineSearchBase

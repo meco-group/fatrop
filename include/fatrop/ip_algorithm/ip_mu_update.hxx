@@ -18,7 +18,7 @@ namespace fatrop
         initialized_ = false;
     }
 
-    template <typename ProblemType> void IpMonotoneMuUpdate<ProblemType>::update_barrier_parameter()
+    template <typename ProblemType> bool IpMonotoneMuUpdate<ProblemType>::update_barrier_parameter()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         Scalar mu = curr_it.mu();

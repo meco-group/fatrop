@@ -55,6 +55,11 @@ namespace fatrop
                     if_else(lower_bounded, res_single_lower_bounded, res_single_upper_bounded));
         ipdata_->current_iterate().set_primal_s(res);
     }
+
+    template <typename ProblemType> void IpInitializer<ProblemType>::reset()
+    {
+        // Empty implementation
+    }
 } // namespace fatrop
 
 #endif // __fatrop_ip_algorithm_ip_initializer_hxx__

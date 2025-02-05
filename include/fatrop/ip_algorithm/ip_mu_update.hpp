@@ -23,8 +23,11 @@ namespace fatrop
          * This method should be implemented by derived classes to update
          * the barrier parameter according to the specific update strategy.
          */
-        virtual void update_barrier_parameter() = 0;
+        virtual bool update_barrier_parameter() = 0;
         virtual void reset() = 0;
+
+    protected:
+        virtual ~IpMuUpdateBase() = default;
     };
 
     /**
@@ -56,7 +59,7 @@ namespace fatrop
          *
          * This method implements a monotone update strategy for the barrier parameter.
          */
-        void update_barrier_parameter() override;
+        bool update_barrier_parameter() override;
         void reset() override;
 
     private:
@@ -72,7 +75,6 @@ namespace fatrop
         bool mu_allow_fast_monotone_decrease_ = true;
         // internal statistics
         bool initialized_ = false;
-
     };
 
 } // namespace fatrop

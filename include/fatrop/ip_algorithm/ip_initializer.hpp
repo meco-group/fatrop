@@ -13,6 +13,7 @@ namespace fatrop
     {
     public:
         virtual void initialize() = 0;
+        virtual void reset() = 0;
 
     protected:
         virtual ~IpInitializerBase() = default;
@@ -26,6 +27,7 @@ namespace fatrop
     public:
         IpInitializer(const IpDataSp ipdata, const IpEqMultInitializerSp &eq_mult_initializer);
         void initialize() override;
+        void reset() override;
 
     private:
         void initialize_slacks();

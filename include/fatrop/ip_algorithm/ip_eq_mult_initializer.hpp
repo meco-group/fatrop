@@ -12,9 +12,16 @@
 
 namespace fatrop
 {
+    class IpEqMultInitializerBase
+    {
+    public:
+        virtual void initialize_eq_mult() = 0;
+        virtual void reset() = 0;
+    protected:
+        virtual ~IpEqMultInitializerBase() = default;
+    };
 
-    template <typename ProblemType>
-    class IpEqMultInitializer
+    template <typename ProblemType> class IpEqMultInitializer : public IpEqMultInitializerBase
     {
         typedef std::shared_ptr<PdSolverOrig<ProblemType>> PdSolverSp;
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
@@ -23,7 +30,8 @@ namespace fatrop
 
     public:
         IpEqMultInitializer(const IpDataSp &ipdata, const PdSolverSp &linear_solver);
-        void initialize_eq_mult();
+        void initialize_eq_mult() override;
+        void reset() override;
 
     private:
         IpDataSp ipdata_;
