@@ -1,6 +1,7 @@
 tags
 python/fatropy.cpp
 
+.cache/
 *.orig
 *jit_tmp*
 .vscode/

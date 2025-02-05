@@ -99,20 +99,6 @@ namespace fatrop
         const Iterate &stored_iterate() const { return *stored_iterate_; }
 
         /**
-         * @brief Set the barrier parameter mu.
-         *
-         * @param mu The new value for mu.
-         */
-        void set_mu(const Scalar mu);
-
-        /**
-         * @brief Get the current value of the barrier parameter mu.
-         *
-         * @return Scalar The current value of mu.
-         */
-        Scalar mu() const { return mu_; }
-
-        /**
          * @brief Get the current iteration number.
          *
          * @return Index The current iteration number.
@@ -144,7 +130,6 @@ namespace fatrop
         void validate_current_iterate() { current_iterate_is_valid_ = true; }
 
     private:
-        Scalar mu_;                ///< Barrier value of the NLP.
         Index iteration_number_;   ///< Number of the current iteration.
         Iterate iterate_data_[3];  ///< Data for the three iterates (current, trial, and stored).
         Iterate *current_iterate_; ///< Pointer to the current iterate.

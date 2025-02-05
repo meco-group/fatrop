@@ -15,11 +15,6 @@ namespace fatrop
           trial_iterate_(&iterate_data_[1]), stored_iterate_(&iterate_data_[2])
     {
     }
-    template <typename ProblemType> void IpData<ProblemType>::set_mu(const Scalar mu)
-    {
-        trial_iterate_->set_mu(mu);
-        mu_ = mu;
-    }
 
     template <typename ProblemType> void IpData<ProblemType>::reset()
     {

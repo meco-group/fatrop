@@ -68,6 +68,18 @@ namespace fatrop
             return true;
         }
 
+        bool is_finite() const
+        {
+            for (Index i = 0; i < m(); i++)
+            {
+                if (!std::isfinite((*this)(i)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         // Various mathematical operations defined as friend functions
         // They allow mathematical operations like sum, norms, and transformations on
         // vectors.
@@ -87,6 +99,26 @@ namespace fatrop
             for (Index i = 0; i < vec.m(); i++)
             {
                 ret = std::max(ret, std::abs(vec(i)));
+            }
+            return ret;
+        }
+
+        friend Scalar max_el(const VecReal<Derived> &vec)
+        {
+            Scalar ret = vec(0);
+            for (Index i = 1; i < vec.m(); i++)
+            {
+                ret = std::max(ret, vec(i));
+            }
+            return ret;
+        }
+
+        friend Scalar min_el(const VecReal<Derived> &vec)
+        {
+            Scalar ret = vec(0);
+            for (Index i = 1; i < vec.m(); i++)
+            {
+                ret = std::min(ret, vec(i));
             }
             return ret;
         }
@@ -156,6 +188,18 @@ namespace fatrop
                                                            const VecReal<Dep2> &b)
         {
             return VecRealPlusVecReal<Derived, Dep2>(a, b);
+        }
+
+        friend VecRealPlusVecReal<Derived, VecRealScalar> operator+(const VecReal<Derived> &a,
+                                                                    const Scalar alpha)
+        {
+            return VecRealPlusVecReal<Derived, VecRealScalar>(a, VecRealScalar(a.m(), alpha));
+        }
+
+        friend VecRealPlusVecReal<Derived, VecRealScalar> operator+(const Scalar alpha,
+                                                                    const VecReal<Derived> &a)
+        {
+            return a + alpha;
         }
 
         template <typename Dep2>
@@ -335,7 +379,8 @@ namespace fatrop
     class VecRealPlusVecReal : public VecReal<VecRealPlusVecReal<Dep1, Dep2>>
     {
     public:
-        VecRealPlusVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a.derived()), b(b.derived())
+        VecRealPlusVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b)
+            : a(a.derived()), b(b.derived())
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for addition");
         };
@@ -354,7 +399,8 @@ namespace fatrop
     class VecRealMinusVecReal : public VecReal<VecRealMinusVecReal<Dep1, Dep2>>
     {
     public:
-        VecRealMinusVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a.derived()), b(b.derived())
+        VecRealMinusVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b)
+            : a(a.derived()), b(b.derived())
         {
             fatrop_dbg_assert(a.m() == b.m() && "Vector sizes must match for subtraction");
         };
@@ -372,7 +418,8 @@ namespace fatrop
     template <typename Dep1> class VecRealTimesScalar : public VecReal<VecRealTimesScalar<Dep1>>
     {
     public:
-        VecRealTimesScalar(const VecReal<Dep1> &a, const Scalar alpha) : a(a.derived()), alpha(alpha) {};
+        VecRealTimesScalar(const VecReal<Dep1> &a, const Scalar alpha)
+            : a(a.derived()), alpha(alpha) {};
         Scalar operator()(const Index i) const { return alpha * a(i); }
         Index m() const { return a.m(); }
 
@@ -388,7 +435,8 @@ namespace fatrop
     class VecRealTimesVecReal : public VecReal<VecRealTimesVecReal<Dep1, Dep2>>
     {
     public:
-        VecRealTimesVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a.derived()), b(b.derived())
+        VecRealTimesVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b)
+            : a(a.derived()), b(b.derived())
         {
             fatrop_dbg_assert(a.m() == b.m() &&
                               "Vector sizes must match for element-wise multiplication");
@@ -408,7 +456,8 @@ namespace fatrop
     class VecRealDivVecReal : public VecReal<VecRealDivVecReal<Dep1, Dep2>>
     {
     public:
-        VecRealDivVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b) : a(a.derived()), b(b.derived())
+        VecRealDivVecReal(const VecReal<Dep1> &a, const VecReal<Dep2> &b)
+            : a(a.derived()), b(b.derived())
         {
             fatrop_dbg_assert(a.m() == b.m() &&
                               "Vector sizes must match for element-wise division");
@@ -427,7 +476,8 @@ namespace fatrop
     template <typename Dep1> class ScalarDivVecReal : public VecReal<ScalarDivVecReal<Dep1>>
     {
     public:
-        ScalarDivVecReal(const Scalar alpha, const VecReal<Dep1> &a) : alpha(alpha), a(a.derived()) {};
+        ScalarDivVecReal(const Scalar alpha, const VecReal<Dep1> &a)
+            : alpha(alpha), a(a.derived()) {};
         Scalar operator()(const Index i) const { return alpha / a(i); }
         Index m() const { return a.m(); }
 

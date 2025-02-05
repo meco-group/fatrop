@@ -201,6 +201,7 @@ namespace fatrop
     {
         barrier_value_evaluated_ = false;
         barrier_gradient_evaluated_ = false;
+        linear_decrease_barrier_evaluated_ = false;
         mu_ = value;
     };
     template <typename ProblemType> Scalar IpIterate<ProblemType>::linear_decrease_objective()
