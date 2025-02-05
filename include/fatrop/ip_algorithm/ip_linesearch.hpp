@@ -14,7 +14,15 @@
 
 namespace fatrop
 {
-    template <typename ProblemType> class IpLinesearch
+    class IpLineSearchBase
+    {
+    public:
+        virtual void find_acceptable_trial_point() = 0;
+        virtual void reset() = 0;
+        virtual void reset_linesearch() = 0;
+    };
+
+    template <typename ProblemType> class IpLinesearch : public IpLineSearchBase
     {
         typedef std::shared_ptr<PdSolverOrig<ProblemType>> PdSolverSp;
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
@@ -23,13 +31,16 @@ namespace fatrop
 
     public:
         IpLinesearch(const IpDataSp &ipdata, const PdSolverSp &linear_solver);
-        void reset();
-        IpFilter &filter();
-        void find_acceptable_trial_point();
+        void find_acceptable_trial_point() override;
+        void reset() override;
+        void reset_linesearch() override;
 
     private:
+        IpFilter &filter();
         void init_this_line_search(bool in_watchdog);
-        bool do_backtracking_line_search(bool skip_first_trial_point, Index& alpha_primal, bool& corr_taken, bool& soc_taken, Index& n_steps, bool& evaluation_error);
+        bool do_backtracking_line_search(bool skip_first_trial_point, Scalar &alpha_primal,
+                                         bool &corr_taken, bool &soc_taken, Index &n_steps,
+                                         bool &evaluation_error);
         void start_watchdog();
         void stop_watchdog();
         bool check_acceptability_trial_point(const Scalar alpha_primal);

@@ -129,6 +129,10 @@ namespace fatrop
          */
         void validate_current_iterate() { current_iterate_is_valid_ = true; }
 
+        bool tiny_step_flag() const { return tiny_step_flag_; }
+        void set_tiny_step_flag(bool tiny_step_flag) { tiny_step_flag_ = tiny_step_flag; }
+        Scalar tolerance() const { return tol_; }
+
     private:
         Index iteration_number_;   ///< Number of the current iteration.
         Iterate iterate_data_[3];  ///< Data for the three iterates (current, trial, and stored).
@@ -136,6 +140,8 @@ namespace fatrop
         Iterate *trial_iterate_;   ///< Pointer to the trial iterate.
         Iterate *stored_iterate_;  ///< Pointer to the stored iterate.
         bool current_iterate_is_valid_ = true; ///< Flag indicating if the current iterate is valid.
+        bool tiny_step_flag_ = false;
+        Scalar tol_ = 1e-8;
     };
     template <typename ProblemType> IpIterate<ProblemType> &IpData<ProblemType>::current_iterate()
     {

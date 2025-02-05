@@ -50,7 +50,7 @@ namespace fatrop
     }
     template <typename ProblemType>
     bool IpLinesearch<ProblemType>::do_backtracking_line_search(bool skip_first_trial_point,
-                                                                Index &alpha_primal,
+                                                                Scalar &alpha_primal,
                                                                 bool &corr_taken, bool &soc_taken,
                                                                 Index &n_steps,
                                                                 bool &evaluation_error)
@@ -61,7 +61,7 @@ namespace fatrop
         Scalar alpha_primal_max = curr_it.maximum_step_size(curr_it.tau()).first;
         Scalar alpha_min = in_watchdog_ ? alpha_primal_max : compute_alpha_min();
         // start the line search with the maximum step size
-        Scalar alpha_primal = alpha_primal_max;
+        alpha_primal = alpha_primal_max;
         // alpha used for ftype and amijo test
         const Scalar alpha_primal_test = in_watchdog_ ? watchdog_alpha_primal_test_ : alpha_primal;
         if (skip_first_trial_point)
@@ -114,14 +114,20 @@ namespace fatrop
     {
         theta_min_ = -1.;
         theta_max_ = -1.;
-        last_rejection_due_to_filter_ = false;
         filter_reset_count_ = 0;
-        filter_reject_count_ = 0;
         in_watchdog_ = false;
         tiny_step_last_iteration_ = false;
         sucessive_tiny_step_count_ = 0;
         acceptable_iteration_count_ = -1;
         last_mu_ = -1.;
+        reset_linesearch();
+    }
+
+    template <typename ProblemType> void IpLinesearch<ProblemType>::reset_linesearch()
+    {
+        filter_reject_count_ = 0;
+        last_rejection_due_to_filter_ = false;
+        filter().reset();
     }
 
     template <typename ProblemType> IpFilter &IpLinesearch<ProblemType>::filter()
@@ -181,7 +187,10 @@ namespace fatrop
                 // dont accept the tiny step
                 tiny_step = false;
             }
-            Scalar delta_y_norm = norm_inf(trial_it.delta_dual_eq_());
+            if (tiny_step && tiny_step_last_iteration_)
+                ipdata_->set_tiny_step_flag(true);
+
+            Scalar delta_y_norm = norm_inf(trial_it.delta_dual_eq());
             if (delta_y_norm < tiny_step_y_tol_)
             {
                 tiny_step_last_iteration_ = false;
@@ -241,7 +250,7 @@ namespace fatrop
         // if the line search is unsuccesfull go to the restoration phase
         if (!accept)
         {
-            assert(false && "Restoration phase not implemented yet.");
+            fatrop_assert_msg(false, "Restoration phase not implemented yet.");
         }
         // else if(/*!in_soft_restoration_phase*/ true || tiny_step )
         if (accept)

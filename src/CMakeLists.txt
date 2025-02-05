@@ -21,6 +21,7 @@ set(FATROP_SOURCES
     ocp/problem_info.cpp
     ip_algorithm/ip_utils.cpp
     ip_algorithm/ip_filter.cpp
+    ip_algorithm/ip_mu_update.cpp
 )
 
 # Create the fatrop shared library

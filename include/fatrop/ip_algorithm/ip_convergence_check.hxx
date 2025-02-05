@@ -30,9 +30,10 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    IpConvergenceStatus IpConvergenceCheck<ProblemType>::check_converged() 
+    IpConvergenceStatus IpConvergenceCheck<ProblemType>::check_converged()
     {
-        if (ipdata_->current_iterate().e_mu(0.) <= tol_)
+        Scalar tol = ipdata_->tolerance();
+        if (ipdata_->current_iterate().e_mu(0.) <= tol)
             return IpConvergenceStatus::Converged;
         if (check_acceptable())
         {

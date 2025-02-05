@@ -18,6 +18,7 @@ namespace fatrop
 
     template <typename ProblemType> void IpData<ProblemType>::reset()
     {
+        tiny_step_flag_ = false;
         validate_current_iterate();
     }
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()

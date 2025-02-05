@@ -40,7 +40,6 @@ namespace fatrop
 
     private:
         IpDataSp ipdata_;
-        Scalar tol_ = 1e-8;
         Scalar tol_acceptable_ = 1e-6;
         Index acceptable_counter_ = 0;
         Index acceptable_iter_ = 15;
