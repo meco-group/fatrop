@@ -21,7 +21,7 @@ namespace fatrop
 
     template <typename ProblemType> class IpInitializer : public IpInitializerBase
     {
-        typedef std::shared_ptr<IpEqMultInitializer<ProblemType>> IpEqMultInitializerSp;
+        typedef std::shared_ptr<IpEqMultInitializerBase> IpEqMultInitializerSp;
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
 
     public:

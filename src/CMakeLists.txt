@@ -7,6 +7,7 @@ set(FATROP_SOURCES
     ocp/jacobian.cpp
     ocp/hessian.cpp
     ocp/ip_algorithm.cpp
+    ocp/ip_alg_builder.cpp
     ocp/ip_convergence_check.cpp
     ocp/ip_data.cpp
     ocp/ip_eq_mult_initializer.cpp
