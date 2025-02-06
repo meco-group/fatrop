@@ -12,15 +12,31 @@
 
 namespace fatrop
 {
+    /**
+     * @brief Base class for search direction computation in interior point methods.
+     */
     class IpSearchDirBase
     {
     public:
+        /**
+         * @brief Reset the search direction computation to its initial state.
+         */
         virtual void reset() = 0;
+
+        /**
+         * @brief Compute the search direction.
+         * @return LinsolReturnFlag Indicating the success or failure of the computation.
+         */
         virtual LinsolReturnFlag compute_search_dir() = 0;
     protected:
         virtual ~IpSearchDirBase() = default;
     };
 
+    /**
+     * @brief Implementation of search direction computation for a specific problem type.
+     * 
+     * @tparam ProblemType The type of optimization problem being solved.
+     */
     template <typename ProblemType>
     class IpSearchDirImpl : public IpSearchDirBase
     {
@@ -32,7 +48,14 @@ namespace fatrop
         typedef std::shared_ptr<LinearSolverType> LinearSolverSp;
 
     public:
+        /**
+         * @brief Construct a new IpSearchDirImpl object.
+         * 
+         * @param ipdata Shared pointer to the interior point algorithm data.
+         * @param linear_solver Shared pointer to the linear solver.
+         */
         IpSearchDirImpl(const IpDataSp &ipdata, const LinearSolverSp &linear_solver);
+
         void reset() override;
         LinsolReturnFlag compute_search_dir() override;
 

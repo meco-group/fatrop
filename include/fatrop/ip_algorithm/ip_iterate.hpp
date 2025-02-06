@@ -23,7 +23,7 @@ namespace fatrop
      * in the IP algorithm, including primal and dual variables, search directions,
      * and various computed quantities.
      *
-     * @tparam ProblemType The type of problem being solved.
+     * @tparam ProblemType The type of optimization problem being solved.
      */
     template <typename ProblemType> struct IpIterate
     {
@@ -36,16 +36,16 @@ namespace fatrop
         IpIterate(const NlpSp &nlp);
 
     public:
-        // Problem information
         Scalar objective_scale = 1.; ///< Scaling factor for the objective function.
 
         /**
-         * @brief Initializes the IpIterate object.
+         * @brief Initializes the IpIterate object with default values.
          */
         void initialize();
 
         /**
          * @brief Resets all evaluated quantities, marking them as not computed.
+         * This is typically called when the iterate is modified.
          */
         void reset_evaluated_quantities();
 

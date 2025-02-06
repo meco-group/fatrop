@@ -22,8 +22,14 @@ namespace fatrop
          *
          * This method should be implemented by derived classes to update
          * the barrier parameter according to the specific update strategy.
+         * 
+         * @return bool True if the update was successful, false otherwise.
          */
         virtual bool update_barrier_parameter() = 0;
+
+        /**
+         * @brief Reset the mu update strategy to its initial state.
+         */
         virtual void reset() = 0;
 
     protected:
@@ -32,6 +38,8 @@ namespace fatrop
 
     /**
      * @brief Monotone mu (barrier parameter) update strategy for interior point methods.
+     *
+     * This class implements a monotonically decreasing update strategy for the barrier parameter.
      *
      * @tparam ProblemType The type of optimization problem being solved.
      */
@@ -55,11 +63,15 @@ namespace fatrop
         }
 
         /**
-         * @brief Update the barrier parameter.
+         * @brief Update the barrier parameter using a monotone strategy.
          *
-         * This method implements a monotone update strategy for the barrier parameter.
+         * @return bool True if the update was successful, false otherwise.
          */
         bool update_barrier_parameter() override;
+
+        /**
+         * @brief Reset the monotone mu update strategy to its initial state.
+         */
         void reset() override;
 
     private:

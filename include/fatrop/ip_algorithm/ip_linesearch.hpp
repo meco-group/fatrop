@@ -14,18 +14,41 @@
 
 namespace fatrop
 {
+    /**
+     * @brief Base class for line search algorithms in interior point methods.
+     */
     class IpLineSearchBase
     {
     public:
+        /**
+         * @brief Find an acceptable trial point.
+         */
         virtual void find_acceptable_trial_point() = 0;
+
+        /**
+         * @brief Reset the line search algorithm.
+         */
         virtual void reset() = 0;
+
+        /**
+         * @brief Reset the line search for a new iteration.
+         */
         virtual void reset_linesearch() = 0;
+
+        /**
+         * @brief Accept the current trial iterate as the new iterate.
+         */
         virtual void accept_trial_iterate() = 0;
 
     protected:
         virtual ~IpLineSearchBase() = default;
     };
 
+    /**
+     * @brief Concrete implementation of line search for a specific problem type.
+     * 
+     * @tparam ProblemType The type of optimization problem being solved.
+     */
     template <typename ProblemType> class IpLinesearch : public IpLineSearchBase
     {
         typedef std::shared_ptr<PdSolverOrig<ProblemType>> PdSolverSp;
@@ -34,7 +57,14 @@ namespace fatrop
         typedef IpIterate<ProblemType> IpIterateType;
 
     public:
+        /**
+         * @brief Construct a new IpLinesearch object.
+         * 
+         * @param ipdata Shared pointer to the interior point algorithm data.
+         * @param linear_solver Shared pointer to the primal-dual linear solver.
+         */
         IpLinesearch(const IpDataSp &ipdata, const PdSolverSp &linear_solver);
+
         void find_acceptable_trial_point() override;
         void reset() override;
         void reset_linesearch() override;
