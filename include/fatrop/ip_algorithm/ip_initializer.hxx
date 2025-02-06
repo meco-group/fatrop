@@ -22,9 +22,12 @@ namespace fatrop
     {
         initialize_slacks();
         eq_mult_initializer_->initialize_eq_mult();
-        // set z to 1.
-        ipdata_->current_iterate().set_dual_bounds_l(VecRealScalar(ipdata_->current_iterate().primal_s().m(), 1.0));
-        ipdata_->current_iterate().set_dual_bounds_u(VecRealScalar(ipdata_->current_iterate().primal_s().m(), 1.0));
+        // set z to 1. if bounded and 0. otherwise
+        const Index m = ipdata_->current_iterate().primal_s().m();
+        const std::vector<bool> lower_bounded = ipdata_->current_iterate().lower_bounded();
+        const std::vector<bool> upper_bounded = ipdata_->current_iterate().upper_bounded();
+        ipdata_->current_iterate().set_dual_bounds_l(if_else(lower_bounded, VecRealScalar(m, 1.0), VecRealScalar(m, 0.0)));
+        ipdata_->current_iterate().set_dual_bounds_u(if_else(upper_bounded, VecRealScalar(m, 1.0), VecRealScalar(m, 0.0)));
     }
     template <typename ProblemType> void IpInitializer<ProblemType>::initialize_slacks()
     {

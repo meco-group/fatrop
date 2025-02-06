@@ -1,8 +1,8 @@
 #include "fatrop/ip_algorithm/ip_alg_builder.hpp"
+#include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/ocp/nlp_ocp.hpp"
 #include "fatrop/ocp/ocp_abstract.hpp"
-#include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include <limits>
 #include <memory>
 using namespace fatrop;
@@ -118,10 +118,10 @@ public:
     virtual Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k, const Scalar *states_k,
                          Scalar *res, const Index k)
     {
-        res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2] + 0.01 * k;
-        res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3] + 0.02 * k;
-        res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_ + 0.03 * k;
-        res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_ + 0.04 * k;
+        res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2];
+        res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3];
+        res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_;
+        res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_;
         return 0;
     }
 
@@ -191,10 +191,10 @@ public:
     {
         if (k == K_ - 1)
             return 0;
-        lower[0] = -0.5;
-        upper[0] = 0.5;
-        lower[1] = -1.;
-        upper[1] = std::numeric_limits<Scalar>::infinity();
+        lower[0] = -50.;
+        upper[0] = 50.;
+        lower[1] = -100.;
+        upper[1] = 100.;
         return 0;
     }
 
@@ -226,6 +226,7 @@ int main()
 {
     IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(std::make_shared<OcpTestProblem>()));
     std::shared_ptr<IpAlgorithm> ipalg = builder.build();
-    ipalg->optimize();
+    IpSolverReturnFlag ret = ipalg->optimize();
+    std::cout << "Return flag: " << int(ret) << std::endl;
     return 0;
 }

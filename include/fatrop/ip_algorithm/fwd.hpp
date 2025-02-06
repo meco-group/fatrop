@@ -27,6 +27,7 @@ namespace fatrop
     class IpMuUpdateBase;
     class IpEqMultInitializerBase;
     class IpInitializerBase;
+    class IpConvergenceCheckBase;
 
 } // namespace fatrop
 

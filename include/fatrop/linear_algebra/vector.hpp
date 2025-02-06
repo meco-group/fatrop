@@ -196,6 +196,12 @@ namespace fatrop
             return VecRealPlusVecReal<Derived, VecRealScalar>(a, VecRealScalar(a.m(), alpha));
         }
 
+        friend VecRealPlusVecReal<Derived, VecRealScalar> operator-(const VecReal<Derived> &a,
+                                                                    const Scalar alpha)
+        {
+            return VecRealPlusVecReal<Derived, VecRealScalar>(a, VecRealScalar(a.m(), -alpha));
+        }
+
         friend VecRealPlusVecReal<Derived, VecRealScalar> operator+(const Scalar alpha,
                                                                     const VecReal<Derived> &a)
         {

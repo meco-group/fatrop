@@ -55,7 +55,7 @@ protected:
 TEST_F(OcpImplExampleTest, SolveLinearSystem)
 {
     LinearSystem<PdSystemType<OcpType>> ls(
-        info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, false, D_eq,
+        info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, true, D_eq,
         data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
         data.current_iterate().dual_bounds_l(), data.current_iterate().dual_bounds_u(), rhs_x,
         rhs_s, rhs_g, rhs_cl, rhs_cu);
@@ -73,13 +73,16 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
     rhs_cu.block(rhs_cu.m(), 0) =
         data.current_iterate().delta_upper() * data.current_iterate().dual_bounds_u();
     LinearSystem<PdSystemType<OcpType>> ls(
-        info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, false, D_eq,
+        info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, true, D_eq,
         data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
         data.current_iterate().dual_bounds_l(), data.current_iterate().dual_bounds_u(), rhs_x,
         rhs_s, rhs_g, rhs_cl, rhs_cu);
 
     LinsolReturnFlag ret = solver.solve_in_place(ls);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
+    VecRealAllocated x_full(ls.m());
+    ls.get_rhs(x_full);
+    EXPECT_TRUE(x_full.is_finite());
 
     Scalar alpha = 1.0;
     Scalar alpha_z = 1.0;

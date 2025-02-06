@@ -37,6 +37,7 @@ protected:
           solver(std::make_shared<PdSolverOrig<OcpType>>(info, aug_solver)),
           search_dir(data, solver)
     {
+        data->current_iterate().set_mu(1.0);
         data->current_iterate().set_dual_bounds_l(
             VecRealScalar(data->current_iterate().dual_bounds_l().m(), 1));
         data->current_iterate().set_dual_bounds_u(
@@ -62,6 +63,7 @@ TEST_F(IpSearchDirTest, UpdateIterateAndCheckInfeasibility)
 
     Scalar alpha = 1.0;
     Scalar alpha_z = 1.0;
+    Scalar mu = data->current_iterate().mu();
     data->trial_iterate().set_primal_x(data->current_iterate().primal_x() +
                                        alpha * data->current_iterate().delta_primal_x());
     data->trial_iterate().set_primal_s(data->current_iterate().primal_s() +
@@ -78,19 +80,24 @@ TEST_F(IpSearchDirTest, UpdateIterateAndCheckInfeasibility)
     EXPECT_LT(norm_inf(data->trial_iterate().dual_infeasibility_x()), 1e-6);
     EXPECT_LT(norm_inf(data->trial_iterate().dual_infeasibility_s()), 1e-6);
     EXPECT_LT(norm_inf(data->trial_iterate().constr_viol()), 1e-6);
+    const Index m = data->current_iterate().primal_s().m();
     // the complementarity constraints are nonlinear so we test the linearized version
     EXPECT_LT(
         norm_inf(
-            data->current_iterate().delta_lower() * data->current_iterate().dual_bounds_l() +
+            if_else(data->current_iterate().lower_bounded(),
+                    data->current_iterate().delta_lower() * data->current_iterate().dual_bounds_l() - mu,
+                    VecRealScalar(m, 0.)) +
             data->current_iterate().delta_lower() * data->current_iterate().delta_dual_bounds_l() +
             data->current_iterate().dual_bounds_l() * data->current_iterate().delta_primal_s()),
         1e-6);
     EXPECT_LT(
-        norm_inf(data->current_iterate().delta_upper() * data->current_iterate().dual_bounds_u() +
-                 data->current_iterate().delta_upper() *
-                     data->current_iterate().delta_dual_bounds_u() +
-                 -1. * data->current_iterate().dual_bounds_u() *
-                     data->current_iterate().delta_primal_s()),
+        norm_inf(
+            if_else(data->current_iterate().upper_bounded(),
+                    data->current_iterate().delta_upper() * data->current_iterate().dual_bounds_u() -mu,
+                    VecRealScalar(m, 0.)) +
+            data->current_iterate().delta_upper() * data->current_iterate().delta_dual_bounds_u() +
+            -1. * data->current_iterate().dual_bounds_u() *
+                data->current_iterate().delta_primal_s()),
         1e-6);
 }
 

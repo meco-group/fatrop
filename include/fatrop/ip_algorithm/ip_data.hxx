@@ -14,6 +14,7 @@ namespace fatrop
         : iterate_data_{nlp, nlp, nlp}, current_iterate_(&iterate_data_[0]),
           trial_iterate_(&iterate_data_[1]), stored_iterate_(&iterate_data_[2])
     {
+        reset();
     }
 
     template <typename ProblemType> void IpData<ProblemType>::reset()

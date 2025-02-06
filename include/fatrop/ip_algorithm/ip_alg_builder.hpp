@@ -88,6 +88,12 @@ namespace fatrop
         IpAlgBuilder &create_eq_mult_initializer();
 
         /**
+         * @brief Create the IpConvergenceCheck component.
+         * @return Reference to this IpAlgBuilder for method chaining.
+         */
+        IpAlgBuilder &create_convergence_check();
+
+        /**
          * @brief Build and return the fully constructed IpAlgorithm.
          *
          * This method ensures all necessary components are created before
@@ -110,6 +116,7 @@ namespace fatrop
         std::shared_ptr<IpInitializerBase> initializer_;
         std::shared_ptr<IpMuUpdateBase> mu_update_;
         std::shared_ptr<IpEqMultInitializerBase> eq_mult_initializer_;
+        std::shared_ptr<IpConvergenceCheckBase> convergence_check_;
     };
 } // namespace fatrop
 

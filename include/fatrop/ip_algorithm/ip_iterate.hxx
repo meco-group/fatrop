@@ -133,7 +133,8 @@ namespace fatrop
         {
             // by convention of the solver dual bounds are zero when not bounded
             dual_infeasibility_s_ =
-                -1. * dual_eq_.block(info_.number_of_slack_variables, info_.offset_g_eq_slack) +
+                obj_gradient_s() -
+                dual_eq_.block(info_.number_of_slack_variables, info_.offset_g_eq_slack) +
                 dual_bounds_u_ - dual_bounds_l_;
             dual_infeasibility_s_evaluated_ = true;
         }
@@ -202,6 +203,7 @@ namespace fatrop
         barrier_value_evaluated_ = false;
         barrier_gradient_evaluated_ = false;
         linear_decrease_barrier_evaluated_ = false;
+        dual_infeasibility_s_evaluated_ = false;
         mu_ = value;
     };
     template <typename ProblemType> Scalar IpIterate<ProblemType>::linear_decrease_objective()
@@ -261,6 +263,8 @@ namespace fatrop
     {
         Scalar alpha_max_pr = 1.;
         Scalar alpha_max_du = 1.;
+        delta_lower();
+        delta_upper();
         for (Index i = 0; i < primal_s_.m(); i++)
         {
             Scalar delta_si = delta_primal_s_(i);

@@ -21,6 +21,7 @@ namespace fatrop
     template <typename ProblemType> bool IpMonotoneMuUpdate<ProblemType>::update_barrier_parameter()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
+        IpIterateType &trial_it = ipdata_->trial_iterate();
         Scalar mu = curr_it.mu();
         Scalar tau = curr_it.tau();
         Scalar sub_problem_error = curr_it.e_mu(mu);
@@ -35,6 +36,7 @@ namespace fatrop
                                      std::pow(mu, mu_superlinear_decrease_power_));
             new_mu = std::max(new_mu, std::min(tol, compl_inf_tol_) / (barrier_tol_factor_ + 1.));
             curr_it.set_mu(new_mu);
+            trial_it.set_mu(new_mu);
             bool mu_changed = new_mu != mu;
             mu = new_mu;
             // if first iteration or
@@ -57,6 +59,7 @@ namespace fatrop
                 linesearch_->reset_linesearch();
             }
         }
+        trial_it.set_mu(mu);
         initialized_ = true;
         return true;
     }

@@ -11,6 +11,7 @@
 #include "fatrop/ip_algorithm/ip_nlp_orig.hpp"
 #include "fatrop/linear_algebra/linear_solver.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
+#include "fatrop/ip_algorithm/ip_convergence_check.hpp"
 
 namespace fatrop
 {
@@ -116,6 +117,15 @@ namespace fatrop
         return *this;
     }
 
+    template <typename ProblemType>
+    IpAlgBuilder<ProblemType> &IpAlgBuilder<ProblemType>::create_convergence_check()
+    {
+        if (!ipdata_)
+            create_ipdata();
+        convergence_check_ = std::make_shared<IpConvergenceCheck<ProblemType>>(ipdata_);
+        return *this;
+    }
+
     template <typename ProblemType> std::shared_ptr<IpAlgorithm> IpAlgBuilder<ProblemType>::build()
     {
         if (!search_dir_)
@@ -128,9 +138,11 @@ namespace fatrop
             create_mu_update();
         if (!eq_mult_initializer_)
             create_eq_mult_initializer();
+        if (!convergence_check_)
+            create_convergence_check();
 
         return std::make_shared<IpAlgorithm>(search_dir_, linesearch_, initializer_, mu_update_,
-                                             eq_mult_initializer_);
+                                             eq_mult_initializer_, convergence_check_);
     }
 } // namespace fatrop
 

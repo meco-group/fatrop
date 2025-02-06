@@ -25,11 +25,16 @@ namespace fatrop
     LinsolReturnFlag IpSearchDirImpl<ProblemType>::compute_search_dir()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
+        Scalar mu = curr_it.mu();
         rhs_x_.block(rhs_x_.m(), 0) = curr_it.dual_infeasibility_x();
         rhs_s_.block(rhs_s_.m(), 0) = curr_it.dual_infeasibility_s();
         rhs_g_.block(rhs_g_.m(), 0) = curr_it.constr_viol();
-        rhs_cl_.block(rhs_cl_.m(), 0) = curr_it.delta_lower() * curr_it.dual_bounds_l();
-        rhs_cu_.block(rhs_cu_.m(), 0) = curr_it.delta_upper() * curr_it.dual_bounds_u();
+        rhs_cl_.block(rhs_cl_.m(), 0) =
+            if_else(curr_it.lower_bounded(), curr_it.delta_lower() * curr_it.dual_bounds_l() - mu,
+                    VecRealScalar(rhs_cl_.m(), 0.));
+        rhs_cu_.block(rhs_cu_.m(), 0) =
+            if_else(curr_it.upper_bounded(), curr_it.delta_upper() * curr_it.dual_bounds_u() - mu,
+                    VecRealScalar(rhs_cu_.m(), 0.));
 
         curr_it.set_Dx(VecRealScalar(curr_it.Dx().m(), 0.));
         curr_it.set_De(VecRealScalar(curr_it.De().m(), 0.));
@@ -37,7 +42,6 @@ namespace fatrop
 
         Scalar delta_w = 0.;
         Scalar delta_c = 0.;
-        Scalar mu = curr_it.mu();
 
         bool solved = false;
         bool first_try_delta_w = true;
@@ -51,9 +55,10 @@ namespace fatrop
             curr_it.set_De_is_zero(delta_c == 0.);
 
             LinearSystem<PdSystemType<ProblemType>> ls(
-                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(), curr_it.De_is_zero(),
-                curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(), curr_it.dual_bounds_l(),
-                curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
+                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
+                curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(),
+                curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_,
+                rhs_cu_);
             ret = linear_solver_->solve_in_place(ls);
             switch (ret)
             {

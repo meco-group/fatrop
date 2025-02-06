@@ -33,20 +33,21 @@ namespace fatrop
     IpConvergenceStatus IpConvergenceCheck<ProblemType>::check_converged()
     {
         Scalar tol = ipdata_->tolerance();
+
         if (ipdata_->current_iterate().e_mu(0.) <= tol)
             return IpConvergenceStatus::Converged;
         if (check_acceptable())
         {
             acceptable_counter_++;
             if (acceptable_counter_ >= acceptable_iter_)
-                return IpConvergenceStatus::Converged_to_acceptable_point;
+                return IpConvergenceStatus::ConvergedToAcceptablePoint;
         }
         else
         {
             acceptable_counter_ = 0;
         }
         if (ipdata_->iteration_number() >= max_iter_)
-            return IpConvergenceStatus::Max_iter_exceeded;
+            return IpConvergenceStatus::MaxIterExceeded;
         return IpConvergenceStatus::Continue;
     }
 

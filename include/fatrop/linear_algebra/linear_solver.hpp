@@ -70,6 +70,7 @@ namespace fatrop
          */
         LinsolReturnFlag solve_in_place_rhs(LinearSystem<LsType> &ls);
 
+
     protected:
         /**
          * @brief Apply iterative refinement to improve the solution accuracy.

@@ -33,6 +33,8 @@ namespace fatrop
         const Scalar b_norm = norm_inf(tmp_);
         for (Index i = 0; i < max_it_ref; i++)
         {
+            fatrop_assert_msg(x_.is_finite(),
+                              "Problem in solving linear solver: solver returned NaN.");
             // compute residual residual = Ax + b
             ls.apply_on_right(x_, 1.0, tmp_, residual_);
             // compute residual inf norm

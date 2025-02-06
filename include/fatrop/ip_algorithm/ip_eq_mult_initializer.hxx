@@ -48,7 +48,7 @@ namespace fatrop
         bool solved = false;
         bool first_try_delta_w = true;
         LinearSystem<PdSystemType<ProblemType>> ls(
-            curr_it.info(), curr_it.jacobian(), curr_it.zero_hessian(), Dx_, false, Deq_, dummy_s_,
+            curr_it.info(), curr_it.jacobian(), curr_it.zero_hessian(), Dx_, true, Deq_, dummy_s_,
             dummy_s_, dummy_z_, dummy_z_, rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
         LinsolReturnFlag ret = linear_solver_->solve_in_place(ls);
         switch (ret)
@@ -74,6 +74,10 @@ namespace fatrop
         }
         if (solved && norm_inf(curr_it.delta_dual_eq()) < lam_max_)
             curr_it.set_dual_eq(rhs_g_);
+        else
+        {
+            curr_it.set_dual_eq(VecRealScalar(curr_it.dual_eq().m(), 0.));
+        }
     }
 
     template <typename ProblemType> void IpEqMultInitializer<ProblemType>::reset()

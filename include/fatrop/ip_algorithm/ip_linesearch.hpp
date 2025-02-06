@@ -20,6 +20,7 @@ namespace fatrop
         virtual void find_acceptable_trial_point() = 0;
         virtual void reset() = 0;
         virtual void reset_linesearch() = 0;
+        virtual void accept_trial_iterate() = 0;
 
     protected:
         virtual ~IpLineSearchBase() = default;
@@ -37,6 +38,7 @@ namespace fatrop
         void find_acceptable_trial_point() override;
         void reset() override;
         void reset_linesearch() override;
+        void accept_trial_iterate() override;
 
     private:
         IpFilter &filter();
@@ -58,6 +60,7 @@ namespace fatrop
         bool check_acceptability_of_trial_point(const Scalar alpha_primal);
         void augment_filter();
         Scalar compute_alpha_min();
+
         IpFilter filter_;
         IpDataSp ipdata_;
         PdSolverSp linear_solver_;

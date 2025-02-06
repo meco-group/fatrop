@@ -484,6 +484,10 @@ namespace fatrop
         }
         return alpha_min_frac_ * alpha_min;
     }
+    template <typename ProblemType> void IpLinesearch<ProblemType>::accept_trial_iterate()
+    {
+        ipdata_->accept_trial_iterate();
+    }
     template <typename ProblemType>
     bool IpLinesearch<ProblemType>::check_acceptability_of_trial_point(const Scalar alpha_primal)
     {

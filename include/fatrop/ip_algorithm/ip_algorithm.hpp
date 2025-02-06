@@ -10,7 +10,7 @@
 
 namespace fatrop
 {
-    enum class SolverReturnFlag
+    enum class IpSolverReturnFlag
     {
         Success,
         MaxIterExceeded,
@@ -31,14 +31,16 @@ namespace fatrop
         typedef std::shared_ptr<IpInitializerBase> IpInitializerSp;
         typedef std::shared_ptr<IpMuUpdateBase> IpMuUpdateSp;
         typedef std::shared_ptr<IpEqMultInitializerBase> IpEqMultInitializerSp;
+        typedef std::shared_ptr<IpConvergenceCheckBase> IpConvergenceCheckSp;
 
     public:
         IpAlgorithm(const IpSearchDirSp &search_dir, const IpLineSearchSp &linesearch,
                     const IpInitializerSp &initializer, const IpMuUpdateSp &mu_update,
-                    const IpEqMultInitializerSp &eq_mult_initializer);
+                    const IpEqMultInitializerSp &eq_mult_initializer,
+                    const IpConvergenceCheckSp &convergence_check);
 
         void reset();
-        SolverReturnFlag optimize(const bool is_resto = false);
+        IpSolverReturnFlag optimize(const bool is_resto = false);
 
     private:
         IpSearchDirSp search_dir_;
@@ -46,6 +48,7 @@ namespace fatrop
         IpInitializerSp initializer_;
         IpMuUpdateSp mu_update_;
         IpEqMultInitializerSp eq_mult_initializer_;
+        IpConvergenceCheckSp convergence_check_;
     };
 } // namespace fatrop
 

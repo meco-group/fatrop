@@ -14,8 +14,9 @@ namespace fatrop
     {
         Continue,
         Converged,
-        Converged_to_acceptable_point,
-        Max_iter_exceeded
+        ConvergedToAcceptablePoint,
+        MaxIterExceeded, 
+        Unassigned
     };
 
     class IpConvergenceCheckBase
@@ -23,6 +24,7 @@ namespace fatrop
     public:
         virtual IpConvergenceStatus check_converged() = 0;
         virtual bool check_acceptable() const = 0;
+        virtual void reset() = 0;
 
     protected:
         virtual ~IpConvergenceCheckBase() = default;
@@ -35,7 +37,7 @@ namespace fatrop
     public:
         IpConvergenceCheck(const IpDataSp &ipdata);
         IpConvergenceStatus check_converged() override;
-        void reset();
+        void reset() override;
         bool check_acceptable() const override;
 
     private:

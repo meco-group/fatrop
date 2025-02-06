@@ -353,7 +353,7 @@ namespace fatrop
          */
         Scalar e_mu(Scalar mu);
 
-        Scalar tau() const { return std::max(mu(), 1-0.99); }
+        Scalar tau() const { return std::max(0.99, 1.-mu()); }
 
         /**
          * @brief Computes the maximum step size.
@@ -462,7 +462,7 @@ namespace fatrop
         bool complementarity_u_evaluated_ =
             false; ///< Flag for upper bound complementarity evaluation
 
-        Scalar kappa_d_ = 1e-5;      ///< Fraction-to-the-boundary parameter
+        Scalar kappa_d_ = 0.;      ///< Fraction-to-the-boundary parameter
         Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
         Scalar smax_ = 100.;         ///< Maximum allowed slack variable value
     };
