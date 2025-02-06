@@ -26,7 +26,6 @@
 #include <fatrop/auxiliary/DynamicLib.hpp>
 #include <fatrop/auxiliary/Common.hpp>
 #include "fatrop/function_evaluation/CasadiCodegen.hpp"
-#include "fatrop/json/json.h"
 #include <fstream>
 #include <sstream>
 
@@ -317,91 +316,7 @@ namespace fatrop
     class StageOCPBuilder
     {
     public:
-        static std::shared_ptr<StageOCP> FromRockitInterface(const std::shared_ptr<DLHandler> &handle, const json::jobject& json_spec)
-        {
-
-            // set up ocp
-            const bool GN = false;
-            // shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
-            // std::ifstream t(json_spec_file);
-            // std::stringstream buffer;
-            // buffer << t.rdbuf();
-            // json::jobject json_spec = json::jobject::parse(buffer.str());
-            const fatrop_int K = json_spec["K"];
-            const fatrop_int nx = json_spec["nx"];
-            const fatrop_int nu = json_spec["nu"];
-            const fatrop_int ngI = json_spec["ngI"];
-            const fatrop_int ng = json_spec["ng"];
-            const fatrop_int ngF = json_spec["ngF"];
-            const fatrop_int ng_ineqI = json_spec["ng_ineqI"];
-            const fatrop_int ng_ineq = json_spec["ng_ineq"];
-            const fatrop_int ng_ineqF = json_spec["ng_ineqF"];
-            const fatrop_int no_stage_params = json_spec["n_stage_params"];
-            const fatrop_int no_global_params = json_spec["n_global_params"];
-            std::vector<double> lowerI = json_spec["lowerI"].get_number_array<double>("%lf");
-            std::vector<double> upperI = json_spec["upperI"].get_number_array<double>("%lf");
-            std::vector<double> lower = json_spec["lower"].get_number_array<double>("%lf");
-            std::vector<double> upper = json_spec["upper"].get_number_array<double>("%lf");
-            std::vector<double> lowerF = json_spec["lowerF"].get_number_array<double>("%lf");
-            std::vector<double> upperF = json_spec["upperF"].get_number_array<double>("%lf");
-            lower.insert(lower.begin(), lowerI.begin(), lowerI.end());
-            upper.insert(upper.begin(), upperI.begin(), upperI.end());
-            lower.insert(lower.end(), lowerF.begin(), lowerF.end());
-            upper.insert(upper.end(), upperF.begin(), upperF.end());
-            std::vector<double> initial_u = json_spec["initial_u"].get_number_array<double>("%lf");
-            std::vector<double> initial_x = json_spec["initial_x"].get_number_array<double>("%lf");
-            EvalCasGen BAbtf(handle, "BAbt");
-            EvalCasGen bkf(handle, "bk");
-            EvalCasGen RSQrqtIf = GN ? EvalCasGen(handle, "RSQrqtIGN") : EvalCasGen(handle, "RSQrqtI");
-            EvalCasGen rqIf(handle, "rqI");
-            EvalCasGen RSQrqtf = GN ? EvalCasGen(handle, "RSQrqtGN") : EvalCasGen(handle, "RSQrqt");
-            EvalCasGen rqf(handle, "rqk");
-            EvalCasGen RSQrqtFf = GN ? EvalCasGen(handle, "RSQrqtFGN") : EvalCasGen(handle, "RSQrqtF");
-            EvalCasGen rqFf(handle, "rqF");
-            EvalCasGen GgtIf(handle, "GgtI");
-            EvalCasGen gIf(handle, "gI");
-            EvalCasGen Ggtf(handle, "Ggt");
-            EvalCasGen gf(handle, "g");
-            EvalCasGen GgtFf(handle, "GgtF");
-            EvalCasGen gFf(handle, "gF");
-            EvalCasGen LIf(handle, "LI");
-            EvalCasGen Lkf(handle, "Lk");
-            EvalCasGen LFf(handle, "LF");
-            EvalCasGen GgineqItf(handle, "GgineqIt");
-            EvalCasGen gineqIf(handle, "gineqI");
-            EvalCasGen Ggineqtf(handle, "Ggineqt");
-            EvalCasGen gineqf(handle, "gineq");
-            EvalCasGen GgineqFtf(handle, "GgineqFt");
-            EvalCasGen gineqFf(handle, "gineqF");
-            std::shared_ptr<StageOCP> stageocp = std::make_shared<StageOCPRockit>(nu, nx, ngI, ng, ngF, ng_ineqI, ng_ineq, ng_ineqF, no_stage_params, no_global_params, K,
-                                                                  BAbtf,
-                                                                  bkf,
-                                                                  RSQrqtIf,
-                                                                  rqIf,
-                                                                  RSQrqtf,
-                                                                  rqf,
-                                                                  RSQrqtFf,
-                                                                  rqFf,
-                                                                  GgtIf,
-                                                                  gIf,
-                                                                  Ggtf,
-                                                                  gf,
-                                                                  GgtFf,
-                                                                  gFf,
-                                                                  GgineqItf,
-                                                                  gineqIf,
-                                                                  Ggineqtf,
-                                                                  gineqf,
-                                                                  GgineqFtf,
-                                                                  gineqFf,
-                                                                  LIf,
-                                                                  Lkf,
-                                                                  LFf, lower, upper,
-                                                                  json_spec["stage_params"].get_number_array<double>("%lf"),
-                                                                  json_spec["global_params"].get_number_array<double>("%lf"),
-                                                                  initial_u, initial_x);
-            return stageocp;
-        }
+        
     };
 }
 #endif // OCPTEMPLATEBASICINCLUDED

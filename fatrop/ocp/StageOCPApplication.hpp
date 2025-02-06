@@ -235,8 +235,6 @@ namespace fatrop
 
     class StageOCPApplicationFactory
     {
-    public:
-        static StageOCPApplication from_rockit_interface(const std::string &functions, const std::string &json_spec_file);
     };
 }
 #endif // BASICOCPAPPLICATIONINCLUDED

@@ -24,7 +24,6 @@
 #include "fatrop/ocp/StageOCP.hpp"
 #include "fatrop/solver/FatropAlg.hpp"
 #include "fatrop/ocp/OCPAbstract.hpp"
-#include "fatrop/json/json.h"
 #include "fatrop/auxiliary/Common.hpp"
 #include "fatrop/solver/NLPL1.hpp"
 using namespace fatrop;
@@ -322,65 +321,6 @@ const StageOCPSolution &StageOCPApplication::last_solution() const
     return last_solution_;
 }
 
-StageOCPApplication StageOCPApplicationFactory::from_rockit_interface(const string &functions, const string &json_spec_file)
-{
-    shared_ptr<DLHandler> handle = make_shared<DLHandler>(functions);
-    std::ifstream t(json_spec_file);
-    std::stringstream buffer;
-    buffer << t.rdbuf();
-    json::jobject json_spec = json::jobject::parse(buffer.str());
-    auto stageocp = StageOCPBuilder::FromRockitInterface(handle, json_spec);
-    // instantiate the BasicOCPApplication
-    auto result = StageOCPApplication(stageocp);
-    // add all samplers
-    vector<string> sampler_names = json_spec["samplers"];
-    // const fatrop_int nu = stageocp->nu_;
-    // const fatrop_int nx = stageocp->nx_;
-    const fatrop_int no_stage_params = stageocp->n_stage_params_;
-    const fatrop_int K = stageocp->K_;
-    for (auto sampler_name : sampler_names)
-    {
-        auto eval = make_shared<EvalCasGen>(handle, "sampler_" + sampler_name);
-        result.stage_expressions[sampler_name] = make_shared<EvalBaseSE>(eval);
-    }
-    // add state samplers
-    json::jobject states_offset = json_spec["states_offset"];
-    vector<string> state_names = states_offset.keys();
-    for (auto state_name : state_names)
-    {
-        vector<fatrop_int> in = states_offset[state_name].as_object().array(0).get_number_array<fatrop_int>("%d");
-        vector<fatrop_int> out = states_offset[state_name].as_object().array(1).get_number_array<fatrop_int>("%d");
-        result.stage_expressions[string("state_") + state_name] = make_shared<IndexEpression>(false, in, out);
-    }
-    // add control samplers
-    json::jobject controls_offset = json_spec["controls_offset"];
-    vector<string> control_names = controls_offset.keys();
-    for (auto control_name : control_names)
-    {
-        vector<fatrop_int> in = controls_offset[control_name].as_object().array(0).get_number_array<fatrop_int>("%d");
-        vector<fatrop_int> out = controls_offset[control_name].as_object().array(1).get_number_array<fatrop_int>("%d");
-        result.stage_expressions[string("control_") + control_name] = make_shared<IndexEpression>(true, in, out);
-    }
-    // add all parameter setters
-    json::jobject control_params_offset = json_spec["control_params_offset"];
-    vector<string> control_params_names = control_params_offset.keys();
-    for (auto control_params_name : control_params_names)
-    {
-        vector<fatrop_int> in = control_params_offset[control_params_name].as_object().array(0).get_number_array<fatrop_int>("%d");
-        vector<fatrop_int> out = control_params_offset[control_params_name].as_object().array(1).get_number_array<fatrop_int>("%d");
-        result.param_setters[control_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, false);
-    }
-    json::jobject global_params_offset = json_spec["global_params_offset"];
-    vector<string> global_params_names = global_params_offset.keys();
-    for (auto global_params_name : global_params_names)
-    {
-        vector<fatrop_int> in = global_params_offset[global_params_name].as_object().array(0).get_number_array<fatrop_int>("%d");
-        vector<fatrop_int> out = global_params_offset[global_params_name].as_object().array(1).get_number_array<fatrop_int>("%d");
-        result.param_setters[global_params_name] = make_shared<ParameterSetter>(in, out, no_stage_params, in.size(), K, true);
-    }
-    result.build();
-    return result;
-}
 void StageOCPApplication::AppParameterSetter::set_value(const initializer_list<double> il_)
 {
     assert((int)il_.size() == _no_var);
