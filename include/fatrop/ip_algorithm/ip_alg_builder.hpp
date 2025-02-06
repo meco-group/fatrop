@@ -101,7 +101,7 @@ namespace fatrop
          *
          * @return std::shared_ptr<IpAlgorithm> The fully constructed IpAlgorithm.
          */
-        std::shared_ptr<IpAlgorithm> build();
+        std::shared_ptr<IpAlgorithm<ProblemType>> build();
 
     private:
         std::shared_ptr<IpNlpOrig<ProblemType>> nlp_orig_;

@@ -18,7 +18,7 @@ namespace fatrop
     template <typename ProblemType> class IpSearchDirImpl;
     template <typename ProblemType> class IpNlpOrig;
     template <typename ProblemType> class AugSystemSolver;
-    class IpAlgorithm;
+    template <typename ProblemType> class IpAlgorithm;
     class IpFilterData;
     class IpFilter;
     // base classes
@@ -28,6 +28,7 @@ namespace fatrop
     class IpEqMultInitializerBase;
     class IpInitializerBase;
     class IpConvergenceCheckBase;
+    class IpIterationOutputBase;
 
 } // namespace fatrop
 

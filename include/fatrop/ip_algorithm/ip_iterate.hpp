@@ -353,7 +353,7 @@ namespace fatrop
          */
         Scalar e_mu(Scalar mu);
 
-        Scalar tau() const { return std::max(0.99, 1.-mu()); }
+        Scalar tau() const { return std::max(0.99, 1. - mu()); }
 
         /**
          * @brief Computes the maximum step size.
@@ -385,6 +385,39 @@ namespace fatrop
          * @return Reference to the Jacobian.
          */
         Jacobian<ProblemType> &jacobian();
+
+        // for printing purposes and debugging
+        // note that this saves info about the step from previous to current iterate
+        struct StepInfo
+        {
+            Scalar alpha_primal;
+            Scalar alpha_dual;
+            Scalar step_length;
+            Scalar inertia_correction_primal;
+            Scalar inertia_correction_dual;
+            char step_type;
+            Index ls_iter;
+        };
+        // for printing purposes and debugging
+        // this contains information about the search direction
+        // computed at the current iterate
+        struct SearchDirInfo
+        {
+            Scalar inertia_correction_primal;
+            Scalar inertia_correction_dual;
+        };
+
+        /**
+         * @brief Returns the step information.
+         * @return Reference to the step information.
+         */
+        StepInfo &step_info() { return step_info_; }
+
+        /**
+         * @brief Returns the search direction information.
+         * @return Reference to the search direction information.
+         */
+        SearchDirInfo &search_dir_info() { return search_dir_info_; }
 
     private:
         const ProblemInfo<ProblemType> info_; ///< Information about the NLP.
@@ -437,6 +470,10 @@ namespace fatrop
         VecRealAllocated Dx_; ///< primal inertia correction vector
         VecRealAllocated De_; ///< equality inertia correction vector
         bool De_is_zero_ = false;
+        // Statistics for printing and debugging
+        StepInfo step_info_; ///< Information about the step from previous to current iterate
+        SearchDirInfo search_dir_info_; ///< Information about the search direction at the current
+                                        ///< iterate
 
         // Flags to track which quantities have already been evaluated
         bool obj_value_evaluated_ = false;      ///< Flag for objective value evaluation
@@ -462,7 +499,7 @@ namespace fatrop
         bool complementarity_u_evaluated_ =
             false; ///< Flag for upper bound complementarity evaluation
 
-        Scalar kappa_d_ = 0.;      ///< Fraction-to-the-boundary parameter
+        Scalar kappa_d_ = 0.;        ///< Fraction-to-the-boundary parameter
         Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
         Scalar smax_ = 100.;         ///< Maximum allowed slack variable value
     };
@@ -556,8 +593,7 @@ void fatrop::IpIterate<ProblemType>::set_De(const VecReal<Derived> &De)
     De_ = De;
 }
 
-template <typename ProblemType>
-void fatrop::IpIterate<ProblemType>::set_De_is_zero(bool value)
+template <typename ProblemType> void fatrop::IpIterate<ProblemType>::set_De_is_zero(bool value)
 {
     De_is_zero_ = value;
 }

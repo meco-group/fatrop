@@ -7,12 +7,11 @@
 #include <memory>
 using namespace fatrop;
 
-// example problem 2D point mass
+// example problem 2D point mass with a small nonlinearity in the dynamics
 // states: [x, y, vx, vy]
 // inputs: [fx, fy]
-// dynamics: [xk+1 = xk + dt*vxk, yk+1 = yk + dt*vyk, vxk+1 = vxk + dt*fx/m, vyk+1 = vyk + dt*fy/m]
-// cost: fx^2 + fy^2
-// constraints:
+// dynamics: [xk+1 = xk + dt*vxk, yk+1 = yk + dt*vyk, vxk+1 = vxk + dt*fx/m +0.5*dt*fy**2/m, vyk+1
+// = vyk + dt*fy/m] cost: fx^2 + fy^2 constraints:
 //  at k = 0: x = 0, y = 0, vx = 0, vy = 0
 //  at k = K: x = 1, y = 1, vx = 0, vy = 0
 class OcpTestProblem : public OcpAbstract
@@ -59,10 +58,10 @@ public:
         // set zero
         blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
         // Matrix B
-        // [  0,    0  ]
-        // [  0,    0  ]
-        // [ dt/m,  0  ]
-        // [  0,   dt/m ]
+        // [  0,    0        ]
+        // [  0,    0        ]
+        // [ dt/m,  dt/m*fy  ]
+        // [  0,    dt/m     ]
 
         // Matrix A
         // [ 1,  0,  dt,  0  ]
@@ -72,6 +71,7 @@ public:
 
         blasfeo_matel_wrap(res, 0, 2) = dt_ / m_;
         blasfeo_matel_wrap(res, 1, 3) = dt_ / m_;
+        blasfeo_matel_wrap(res, 1, 2) = dt_ / m_ * inputs_k[1];
 
         blasfeo_diare_wrap(4, 1.0, res, 2, 0);
         blasfeo_matel_wrap(res, 4, 0) = dt_;
@@ -91,6 +91,9 @@ public:
         if (k < K_ - 1)
         {
             blasfeo_diare_wrap(2, 2.0, res, 0, 0);
+            // add the contribution from the nonlinearity in the dynamics
+            Scalar lam = lam_dyn_k[2];
+            blasfeo_matel_wrap(res, 1, 1) += dt_ * lam / m_;
         }
         return 0;
     };
@@ -120,7 +123,8 @@ public:
     {
         res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2];
         res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3];
-        res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_;
+        res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_ +
+                 dt_ * 0.5*inputs_k[1]*inputs_k[1] / m_;
         res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_;
         return 0;
     }
@@ -225,8 +229,9 @@ private:
 int main()
 {
     IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(std::make_shared<OcpTestProblem>()));
-    std::shared_ptr<IpAlgorithm> ipalg = builder.build();
+    std::shared_ptr<IpAlgorithm<OcpType>> ipalg = builder.build();
     IpSolverReturnFlag ret = ipalg->optimize();
     std::cout << "Return flag: " << int(ret) << std::endl;
+    std::cout << "Return flag == success: " << (ret == IpSolverReturnFlag::Success) << std::endl;
     return 0;
 }

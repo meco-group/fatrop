@@ -72,7 +72,7 @@ namespace fatrop
             fatrop_assert_msg(false, "Unexpected return flag from linear solver");
             break;
         }
-        if (solved && norm_inf(curr_it.delta_dual_eq()) < lam_max_)
+        if (solved && norm_inf(rhs_g_) < lam_max_)
             curr_it.set_dual_eq(rhs_g_);
         else
         {

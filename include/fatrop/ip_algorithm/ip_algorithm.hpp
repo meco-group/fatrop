@@ -6,7 +6,6 @@
 #define __fatrop_ip_algorithm_ip_algorithm_hpp__
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
-#include "fatrop/ip_algorithm/ip_iteration_output.hpp"
 #include <memory>
 
 namespace fatrop
@@ -25,7 +24,8 @@ namespace fatrop
         InternalError,
         Unknown
     };
-   class IpAlgorithm
+    template <typename ProblemType>
+    class IpAlgorithm
     {
         typedef std::shared_ptr<IpSearchDirBase> IpSearchDirSp;
         typedef std::shared_ptr<IpLineSearchBase> IpLineSearchSp;
@@ -34,13 +34,15 @@ namespace fatrop
         typedef std::shared_ptr<IpEqMultInitializerBase> IpEqMultInitializerSp;
         typedef std::shared_ptr<IpConvergenceCheckBase> IpConvergenceCheckSp;
         typedef std::shared_ptr<IpIterationOutputBase> IpIterationOutputSp;
+        typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
 
     public:
         IpAlgorithm(const IpSearchDirSp &search_dir, const IpLineSearchSp &linesearch,
                     const IpInitializerSp &initializer, const IpMuUpdateSp &mu_update,
                     const IpEqMultInitializerSp &eq_mult_initializer,
                     const IpConvergenceCheckSp &convergence_check,
-                    const IpIterationOutputSp &iteration_output);
+                    const IpIterationOutputSp &iteration_output,
+                    const IpDataSp &ip_data);
 
         void reset();
         IpSolverReturnFlag optimize(const bool is_resto = false);
@@ -53,6 +55,7 @@ namespace fatrop
         IpEqMultInitializerSp eq_mult_initializer_;
         IpConvergenceCheckSp convergence_check_;
         IpIterationOutputSp iteration_output_;
+        IpDataSp ip_data_;
     };
 } // namespace fatrop
 

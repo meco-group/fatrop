@@ -46,7 +46,7 @@ namespace fatrop
         VecRealAllocated Deq_;
         VecRealAllocated dummy_s_;
         VecRealAllocated dummy_z_;
-        Scalar lam_max_;
+        Scalar lam_max_ = 1e3;
     };
 } // namespace fatrop
 

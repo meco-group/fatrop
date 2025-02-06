@@ -113,6 +113,8 @@ namespace fatrop
         curr_it.set_delta_dual_eq(rhs_g_);
         curr_it.set_delta_dual_bounds_l(rhs_cl_);
         curr_it.set_delta_dual_bounds_u(rhs_cu_);
+        curr_it.search_dir_info().inertia_correction_primal = delta_w;
+        curr_it.search_dir_info().inertia_correction_dual = delta_c;
         return ret;
     }
 } // namespace fatrop

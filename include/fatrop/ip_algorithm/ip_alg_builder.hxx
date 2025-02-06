@@ -136,7 +136,7 @@ namespace fatrop
         return *this;
     }
 
-    template <typename ProblemType> std::shared_ptr<IpAlgorithm> IpAlgBuilder<ProblemType>::build()
+    template <typename ProblemType> std::shared_ptr<IpAlgorithm<ProblemType>> IpAlgBuilder<ProblemType>::build()
     {
         if (!search_dir_)
             create_search_dir();
@@ -153,8 +153,8 @@ namespace fatrop
         if (!iteration_output_)
             create_iteration_output();
 
-        return std::make_shared<IpAlgorithm>(search_dir_, linesearch_, initializer_, mu_update_,
-                                             eq_mult_initializer_, convergence_check_, iteration_output_);
+        return std::make_shared<IpAlgorithm<ProblemType>>(search_dir_, linesearch_, initializer_, mu_update_,
+                                             eq_mult_initializer_, convergence_check_, iteration_output_, ipdata_);
     }
 } // namespace fatrop
 
