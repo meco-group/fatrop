@@ -103,10 +103,9 @@ namespace fatrop
             {
                 delta_c = delta_c_stripe_ * pow(mu, kappa_c_);
             }
-
-            if (delta_w > 0)
-                delta_w_last_ = delta_w;
         }
+        if (delta_w > 0)
+            delta_w_last_ = delta_w;
 
         curr_it.set_delta_primal_x(rhs_x_);
         curr_it.set_delta_primal_s(rhs_s_);
