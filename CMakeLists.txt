@@ -1,14 +1,34 @@
 cmake_minimum_required(VERSION 3.10)
-project(fatrop)
+project(fatrop VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Generate position-independent code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Set default build type to Release
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Set compilation flags for Release and Debug
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+
 # Option to build tests (default is ON)
 option(BUILD_TESTS "Build the tests" ON)
 
+# Add the external directory
+add_subdirectory(external)
+
 # Add BLASFEO
-find_package(blasfeo REQUIRED)
+if(WITH_BUILD_BLASFEO)
+    # BLASFEO is already available from FetchContent
+    add_library(blasfeo::blasfeo ALIAS blasfeo)
+else()
+    find_package(blasfeo REQUIRED)
+endif()
 
 # Add include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -24,6 +44,6 @@ if(BUILD_TESTS)
   # Enable testing
   enable_testing()
 
-  # Add the unittest directory
-  add_subdirectory(unittest)
+  # Add the unittest directory, but exclude it from installation
+  add_subdirectory(unittest EXCLUDE_FROM_ALL)
 endif()

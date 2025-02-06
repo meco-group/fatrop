@@ -29,5 +29,46 @@ set(FATROP_SOURCES
 # Create the fatrop shared library
 add_library(fatrop SHARED ${FATROP_SOURCES})
 
+# Set properties for the fatrop target
+set_target_properties(fatrop PROPERTIES
+    VERSION ${PROJECT_VERSION}
+)
+
 # Link fatrop with blasfeo
 target_link_libraries(fatrop PUBLIC blasfeo)
+
+# Specify include directories for the target
+target_include_directories(fatrop
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+# Define installation directories
+set(LIBRARY_INSTALL_DIR lib)
+set(ARCHIVE_INSTALL_DIR lib)
+set(RUNTIME_INSTALL_DIR bin)
+set(INCLUDE_INSTALL_DIR include)
+set(CMAKE_INSTALL_DIR cmake)
+
+# Define install targets
+set(INSTALL_TARGETS fatrop)
+
+# Export the target
+install(TARGETS ${INSTALL_TARGETS}
+    EXPORT fatropConfig
+    LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
+    ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR}
+    RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
+    INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
+)
+
+# Install header files (only .hpp)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/fatrop
+        DESTINATION ${INCLUDE_INSTALL_DIR}
+        FILES_MATCHING PATTERN "*.hpp")
+
+# Install the export
+install(EXPORT fatropConfig
+        NAMESPACE fatrop::
+        DESTINATION ${CMAKE_INSTALL_DIR})
