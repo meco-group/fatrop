@@ -12,6 +12,7 @@
 #include "fatrop/linear_algebra/linear_solver.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/ip_algorithm/ip_convergence_check.hpp"
+#include "fatrop/ip_algorithm/ip_iteration_output.hpp"
 
 namespace fatrop
 {
@@ -23,6 +24,15 @@ namespace fatrop
         create_problem_info();
         create_aug_system_solver();
         create_pdsolver();
+    }
+
+    template <typename ProblemType>
+    IpAlgBuilder<ProblemType> &IpAlgBuilder<ProblemType>::create_iteration_output()
+    {
+        if (!ipdata_)
+            create_ipdata();
+        iteration_output_ = std::make_shared<IpIterationOutput<ProblemType>>(ipdata_);
+        return *this;
     }
 
     template <typename ProblemType>
@@ -140,9 +150,11 @@ namespace fatrop
             create_eq_mult_initializer();
         if (!convergence_check_)
             create_convergence_check();
+        if (!iteration_output_)
+            create_iteration_output();
 
         return std::make_shared<IpAlgorithm>(search_dir_, linesearch_, initializer_, mu_update_,
-                                             eq_mult_initializer_, convergence_check_);
+                                             eq_mult_initializer_, convergence_check_, iteration_output_);
     }
 } // namespace fatrop
 

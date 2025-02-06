@@ -117,6 +117,14 @@ namespace fatrop
         std::shared_ptr<IpMuUpdateBase> mu_update_;
         std::shared_ptr<IpEqMultInitializerBase> eq_mult_initializer_;
         std::shared_ptr<IpConvergenceCheckBase> convergence_check_;
+        std::shared_ptr<IpIterationOutputBase> iteration_output_;
+
+    public:
+        /**
+         * @brief Create the IpIterationOutput component.
+         * @return Reference to this IpAlgBuilder for method chaining.
+         */
+        IpAlgBuilder &create_iteration_output();
     };
 } // namespace fatrop
 
