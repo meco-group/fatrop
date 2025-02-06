@@ -1,6 +1,6 @@
 /*
  * Fatrop - A fast trajectory optimization solver
- * Copyright (C) 2022, 2023 Lander Vanroye, KU Leuven. All rights reserved.
+ *  Copyright (C) 2022 - 2024 Lander Vanroye, KU Leuven. All rights reserved.
  *
  * This file is part of Fatrop.
  *
@@ -82,7 +82,7 @@ bool FatropOptions::has_option(const std::string &option_name) const
     {
         return true;
     }
-    if(integer_options.find(option_name) != integer_options.end())
+    if (integer_options.find(option_name) != integer_options.end())
     {
         return true;
     }
@@ -96,120 +96,135 @@ bool FatropOptions::has_option(const std::string &option_name) const
     }
     return false;
 }
-template <typename T>
+
+
+template<typename T>
 void FatropOptions::set(const string &option_name, T value) const
+{
+	throw std::runtime_error("Option type unknown,");
+}
+
+namespace fatrop {
+
+template <>
+void FatropOptions::set(const string &option_name, double value) const
 {
     if (numeric_options.find(option_name) != numeric_options.end())
     {
-        if constexpr (std::is_floating_point<T>::value)
-        {
-            numeric_options.at(option_name).set(value);
-        }
-        else
-        {
-            throw std::runtime_error("Option " + option_name + " of type double");
-        }
-    }
-    else if (integer_options.find(option_name) != integer_options.end())
-    {
-        if constexpr (std::is_integral<T>::value)
-        {
-            integer_options.at(option_name).set(value);
-        }
-        else if constexpr (std::is_floating_point<T>::value)
-        {
-            if ((int)value == value)
-            {
-                integer_options.at(option_name).set((int)value);
-            }
-            else
-            {
-                throw std::runtime_error("Option " + option_name + " of type int");
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Option " + option_name + " of type int");
-        }
-    }
-    else if (boolean_options.find(option_name) != boolean_options.end())
-    {
-        if constexpr (std::is_same<T, bool>::value)
-        {
-            boolean_options.at(option_name).set(value);
-        }
-        else if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
-        {
-            if (value == 0)
-            {
-                boolean_options.at(option_name).set(false);
-            }
-            else if (value == 1)
-            {
-                boolean_options.at(option_name).set(true);
-            }
-            else
-            {
-                throw std::runtime_error("Option " + option_name + " of type bool can only convert integer value 0 or 1 to bool, got " + to_string(value));
-            }
-        }
-        else
-        {
-            throw std::runtime_error("Option " + option_name + " of type bool");
-        }
-    }
-    else
-    {
-        throw std::runtime_error("Option " + option_name + " not found");
-    }
+	 for (auto &el : numeric_options.at(option_name))
+                el.set(value);
+    } else {
+	 throw std::runtime_error("Option " + option_name + " of type double");
+	}
 }
-template <typename T>
-void FatropOptions::prebuilt_set(const string &option_name, T value)
+
+template <>
+void FatropOptions::set(const string &option_name, int value) const
 {
-    if constexpr (std::is_integral<T>::value || std::is_floating_point<T>::value)
+    if (integer_options.find(option_name) != integer_options.end())
     {
-        prebuilt_double[option_name] = value;
-    }
-    if constexpr (std::is_same<T, std::string>::value)
-    {
-        prebuilt_string[option_name] = value;
-    }
+	 for (auto &el : integer_options.at(option_name))
+                el.set(value);
+    } else {
+	 throw std::runtime_error("Option " + option_name + " of type int");
+	}
 }
+
+template <>
+void FatropOptions::set(const string &option_name, bool value) const
+{
+    if (boolean_options.find(option_name) != boolean_options.end())
+    {
+	 for (auto &el : boolean_options.at(option_name))
+                el.set(value);
+    } else {
+	 throw std::runtime_error("Option " + option_name + " of type int");
+	}
+}
+
+template <>
+void FatropOptions::set(const string &option_name, const std::string& value) const
+{
+    if (string_options.find(option_name) != string_options.end())
+    {
+	 for (auto &el : string_options.at(option_name))
+                el.set(value);
+    } else {
+	 throw std::runtime_error("Option " + option_name + " of type string");
+	}
+}
+
+}
+
+template <typename T>
+void FatropOptions::prebuilt_set(const string &option_name, T value) {}
+
+namespace fatrop {
+template <>
+void FatropOptions::prebuilt_set(const string &option_name, double value)
+{
+    prebuilt_double[option_name] = value;
+}
+template <>
+void FatropOptions::prebuilt_set(const string &option_name, int value)
+{
+    prebuilt_double[option_name] = value;
+}
+template <>
+void FatropOptions::prebuilt_set(const string &option_name, const std::string& value)
+{
+    prebuilt_string[option_name] = value;
+}
+
+}
+
 
 void FatropOptions::register_option(const DoubleOption &option)
 {
-    numeric_options[option.name_] = option;
+    numeric_options[option.name_].push_back(option);
     option.set_default();
     // check if available in prebuilt options
     if (prebuilt_double.find(option.name_) != prebuilt_double.end())
     {
         option.set(prebuilt_double[option.name_]);
+    }
+    else
+    {
+        prebuilt_set(option.name_, option.default_value_);
     }
 }
 void FatropOptions::register_option(const IntegerOption &option)
 {
-    integer_options[option.name_] = option;
+    integer_options[option.name_].push_back(option);
     option.set_default();
     // check if available in prebuilt options
     if (prebuilt_double.find(option.name_) != prebuilt_double.end())
     {
         option.set(prebuilt_double[option.name_]);
     }
+    else
+    {
+        prebuilt_set(option.name_, option.default_value_);
+    }
 }
 void FatropOptions::register_option(const BooleanOption &option)
 {
-    boolean_options[option.name_] = option;
+    boolean_options[option.name_].push_back(option);
     option.set_default();
     // check if available in prebuilt options
     if (prebuilt_double.find(option.name_) != prebuilt_double.end())
     {
         option.set(prebuilt_double[option.name_]);
+    }
+    else
+    {
+        prebuilt_set(option.name_, option.default_value_);
     }
 }
 
 void FatropOptions::register_option(const StringOption &option)
 {
-    string_options[option.name_] = option;
+    string_options[option.name_].push_back(option);
     option.set_default();
     // check if available in prebuilt options
     if (prebuilt_string.find(option.name_) != prebuilt_string.end())
@@ -224,21 +239,21 @@ auto operator<<(std::ostream &os, const FatropOptions &m) -> std::ostream &
     {
         for (auto const &x : m.numeric_options)
         {
-            os << "   " << x.first << " : " << *x.second.value << std::endl;
+                os << "   " << x.first << " : " << *x.second.at(0).value << std::endl;
         }
     }
     os << "Integer options :" << std::endl;
     {
         for (auto const &x : m.integer_options)
         {
-            os << "   " << x.first << " : " << *x.second.value << std::endl;
+                os << "   " << x.first << " : " << *x.second.at(0).value << std::endl;
         }
     }
     os << "Boolean options :" << std::endl;
     {
         for (auto const &x : m.boolean_options)
         {
-            os << "   " << x.first << " : " << *x.second.value << std::endl;
+                os << "   " << x.first << " : " << *x.second.at(0).value << std::endl;
         }
     }
     return os;
