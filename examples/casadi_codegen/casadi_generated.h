@@ -37,7 +37,7 @@ int opti_func_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_
 #define opti_func_SZ_ARG 315
 #define opti_func_SZ_RES 316
 #define opti_func_SZ_IW 3403
-#define opti_func_SZ_W 40843
+#define opti_func_SZ_W 40645
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

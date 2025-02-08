@@ -121,11 +121,15 @@ public:
     virtual Index eval_b(const Scalar *states_kp1, const Scalar *inputs_k, const Scalar *states_k,
                          Scalar *res, const Index k)
     {
-        res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2];
-        res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3];
+        /**
+         * note here it is important to write down the dynamics in the form
+         *                -x_{k+1}+f(u_k, x_k) = 0
+         */
+        res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2]; // == 0
+        res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3]; // == 0
         res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_ +
-                 dt_ * 0.5*inputs_k[1]*inputs_k[1] / m_;
-        res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_;
+                 dt_ * 0.5 * inputs_k[1] * inputs_k[1] / m_;            // == 0
+        res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_; // == 0
         return 0;
     }
 
@@ -133,17 +137,17 @@ public:
     {
         if (k == 0)
         {
-            res[0] = states_k[0];
-            res[1] = states_k[1];
-            res[2] = states_k[2];
-            res[3] = states_k[3];
+            res[0] = states_k[0]; // == 0
+            res[1] = states_k[1]; // == 0
+            res[2] = states_k[2]; // == 0
+            res[3] = states_k[3]; // == 0
         }
         else if (k == K_ - 1)
         {
-            res[0] = states_k[0] - 1.0;
-            res[1] = states_k[1] - 2.0;
-            res[2] = states_k[2] - 3.0;
-            res[3] = states_k[3] - 4.0;
+            res[0] = states_k[0] - 1.0; // == 0
+            res[1] = states_k[1] - 2.0; // == 0
+            res[2] = states_k[2] - 3.0; // == 0
+            res[3] = states_k[3] - 4.0; // == 0
         }
         return 0;
     };

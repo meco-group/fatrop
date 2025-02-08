@@ -72,9 +72,9 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
                                            dims.number_of_ineq_constraints.end(), 0);
     // set up the offsets the equality constraints are ordered as a concatenation of [g_eq_dyn,
     // g_eq_path, g_eq_slack]
-    offset_g_eq_dyn = 0;
-    offset_g_eq_path = number_of_g_eq_dyn;
-    offset_g_eq_slack = offset_g_eq_path + number_of_g_eq_path;
+    offset_g_eq_path = 0;
+    offset_g_eq_dyn = number_of_g_eq_path;
+    offset_g_eq_slack = offset_g_eq_dyn + number_of_g_eq_dyn;
     compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), offset_g_eq_dyn,
                     offsets_g_eq_dyn.begin());
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(),
