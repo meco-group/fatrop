@@ -88,6 +88,8 @@ namespace fatrop
         virtual Index get_bounds(const ProblemInfo<ProblemType> &info, VecRealView &lower_bounds,
                                  VecRealView &upper_bounds) override;
 
+        virtual Index get_initial_primal(const ProblemInfo<ProblemType> &info, VecRealView &primal_x) override;
+
     private:
         NlpSp nlp_;                           ///< Shared pointer to the original NLP problem
         VecRealAllocated modified_bounds_lower_; ///< Modified lower bounds

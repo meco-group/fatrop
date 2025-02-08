@@ -96,6 +96,12 @@ namespace fatrop
         return 0;
     }
 
+    template <typename ProblemType>
+    Index IpNlpOrig<ProblemType>::get_initial_primal(const ProblemInfo<ProblemType> &info, VecRealView &primal_x)
+    {
+        return nlp_->get_initial_primal(info, primal_x);
+    }
+
 } // namespace fatrop
 
 #endif // __fatrop_ip_algorithm_ip_nlp_orig_hxx__

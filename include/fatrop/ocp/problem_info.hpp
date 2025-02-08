@@ -62,6 +62,7 @@ namespace fatrop
          */
         std::vector<Index> offsets_slack;
         std::vector<Index> offsets_eq;
+        std::vector<Index> offsets_dyn;
 
         /// Offsets for the quantities related to equality constraints, the constraints are ordered
         /// as a concatenation of [g_eq_dyn, g_eq_path, g_eq_slack]

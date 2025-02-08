@@ -1,7 +1,6 @@
 include(FetchContent)
 
 option(WITH_BUILD_BLASFEO "Build BLASFEO from source" OFF)
-
 if(WITH_BUILD_BLASFEO)
     FetchContent_Declare(
         blasfeo

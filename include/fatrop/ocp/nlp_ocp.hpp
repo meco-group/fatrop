@@ -43,8 +43,9 @@ namespace fatrop
         Index eval_objective(const OcpInfo &info, const Scalar objective_scale,
                              const VecRealView &primal_x, const VecRealView &primal_s,
                              Scalar &res) override;
-        Index get_bounds(const OcpInfo &info,
-                             VecRealView &lower_bounds, VecRealView &upper_bounds) override;
+        Index get_bounds(const OcpInfo &info, VecRealView &lower_bounds,
+                         VecRealView &upper_bounds) override;
+        Index get_initial_primal(const ProblemInfo<OcpType> &info, VecRealView &primal_x) override;
 
     private:
         const OcpAbstractSp ocp_;

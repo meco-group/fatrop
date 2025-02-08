@@ -44,12 +44,6 @@ target_include_directories(fatrop
         $<INSTALL_INTERFACE:include>
 )
 
-# Define installation directories
-set(LIBRARY_INSTALL_DIR lib)
-set(ARCHIVE_INSTALL_DIR lib)
-set(RUNTIME_INSTALL_DIR bin)
-set(INCLUDE_INSTALL_DIR include)
-set(CMAKE_INSTALL_DIR cmake)
 
 # Define install targets
 set(INSTALL_TARGETS fatrop)

@@ -74,7 +74,8 @@ namespace fatrop
         {
             const Scalar *inputs_k = primal_x_p + info.offsets_primal_u[k];
             const Scalar *states_k = primal_x_p + info.offsets_primal_x[k];
-            const Scalar *lam_dyn_k = (k!= info.dims.K-1) ? lam_p + info.offsets_g_eq_dyn[k] : nullptr;
+            const Scalar *lam_dyn_k =
+                (k != info.dims.K - 1) ? lam_p + info.offsets_g_eq_dyn[k] : nullptr;
             const Scalar *lam_eq_k = lam_p + info.offsets_g_eq_path[k];
             const Scalar *lam_eq_ineq_k = lam_p + info.offsets_g_eq_slack[k];
             ocp_->eval_RSQrqt(&objective_scale, inputs_k, states_k, lam_dyn_k, lam_eq_k,
@@ -182,6 +183,18 @@ namespace fatrop
             Scalar *lower_bounds_k = lower_bounds_p + info.offsets_slack[k];
             Scalar *upper_bounds_k = upper_bounds_p + info.offsets_slack[k];
             ocp_->get_bounds(lower_bounds_k, upper_bounds_k, k);
+        }
+        return 0;
+    }
+
+    template <typename OcpAbstractTag>
+    Index NlpOcpTpl<OcpAbstractTag>::get_initial_primal(const ProblemInfo<OcpType> &info, VecRealView &primal_x)
+    {
+        Scalar *primal_x_ptr = primal_x.data();
+        for (Index k = 0; k < info.dims.K; k++)
+        {
+            ocp_->get_initial_uk(primal_x_ptr + info.offsets_primal_u[k], k);
+            ocp_->get_initial_xk(primal_x_ptr + info.offsets_primal_x[k], k);
         }
         return 0;
     }

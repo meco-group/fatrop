@@ -6,8 +6,8 @@
 #define __fatrop_nlp_nlp__
 
 #include "fatrop/context/context.hpp"
-#include "fatrop/nlp/fwd.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
+#include "fatrop/nlp/fwd.hpp"
 
 namespace fatrop
 {
@@ -35,6 +35,7 @@ namespace fatrop
                                      const VecRealView &primal_s, Scalar &res) = 0;
         virtual Index get_bounds(const ProblemInfo<ProblemType> &info, VecRealView &lower_bounds,
                                  VecRealView &upper_bounds) = 0;
+        virtual Index get_initial_primal(const ProblemInfo<ProblemType> &info, VecRealView &primal_x) = 0;
         virtual ~Nlp() = default;
     };
 } // namespace fatrop

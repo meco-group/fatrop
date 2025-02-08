@@ -17,7 +17,7 @@ else()
 include(FetchContent)
   FetchContent_Declare(
     googletest
-    URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
   )
   FetchContent_MakeAvailable(googletest)
@@ -42,19 +42,19 @@ add_executable(ip_initializer_test ip_algorithm/ip_initializer_test.cpp)
 add_executable(ip_filter_test ip_algorithm/ip_filter_test.cpp)
 
 # Link the test executables with Google Test and other required libraries
-target_link_libraries(vector_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(matrix_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(lu_factorization_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(jacobian_hessian_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(aug_system_solver_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(problem_info_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(pd_system_solver_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(ocp_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(nlp_ocp_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(ocp_ip_data_solve_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(ip_search_dir_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(ip_initializer_test gtest gtest_main blasfeo fatrop)
-target_link_libraries(ip_filter_test gtest gtest_main blasfeo fatrop)
+target_link_libraries(vector_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(matrix_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(lu_factorization_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(jacobian_hessian_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(aug_system_solver_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(problem_info_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(pd_system_solver_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(ocp_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(nlp_ocp_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(ocp_ip_data_solve_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(ip_search_dir_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(ip_initializer_test GTest::gtest GTest::gtest_main blasfeo fatrop)
+target_link_libraries(ip_filter_test GTest::gtest GTest::gtest_main blasfeo fatrop)
 
 # Discover and add the tests
 gtest_discover_tests(vector_test)
