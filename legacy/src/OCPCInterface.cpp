@@ -8,6 +8,7 @@
  *
  */
 
+#include "fatrop/common/printing.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_alg_builder.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
@@ -382,9 +383,10 @@ namespace fatrop
                         FatropOcpCFlush flush)
             : stream(write, flush), m(std::make_shared<FatropOcpCMapping>(ocp_interface))
         {
+            // set the stream
             if (write != 0)
             {
-                // app.printer_ = std::make_shared<FatropPrinter>(0, stream);
+                Printing::set_stream(std::make_unique<FatropOcpCStream>(write, flush));
             }
             IpAlgBuilder<OcpType> builder(m);
             algo = builder.build();
@@ -476,7 +478,7 @@ namespace fatrop
         catch (std::exception &e)
         {
             // todo implement
-            // s->driver->printer()->level(1) << "Uncaught Exception: " << e.what() << std::endl;
+            f_out << "Uncaught Exception: " << e.what() << std::endl;
             return -1;
         }
     }

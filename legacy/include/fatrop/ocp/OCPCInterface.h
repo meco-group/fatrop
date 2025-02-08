@@ -165,14 +165,102 @@ extern "C"
         FatropOcpCGetDim_k get_ng_ineq;
         /// @brief horizon length
         FatropOcpCGetDim get_horizon_length;
+        /// @brief  discretized dynamics
+        /// it evaluates the vertical concatenation of A_k^T, B_k^T, and b_k^T from the linearized
+        /// dynamics x_{k+1} = A_k x_k + B_k u_k + b_k. The matrix is in column major format.
+        /// @param states_kp1: pointer to nx_{k+1}-array states of time step k+1
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to (nu+nx+1 x nu+nx)-matrix
+        /// @param k: time step
         FatropOcpCEval_BAbt_k eval_BAbt;
+        /// @brief  stagewise Lagrangian Hessian
+        /// It evaluates is the vertical concatenation of (1) the Hessian of the Lagrangian to the
+        /// concatenation of (u_k, x_k) (2) the first order derivative of the Lagrangian Hessian to
+        /// the concatenation of (u_k, x_k). The matrix is in column major format.
+        /// @param objective_scale: scale factor for objective function (usually 1.0)
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param lam_dyn_k: pointer to array dual variables for dynamics of time step k
+        /// @param lam_eq_k: pointer to array dual variables for equality constraints of time step k
+        /// @param lam_eq_ineq_k: pointer to array dual variables for inequality constraints of time
+        /// step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to (nu+nx+1 x nu+nx)-matrix.
+        /// @param k
+        /// @return
         FatropOcpCEval_RSQrqt_k eval_RSQrqt;
+        /// @brief stagewise equality constraints Jacobian.
+        /// It evaluates the vertical concatenation of (1) the Jacobian of the equality constraints
+        /// to the concatenation of (u_k, x_k) (2) the equality constraints evaluated at u_k, x_k.
+        /// The matrix is in column major format.
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to (nu+nx+1 x ng)-matrix.
+        /// @param k: time step
+        /// @return
         FatropOcpCEval_Ggt_k eval_Ggt;
+        /// @brief stagewise inequality constraints Jacobian.
+        /// It evaluates the vertical concatenation of (1) the Jacobian of the inequality
+        /// constraints to the concatenation of (u_k, x_k) (2) the inequality constraints evaluated
+        /// at u_k, x_k. The matrix is in column major format.
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params_ko: pointer to array global parameters
+        /// @param res: pointer to (nu+nx+1 x ng_ineq)-matrix, column major format
+        /// @param k : time step
+        /// @return
         FatropOcpCEval_Ggt_ineq_k eval_Ggt_ineq;
+        /// @brief the dynamics constraint violation (b_k = -x_{k+1} + f_k(u_k, x_k, p_k, p))
+        /// @param states_kp1: pointer to array states of time step k+1
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to array nx_{k+1}-vector
+        /// @param k: time step
+        /// @return
         FatropOcpCEval_b_k eval_b;
+        /// @brief the equality constraint violation (g_k = g_k(u_k, x_k, p_k, p))
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to array ng-vector
+        /// @param k: time step
         FatropOcpCEval_g_k eval_g;
+        /// @brief the inequality constraint violation (g_ineq_k = g_ineq_k(u_k, x_k, p_k, p))
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to array ng_ineq-vector
+        /// @param k: time step
         FatropOcpCEval_gineq_k eval_gineq;
+        /// @brief gradient of the objective function (not the Lagrangian!) to the concatenation of
+        /// (u_k, x_k)
+        /// @param objective_scale: pointer to objective scale
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to (nu+nx)-array
+        /// @param k: time step
         FatropOcpCEval_rq_k eval_rq;
+        /// @brief objective function value
+        /// @param objective_scale: pointer to array objective scale
+        /// @param inputs_k: pointer to array inputs of time step k
+        /// @param states_k: pointer to array states of time step k
+        /// @param stage_params_k: pointer to array stage parameters of time step k
+        /// @param global_params: pointer to array global parameters
+        /// @param res: pointer to double
+        /// @param k: time step
         FatropOcpCEval_L_k eval_L;
         /// @brief the bounds of the inequalites at stage k
         /// @param lower: pointer to ng_ineq-vector
