@@ -62,7 +62,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
                     offsets_eq.begin());
     offsets_dyn = std::vector<Index>(dims.K - 1, 0);
     compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0,
-                    offsets_eq.begin());
+                    offsets_dyn.begin());
     // compute the number of (dyn, path, slack)-equality constraints
     number_of_g_eq_dyn =
         std::accumulate(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0);
