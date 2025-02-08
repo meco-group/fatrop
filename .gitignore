@@ -29,7 +29,6 @@ python/fatropy.cpp
 *.egg
 *.whl
 fatropy_old/fatropy.cpp
-casadi_codegen*
 *.tar.gz
 output.txt
 
