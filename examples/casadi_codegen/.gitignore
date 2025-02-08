@@ -1,0 +1,2 @@
+# ignore the casadi_generated.(c|h) files
+casadi_generated.*

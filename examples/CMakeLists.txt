@@ -7,10 +7,5 @@ target_link_libraries(ocp_impl_example PRIVATE fatrop)
 add_executable(ocp_impl_example_static ocp_impl_example_static.cpp)
 target_link_libraries(ocp_impl_example_static PRIVATE fatrop)
 
-# compile the casadi generated c code to a shared library
-add_library(casadi_generated SHARED casadi_codegen/casadi_generated.c) 
-target_link_libraries(casadi_generated PRIVATE fatrop)
-
-add_executable(ocp_impl_example_codegen casadi_codegen/ocp_impl_example_codegen.cpp)
-target_link_libraries(ocp_impl_example_codegen PRIVATE casadi_generated)
-target_include_directories(ocp_impl_example_codegen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/casadi_codegen)
+# Include the casadi_codegen subdirectory
+add_subdirectory(casadi_codegen)
