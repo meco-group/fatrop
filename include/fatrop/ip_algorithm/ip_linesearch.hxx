@@ -4,6 +4,7 @@
 
 #ifndef __fatrop_ip_algorithm_ip_linesearch_hxx__
 #define __fatrop_ip_algorithm_ip_linesearch_hxx__
+#include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
 #include "fatrop/ip_algorithm/ip_utils.hpp"
@@ -381,12 +382,12 @@ namespace fatrop
             soc_rhs_cl_.block(soc_rhs_cl_.m(), 0) = curr_it.relaxed_complementarity_l();
             soc_rhs_cu_.block(soc_rhs_cu_.m(), 0) = curr_it.relaxed_complementarity_u();
 
-                // solve the linear system
-                LinearSystem<PdSystemType<ProblemType>> ls(
-                    curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
-                    curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(),
-                    curr_it.delta_upper(), curr_it.dual_bounds_l(), curr_it.dual_bounds_u(),
-                    soc_rhs_x_, soc_rhs_s_, soc_rhs_g_, soc_rhs_cl_, soc_rhs_cu_);
+            // solve the linear system
+            LinearSystem<PdSystemType<ProblemType>> ls(
+                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
+                curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(),
+                curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), soc_rhs_x_, soc_rhs_s_,
+                soc_rhs_g_, soc_rhs_cl_, soc_rhs_cu_);
 
             LinsolReturnFlag ret = linear_solver_->solve_in_place_rhs(ls);
             // check if the linear system was solved successfully
@@ -578,6 +579,35 @@ namespace fatrop
             // increment this while I would expect it to
         }
         return true;
+    }
+
+    template <typename ProblemType>
+    void IpLinesearch<ProblemType>::register_options(OptionRegistry &registry)
+    {
+        registry.register_option("max_soc", &IpLinesearch::set_max_soc, this);
+        registry.register_option("kappa_soc", &IpLinesearch::set_kappa_soc, this);
+        registry.register_option("theta_min", &IpLinesearch::set_theta_min, this);
+        registry.register_option("theta_max", &IpLinesearch::set_theta_max, this);
+        registry.register_option("theta_min_fact", &IpLinesearch::set_theta_min_fact, this);
+        registry.register_option("s_phi", &IpLinesearch::set_s_phi, this);
+        registry.register_option("s_theta", &IpLinesearch::set_s_theta, this);
+        registry.register_option("delta", &IpLinesearch::set_delta, this);
+        registry.register_option("tiny_step_tol", &IpLinesearch::set_tiny_step_tol, this);
+        registry.register_option("tiny_step_y_tol", &IpLinesearch::set_tiny_step_y_tol, this);
+        registry.register_option("gamma_theta", &IpLinesearch::set_gamma_theta, this);
+        registry.register_option("gamma_phi", &IpLinesearch::set_gamma_phi, this);
+        registry.register_option("eta_phi", &IpLinesearch::set_eta_phi, this);
+        registry.register_option("alpha_min_frac", &IpLinesearch::set_alpha_min_frac, this);
+        registry.register_option("theta_max_fact", &IpLinesearch::set_theta_max_fact, this);
+        registry.register_option("max_filter_resets", &IpLinesearch::set_max_filter_resets, this);
+        registry.register_option("filter_reset_trigger", &IpLinesearch::set_filter_reset_trigger,
+                                 this);
+        registry.register_option("obj_max_incr", &IpLinesearch::set_obj_max_incr, this);
+        registry.register_option("watchdog_shortened_iter_trigger",
+                                 &IpLinesearch::set_watchdog_shortened_iter_trigger, this);
+        registry.register_option("watchdog_trial_iter_max",
+                                 &IpLinesearch::set_watchdog_trial_iter_max, this);
+        registry.register_option("alpha_red_factor", &IpLinesearch::set_alpha_red_factor, this);
     }
 
 } // namespace fatrop

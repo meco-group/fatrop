@@ -5,6 +5,7 @@
 #ifndef __fatrop_ip_algorithm_ip_data_hxx__
 #define __fatrop_ip_algorithm_ip_data_hxx__
 #include "ip_data.hpp"
+#include "fatrop/common/options.hpp"
 
 namespace fatrop
 {
@@ -49,6 +50,12 @@ namespace fatrop
         current_iterate_ = stored_iterate_;
         stored_iterate_ = tmp;
         validate_current_iterate();
+    }
+
+    template <typename ProblemType>
+    void IpData<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("tolerance", &IpData::set_tolerance, this);
     }
 
 } // namespace fatrop

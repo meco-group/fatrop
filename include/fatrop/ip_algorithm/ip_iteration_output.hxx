@@ -65,6 +65,13 @@ namespace fatrop
         print_iteration(iter, objective, inf_pr, inf_du, std::log10(mu), d_norm, rg, alpha_du,
                         alpha_pr, ls, info_alpha_primal_char);
     }
+    template <typename ProblemType>
+    void IpIterationOutput<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        // Currently, there are no options to register for IpIterationOutput
+        // This function is added for consistency and future extensibility
+    }
+
 } // namespace fatrop
 
 #endif // __fatrop_ip_iteration_output_hxx__

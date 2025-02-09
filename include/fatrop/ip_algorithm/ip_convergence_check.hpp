@@ -4,6 +4,7 @@
 
 #ifndef __fatrop_ip_algorithm_ip_convergence_check_hpp__
 #define __fatrop_ip_algorithm_ip_convergence_check_hpp__
+#include "fatrop/common/fwd.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
@@ -70,10 +71,19 @@ namespace fatrop
 
     private:
         IpDataSp ipdata_;
-        Scalar tol_acceptable_ = 1e-6;    ///< Tolerance for acceptable point
-        Index acceptable_counter_ = 0;    ///< Counter for consecutive acceptable iterations
-        Index acceptable_iter_ = 15;      ///< Number of consecutive acceptable iterations required
-        Index max_iter_ = 1000;           ///< Maximum number of iterations allowed
+        Scalar tol_acceptable_ = 1e-6; ///< Tolerance for acceptable point
+        Index acceptable_counter_ = 0; ///< Counter for consecutive acceptable iterations
+        Index acceptable_iter_ = 15;   ///< Number of consecutive acceptable iterations required
+        Index max_iter_ = 1000;        ///< Maximum number of iterations allowed
+
+    public:
+        // Setter methods for options
+        void set_tol_acceptable(const Scalar &value) { tol_acceptable_ = value; }
+        void set_acceptable_iter(const Index &value) { acceptable_iter_ = value; }
+        void set_max_iter(const Index &value) { max_iter_ = value; }
+
+        // Register options
+        void register_options(OptionRegistry &registry);
     };
 
 } // namespace fatrop

@@ -4,6 +4,7 @@
 
 #ifndef __fatrop_ip_algorithm_ip_linesearch_hpp__
 #define __fatrop_ip_algorithm_ip_linesearch_hpp__
+#include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/ip_algorithm/ip_filter.hpp"
@@ -40,6 +41,8 @@ namespace fatrop
          */
         virtual void accept_trial_iterate() = 0;
 
+        virtual void register_options(OptionRegistry &registry) = 0;
+
     protected:
         virtual ~IpLineSearchBase() = default;
     };
@@ -69,6 +72,32 @@ namespace fatrop
         void reset() override;
         void reset_linesearch() override;
         void accept_trial_iterate() override;
+        // Setter methods for options
+        void set_max_soc(const Index &value) { max_soc_ = value; }
+        void set_kappa_soc(const Scalar &value) { kappa_soc_ = value; }
+        void set_theta_min(const Scalar &value) { theta_min_ = value; }
+        void set_theta_max(const Scalar &value) { theta_max_ = value; }
+        void set_theta_min_fact(const Scalar &value) { theta_min_fact_ = value; }
+        void set_s_phi(const Scalar &value) { s_phi_ = value; }
+        void set_s_theta(const Scalar &value) { s_theta_ = value; }
+        void set_delta(const Scalar &value) { delta_ = value; }
+        void set_tiny_step_tol(const Scalar &value) { tiny_step_tol_ = value; }
+        void set_tiny_step_y_tol(const Scalar &value) { tiny_step_y_tol_ = value; }
+        void set_gamma_theta(const Scalar &value) { gamma_theta_ = value; }
+        void set_gamma_phi(const Scalar &value) { gamma_phi_ = value; }
+        void set_eta_phi(const Scalar &value) { eta_phi_ = value; }
+        void set_alpha_min_frac(const Scalar &value) { alpha_min_frac_ = value; }
+        void set_theta_max_fact(const Scalar &value) { theta_max_fact_ = value; }
+        void set_max_filter_resets(const Index &value) { max_filter_resets_ = value; }
+        void set_filter_reset_trigger(const Index &value) { filter_reset_trigger_ = value; }
+        void set_obj_max_incr(const Scalar &value) { obj_max_incr_ = value; }
+        void set_watchdog_shortened_iter_trigger(const Index &value)
+        {
+            watchdog_shortened_iter_trigger_ = value;
+        }
+        void set_watchdog_trial_iter_max(const Index &value) { watchdog_trial_iter_max_ = value; }
+        void set_alpha_red_factor(const Scalar &value) { alpha_red_factor_ = value; }
+        void register_options(OptionRegistry &registry) override;
 
     private:
         IpFilter &filter();
@@ -91,7 +120,8 @@ namespace fatrop
         void augment_filter();
         Scalar compute_alpha_min();
         char update_for_next_iteration(const Scalar alpha_primal_test);
-        void update_step_info(const Scalar alpha_primal, const Scalar alpha_dual, const Index n_steps, const char info_alpha_primal_char);
+        void update_step_info(const Scalar alpha_primal, const Scalar alpha_dual,
+                              const Index n_steps, const char info_alpha_primal_char);
 
         IpFilter filter_;
         IpDataSp ipdata_;
@@ -123,6 +153,7 @@ namespace fatrop
         Index watchdog_shortened_iter_trigger_ = 10;
         Index watchdog_trial_iter_max_ = 3;
         Scalar alpha_red_factor_ = 0.5;
+
         // internal staticstics
         bool in_watchdog_;
         Scalar reference_theta_;

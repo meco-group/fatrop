@@ -5,10 +5,12 @@
 #ifndef __fatrop_ip_algorithm_ip_alg_builder__
 #define __fatrop_ip_algorithm_ip_alg_builder__
 
+#include "fatrop/common/fwd.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/nlp/fwd.hpp"
 #include <memory>
+#include <optional>
 
 namespace fatrop
 {
@@ -94,6 +96,12 @@ namespace fatrop
         IpAlgBuilder &create_convergence_check();
 
         /**
+         * @brief Create the IpIterationOutput component.
+         * @return Reference to this IpAlgBuilder for method chaining.
+         */
+
+        IpAlgBuilder &create_iteration_output();
+        /**
          * @brief Build and return the fully constructed IpAlgorithm.
          *
          * This method ensures all necessary components are created before
@@ -101,7 +109,7 @@ namespace fatrop
          *
          * @return std::shared_ptr<IpAlgorithm> The fully constructed IpAlgorithm.
          */
-        std::shared_ptr<IpAlgorithm<ProblemType>> build();
+        std::shared_ptr<IpAlgorithm<ProblemType>> build(OptionRegistry* options = nullptr);
 
     private:
         std::shared_ptr<IpNlpOrig<ProblemType>> nlp_orig_;
@@ -118,13 +126,6 @@ namespace fatrop
         std::shared_ptr<IpEqMultInitializerBase> eq_mult_initializer_;
         std::shared_ptr<IpConvergenceCheckBase> convergence_check_;
         std::shared_ptr<IpIterationOutputBase> iteration_output_;
-
-    public:
-        /**
-         * @brief Create the IpIterationOutput component.
-         * @return Reference to this IpAlgBuilder for method chaining.
-         */
-        IpAlgBuilder &create_iteration_output();
     };
 } // namespace fatrop
 

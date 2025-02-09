@@ -1,18 +1,19 @@
 #ifndef __fatrop_ip_algorithm_ip_alg_builder_hxx__
 #define __fatrop_ip_algorithm_ip_alg_builder_hxx__
 
+#include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_alg_builder.hpp"
+#include "fatrop/ip_algorithm/ip_algorithm.hpp"
+#include "fatrop/ip_algorithm/ip_convergence_check.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_initializer.hpp"
+#include "fatrop/ip_algorithm/ip_iteration_output.hpp"
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
 #include "fatrop/ip_algorithm/ip_mu_update.hpp"
-#include "fatrop/ip_algorithm/ip_search_dir.hpp"
 #include "fatrop/ip_algorithm/ip_nlp_orig.hpp"
+#include "fatrop/ip_algorithm/ip_search_dir.hpp"
 #include "fatrop/linear_algebra/linear_solver.hpp"
-#include "fatrop/ip_algorithm/ip_algorithm.hpp"
-#include "fatrop/ip_algorithm/ip_convergence_check.hpp"
-#include "fatrop/ip_algorithm/ip_iteration_output.hpp"
 
 namespace fatrop
 {
@@ -136,7 +137,9 @@ namespace fatrop
         return *this;
     }
 
-    template <typename ProblemType> std::shared_ptr<IpAlgorithm<ProblemType>> IpAlgBuilder<ProblemType>::build()
+    template <typename ProblemType>
+    std::shared_ptr<IpAlgorithm<ProblemType>>
+    IpAlgBuilder<ProblemType>::build(OptionRegistry *options)
     {
         if (!search_dir_)
             create_search_dir();
@@ -153,8 +156,15 @@ namespace fatrop
         if (!iteration_output_)
             create_iteration_output();
 
-        return std::make_shared<IpAlgorithm<ProblemType>>(search_dir_, linesearch_, initializer_, mu_update_,
-                                             eq_mult_initializer_, convergence_check_, iteration_output_, ipdata_);
+        if (options)
+        {
+            options->register_options(*linesearch_);
+            std::cout << *options << std::endl;
+        }
+
+        return std::make_shared<IpAlgorithm<ProblemType>>(
+            search_dir_, linesearch_, initializer_, mu_update_, eq_mult_initializer_,
+            convergence_check_, iteration_output_, ipdata_);
     }
 } // namespace fatrop
 

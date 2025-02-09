@@ -6,6 +6,7 @@
 #define __fatrop_ip_algorithm_ip_initializer_hpp__
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
+#include "fatrop/common/fwd.hpp"
 #include <memory>
 namespace fatrop
 {
@@ -61,6 +62,14 @@ namespace fatrop
         IpEqMultInitializerSp eq_mult_initializer_; ///< Equality multiplier initializer
         Scalar bound_push = 1e-2;              ///< Bound push parameter (kappa_1)
         Scalar bound_frac = 1e-2;              ///< Bound fraction parameter (kappa_2)
+
+    public:
+        // Setter methods for options
+        void set_bound_push(const Scalar& value) { bound_push = value; }
+        void set_bound_frac(const Scalar& value) { bound_frac = value; }
+
+        // Register options
+        void register_options(OptionRegistry& registry);
     };
 
 } // namespace fatrop

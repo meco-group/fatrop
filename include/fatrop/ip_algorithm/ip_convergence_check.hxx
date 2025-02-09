@@ -11,6 +11,7 @@
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/dims.hpp"
 #include "fatrop/ocp/nlp_ocp.hpp"
+#include "fatrop/common/options.hpp"
 
 namespace fatrop
 {
@@ -49,6 +50,14 @@ namespace fatrop
         if (ipdata_->iteration_number() >= max_iter_)
             return IpConvergenceStatus::MaxIterExceeded;
         return IpConvergenceStatus::Continue;
+    }
+
+    template <typename ProblemType>
+    void IpConvergenceCheck<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("tol_acceptable", &IpConvergenceCheck::set_tol_acceptable, this);
+        registry.register_option("acceptable_iter", &IpConvergenceCheck::set_acceptable_iter, this);
+        registry.register_option("max_iter", &IpConvergenceCheck::set_max_iter, this);
     }
 
 } // namespace fatrop

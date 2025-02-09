@@ -9,6 +9,7 @@
 #include "fatrop/ip_algorithm/pd_solver_orig.hpp"
 #include "fatrop/ip_algorithm/pd_system_orig.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
+#include "fatrop/common/options.hpp"
 
 namespace fatrop
 {
@@ -84,6 +85,12 @@ namespace fatrop
     {
         // Empty implementation
     }
+    template <typename ProblemType>
+    void IpEqMultInitializer<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("lam_max", &IpEqMultInitializer::set_lam_max, this);
+    }
+
 } // namespace fatrop
 
 #endif // __fatrop_ip_algorithm_ip_eq_mult_initializer_hxx__

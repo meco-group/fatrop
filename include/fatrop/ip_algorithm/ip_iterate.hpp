@@ -5,6 +5,7 @@
 #ifndef __fatrop_ip_algorithm_ip_iterate_hpp__
 #define __fatrop_ip_algorithm_ip_iterate_hpp__
 
+#include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/fwd.hpp"
@@ -533,6 +534,14 @@ namespace fatrop
         Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
         Scalar kappa_d_ = 1e-5;
         Scalar smax_ = 100.;
+
+    public:
+        // Setter methods for options
+        void set_kappa_d(const Scalar &value) { kappa_d_ = value; }
+        void set_smax(const Scalar &value) { smax_ = value; }
+
+        // Register options
+        void register_options(OptionRegistry &registry);
     };
 } // namespace fatrop
 // implementation

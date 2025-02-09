@@ -7,6 +7,7 @@
 
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
+#include "fatrop/common/fwd.hpp"
 #include <memory>
 
 namespace fatrop
@@ -87,6 +88,19 @@ namespace fatrop
         bool mu_allow_fast_monotone_decrease_ = true;
         // internal statistics
         bool initialized_ = false;
+
+    public:
+        // Setter methods for options
+        void set_barrier_tol_factor(const Scalar& value) { barrier_tol_factor_ = value; }
+        void set_mu_linear_decrease_factor(const Scalar& value) { mu_linear_decrease_factor_ = value; }
+        void set_mu_superlinear_decrease_power(const Scalar& value) { mu_superlinear_decrease_power_ = value; }
+        void set_tau_min(const Scalar& value) { tau_min_ = value; }
+        void set_mu_init(const Scalar& value) { mu_init_ = value; }
+        void set_compl_inf_tol(const Scalar& value) { compl_inf_tol_ = value; }
+        void set_mu_allow_fast_monotone_decrease(const bool& value) { mu_allow_fast_monotone_decrease_ = value; }
+
+        // Register options
+        void register_options(OptionRegistry& registry);
     };
 
 } // namespace fatrop

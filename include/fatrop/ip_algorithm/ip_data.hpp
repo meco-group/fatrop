@@ -7,6 +7,7 @@
 #include "fatrop/common/exception.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include "fatrop/common/fwd.hpp"
 namespace fatrop
 {
     /**
@@ -138,6 +139,12 @@ namespace fatrop
          * @return Scalar The current tolerance value.
          */
         Scalar tolerance() const { return tol_; }
+
+        // Setter method for tolerance
+        void set_tolerance(const Scalar& value) { tol_ = value; }
+
+        // Register options
+        void register_options(OptionRegistry& registry);
 
     private:
         Index iteration_number_;   ///< Number of the current iteration.

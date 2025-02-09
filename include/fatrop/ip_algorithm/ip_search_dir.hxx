@@ -2,6 +2,7 @@
 
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include "fatrop/common/options.hpp"
 #include <cmath>
 
 namespace fatrop
@@ -111,5 +112,17 @@ namespace fatrop
         curr_it.search_dir_info().inertia_correction_primal = delta_w;
         curr_it.search_dir_info().inertia_correction_dual = delta_c;
         return ret;
+    }
+
+    template <typename ProblemType>
+    void IpSearchDirImpl<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("delta_w0", &IpSearchDirImpl::set_delta_w0, this);
+        registry.register_option("delta_wmin", &IpSearchDirImpl::set_delta_wmin, this);
+        registry.register_option("kappa_wmin", &IpSearchDirImpl::set_kappa_wmin, this);
+        registry.register_option("kappa_wplus", &IpSearchDirImpl::set_kappa_wplus, this);
+        registry.register_option("kappa_wplusem", &IpSearchDirImpl::set_kappa_wplusem, this);
+        registry.register_option("kappa_c", &IpSearchDirImpl::set_kappa_c, this);
+        registry.register_option("delta_c_stripe", &IpSearchDirImpl::set_delta_c_stripe, this);
     }
 } // namespace fatrop

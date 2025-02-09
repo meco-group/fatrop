@@ -6,6 +6,7 @@
 #define __fatrop_ip_algorithm_ip_nlp_orig_hxx__
 #include "fatrop/nlp/dims.hpp"
 #include "ip_nlp_orig.hpp"
+#include "fatrop/common/options.hpp"
 #include <cmath>
 
 namespace fatrop
@@ -100,6 +101,13 @@ namespace fatrop
     Index IpNlpOrig<ProblemType>::get_initial_primal(const ProblemInfo<ProblemType> &info, VecRealView &primal_x)
     {
         return nlp_->get_initial_primal(info, primal_x);
+    }
+
+    template <typename ProblemType>
+    void IpNlpOrig<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("constr_viol_tol", &IpNlpOrig::set_constr_viol_tol, this);
+        registry.register_option("bound_relax_factor", &IpNlpOrig::set_bound_relax_factor, this);
     }
 
 } // namespace fatrop

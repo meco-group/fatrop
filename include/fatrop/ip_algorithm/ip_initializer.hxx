@@ -8,6 +8,7 @@
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_initializer.hpp"
 #include "fatrop/nlp/nlp.hpp"
+#include "fatrop/common/options.hpp"
 namespace fatrop
 {
 
@@ -63,6 +64,13 @@ namespace fatrop
     {
         // Empty implementation
     }
+    template <typename ProblemType>
+    void IpInitializer<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("bound_push", &IpInitializer::set_bound_push, this);
+        registry.register_option("bound_frac", &IpInitializer::set_bound_frac, this);
+    }
+
 } // namespace fatrop
 
 #endif // __fatrop_ip_algorithm_ip_initializer_hxx__

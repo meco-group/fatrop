@@ -69,6 +69,13 @@ namespace fatrop
         VecRealAllocated dummy_s_; ///< Dummy slack variables
         VecRealAllocated dummy_z_; ///< Dummy bound multipliers
         Scalar lam_max_ = 1e3;     ///< Maximum allowed value for multipliers
+
+    public:
+        // Setter method for lam_max
+        void set_lam_max(const Scalar& value) { lam_max_ = value; }
+
+        // Register options
+        void register_options(OptionRegistry& registry);
     };
 } // namespace fatrop
 

@@ -6,6 +6,7 @@
 #define __fatrop_ip_algorithm_ip_iterate_hxx__
 
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include "fatrop/common/options.hpp"
 #include <algorithm>
 #include <cmath>
 namespace fatrop
@@ -415,6 +416,13 @@ namespace fatrop
         }
         return jacobian_;
     }
+    template <typename ProblemType>
+    void IpIterate<ProblemType>::register_options(OptionRegistry& registry)
+    {
+        registry.register_option("kappa_d", &IpIterate::set_kappa_d, this);
+        registry.register_option("smax", &IpIterate::set_smax, this);
+    }
+
 } // namespace fatrop
 
 #endif // __fatrop_algorithm_ip_iterate_hxx__

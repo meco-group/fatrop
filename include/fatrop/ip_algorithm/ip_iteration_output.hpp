@@ -4,6 +4,7 @@
 
 #ifndef __fatrop_ip_iteration_output_hpp__
 #define __fatrop_ip_iteration_output_hpp__
+#include "fatrop/common/options.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
@@ -32,11 +33,10 @@ namespace fatrop
 
     /**
      * @brief Concrete implementation of iteration output for a specific problem type.
-     * 
+     *
      * @tparam ProblemType The type of optimization problem being solved.
      */
-    template<typename ProblemType>
-    class IpIterationOutput : public IpIterationOutputBase
+    template <typename ProblemType> class IpIterationOutput : public IpIterationOutputBase
     {
     public:
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
@@ -44,7 +44,7 @@ namespace fatrop
 
         /**
          * @brief Construct a new IpIterationOutput object.
-         * 
+         *
          * @param ipdata Shared pointer to the interior point algorithm data.
          */
         IpIterationOutput(const IpDataSp &ipdata);
@@ -55,7 +55,7 @@ namespace fatrop
     private:
         /**
          * @brief Print detailed information about a single iteration.
-         * 
+         *
          * @param iter Iteration number
          * @param objective Objective function value
          * @param inf_pr Primal infeasibility
@@ -72,6 +72,10 @@ namespace fatrop
                              Scalar alpha_pr, Index ls, char alpha_pr_type);
 
         IpDataSp ipdata_; ///< Shared pointer to the interior point algorithm data
+
+    public:
+        // Register options
+        void register_options(OptionRegistry &registry);
     };
 
 } // namespace fatrop
