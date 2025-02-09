@@ -27,6 +27,7 @@ namespace fatrop
          * @return bool True if the update was successful, false otherwise.
          */
         virtual bool update_barrier_parameter() = 0;
+        virtual void register_options(OptionRegistry& registry) = 0;
 
         /**
          * @brief Reset the mu update strategy to its initial state.

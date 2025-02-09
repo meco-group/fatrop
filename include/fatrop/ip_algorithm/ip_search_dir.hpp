@@ -23,6 +23,7 @@ namespace fatrop
          * @brief Reset the search direction computation to its initial state.
          */
         virtual void reset() = 0;
+        virtual void register_options(OptionRegistry& registry) = 0;
 
         /**
          * @brief Compute the search direction.

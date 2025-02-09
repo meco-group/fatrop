@@ -22,6 +22,7 @@ namespace fatrop
          * @brief Initialize the equality multipliers.
          */
         virtual void initialize_eq_mult() = 0;
+        virtual void register_options(OptionRegistry& registry) = 0;
 
         /**
          * @brief Reset the initializer to its initial state.

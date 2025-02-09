@@ -34,6 +34,7 @@ namespace fatrop
          * @return The current convergence status.
          */
         virtual IpConvergenceStatus check_converged() = 0;
+        virtual void register_options(OptionRegistry &registry) = 0;
 
         /**
          * @brief Check if the current solution is acceptable.

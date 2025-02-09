@@ -29,6 +29,12 @@ namespace fatrop
          */
         IpAlgBuilder(const std::shared_ptr<Nlp<ProblemType>> &nlp);
 
+        IpAlgBuilder &with_options_registry(OptionRegistry *options_registry)
+        {
+            options_registry_ = options_registry;
+            return *this;
+        }
+
         /**
          * @brief Create the IpData component.
          * @return Reference to this IpAlgBuilder for method chaining.
@@ -109,7 +115,7 @@ namespace fatrop
          *
          * @return std::shared_ptr<IpAlgorithm> The fully constructed IpAlgorithm.
          */
-        std::shared_ptr<IpAlgorithm<ProblemType>> build(OptionRegistry* options = nullptr);
+        std::shared_ptr<IpAlgorithm<ProblemType>> build();
 
     private:
         std::shared_ptr<IpNlpOrig<ProblemType>> nlp_orig_;
@@ -126,6 +132,7 @@ namespace fatrop
         std::shared_ptr<IpEqMultInitializerBase> eq_mult_initializer_;
         std::shared_ptr<IpConvergenceCheckBase> convergence_check_;
         std::shared_ptr<IpIterationOutputBase> iteration_output_;
+        OptionRegistry *options_registry_ = nullptr;
     };
 } // namespace fatrop
 
