@@ -31,19 +31,19 @@ namespace fatrop
     public:
         virtual void operator()(const int &value)
         {
-            throw std::runtime_error("Invalid type for option.");
+            throw std::runtime_error("Invalid type for option, got type int.");
         }
         virtual void operator()(const double &value)
         {
-            throw std::runtime_error("Invalid type for option.");
+            throw std::runtime_error("Invalid type for option, got type double.");
         }
         virtual void operator()(const bool &value)
         {
-            throw std::runtime_error("Invalid type for option.");
+            throw std::runtime_error("Invalid type for option, got type bool.");
         }
         virtual void operator()(const std::string &value)
         {
-            throw std::runtime_error("Invalid type for option.");
+            throw std::runtime_error("Invalid type for option, got type string.");
         }
         virtual ~OptionSetterBase() = default;
     };
@@ -114,6 +114,28 @@ namespace fatrop
          * @param value The int value to convert to bool and set.
          */
         void operator()(const int value) override { (algo->*set_option)(value != 0); }
+
+        /**
+         * @brief Set the bool option value from a string (yes/no).
+         */
+
+        void operator()(const std::string &value) override
+        {
+            if (value == "yes")
+            {
+                (algo->*set_option)(true);
+            }
+            else if (value == "no")
+            {
+                (algo->*set_option)(false);
+            }
+            else
+            {
+                throw std::runtime_error("Trying to set bool option with string, value should be "
+                                         "\"yes\" or \"no\", got " +
+                                         value + ".");
+            }
+        }
 
     private:
         void (AlgoType::*set_option)(bool);
