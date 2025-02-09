@@ -102,6 +102,23 @@ namespace fatrop
             alpha_primal *= alpha_red_factor_;
             n_steps++;
         }
+
+        Scalar alpha_dual_max = curr_it.maximum_step_size_dual(curr_it.tau());
+
+        char info_alpha_primal_char = '?';
+        if (!accept && in_watchdog_)
+        {
+            info_alpha_primal_char = 'w';
+        }
+        else if (accept)
+        {
+            info_alpha_primal_char = update_for_next_iteration(alpha_primal_max);
+        }
+        if (soc_taken)
+        {
+            info_alpha_primal_char = (char)toupper(info_alpha_primal_char);
+        }
+        update_step_info(alpha_primal, alpha_dual_max, n_steps, info_alpha_primal_char);
         return accept;
     }
 
@@ -263,36 +280,41 @@ namespace fatrop
             {
                 watchdog_shortened_iter_count_++;
             }
-            update_for_next_iteration(alpha_primal, alpha_primal_max, alpha_dual_max, n_steps);
         }
     }
-
     template <typename ProblemType>
-    void IpLinesearch<ProblemType>::update_for_next_iteration(const Scalar alpha_primal,
-                                                              const Scalar alpha_primal_max,
-                                                              const Scalar alpha_dual_max,
-                                                              const Index n_steps)
+    void IpLinesearch<ProblemType>::update_step_info(const Scalar alpha_primal,
+                                                     const Scalar alpha_dual,
+                                                     const Index n_steps, const char info_alpha_primal_char)
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         IpIterateType &trial_it = ipdata_->trial_iterate();
 
         trial_it.step_info().alpha_primal = alpha_primal;
-        trial_it.step_info().alpha_dual = alpha_dual_max;
+        trial_it.step_info().alpha_dual = alpha_dual;
         trial_it.step_info().step_length =
             std::max(norm_inf(trial_it.delta_primal_x()), norm_inf(trial_it.delta_primal_s()));
         trial_it.step_info().inertia_correction_primal =
             curr_it.search_dir_info().inertia_correction_primal;
         trial_it.step_info().inertia_correction_dual =
             curr_it.search_dir_info().inertia_correction_dual;
-        if (!is_f_type(alpha_primal_max) || !armijo_holds(alpha_primal_max))
+        trial_it.step_info().ls_iter = n_steps;
+        trial_it.step_info().alpha_primal_type = info_alpha_primal_char;
+    }
+
+    template <typename ProblemType>
+    char IpLinesearch<ProblemType>::update_for_next_iteration(const Scalar alpha_primal_test)
+    {
+        char info_alpha_primal_char;
+        if (!is_f_type(alpha_primal_test) || !armijo_holds(alpha_primal_test))
         {
-            trial_it.step_info().step_type = 'h';
+            info_alpha_primal_char = 'h';
         }
         else
         {
-            trial_it.step_info().step_type = 'f';
+            info_alpha_primal_char = 'f';
         }
-        trial_it.step_info().ls_iter = n_steps;
+        return info_alpha_primal_char;
     }
 
     template <typename ProblemType> void IpLinesearch<ProblemType>::start_watchdog()
@@ -317,7 +339,6 @@ namespace fatrop
         reference_grad_bar_delta_ = watchdog_grad_bar_delta_;
         ipdata_->restore_current_iterate();
     }
-
 
     template <typename ProblemType>
     void IpLinesearch<ProblemType>::perform_dual_step(const Scalar alpha_primal,

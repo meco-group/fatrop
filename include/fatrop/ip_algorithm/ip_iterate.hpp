@@ -399,7 +399,7 @@ namespace fatrop
             Scalar step_length = 0.;
             Scalar inertia_correction_primal = 0.;
             Scalar inertia_correction_dual = 0.;
-            char step_type = 'x';
+            char alpha_primal_type = 'x';
             Index ls_iter = 0.;
         };
         // for printing purposes and debugging

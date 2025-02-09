@@ -69,7 +69,7 @@ namespace fatrop
          */
         void print_iteration(Index iter, Scalar objective, Scalar inf_pr, Scalar inf_du,
                              Scalar lg_mu, Scalar d_norm, Scalar rg, Scalar alpha_du,
-                             Scalar alpha_pr, Index ls);
+                             Scalar alpha_pr, Index ls, char alpha_pr_type);
 
         IpDataSp ipdata_; ///< Shared pointer to the interior point algorithm data
     };

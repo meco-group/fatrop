@@ -19,32 +19,32 @@ namespace fatrop
     template <typename ProblemType> void IpIterationOutput<ProblemType>::print_header()
     {
         f_out << std::setw(4) << "iter" << " " << std::setw(12) << "objective" << " "
-                   << std::setw(8) << "inf_pr" << " " << std::setw(8) << "inf_du" << " "
-                   << std::setw(6) << "lg(mu)" << " " << std::setw(8) << "||d||" << " "
-                   << std::setw(8) << "lg(rg)"
-                   << " " << std::setw(10) << "alpha_du" << " " << std::setw(10) << "alpha_pr"
-                   << " " << std::setw(4) << "ls" << std::endl;
+              << std::setw(8) << "inf_pr" << " " << std::setw(8) << "inf_du" << " " << std::setw(6)
+              << "lg(mu)" << " " << std::setw(8) << "||d||" << " " << std::setw(8) << "lg(rg)"
+              << " " << std::setw(10) << "alpha_du" << " " << std::setw(10) << "alpha_pr"
+              << " " << std::setw(4) << "ls" << std::endl;
     }
 
     template <typename ProblemType>
     void IpIterationOutput<ProblemType>::print_iteration(Index iter, Scalar objective,
                                                          Scalar inf_pr, Scalar inf_du, Scalar lg_mu,
                                                          Scalar d_norm, Scalar rg, Scalar alpha_du,
-                                                         Scalar alpha_pr, Index ls)
+                                                         Scalar alpha_pr, Index ls,
+                                                         char info_alpha_primal_char)
     {
         f_out << std::setw(4) << iter << " " << std::setw(12) << std::scientific
-                   << std::setprecision(8) << objective << " " << std::setw(8) << std::scientific
-                   << std::setprecision(2) << inf_pr << " " << std::setw(8) << std::scientific
-                   << std::setprecision(2) << inf_du << " " << std::setw(6) << std::fixed
-                   << std::setprecision(1) << lg_mu << " " << std::setw(8) << std::scientific
-                   << std::setprecision(2) << d_norm << " " << std::setw(6);
+              << std::setprecision(8) << objective << " " << std::setw(8) << std::scientific
+              << std::setprecision(2) << inf_pr << " " << std::setw(8) << std::scientific
+              << std::setprecision(2) << inf_du << " " << std::setw(6) << std::fixed
+              << std::setprecision(1) << lg_mu << " " << std::setw(8) << std::scientific
+              << std::setprecision(2) << d_norm << " " << std::setw(6);
         if (rg == 0.0)
             f_out << "-";
         else
             f_out << std::fixed << std::setprecision(1) << std::log10(rg);
         f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
-                   << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr << " "
-                   << std::setw(4) << ls << std::endl;
+              << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr << " "
+              << std::setw(4) << ls << info_alpha_primal_char << std::endl;
     }
 
     template <typename ProblemType> void IpIterationOutput<ProblemType>::output_current_iteration()
@@ -61,8 +61,9 @@ namespace fatrop
         const Scalar alpha_pr = curr_it.step_info().alpha_primal;
         const Scalar alpha_du = curr_it.step_info().alpha_dual;
         const Scalar ls = curr_it.step_info().ls_iter + 1;
+        const char info_alpha_primal_char = curr_it.step_info().alpha_primal_type;
         print_iteration(iter, objective, inf_pr, inf_du, std::log10(mu), d_norm, rg, alpha_du,
-                        alpha_pr, ls);
+                        alpha_pr, ls, info_alpha_primal_char);
     }
 } // namespace fatrop
 

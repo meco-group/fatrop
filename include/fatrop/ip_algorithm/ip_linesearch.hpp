@@ -90,8 +90,8 @@ namespace fatrop
         bool check_acceptability_of_trial_point(const Scalar alpha_primal);
         void augment_filter();
         Scalar compute_alpha_min();
-        void update_for_next_iteration(const Scalar alpha_primal, const Scalar alpha_primal_max,
-                                       const Scalar alpha_dual_max, const Index n_steps);
+        char update_for_next_iteration(const Scalar alpha_primal_test);
+        void update_step_info(const Scalar alpha_primal, const Scalar alpha_dual, const Index n_steps, const char info_alpha_primal_char);
 
         IpFilter filter_;
         IpDataSp ipdata_;
