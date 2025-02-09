@@ -178,11 +178,40 @@ namespace fatrop
         return delta_upper_;
     }
 
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::relaxed_complementarity_l(const Scalar mu_in)
+    {
+        relaxed_complementarity_l_ = if_else(lower_bounded(), complementarity_l() - mu_in,
+                                             VecRealScalar(dual_bounds_l_.m(), 0.));
+        return relaxed_complementarity_l_;
+    }
+
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::relaxed_complementarity_u(const Scalar mu_in)
+    {
+        relaxed_complementarity_u_ = if_else(upper_bounded(), complementarity_u() - mu_in,
+                                             VecRealScalar(dual_bounds_l_.m(), 0.));
+        return relaxed_complementarity_u_;
+    }
+
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::relaxed_complementarity_l()
+    {
+        return relaxed_complementarity_l(mu());
+    }
+
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::relaxed_complementarity_u()
+    {
+        return relaxed_complementarity_u(mu());
+    }
+
     template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::complementarity_l()
     {
         if (!complementarity_l_evaluated_)
         {
-            complementarity_l_ = dual_bounds_l_ * delta_lower();
+            complementarity_l_ = if_else(lower_bounded(), dual_bounds_l_ * delta_lower(),
+                                         VecRealScalar(dual_bounds_l_.m(), 0.));
             complementarity_l_evaluated_ = true;
         }
         return complementarity_l_;
@@ -192,7 +221,8 @@ namespace fatrop
     {
         if (!complementarity_u_evaluated_)
         {
-            complementarity_u_ = dual_bounds_u_ * delta_upper();
+            complementarity_u_ = if_else(upper_bounded(), dual_bounds_u_ * delta_upper(),
+                                         VecRealScalar(dual_bounds_u_.m(), 0.));
             complementarity_u_evaluated_ = true;
         }
         return complementarity_u_;
@@ -238,8 +268,8 @@ namespace fatrop
         Scalar dual_infeasibility_s_linf = norm_inf(dual_infeasibility_s());
         Scalar dual_infeasibility_linf =
             std::max(dual_infeasibility_x_linf, dual_infeasibility_s_linf);
-        Scalar complementarity_l_linf = norm_inf(complementarity_l());
-        Scalar complementarity_u_linf = norm_inf(complementarity_u());
+        Scalar complementarity_l_linf = norm_inf(relaxed_complementarity_l(mu));
+        Scalar complementarity_u_linf = norm_inf(relaxed_complementarity_u(mu));
         Scalar complementarity_linf = std::max(complementarity_l_linf, complementarity_u_linf);
         Scalar res = 0.;
         Scalar sd = 0.;
@@ -265,7 +295,8 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    Scalar IpIterate<ProblemType>::maximum_step_size_primal(const Scalar tau, const VecRealView &delta_s)
+    Scalar IpIterate<ProblemType>::maximum_step_size_primal(const Scalar tau,
+                                                            const VecRealView &delta_s)
     {
         Scalar alpha_max_pr = 1.;
         delta_lower();
@@ -294,7 +325,9 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    Scalar IpIterate<ProblemType>::maximum_step_size_dual(const Scalar tau, const VecRealView &delta_dual_bounds_l, const VecRealView &delta_dual_bounds_u)
+    Scalar IpIterate<ProblemType>::maximum_step_size_dual(const Scalar tau,
+                                                          const VecRealView &delta_dual_bounds_l,
+                                                          const VecRealView &delta_dual_bounds_u)
     {
         Scalar alpha_max_du = 1.;
         for (Index i = 0; i < primal_s_.m(); i++)
@@ -342,6 +375,8 @@ namespace fatrop
           delta_upper_(nlp->nlp_dims().number_of_ineq_constraints), jacobian_(nlp->problem_dims()),
           complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
           complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
+          relaxed_complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
+          relaxed_complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
           hessian_(nlp->problem_dims()), lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),

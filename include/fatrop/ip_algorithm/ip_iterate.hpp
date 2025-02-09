@@ -287,6 +287,30 @@ namespace fatrop
         const VecRealView &complementarity_u();
 
         /**
+         * @brief Computes and returns the complementarity for lower bounds.
+         * @return Constant reference to the complementarity vector for lower bounds.
+         */
+        const VecRealView &relaxed_complementarity_l(const Scalar mu);
+
+        /**
+         * @brief Computes and returns the complementarity for upper bounds.
+         * @return Constant reference to the complementarity vector for upper bounds.
+         */
+        const VecRealView &relaxed_complementarity_u(const Scalar mu);
+
+        /**
+         * @brief Computes and returns the complementarity for lower bounds.
+         * @return Constant reference to the complementarity vector for lower bounds.
+         */
+        const VecRealView &relaxed_complementarity_l();
+
+        /**
+         * @brief Computes and returns the complementarity for upper bounds.
+         * @return Constant reference to the complementarity vector for upper bounds.
+         */
+        const VecRealView &relaxed_complementarity_u();
+
+        /**
          * @brief Returns the current value of mu (barrier parameter).
          * @return The current value of mu.
          */
@@ -363,7 +387,8 @@ namespace fatrop
         Scalar maximum_step_size_primal(const Scalar tau);
         Scalar maximum_step_size_primal(const Scalar tau, const VecRealView &delta_s);
         Scalar maximum_step_size_dual(const Scalar tau);
-        Scalar maximum_step_size_dual(const Scalar tau, const VecRealView &delta_dual_bounds_l, const VecRealView &delta_dual_bounds_u);
+        Scalar maximum_step_size_dual(const Scalar tau, const VecRealView &delta_dual_bounds_l,
+                                      const VecRealView &delta_dual_bounds_u);
         std::pair<Scalar, Scalar> maximum_step_size(const Scalar tau);
 
         /**
@@ -453,12 +478,14 @@ namespace fatrop
         VecRealAllocated barrier_gradient_; ///< Gradient of the barrier function.
         VecRealAllocated delta_lower_;
         VecRealAllocated delta_upper_;
-        Scalar linear_decrease_objective_;   ///< Linear decrease of the objective function.
-        Scalar linear_decrease_barrier_;     ///< Linear decrease of the barrier function.
-        VecRealAllocated complementarity_l_; ///< Complementarity of the NLP.
-        VecRealAllocated complementarity_u_; ///< Complementarity of the NLP.
-        Jacobian<ProblemType> jacobian_;     ///< Jacobian of the NLP.
-        Hessian<ProblemType> hessian_;       ///< Hessian of the NLP.
+        Scalar linear_decrease_objective_;           ///< Linear decrease of the objective function.
+        Scalar linear_decrease_barrier_;             ///< Linear decrease of the barrier function.
+        VecRealAllocated complementarity_l_;         ///< Complementarity of the NLP.
+        VecRealAllocated complementarity_u_;         ///< Complementarity of the NLP.
+        VecRealAllocated relaxed_complementarity_l_; ///< Complementarity of the NLP.
+        VecRealAllocated relaxed_complementarity_u_; ///< Complementarity of the NLP.
+        Jacobian<ProblemType> jacobian_;             ///< Jacobian of the NLP.
+        Hessian<ProblemType> hessian_;               ///< Hessian of the NLP.
         // Problem information
         VecRealAllocated lower_bounds_; ///< Lower bounds of the variables.
         VecRealAllocated upper_bounds_; ///< Upper bounds of the variables.
@@ -503,9 +530,9 @@ namespace fatrop
         bool complementarity_u_evaluated_ =
             false; ///< Flag for upper bound complementarity evaluation
 
-        Scalar kappa_d_ = 0.;        ///< Fraction-to-the-boundary parameter
         Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
-        Scalar smax_ = 100.;         ///< Maximum allowed slack variable value
+        Scalar kappa_d_ = 1e-5;
+        Scalar smax_ = 100.;
     };
 } // namespace fatrop
 // implementation

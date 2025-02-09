@@ -284,8 +284,8 @@ namespace fatrop
     }
     template <typename ProblemType>
     void IpLinesearch<ProblemType>::update_step_info(const Scalar alpha_primal,
-                                                     const Scalar alpha_dual,
-                                                     const Index n_steps, const char info_alpha_primal_char)
+                                                     const Scalar alpha_dual, const Index n_steps,
+                                                     const char info_alpha_primal_char)
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         IpIterateType &trial_it = ipdata_->trial_iterate();
@@ -378,19 +378,15 @@ namespace fatrop
             soc_rhs_s_ = curr_it.dual_infeasibility_s();
             soc_rhs_g_ = alpha_primal_soc * curr_it.constr_viol() + trial_it.constr_viol();
             Scalar mu = curr_it.mu();
-            soc_rhs_cl_.block(soc_rhs_cl_.m(), 0) = if_else(
-                curr_it.lower_bounded(), curr_it.delta_lower() * curr_it.dual_bounds_l() - mu,
-                VecRealScalar(soc_rhs_cl_.m(), 0.));
-            soc_rhs_cu_.block(soc_rhs_cu_.m(), 0) = if_else(
-                curr_it.upper_bounded(), curr_it.delta_upper() * curr_it.dual_bounds_u() - mu,
-                VecRealScalar(soc_rhs_cu_.m(), 0.));
+            soc_rhs_cl_.block(soc_rhs_cl_.m(), 0) = curr_it.relaxed_complementarity_l();
+            soc_rhs_cu_.block(soc_rhs_cu_.m(), 0) = curr_it.relaxed_complementarity_u();
 
-            // solve the linear system
-            LinearSystem<PdSystemType<ProblemType>> ls(
-                curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
-                curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(),
-                curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), soc_rhs_x_, soc_rhs_s_,
-                soc_rhs_g_, soc_rhs_cl_, soc_rhs_cu_);
+                // solve the linear system
+                LinearSystem<PdSystemType<ProblemType>> ls(
+                    curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
+                    curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(),
+                    curr_it.delta_upper(), curr_it.dual_bounds_l(), curr_it.dual_bounds_u(),
+                    soc_rhs_x_, soc_rhs_s_, soc_rhs_g_, soc_rhs_cl_, soc_rhs_cu_);
 
             LinsolReturnFlag ret = linear_solver_->solve_in_place_rhs(ls);
             // check if the linear system was solved successfully

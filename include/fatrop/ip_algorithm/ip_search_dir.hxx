@@ -29,12 +29,8 @@ namespace fatrop
         rhs_x_.block(rhs_x_.m(), 0) = curr_it.dual_infeasibility_x();
         rhs_s_.block(rhs_s_.m(), 0) = curr_it.dual_infeasibility_s();
         rhs_g_.block(rhs_g_.m(), 0) = curr_it.constr_viol();
-        rhs_cl_.block(rhs_cl_.m(), 0) =
-            if_else(curr_it.lower_bounded(), curr_it.delta_lower() * curr_it.dual_bounds_l() - mu,
-                    VecRealScalar(rhs_cl_.m(), 0.));
-        rhs_cu_.block(rhs_cu_.m(), 0) =
-            if_else(curr_it.upper_bounded(), curr_it.delta_upper() * curr_it.dual_bounds_u() - mu,
-                    VecRealScalar(rhs_cu_.m(), 0.));
+        rhs_cl_.block(rhs_cl_.m(), 0) = curr_it.relaxed_complementarity_l();
+        rhs_cu_.block(rhs_cu_.m(), 0) = curr_it.relaxed_complementarity_u();
 
         curr_it.set_Dx(VecRealScalar(curr_it.Dx().m(), 0.));
         curr_it.set_De(VecRealScalar(curr_it.De().m(), 0.));

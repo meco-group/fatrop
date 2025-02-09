@@ -40,11 +40,11 @@ namespace fatrop
             bool mu_changed = new_mu != mu;
             mu = new_mu;
             // if first iteration or
-            if (initialized_ || !mu_allow_fast_monotone_decrease_)
+            if (initialized_ && !mu_allow_fast_monotone_decrease_)
             {
                 done = true;
             }
-            else if (mu_changed)
+            else if (!mu_changed)
             {
                 done = true;
             }
@@ -52,12 +52,13 @@ namespace fatrop
             {
                 sub_problem_error = curr_it.e_mu(mu);
                 kappa_eps_mu = barrier_tol_factor_ * mu;
-                done = sub_problem_error > kappa_eps_mu;
+                done = (sub_problem_error > kappa_eps_mu);
             }
             if (done && mu_changed)
             {
                 linesearch_->reset_linesearch();
             }
+            tiny_step_flag = false;
         }
         trial_it.set_mu(mu);
         initialized_ = true;

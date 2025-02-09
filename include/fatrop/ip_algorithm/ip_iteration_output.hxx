@@ -22,7 +22,7 @@ namespace fatrop
               << std::setw(8) << "inf_pr" << " " << std::setw(8) << "inf_du" << " " << std::setw(6)
               << "lg(mu)" << " " << std::setw(8) << "||d||" << " " << std::setw(8) << "lg(rg)"
               << " " << std::setw(10) << "alpha_du" << " " << std::setw(10) << "alpha_pr"
-              << " " << std::setw(4) << "ls" << std::endl;
+              << " " << std::setw(2) << "ls" << std::endl;
     }
 
     template <typename ProblemType>
@@ -44,7 +44,7 @@ namespace fatrop
             f_out << std::fixed << std::setprecision(1) << std::log10(rg);
         f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
               << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr << " "
-              << std::setw(4) << ls << info_alpha_primal_char << std::endl;
+              << std::setw(2) << ls << info_alpha_primal_char << std::endl;
     }
 
     template <typename ProblemType> void IpIterationOutput<ProblemType>::output_current_iteration()
