@@ -46,7 +46,7 @@ namespace fatrop
 
     /**
      * @brief Concrete implementation of line search for a specific problem type.
-     * 
+     *
      * @tparam ProblemType The type of optimization problem being solved.
      */
     template <typename ProblemType> class IpLinesearch : public IpLineSearchBase
@@ -59,7 +59,7 @@ namespace fatrop
     public:
         /**
          * @brief Construct a new IpLinesearch object.
-         * 
+         *
          * @param ipdata Shared pointer to the interior point algorithm data.
          * @param linear_solver Shared pointer to the primal-dual linear solver.
          */
@@ -90,7 +90,8 @@ namespace fatrop
         bool check_acceptability_of_trial_point(const Scalar alpha_primal);
         void augment_filter();
         Scalar compute_alpha_min();
-        void update_for_next_iteration(const Scalar alpha_primal, const Scalar alpha_primal_max, const Scalar alpha_dual_max, const Index n_steps);
+        void update_for_next_iteration(const Scalar alpha_primal, const Scalar alpha_primal_max,
+                                       const Scalar alpha_dual_max, const Index n_steps);
 
         IpFilter filter_;
         IpDataSp ipdata_;
@@ -100,11 +101,6 @@ namespace fatrop
         VecRealAllocated soc_rhs_g_;
         VecRealAllocated soc_rhs_cl_;
         VecRealAllocated soc_rhs_cu_;
-        VecRealAllocated backup_delta_x_;
-        VecRealAllocated backup_delta_s_;
-        VecRealAllocated backup_delta_g_;
-        VecRealAllocated backup_delta_cl_;
-        VecRealAllocated backup_delta_cu_;
         // options
         Index max_soc_ = 4;
         Scalar kappa_soc_ = 0.99;

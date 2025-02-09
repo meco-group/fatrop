@@ -259,33 +259,66 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    std::pair<Scalar, Scalar> IpIterate<ProblemType>::maximum_step_size(const Scalar tau)
+    Scalar IpIterate<ProblemType>::maximum_step_size_primal(const Scalar tau)
+    {
+        return maximum_step_size_primal(tau, delta_primal_s_);
+    }
+
+    template <typename ProblemType>
+    Scalar IpIterate<ProblemType>::maximum_step_size_primal(const Scalar tau, const VecRealView &delta_s)
     {
         Scalar alpha_max_pr = 1.;
-        Scalar alpha_max_du = 1.;
         delta_lower();
         delta_upper();
         for (Index i = 0; i < primal_s_.m(); i++)
         {
-            Scalar delta_si = delta_primal_s_(i);
+            Scalar delta_si = delta_s(i);
             if (lower_bounded_[i])
             {
-                Scalar delta_zi = delta_dual_bounds_l_(i);
                 if (delta_si < 0)
                     alpha_max_pr = std::min(alpha_max_pr, -tau * delta_lower_(i) / delta_si);
+            }
+            if (upper_bounded_[i])
+            {
+                if (delta_si > 0)
+                    alpha_max_pr = std::min(alpha_max_pr, tau * delta_upper_(i) / delta_si);
+            }
+        }
+        return alpha_max_pr;
+    }
+
+    template <typename ProblemType>
+    Scalar IpIterate<ProblemType>::maximum_step_size_dual(const Scalar tau)
+    {
+        return maximum_step_size_dual(tau, delta_dual_bounds_l_, delta_dual_bounds_u_);
+    }
+
+    template <typename ProblemType>
+    Scalar IpIterate<ProblemType>::maximum_step_size_dual(const Scalar tau, const VecRealView &delta_dual_bounds_l, const VecRealView &delta_dual_bounds_u)
+    {
+        Scalar alpha_max_du = 1.;
+        for (Index i = 0; i < primal_s_.m(); i++)
+        {
+            if (lower_bounded_[i])
+            {
+                Scalar delta_zi = delta_dual_bounds_l(i);
                 if (delta_zi < 0)
                     alpha_max_du = std::min(alpha_max_du, -tau * dual_bounds_l_(i) / delta_zi);
             }
             if (upper_bounded_[i])
             {
-                Scalar delta_zi = delta_dual_bounds_u_(i);
-                if (delta_si > 0)
-                    alpha_max_pr = std::min(alpha_max_pr, tau * delta_upper_(i) / delta_si);
+                Scalar delta_zi = delta_dual_bounds_u(i);
                 if (delta_zi < 0)
                     alpha_max_du = std::min(alpha_max_du, -tau * dual_bounds_u_(i) / delta_zi);
             }
         }
-        return {alpha_max_pr, alpha_max_du};
+        return alpha_max_du;
+    }
+
+    template <typename ProblemType>
+    std::pair<Scalar, Scalar> IpIterate<ProblemType>::maximum_step_size(const Scalar tau)
+    {
+        return {maximum_step_size_primal(tau), maximum_step_size_dual(tau)};
     }
     template <typename ProblemType>
     IpIterate<ProblemType>::IpIterate(const NlpSp &nlp)

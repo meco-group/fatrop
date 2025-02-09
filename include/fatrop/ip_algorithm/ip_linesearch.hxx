@@ -21,12 +21,7 @@ namespace fatrop
           soc_rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           soc_rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           soc_rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          soc_rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          backup_delta_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
-          backup_delta_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          backup_delta_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
-          backup_delta_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          backup_delta_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
+          soc_rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
     {
     }
 
@@ -58,7 +53,7 @@ namespace fatrop
         IpIterateType &curr_it = ipdata_->current_iterate();
         evaluation_error = false;
         bool accept = false;
-        Scalar alpha_primal_max = curr_it.maximum_step_size(curr_it.tau()).first;
+        Scalar alpha_primal_max = curr_it.maximum_step_size_primal(curr_it.tau());
         Scalar alpha_min = in_watchdog_ ? alpha_primal_max : compute_alpha_min();
         // start the line search with the maximum step size
         alpha_primal = alpha_primal_max;
@@ -175,7 +170,7 @@ namespace fatrop
         //  handle the case of tiny steps
         if (tiny_step)
         {
-            Scalar alpha_primal = curr_it.maximum_step_size(curr_it.tau()).first;
+            Scalar alpha_primal = curr_it.maximum_step_size_primal(curr_it.tau());
             trial_it.set_primal_x(curr_it.primal_x() +
                                   alpha_primal * curr_it.delta_primal_x()); // x
             trial_it.set_primal_s(curr_it.primal_s() +
@@ -273,7 +268,10 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    void IpLinesearch<ProblemType>::update_for_next_iteration(const Scalar alpha_primal, const Scalar alpha_primal_max, const Scalar alpha_dual_max, const Index n_steps)
+    void IpLinesearch<ProblemType>::update_for_next_iteration(const Scalar alpha_primal,
+                                                              const Scalar alpha_primal_max,
+                                                              const Scalar alpha_dual_max,
+                                                              const Index n_steps)
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         IpIterateType &trial_it = ipdata_->trial_iterate();
@@ -320,21 +318,6 @@ namespace fatrop
         ipdata_->restore_current_iterate();
     }
 
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::check_acceptability_trial_point(const Scalar alpha_primal)
-    {
-        bool accept;
-        Scalar theta_trial = norm_l1(ipdata_->current_iterate().constr_viol());
-        if (theta_min_ < 0)
-        {
-            theta_min_ = theta_min_fact_ * std::max(1.0, reference_theta_);
-        }
-        Scalar trial_barr =
-            ipdata_->current_iterate().barrier_value() + ipdata_->current_iterate().obj_value();
-        fatrop_assert_msg(std::isfinite(trial_barr), "trial_barr is not finite");
-
-        return accept;
-    }
 
     template <typename ProblemType>
     void IpLinesearch<ProblemType>::perform_dual_step(const Scalar alpha_primal,
@@ -356,13 +339,7 @@ namespace fatrop
         if (max_soc_ == 0)
             return false;
         IpIterateType &curr_it = ipdata_->current_iterate();
-        IpIterateType &trial_it = ipdata_->current_iterate();
-        // first backup the current search directions
-        backup_delta_x_ = curr_it.delta_primal_x();
-        backup_delta_s_ = curr_it.delta_primal_s();
-        backup_delta_g_ = curr_it.delta_dual_eq();
-        backup_delta_cl_ = curr_it.delta_dual_bounds_l();
-        backup_delta_cu_ = curr_it.delta_dual_bounds_u();
+        IpIterateType &trial_it = ipdata_->trial_iterate();
 
         bool accept = false;
         Index count_soc = 0;
@@ -373,13 +350,19 @@ namespace fatrop
         while (count_soc < max_soc_ && !accept &&
                (count_soc == 0 || theta_trial < kappa_soc_ * theta_soc_old))
         {
+            theta_soc_old = theta_trial;
 
             // set up the rhs for the second order correction
             soc_rhs_x_ = curr_it.dual_infeasibility_x();
             soc_rhs_s_ = curr_it.dual_infeasibility_s();
-            soc_rhs_g_ = curr_it.constr_viol() + alpha_primal_soc * trial_it.constr_viol();
-            soc_rhs_cl_ = curr_it.complementarity_l();
-            soc_rhs_cu_ = curr_it.complementarity_u();
+            soc_rhs_g_ = alpha_primal_soc * curr_it.constr_viol() + trial_it.constr_viol();
+            Scalar mu = curr_it.mu();
+            soc_rhs_cl_.block(soc_rhs_cl_.m(), 0) = if_else(
+                curr_it.lower_bounded(), curr_it.delta_lower() * curr_it.dual_bounds_l() - mu,
+                VecRealScalar(soc_rhs_cl_.m(), 0.));
+            soc_rhs_cu_.block(soc_rhs_cu_.m(), 0) = if_else(
+                curr_it.upper_bounded(), curr_it.delta_upper() * curr_it.dual_bounds_u() - mu,
+                VecRealScalar(soc_rhs_cu_.m(), 0.));
 
             // solve the linear system
             LinearSystem<PdSystemType<ProblemType>> ls(
@@ -393,27 +376,26 @@ namespace fatrop
             if (!(ret == LinsolReturnFlag::SUCCESS || ret == LinsolReturnFlag::ITREF_MAX_ITER ||
                   ret == LinsolReturnFlag::ITREF_INCREASE))
                 break;
-            // set the new search directions
             // compute the maximum step size for the second order correction
-            std::pair<Scalar, Scalar> alpha_max_pr_du = curr_it.maximum_step_size(curr_it.tau());
-            alpha_primal_soc = alpha_max_pr_du.first;
-            Scalar alpha_dual_soc = alpha_max_pr_du.second;
+            alpha_primal_soc = curr_it.maximum_step_size_primal(curr_it.tau(), soc_rhs_s_);
             // set the new trial iterate
-            trial_it.set_primal_x(curr_it.primal_x() + alpha_primal_soc * curr_it.delta_primal_x());
-            trial_it.set_primal_s(curr_it.primal_s() + alpha_primal_soc * curr_it.delta_primal_s());
-            trial_it.set_dual_eq(curr_it.dual_eq() + alpha_primal_soc * curr_it.delta_dual_eq());
-            trial_it.set_dual_bounds_l(curr_it.dual_bounds_l() +
-                                       alpha_dual_soc * curr_it.delta_dual_bounds_l());
-            trial_it.set_dual_bounds_u(curr_it.dual_bounds_u() +
-                                       alpha_dual_soc * curr_it.delta_dual_bounds_u());
+            trial_it.set_primal_x(curr_it.primal_x() + alpha_primal_soc * soc_rhs_x_);
+            trial_it.set_primal_s(curr_it.primal_s() + alpha_primal_soc * soc_rhs_s_);
             // check if the trial point is acceptable
-            accept = check_acceptability_trial_point(alpha_primal_test);
+            accept = check_acceptability_of_trial_point(alpha_primal_test);
             if (accept)
             {
+                // set the new search directions
+                curr_it.set_delta_primal_x(soc_rhs_x_);
+                curr_it.set_delta_primal_s(soc_rhs_s_);
+                curr_it.set_delta_dual_eq(soc_rhs_g_);
+                curr_it.set_delta_dual_bounds_l(soc_rhs_cl_);
+                curr_it.set_delta_dual_bounds_u(soc_rhs_cu_);
                 alpha_primal = alpha_primal_soc;
             }
             else
             {
+                theta_trial = norm_l1(trial_it.constr_viol());
                 count_soc++;
             }
         }

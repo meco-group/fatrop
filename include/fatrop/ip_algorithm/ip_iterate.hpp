@@ -360,6 +360,10 @@ namespace fatrop
          * @param tau The fraction-to-the-boundary parameter.
          * @return A pair of Scalars representing the maximum primal and dual step sizes.
          */
+        Scalar maximum_step_size_primal(const Scalar tau);
+        Scalar maximum_step_size_primal(const Scalar tau, const VecRealView &delta_s);
+        Scalar maximum_step_size_dual(const Scalar tau);
+        Scalar maximum_step_size_dual(const Scalar tau, const VecRealView &delta_dual_bounds_l, const VecRealView &delta_dual_bounds_u);
         std::pair<Scalar, Scalar> maximum_step_size(const Scalar tau);
 
         /**
@@ -390,21 +394,21 @@ namespace fatrop
         // note that this saves info about the step from previous to current iterate
         struct StepInfo
         {
-            Scalar alpha_primal;
-            Scalar alpha_dual;
-            Scalar step_length;
-            Scalar inertia_correction_primal;
-            Scalar inertia_correction_dual;
-            char step_type;
-            Index ls_iter;
+            Scalar alpha_primal = 0.;
+            Scalar alpha_dual = 0.;
+            Scalar step_length = 0.;
+            Scalar inertia_correction_primal = 0.;
+            Scalar inertia_correction_dual = 0.;
+            char step_type = 'x';
+            Index ls_iter = 0.;
         };
         // for printing purposes and debugging
         // this contains information about the search direction
         // computed at the current iterate
         struct SearchDirInfo
         {
-            Scalar inertia_correction_primal;
-            Scalar inertia_correction_dual;
+            Scalar inertia_correction_primal = 0.;
+            Scalar inertia_correction_dual = 0.;
         };
 
         /**
