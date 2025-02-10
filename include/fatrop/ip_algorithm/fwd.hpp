@@ -10,12 +10,11 @@ namespace fatrop
     template <typename ProblemType> class IpAlgBuilder;
     template <typename ProblemType> struct IpData;
     template <typename ProblemType> struct IpIterate;
-    template <typename ProblemType> class IpSearchDirImpl;
     template <typename ProblemType> class PdSolverOrig;
     template <typename ProblemType> class PdSystemType;
     template <typename ProblemType> struct IpIterate;
     template <typename ProblemType> class IpEqMultInitializer;
-    template <typename ProblemType> class IpSearchDirImpl;
+    template <typename SolverType, typename ProblemType> class IpSearchDirImpl;
     template <typename ProblemType> class IpNlpOrig;
     template <typename ProblemType> class AugSystemSolver;
     template <typename ProblemType> class IpAlgorithm;

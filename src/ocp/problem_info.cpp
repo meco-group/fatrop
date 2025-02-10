@@ -86,4 +86,21 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     pd_orig_offset_mult = pd_orig_offset_slack + number_of_slack_variables;
     pd_orig_offset_zl = pd_orig_offset_mult + number_of_eq_constraints;
     pd_orig_offset_zu = pd_orig_offset_zl + number_of_slack_variables;
+
+    number_of_slack_variables_resto = number_of_slack_variables + 2 * number_of_eq_constraints;
+
+    pd_resto_offset_primal = 0;
+    pd_resto_offset_slack = pd_resto_offset_primal + number_of_primal_variables;
+    pd_resto_offset_mult = pd_resto_offset_slack + number_of_slack_variables_resto;
+    pd_resto_offset_zl = pd_resto_offset_mult + number_of_eq_constraints;
+    pd_resto_offset_zu =
+        pd_resto_offset_zl + number_of_slack_variables + 2 * number_of_eq_constraints;
+    //
+    pd_resto_offset_zp = pd_resto_offset_zl + number_of_slack_variables;
+    pd_resto_offset_zn = pd_resto_offset_zp + number_of_eq_constraints;
+    offset_slack_p = offset_slack + number_of_slack_variables;
+    offset_slack_n = offset_slack_p + number_of_eq_constraints;
+    offset_s = 0;
+    offset_p = number_of_slack_variables;
+    offset_n = offset_p + number_of_eq_constraints;
 }

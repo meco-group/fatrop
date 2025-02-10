@@ -19,7 +19,9 @@ set(FATROP_SOURCES
     ocp/ip_search_dir.cpp
     ocp/nlp_ocp.cpp
     ocp/pd_system_orig.cpp
+    ocp/pd_system_resto.cpp
     ocp/pd_solver_orig.cpp
+    ocp/pd_solver_resto.cpp
     ocp/problem_info.cpp
     ip_algorithm/ip_filter.cpp
     ip_algorithm/ip_mu_update.cpp

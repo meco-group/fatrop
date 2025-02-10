@@ -1,0 +1,1 @@
+// Manages building, options and retrieval of solutions without having to rely on internal types.

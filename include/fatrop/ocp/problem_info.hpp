@@ -49,7 +49,7 @@ namespace fatrop
         std::vector<Index> offsets_primal_u;
         std::vector<Index> offsets_primal_x;
 
-        /// Offset for the slack variables in the overall variable vector
+        /// Offset for the slack variables in the overall variable vector (combined x and s vector)
         Index offset_slack;
 
         /**
@@ -60,7 +60,7 @@ namespace fatrop
          * With these offsets, the slack variables, the inequality constraints and the dual bound
          * multipliers are related.
          */
-        std::vector<Index> offsets_slack;
+        std::vector<Index> offsets_slack; 
         std::vector<Index> offsets_eq;
         std::vector<Index> offsets_dyn;
 
@@ -123,6 +123,25 @@ namespace fatrop
         Index pd_orig_offset_mult;
         Index pd_orig_offset_zl;
         Index pd_orig_offset_zu;
+
+        // Info for the restoration phase
+        Index number_of_slack_variables_resto;
+
+        Index pd_resto_offset_primal;
+        Index pd_resto_offset_slack;
+        Index pd_resto_offset_mult;
+        Index pd_resto_offset_zl;
+        Index pd_resto_offset_zu;
+
+        Index pd_resto_offset_zp;
+        Index pd_resto_offset_zn;
+        // when normal and slack variables are in the same vector
+        Index offset_slack_p;
+        Index offset_slack_n;
+        // Offset when in vector with all slack variables
+        Index offset_s;
+        Index offset_p;
+        Index offset_n;
     };
 } // namespace fatrop
 
