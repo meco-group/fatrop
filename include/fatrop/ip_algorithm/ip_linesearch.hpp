@@ -97,7 +97,7 @@ namespace fatrop
         }
         void set_watchdog_trial_iter_max(const Index &value) { watchdog_trial_iter_max_ = value; }
         void set_alpha_red_factor(const Scalar &value) { alpha_red_factor_ = value; }
-        void set_max_iter(const Index max_iter)
+        void set_max_iter(const Index& max_iter)
         {
             filter().reserve(max_iter_ + 1);
             max_iter_ = max_iter;

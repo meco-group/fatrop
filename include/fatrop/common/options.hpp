@@ -5,6 +5,7 @@
 #ifndef __fatrop_common_options_hpp__
 #define __fatrop_common_options_hpp__
 
+#include "fatrop/context/context.hpp"
 #include <memory>
 #include <ostream>
 #include <stdexcept>
@@ -18,7 +19,7 @@ namespace fatrop
     /**
      * @brief Variant type for different option values.
      */
-    typedef std::variant<int, double, bool, std::string> OptionVariant;
+    typedef std::variant<Index, Scalar, bool, std::string> OptionVariant;
 
     /**
      * @brief Base class for option setters, implementing the visitor pattern.
@@ -29,13 +30,13 @@ namespace fatrop
     class OptionSetterBase
     {
     public:
-        virtual void operator()(const int &value)
+        virtual void operator()(const Index &value)
         {
-            throw std::runtime_error("Invalid type for option, got type int.");
+            throw std::runtime_error("Invalid type for option, got type Index (int).");
         }
-        virtual void operator()(const double &value)
+        virtual void operator()(const Scalar &value)
         {
-            throw std::runtime_error("Invalid type for option, got type double.");
+            throw std::runtime_error("Invalid type for option, got type Scalar (double).");
         }
         virtual void operator()(const bool &value)
         {
@@ -63,7 +64,7 @@ namespace fatrop
          * @param set_option Function pointer to the setter method in AlgoType.
          * @param algo Pointer to the algorithm object.
          */
-        OptionSetter(void (AlgoType::*set_option)(OptionType), AlgoType *algo)
+        OptionSetter(void (AlgoType::*set_option)(const OptionType&), AlgoType *algo)
             : set_option(set_option), algo(algo)
         {
         }
@@ -76,7 +77,7 @@ namespace fatrop
         void operator()(const OptionType &value) override { (algo->*set_option)(value); }
 
     private:
-        void (AlgoType::*set_option)(OptionType);
+        void (AlgoType::*set_option)(const OptionType&);
         AlgoType *algo;
     };
 
@@ -96,7 +97,7 @@ namespace fatrop
          * @param set_option Function pointer to the setter method in AlgoType.
          * @param algo Pointer to the algorithm object.
          */
-        OptionSetter(void (AlgoType::*set_option)(bool), AlgoType *algo)
+        OptionSetter(void (AlgoType::*set_option)(const bool &), AlgoType *algo)
             : set_option(set_option), algo(algo)
         {
         }
@@ -106,14 +107,14 @@ namespace fatrop
          *
          * @param value The bool value to set.
          */
-        void operator()(const bool value) override { (algo->*set_option)(value); }
+        void operator()(const bool& value) override { (algo->*set_option)(value); }
 
         /**
          * @brief Set the bool option value from an int.
          *
          * @param value The int value to convert to bool and set.
          */
-        void operator()(const int value) override { (algo->*set_option)(value != 0); }
+        void operator()(const Index& value) override { (algo->*set_option)(value != 0); }
 
         /**
          * @brief Set the bool option value from a string (yes/no).
@@ -138,7 +139,7 @@ namespace fatrop
         }
 
     private:
-        void (AlgoType::*set_option)(bool);
+        void (AlgoType::*set_option)(const bool &);
         AlgoType *algo;
     };
 
@@ -164,7 +165,7 @@ namespace fatrop
          */
         template <typename OptionType, typename AlgoType>
         void register_option(const std::string &option_name,
-                             void (AlgoType::*set_option)(OptionType), AlgoType *algo)
+                             void (AlgoType::*set_option)(const OptionType &), AlgoType *algo)
         {
             options[option_name].push_back(
                 std::make_unique<OptionSetter<OptionType, AlgoType>>(set_option, algo));
