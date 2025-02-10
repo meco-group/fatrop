@@ -97,6 +97,11 @@ namespace fatrop
         }
         void set_watchdog_trial_iter_max(const Index &value) { watchdog_trial_iter_max_ = value; }
         void set_alpha_red_factor(const Scalar &value) { alpha_red_factor_ = value; }
+        void set_max_iter(const Index max_iter)
+        {
+            filter().reserve(max_iter_ + 1);
+            max_iter_ = max_iter;
+        }
         void register_options(OptionRegistry &registry) override;
 
     private:
@@ -153,6 +158,7 @@ namespace fatrop
         Index watchdog_shortened_iter_trigger_ = 10;
         Index watchdog_trial_iter_max_ = 3;
         Scalar alpha_red_factor_ = 0.5;
+        Index max_iter_ = 1000;
 
         // internal staticstics
         bool in_watchdog_;

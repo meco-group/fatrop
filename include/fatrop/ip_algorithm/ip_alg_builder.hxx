@@ -21,10 +21,6 @@ namespace fatrop
     IpAlgBuilder<ProblemType>::IpAlgBuilder(const std::shared_ptr<Nlp<ProblemType>> &nlp)
     {
         nlp_orig_ = std::make_shared<IpNlpOrig<ProblemType>>(nlp);
-        create_ipdata();
-        create_problem_info();
-        create_aug_system_solver();
-        create_pdsolver();
     }
 
     template <typename ProblemType>
@@ -158,6 +154,10 @@ namespace fatrop
     template <typename ProblemType>
     std::shared_ptr<IpAlgorithm<ProblemType>> IpAlgBuilder<ProblemType>::build()
     {
+        create_ipdata();
+        create_problem_info();
+        create_aug_system_solver();
+        create_pdsolver();
         if (!search_dir_)
             create_search_dir();
         if (!linesearch_)

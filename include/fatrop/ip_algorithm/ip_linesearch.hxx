@@ -24,6 +24,8 @@ namespace fatrop
           soc_rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           soc_rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
     {
+        // avoid dynamic memory allocation during solving
+        filter().reserve(max_iter_ + 1);
     }
 
     template <typename ProblemType>
@@ -608,6 +610,7 @@ namespace fatrop
         registry.register_option("watchdog_trial_iter_max",
                                  &IpLinesearch::set_watchdog_trial_iter_max, this);
         registry.register_option("alpha_red_factor", &IpLinesearch::set_alpha_red_factor, this);
+        registry.register_option("max_iter", &IpLinesearch::set_max_iter, this);
     }
 
 } // namespace fatrop
