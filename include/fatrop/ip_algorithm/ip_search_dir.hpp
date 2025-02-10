@@ -39,14 +39,13 @@ namespace fatrop
      * 
      * @tparam ProblemType The type of optimization problem being solved.
      */
-    template <typename ProblemType>
+    template <typename LinearSolverType, typename ProblemType>
     class IpSearchDirImpl : public IpSearchDirBase
     {
         typedef IpIterate<ProblemType> IpIterateType;
         typedef std::shared_ptr<IpIterateType> IpIterateSp;
         typedef IpData<ProblemType> IpDataType;
         typedef std::shared_ptr<IpDataType> IpDataSp;
-        typedef LinearSolver<PdSolverOrig<ProblemType>, PdSystemType<ProblemType>> LinearSolverType;
         typedef std::shared_ptr<LinearSolverType> LinearSolverSp;
 
     public:

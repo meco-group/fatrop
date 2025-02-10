@@ -19,6 +19,10 @@
 namespace fatrop
 {
     /**
+     * TODO: does making this tag templated pattern make sense here?
+     */
+
+    /**
      * @brief Represents a linear system of the form Ax = -b.
      *
      * @tparam LsType The underlying type used to represent the linear system.

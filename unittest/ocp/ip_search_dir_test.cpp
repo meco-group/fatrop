@@ -51,7 +51,7 @@ protected:
     VecRealAllocated D_x, D_eq, D_i;
     std::shared_ptr<AugSystemSolver<OcpType>> aug_solver;
     std::shared_ptr<PdSolverOrig<OcpType>> solver;
-    IpSearchDirImpl<OcpType> search_dir;
+    IpSearchDirImpl<PdSolverOrig<OcpType>, OcpType> search_dir;
 };
 
 TEST_F(IpSearchDirTest, SolveLinearSystem) { EXPECT_NO_THROW(search_dir.compute_search_dir()); }
@@ -85,20 +85,23 @@ TEST_F(IpSearchDirTest, UpdateIterateAndCheckInfeasibility)
     EXPECT_LT(
         norm_inf(
             if_else(data->current_iterate().lower_bounded(),
-                    data->current_iterate().delta_lower() * data->current_iterate().dual_bounds_l() - mu,
+                    data->current_iterate().delta_lower() *
+                            data->current_iterate().dual_bounds_l() -
+                        mu,
                     VecRealScalar(m, 0.)) +
             data->current_iterate().delta_lower() * data->current_iterate().delta_dual_bounds_l() +
             data->current_iterate().dual_bounds_l() * data->current_iterate().delta_primal_s()),
         1e-6);
-    EXPECT_LT(
-        norm_inf(
-            if_else(data->current_iterate().upper_bounded(),
-                    data->current_iterate().delta_upper() * data->current_iterate().dual_bounds_u() -mu,
-                    VecRealScalar(m, 0.)) +
-            data->current_iterate().delta_upper() * data->current_iterate().delta_dual_bounds_u() +
-            -1. * data->current_iterate().dual_bounds_u() *
-                data->current_iterate().delta_primal_s()),
-        1e-6);
+    EXPECT_LT(norm_inf(if_else(data->current_iterate().upper_bounded(),
+                               data->current_iterate().delta_upper() *
+                                       data->current_iterate().dual_bounds_u() -
+                                   mu,
+                               VecRealScalar(m, 0.)) +
+                       data->current_iterate().delta_upper() *
+                           data->current_iterate().delta_dual_bounds_u() +
+                       -1. * data->current_iterate().dual_bounds_u() *
+                           data->current_iterate().delta_primal_s()),
+              1e-6);
 }
 
 int main(int argc, char **argv)

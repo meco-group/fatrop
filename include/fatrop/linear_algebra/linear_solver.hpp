@@ -21,6 +21,7 @@ namespace fatrop
     template <typename Derived, typename LsType> class LinearSolver
     {
     public:
+        typedef LinearSystem<LsType> LinearSystemType;
         /**
          * @brief Construct a new Linear Solver object.
          *

@@ -55,8 +55,6 @@ namespace fatrop
         if (!problem_info_)
             create_problem_info();
         aug_system_solver_ = std::make_shared<AugSystemSolver<ProblemType>>(*problem_info_);
-        // if(options_registry_)
-        //     aug_system_solver_->register_options(*options_registry_);
         return *this;
     }
 
@@ -69,8 +67,6 @@ namespace fatrop
             create_aug_system_solver();
         pd_solver_ =
             std::make_shared<PdSolverOrig<ProblemType>>(*problem_info_, aug_system_solver_);
-        // if(options_registry_)
-        //     pd_solver_->register_options(*options_registry_);
         return *this;
     }
 
@@ -81,9 +77,9 @@ namespace fatrop
             create_ipdata();
         if (!pd_solver_)
             create_pdsolver();
-        search_dir_ = std::make_shared<IpSearchDirImpl<ProblemType>>(ipdata_, pd_solver_);
+        search_dir_ = std::make_shared<IpSearchDirImpl<PdSolverOrig<ProblemType>, ProblemType>>(ipdata_, pd_solver_);
         if (options_registry_)
-            search_dir_->register_options(*options_registry_);
+            options_registry_->register_options(*search_dir_);
         return *this;
     }
 
@@ -96,7 +92,7 @@ namespace fatrop
             create_pdsolver();
         linesearch_ = std::make_shared<IpLinesearch<ProblemType>>(ipdata_, pd_solver_);
         if (options_registry_)
-            linesearch_->register_options(*options_registry_);
+            options_registry_->register_options(*linesearch_);
         return *this;
     }
 
@@ -108,8 +104,8 @@ namespace fatrop
         if (!eq_mult_initializer_)
             create_eq_mult_initializer();
         initializer_ = std::make_shared<IpInitializer<ProblemType>>(ipdata_, eq_mult_initializer_);
-        if(options_registry_)
-            initializer_->register_options(*options_registry_);
+        if (options_registry_)
+            options_registry_->register_options(*initializer_);
         return *this;
     }
 
@@ -121,8 +117,8 @@ namespace fatrop
         if (!linesearch_)
             create_linesearch();
         mu_update_ = std::make_shared<IpMonotoneMuUpdate<ProblemType>>(ipdata_, linesearch_);
-        if(options_registry_)
-            mu_update_->register_options(*options_registry_);
+        if (options_registry_)
+            options_registry_->register_options(*mu_update_);
         return *this;
     }
 
@@ -135,8 +131,8 @@ namespace fatrop
             create_pdsolver();
         eq_mult_initializer_ =
             std::make_shared<IpEqMultInitializer<ProblemType>>(ipdata_, pd_solver_);
-        if(options_registry_)
-            eq_mult_initializer_->register_options(*options_registry_);
+        if (options_registry_)
+            options_registry_->register_options(*eq_mult_initializer_);
         return *this;
     }
 
@@ -146,18 +142,22 @@ namespace fatrop
         if (!ipdata_)
             create_ipdata();
         convergence_check_ = std::make_shared<IpConvergenceCheck<ProblemType>>(ipdata_);
-        if(options_registry_)
-            convergence_check_->register_options(*options_registry_);
+        if (options_registry_)
+            options_registry_->register_options(*convergence_check_);
         return *this;
     }
 
     template <typename ProblemType>
     std::shared_ptr<IpAlgorithm<ProblemType>> IpAlgBuilder<ProblemType>::build()
     {
-        create_ipdata();
-        create_problem_info();
-        create_aug_system_solver();
-        create_pdsolver();
+        // if (!ipdata_)
+        //     create_ipdata();
+        // if (!problem_info_)
+        //     create_problem_info();
+        // if (!aug_system_solver_)
+        //     create_aug_system_solver();
+        // if (!pd_solver_)
+        //     create_pdsolver();
         if (!search_dir_)
             create_search_dir();
         if (!linesearch_)

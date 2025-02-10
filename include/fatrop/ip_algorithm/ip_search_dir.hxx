@@ -7,8 +7,8 @@
 
 namespace fatrop
 {
-    template <typename ProblemType>
-    IpSearchDirImpl<ProblemType>::IpSearchDirImpl(const IpDataSp &ipdata,
+    template <typename LinearSolverType, typename ProblemType>
+    IpSearchDirImpl<LinearSolverType, ProblemType>::IpSearchDirImpl(const IpDataSp &ipdata,
                                                   const LinearSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
@@ -18,12 +18,12 @@ namespace fatrop
           rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
     {
     }
-    template <typename ProblemType> void IpSearchDirImpl<ProblemType>::reset()
+    template <typename LinearSolverType, typename ProblemType> void IpSearchDirImpl<LinearSolverType, ProblemType>::reset()
     {
         delta_w_last_ = 0.;
     }
-    template <typename ProblemType>
-    LinsolReturnFlag IpSearchDirImpl<ProblemType>::compute_search_dir()
+    template <typename LinearSolverType, typename ProblemType>
+    LinsolReturnFlag IpSearchDirImpl<LinearSolverType, ProblemType>::compute_search_dir()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         Scalar mu = curr_it.mu();
@@ -51,7 +51,7 @@ namespace fatrop
             curr_it.set_De(VecRealScalar(curr_it.De().m(), delta_c));
             curr_it.set_De_is_zero(delta_c == 0.);
 
-            LinearSystem<PdSystemType<ProblemType>> ls(
+            typename LinearSolverType::LinearSystemType ls(
                 curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
                 curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(),
                 curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_,
@@ -114,8 +114,8 @@ namespace fatrop
         return ret;
     }
 
-    template <typename ProblemType>
-    void IpSearchDirImpl<ProblemType>::register_options(OptionRegistry& registry)
+    template <typename LinearSolverType, typename ProblemType>
+    void IpSearchDirImpl<LinearSolverType, ProblemType>::register_options(OptionRegistry& registry)
     {
         registry.register_option("delta_w0", &IpSearchDirImpl::set_delta_w0, this);
         registry.register_option("delta_wmin", &IpSearchDirImpl::set_delta_wmin, this);
