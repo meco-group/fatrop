@@ -44,12 +44,12 @@ TEST_F(ProblemInfoTest, ConstructorAndOffsets)
             EXPECT_EQ(problem_info.number_of_g_eq_slack, 21);
 
             // // Test equality constraint offsets
-            EXPECT_EQ(problem_info.offset_g_eq_dyn, 0);
-            EXPECT_EQ(problem_info.offset_g_eq_path, 11);
+            EXPECT_EQ(problem_info.offset_g_eq_dyn, 6);
+            EXPECT_EQ(problem_info.offset_g_eq_path, 0);
             EXPECT_EQ(problem_info.offset_g_eq_slack, 17);
 
-            EXPECT_EQ(problem_info.offsets_g_eq_dyn, std::vector<Index>({0, 5}));
-            EXPECT_EQ(problem_info.offsets_g_eq_path, std::vector<Index>({11, 12, 14}));
+            EXPECT_EQ(problem_info.offsets_g_eq_path, std::vector<Index>({0, 1, 3}));
+            EXPECT_EQ(problem_info.offsets_g_eq_dyn, std::vector<Index>({6, 11}));
             EXPECT_EQ(problem_info.offsets_g_eq_slack, std::vector<Index>({17, 23, 30}));
         }
 
