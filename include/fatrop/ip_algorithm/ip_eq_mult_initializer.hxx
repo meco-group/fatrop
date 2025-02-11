@@ -4,12 +4,12 @@
 
 #ifndef __fatrop_ip_algorithm_ip_eq_mult_initializer_hxx__
 #define __fatrop_ip_algorithm_ip_eq_mult_initializer_hxx__
+#include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/pd_solver_orig.hpp"
 #include "fatrop/ip_algorithm/pd_system_orig.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
-#include "fatrop/common/options.hpp"
 
 namespace fatrop
 {
@@ -18,16 +18,16 @@ namespace fatrop
                                                           const PdSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
-          rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
+          rhs_s_(ipdata->current_iterate().info().number_of_slack_variables),
           rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
-          rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
+          rhs_cl_(ipdata->current_iterate().info().number_of_slack_variables),
+          rhs_cu_(ipdata->current_iterate().info().number_of_slack_variables),
           Dx_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables +
-              ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          Ds_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
+              ipdata->current_iterate().info().number_of_slack_variables),
+          Ds_(ipdata->current_iterate().info().number_of_slack_variables),
           Deq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
-          dummy_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          dummy_z_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
+          dummy_s_(ipdata->current_iterate().info().number_of_slack_variables),
+          dummy_z_(ipdata->current_iterate().info().number_of_slack_variables)
     {
     }
 
@@ -36,7 +36,8 @@ namespace fatrop
         IpIterateType &curr_it = ipdata_->current_iterate();
         curr_it.set_dual_eq(VecRealScalar(curr_it.dual_eq().m(), 0.));
         rhs_x_.block(rhs_x_.m(), 0) = curr_it.dual_infeasibility_x();
-        rhs_s_.block(rhs_s_.m(), 0) = curr_it.dual_infeasibility_s();
+        rhs_s_.block(rhs_s_.m(), 0) = curr_it.dual_infeasibility_s().block(
+            ipdata_->current_iterate().info().number_of_slack_variables, 0);
         rhs_g_.block(rhs_g_.m(), 0) = 0;
         rhs_cl_.block(rhs_cl_.m(), 0) = 0;
         rhs_cu_.block(rhs_cu_.m(), 0) = 0;
@@ -86,7 +87,7 @@ namespace fatrop
         // Empty implementation
     }
     template <typename ProblemType>
-    void IpEqMultInitializer<ProblemType>::register_options(OptionRegistry& registry)
+    void IpEqMultInitializer<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("lam_max", &IpEqMultInitializer::set_lam_max, this);
     }

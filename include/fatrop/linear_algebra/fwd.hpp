@@ -26,6 +26,7 @@ namespace fatrop
     template <typename Dep1, typename Dep2> class VecRealDivVecReal;
     template <typename Dep1, typename Dep2> class VecRealMin;
     template <typename Dep1, typename Dep2> class VecRealMax;
+    template <typename Dep1, typename Dep2> class VecRealConcat;
 
     // Non-template vector classes
     class VecRealScalar;

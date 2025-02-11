@@ -4,9 +4,9 @@
 
 #ifndef __fatrop_ip_algorithm_ip_nlp_orig_hxx__
 #define __fatrop_ip_algorithm_ip_nlp_orig_hxx__
-#include "fatrop/nlp/dims.hpp"
-#include "ip_nlp_orig.hpp"
 #include "fatrop/common/options.hpp"
+#include "fatrop/ip_algorithm/ip_nlp_orig.hpp"
+#include "fatrop/nlp/dims.hpp"
 #include <cmath>
 
 namespace fatrop
@@ -62,9 +62,11 @@ namespace fatrop
     Index IpNlpOrig<ProblemType>::eval_objective_gradient(const ProblemInfo<ProblemType> &info,
                                                           const Scalar objective_scale,
                                                           const VecRealView &primal_x,
+                                                          const VecRealView &primal_s,
                                                           VecRealView &grad_x, VecRealView &grad_s)
     {
-        return nlp_->eval_objective_gradient(info, objective_scale, primal_x, grad_x, grad_s);
+        return nlp_->eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x,
+                                             grad_s);
     }
 
     template <typename ProblemType>
@@ -98,13 +100,28 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    Index IpNlpOrig<ProblemType>::get_initial_primal(const ProblemInfo<ProblemType> &info, VecRealView &primal_x)
+    Index IpNlpOrig<ProblemType>::get_initial_primal(const ProblemInfo<ProblemType> &info,
+                                                     VecRealView &primal_x)
     {
         return nlp_->get_initial_primal(info, primal_x);
     }
 
     template <typename ProblemType>
-    void IpNlpOrig<ProblemType>::register_options(OptionRegistry& registry)
+    void IpNlpOrig<ProblemType>::get_primal_damping(const ProblemInfo<ProblemType> &info,
+                                                    VecRealView &damping)
+    {
+        nlp_->get_primal_damping(info, damping);
+    }
+    template <typename ProblemType>
+    void IpNlpOrig<ProblemType>::apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
+                                    const VecRealView &multipliers, const Scalar alpha,
+                                    const VecRealView &y, VecRealView &out)
+    {
+        nlp_->apply_jacobian_s_transpose(info, multipliers, alpha, y, out);
+    }
+
+    template <typename ProblemType>
+    void IpNlpOrig<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("constr_viol_tol", &IpNlpOrig::set_constr_viol_tol, this);
         registry.register_option("bound_relax_factor", &IpNlpOrig::set_bound_relax_factor, this);

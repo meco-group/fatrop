@@ -142,6 +142,8 @@ namespace fatrop
         Index offset_s;
         Index offset_p;
         Index offset_n;
+
+        std::vector<bool> constraint_allows_dual_damping;
     };
 } // namespace fatrop
 

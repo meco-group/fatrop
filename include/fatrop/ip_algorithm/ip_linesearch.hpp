@@ -46,15 +46,21 @@ namespace fatrop
     protected:
         virtual ~IpLineSearchBase() = default;
     };
+    /** 
+     * 
+     * todo: do we really want to template on the linear solver type here? 
+     * 
+     * */
 
     /**
      * @brief Concrete implementation of line search for a specific problem type.
      *
      * @tparam ProblemType The type of optimization problem being solved.
      */
-    template <typename ProblemType> class IpLinesearch : public IpLineSearchBase
+    template <typename LinearSolverType, typename ProblemType>
+    class IpLinesearch : public IpLineSearchBase
     {
-        typedef std::shared_ptr<PdSolverOrig<ProblemType>> PdSolverSp;
+        typedef std::shared_ptr<LinearSolverType> LinearSolverSp;
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
         typedef std::shared_ptr<Nlp<ProblemType>> NlpSp;
         typedef IpIterate<ProblemType> IpIterateType;
@@ -64,9 +70,9 @@ namespace fatrop
          * @brief Construct a new IpLinesearch object.
          *
          * @param ipdata Shared pointer to the interior point algorithm data.
-         * @param linear_solver Shared pointer to the primal-dual linear solver.
+         * @param linear_solver Shared pointer to the linear solver.
          */
-        IpLinesearch(const IpDataSp &ipdata, const PdSolverSp &linear_solver);
+        IpLinesearch(const IpDataSp &ipdata, const LinearSolverSp &linear_solver);
 
         void find_acceptable_trial_point() override;
         void reset() override;
@@ -97,7 +103,7 @@ namespace fatrop
         }
         void set_watchdog_trial_iter_max(const Index &value) { watchdog_trial_iter_max_ = value; }
         void set_alpha_red_factor(const Scalar &value) { alpha_red_factor_ = value; }
-        void set_max_iter(const Index& max_iter)
+        void set_max_iter(const Index &max_iter)
         {
             filter().reserve(max_iter_ + 1);
             max_iter_ = max_iter;
@@ -130,7 +136,7 @@ namespace fatrop
 
         IpFilter filter_;
         IpDataSp ipdata_;
-        PdSolverSp linear_solver_;
+        LinearSolverSp linear_solver_;
         VecRealAllocated soc_rhs_x_;
         VecRealAllocated soc_rhs_s_;
         VecRealAllocated soc_rhs_g_;

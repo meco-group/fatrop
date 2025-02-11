@@ -227,7 +227,8 @@ namespace fatrop
         }
         Index eval_objective_gradient(const ProblemInfo<OcpType> &info,
                                       const Scalar objective_scale, const VecRealView &primal_x,
-                                      VecRealView &grad_x, VecRealView &grad_s) override
+                                      const VecRealView &primal_s, VecRealView &grad_x,
+                                      VecRealView &grad_s) override
         {
             // get the double pointers for the vector views
             const Scalar *primal_x_ptr = primal_x.data();
@@ -310,6 +311,19 @@ namespace fatrop
                     ocp->get_initial_xk(primal_x_ptr + info.offsets_primal_x[k], k, ocp->user_data);
             }
             return 0;
+        }
+        void get_primal_damping(const ProblemInfo<OcpType> &info, VecRealView &damping) override
+        {
+            damping = 0.0;
+        }
+        void apply_jacobian_s_transpose(const ProblemInfo<OcpType> &info,
+                                        const VecRealView &multipliers, const Scalar alpha,
+                                        const VecRealView &y, VecRealView &out) override
+        {
+            out = alpha * y;
+            out.block(info.number_of_slack_variables, 0) =
+                out.block(info.number_of_slack_variables, 0) -
+                multipliers.block(info.number_of_slack_variables, info.offset_g_eq_slack);
         }
 
     private:

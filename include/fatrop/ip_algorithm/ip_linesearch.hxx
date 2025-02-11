@@ -15,8 +15,8 @@
 
 namespace fatrop
 {
-    template <typename ProblemType>
-    IpLinesearch<ProblemType>::IpLinesearch(const IpDataSp &ipdata, const PdSolverSp &linear_solver)
+    template <typename LinearSolverType, typename ProblemType>
+    IpLinesearch<LinearSolverType, ProblemType>::IpLinesearch(const IpDataSp &ipdata, const LinearSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           soc_rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
           soc_rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
@@ -28,8 +28,8 @@ namespace fatrop
         filter().reserve(max_iter_ + 1);
     }
 
-    template <typename ProblemType>
-    void IpLinesearch<ProblemType>::init_this_line_search(bool in_watchdog)
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::init_this_line_search(bool in_watchdog)
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         if (!in_watchdog)
@@ -46,8 +46,8 @@ namespace fatrop
             reference_grad_bar_delta_ = watchdog_grad_bar_delta_;
         }
     }
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::do_backtracking_line_search(bool skip_first_trial_point,
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::do_backtracking_line_search(bool skip_first_trial_point,
                                                                 Scalar &alpha_primal,
                                                                 bool &corr_taken, bool &soc_taken,
                                                                 Index &n_steps,
@@ -125,7 +125,8 @@ namespace fatrop
         return accept;
     }
 
-    template <typename ProblemType> void IpLinesearch<ProblemType>::reset()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::reset()
     {
         theta_min_ = -1.;
         theta_max_ = -1.;
@@ -138,19 +139,22 @@ namespace fatrop
         reset_linesearch();
     }
 
-    template <typename ProblemType> void IpLinesearch<ProblemType>::reset_linesearch()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::reset_linesearch()
     {
         filter_reject_count_ = 0;
         last_rejection_due_to_filter_ = false;
         filter().reset();
     }
 
-    template <typename ProblemType> IpFilter &IpLinesearch<ProblemType>::filter()
+    template <typename LinearSolverType, typename ProblemType>
+    IpFilter &IpLinesearch<LinearSolverType, ProblemType>::filter()
     {
         return filter_;
     }
 
-    template <typename ProblemType> void IpLinesearch<ProblemType>::find_acceptable_trial_point()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::find_acceptable_trial_point()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         IpIterateType &trial_it = ipdata_->trial_iterate();
@@ -285,8 +289,8 @@ namespace fatrop
             }
         }
     }
-    template <typename ProblemType>
-    void IpLinesearch<ProblemType>::update_step_info(const Scalar alpha_primal,
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::update_step_info(const Scalar alpha_primal,
                                                      const Scalar alpha_dual, const Index n_steps,
                                                      const char info_alpha_primal_char)
     {
@@ -305,8 +309,8 @@ namespace fatrop
         trial_it.step_info().alpha_primal_type = info_alpha_primal_char;
     }
 
-    template <typename ProblemType>
-    char IpLinesearch<ProblemType>::update_for_next_iteration(const Scalar alpha_primal_test)
+    template <typename LinearSolverType, typename ProblemType>
+    char IpLinesearch<LinearSolverType, ProblemType>::update_for_next_iteration(const Scalar alpha_primal_test)
     {
         char info_alpha_primal_char;
         if (!is_f_type(alpha_primal_test) || !armijo_holds(alpha_primal_test))
@@ -320,7 +324,8 @@ namespace fatrop
         return info_alpha_primal_char;
     }
 
-    template <typename ProblemType> void IpLinesearch<ProblemType>::start_watchdog()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::start_watchdog()
     {
         in_watchdog_ = true;
         watchdog_trial_iter_count_ = 0;
@@ -334,7 +339,8 @@ namespace fatrop
         // current iterate is now invalidated
     }
 
-    template <typename ProblemType> void IpLinesearch<ProblemType>::stop_watchdog()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::stop_watchdog()
     {
         in_watchdog_ = false;
         reference_theta_ = watchdog_theta_;
@@ -343,8 +349,8 @@ namespace fatrop
         ipdata_->restore_current_iterate();
     }
 
-    template <typename ProblemType>
-    void IpLinesearch<ProblemType>::perform_dual_step(const Scalar alpha_primal,
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::perform_dual_step(const Scalar alpha_primal,
                                                       const Scalar alpha_dual)
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
@@ -356,8 +362,8 @@ namespace fatrop
                                    alpha_dual * curr_it.delta_dual_bounds_u());
     }
 
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::try_second_order_correction(const Scalar alpha_primal_test,
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::try_second_order_correction(const Scalar alpha_primal_test,
                                                                 Scalar &alpha_primal)
     {
         if (max_soc_ == 0)
@@ -385,7 +391,7 @@ namespace fatrop
             soc_rhs_cu_.block(soc_rhs_cu_.m(), 0) = curr_it.relaxed_complementarity_u();
 
             // solve the linear system
-            LinearSystem<PdSystemType<ProblemType>> ls(
+            typename LinearSolverType::LinearSystemType ls(
                 curr_it.info(), curr_it.jacobian(), curr_it.hessian(), curr_it.Dx(),
                 curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(),
                 curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), soc_rhs_x_, soc_rhs_s_,
@@ -422,8 +428,8 @@ namespace fatrop
         return accept;
     }
 
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::is_acceptable_to_current_iterate(
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::is_acceptable_to_current_iterate(
         const Scalar trial_barr, const Scalar trial_theta, const bool called_from_resto /*=false*/)
     {
         using namespace internal;
@@ -441,15 +447,15 @@ namespace fatrop
                            reference_barr_));
     }
 
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::is_acceptable_to_filter(const Scalar trial_barr,
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::is_acceptable_to_filter(const Scalar trial_barr,
                                                             const Scalar trial_theta)
     {
         return filter().is_acceptable({trial_barr, trial_theta}); // Placeholder return
     }
 
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::armijo_holds(const Scalar alpha_primal)
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::armijo_holds(const Scalar alpha_primal)
     {
         using namespace internal;
         Scalar trial_barr =
@@ -458,7 +464,8 @@ namespace fatrop
                           eta_phi_ * alpha_primal * reference_grad_bar_delta_, reference_barr_);
     }
 
-    template <typename ProblemType> bool IpLinesearch<ProblemType>::detect_tiny_step()
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::detect_tiny_step()
     {
         if (tiny_step_tol_ == 0.)
             return false;
@@ -478,8 +485,8 @@ namespace fatrop
         return true;
     }
 
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::is_f_type(const Scalar alpha_primal)
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::is_f_type(const Scalar alpha_primal)
     {
         Scalar mach_eps = std::numeric_limits<Scalar>::epsilon();
         if (reference_theta_ == 0. && reference_grad_bar_delta_ > 0. &&
@@ -492,13 +499,15 @@ namespace fatrop
                     delta_ * std::pow(reference_theta_, s_theta_));
     }
 
-    template <typename ProblemType> void IpLinesearch<ProblemType>::augment_filter()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::augment_filter()
     {
         Scalar phi_add = reference_barr_ - gamma_phi_ * reference_theta_;
         Scalar theta_add = (1. - gamma_theta_) * reference_theta_;
         filter().augment({phi_add, theta_add});
     }
-    template <typename ProblemType> Scalar IpLinesearch<ProblemType>::compute_alpha_min()
+    template <typename LinearSolverType, typename ProblemType>
+    Scalar IpLinesearch<LinearSolverType, ProblemType>::compute_alpha_min()
     {
         IpIterateType &curr_it = ipdata_->current_iterate();
         Scalar gBD = curr_it.linear_decrease_barrier() + curr_it.linear_decrease_objective();
@@ -515,12 +524,13 @@ namespace fatrop
         }
         return alpha_min_frac_ * alpha_min;
     }
-    template <typename ProblemType> void IpLinesearch<ProblemType>::accept_trial_iterate()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::accept_trial_iterate()
     {
         ipdata_->accept_trial_iterate();
     }
-    template <typename ProblemType>
-    bool IpLinesearch<ProblemType>::check_acceptability_of_trial_point(const Scalar alpha_primal)
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::check_acceptability_of_trial_point(const Scalar alpha_primal)
     {
         bool accept;
         IpIterateType &trial_it = ipdata_->trial_iterate();
@@ -583,8 +593,8 @@ namespace fatrop
         return true;
     }
 
-    template <typename ProblemType>
-    void IpLinesearch<ProblemType>::register_options(OptionRegistry &registry)
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("max_soc", &IpLinesearch::set_max_soc, this);
         registry.register_option("kappa_soc", &IpLinesearch::set_kappa_soc, this);

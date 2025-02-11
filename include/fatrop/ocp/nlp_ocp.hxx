@@ -133,11 +133,9 @@ namespace fatrop
     }
 
     template <typename OcpAbstractTag>
-    Index NlpOcpTpl<OcpAbstractTag>::eval_objective_gradient(const OcpInfo &info,
-                                                             const Scalar objective_scale,
-                                                             const VecRealView &primal_x,
-                                                             VecRealView &grad_x,
-                                                             VecRealView &grad_s)
+    Index NlpOcpTpl<OcpAbstractTag>::eval_objective_gradient(
+        const OcpInfo &info, const Scalar objective_scale, const VecRealView &primal_x,
+        const VecRealView &primal_s, VecRealView &grad_x, VecRealView &grad_s)
     {
         grad_s.block(info.number_of_g_eq_slack, 0) = 0;
         const Scalar *primal_x_p = primal_x.data();
@@ -188,7 +186,8 @@ namespace fatrop
     }
 
     template <typename OcpAbstractTag>
-    Index NlpOcpTpl<OcpAbstractTag>::get_initial_primal(const ProblemInfo<OcpType> &info, VecRealView &primal_x)
+    Index NlpOcpTpl<OcpAbstractTag>::get_initial_primal(const ProblemInfo<OcpType> &info,
+                                                        VecRealView &primal_x)
     {
         Scalar *primal_x_ptr = primal_x.data();
         for (Index k = 0; k < info.dims.K; k++)
@@ -197,6 +196,24 @@ namespace fatrop
             ocp_->get_initial_xk(primal_x_ptr + info.offsets_primal_x[k], k);
         }
         return 0;
+    }
+    template <typename OcpAbstractTag>
+    void NlpOcpTpl<OcpAbstractTag>::get_primal_damping(const ProblemInfo<OcpType> &info,
+                                                       VecRealView &damping)
+    {
+        damping = 0;
+    }
+    template <typename OcpAbstractTag>
+    void NlpOcpTpl<OcpAbstractTag>::apply_jacobian_s_transpose(const ProblemInfo<OcpType> &info,
+                                                               const VecRealView &multipliers,
+                                                               const Scalar alpha,
+                                                               const VecRealView &y,
+                                                               VecRealView &out)
+    {
+        out = alpha * y;
+        out.block(info.number_of_slack_variables, 0) =
+            out.block(info.number_of_slack_variables, 0) -
+            multipliers.block(info.number_of_slack_variables, info.offset_g_eq_slack);
     }
 }
 

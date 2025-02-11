@@ -20,7 +20,7 @@ namespace fatrop
 {
     // OcpEvalType can be Eval abstract (dynamic polymorphism) or
     // a static implementation, a template specialization on the NlpOcpTpl level can be made as
-    // well, using a newly created tag class.
+    // well, using a newly created tag class. 
     template <typename OcpAbstractTag> class NlpOcpTpl : public Nlp<OcpType>
     {
         typedef std::shared_ptr<OcpAbstractTpl<OcpAbstractTag>> OcpAbstractSp;
@@ -38,14 +38,18 @@ namespace fatrop
         Index eval_constraint_violation(const OcpInfo &info, const VecRealView &primal_x,
                                         const VecRealView &primal_s, VecRealView &res) override;
         Index eval_objective_gradient(const OcpInfo &info, const Scalar objective_scale,
-                                      const VecRealView &primal_x, VecRealView &grad_x,
-                                      VecRealView &grad_s) override;
+                                      const VecRealView &primal_x, const VecRealView &primal_s,
+                                      VecRealView &grad_x, VecRealView &grad_s) override;
         Index eval_objective(const OcpInfo &info, const Scalar objective_scale,
                              const VecRealView &primal_x, const VecRealView &primal_s,
                              Scalar &res) override;
         Index get_bounds(const OcpInfo &info, VecRealView &lower_bounds,
                          VecRealView &upper_bounds) override;
         Index get_initial_primal(const ProblemInfo<OcpType> &info, VecRealView &primal_x) override;
+        void get_primal_damping(const ProblemInfo<OcpType> &info, VecRealView &damping) override;
+        void apply_jacobian_s_transpose(const ProblemInfo<OcpType> &info,
+                                                const VecRealView &multipliers, const Scalar alpha,
+                                                const VecRealView &y, VecRealView &out) override;
 
     private:
         const OcpAbstractSp ocp_;

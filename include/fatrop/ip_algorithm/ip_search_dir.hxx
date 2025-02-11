@@ -1,15 +1,15 @@
 #include "ip_search_dir.hpp"
 
+#include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
-#include "fatrop/common/options.hpp"
 #include <cmath>
 
 namespace fatrop
 {
     template <typename LinearSolverType, typename ProblemType>
-    IpSearchDirImpl<LinearSolverType, ProblemType>::IpSearchDirImpl(const IpDataSp &ipdata,
-                                                  const LinearSolverSp &linear_solver)
+    IpSearchDirImpl<LinearSolverType, ProblemType>::IpSearchDirImpl(
+        const IpDataSp &ipdata, const LinearSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
           rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
           rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
@@ -18,7 +18,8 @@ namespace fatrop
           rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
     {
     }
-    template <typename LinearSolverType, typename ProblemType> void IpSearchDirImpl<LinearSolverType, ProblemType>::reset()
+    template <typename LinearSolverType, typename ProblemType>
+    void IpSearchDirImpl<LinearSolverType, ProblemType>::reset()
     {
         delta_w_last_ = 0.;
     }
@@ -33,7 +34,7 @@ namespace fatrop
         rhs_cl_.block(rhs_cl_.m(), 0) = curr_it.relaxed_complementarity_l();
         rhs_cu_.block(rhs_cu_.m(), 0) = curr_it.relaxed_complementarity_u();
 
-        curr_it.set_Dx(VecRealScalar(curr_it.Dx().m(), 0.));
+        curr_it.set_Dx(curr_it.primal_damping());
         curr_it.set_De(VecRealScalar(curr_it.De().m(), 0.));
         curr_it.set_De_is_zero(true);
 
@@ -47,7 +48,7 @@ namespace fatrop
         {
             bool update_delta_w = false;
             bool update_delta_c = false;
-            curr_it.set_Dx(VecRealScalar(curr_it.Dx().m(), delta_w));
+            curr_it.set_Dx(VecRealScalar(curr_it.Dx().m(), delta_w) + curr_it.primal_damping());
             curr_it.set_De(VecRealScalar(curr_it.De().m(), delta_c));
             curr_it.set_De_is_zero(delta_c == 0.);
 
@@ -115,7 +116,7 @@ namespace fatrop
     }
 
     template <typename LinearSolverType, typename ProblemType>
-    void IpSearchDirImpl<LinearSolverType, ProblemType>::register_options(OptionRegistry& registry)
+    void IpSearchDirImpl<LinearSolverType, ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("delta_w0", &IpSearchDirImpl::set_delta_w0, this);
         registry.register_option("delta_wmin", &IpSearchDirImpl::set_delta_wmin, this);

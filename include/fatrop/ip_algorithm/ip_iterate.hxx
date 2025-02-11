@@ -5,8 +5,8 @@
 #ifndef __fatrop_ip_algorithm_ip_iterate_hxx__
 #define __fatrop_ip_algorithm_ip_iterate_hxx__
 
-#include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/common/options.hpp"
+#include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include <algorithm>
 #include <cmath>
 namespace fatrop
@@ -49,6 +49,7 @@ namespace fatrop
         linear_decrease_barrier_evaluated_ = false;
         complementarity_l_evaluated_ = false;
         complementarity_u_evaluated_ = false;
+        primal_damping_evaluated_ = false;
     }
 
     template <typename ProblemType> Scalar IpIterate<ProblemType>::obj_value()
@@ -83,8 +84,8 @@ namespace fatrop
     {
         if (!obj_gradient_evaluated_)
         {
-            Index status = nlp_->eval_objective_gradient(info_, objective_scale, primal_x_,
-                                                         obj_gradient_x_, obj_gradient_s_);
+            Index status = nlp_->eval_objective_gradient(
+                info_, objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
                               "Error in evaluating the gradient of the objective function.");
             obj_gradient_evaluated_ = true;
@@ -95,8 +96,8 @@ namespace fatrop
     {
         if (!obj_gradient_evaluated_)
         {
-            Index status = nlp_->eval_objective_gradient(info_, objective_scale, primal_x_,
-                                                         obj_gradient_x_, obj_gradient_s_);
+            Index status = nlp_->eval_objective_gradient(
+                info_, objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
                               "Error in evaluating the gradient of the objective function.");
             obj_gradient_evaluated_ = true;
@@ -132,11 +133,9 @@ namespace fatrop
     {
         if (!dual_infeasibility_s_evaluated_)
         {
-            // by convention of the solver dual bounds are zero when not bounded
-            dual_infeasibility_s_ =
-                obj_gradient_s() -
-                dual_eq_.block(info_.number_of_slack_variables, info_.offset_g_eq_slack) +
-                dual_bounds_u_ - dual_bounds_l_;
+            dual_infeasibility_s_ = obj_gradient_s() + dual_bounds_u_ - dual_bounds_l_;
+            nlp_->apply_jacobian_s_transpose(info_, dual_eq_, 1.0, dual_infeasibility_s_,
+                                             dual_infeasibility_s_);
             dual_infeasibility_s_evaluated_ = true;
         }
         return dual_infeasibility_s_;
@@ -237,6 +236,16 @@ namespace fatrop
         dual_infeasibility_s_evaluated_ = false;
         mu_ = value;
     };
+
+    template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::primal_damping()
+    {
+        if (!primal_damping_evaluated_)
+        {
+            nlp_->get_primal_damping(info_, primal_damping_);
+            primal_damping_evaluated_ = true;
+        }
+        return primal_damping_;
+    }
     template <typename ProblemType> Scalar IpIterate<ProblemType>::linear_decrease_objective()
     {
         if (!linear_decrease_objective_evaluated_)
@@ -378,6 +387,8 @@ namespace fatrop
           complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
           relaxed_complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
           relaxed_complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
+          primal_damping_(nlp->nlp_dims().number_of_variables +
+                          nlp->nlp_dims().number_of_ineq_constraints),
           hessian_(nlp->problem_dims()), lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
@@ -402,6 +413,7 @@ namespace fatrop
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::zero_hessian()
     {
+        primal_damping_ = 0.;
         hessian_.set_zero();
         hessian_evaluated_ = false;
         return hessian_;
@@ -417,7 +429,7 @@ namespace fatrop
         return jacobian_;
     }
     template <typename ProblemType>
-    void IpIterate<ProblemType>::register_options(OptionRegistry& registry)
+    void IpIterate<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("kappa_d", &IpIterate::set_kappa_d, this);
         registry.register_option("smax", &IpIterate::set_smax, this);

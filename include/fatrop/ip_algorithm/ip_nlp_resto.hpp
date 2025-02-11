@@ -2,38 +2,37 @@
 // Copyright (C) 2024 Lander Vanroye, KU Leuven
 //
 
-#ifndef __fatrop_ip_algorithm_ip_nlp_orig_hpp__
-#define __fatrop_ip_algorithm_ip_nlp_orig_hpp__
+#ifndef __fatrop_ip_algorithm_ip_nlp_resto_hpp__
+#define __fatrop_ip_algorithm_ip_nlp_resto_hpp__
 #include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
+#include "fatrop/nlp/dims.hpp"
 #include "fatrop/nlp/fwd.hpp"
 #include "fatrop/nlp/nlp.hpp"
 #include <memory>
 namespace fatrop
 {
     /**
-     * @brief Original NLP formulation for interior point methods.
+     * @brief Resto NLP formulation for interior point methods.
      *
      * This class wraps the original NLP problem and provides the interface
      * required for the interior point algorithm.
-     * Decorator class that adds some functionality to make the problem easier digestible by IP
-     * algorithm.
      *
      * @tparam ProblemType The type of optimization problem being solved.
      */
-    template <typename ProblemType> class IpNlpOrig : public Nlp<ProblemType>
+    template <typename ProblemType> class IpNlpResto : public Nlp<ProblemType>
     {
         typedef std::shared_ptr<Nlp<ProblemType>> NlpSp;
 
     public:
         /**
-         * @brief Construct a new IpNlpOrig object.
+         * @brief Construct a new IpNlpResto object.
          *
-         * @param nlp Shared pointer to the original NLP problem.
+         * @param nlp Shared pointer to the resto NLP problem.
          */
-        IpNlpOrig(const NlpSp &nlp);
+        IpNlpResto(const NlpSp &nlp);
 
         /**
          * @brief Get the dimensions of the NLP problem.
@@ -75,8 +74,9 @@ namespace fatrop
          */
         virtual Index eval_objective_gradient(const ProblemInfo<ProblemType> &info,
                                               const Scalar objective_scale,
-                                              const VecRealView &primal_x,
-                                              const VecRealView &primal_s, VecRealView &grad_x,
+                                              const VecRealView &primal_x, 
+                                              const VecRealView &primal_s, 
+                                              VecRealView &grad_x,
                                               VecRealView &grad_s) override;
 
         /**
@@ -99,25 +99,24 @@ namespace fatrop
                                         VecRealView &damping) override;
 
         virtual void apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
-                                                const VecRealView &multipliers, const Scalar alpha,
-                                                const VecRealView &y, VecRealView &out) override;
+                                        const VecRealView &multipliers, const Scalar alpha,
+                                        const VecRealView &y, VecRealView &out) override;
+        void set_xs_reference(const ProblemInfo<ProblemType> &info, const VecRealView &x_reference,
+                              const VecRealView &s_reference);
+        void set_zeta(const Scalar zeta) { zeta_ = zeta; };
 
     private:
-        NlpSp nlp_;                              ///< Shared pointer to the original NLP problem
-        VecRealAllocated modified_bounds_lower_; ///< Modified lower bounds
-        VecRealAllocated modified_bounds_upper_; ///< Modified upper bounds
-        Scalar constr_viol_tol_ = 1e-4;          ///< Constraint violation tolerance
-        Scalar bound_relax_factor_ = 1e-8;       ///< Factor for relaxing bounds
+        NlpSp nlp_; ///< Shared pointer to the original NLP problem
+        NlpDims dims_;
+        VecRealAllocated x_reference_;
+        VecRealAllocated dr_;
+        Scalar zeta_;
 
     public:
-        // Setter methods for options
-        void set_constr_viol_tol(const Scalar &value) { constr_viol_tol_ = value; }
-        void set_bound_relax_factor(const Scalar &value) { bound_relax_factor_ = value; }
-
         // Register options
         void register_options(OptionRegistry &registry);
     };
 
 } // namespace fatrop
 
-#endif //__fatrop_ip_algorithm_ip_nlp_orig_hpp__
+#endif //__fatrop_ip_algorithm_ip_nlp_resto_hpp__

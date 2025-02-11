@@ -28,14 +28,22 @@ namespace fatrop
                                                 const VecRealView &primal_s, VecRealView &res) = 0;
         virtual Index eval_objective_gradient(const ProblemInfo<ProblemType> &info,
                                               const Scalar objective_scale,
-                                              const VecRealView &primal_x, VecRealView &grad_x,
+                                              const VecRealView &primal_x, 
+                                              const VecRealView &primal_s, 
+                                              VecRealView &grad_x,
                                               VecRealView &grad_s) = 0;
         virtual Index eval_objective(const ProblemInfo<ProblemType> &info,
                                      const Scalar objective_scale, const VecRealView &primal_x,
                                      const VecRealView &primal_s, Scalar &res) = 0;
         virtual Index get_bounds(const ProblemInfo<ProblemType> &info, VecRealView &lower_bounds,
                                  VecRealView &upper_bounds) = 0;
-        virtual Index get_initial_primal(const ProblemInfo<ProblemType> &info, VecRealView &primal_x) = 0;
+        virtual Index get_initial_primal(const ProblemInfo<ProblemType> &info,
+                                         VecRealView &primal_x) = 0;
+        virtual void get_primal_damping(const ProblemInfo<ProblemType> &info,
+                                        VecRealView &damping) = 0;
+        virtual void apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
+                                        const VecRealView &multipliers, const Scalar alpha,
+                                        const VecRealView &y, VecRealView &out) = 0;
         virtual ~Nlp() = default;
     };
 } // namespace fatrop

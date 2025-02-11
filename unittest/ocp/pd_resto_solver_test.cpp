@@ -147,14 +147,14 @@ protected:
 
         // 
         // sl = 1.;
-        su = 1.;
+        // su = 1.;
         // zl = 0.;
-        zu = 0.;
+        // zu = 0.;
         // rhs_cl = 0.;
-        rhs_cu = 0.;
-        rhs_g = 0.;
-        rhs_x = 0.;
-        rhs_s = 0.;
+        // rhs_cu = 0.;
+        // rhs_g = 0.;
+        // rhs_x = 0.;
+        // rhs_s = 0.;
         // D_eq = 0.;
         // D_x = 0.;
 
@@ -163,7 +163,6 @@ protected:
 
 TEST_F(PdTest, TestSolve)
 {
-    std::cout << " zu " << zu << std::endl;
     LinearSystem<PdSystemResto<OcpType>> ls(info, jacobian, hessian, D_x, false, D_eq, sl, su, zl,
                                             zu, rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu);
     VecRealAllocated x_full(ls.m());
@@ -172,12 +171,9 @@ TEST_F(PdTest, TestSolve)
     ls.get_rhs(rhs_save);
     LinsolReturnFlag ret = pd_solver_resto.solve_in_place(ls);
     ls.get_rhs(x_full);
-    // EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
+    EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     ls.set_rhs(rhs_save);
     ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
-    std::cout << "rhs: " << rhs_save << std::endl;
-    std::cout << "x_full: " << x_full << std::endl;
-    std::cout << "tmp: " << tmp << std::endl;
     EXPECT_NEAR(norm_inf(tmp), 0, 1e-6);
 }
 

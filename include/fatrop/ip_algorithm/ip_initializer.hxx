@@ -46,13 +46,15 @@ namespace fatrop
                       bound_frac * (upper_bounds - lower_bounds));
         auto pr = min(bound_push * max(VecRealScalar(number_of_slacks, 1.0), abs(upper_bounds)),
                       bound_frac * (upper_bounds - lower_bounds));
+        // set the s part of the slacks to viol_s
+        auto res_unprojected = concat(viol_s, VecRealScalar(number_of_slacks - viol_s.m(), 0.0));
         //   project the slacks
-        auto res_double_bounded = min(max(viol_s, lower_bounds + pl), upper_bounds - pr);
+        auto res_double_bounded = min(max(res_unprojected, lower_bounds + pl), upper_bounds - pr);
         auto res_single_lower_bounded =
-            max(viol_s, lower_bounds + bound_push * max(VecRealScalar(number_of_slacks, 1.0),
+            max(res_unprojected, lower_bounds + bound_push * max(VecRealScalar(number_of_slacks, 1.0),
                                                         abs(lower_bounds)));
         auto res_single_upper_bounded =
-            min(viol_s, upper_bounds - bound_push * max(VecRealScalar(number_of_slacks, 1.0),
+            min(res_unprojected, upper_bounds - bound_push * max(VecRealScalar(number_of_slacks, 1.0),
                                                         abs(upper_bounds)));
         auto res =
             if_else(double_bounded, res_double_bounded,

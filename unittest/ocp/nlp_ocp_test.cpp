@@ -65,8 +65,8 @@ TEST_F(NlpOcpTest, TestObjectiveGradient)
     VecRealAllocated grad_x(nlp_ocp.nlp_dims().number_of_variables);
     VecRealAllocated grad_s(nlp_ocp.nlp_dims().number_of_ineq_constraints);
     Scalar objective_scale = 1.0;
-    EXPECT_NO_THROW(
-        nlp_ocp.eval_objective_gradient(ocp_info, objective_scale, primal_x, grad_x, grad_s));
+    EXPECT_NO_THROW(nlp_ocp.eval_objective_gradient(ocp_info, objective_scale, primal_x, primal_s,
+                                                    grad_x, grad_s));
     // Add more specific checks here if needed
 }
 

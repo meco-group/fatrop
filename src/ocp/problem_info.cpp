@@ -102,4 +102,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     offset_s = 0;
     offset_p = number_of_slack_variables;
     offset_n = offset_p + number_of_eq_constraints;
+    constraint_allows_dual_damping = std::vector<bool>(number_of_eq_constraints, true);
+    for (Index i = 0; i < number_of_g_eq_dyn; i++)
+        constraint_allows_dual_damping[i + offset_g_eq_dyn] = false;
 }

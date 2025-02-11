@@ -335,6 +335,8 @@ namespace fatrop
          */
         const VecRealView &De() const { return De_; }
 
+        const VecRealView &primal_damping() ;
+
         /**
          * @brief Returns the flag indicating if De_ is zero.
          * @return The value of De_is_zero_.
@@ -485,8 +487,9 @@ namespace fatrop
         VecRealAllocated complementarity_u_;         ///< Complementarity of the NLP.
         VecRealAllocated relaxed_complementarity_l_; ///< Complementarity of the NLP.
         VecRealAllocated relaxed_complementarity_u_; ///< Complementarity of the NLP.
-        Jacobian<ProblemType> jacobian_;             ///< Jacobian of the NLP.
-        Hessian<ProblemType> hessian_;               ///< Hessian of the NLP.
+        VecRealAllocated primal_damping_;
+        Jacobian<ProblemType> jacobian_; ///< Jacobian of the NLP.
+        Hessian<ProblemType> hessian_;   ///< Hessian of the NLP.
         // Problem information
         VecRealAllocated lower_bounds_; ///< Lower bounds of the variables.
         VecRealAllocated upper_bounds_; ///< Upper bounds of the variables.
@@ -530,6 +533,7 @@ namespace fatrop
             false; ///< Flag for lower bound complementarity evaluation
         bool complementarity_u_evaluated_ =
             false; ///< Flag for upper bound complementarity evaluation
+        bool primal_damping_evaluated_ = false; ///< Flag for primal damping evaluation
 
         Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
         Scalar kappa_d_ = 1e-5;

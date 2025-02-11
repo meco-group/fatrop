@@ -154,6 +154,16 @@ namespace fatrop
             return ret;
         }
 
+        friend Scalar sumsqr(const VecReal<Derived> &a)
+        {
+            Scalar ret = 0;
+            for (Index i = 0; i < a.m(); i++)
+            {
+                ret += a(i) * a(i);
+            }
+            return ret;
+        }
+
         friend VecRealAbs<Derived> abs(const VecReal<Derived> &a) { return VecRealAbs<Derived>(a); }
 
         friend VecRealLog<Derived> log(const VecReal<Derived> &a) { return VecRealLog<Derived>(a); }
@@ -174,6 +184,13 @@ namespace fatrop
         friend VecRealMax<Derived, Dep2> max(const VecReal<Derived> &a, const VecReal<Dep2> &b)
         {
             return VecRealMax<Derived, Dep2>(a, b);
+        }
+
+        template <typename Dep2>
+        friend VecRealConcat<Derived, Dep2> concat(const VecReal<Derived> &a,
+                                                   const VecReal<Dep2> &b)
+        {
+            return VecRealConcat<Derived, Dep2>(a, b);
         }
 
         template <typename IfElseOp, typename Dep2>
@@ -361,6 +378,22 @@ namespace fatrop
         const Dep1 a;
         const Dep2 b;
         const std::vector<bool> &if_else_op;
+    };
+
+    template <typename Dep1, typename Dep2>
+    class VecRealConcat : public VecReal<VecRealConcat<Dep1, Dep2>>
+    {
+    public:
+        VecRealConcat(const VecReal<Dep1> &a, const VecReal<Dep2> &b)
+            : a(a.derived()), b(b.derived())
+        {
+        }
+        Scalar operator()(const Index i) const { return i < a.m() ? a(i) : b(i - a.m()); }
+        Index m() const { return a.m() + b.m(); }
+
+    private:
+        const Dep1 a;
+        const Dep2 b;
     };
 
     /**
