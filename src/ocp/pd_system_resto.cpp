@@ -15,11 +15,10 @@ LinearSystem<PdSystemResto<OcpType>>::LinearSystem(
     const VecRealView &D_x, bool De_is_zero, const VecRealView &D_e, const VecRealView &Sl_i,
     const VecRealView &Su_i, const VecRealView &Zl_i, const VecRealView &Zu_i, VecRealView &rhs_f_x,
     VecRealView &rhs_f_s, VecRealView &rhs_g, VecRealView &rhs_cl, VecRealView &rhs_cu)
-    : info_(info), m_(info.number_of_primal_variables + 3 * info.number_of_slack_variables +
-                      info.number_of_eq_constraints),
-      jac_(jac), hess_(hess), D_x_(D_x), De_is_zero_(De_is_zero), D_e_(D_e), Sl_i_(Sl_i),
-      Su_i_(Su_i), Zl_i_(Zl_i), Zu_i_(Zu_i), rhs_f_x_(rhs_f_x), rhs_f_s_(rhs_f_s), rhs_g_(rhs_g),
-      rhs_cl_(rhs_cl), rhs_cu_(rhs_cu)
+    : info_(info), m_(LinearSystem<PdSystemResto<OcpType>>::m(info)), jac_(jac), hess_(hess),
+      D_x_(D_x), De_is_zero_(De_is_zero), D_e_(D_e), Sl_i_(Sl_i), Su_i_(Su_i), Zl_i_(Zl_i),
+      Zu_i_(Zu_i), rhs_f_x_(rhs_f_x), rhs_f_s_(rhs_f_s), rhs_g_(rhs_g), rhs_cl_(rhs_cl),
+      rhs_cu_(rhs_cu)
 {
 }
 Index LinearSystem<PdSystemResto<OcpType>>::m(const ProblemInfo<OcpType> &info)
@@ -97,8 +96,21 @@ void LinearSystem<PdSystemResto<OcpType>>::apply_on_right(const VecRealView &x, 
     out_s = out_s + D_x_s * x_slack;
     // out_s -= I @ lam_I
     out_s_s = out_s_s - mult_ineq;
-    out_s_p = out_s_p + mult_ineq;
-    out_s_n = out_s_n - mult_ineq;
+
+    out_s_p.block(info_.number_of_g_eq_path, info_.offset_g_eq_path) =
+        out_s_p.block(info_.number_of_g_eq_path, info_.offset_g_eq_path) +
+        mult.block(info_.number_of_g_eq_path, info_.offset_g_eq_path);
+    out_s_n.block(info_.number_of_g_eq_path, info_.offset_g_eq_path) =
+        out_s_n.block(info_.number_of_g_eq_path, info_.offset_g_eq_path) -
+        mult.block(info_.number_of_g_eq_path, info_.offset_g_eq_path);
+
+    out_s_p.block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack) =
+        out_s_p.block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack) +
+        mult.block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack);
+    out_s_n.block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack) =
+        out_s_n.block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack) -
+        mult.block(info_.number_of_g_eq_slack, info_.offset_g_eq_slack);
+
     // out_s -= -I @ zl + I @ zu
     out_s = out_s - zl + zu;
     // out_mult += [A_e; A_d; A_i] @ x

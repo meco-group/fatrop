@@ -154,7 +154,7 @@ protected:
         for (Index i = 0; i < info.number_of_eq_constraints; ++i)
         {
             rhs_g(i) = 1.0 * i;
-            D_eq(i) = 1e-8 * (i + 1);
+            D_eq(i) = 1e-2 * (i + 1);
         }
 
         for (Index i = 0; i < info.number_of_slack_variables; ++i)
@@ -165,6 +165,7 @@ protected:
             zu(i) = 1. + 0.4 * i;
             rhs_cl(i) = 1. + 0.5 * i;
             rhs_cu(i) = 1. + 0.6 * i;
+            rhs_s(i) = 1. + 0.7 * i;
         }
     };
 };
@@ -199,4 +200,11 @@ TEST_F(PdTest, TestSolveDegen)
     ls.set_rhs(rhs_save);
     ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
     EXPECT_NEAR(norm_inf(tmp), 0, 1e-6);
+}
+
+
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

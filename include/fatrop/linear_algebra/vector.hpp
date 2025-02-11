@@ -468,7 +468,11 @@ namespace fatrop
             fatrop_dbg_assert(a.m() == b.m() &&
                               "Vector sizes must match for element-wise division");
         };
-        Scalar operator()(const Index i) const { return a(i) / b(i); }
+        Scalar operator()(const Index i) const
+        {
+            fatrop_dbg_assert(b(i) != 0.0);
+            return a(i) / b(i);
+        }
         Index m() const { return a.m(); }
 
     private:
@@ -484,7 +488,11 @@ namespace fatrop
     public:
         ScalarDivVecReal(const Scalar alpha, const VecReal<Dep1> &a)
             : alpha(alpha), a(a.derived()) {};
-        Scalar operator()(const Index i) const { return alpha / a(i); }
+        Scalar operator()(const Index i) const
+        {
+            fatrop_dbg_assert(a(i) != 0.);
+            return alpha / a(i);
+        }
         Index m() const { return a.m(); }
 
     private:
@@ -605,6 +613,9 @@ namespace fatrop
          */
         VecRealView block(Index size, Index start) const
         {
+            // check if the block is within bounds
+            fatrop_dbg_assert(start >= 0 && (start + size) <= m() &&
+                              "Block must be within bounds of the vector");
             return VecRealView(vec_, size, ai_ + start);
         }
         inline VEC &vec();

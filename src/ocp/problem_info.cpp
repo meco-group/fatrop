@@ -93,8 +93,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     pd_resto_offset_slack = pd_resto_offset_primal + number_of_primal_variables;
     pd_resto_offset_mult = pd_resto_offset_slack + number_of_slack_variables_resto;
     pd_resto_offset_zl = pd_resto_offset_mult + number_of_eq_constraints;
-    pd_resto_offset_zu =
-        pd_resto_offset_zl + number_of_slack_variables + 2 * number_of_eq_constraints;
+    pd_resto_offset_zu = pd_resto_offset_zl + number_of_slack_variables_resto;
     //
     pd_resto_offset_zp = pd_resto_offset_zl + number_of_slack_variables;
     pd_resto_offset_zn = pd_resto_offset_zp + number_of_eq_constraints;

@@ -101,7 +101,7 @@ LinsolReturnFlag PdSolverOrig<OcpType>::solve_once_impl(LinearSystem<PdSystemTyp
         ret = aug_system_solver_->solve(ls.info_, ls.jac_, ls.hess_, ls.D_x_, D_ii_, ls.rhs_f_x_,
                                         gg_, x_aug_, mult_aug_);
     else
-        ret = aug_system_solver_->solve(ls.info_, ls.jac_, ls.hess_, ls.D_x_, ls.D_e_, D_ii_,
+        ret = aug_system_solver_->solve(ls.info_, ls.jac_, ls.hess_, ls.D_x_, ls.D_e_.block(ls.info_.number_of_g_eq_path, ls.info_.offset_g_eq_path), D_ii_,
                                         ls.rhs_f_x_, gg_, x_aug_, mult_aug_);
     dereduce(ls, x);
     return ret;
@@ -113,7 +113,7 @@ void PdSolverOrig<OcpType>::solve_rhs_impl(LinearSystem<PdSystemType<OcpType>> &
         aug_system_solver_->solve_rhs(ls.info_, ls.jac_, ls.hess_, D_ii_, ls.rhs_f_x_, gg_, x_aug_,
                                       mult_aug_);
     else
-        aug_system_solver_->solve_rhs(ls.info_, ls.jac_, ls.hess_, ls.D_e_, D_ii_, ls.rhs_f_x_, gg_,
+        aug_system_solver_->solve_rhs(ls.info_, ls.jac_, ls.hess_, ls.D_e_.block(ls.info_.number_of_g_eq_path, ls.info_.offset_g_eq_path), D_ii_, ls.rhs_f_x_, gg_,
                                       x_aug_, mult_aug_);
     dereduce(ls, x);
 }
