@@ -23,6 +23,11 @@ namespace fatrop
         tiny_step_flag_ = false;
         iteration_number_ = 0;
         validate_current_iterate();
+        // initialize associated iterates
+        for (auto &iterate : iterate_data_)
+        {
+            iterate.initialize();
+        }
     }
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()
     {

@@ -15,6 +15,11 @@ namespace fatrop
     {
         // reset evaluated quantities
         reset_evaluated_quantities();
+        /**
+         * todo, with every solve the get_bounds function is called 3 times, avoid this.
+         * morever, it is also called upon construction (first time solver is used).
+         * Also avoid this.
+         */
         // set the bounds
         nlp_->get_bounds(info_, lower_bounds_, upper_bounds_);
         // set the bound flags
@@ -31,7 +36,12 @@ namespace fatrop
             single_lower_bounded_[i] = single_bounded && lower_bounded_[i];
             single_upper_bounded_[i] = single_bounded && upper_bounded_[i];
         }
+
+        // reset info' s
+        step_info_ = StepInfo();
+        search_dir_info_ = SearchDirInfo();
     }
+
     template <typename ProblemType> void IpIterate<ProblemType>::reset_evaluated_quantities()
     {
         obj_value_evaluated_ = false;
