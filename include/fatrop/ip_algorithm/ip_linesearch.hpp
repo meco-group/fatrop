@@ -140,6 +140,7 @@ namespace fatrop
         VecRealAllocated soc_rhs_x_;
         VecRealAllocated soc_rhs_s_;
         VecRealAllocated soc_rhs_g_;
+        VecRealAllocated soc_g_accumulate_;
         VecRealAllocated soc_rhs_cl_;
         VecRealAllocated soc_rhs_cu_;
         // options
