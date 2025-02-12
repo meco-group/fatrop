@@ -127,8 +127,8 @@ namespace fatrop
         std::shared_ptr<PdSolverOrig<ProblemType>> pd_solver_;
         std::shared_ptr<LinearSolver<PdSolverOrig<ProblemType>, PdSystemType<ProblemType>>>
             linear_solver_;
-        std::shared_ptr<IpSearchDirBase> search_dir_;
-        std::shared_ptr<IpLineSearchBase> linesearch_;
+        std::shared_ptr<IpSearchDirImpl<PdSolverOrig<ProblemType>, ProblemType>> search_dir_;
+        std::shared_ptr<IpLinesearch<PdSolverOrig<ProblemType>, ProblemType>> linesearch_;
         std::shared_ptr<IpInitializerBase> initializer_;
         std::shared_ptr<IpMuUpdateBase> mu_update_;
         std::shared_ptr<IpEqMultInitializerBase> eq_mult_initializer_;

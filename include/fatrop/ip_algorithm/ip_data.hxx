@@ -13,7 +13,7 @@ namespace fatrop
     template <typename ProblemType>
     IpData<ProblemType>::IpData(const NlpSp &nlp)
         : iterate_data_{nlp, nlp, nlp}, current_iterate_(&iterate_data_[0]),
-          trial_iterate_(&iterate_data_[1]), stored_iterate_(&iterate_data_[2])
+          trial_iterate_(&iterate_data_[1]), stored_iterate_(&iterate_data_[2]), nlp_(nlp)
     {
         reset();
     }

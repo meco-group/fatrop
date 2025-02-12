@@ -90,7 +90,7 @@ namespace fatrop
             create_ipdata();
         if (!pd_solver_)
             create_pdsolver();
-        linesearch_ = std::make_shared<IpLinesearch<ProblemType>>(ipdata_, pd_solver_);
+        linesearch_ = std::make_shared<IpLinesearch<PdSolverOrig<ProblemType>, ProblemType>>(ipdata_, pd_solver_);
         if (options_registry_)
             options_registry_->register_options(*linesearch_);
         return *this;

@@ -5,9 +5,9 @@
 #ifndef __fatrop_ip_algorithm_ip_data_hpp__
 #define __fatrop_ip_algorithm_ip_data_hpp__
 #include "fatrop/common/exception.hpp"
+#include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
-#include "fatrop/common/fwd.hpp"
 namespace fatrop
 {
     /**
@@ -38,7 +38,7 @@ namespace fatrop
          * @brief Get the NLP problem associated with this data.
          * @return NlpSp The shared pointer to the NLP problem.
          */
-        NlpSp get_nlp() const;
+        NlpSp get_nlp() const{ return nlp_; };
 
         /**
          * @brief Accept the trial iterate as the new current iterate.
@@ -141,10 +141,10 @@ namespace fatrop
         Scalar tolerance() const { return tol_; }
 
         // Setter method for tolerance
-        void set_tolerance(const Scalar& value) { tol_ = value; }
+        void set_tolerance(const Scalar &value) { tol_ = value; }
 
         // Register options
-        void register_options(OptionRegistry& registry);
+        void register_options(OptionRegistry &registry);
 
     private:
         Index iteration_number_;   ///< Number of the current iteration.
@@ -155,6 +155,7 @@ namespace fatrop
         bool current_iterate_is_valid_ = true; ///< Flag indicating if the current iterate is valid.
         bool tiny_step_flag_ = false;
         Scalar tol_ = 1e-8;
+        NlpSp nlp_; ///< Shared pointer to the NLP problem.
     };
     template <typename ProblemType> IpIterate<ProblemType> &IpData<ProblemType>::current_iterate()
     {

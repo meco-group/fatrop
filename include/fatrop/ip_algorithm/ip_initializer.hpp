@@ -63,6 +63,7 @@ namespace fatrop
         IpEqMultInitializerSp eq_mult_initializer_; ///< Equality multiplier initializer
         Scalar bound_push = 1e-2;              ///< Bound push parameter (kappa_1)
         Scalar bound_frac = 1e-2;              ///< Bound fraction parameter (kappa_2)
+        VecRealAllocated primal_buff_;
 
     public:
         // Setter methods for options

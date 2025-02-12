@@ -42,6 +42,7 @@ namespace fatrop
         mu_update_->reset();
         eq_mult_initializer_->reset();
         convergence_check_->reset();
+        ip_data_->reset();
         // Note: IpIterationOutput might not need a reset method
     }
 

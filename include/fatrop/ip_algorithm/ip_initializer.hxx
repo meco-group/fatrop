@@ -15,12 +15,15 @@ namespace fatrop
     template <typename ProblemType>
     IpInitializer<ProblemType>::IpInitializer(const IpDataSp ipdata,
                                               const IpEqMultInitializerSp &eq_mult_initializer)
-        : ipdata_(ipdata), eq_mult_initializer_(eq_mult_initializer)
+        : ipdata_(ipdata), eq_mult_initializer_(eq_mult_initializer), primal_buff_(ipdata->current_iterate().primal_x().m())
     {
     }
 
     template <typename ProblemType> void IpInitializer<ProblemType>::initialize()
     {
+        // get primal initialization from the interface
+        ipdata_->get_nlp()->get_initial_primal(ipdata_->current_iterate().info(), primal_buff_);
+        ipdata_->current_iterate().set_primal_x(primal_buff_);
         const Index m = ipdata_->current_iterate().primal_s().m();
         const std::vector<bool> lower_bounded = ipdata_->current_iterate().lower_bounded();
         const std::vector<bool> upper_bounded = ipdata_->current_iterate().upper_bounded();
@@ -32,8 +35,10 @@ namespace fatrop
     }
     template <typename ProblemType> void IpInitializer<ProblemType>::initialize_slacks()
     {
-        fatrop_assert_msg(ipdata_->current_iterate().primal_s().is_zero(),
-                          "Slack variables must be zero at initialization");
+        // set slack variables to zero
+        ipdata_->current_iterate().set_primal_s(VecRealScalar(ipdata_->current_iterate().primal_s().m(), 0.0));
+        // fatrop_assert_msg(ipdata_->current_iterate().primal_s().is_zero(),
+        //                   "Slack variables must be zero at initialization");
         const VecRealView viol_s = ipdata_->current_iterate().constr_viol_ineq();
         const VecRealView lower_bounds = ipdata_->current_iterate().lower_bounds();
         const VecRealView upper_bounds = ipdata_->current_iterate().upper_bounds();
