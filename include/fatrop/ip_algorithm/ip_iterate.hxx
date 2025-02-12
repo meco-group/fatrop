@@ -131,6 +131,8 @@ namespace fatrop
     template <typename ProblemType>
     const VecRealView &IpIterate<ProblemType>::dual_infeasibility_s()
     {
+        // note that the setters of dual bounds make sure that duals where no bound is present are
+        // zero
         if (!dual_infeasibility_s_evaluated_)
         {
             dual_infeasibility_s_ = obj_gradient_s() + dual_bounds_u_ - dual_bounds_l_;

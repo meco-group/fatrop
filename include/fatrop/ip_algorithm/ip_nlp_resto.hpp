@@ -74,9 +74,8 @@ namespace fatrop
          */
         virtual Index eval_objective_gradient(const ProblemInfo<ProblemType> &info,
                                               const Scalar objective_scale,
-                                              const VecRealView &primal_x, 
-                                              const VecRealView &primal_s, 
-                                              VecRealView &grad_x,
+                                              const VecRealView &primal_x,
+                                              const VecRealView &primal_s, VecRealView &grad_x,
                                               VecRealView &grad_s) override;
 
         /**
@@ -99,18 +98,20 @@ namespace fatrop
                                         VecRealView &damping) override;
 
         virtual void apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
-                                        const VecRealView &multipliers, const Scalar alpha,
-                                        const VecRealView &y, VecRealView &out) override;
+                                                const VecRealView &multipliers, const Scalar alpha,
+                                                const VecRealView &y, VecRealView &out) override;
         void set_xs_reference(const ProblemInfo<ProblemType> &info, const VecRealView &x_reference,
                               const VecRealView &s_reference);
         void set_zeta(const Scalar zeta) { zeta_ = zeta; };
+        void set_rho(const Scalar rho) { rho_ = rho; };
 
     private:
         NlpSp nlp_; ///< Shared pointer to the original NLP problem
         NlpDims dims_;
         VecRealAllocated x_reference_;
         VecRealAllocated dr_;
-        Scalar zeta_;
+        Scalar zeta_ = 1.;
+        Scalar rho_ = 1.;
 
     public:
         // Register options

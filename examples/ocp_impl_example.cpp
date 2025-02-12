@@ -90,7 +90,7 @@ public:
         // [ 0,  2 ]
         if (k < K_ - 1)
         {
-            blasfeo_diare_wrap(2, 2.0, res, 0, 0);
+            blasfeo_diare_wrap(2, objective_scale[0] * 2.0, res, 0, 0);
             // add the contribution from the nonlinearity in the dynamics
             Scalar lam = lam_dyn_k[2];
             blasfeo_matel_wrap(res, 1, 1) += dt_ * lam / m_;
@@ -144,10 +144,10 @@ public:
         }
         else if (k == K_ - 1)
         {
-            res[0] = states_k[0] - 1.0; // == 0
-            res[1] = states_k[1] - 2.0; // == 0
-            res[2] = states_k[2] - 3.0; // == 0
-            res[3] = states_k[3] - 4.0; // == 0
+            res[0] = states_k[0] - 10; // == 0
+            res[1] = states_k[1] - 20; // == 0
+            res[2] = states_k[2] - 30; // == 0
+            res[3] = states_k[3] - 40; // == 0
         }
         return 0;
     };
@@ -230,10 +230,14 @@ private:
     const Scalar dt_ = 0.05;
 };
 
+#include "fatrop/common/options.hpp"
+
 int main()
 {
+    OptionRegistry options;
     IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(std::make_shared<OcpTestProblem>()));
-    std::shared_ptr<IpAlgorithm<OcpType>> ipalg = builder.build();
+    std::shared_ptr<IpAlgorithm<OcpType>> ipalg = builder.with_options_registry(&options).build();
+    std::cout << options << std::endl;
     IpSolverReturnFlag ret = ipalg->optimize();
     std::cout << "Return flag: " << int(ret) << std::endl;
     std::cout << "Return flag == success: " << (ret == IpSolverReturnFlag::Success) << std::endl;

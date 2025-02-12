@@ -92,7 +92,7 @@ namespace fatrop
                 // [ 0,  2 ]
                 if (k < K_ - 1)
                 {
-                    blasfeo_diare_wrap(2, 2.0, res, 0, 0);
+                    blasfeo_diare_wrap(2, *objective_scale*2.0, res, 0, 0);
                 }
                 return 0;
             };
@@ -170,11 +170,11 @@ namespace fatrop
                 {
                     res[0] = 2 * objective_scale[0] * inputs_k[0] + 0.05 * k;
                     res[1] = 2 * objective_scale[0] * inputs_k[1] + 0.06 * k;
-                    res[2] = 0. + 0.07 * k;
-                    res[3] = 0. + 0.08 * k;
-                    res[4] = 0. + 0.09 * k;
-                    res[5] = 0. + 0.10 * k;
-                    res[6] = 0. + 0.11 * k;
+                    res[2] = 0. +  0.07 * k;
+                    res[3] = 0. +  0.08 * k;
+                    res[4] = 0. +  0.09 * k;
+                    res[5] = 0. +  0.10 * k;
+                    res[6] = 0. +  0.11 * k;
                 }
                 return 0;
             }

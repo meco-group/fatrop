@@ -68,6 +68,8 @@ namespace fatrop
         iteration_output_->output_current_iteration();
         if (conv_status == IpConvergenceStatus::Converged)
             retval = IpSolverReturnFlag::Success;
+        if (conv_status == IpConvergenceStatus::ConvergedToAcceptablePoint)
+            retval = IpSolverReturnFlag::StopAtAcceptablePoint;
         return retval;
     }
     template <typename ProblemType>

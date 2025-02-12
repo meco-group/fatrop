@@ -335,7 +335,7 @@ namespace fatrop
          */
         const VecRealView &De() const { return De_; }
 
-        const VecRealView &primal_damping() ;
+        const VecRealView &primal_damping();
 
         /**
          * @brief Returns the flag indicating if De_ is zero.
@@ -532,7 +532,7 @@ namespace fatrop
         bool complementarity_l_evaluated_ =
             false; ///< Flag for lower bound complementarity evaluation
         bool complementarity_u_evaluated_ =
-            false; ///< Flag for upper bound complementarity evaluation
+            false;                              ///< Flag for upper bound complementarity evaluation
         bool primal_damping_evaluated_ = false; ///< Flag for primal damping evaluation
 
         Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
@@ -577,7 +577,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_l(const VecReal<Derived> &d
 {
     complementarity_l_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
-    dual_bounds_l_ = dual_bounds_l;
+    dual_bounds_l_ = if_else(lower_bounded(), dual_bounds_l, VecRealScalar(dual_bounds_l_.m(), 0.));
 }
 template <typename ProblemType>
 template <typename Derived>
@@ -585,7 +585,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &d
 {
     complementarity_u_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
-    dual_bounds_u_ = dual_bounds_u;
+    dual_bounds_u_ = if_else(upper_bounded(), dual_bounds_u, VecRealScalar(dual_bounds_u_.m(), 0.));
 }
 template <typename ProblemType>
 template <typename Derived>
@@ -613,14 +613,16 @@ template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_delta_dual_bounds_l(
     const VecReal<Derived> &delta_dual_bounds_l)
 {
-    delta_dual_bounds_l_ = delta_dual_bounds_l;
+    delta_dual_bounds_l_ =
+        if_else(lower_bounded(), delta_dual_bounds_l, VecRealScalar(delta_dual_bounds_l_.m(), 0.));
 }
 template <typename ProblemType>
 template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_delta_dual_bounds_u(
     const VecReal<Derived> &delta_dual_bounds_u)
 {
-    delta_dual_bounds_u_ = delta_dual_bounds_u;
+    delta_dual_bounds_u_ =
+        if_else(upper_bounded(), delta_dual_bounds_u, VecRealScalar(delta_dual_bounds_u_.m(), 0.));
 }
 
 template <typename ProblemType>

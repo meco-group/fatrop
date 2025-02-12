@@ -105,7 +105,7 @@ public:
         // [ 0,  2 ]
         if (k < K_ - 1)
         {
-            blasfeo_diare_wrap(2, 2.0, res, 0, 0);
+            blasfeo_diare_wrap(2, objective_scale[0] * 2.0, res, 0, 0);
             // add the contribution from the nonlinearity in the dynamics
             Scalar lam = lam_dyn_k[2];
             blasfeo_matel_wrap(res, 1, 1) += dt_ * lam / m_;

@@ -24,6 +24,9 @@ namespace fatrop
         dims_.number_of_ineq_constraints =
             orig_dims.number_of_ineq_constraints + 2 * orig_dims.number_of_eq_constraints;
         dims_.number_of_eq_constraints = orig_dims.number_of_eq_constraints;
+
+        // set default value for dr
+        dr_ = 1.;
     }
 
     template <typename ProblemType> const NlpDims &IpNlpResto<ProblemType>::nlp_dims() const
@@ -79,19 +82,19 @@ namespace fatrop
     {
         VecRealView dr_x = dr_.block(info.number_of_primal_variables, 0);
         VecRealView x_reference_x = x_reference_.block(info.number_of_primal_variables, 0);
-        grad_x = zeta_ * dr_x * (primal_x - x_reference_x);
+        grad_x = zeta_ * dr_x * dr_x * (primal_x - x_reference_x);
         VecRealView dr_s = dr_.block(info.number_of_slack_variables, info.offset_slack);
         VecRealView x_reference_s =
             x_reference_.block(info.number_of_slack_variables, info.offset_slack);
         VecRealView grad_ss = grad_s.block(info.number_of_slack_variables, 0);
         VecRealView primal_s_s = primal_s.block(info.number_of_slack_variables, 0);
-        grad_ss = zeta_ * dr_s * (primal_s_s - x_reference_s);
+        grad_ss = zeta_ * dr_s * dr_s * (primal_s_s - x_reference_s);
 
         VecRealView gs_p = grad_s.block(info.number_of_eq_constraints, info.offset_p);
         VecRealView gs_n = grad_s.block(info.number_of_eq_constraints, info.offset_n);
-        gs_p = if_else(info.constraint_allows_dual_damping, VecRealScalar(gs_p.m(), 1.),
+        gs_p = if_else(info.constraint_allows_dual_damping, VecRealScalar(gs_p.m(), rho_),
                        VecRealScalar(gs_p.m(), 0.));
-        gs_n = if_else(info.constraint_allows_dual_damping, VecRealScalar(gs_n.m(), 1.),
+        gs_n = if_else(info.constraint_allows_dual_damping, VecRealScalar(gs_n.m(), rho_),
                        VecRealScalar(gs_n.m(), 0.));
 
         return 0.;
@@ -114,7 +117,8 @@ namespace fatrop
         res += 0.5 * zeta_ * sumsqr(dr_s * (primal_s_s - x_reference_s));
         VecRealView p = primal_s.block(info.number_of_eq_constraints, info.offset_p);
         VecRealView n = primal_s.block(info.number_of_eq_constraints, info.offset_n);
-        res += sum(if_else(info.constraint_allows_dual_damping, p + n, VecRealScalar(p.m(), 0.)));
+        res += rho_ *
+               sum(if_else(info.constraint_allows_dual_damping, p + n, VecRealScalar(p.m(), 0.)));
         return 0;
     }
 
@@ -156,7 +160,7 @@ namespace fatrop
         VecRealView xs_orig =
             damping.block(info.number_of_primal_variables + info.number_of_slack_variables, 0);
         nlp_->get_primal_damping(info, xs_orig);
-        xs_orig = xs_orig + dr_;
+        xs_orig = xs_orig + zeta_ * dr_ * dr_;
         damping.block(info.number_of_eq_constraints, info.offset_slack_p) = 0.;
         damping.block(info.number_of_eq_constraints, info.offset_slack_n) = 0.;
     }
