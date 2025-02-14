@@ -88,8 +88,6 @@ namespace fatrop
         os << std::left << std::setw(30) << "Operation" << std::right << std::setw(10) << "Time (s)"
            << std::endl;
         os << std::string(40, '-') << std::endl;
-        os << std::left << std::setw(30) << "full algorithm" << std::right << std::setw(10)
-           << std::fixed << std::setprecision(6) << timings.full_algorithm.elapsed() << std::endl;
         os << std::left << std::setw(30) << "initialization" << std::right << std::setw(10)
            << std::fixed << std::setprecision(6) << timings.initialization.elapsed() << std::endl;
         os << std::left << std::setw(30) << "compute search dir" << std::right << std::setw(10)
@@ -105,14 +103,17 @@ namespace fatrop
            << std::fixed << std::setprecision(6) << timings.eval_hessian.elapsed() << std::endl;
         os << std::left << std::setw(30) << "eval jacobian" << std::right << std::setw(10)
            << std::fixed << std::setprecision(6) << timings.eval_jacobian.elapsed() << std::endl;
-        os << std::left << std::setw(30) << "rest:" << std::right << std::setw(10) << std::fixed
+        os << std::left << std::setw(30) << "rest" << std::right << std::setw(10) << std::fixed
            << std::setprecision(6) << timings.compute_rest_time() << std::endl;
         os << std::string(40, '-') << std::endl;
-        os << std::left << std::setw(30) << "time function evaluation:" << std::right
+        os << std::left << std::setw(30) << "time function evaluation" << std::right
            << std::setw(10) << std::fixed << std::setprecision(6)
            << timings.compute_function_evaluation() << std::endl;
-        os << std::left << std::setw(30) << "time fatrop:" << std::right << std::setw(10)
+        os << std::left << std::setw(30) << "time fatrop" << std::right << std::setw(10)
            << std::fixed << std::setprecision(6) << timings.compute_fatrop() << std::endl;
+        os << std::string(40, '-') << std::endl;
+        os << std::left << std::setw(30) << "total " << std::right << std::setw(10)
+           << std::fixed << std::setprecision(6) << timings.full_algorithm.elapsed() << std::endl;
         return os;
     }
 
