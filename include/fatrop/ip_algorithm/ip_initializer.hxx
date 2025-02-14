@@ -25,8 +25,8 @@ namespace fatrop
         ipdata_->get_nlp()->get_initial_primal(ipdata_->current_iterate().info(), primal_buff_);
         ipdata_->current_iterate().set_primal_x(primal_buff_);
         const Index m = ipdata_->current_iterate().primal_s().m();
-        const std::vector<bool> lower_bounded = ipdata_->current_iterate().lower_bounded();
-        const std::vector<bool> upper_bounded = ipdata_->current_iterate().upper_bounded();
+        const std::vector<bool>& lower_bounded = ipdata_->current_iterate().lower_bounded();
+        const std::vector<bool>& upper_bounded = ipdata_->current_iterate().upper_bounded();
         // set z to 1. if bounded and 0. otherwise
         ipdata_->current_iterate().set_dual_bounds_l(if_else(lower_bounded, VecRealScalar(m, 1.0), VecRealScalar(m, 0.0)));
         ipdata_->current_iterate().set_dual_bounds_u(if_else(upper_bounded, VecRealScalar(m, 1.0), VecRealScalar(m, 0.0)));
@@ -42,8 +42,8 @@ namespace fatrop
         const VecRealView viol_s = ipdata_->current_iterate().constr_viol_ineq();
         const VecRealView lower_bounds = ipdata_->current_iterate().lower_bounds();
         const VecRealView upper_bounds = ipdata_->current_iterate().upper_bounds();
-        const std::vector<bool> lower_bounded = ipdata_->current_iterate().lower_bounded();
-        const std::vector<bool> upper_bounded = ipdata_->current_iterate().upper_bounded();
+        const std::vector<bool> lower_bounded& = ipdata_->current_iterate().lower_bounded();
+        const std::vector<bool> upper_bounded& = ipdata_->current_iterate().upper_bounded();
         auto double_bounded = [&](Index i) { return lower_bounded[i] && upper_bounded[i]; };
         auto single_bounded = [&](Index i) { return lower_bounded[i] ^ upper_bounded[i]; };
         Index number_of_slacks = lower_bounds.m();
