@@ -30,7 +30,7 @@ namespace fatrop
     {
         Scalar res_prev = std::numeric_limits<Scalar>::max();
         ls.get_rhs(tmp_);
-        const Scalar b_norm = norm_inf(tmp_);
+        const Scalar b_norm = std::max(norm_inf(tmp_), 1.0);
         for (Index i = 0; i < max_it_ref; i++)
         {
             fatrop_assert_msg(x_.is_finite(),
