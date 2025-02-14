@@ -1,3 +1,4 @@
+#include "fatrop/common/timing.hpp"
 #include "fatrop/ip_algorithm/ip_alg_builder.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
@@ -93,7 +94,7 @@ public:
             blasfeo_diare_wrap(2, objective_scale[0] * 2.0, res, 0, 0);
             // add the contribution from the nonlinearity in the dynamics
             Scalar lam = lam_dyn_k[2];
-            blasfeo_matel_wrap(res, 1, 1) += dt_ * lam / m_;
+            blasfeo_matel_wrap(res, 1, 1) += dt_ * lam;
         }
         return 0;
     };
@@ -128,7 +129,7 @@ public:
         res[0] = -states_kp1[0] + states_k[0] + dt_ * states_k[2]; // == 0
         res[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3]; // == 0
         res[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_ +
-                 dt_ * 0.5 * inputs_k[1] * inputs_k[1] / m_;            // == 0
+                 dt_ * 0.5 * inputs_k[1] * inputs_k[1];            // == 0
         res[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_; // == 0
         return 0;
     }
@@ -144,10 +145,10 @@ public:
         }
         else if (k == K_ - 1)
         {
-            res[0] = states_k[0] - 10; // == 0
-            res[1] = states_k[1] - 20; // == 0
-            res[2] = states_k[2] - 30; // == 0
-            res[3] = states_k[3] - 40; // == 0
+            res[0] = states_k[0] - 1.; // == 0
+            res[1] = states_k[1] - 2.; // == 0
+            res[2] = states_k[2] - 3.; // == 0
+            res[3] = states_k[3] - 4.; // == 0
         }
         return 0;
     };
@@ -231,6 +232,7 @@ private:
 };
 
 #include "fatrop/common/options.hpp"
+#include "fatrop/fatrop.hpp"
 
 int main()
 {
@@ -238,8 +240,17 @@ int main()
     IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(std::make_shared<OcpTestProblem>()));
     std::shared_ptr<IpAlgorithm<OcpType>> ipalg = builder.with_options_registry(&options).build();
     std::cout << options << std::endl;
-    IpSolverReturnFlag ret = ipalg->optimize();
-    std::cout << "Return flag: " << int(ret) << std::endl;
-    std::cout << "Return flag == success: " << (ret == IpSolverReturnFlag::Success) << std::endl;
+    for(int i =0; i< 10; i++)
+    {
+        Timer timer;
+        timer.start();
+        IpSolverReturnFlag ret = ipalg->optimize();
+        std::cout << "Elapsed time: " << timer.stop() << std::endl;
+        auto data = builder.get_ipdata();
+        std::cout << "Return flag: " << int(ret) << std::endl;
+        std::cout << "Return flag == success: " << (ret == IpSolverReturnFlag::Success)
+                  << std::endl;
+        std::cout << data->timing_statistics() << std::endl;
+    }
     return 0;
 }

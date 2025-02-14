@@ -14,14 +14,12 @@ def dyn_fun():
 
     dp = xk[2:]
     dv = uk / m 
-    dv[0] += .5*uk[1]*uk[1]
+    dv[0] += 0.5*uk[1]*uk[1]
 
     return cs.Function("dyn", [uk, xk],  [xk + dt*cs.vertcat(dp, dv)])
 
 # It is always a good idea to put code that is re-used in a casadi Function, which is expanded for efficiency (changing an MX to an SX Function).
-# We also set the "jac_penalty" option to 0, so we will force casadi to compute the Jacobian rather than using reverse mode (which is not so efficient for casadi MX)
-# We also propagate this options to the first derivative of this function (der_options).
-fun = dyn_fun().expand("dyn" , {"jac_penalty":0, "der_options":{"jac_penalty":0}})
+fun = dyn_fun().expand()
 
 
 def path_constraints_fun():
@@ -31,14 +29,11 @@ def path_constraints_fun():
     cc.append((-50. , uk[0], 50.))
     cc.append((-100., uk[1], 100.))
     # no collision
-    obstacle_pos = cs.vertcat(5., 10.)
-    obstacle_radius = 1. 
-    cc.append((0, cs.sumsqr(xk[:2] - obstacle_pos) - obstacle_radius*obstacle_radius, np.inf))
     lower, con, upper = zip(*cc)
     return [lower, cs.Function("path_constraints", [uk, xk], [cs.vertcat(*con)]).expand(), upper]
 
 pc_fun = path_constraints_fun()
-pc_fun[1] = pc_fun[1].expand("path_constraints", {"jac_penalty":0, "der_options":{"jac_penalty":0}})
+pc_fun[1] = pc_fun[1].expand()
     
 
 # define our optimal control problem
@@ -96,6 +91,6 @@ for k in range(K):
     J += cost(u[k], x[k], k)
 opti.minimize(J)
 
-opti.solver('fatrop', {'structure_detection':'manual', 'nx': nx, 'nu':nu, 'ng':ng, 'N':K-1, "expand": False})
-opti.solve()
+opti.solver('fatrop', {'structure_detection':'manual', 'nx': nx, 'nu':nu, 'ng':ng, 'N':K-1, "expand": True, "fatrop.mu_init":1e-1})
 opti.to_function("opti_func", [], [opti.x]).generate('casadi_generated.c', {"with_header": True})
+# opti.solve()

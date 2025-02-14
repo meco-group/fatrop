@@ -9,11 +9,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set default build type to Release
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
 # Set compilation flags for Release and Debug
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 # Option to build tests (default is ON)
