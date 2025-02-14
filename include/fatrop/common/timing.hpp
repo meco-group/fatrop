@@ -18,19 +18,21 @@ namespace fatrop
 {
     struct Timer
     {
-        void start() { blasfeo_tic(&timer); }
+        void start() { fatrop_tic(&timer); }
         double stop()
         {
-            el_time += blasfeo_toc(&timer);
+            el_time += fatrop_toc(&timer);
             double ret = el_time;
             el_time = 0.;
             return ret;
         }
         double pause()
         {
-            el_time += blasfeo_toc(&timer);
+            el_time += fatrop_toc(&timer);
             return el_time;
         }
+        double elapsed() const { return el_time; }
+        void reset() { el_time = 0.; }
         blasfeo_timer timer;
         double el_time = 0.;
         friend std::ostream &operator<<(std::ostream &os, const Timer &el_time)

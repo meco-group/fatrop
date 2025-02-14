@@ -14,7 +14,7 @@ namespace fatrop
 
     template <typename ProblemType>
     IpNlpResto<ProblemType>::IpNlpResto(const NlpSp &nlp)
-        : nlp_(nlp), x_reference_(nlp->nlp_dims().number_of_variables +
+        : nlp_orig_(nlp), x_reference_(nlp->nlp_dims().number_of_variables +
                                   nlp->nlp_dims().number_of_ineq_constraints),
           dr_(x_reference_.m())
     {
@@ -37,7 +37,7 @@ namespace fatrop
     template <typename ProblemType>
     const ProblemDims<ProblemType> &IpNlpResto<ProblemType>::problem_dims() const
     {
-        return nlp_->problem_dims();
+        return nlp_orig_->problem_dims();
     }
 
     template <typename ProblemType>
@@ -47,7 +47,7 @@ namespace fatrop
                                                  const VecRealView &primal_s,
                                                  const VecRealView &lam, Hessian<ProblemType> &hess)
     {
-        return nlp_->eval_lag_hess(info, 0.0, primal_x, primal_s, lam, hess);
+        return nlp_orig_->eval_lag_hess(info, 0.0, primal_x, primal_s, lam, hess);
     }
 
     template <typename ProblemType>
@@ -56,7 +56,7 @@ namespace fatrop
                                                    const VecRealView &primal_s,
                                                    Jacobian<ProblemType> &jac)
     {
-        return nlp_->eval_constr_jac(info, primal_x, primal_s, jac);
+        return nlp_orig_->eval_constr_jac(info, primal_x, primal_s, jac);
     }
 
     template <typename ProblemType>
@@ -65,7 +65,7 @@ namespace fatrop
                                                              const VecRealView &primal_s,
                                                              VecRealView &res)
     {
-        Index ret = nlp_->eval_constraint_violation(info, primal_x, primal_s, res);
+        Index ret = nlp_orig_->eval_constraint_violation(info, primal_x, primal_s, res);
         // now we add the +p and -n slack variables where applicable
         VecRealView p = primal_s.block(info.number_of_eq_constraints, info.offset_p);
         VecRealView n = primal_s.block(info.number_of_eq_constraints, info.offset_n);
@@ -129,7 +129,7 @@ namespace fatrop
         // get the bounds for s
         VecRealView lower_bounds_s = lower_bounds.block(info.number_of_slack_variables, 0);
         VecRealView upper_bounds_s = upper_bounds.block(info.number_of_slack_variables, 0);
-        nlp_->get_bounds(info, lower_bounds_s, upper_bounds_s);
+        nlp_orig_->get_bounds(info, lower_bounds_s, upper_bounds_s);
         // set the lower bounds for the constraints that allow dual damping to zero otherwise -infty
         lower_bounds.block(info.number_of_eq_constraints, info.offset_p) = if_else(
             info.constraint_allows_dual_damping, VecRealScalar(info.number_of_eq_constraints, 0.),
@@ -150,7 +150,7 @@ namespace fatrop
     Index IpNlpResto<ProblemType>::get_initial_primal(const ProblemInfo<ProblemType> &info,
                                                       VecRealView &primal_x)
     {
-        return nlp_->get_initial_primal(info, primal_x);
+        return nlp_orig_->get_initial_primal(info, primal_x);
     }
 
     template <typename ProblemType>
@@ -159,7 +159,7 @@ namespace fatrop
     {
         VecRealView xs_orig =
             damping.block(info.number_of_primal_variables + info.number_of_slack_variables, 0);
-        nlp_->get_primal_damping(info, xs_orig);
+        nlp_orig_->get_primal_damping(info, xs_orig);
         xs_orig = xs_orig + zeta_ * dr_ * dr_;
         damping.block(info.number_of_eq_constraints, info.offset_slack_p) = 0.;
         damping.block(info.number_of_eq_constraints, info.offset_slack_n) = 0.;
@@ -182,7 +182,7 @@ namespace fatrop
     {
         VecRealView y_orig = y.block(info.number_of_slack_variables, 0);
         VecRealView out_orig = y.block(info.number_of_slack_variables, 0);
-        nlp_->apply_jacobian_s_transpose(info, multipliers, alpha, y, out);
+        nlp_orig_->apply_jacobian_s_transpose(info, multipliers, alpha, y, out);
         VecRealView y_p = y.block(info.number_of_eq_constraints, info.offset_p);
         VecRealView out_p = out.block(info.number_of_eq_constraints, info.offset_p);
         VecRealView y_n = y.block(info.number_of_eq_constraints, info.offset_n);

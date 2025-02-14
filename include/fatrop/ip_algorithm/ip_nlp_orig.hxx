@@ -6,6 +6,7 @@
 #define __fatrop_ip_algorithm_ip_nlp_orig_hxx__
 #include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_nlp_orig.hpp"
+#include "fatrop/ip_algorithm/ip_timings.hpp"
 #include "fatrop/nlp/dims.hpp"
 #include <cmath>
 
@@ -37,7 +38,12 @@ namespace fatrop
                                                 const VecRealView &primal_s, const VecRealView &lam,
                                                 Hessian<ProblemType> &hess)
     {
-        return nlp_->eval_lag_hess(info, objective_scale, primal_x, primal_s, lam, hess);
+        if (timings_)
+            timings_->eval_hessian.start();
+        Index ret = nlp_->eval_lag_hess(info, objective_scale, primal_x, primal_s, lam, hess);
+        if (timings_)
+            timings_->eval_hessian.pause();
+        return ret;
     }
 
     template <typename ProblemType>
@@ -46,7 +52,12 @@ namespace fatrop
                                                   const VecRealView &primal_s,
                                                   Jacobian<ProblemType> &jac)
     {
-        return nlp_->eval_constr_jac(info, primal_x, primal_s, jac);
+        if (timings_)
+            timings_->eval_jacobian.start();
+        Index ret = nlp_->eval_constr_jac(info, primal_x, primal_s, jac);
+        if (timings_)
+            timings_->eval_jacobian.pause();
+        return ret;
     }
 
     template <typename ProblemType>
@@ -55,7 +66,12 @@ namespace fatrop
                                                             const VecRealView &primal_s,
                                                             VecRealView &res)
     {
-        return nlp_->eval_constraint_violation(info, primal_x, primal_s, res);
+        if (timings_)
+            timings_->eval_constraint_violation.start();
+        Index ret = nlp_->eval_constraint_violation(info, primal_x, primal_s, res);
+        if (timings_)
+            timings_->eval_constraint_violation.pause();
+        return ret;
     }
 
     template <typename ProblemType>
@@ -65,8 +81,13 @@ namespace fatrop
                                                           const VecRealView &primal_s,
                                                           VecRealView &grad_x, VecRealView &grad_s)
     {
-        return nlp_->eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x,
-                                             grad_s);
+        if (timings_)
+            timings_->eval_gradient.start();
+        Index ret = nlp_->eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x,
+                                                  grad_s);
+        if (timings_)
+            timings_->eval_gradient.pause();
+        return ret;
     }
 
     template <typename ProblemType>
@@ -75,7 +96,12 @@ namespace fatrop
                                                  const VecRealView &primal_x,
                                                  const VecRealView &primal_s, Scalar &res)
     {
-        return nlp_->eval_objective(info, objective_scale, primal_x, primal_s, res);
+        if (timings_)
+            timings_->eval_objective.start();
+        Index ret = nlp_->eval_objective(info, objective_scale, primal_x, primal_s, res);
+        if (timings_)
+            timings_->eval_objective.pause();
+        return ret;
     }
 
     template <typename ProblemType>
@@ -114,8 +140,9 @@ namespace fatrop
     }
     template <typename ProblemType>
     void IpNlpOrig<ProblemType>::apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
-                                    const VecRealView &multipliers, const Scalar alpha,
-                                    const VecRealView &y, VecRealView &out)
+                                                            const VecRealView &multipliers,
+                                                            const Scalar alpha,
+                                                            const VecRealView &y, VecRealView &out)
     {
         nlp_->apply_jacobian_s_transpose(info, multipliers, alpha, y, out);
     }

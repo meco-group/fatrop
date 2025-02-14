@@ -12,7 +12,9 @@
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
 #include "fatrop/ip_algorithm/ip_mu_update.hpp"
 #include "fatrop/ip_algorithm/ip_nlp_orig.hpp"
+#include "fatrop/ip_algorithm/ip_resto_phase_min_cl1.hpp"
 #include "fatrop/ip_algorithm/ip_search_dir.hpp"
+#include "fatrop/ip_algorithm/ip_timings.hpp"
 #include "fatrop/linear_algebra/linear_solver.hpp"
 
 namespace fatrop
@@ -77,7 +79,8 @@ namespace fatrop
             create_ipdata();
         if (!pd_solver_)
             create_pdsolver();
-        search_dir_ = std::make_shared<IpSearchDirImpl<PdSolverOrig<ProblemType>, ProblemType>>(ipdata_, pd_solver_);
+        search_dir_ = std::make_shared<IpSearchDirImpl<PdSolverOrig<ProblemType>, ProblemType>>(
+            ipdata_, pd_solver_);
         if (options_registry_)
             options_registry_->register_options(*search_dir_);
         return *this;
@@ -90,7 +93,8 @@ namespace fatrop
             create_ipdata();
         if (!pd_solver_)
             create_pdsolver();
-        linesearch_ = std::make_shared<IpLinesearch<PdSolverOrig<ProblemType>, ProblemType>>(ipdata_, pd_solver_);
+        linesearch_ = std::make_shared<IpLinesearch<PdSolverOrig<ProblemType>, ProblemType>>(
+            ipdata_, pd_solver_, nullptr);
         if (options_registry_)
             options_registry_->register_options(*linesearch_);
         return *this;
@@ -172,6 +176,8 @@ namespace fatrop
             create_convergence_check();
         if (!iteration_output_)
             create_iteration_output();
+        // set the timings satistics
+        nlp_orig_->set_timing_statistics(&ipdata_->timing_statistics());
 
         return std::make_shared<IpAlgorithm<ProblemType>>(
             search_dir_, linesearch_, initializer_, mu_update_, eq_mult_initializer_,

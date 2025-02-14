@@ -8,6 +8,7 @@
 #include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include "fatrop/ip_algorithm/ip_timings.hpp"
 namespace fatrop
 {
     /**
@@ -146,6 +147,8 @@ namespace fatrop
         // Register options
         void register_options(OptionRegistry &registry);
 
+        IpTimingStatistics &timing_statistics() { return timings_; }
+
     private:
         Index iteration_number_;   ///< Number of the current iteration.
         Iterate iterate_data_[3];  ///< Data for the three iterates (current, trial, and stored).
@@ -156,6 +159,7 @@ namespace fatrop
         bool tiny_step_flag_ = false;
         Scalar tol_ = 1e-8;
         NlpSp nlp_; ///< Shared pointer to the NLP problem.
+        IpTimingStatistics timings_;
     };
     template <typename ProblemType> IpIterate<ProblemType> &IpData<ProblemType>::current_iterate()
     {

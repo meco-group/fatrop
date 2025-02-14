@@ -21,7 +21,7 @@ namespace fatrop
         /**
          * @brief Initialize the equality multipliers.
          */
-        virtual void initialize_eq_mult() = 0;
+        virtual void initialize_eq_mult(bool trial_it = false) = 0;
         virtual void register_options(OptionRegistry& registry) = 0;
 
         /**
@@ -53,7 +53,7 @@ namespace fatrop
          */
         IpEqMultInitializer(const IpDataSp &ipdata, const PdSolverSp &linear_solver);
 
-        void initialize_eq_mult() override;
+        void initialize_eq_mult(bool trial_it = false) override;
         void reset() override;
 
     private:

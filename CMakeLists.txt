@@ -13,7 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set compilation flags for Release and Debug
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 # Option to build tests (default is ON)

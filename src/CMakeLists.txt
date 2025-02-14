@@ -17,6 +17,7 @@ set(FATROP_SOURCES
     ocp/ip_linesearch.cpp
     ocp/ip_nlp_orig.cpp
     ocp/ip_nlp_resto.cpp
+    ocp/ip_resto_phase_min_cl1.cpp
     ocp/ip_search_dir.cpp
     ocp/nlp_ocp.cpp
     ocp/pd_system_orig.cpp

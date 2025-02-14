@@ -104,9 +104,10 @@ namespace fatrop
                               const VecRealView &s_reference);
         void set_zeta(const Scalar zeta) { zeta_ = zeta; };
         void set_rho(const Scalar rho) { rho_ = rho; };
+        NlpSp get_orig_nlp() { return nlp_orig_; };
 
     private:
-        NlpSp nlp_; ///< Shared pointer to the original NLP problem
+        NlpSp nlp_orig_; ///< Shared pointer to the original NLP problem
         NlpDims dims_;
         VecRealAllocated x_reference_;
         VecRealAllocated dr_;

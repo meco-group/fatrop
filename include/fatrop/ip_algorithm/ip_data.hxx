@@ -4,8 +4,8 @@
 
 #ifndef __fatrop_ip_algorithm_ip_data_hxx__
 #define __fatrop_ip_algorithm_ip_data_hxx__
-#include "ip_data.hpp"
 #include "fatrop/common/options.hpp"
+#include "ip_data.hpp"
 
 namespace fatrop
 {
@@ -28,6 +28,7 @@ namespace fatrop
         {
             iterate.initialize();
         }
+        timing_statistics().reset();
     }
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()
     {
@@ -58,7 +59,7 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    void IpData<ProblemType>::register_options(OptionRegistry& registry)
+    void IpData<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("tolerance", &IpData::set_tolerance, this);
     }

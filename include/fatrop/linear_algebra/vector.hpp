@@ -133,6 +133,11 @@ namespace fatrop
             return ret;
         }
 
+        friend Scalar norm_l1_divided_by_m(const VecReal<Derived> &vec)
+        {
+            return norm_l1(vec) / vec.m();
+        }
+
         friend Scalar norm_l2(const VecReal<Derived> &vec)
         {
             Scalar ret = 0;

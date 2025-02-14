@@ -14,6 +14,7 @@
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
 #include "fatrop/ip_algorithm/ip_mu_update.hpp"
 #include "fatrop/ip_algorithm/ip_search_dir.hpp"
+#include "fatrop/ip_algorithm/ip_timings.hpp"
 #include "fatrop/ocp/type.hpp"
 namespace fatrop
 {
@@ -50,6 +51,7 @@ namespace fatrop
     IpSolverReturnFlag IpAlgorithm<ProblemType>::optimize(const bool is_resto)
     {
         reset();
+        ip_data_->timing_statistics().full_algorithm.start();
         initializer_->initialize();
         IpSolverReturnFlag retval = IpSolverReturnFlag::Unknown;
         IpConvergenceStatus conv_status = convergence_check_->check_converged();
@@ -60,9 +62,11 @@ namespace fatrop
         {
             iteration_output_->output_current_iteration();
             mu_update_->update_barrier_parameter();
+            ip_data_->timing_statistics().compute_search_dir.start();
             search_dir_->compute_search_dir();
+            ip_data_->timing_statistics().compute_search_dir.pause();
             linesearch_->find_acceptable_trial_point();
-            linesearch_->accept_trial_iterate();
+            ip_data_->accept_trial_iterate();
             conv_status = convergence_check_->check_converged();
             ip_data_->set_iteration_number(ip_data_->iteration_number() + 1);
         }
@@ -71,6 +75,7 @@ namespace fatrop
             retval = IpSolverReturnFlag::Success;
         if (conv_status == IpConvergenceStatus::ConvergedToAcceptablePoint)
             retval = IpSolverReturnFlag::StopAtAcceptablePoint;
+        ip_data_->timing_statistics().full_algorithm.pause();
         return retval;
     }
     template <typename ProblemType>

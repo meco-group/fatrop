@@ -7,6 +7,7 @@
 #include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
+#include "fatrop/ip_algorithm/ip_resto_phase.hpp"
 #include "fatrop/ip_algorithm/ip_utils.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
@@ -16,9 +17,10 @@
 namespace fatrop
 {
     template <typename LinearSolverType, typename ProblemType>
-    IpLinesearch<LinearSolverType, ProblemType>::IpLinesearch(const IpDataSp &ipdata,
-                                                              const LinearSolverSp &linear_solver)
-        : ipdata_(ipdata), linear_solver_(linear_solver),
+    IpLinesearch<LinearSolverType, ProblemType>::IpLinesearch(
+        const IpDataSp &ipdata, const LinearSolverSp &linear_solver,
+        const RestorationPhaseSp &restoration_phase)
+        : ipdata_(ipdata), linear_solver_(linear_solver), restoration_phase_(restoration_phase),
           soc_rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
           soc_rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           soc_rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
@@ -137,7 +139,18 @@ namespace fatrop
         acceptable_iteration_count_ = -1;
         last_mu_ = -1.;
         reset_linesearch();
+        watchdog_shortened_iter_count_ = 0;
+        watchdog_trial_iter_count_ = 0;
+        in_soft_resto_phase_ = false;
+        soft_resto_counter_ = 0;
+        if (restoration_phase_)
+            restoration_phase_->reset();
     }
+
+    /**
+     * this is a seperate function because not all quanities have to be resetted when called from mu
+     * updater
+     */
 
     template <typename LinearSolverType, typename ProblemType>
     void IpLinesearch<LinearSolverType, ProblemType>::reset_linesearch()
@@ -186,7 +199,7 @@ namespace fatrop
         }
         // Check if we want to wake up the watchdog
         if (watchdog_shortened_iter_trigger_ > 0 && !in_watchdog_ && !goto_resto && !tiny_step &&
-            // !in_soft_resto_phase_ && !expect_infeasible_problem_ &&
+            !in_soft_resto_phase_ /*&& !expect_infeasible_problem_ */ &&
             watchdog_shortened_iter_count_ >= watchdog_shortened_iter_trigger_)
         {
             start_watchdog();
@@ -227,7 +240,30 @@ namespace fatrop
         }
         if (!goto_resto && !tiny_step)
         {
-            // todo soft resto not implemented
+            if (in_soft_resto_phase_)
+            {
+                soft_resto_counter_++;
+                if (soft_resto_counter_ > max_soft_resto_iters_)
+                {
+                    accept = false;
+                }
+                else
+                {
+                    bool satisfies_original_criterion = false;
+                    accept = try_soft_resto_step(satisfies_original_criterion);
+                    if (accept)
+                    {
+                        trial_it.step_info().alpha_primal_type = 's';
+                    }
+                    if (satisfies_original_criterion)
+                    {
+                        in_soft_resto_phase_ = false;
+                        soft_resto_counter_ = 0;
+                        trial_it.step_info().alpha_primal_type = 'S';
+                    }
+                }
+            }
+            else
             {
                 bool done = false;
                 bool skip_first_trial_point = false;
@@ -264,28 +300,53 @@ namespace fatrop
                         done = true;
                     }
                 }
-            }
+            } // else if(in_soft_restoration_phase)
         } // if(!goto_resto && !tiny_step)
         // if the line search is unsuccesfull go to the restoration phase
         if (!accept)
         {
-            fatrop_assert_msg(false, "Restoration phase not implemented yet.");
-        }
-        // else if(/*!in_soft_restoration_phase*/ true || tiny_step )
-        if (accept)
-        {
-            auto alpha_max = curr_it.maximum_step_size(curr_it.tau());
-            Scalar alpha_primal_max = alpha_max.first;
-            Scalar alpha_dual_max = alpha_max.second;
-            perform_dual_step(alpha_primal, alpha_dual_max);
-
-            if (n_steps == 0)
+            // todo rigorous mode not implemented
+            if (!in_soft_resto_phase_ && !goto_resto /* && ! expect_infeasible_problem*/)
             {
-                watchdog_shortened_iter_count_ = 0;
+                prepare_resto_phase_start();
+                bool satisfies_original_criterion = false;
+                accept = try_soft_resto_step(satisfies_original_criterion);
+                if (accept)
+                {
+                    if (satisfies_original_criterion)
+                    {
+                        trial_it.step_info().alpha_primal_type = 'S';
+                    }
+                    else
+                    {
+                        trial_it.step_info().alpha_primal_type = 's';
+                        in_soft_resto_phase_ = true;
+                    }
+                }
             }
-            if (n_steps > 0)
+            if (!accept) // go to restoration phase
             {
-                watchdog_shortened_iter_count_++;
+                fatrop_assert_msg(false, "Restoration phase not implemented yet.");
+            }
+        }
+        else if (!in_soft_resto_phase_ || tiny_step)
+        {
+            // no restoration phase and now updating dual variables
+            if (accept)
+            {
+                auto alpha_max = curr_it.maximum_step_size(curr_it.tau());
+                Scalar alpha_primal_max = alpha_max.first;
+                Scalar alpha_dual_max = alpha_max.second;
+                perform_dual_step(alpha_primal, alpha_dual_max);
+
+                if (n_steps == 0)
+                {
+                    watchdog_shortened_iter_count_ = 0;
+                }
+                if (n_steps > 0)
+                {
+                    watchdog_shortened_iter_count_++;
+                }
             }
         }
     }
@@ -309,6 +370,12 @@ namespace fatrop
         trial_it.step_info().alpha_primal_type = info_alpha_primal_char;
     }
 
+    template <typename LinearSolverType, typename ProblemType>
+    void IpLinesearch<LinearSolverType, ProblemType>::prepare_resto_phase_start()
+    {
+        // augment the filter with the current iterate
+        augment_filter();
+    }
     template <typename LinearSolverType, typename ProblemType>
     char IpLinesearch<LinearSolverType, ProblemType>::update_for_next_iteration(
         const Scalar alpha_primal_test)
@@ -431,6 +498,52 @@ namespace fatrop
         }
         return accept;
     }
+    // unnamed namespace for limiting scope to compilation unit of this file
+    namespace
+    {
+        template <typename ProblemType> Scalar primal_dual_error(IpIterate<ProblemType> &iterate)
+        {
+            Scalar res = 0.;
+            res += norm_l1_divided_by_m(iterate.dual_infeasibility_x());
+            res += norm_l1_divided_by_m(iterate.dual_infeasibility_s());
+            res += norm_l1_divided_by_m(iterate.constr_viol());
+            res += norm_l1_divided_by_m(iterate.relaxed_complementarity_l());
+            res += norm_l1_divided_by_m(iterate.relaxed_complementarity_u());
+            return res;
+        }
+    }
+    template <typename LinearSolverType, typename ProblemType>
+    bool IpLinesearch<LinearSolverType, ProblemType>::try_soft_resto_step(
+        bool &satisfies_original_criterion)
+    {
+        if (soft_rest_pd_error_reduction_factor_ == 0.)
+            return false;
+
+        satisfies_original_criterion = false;
+        IpIterateType &curr_it = ipdata_->current_iterate();
+        IpIterateType &trial = ipdata_->trial_iterate();
+        Scalar alpha_primal_max = curr_it.maximum_step_size_primal(curr_it.tau());
+        Scalar alpha_dual_max = curr_it.maximum_step_size_dual(curr_it.tau());
+        Scalar alpha = std::min(alpha_primal_max, alpha_dual_max);
+        // todo: in contrast to Ipopt, we dont check for evaluation errors, we will however throw an
+        // exception at check_acceptability_of_trial_point but we dont have a mechanism to catch
+        // this exception
+        trial.set_primal_x(curr_it.primal_x() + alpha * curr_it.delta_primal_x());
+        trial.set_primal_s(curr_it.primal_s() + alpha * curr_it.delta_primal_s());
+        perform_dual_step(alpha, alpha);
+        if (check_acceptability_of_trial_point(0.))
+            return true;
+
+        Scalar mu = curr_it.mu();
+        Scalar trial_pd_error = primal_dual_error(trial);
+        Scalar curr_pd_error = primal_dual_error(curr_it);
+        // check if there is sufficient reduction in the primal dual error
+        if (trial_pd_error <= soft_rest_pd_error_reduction_factor_ * curr_pd_error)
+        {
+            return true;
+        }
+        return false;
+    }
 
     template <typename LinearSolverType, typename ProblemType>
     bool IpLinesearch<LinearSolverType, ProblemType>::is_acceptable_to_current_iterate(
@@ -529,11 +642,7 @@ namespace fatrop
         }
         return alpha_min_frac_ * alpha_min;
     }
-    template <typename LinearSolverType, typename ProblemType>
-    void IpLinesearch<LinearSolverType, ProblemType>::accept_trial_iterate()
-    {
-        ipdata_->accept_trial_iterate();
-    }
+
     template <typename LinearSolverType, typename ProblemType>
     bool IpLinesearch<LinearSolverType, ProblemType>::check_acceptability_of_trial_point(
         const Scalar alpha_primal)
@@ -627,6 +736,10 @@ namespace fatrop
                                  &IpLinesearch::set_watchdog_trial_iter_max, this);
         registry.register_option("alpha_red_factor", &IpLinesearch::set_alpha_red_factor, this);
         registry.register_option("max_iter", &IpLinesearch::set_max_iter, this);
+        registry.register_option("soft_rest_pd_error_reduction_factor",
+                                 &IpLinesearch::set_soft_rest_pd_error_reduction_factor, this);
+        registry.register_option("max_soft_resto_iters", &IpLinesearch::set_max_soft_resto_iters,
+                                 this);
     }
 
 } // namespace fatrop

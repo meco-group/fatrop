@@ -32,6 +32,9 @@ namespace fatrop
     class IpInitializerBase;
     class IpConvergenceCheckBase;
     class IpIterationOutputBase;
+    class IpRestoPhaseBase; 
+    template <typename ProblemType> class IpRestoPhaseMinCL1;
+    class IpTimingStatistics;
 
 } // namespace fatrop
 

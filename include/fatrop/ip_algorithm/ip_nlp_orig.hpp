@@ -6,6 +6,7 @@
 #define __fatrop_ip_algorithm_ip_nlp_orig_hpp__
 #include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
+#include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/fwd.hpp"
@@ -108,11 +109,14 @@ namespace fatrop
         VecRealAllocated modified_bounds_upper_; ///< Modified upper bounds
         Scalar constr_viol_tol_ = 1e-4;          ///< Constraint violation tolerance
         Scalar bound_relax_factor_ = 1e-8;       ///< Factor for relaxing bounds
+        IpTimingStatistics *timings_ = nullptr;  ///< Timing statistics
 
     public:
         // Setter methods for options
         void set_constr_viol_tol(const Scalar &value) { constr_viol_tol_ = value; }
         void set_bound_relax_factor(const Scalar &value) { bound_relax_factor_ = value; }
+
+        void set_timing_statistics(IpTimingStatistics *timings) { timings_ = timings; }
 
         // Register options
         void register_options(OptionRegistry &registry);

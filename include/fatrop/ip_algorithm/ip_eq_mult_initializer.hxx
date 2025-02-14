@@ -31,12 +31,13 @@ namespace fatrop
     {
     }
 
-    template <typename ProblemType> void IpEqMultInitializer<ProblemType>::initialize_eq_mult()
+    template <typename ProblemType>
+    void IpEqMultInitializer<ProblemType>::initialize_eq_mult(bool trial_it /* = false */)
     {
-        IpIterateType &curr_it = ipdata_->current_iterate();
-        curr_it.set_dual_eq(VecRealScalar(curr_it.dual_eq().m(), 0.));
-        rhs_x_.block(rhs_x_.m(), 0) = curr_it.dual_infeasibility_x();
-        rhs_s_.block(rhs_s_.m(), 0) = curr_it.dual_infeasibility_s().block(
+        IpIterateType &iterate = trial_it ? ipdata_->trial_iterate() : ipdata_->current_iterate();
+        iterate.set_dual_eq(VecRealScalar(iterate.dual_eq().m(), 0.));
+        rhs_x_.block(rhs_x_.m(), 0) = iterate.dual_infeasibility_x();
+        rhs_s_.block(rhs_s_.m(), 0) = iterate.dual_infeasibility_s().block(
             ipdata_->current_iterate().info().number_of_slack_variables, 0);
         rhs_g_.block(rhs_g_.m(), 0) = 0;
         rhs_cl_.block(rhs_cl_.m(), 0) = 0;
@@ -50,7 +51,7 @@ namespace fatrop
         bool solved = false;
         bool first_try_delta_w = true;
         LinearSystem<PdSystemType<ProblemType>> ls(
-            curr_it.info(), curr_it.jacobian(), curr_it.zero_hessian(), Dx_, true, Deq_, dummy_s_,
+            iterate.info(), iterate.jacobian(), iterate.zero_hessian(), Dx_, true, Deq_, dummy_s_,
             dummy_s_, dummy_z_, dummy_z_, rhs_x_, rhs_s_, rhs_g_, rhs_cl_, rhs_cu_);
         LinsolReturnFlag ret = linear_solver_->solve_in_place(ls);
         switch (ret)
@@ -75,10 +76,13 @@ namespace fatrop
             break;
         }
         if (solved && norm_inf(rhs_g_) < lam_max_)
-            curr_it.set_dual_eq(rhs_g_);
+            if (trial_it)
+                iterate.set_dual_eq(rhs_g_);
+            else
+                iterate.set_dual_eq(rhs_g_);
         else
         {
-            curr_it.set_dual_eq(VecRealScalar(curr_it.dual_eq().m(), 0.));
+            iterate.set_dual_eq(VecRealScalar(iterate.dual_eq().m(), 0.));
         }
     }
 

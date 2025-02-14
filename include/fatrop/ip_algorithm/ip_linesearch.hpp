@@ -36,20 +36,15 @@ namespace fatrop
          */
         virtual void reset_linesearch() = 0;
 
-        /**
-         * @brief Accept the current trial iterate as the new iterate.
-         */
-        virtual void accept_trial_iterate() = 0;
-
         virtual void register_options(OptionRegistry &registry) = 0;
 
     protected:
         virtual ~IpLineSearchBase() = default;
     };
-    /** 
-     * 
-     * todo: do we really want to template on the linear solver type here? 
-     * 
+    /**
+     *
+     * todo: do we really want to template on the linear solver type here?
+     *
      * */
 
     /**
@@ -64,6 +59,7 @@ namespace fatrop
         typedef std::shared_ptr<IpData<ProblemType>> IpDataSp;
         typedef std::shared_ptr<Nlp<ProblemType>> NlpSp;
         typedef IpIterate<ProblemType> IpIterateType;
+        typedef std::shared_ptr<IpRestoPhaseBase> RestorationPhaseSp;
 
     public:
         /**
@@ -71,13 +67,14 @@ namespace fatrop
          *
          * @param ipdata Shared pointer to the interior point algorithm data.
          * @param linear_solver Shared pointer to the linear solver.
+         * @param restoration_phase Shared pointer to the restoration phase.
          */
-        IpLinesearch(const IpDataSp &ipdata, const LinearSolverSp &linear_solver);
+        IpLinesearch(const IpDataSp &ipdata, const LinearSolverSp &linear_solver,
+                     const RestorationPhaseSp &restoration_phase);
 
         void find_acceptable_trial_point() override;
         void reset() override;
         void reset_linesearch() override;
-        void accept_trial_iterate() override;
         // Setter methods for options
         void set_max_soc(const Index &value) { max_soc_ = value; }
         void set_kappa_soc(const Scalar &value) { kappa_soc_ = value; }
@@ -108,6 +105,11 @@ namespace fatrop
             filter().reserve(max_iter_ + 1);
             max_iter_ = max_iter;
         }
+        void set_soft_rest_pd_error_reduction_factor(const Scalar &value)
+        {
+            soft_rest_pd_error_reduction_factor_ = value;
+        }
+        void set_max_soft_resto_iters(const Index &value) { max_soft_resto_iters_ = value; }
         void register_options(OptionRegistry &registry) override;
 
     private:
@@ -121,6 +123,7 @@ namespace fatrop
         bool check_acceptability_trial_point(const Scalar alpha_primal);
         void perform_dual_step(const Scalar alpha_primal, const Scalar alpha_dual);
         bool try_second_order_correction(const Scalar alpha_primal_test, Scalar &alpha_primal);
+        bool try_soft_resto_step(bool &satisfies_original_criterion);
         bool is_acceptable_to_current_iterate(const Scalar trial_barr, const Scalar trial_theta,
                                               const bool called_from_resto = false);
         bool is_acceptable_to_filter(const Scalar trial_barr, const Scalar trial_theta);
@@ -133,10 +136,12 @@ namespace fatrop
         char update_for_next_iteration(const Scalar alpha_primal_test);
         void update_step_info(const Scalar alpha_primal, const Scalar alpha_dual,
                               const Index n_steps, const char info_alpha_primal_char);
+        void prepare_resto_phase_start();
 
         IpFilter filter_;
         IpDataSp ipdata_;
         LinearSolverSp linear_solver_;
+        RestorationPhaseSp restoration_phase_;
         VecRealAllocated soc_rhs_x_;
         VecRealAllocated soc_rhs_s_;
         VecRealAllocated soc_rhs_g_;
@@ -166,6 +171,8 @@ namespace fatrop
         Index watchdog_trial_iter_max_ = 3;
         Scalar alpha_red_factor_ = 0.5;
         Index max_iter_ = 1000;
+        Scalar soft_rest_pd_error_reduction_factor_ = 1. - 1e-4;
+        Index max_soft_resto_iters_ = 10;
 
         // internal staticstics
         bool in_watchdog_;
@@ -185,6 +192,8 @@ namespace fatrop
         Scalar last_mu_;
         Index watchdog_shortened_iter_count_;
         Index watchdog_trial_iter_count_ = 0;
+        bool in_soft_resto_phase_;
+        Index soft_resto_counter_;
     };
 } // namespace fatrop
 
