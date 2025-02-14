@@ -9,6 +9,7 @@
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/ip_algorithm/ip_timings.hpp"
+
 namespace fatrop
 {
     /**
@@ -160,6 +161,8 @@ namespace fatrop
         Scalar tol_ = 1e-8;
         NlpSp nlp_; ///< Shared pointer to the NLP problem.
         IpTimingStatistics timings_;
+        Hessian<ProblemType> hessian_curr_;
+        Jacobian<ProblemType> jacobian_curr_;
     };
     template <typename ProblemType> IpIterate<ProblemType> &IpData<ProblemType>::current_iterate()
     {

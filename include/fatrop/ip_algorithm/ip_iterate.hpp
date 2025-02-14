@@ -451,6 +451,16 @@ namespace fatrop
          */
         SearchDirInfo &search_dir_info() { return search_dir_info_; }
 
+        void set_jacobian(Jacobian<ProblemType>* jacobian_ptr)
+        {
+            jacobian_ = jacobian_ptr;
+        }
+
+        void set_hessian(Hessian<ProblemType>* hessian_ptr)
+        {
+            hessian_ = hessian_ptr;
+        }
+
     private:
         const ProblemInfo<ProblemType> info_; ///< Information about the NLP.
         NlpSp nlp_;
@@ -488,8 +498,8 @@ namespace fatrop
         VecRealAllocated relaxed_complementarity_l_; ///< Complementarity of the NLP.
         VecRealAllocated relaxed_complementarity_u_; ///< Complementarity of the NLP.
         VecRealAllocated primal_damping_;
-        Jacobian<ProblemType> jacobian_; ///< Jacobian of the NLP.
-        Hessian<ProblemType> hessian_;   ///< Hessian of the NLP.
+        Jacobian<ProblemType>* jacobian_; ///< Jacobian of the NLP.
+        Hessian<ProblemType>* hessian_;   ///< Hessian of the NLP.
         // Problem information
         VecRealAllocated lower_bounds_; ///< Lower bounds of the variables.
         VecRealAllocated upper_bounds_; ///< Upper bounds of the variables.

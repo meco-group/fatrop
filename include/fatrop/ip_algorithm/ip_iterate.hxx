@@ -394,14 +394,14 @@ namespace fatrop
           dual_infeasibility_s_(nlp->nlp_dims().number_of_ineq_constraints),
           barrier_gradient_(nlp->nlp_dims().number_of_ineq_constraints), nlp_(nlp),
           delta_lower_(nlp->nlp_dims().number_of_ineq_constraints),
-          delta_upper_(nlp->nlp_dims().number_of_ineq_constraints), jacobian_(nlp->problem_dims()),
+          delta_upper_(nlp->nlp_dims().number_of_ineq_constraints), jacobian_(nullptr),
           complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
           complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
           relaxed_complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
           relaxed_complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
           primal_damping_(nlp->nlp_dims().number_of_variables +
                           nlp->nlp_dims().number_of_ineq_constraints),
-          hessian_(nlp->problem_dims()), lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
+          hessian_(nullptr), lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
@@ -414,31 +414,33 @@ namespace fatrop
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
     {
+        fatrop_assert_msg(hessian_ != nullptr, "Hessian not set.");
         if (!hessian_evaluated_)
         {
             Index status = nlp_->eval_lag_hess(info_, objective_scale, primal_x_, primal_s_,
-                                               dual_eq_, hessian_);
+                                               dual_eq_, *hessian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
             hessian_evaluated_ = true;
         }
-        return hessian_;
+        return *hessian_;
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::zero_hessian()
     {
         primal_damping_ = 0.;
-        hessian_.set_zero();
+        (*hessian_).set_zero();
         hessian_evaluated_ = false;
-        return hessian_;
+        return *hessian_;
     }
     template <typename ProblemType> Jacobian<ProblemType> &IpIterate<ProblemType>::jacobian()
     {
+        fatrop_assert_msg(jacobian_ != nullptr, "Jacobian not set.");
         if (!jacobian_evaluated_)
         {
-            Index status = nlp_->eval_constr_jac(info_, primal_x_, primal_s_, jacobian_);
+            Index status = nlp_->eval_constr_jac(info_, primal_x_, primal_s_, *jacobian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Jacobian of the constraints.");
             jacobian_evaluated_ = true;
         }
-        return jacobian_;
+        return *jacobian_;
     }
     template <typename ProblemType>
     void IpIterate<ProblemType>::register_options(OptionRegistry &registry)

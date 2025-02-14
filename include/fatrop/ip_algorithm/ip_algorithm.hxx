@@ -62,9 +62,7 @@ namespace fatrop
         {
             iteration_output_->output_current_iteration();
             mu_update_->update_barrier_parameter();
-            ip_data_->timing_statistics().compute_search_dir.start();
             search_dir_->compute_search_dir();
-            ip_data_->timing_statistics().compute_search_dir.pause();
             linesearch_->find_acceptable_trial_point();
             ip_data_->accept_trial_iterate();
             conv_status = convergence_check_->check_converged();

@@ -57,7 +57,10 @@ namespace fatrop
                 curr_it.De_is_zero(), curr_it.De(), curr_it.delta_lower(), curr_it.delta_upper(),
                 curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), rhs_x_, rhs_s_, rhs_g_, rhs_cl_,
                 rhs_cu_);
+            // solve the linear system
+            ipdata_->timing_statistics().compute_search_dir.start();
             ret = linear_solver_->solve_in_place(ls);
+            ipdata_->timing_statistics().compute_search_dir.pause();
             switch (ret)
             {
             case (LinsolReturnFlag::SUCCESS):

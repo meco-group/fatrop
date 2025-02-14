@@ -13,7 +13,8 @@ namespace fatrop
     template <typename ProblemType>
     IpData<ProblemType>::IpData(const NlpSp &nlp)
         : iterate_data_{nlp, nlp, nlp}, current_iterate_(&iterate_data_[0]),
-          trial_iterate_(&iterate_data_[1]), stored_iterate_(&iterate_data_[2]), nlp_(nlp)
+          trial_iterate_(&iterate_data_[1]), stored_iterate_(&iterate_data_[2]), nlp_(nlp),
+          hessian_curr_(nlp->problem_dims()), jacobian_curr_(nlp->problem_dims())
     {
         reset();
     }
@@ -29,6 +30,10 @@ namespace fatrop
             iterate.initialize();
         }
         timing_statistics().reset();
+        current_iterate().set_hessian(&hessian_curr_);
+        current_iterate().set_jacobian(&jacobian_curr_);
+        trial_iterate().set_hessian(nullptr);
+        trial_iterate().set_jacobian(nullptr);
     }
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()
     {
@@ -38,6 +43,11 @@ namespace fatrop
         trial_iterate_ = tmp;
         trial_iterate_->reset_evaluated_quantities();
         validate_current_iterate();
+        // set the hessian and jacobian pointers
+        trial_iterate().set_hessian(nullptr);
+        trial_iterate().set_jacobian(nullptr);
+        current_iterate().set_hessian(&hessian_curr_);
+        current_iterate().set_jacobian(&jacobian_curr_);
     }
 
     template <typename ProblemType> void IpData<ProblemType>::backup_current_iterate()
