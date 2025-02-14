@@ -83,7 +83,7 @@ namespace fatrop
 
         const Index m_;             ///< Dimension of the linear system.
         Index min_it_ref = 0;       ///< Minimum number of iterative refinement steps.
-        Index max_it_ref = 10;      ///< Maximum number of iterative refinement steps.
+        Index max_it_ref = 5;      ///< Maximum number of iterative refinement steps.
         Scalar tol_ = 1e-8;         ///< Tolerance for iterative refinement convergence.
         VecRealAllocated x;         ///< Allocated vector for solution.
         VecRealAllocated x_;        ///< Allocated vector for intermediate solution.
