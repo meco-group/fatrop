@@ -68,9 +68,7 @@ namespace fatrop
     template <typename ProblemType> void IpData<ProblemType>::accept_trial_iterate()
     {
         // switch trial and current iterate
-        Iterate *tmp = &current_iterate();
-        current_iterate_ = trial_iterate_;
-        trial_iterate_ = tmp;
+        std::swap(current_iterate_, trial_iterate_);
         trial_iterate_->reset_evaluated_quantities();
         // set the hessian and jacobian pointers
         current_iterate().set_hessian(hessian_curr_);
