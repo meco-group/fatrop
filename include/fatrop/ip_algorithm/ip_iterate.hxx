@@ -6,36 +6,16 @@
 #define __fatrop_ip_algorithm_ip_iterate_hxx__
 
 #include "fatrop/common/options.hpp"
+#include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include <algorithm>
 #include <cmath>
 namespace fatrop
 {
-    template <typename ProblemType> void IpIterate<ProblemType>::initialize()
+    template <typename ProblemType> void IpIterate<ProblemType>::reset()
     {
         // reset evaluated quantities
         reset_evaluated_quantities();
-        /**
-         * todo, with every solve the get_bounds function is called 3 times, avoid this.
-         * morever, it is also called upon construction (first time solver is used).
-         * Also avoid this.
-         */
-        // set the bounds
-        nlp_->get_bounds(info_, lower_bounds_, upper_bounds_);
-        // set the bound flags
-        number_of_bounds_ = 0;
-        for (Index i = 0; i < lower_bounds_.m(); i++)
-        {
-            lower_bounded_[i] = !std::isinf(lower_bounds_(i));
-            upper_bounded_[i] = !std::isinf(upper_bounds_(i));
-            if (lower_bounded_[i])
-                number_of_bounds_++;
-            if (upper_bounded_[i])
-                number_of_bounds_++;
-            bool single_bounded = lower_bounded_[i] ^ upper_bounded_[i];
-            single_lower_bounded_[i] = single_bounded && lower_bounded_[i];
-            single_upper_bounded_[i] = single_bounded && upper_bounded_[i];
-        }
 
         // reset info' s
         step_info_ = StepInfo();
@@ -67,7 +47,7 @@ namespace fatrop
         if (!obj_value_evaluated_)
         {
             Index status =
-                nlp_->eval_objective(info_, objective_scale, primal_x_, primal_s_, obj_value_);
+                nlp_->eval_objective(info(), objective_scale, primal_x_, primal_s_, obj_value_);
             fatrop_assert_msg(status == 0, "Error in evaluating the objective function.");
             obj_value_evaluated_ = true;
         }
@@ -78,13 +58,13 @@ namespace fatrop
     {
         if (!barrier_value_evaluated_)
         {
-            barrier_value_ = sum(if_else(lower_bounded_, -1. * log(delta_lower()),
+            barrier_value_ = sum(if_else((*lower_bounded_), -1. * log(delta_lower()),
                                          VecRealScalar(primal_s_.m(), 0.)) +
-                                 if_else(upper_bounded_, -1. * log(delta_upper()),
+                                 if_else((*upper_bounded_), -1. * log(delta_upper()),
                                          VecRealScalar(primal_s_.m(), 0.)) +
-                                 if_else(single_lower_bounded_, kappa_d_ * delta_lower(),
+                                 if_else((*single_lower_bounded_), kappa_d_ * delta_lower(),
                                          VecRealScalar(primal_s_.m(), 0.)) +
-                                 if_else(single_upper_bounded_, kappa_d_ * delta_upper(),
+                                 if_else((*single_upper_bounded_), kappa_d_ * delta_upper(),
                                          VecRealScalar(primal_s_.m(), 0.)));
             barrier_value_ *= mu();
         }
@@ -95,7 +75,7 @@ namespace fatrop
         if (!obj_gradient_evaluated_)
         {
             Index status = nlp_->eval_objective_gradient(
-                info_, objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
+                info(), objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
                               "Error in evaluating the gradient of the objective function.");
             obj_gradient_evaluated_ = true;
@@ -107,7 +87,7 @@ namespace fatrop
         if (!obj_gradient_evaluated_)
         {
             Index status = nlp_->eval_objective_gradient(
-                info_, objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
+                info(), objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
                               "Error in evaluating the gradient of the objective function.");
             obj_gradient_evaluated_ = true;
@@ -119,7 +99,7 @@ namespace fatrop
         if (!constr_viol_evaluated_)
         {
             Index status =
-                nlp_->eval_constraint_violation(info_, primal_x_, primal_s_, constr_viol_);
+                nlp_->eval_constraint_violation(info(), primal_x_, primal_s_, constr_viol_);
             fatrop_assert_msg(status == 0, "Error in evaluating the constraint violation.");
             constr_viol_evaluated_ = true;
         }
@@ -131,7 +111,7 @@ namespace fatrop
         if (!dual_infeasibility_x_evaluated_)
         {
             dual_infeasibility_x_.block(dual_infeasibility_x_.m(), 0) = obj_gradient_x();
-            jacobian().transpose_apply_on_right(info_, dual_eq_, 1.0, dual_infeasibility_x_,
+            jacobian().transpose_apply_on_right(info(), dual_eq_, 1.0, dual_infeasibility_x_,
                                                 dual_infeasibility_x_);
             dual_infeasibility_x_evaluated_ = true;
         }
@@ -146,7 +126,7 @@ namespace fatrop
         if (!dual_infeasibility_s_evaluated_)
         {
             dual_infeasibility_s_ = obj_gradient_s() + dual_bounds_u_ - dual_bounds_l_;
-            nlp_->apply_jacobian_s_transpose(info_, dual_eq_, 1.0, dual_infeasibility_s_,
+            nlp_->apply_jacobian_s_transpose(info(), dual_eq_, 1.0, dual_infeasibility_s_,
                                              dual_infeasibility_s_);
             dual_infeasibility_s_evaluated_ = true;
         }
@@ -159,11 +139,11 @@ namespace fatrop
         {
             const Index m = primal_s_.m();
             barrier_gradient_ =
-                if_else(lower_bounded_, -mu() / delta_lower(), VecRealScalar(m, 0.)) +
-                if_else(upper_bounded_, +mu() / delta_upper(), VecRealScalar(m, 0.)) +
-                if_else(single_lower_bounded_, VecRealScalar(m, mu() * kappa_d_),
+                if_else((*lower_bounded_), -mu() / delta_lower(), VecRealScalar(m, 0.)) +
+                if_else((*upper_bounded_), +mu() / delta_upper(), VecRealScalar(m, 0.)) +
+                if_else((*single_lower_bounded_), VecRealScalar(m, mu() * kappa_d_),
                         VecRealScalar(m, 0.)) +
-                if_else(single_upper_bounded_, VecRealScalar(m, -mu() * kappa_d_),
+                if_else((*single_upper_bounded_), VecRealScalar(m, -mu() * kappa_d_),
                         VecRealScalar(m, 0.));
             barrier_gradient_evaluated_ = true;
         }
@@ -173,8 +153,8 @@ namespace fatrop
     {
         if (!delta_lower_evaluated_)
         {
-            delta_lower_ = if_else(lower_bounded_, primal_s() - lower_bounds_,
-                                   VecRealScalar(lower_bounds_.m(), 1.));
+            delta_lower_ = if_else((*lower_bounded_), primal_s() - (*lower_bounds_),
+                                   VecRealScalar((*lower_bounds_).m(), 1.));
             delta_lower_evaluated_ = true;
         }
         return delta_lower_;
@@ -183,8 +163,8 @@ namespace fatrop
     {
         if (!delta_upper_evaluated_)
         {
-            delta_upper_ = if_else(upper_bounded_, upper_bounds_ - primal_s(),
-                                   VecRealScalar(upper_bounds_.m(), 1.));
+            delta_upper_ = if_else((*upper_bounded_), (*upper_bounds_) - primal_s(),
+                                   VecRealScalar((*upper_bounds_).m(), 1.));
             delta_upper_evaluated_ = true;
         }
         return delta_upper_;
@@ -253,7 +233,7 @@ namespace fatrop
     {
         if (!primal_damping_evaluated_)
         {
-            nlp_->get_primal_damping(info_, primal_damping_);
+            nlp_->get_primal_damping(info(), primal_damping_);
             primal_damping_evaluated_ = true;
         }
         return primal_damping_;
@@ -282,9 +262,9 @@ namespace fatrop
     {
         Scalar zl1 = norm_l1(dual_bounds_l()) + norm_l1(dual_bounds_u());
         Index number_of_eq_constraints = nlp()->nlp_dims().number_of_eq_constraints;
-        Index number_of_dual_vars = number_of_bounds_ + number_of_eq_constraints;
+        Index number_of_dual_vars = (*number_of_bounds_) + number_of_eq_constraints;
         Scalar lam_mean = (zl1 + norm_l1(dual_eq())) / (number_of_dual_vars);
-        Scalar z_mean = zl1 / number_of_bounds_;
+        Scalar z_mean = zl1 / (*number_of_bounds_);
         Scalar constraint_violation = norm_inf(constr_viol());
         Scalar dual_infeasibility_x_linf = norm_inf(dual_infeasibility_x());
         Scalar dual_infeasibility_s_linf = norm_inf(dual_infeasibility_s());
@@ -326,12 +306,12 @@ namespace fatrop
         for (Index i = 0; i < primal_s_.m(); i++)
         {
             Scalar delta_si = delta_s(i);
-            if (lower_bounded_[i])
+            if ((*lower_bounded_)[i])
             {
                 if (delta_si < 0)
                     alpha_max_pr = std::min(alpha_max_pr, -tau * delta_lower_(i) / delta_si);
             }
-            if (upper_bounded_[i])
+            if ((*upper_bounded_)[i])
             {
                 if (delta_si > 0)
                     alpha_max_pr = std::min(alpha_max_pr, tau * delta_upper_(i) / delta_si);
@@ -354,13 +334,13 @@ namespace fatrop
         Scalar alpha_max_du = 1.;
         for (Index i = 0; i < primal_s_.m(); i++)
         {
-            if (lower_bounded_[i])
+            if ((*lower_bounded_)[i])
             {
                 Scalar delta_zi = delta_dual_bounds_l(i);
                 if (delta_zi < 0)
                     alpha_max_du = std::min(alpha_max_du, -tau * dual_bounds_l_(i) / delta_zi);
             }
-            if (upper_bounded_[i])
+            if ((*upper_bounded_)[i])
             {
                 Scalar delta_zi = delta_dual_bounds_u(i);
                 if (delta_zi < 0)
@@ -376,48 +356,46 @@ namespace fatrop
         return {maximum_step_size_primal(tau), maximum_step_size_dual(tau)};
     }
     template <typename ProblemType>
-    IpIterate<ProblemType>::IpIterate(const NlpSp &nlp)
-        : info_(nlp->problem_dims()), primal_x_(nlp->nlp_dims().number_of_variables),
-          primal_s_(nlp->nlp_dims().number_of_ineq_constraints),
-          dual_eq_(nlp->nlp_dims().number_of_eq_constraints),
-          dual_bounds_l_(nlp->nlp_dims().number_of_ineq_constraints),
-          dual_bounds_u_(nlp->nlp_dims().number_of_ineq_constraints),
-          delta_primal_x_(nlp->nlp_dims().number_of_variables),
-          delta_primal_s_(nlp->nlp_dims().number_of_ineq_constraints),
-          delta_dual_eq_(nlp->nlp_dims().number_of_eq_constraints),
-          delta_dual_bounds_l_(nlp->nlp_dims().number_of_ineq_constraints),
-          delta_dual_bounds_u_(nlp->nlp_dims().number_of_ineq_constraints),
-          obj_gradient_x_(nlp->nlp_dims().number_of_variables),
-          obj_gradient_s_(nlp->nlp_dims().number_of_ineq_constraints),
-          constr_viol_(nlp->nlp_dims().number_of_eq_constraints),
-          dual_infeasibility_x_(nlp->nlp_dims().number_of_variables),
-          dual_infeasibility_s_(nlp->nlp_dims().number_of_ineq_constraints),
-          barrier_gradient_(nlp->nlp_dims().number_of_ineq_constraints), nlp_(nlp),
-          delta_lower_(nlp->nlp_dims().number_of_ineq_constraints),
-          delta_upper_(nlp->nlp_dims().number_of_ineq_constraints), jacobian_(nullptr),
-          complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
-          complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
-          relaxed_complementarity_l_(nlp->nlp_dims().number_of_ineq_constraints),
-          relaxed_complementarity_u_(nlp->nlp_dims().number_of_ineq_constraints),
-          primal_damping_(nlp->nlp_dims().number_of_variables +
-                          nlp->nlp_dims().number_of_ineq_constraints),
-          hessian_(nullptr), lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
-          upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
-          lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
-          upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
-          single_lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
-          single_upper_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
-          Dx_(nlp->nlp_dims().number_of_variables + nlp->nlp_dims().number_of_ineq_constraints),
-          De_(nlp->nlp_dims().number_of_eq_constraints)
+    IpIterate<ProblemType>::IpIterate(IpDataType &data)
+        : nlp_(data.get_nlp()), info_(&(data.info())), primal_x_(nlp_->nlp_dims().number_of_variables),
+          primal_s_(nlp_->nlp_dims().number_of_ineq_constraints),
+          dual_eq_(nlp_->nlp_dims().number_of_eq_constraints),
+          dual_bounds_l_(nlp_->nlp_dims().number_of_ineq_constraints),
+          dual_bounds_u_(nlp_->nlp_dims().number_of_ineq_constraints),
+          delta_primal_x_(nlp_->nlp_dims().number_of_variables),
+          delta_primal_s_(nlp_->nlp_dims().number_of_ineq_constraints),
+          delta_dual_eq_(nlp_->nlp_dims().number_of_eq_constraints),
+          delta_dual_bounds_l_(nlp_->nlp_dims().number_of_ineq_constraints),
+          delta_dual_bounds_u_(nlp_->nlp_dims().number_of_ineq_constraints),
+          obj_gradient_x_(nlp_->nlp_dims().number_of_variables),
+          obj_gradient_s_(nlp_->nlp_dims().number_of_ineq_constraints),
+          constr_viol_(nlp_->nlp_dims().number_of_eq_constraints),
+          dual_infeasibility_x_(nlp_->nlp_dims().number_of_variables),
+          dual_infeasibility_s_(nlp_->nlp_dims().number_of_ineq_constraints),
+          barrier_gradient_(nlp_->nlp_dims().number_of_ineq_constraints),
+          delta_lower_(nlp_->nlp_dims().number_of_ineq_constraints),
+          delta_upper_(nlp_->nlp_dims().number_of_ineq_constraints), jacobian_(nullptr),
+          complementarity_l_(nlp_->nlp_dims().number_of_ineq_constraints),
+          complementarity_u_(nlp_->nlp_dims().number_of_ineq_constraints),
+          relaxed_complementarity_l_(nlp_->nlp_dims().number_of_ineq_constraints),
+          relaxed_complementarity_u_(nlp_->nlp_dims().number_of_ineq_constraints),
+          primal_damping_(nlp_->nlp_dims().number_of_variables +
+                          nlp_->nlp_dims().number_of_ineq_constraints),
+          hessian_(nullptr), lower_bounds_(&data.lower_bounds_), upper_bounds_(&data.upper_bounds_),
+          lower_bounded_(&data.lower_bounded_), upper_bounded_(&data.upper_bounded_),
+          single_lower_bounded_(&data.single_lower_bounded_),
+          single_upper_bounded_(&data.single_upper_bounded_),
+          Dx_(nlp_->nlp_dims().number_of_variables + nlp_->nlp_dims().number_of_ineq_constraints),
+          De_(nlp_->nlp_dims().number_of_eq_constraints), number_of_bounds_(&data.number_of_bounds_)
     {
-        initialize();
+        reset();
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
     {
         fatrop_assert_msg(hessian_ != nullptr, "Hessian not set.");
         if (!hessian_evaluated_)
         {
-            Index status = nlp_->eval_lag_hess(info_, objective_scale, primal_x_, primal_s_,
+            Index status = nlp_->eval_lag_hess(info(), objective_scale, primal_x_, primal_s_,
                                                dual_eq_, *hessian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
             hessian_evaluated_ = true;
@@ -436,7 +414,7 @@ namespace fatrop
         fatrop_assert_msg(jacobian_ != nullptr, "Jacobian not set.");
         if (!jacobian_evaluated_)
         {
-            Index status = nlp_->eval_constr_jac(info_, primal_x_, primal_s_, *jacobian_);
+            Index status = nlp_->eval_constr_jac(info(), primal_x_, primal_s_, *jacobian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Jacobian of the constraints.");
             jacobian_evaluated_ = true;
         }

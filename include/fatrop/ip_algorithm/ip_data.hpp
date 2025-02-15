@@ -9,6 +9,8 @@
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/ip_algorithm/ip_timings.hpp"
+#include "fatrop/linear_algebra/vector.hpp"
+#include <vector>
 
 namespace fatrop
 {
@@ -24,12 +26,15 @@ namespace fatrop
     {
         typedef std::shared_ptr<Nlp<ProblemType>> NlpSp;
         typedef IpIterate<ProblemType> Iterate;
+        typedef ProblemInfo<ProblemType> InfoType;
 
         /**
          * @brief Construct a new IpData object.
          * @param nlp Shared pointer to the NLP problem.
          */
         IpData(const NlpSp &nlp);
+
+        const InfoType &info() { return info_; }
 
         /**
          * @brief Reset the IpData object to its initial state.
@@ -40,7 +45,7 @@ namespace fatrop
          * @brief Get the NLP problem associated with this data.
          * @return NlpSp The shared pointer to the NLP problem.
          */
-        NlpSp get_nlp() const{ return nlp_; };
+        NlpSp get_nlp() const { return nlp_; };
 
         /**
          * @brief Accept the trial iterate as the new current iterate.
@@ -51,13 +56,12 @@ namespace fatrop
         /**
          * @brief Backup the current iterate into the stored iterate.
          * Used for the watchdog mechanism. Switches current and stored iterate pointers.
-         * Warning: Invalidates the current iterate.
          */
-        void backup_current_iterate();
+        void store_current_iterate();
 
         /**
          * @brief Restore the stored iterate as the current iterate.
-         * Used in conjunction with backup_current_iterate() for the watchdog mechanism.
+         * Used in conjunction with store_current_iterate() for the watchdog mechanism.
          */
         void restore_current_iterate();
 
@@ -113,18 +117,6 @@ namespace fatrop
         }
 
         /**
-         * @brief Invalidate the current iterate.
-         * Marks the current iterate as invalid.
-         */
-        void invalidate_current_iterate() { current_iterate_is_valid_ = false; }
-
-        /**
-         * @brief Validate the current iterate.
-         * Marks the current iterate as valid.
-         */
-        void validate_current_iterate() { current_iterate_is_valid_ = true; }
-
-        /**
          * @brief Check if a tiny step flag is set.
          * @return bool True if the tiny step flag is set, false otherwise.
          */
@@ -151,28 +143,45 @@ namespace fatrop
         IpTimingStatistics &timing_statistics() { return timings_; }
 
     private:
+        NlpSp nlp_; ///< Shared pointer to the NLP problem.
+        InfoType info_;
         Index iteration_number_;   ///< Number of the current iteration.
         Iterate iterate_data_[3];  ///< Data for the three iterates (current, trial, and stored).
         Iterate *current_iterate_; ///< Pointer to the current iterate.
         Iterate *trial_iterate_;   ///< Pointer to the trial iterate.
         Iterate *stored_iterate_;  ///< Pointer to the stored iterate.
-        bool current_iterate_is_valid_ = true; ///< Flag indicating if the current iterate is valid.
         bool tiny_step_flag_ = false;
         Scalar tol_ = 1e-8;
-        NlpSp nlp_; ///< Shared pointer to the NLP problem.
         IpTimingStatistics timings_;
-        Hessian<ProblemType> hessian_curr_;
-        Jacobian<ProblemType> jacobian_curr_;
+        Hessian<ProblemType> hessian_data_[2];
+        Jacobian<ProblemType> jacobian_data_[2];
+        Hessian<ProblemType> *hessian_curr_ = nullptr;
+        Jacobian<ProblemType> *jacobian_curr_ = nullptr;
+        Hessian<ProblemType> *hessian_stored_ = nullptr;
+        Jacobian<ProblemType> *jacobian_stored_ = nullptr;
+        bool stored_iterate_is_valid_ = false;
+        // problem information
+    protected:
+        friend class IpIterate<ProblemType>;
+        VecRealAllocated lower_bounds_; ///< Lower bounds of the variables.
+        VecRealAllocated upper_bounds_; ///< Upper bounds of the variables.
+        std::vector<bool>
+            lower_bounded_; ///< Boolean vector indicating if the variables are lower bounded.
+        std::vector<bool>
+            upper_bounded_; ///< Boolean vector indicating if the variables are upper bounded.
+        std::vector<bool> single_lower_bounded_; ///< Boolean vector indicating if the variables are
+                                                 ///< lower bounded.
+        std::vector<bool> single_upper_bounded_; ///< Boolean vector indicating if the variables are
+                                                 ///< upper bounded.
+        Index number_of_bounds_ ; ///< Total number of bounds in the problem
     };
     template <typename ProblemType> IpIterate<ProblemType> &IpData<ProblemType>::current_iterate()
     {
-        fatrop_assert_msg(current_iterate_is_valid_, "the current iterate is invalidated.");
         return *current_iterate_;
     }
     template <typename ProblemType>
     const IpIterate<ProblemType> &IpData<ProblemType>::current_iterate() const
     {
-        fatrop_assert_msg(current_iterate_is_valid_, "the current iterate is invalidated.");
         return *current_iterate_;
     }
 

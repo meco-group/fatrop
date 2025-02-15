@@ -93,10 +93,14 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
                                            alpha_z * rhs_cl);
     data.trial_iterate().set_dual_bounds_u(data.current_iterate().dual_bounds_u() +
                                            alpha_z * rhs_cu);
+    data.store_current_iterate();
+    data.accept_trial_iterate();
 
-    EXPECT_LT(norm_inf(data.trial_iterate().dual_infeasibility_x()), 1e-6);
-    EXPECT_LT(norm_inf(data.trial_iterate().dual_infeasibility_s()), 1e-6);
-    EXPECT_LT(norm_inf(data.trial_iterate().constr_viol()), 1e-6);
+    EXPECT_LT(norm_inf(data.current_iterate().dual_infeasibility_x()), 1e-6);
+    EXPECT_LT(norm_inf(data.current_iterate().dual_infeasibility_s()), 1e-6);
+    EXPECT_LT(norm_inf(data.current_iterate().constr_viol()), 1e-6);
+
+    data.restore_current_iterate();
     // the complementarity constraints are nonlinear so we test the linearized version
     EXPECT_LT(
         norm_inf(data.current_iterate().delta_lower() * data.current_iterate().dual_bounds_l() +

@@ -7,10 +7,9 @@
 
 #include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
+#include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/fwd.hpp"
-#include "fatrop/nlp/hessian.hpp"
-#include "fatrop/nlp/jacobian.hpp"
 #include <memory>
 #include <utility>
 #include <vector>
@@ -29,12 +28,15 @@ namespace fatrop
     template <typename ProblemType> struct IpIterate
     {
         typedef std::shared_ptr<Nlp<ProblemType>> NlpSp;
+        typedef IpData<ProblemType> IpDataType;
 
+    protected:
+        friend class IpData<ProblemType>;
         /**
          * @brief Constructs an IpIterate object.
          * @param nlp Shared pointer to the NLP problem.
          */
-        IpIterate(const NlpSp &nlp);
+        IpIterate(IpDataType &ip_data);
 
     public:
         Scalar objective_scale = 1.; ///< Scaling factor for the objective function.
@@ -42,7 +44,7 @@ namespace fatrop
         /**
          * @brief Initializes the IpIterate object with default values.
          */
-        void initialize();
+        void reset();
 
         /**
          * @brief Resets all evaluated quantities, marking them as not computed.
@@ -54,7 +56,7 @@ namespace fatrop
          * @brief Returns the problem information.
          * @return Constant reference to the ProblemInfo object.
          */
-        const ProblemInfo<ProblemType> &info() const { return info_; }
+        const ProblemInfo<ProblemType> &info() const { return *info_; }
 
         /**
          * @brief Returns the NLP problem.
@@ -126,25 +128,25 @@ namespace fatrop
          * @brief Returns the lower bounds of the variables.
          * @return Constant reference to the lower bounds vector.
          */
-        const VecRealView &lower_bounds() const { return lower_bounds_; };
+        const VecRealView &lower_bounds() const { return *lower_bounds_; };
 
         /**
          * @brief Returns the upper bounds of the variables.
          * @return Constant reference to the upper bounds vector.
          */
-        const VecRealView &upper_bounds() const { return upper_bounds_; };
+        const VecRealView &upper_bounds() const { return *upper_bounds_; };
 
         /**
          * @brief Returns a boolean vector indicating which variables are lower bounded.
          * @return Constant reference to the lower bounded boolean vector.
          */
-        const std::vector<bool> &lower_bounded() const { return lower_bounded_; };
+        const std::vector<bool> &lower_bounded() const { return *lower_bounded_; };
 
         /**
          * @brief Returns a boolean vector indicating which variables are upper bounded.
          * @return Constant reference to the upper bounded boolean vector.
          */
-        const std::vector<bool> &upper_bounded() const { return upper_bounded_; };
+        const std::vector<bool> &upper_bounded() const { return *upper_bounded_; };
 
         /**
          * @brief Sets the primal variables x.
@@ -398,7 +400,7 @@ namespace fatrop
          * @brief Returns the number of bounds in the problem.
          * @return The number of bounds.
          */
-        Index number_of_bounds() const { return number_of_bounds_; }
+        Index number_of_bounds() const { return *number_of_bounds_; }
 
         /**
          * @brief Returns a reference to the Hessian of the problem.
@@ -451,19 +453,13 @@ namespace fatrop
          */
         SearchDirInfo &search_dir_info() { return search_dir_info_; }
 
-        void set_jacobian(Jacobian<ProblemType>* jacobian_ptr)
-        {
-            jacobian_ = jacobian_ptr;
-        }
+        void set_jacobian(Jacobian<ProblemType> *jacobian_ptr) { jacobian_ = jacobian_ptr; }
 
-        void set_hessian(Hessian<ProblemType>* hessian_ptr)
-        {
-            hessian_ = hessian_ptr;
-        }
+        void set_hessian(Hessian<ProblemType> *hessian_ptr) { hessian_ = hessian_ptr; }
 
     private:
-        const ProblemInfo<ProblemType> info_; ///< Information about the NLP.
         NlpSp nlp_;
+        const ProblemInfo<ProblemType> *info_; ///< Information about the NLP.
         // Iteration point
         VecRealAllocated primal_x_;      ///< Primal variables of the NLP.
         VecRealAllocated primal_s_;      ///< Primal variables of the NLP.
@@ -498,19 +494,19 @@ namespace fatrop
         VecRealAllocated relaxed_complementarity_l_; ///< Complementarity of the NLP.
         VecRealAllocated relaxed_complementarity_u_; ///< Complementarity of the NLP.
         VecRealAllocated primal_damping_;
-        Jacobian<ProblemType>* jacobian_; ///< Jacobian of the NLP.
-        Hessian<ProblemType>* hessian_;   ///< Hessian of the NLP.
+        Jacobian<ProblemType> *jacobian_; ///< Jacobian of the NLP.
+        Hessian<ProblemType> *hessian_;   ///< Hessian of the NLP.
         // Problem information
-        VecRealAllocated lower_bounds_; ///< Lower bounds of the variables.
-        VecRealAllocated upper_bounds_; ///< Upper bounds of the variables.
-        std::vector<bool>
-            lower_bounded_; ///< Boolean vector indicating if the variables are lower bounded.
-        std::vector<bool>
-            upper_bounded_; ///< Boolean vector indicating if the variables are upper bounded.
-        std::vector<bool> single_lower_bounded_; ///< Boolean vector indicating if the variables are
-                                                 ///< lower bounded.
-        std::vector<bool> single_upper_bounded_; ///< Boolean vector indicating if the variables are
-                                                 ///< upper bounded.
+        const VecRealAllocated *lower_bounds_; ///< Lower bounds of the variables.
+        const VecRealAllocated *upper_bounds_; ///< Upper bounds of the variables.
+        const std::vector<bool>
+            *lower_bounded_; ///< Boolean vector indicating if the variables are lower bounded.
+        const std::vector<bool>
+            *upper_bounded_; ///< Boolean vector indicating if the variables are upper bounded.
+        const std::vector<bool> *single_lower_bounded_; ///< Boolean vector indicating if the
+                                                        ///< variables are lower bounded.
+        const std::vector<bool> *single_upper_bounded_; ///< Boolean vector indicating if the
+                                                        ///< variables are upper bounded.
         // Vector quantities related to solving for the search direction
         VecRealAllocated Dx_; ///< primal inertia correction vector
         VecRealAllocated De_; ///< equality inertia correction vector
@@ -545,7 +541,7 @@ namespace fatrop
             false;                              ///< Flag for upper bound complementarity evaluation
         bool primal_damping_evaluated_ = false; ///< Flag for primal damping evaluation
 
-        Index number_of_bounds_ = 0; ///< Total number of bounds in the problem
+        Index *number_of_bounds_; ///< Total number of bounds in the problem
         Scalar kappa_d_ = 1e-5;
         Scalar smax_ = 100.;
 

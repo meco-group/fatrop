@@ -403,8 +403,7 @@ namespace fatrop
         watchdog_grad_bar_delta_ =
             curr_it.linear_decrease_barrier() + curr_it.linear_decrease_objective();
         watchdog_alpha_primal_test_ = curr_it.maximum_step_size(curr_it.tau()).first;
-        ipdata_->backup_current_iterate();
-        // current iterate is now invalidated
+        ipdata_->store_current_iterate();
     }
 
     template <typename LinearSolverType, typename ProblemType>
