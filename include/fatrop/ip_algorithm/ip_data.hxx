@@ -15,8 +15,8 @@ namespace fatrop
         : nlp_(nlp), info_(nlp->problem_dims()), iterate_data_{*this, *this, *this},
           current_iterate_(&iterate_data_[0]), trial_iterate_(&iterate_data_[1]),
           stored_iterate_(&iterate_data_[2]),
-          hessian_data_{nlp->problem_dims(), nlp->problem_dims()},
-          jacobian_data_{nlp->problem_dims(), nlp->problem_dims()},
+          hessian_data_{nlp->problem_dims(), nlp->problem_dims(), nlp->problem_dims()},
+          jacobian_data_{nlp->problem_dims(), nlp->problem_dims(), nlp->problem_dims()},
           lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           lower_bounded_(nlp->nlp_dims().number_of_ineq_constraints),
@@ -54,8 +54,10 @@ namespace fatrop
         }
         jacobian_curr_ = &jacobian_data_[0];
         hessian_curr_ = &hessian_data_[0];
-        jacobian_stored_ = &jacobian_data_[1];
-        hessian_stored_ = &hessian_data_[1];
+        hessian_trial_ = &hessian_data_[1];
+        jacobian_trial_ = &jacobian_data_[1];
+        jacobian_stored_ = &jacobian_data_[2];
+        hessian_stored_ = &hessian_data_[2];
         timing_statistics().reset();
         current_iterate().set_hessian(hessian_curr_);
         current_iterate().set_jacobian(jacobian_curr_);
@@ -69,14 +71,14 @@ namespace fatrop
     {
         // switch trial and current iterate
         std::swap(current_iterate_, trial_iterate_);
+        std::swap(hessian_curr_, hessian_trial_);
+        std::swap(jacobian_curr_, jacobian_trial_);
         trial_iterate_->reset_evaluated_quantities();
         // set the hessian and jacobian pointers
         current_iterate().set_hessian(hessian_curr_);
         current_iterate().set_jacobian(jacobian_curr_);
-        trial_iterate().set_hessian(nullptr);
-        trial_iterate().set_jacobian(nullptr);
-        stored_iterate().set_hessian(nullptr);
-        stored_iterate().set_jacobian(nullptr);
+        trial_iterate().set_hessian(hessian_trial_);
+        trial_iterate().set_jacobian(jacobian_trial_);
     }
 
     template <typename ProblemType> void IpData<ProblemType>::store_current_iterate()

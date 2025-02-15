@@ -7,19 +7,18 @@
 #include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
+#include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/ip_algorithm/ip_resto_phase_min_cl1.hpp"
-#include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 
 namespace fatrop
 {
     template <typename ProblemType>
-    IpRestoPhaseMinCl1<ProblemType>::IpRestoPhaseMinCl1(const IpAlgorithmSp &resto_ip_algorithm,
-                                                        const IpInitializerBaseSp &ip_initializer,
-                                                        const IpDataSp &ip_data_orig,
-                                                        const IpDataSp &ip_data_resto,
-                                                        const IpNlpRestoSp &ip_nlp_resto)
-        : resto_ip_algorithm_(resto_ip_algorithm), ip_initializer_(ip_initializer),
+    IpRestoPhaseMinCl1<ProblemType>::IpRestoPhaseMinCl1(
+        const IpAlgorithmSp &resto_ip_algorithm, const IpEqMultInitializerSp &eq_mult_initializer,
+        const IpDataSp &ip_data_orig, const IpDataSp &ip_data_resto,
+        const IpNlpRestoSp &ip_nlp_resto)
+        : resto_ip_algorithm_(resto_ip_algorithm), eq_mult_initializer_(eq_mult_initializer),
           ip_data_orig_(ip_data_orig), ip_data_resto_(ip_data_resto), ip_nlp_resto_(ip_nlp_resto)
     {
     }
@@ -47,7 +46,7 @@ namespace fatrop
             // set the current iterate of the original ip data such that it can be returned to the
             curr_it_orig.set_primal_x(curr_it_resto.primal_x());
             curr_it_orig.set_primal_s(
-                curr_it_resto.primal_s().block(info.number_of_slack_varianbles, 0));
+                curr_it_resto.primal_s().block(info.number_of_slack_variables, 0));
             // what to do with the duals?
             // Ipopt returns them but they dont really make sense for the original problem.
             fatrop_assert(false && "Restoration phase failed");
@@ -61,8 +60,8 @@ namespace fatrop
             // compute delta s from curr_s of the original solver to curr_s of the resto solver,
             // thsi will be used later to compute delta z
             trial_it_orig.set_delta_primal_s(
-                curr_it_resto.primal_s().block(info.number_of_slack_varianbles, 0) -
-                curr_it_orig.primal_s().block(info.number_of_slack_varianbles, 0));
+                curr_it_resto.primal_s().block(info.number_of_slack_variables, 0) -
+                curr_it_orig.primal_s().block(info.number_of_slack_variables, 0));
             // now we compute delta z as if one step was taken.
             const VecRealView Sl = curr_it_orig.delta_lower();
             const VecRealView Su = curr_it_orig.delta_upper();
@@ -94,9 +93,9 @@ namespace fatrop
             // copy the result to the trial iterate of the original problem
             trial_it_orig.set_primal_x(curr_it_resto.primal_x());
             trial_it_orig.set_primal_s(
-                curr_it_resto.primal_s().block(info.number_of_slack_varianbles, 0));
+                curr_it_resto.primal_s().block(info.number_of_slack_variables, 0));
             // run the eq mult initializer
-            ip_initializer_->initialize_eq_mult(true);
+            eq_mult_initializer_->initialize_eq_mult(true);
             ip_data_orig_->set_iteration_number(ip_data_orig_->iteration_number() - 1);
         }
 

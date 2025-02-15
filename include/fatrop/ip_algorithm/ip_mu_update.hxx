@@ -5,11 +5,11 @@
 #ifndef __fatrop_ip_mu_update_hxx__
 #define __fatrop_ip_mu_update_hxx__
 
+#include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
 #include "fatrop/ip_algorithm/ip_mu_update.hpp"
-#include "fatrop/common/options.hpp"
 
 namespace fatrop
 {
@@ -31,6 +31,9 @@ namespace fatrop
         bool tiny_step_flag = ipdata_->tiny_step_flag();
         ipdata_->set_tiny_step_flag(false);
         bool done = false;
+        /**
+         * todo: special case when resto phase: skip first iteration
+         */
         while ((sub_problem_error < kappa_eps_mu || tiny_step_flag) && !done)
         {
             Scalar new_mu = std::min(mu_linear_decrease_factor_ * mu,
@@ -67,15 +70,19 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    void IpMonotoneMuUpdate<ProblemType>::register_options(OptionRegistry& registry)
+    void IpMonotoneMuUpdate<ProblemType>::register_options(OptionRegistry &registry)
     {
-        registry.register_option("barrier_tol_factor", &IpMonotoneMuUpdate::set_barrier_tol_factor, this);
-        registry.register_option("mu_linear_decrease_factor", &IpMonotoneMuUpdate::set_mu_linear_decrease_factor, this);
-        registry.register_option("mu_superlinear_decrease_power", &IpMonotoneMuUpdate::set_mu_superlinear_decrease_power, this);
+        registry.register_option("barrier_tol_factor", &IpMonotoneMuUpdate::set_barrier_tol_factor,
+                                 this);
+        registry.register_option("mu_linear_decrease_factor",
+                                 &IpMonotoneMuUpdate::set_mu_linear_decrease_factor, this);
+        registry.register_option("mu_superlinear_decrease_power",
+                                 &IpMonotoneMuUpdate::set_mu_superlinear_decrease_power, this);
         registry.register_option("tau_min", &IpMonotoneMuUpdate::set_tau_min, this);
         registry.register_option("mu_init", &IpMonotoneMuUpdate::set_mu_init, this);
         registry.register_option("compl_inf_tol", &IpMonotoneMuUpdate::set_compl_inf_tol, this);
-        registry.register_option("mu_allow_fast_monotone_decrease", &IpMonotoneMuUpdate::set_mu_allow_fast_monotone_decrease, this);
+        registry.register_option("mu_allow_fast_monotone_decrease",
+                                 &IpMonotoneMuUpdate::set_mu_allow_fast_monotone_decrease, this);
     }
 
 } // namespace fatrop

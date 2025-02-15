@@ -169,9 +169,9 @@ namespace fatrop
     template <typename LinearSolverType, typename ProblemType>
     void IpLinesearch<LinearSolverType, ProblemType>::find_acceptable_trial_point()
     {
-        IpIterateType &curr_it = ipdata_->current_iterate();
-        IpIterateType &trial_it = ipdata_->trial_iterate();
-        Scalar curr_mu = curr_it.mu();
+        IpIterateType *curr_it = &ipdata_->current_iterate();
+        IpIterateType *trial_it = &ipdata_->trial_iterate();
+        Scalar curr_mu = (*curr_it).mu();
         bool mu_changed = (curr_mu != last_mu_);
         if (mu_changed) // or first call
         {
@@ -194,6 +194,8 @@ namespace fatrop
         if (in_watchdog_ && (goto_resto || tiny_step))
         {
             stop_watchdog();
+            curr_it = &ipdata_->current_iterate();
+            trial_it = &ipdata_->trial_iterate();
             goto_resto = false;
             tiny_step = false;
         }
@@ -203,18 +205,20 @@ namespace fatrop
             watchdog_shortened_iter_count_ >= watchdog_shortened_iter_trigger_)
         {
             start_watchdog();
+            curr_it = &ipdata_->current_iterate();
+            trial_it = &ipdata_->trial_iterate();
         }
         //  handle the case of tiny steps
         if (tiny_step)
         {
-            Scalar alpha_primal = curr_it.maximum_step_size_primal(curr_it.tau());
-            trial_it.set_primal_x(curr_it.primal_x() +
-                                  alpha_primal * curr_it.delta_primal_x()); // x
-            trial_it.set_primal_s(curr_it.primal_s() +
-                                  alpha_primal * curr_it.delta_primal_s()); // s
+            Scalar alpha_primal = (*curr_it).maximum_step_size_primal((*curr_it).tau());
+            (*trial_it).set_primal_x((*curr_it).primal_x() +
+                                     alpha_primal * (*curr_it).delta_primal_x()); // x
+            (*trial_it).set_primal_s((*curr_it).primal_s() +
+                                     alpha_primal * (*curr_it).delta_primal_s()); // s
             // let's see if we can evaluate objective barrier and contraints and if they are finite
-            if (!trial_it.constr_viol().is_finite() || !std::isfinite(trial_it.obj_value()) ||
-                !std::isfinite(trial_it.barrier_value()))
+            if (!(*trial_it).constr_viol().is_finite() || !std::isfinite((*trial_it).obj_value()) ||
+                !std::isfinite((*trial_it).barrier_value()))
             {
                 // dont accept the tiny step
                 tiny_step = false;
@@ -222,7 +226,7 @@ namespace fatrop
             if (tiny_step && tiny_step_last_iteration_)
                 ipdata_->set_tiny_step_flag(true);
 
-            Scalar delta_y_norm = norm_inf(trial_it.delta_dual_eq());
+            Scalar delta_y_norm = norm_inf((*trial_it).delta_dual_eq());
             if (delta_y_norm < tiny_step_y_tol_)
             {
                 tiny_step_last_iteration_ = false;
@@ -253,13 +257,13 @@ namespace fatrop
                     accept = try_soft_resto_step(satisfies_original_criterion);
                     if (accept)
                     {
-                        trial_it.step_info().alpha_primal_type = 's';
+                        (*trial_it).step_info().alpha_primal_type = 's';
                     }
                     if (satisfies_original_criterion)
                     {
                         in_soft_resto_phase_ = false;
                         soft_resto_counter_ = 0;
-                        trial_it.step_info().alpha_primal_type = 'S';
+                        (*trial_it).step_info().alpha_primal_type = 'S';
                     }
                 }
             }
@@ -286,7 +290,12 @@ namespace fatrop
                         if (evaluation_error ||
                             watchdog_trial_iter_count_ >= watchdog_trial_iter_max_)
                         {
-                            stop_watchdog();
+                            if (in_watchdog_)
+                            {
+                                stop_watchdog();
+                                curr_it = &ipdata_->current_iterate();
+                                trial_it = &ipdata_->trial_iterate();
+                            }
                             skip_first_trial_point = true;
                         }
                         else
@@ -315,18 +324,31 @@ namespace fatrop
                 {
                     if (satisfies_original_criterion)
                     {
-                        trial_it.step_info().alpha_primal_type = 'S';
+                        (*trial_it).step_info().alpha_primal_type = 'S';
                     }
                     else
                     {
-                        trial_it.step_info().alpha_primal_type = 's';
+                        (*trial_it).step_info().alpha_primal_type = 's';
                         in_soft_resto_phase_ = true;
                     }
                 }
             }
             if (!accept) // go to restoration phase
             {
-                fatrop_assert_msg(false, "Restoration phase not implemented yet.");
+                f_out << "calling restoration phase" << std::endl;
+                fatrop_assert_msg(restoration_phase_,
+                                  "Restoration phase not set in line search object. Maybe called "
+                                  "from restoration phase algorithm.");
+                /**
+                 * todo set the step info
+                 */
+                accept = restoration_phase_->perform_restoration();
+                if (!accept)
+                    fatrop_assert(false && "Restoration phase failed");
+
+                in_soft_resto_phase_ = false;
+                soft_resto_counter_ = 0;
+                watchdog_shortened_iter_count_ = 0;
             }
         }
         else if (!in_soft_resto_phase_ || tiny_step)
@@ -334,7 +356,7 @@ namespace fatrop
             // no restoration phase and now updating dual variables
             if (accept)
             {
-                auto alpha_max = curr_it.maximum_step_size(curr_it.tau());
+                auto alpha_max = (*curr_it).maximum_step_size((*curr_it).tau());
                 Scalar alpha_primal_max = alpha_max.first;
                 Scalar alpha_dual_max = alpha_max.second;
                 perform_dual_step(alpha_primal, alpha_dual_max);
@@ -395,6 +417,7 @@ namespace fatrop
     template <typename LinearSolverType, typename ProblemType>
     void IpLinesearch<LinearSolverType, ProblemType>::start_watchdog()
     {
+        fatrop_assert_msg(!in_watchdog_, "start watchdog called but watchdog is already active");
         in_watchdog_ = true;
         watchdog_trial_iter_count_ = 0;
         IpIterateType &curr_it = ipdata_->current_iterate();
@@ -409,6 +432,7 @@ namespace fatrop
     template <typename LinearSolverType, typename ProblemType>
     void IpLinesearch<LinearSolverType, ProblemType>::stop_watchdog()
     {
+        fatrop_assert_msg(in_watchdog_, "stop watchdog called but watchdog is not active");
         in_watchdog_ = false;
         reference_theta_ = watchdog_theta_;
         reference_barr_ = watchdog_barr_;
@@ -420,8 +444,8 @@ namespace fatrop
     void IpLinesearch<LinearSolverType, ProblemType>::perform_dual_step(const Scalar alpha_primal,
                                                                         const Scalar alpha_dual)
     {
-        IpIterateType &curr_it = ipdata_->current_iterate();
-        IpIterateType &trial_it = ipdata_->trial_iterate();
+        IpIterateType& curr_it = ipdata_->current_iterate();
+        IpIterateType& trial_it = ipdata_->trial_iterate();
         trial_it.set_dual_eq(curr_it.dual_eq() + alpha_primal * curr_it.delta_dual_eq());
         trial_it.set_dual_bounds_l(curr_it.dual_bounds_l() +
                                    alpha_dual * curr_it.delta_dual_bounds_l());

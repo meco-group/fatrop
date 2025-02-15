@@ -141,8 +141,6 @@ namespace fatrop
         Index eval_constr_jac(const ProblemInfo<OcpType> &info, const VecRealView &primal_x,
                               const VecRealView &primal_s, Jacobian<OcpType> &jac) override
         {
-            Timer t;
-            t.start();
             // take the matrices from jac and put them in the buffer
             std::vector<MAT *> &BAbt_buff = matrix_buffer_[0];
             std::vector<MAT *> &Gg_eqt_buff = matrix_buffer_[1];

@@ -5,6 +5,7 @@
 #ifndef __fatrop_ip_algorithm_ip_eq_mult_initializer_hpp__
 #define __fatrop_ip_algorithm_ip_eq_mult_initializer_hpp__
 #include "fatrop/ip_algorithm/fwd.hpp"
+#include "fatrop/common/fwd.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 
 #include "fatrop/nlp/fwd.hpp"

@@ -7,6 +7,7 @@
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/common/fwd.hpp"
+#include "fatrop/linear_algebra/vector.hpp"
 #include <memory>
 namespace fatrop
 {

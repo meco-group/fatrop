@@ -41,6 +41,12 @@ namespace fatrop
          */
         IpAlgBuilder &create_ipdata();
 
+        // /**
+        //  * @brief Create the restoration phase component.
+        //  * @return Reference to this IpAlgBuilder for method chaining.
+        //  */
+        // IpAlgBuilder &create_restoration_phase();
+
         /**
          * @brief Create the ProblemInfo component.
          * @return Reference to this IpAlgBuilder for method chaining.
@@ -134,6 +140,8 @@ namespace fatrop
         std::shared_ptr<IpEqMultInitializerBase> eq_mult_initializer_;
         std::shared_ptr<IpConvergenceCheckBase> convergence_check_;
         std::shared_ptr<IpIterationOutputBase> iteration_output_;
+        std::shared_ptr<IpRestoPhaseMinCl1<ProblemType>> resto_phase_;
+        std::shared_ptr<IpConvergenceCheckResto<ProblemType>> convergence_check_resto_;
         OptionRegistry *options_registry_ = nullptr;
     };
 } // namespace fatrop

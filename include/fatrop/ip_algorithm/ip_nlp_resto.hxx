@@ -196,6 +196,9 @@ namespace fatrop
     template <typename ProblemType>
     void IpNlpResto<ProblemType>::register_options(OptionRegistry &registry)
     {
+        /**
+         * todo register options
+         */
     }
 
 } // namespace fatrop

@@ -16,6 +16,8 @@ namespace fatrop
     template <typename ProblemType> class PdSystemResto;
     template <typename ProblemType> struct IpIterate;
     template <typename ProblemType> class IpEqMultInitializer;
+    template <typename ProblemType> class IpEqMultInitializerResto;
+    template <typename ProblemType> class IpConvergenceCheckResto;
     template <typename SolverType, typename ProblemType> class IpSearchDirImpl;
     template <typename LinearSolverType, typename ProblemType> class IpLinesearch;
     template <typename ProblemType> class IpNlpOrig;
@@ -33,7 +35,7 @@ namespace fatrop
     class IpConvergenceCheckBase;
     class IpIterationOutputBase;
     class IpRestoPhaseBase; 
-    template <typename ProblemType> class IpRestoPhaseMinCL1;
+    template <typename ProblemType> class IpRestoPhaseMinCl1;
     class IpTimingStatistics;
 
 } // namespace fatrop

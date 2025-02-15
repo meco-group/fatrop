@@ -20,6 +20,7 @@ namespace fatrop
         Converged,                  ///< Algorithm has converged to optimal solution
         ConvergedToAcceptablePoint, ///< Algorithm has converged to an acceptable suboptimal point
         MaxIterExceeded,            ///< Maximum number of iterations exceeded
+        RestoFail,
         Unassigned                  ///< Convergence status not yet determined
     };
 

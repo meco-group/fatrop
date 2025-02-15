@@ -17,6 +17,7 @@ namespace fatrop
     template <typename Dep1> class VecRealExp;
     template <typename Dep1> class VecRealSin;
     template <typename Dep1> class VecRealCos;
+    template <typename Dep1> class VecRealSqrt;
     template <typename IfElseOp, typename Dep1, typename Dep2> class VecRealIfElse;
     template <typename Dep1> class VecRealTimesScalar;
     template <typename Dep1, typename Dep2> class VecRealPlusVecReal;

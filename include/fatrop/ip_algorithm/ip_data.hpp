@@ -153,10 +153,13 @@ namespace fatrop
         bool tiny_step_flag_ = false;
         Scalar tol_ = 1e-8;
         IpTimingStatistics timings_;
-        Hessian<ProblemType> hessian_data_[2];
-        Jacobian<ProblemType> jacobian_data_[2];
+        /** todo make this unique pointer to allow incomplete types? */
+        Hessian<ProblemType> hessian_data_[3];
+        Jacobian<ProblemType> jacobian_data_[3];
         Hessian<ProblemType> *hessian_curr_ = nullptr;
         Jacobian<ProblemType> *jacobian_curr_ = nullptr;
+        Hessian<ProblemType> *hessian_trial_ = nullptr;
+        Jacobian<ProblemType> *jacobian_trial_ = nullptr;
         Hessian<ProblemType> *hessian_stored_ = nullptr;
         Jacobian<ProblemType> *jacobian_stored_ = nullptr;
         bool stored_iterate_is_valid_ = false;
@@ -173,7 +176,7 @@ namespace fatrop
                                                  ///< lower bounded.
         std::vector<bool> single_upper_bounded_; ///< Boolean vector indicating if the variables are
                                                  ///< upper bounded.
-        Index number_of_bounds_ ; ///< Total number of bounds in the problem
+        Index number_of_bounds_;                 ///< Total number of bounds in the problem
     };
     template <typename ProblemType> IpIterate<ProblemType> &IpData<ProblemType>::current_iterate()
     {

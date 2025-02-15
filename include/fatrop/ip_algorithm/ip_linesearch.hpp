@@ -37,6 +37,10 @@ namespace fatrop
         virtual void reset_linesearch() = 0;
 
         virtual void register_options(OptionRegistry &registry) = 0;
+        virtual bool is_acceptable_to_current_iterate(const Scalar trial_barr,
+                                                      const Scalar trial_theta,
+                                                      const bool called_from_resto = false) = 0;
+        virtual bool is_acceptable_to_filter(const Scalar trial_barr, const Scalar trial_theta) = 0;
 
     protected:
         virtual ~IpLineSearchBase() = default;
@@ -125,8 +129,8 @@ namespace fatrop
         bool try_second_order_correction(const Scalar alpha_primal_test, Scalar &alpha_primal);
         bool try_soft_resto_step(bool &satisfies_original_criterion);
         bool is_acceptable_to_current_iterate(const Scalar trial_barr, const Scalar trial_theta,
-                                              const bool called_from_resto = false);
-        bool is_acceptable_to_filter(const Scalar trial_barr, const Scalar trial_theta);
+                                              const bool called_from_resto = false) override;
+        bool is_acceptable_to_filter(const Scalar trial_barr, const Scalar trial_theta) override;
         bool armijo_holds(const Scalar alpha_primal);
         bool detect_tiny_step();
         bool is_f_type(const Scalar alpha_primal);

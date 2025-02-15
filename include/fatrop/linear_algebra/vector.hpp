@@ -179,6 +179,11 @@ namespace fatrop
 
         friend VecRealCos<Derived> cos(const VecReal<Derived> &a) { return VecRealCos<Derived>(a); }
 
+        friend VecRealSqrt<Derived> sqrt(const VecReal<Derived> &a)
+        {
+            return VecRealSqrt<Derived>(a);
+        }
+
         template <typename Dep2>
         friend VecRealMin<Derived, Dep2> min(const VecReal<Derived> &a, const VecReal<Dep2> &b)
         {
@@ -607,6 +612,20 @@ namespace fatrop
     public:
         VecRealCos(const VecReal<Dep1> &a) : a(a.derived()) {};
         Scalar operator()(const Index i) const { return std::cos(a(i)); }
+        Index m() const { return a.m(); }
+
+    private:
+        const Dep1 a;
+    };
+
+    /**
+     * @brief Represents element-wise sqrt of a vector.
+     */
+    template <typename Dep1> class VecRealSqrt : public VecReal<VecRealSqrt<Dep1>>
+    {
+    public:
+        VecRealSqrt(const VecReal<Dep1> &a) : a(a.derived()) {};
+        Scalar operator()(const Index i) const { return std::sqrt(a(i)); }
         Index m() const { return a.m(); }
 
     private:
