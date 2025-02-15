@@ -21,6 +21,7 @@
 #include <limits>
 #include <memory>
 
+#include "fatrop/ocp/OCPCInterfaceInternal.hpp"
 namespace fatrop
 {
 
@@ -32,7 +33,6 @@ namespace fatrop
     };
 
 #define FATROP_OCP_SOLVER_IMPLEMENTATION
-#include "fatrop/ocp/OCPCInterface.h"
     namespace // nameless namespace
     {
         struct FatropOcpCAuxiliary
@@ -74,264 +74,258 @@ namespace fatrop
 
     }
 
-    class FatropOcpCMapping : public Nlp<OcpType>
+    FatropOcpCMapping::FatropOcpCMapping(FatropOcpCInterface *ocp)
+        : ocp(ocp), ocp_dims_(FatropOcpCAuxiliary::get_ocp_dims(*ocp)),
+          nlp_dims_(FatropOcpCAuxiliary::get_nlp_dims(ocp_dims_)), K_(ocp_dims_.K),
+          matrix_buffer_{std::vector<MAT *>(K_), std::vector<MAT *>(K_), std::vector<MAT *>(K_)}
     {
-    public:
-        FatropOcpCInterface *ocp;
-        FatropOcpCDims s;
-        FatropOcpCMapping(FatropOcpCInterface *ocp)
-            : ocp(ocp), ocp_dims_(FatropOcpCAuxiliary::get_ocp_dims(*ocp)),
-              nlp_dims_(FatropOcpCAuxiliary::get_nlp_dims(ocp_dims_)), K_(ocp_dims_.K),
-              matrix_buffer_{std::vector<MAT *>(K_), std::vector<MAT *>(K_), std::vector<MAT *>(K_)}
+        // check if no parameters are used by the ocp, because this is not supported anymore
+        if (ocp->get_n_global_params && ocp->get_n_global_params(ocp->user_data) > 0)
         {
-            // check if no parameters are used by the ocp, because this is not supported anymore
-            if (ocp->get_n_global_params && ocp->get_n_global_params(ocp->user_data) > 0)
+            throw std::runtime_error("Parameters are not supported anymore in the C interface");
+        }
+        for (Index k = 0; k < ocp_dims_.K; k++)
+        {
+            if (ocp->get_n_stage_params && ocp->get_n_stage_params(k, ocp->user_data) > 0)
             {
                 throw std::runtime_error("Parameters are not supported anymore in the C interface");
             }
-            for (Index k = 0; k < ocp_dims_.K; k++)
-            {
-                if (ocp->get_n_stage_params && ocp->get_n_stage_params(k, ocp->user_data) > 0)
-                {
-                    throw std::runtime_error(
-                        "Parameters are not supported anymore in the C interface");
-                }
-            }
         }
+    }
 
-        const NlpDims &nlp_dims() const override { return nlp_dims_; };
-        const ProblemDims<OcpType> &problem_dims() const override { return ocp_dims_; };
-        Index eval_lag_hess(const ProblemInfo<OcpType> &info, const Scalar objective_scale,
-                            const VecRealView &primal_x, const VecRealView &primal_s,
-                            const VecRealView &lam, Hessian<OcpType> &hess) override
+    const NlpDims &FatropOcpCMapping::nlp_dims() const { return nlp_dims_; };
+    const ProblemDims<OcpType> &FatropOcpCMapping::problem_dims() const { return ocp_dims_; };
+    Index FatropOcpCMapping::eval_lag_hess(const ProblemInfo<OcpType> &info,
+                                           const Scalar objective_scale,
+                                           const VecRealView &primal_x, const VecRealView &primal_s,
+                                           const VecRealView &lam, Hessian<OcpType> &hess)
+    {
+        // take the matrices from hess and put them in the buffer
+        std::vector<MAT *> &RSQrqt_buff = matrix_buffer_[0];
+        for (Index k = 0; k < K_; k++)
         {
-            // take the matrices from hess and put them in the buffer
-            std::vector<MAT *> &RSQrqt_buff = matrix_buffer_[0];
-            for (Index k = 0; k < K_; k++)
-            {
-                RSQrqt_buff[k] = &hess.RSQrqt[k].mat();
-            }
-            // get the double pointers for the vector views
-            const Scalar *primal_x_ptr = primal_x.data();
-            const Scalar *primal_s_ptr = primal_s.data();
-            const Scalar *lam_ptr = lam.data();
-            // call the C interface
-            int ret = ocp->full_eval_lag_hess(objective_scale, primal_x_ptr, lam_ptr, nullptr,
-                                              nullptr, RSQrqt_buff[0], &s, ocp->user_data);
-            if (ret == 2)
-                return 0;
-            if (ret == 0)
-            {
-                for (Index k = 0; k < info.dims.K; k++)
-                {
-                    const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
-                    const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
-                    const Scalar *lam_dyn_k =
-                        (k != info.dims.K - 1) ? lam_ptr + info.offsets_g_eq_dyn[k] : nullptr;
-                    const Scalar *lam_eq_k = lam_ptr + info.offsets_g_eq_path[k];
-                    const Scalar *lam_eq_ineq_k = lam_ptr + info.offsets_g_eq_slack[k];
-                    if (ocp->eval_RSQrqt)
-                        ocp->eval_RSQrqt(&objective_scale, inputs_k, states_k, lam_dyn_k, lam_eq_k,
-                                         lam_eq_ineq_k, nullptr, nullptr, RSQrqt_buff[k], k,
-                                         ocp->user_data);
-                }
-            }
-            return 0;
+            RSQrqt_buff[k] = &hess.RSQrqt[k].mat();
         }
-        Index eval_constr_jac(const ProblemInfo<OcpType> &info, const VecRealView &primal_x,
-                              const VecRealView &primal_s, Jacobian<OcpType> &jac) override
-        {
-            // take the matrices from jac and put them in the buffer
-            std::vector<MAT *> &BAbt_buff = matrix_buffer_[0];
-            std::vector<MAT *> &Gg_eqt_buff = matrix_buffer_[1];
-            std::vector<MAT *> &Gg_ineqt_buff = matrix_buffer_[2];
-            // get the double pointers for the vector views
-            const Scalar *primal_x_ptr = primal_x.data();
-            for (Index k = 0; k < K_; k++)
-            {
-                BAbt_buff[k] = &jac.BAbt[k].mat();
-                Gg_eqt_buff[k] = &jac.Gg_eqt[k].mat();
-                Gg_ineqt_buff[k] = &jac.Gg_ineqt[k].mat();
-            }
-            // call the C interface
-            int ret =
-                ocp->full_eval_constr_jac(primal_x_ptr, nullptr, nullptr, BAbt_buff[0],
-                                          Gg_eqt_buff[0], Gg_ineqt_buff[0], &s, ocp->user_data);
-            if (ret == 2)
-                return 0;
-            if (ret == 0)
-            {
-                for (Index k = 0; k < info.dims.K; k++)
-                {
-                    const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
-                    const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
-                    if (ocp->eval_Ggt)
-                        ocp->eval_Ggt(inputs_k, states_k, nullptr, nullptr, Gg_eqt_buff[k], k,
-                                      ocp->user_data);
-
-                    if (ocp->eval_Ggt_ineq)
-                        ocp->eval_Ggt_ineq(inputs_k, states_k, nullptr, nullptr, Gg_ineqt_buff[k],
-                                           k, ocp->user_data);
-                    if (k != info.dims.K - 1)
-                    {
-                        const Scalar *states_kp1 = primal_x_ptr + info.offsets_primal_x[k + 1];
-                        if (ocp->eval_BAbt)
-                            ocp->eval_BAbt(states_kp1, inputs_k, states_k, nullptr, nullptr,
-                                           BAbt_buff[k], k, ocp->user_data);
-                    }
-                }
-            }
+        // get the double pointers for the vector views
+        const Scalar *primal_x_ptr = primal_x.data();
+        const Scalar *primal_s_ptr = primal_s.data();
+        const Scalar *lam_ptr = lam.data();
+        // call the C interface
+        int ret = ocp->full_eval_lag_hess(objective_scale, primal_x_ptr, lam_ptr, nullptr, nullptr,
+                                          RSQrqt_buff[0], &s, ocp->user_data);
+        if (ret == 2)
             return 0;
-        }
-        Index eval_constraint_violation(const ProblemInfo<OcpType> &info,
-                                        const VecRealView &primal_x, const VecRealView &primal_s,
-                                        VecRealView &res) override
+        if (ret == 0)
         {
-            // get the double pointers for the vector views
-            const Scalar *primal_x_ptr = primal_x.data();
-            Scalar *res_ptr = res.data();
-            // call the C interface
-            int ret = ocp->full_eval_contr_viol(primal_x_ptr, nullptr, nullptr, res_ptr, &s,
-                                                ocp->user_data);
-            if (ret == 2)
-                return 0;
-            if (ret == 0)
-            {
-                Scalar *res_p = res.data();
-                for (Index k = 0; k < info.dims.K; k++)
-                {
-                    const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
-                    const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
-                    if (ocp->eval_g)
-                        ocp->eval_g(inputs_k, states_k, nullptr, nullptr,
-                                    res_ptr + info.offsets_g_eq_path[k], k, ocp->user_data);
-
-                    if (ocp->eval_gineq)
-                        ocp->eval_gineq(inputs_k, states_k, nullptr, nullptr,
-                                        res_ptr + info.offsets_g_eq_slack[k], k, ocp->user_data);
-
-                    if (k != info.dims.K - 1)
-                    {
-                        const Scalar *states_kp1 = primal_x_ptr + info.offsets_primal_x[k + 1];
-                        if (ocp->eval_b)
-                            ocp->eval_b(states_kp1, inputs_k, states_k, nullptr, nullptr,
-                                        res_ptr + info.offsets_g_eq_dyn[k], k, ocp->user_data);
-                    }
-                }
-            }
-            // add -s to the slack constraints
-            res.block(info.number_of_g_eq_slack, info.offset_g_eq_slack) =
-                res.block(info.number_of_g_eq_slack, info.offset_g_eq_slack) -
-                primal_s.block(info.number_of_g_eq_slack, 0);
-            return 0;
-        }
-        Index eval_objective_gradient(const ProblemInfo<OcpType> &info,
-                                      const Scalar objective_scale, const VecRealView &primal_x,
-                                      const VecRealView &primal_s, VecRealView &grad_x,
-                                      VecRealView &grad_s) override
-        {
-            // get the double pointers for the vector views
-            const Scalar *primal_x_ptr = primal_x.data();
-            Scalar *grad_x_ptr = grad_x.data();
-            // set grad_s to zero
-            grad_s = 0.0;
-            // call the C interface
-            int ret = ocp->full_eval_obj_grad(objective_scale, primal_x.data(), nullptr, nullptr,
-                                              grad_x.data(), &s, ocp->user_data);
-            if (ret == 2)
-                return 0;
-            if (ret == 0)
-            {
-                for (Index k = 0; k < info.dims.K; k++)
-                {
-                    const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
-                    const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
-                    // ocp_->eval_rq(&objective_scale, inputs_k, states_k,
-                    //               grad_x_p + info.offsets_primal_u[k], k);
-                    if (ocp->eval_rq)
-                        return ocp->eval_rq(&objective_scale, inputs_k, states_k, nullptr, nullptr,
-                                            grad_x_ptr + info.offsets_primal_u[k], k,
-                                            ocp->user_data);
-                }
-            }
-            return 0;
-        }
-        Index eval_objective(const ProblemInfo<OcpType> &info, const Scalar objective_scale,
-                             const VecRealView &primal_x, const VecRealView &primal_s,
-                             Scalar &res) override
-        {
-            // get the double pointers for the vector views
-            const Scalar *primal_x_ptr = primal_x.data();
-            // call the C interface
-            int ret = ocp->full_eval_obj(objective_scale, primal_x.data(), nullptr, nullptr, &res,
-                                         &s, ocp->user_data);
-            if (ret == 2)
-                return 0;
-            if (ret == 0)
-            {
-                res = 0;
-                for (Index k = 0; k < info.dims.K; k++)
-                {
-                    Scalar ret = 0;
-                    const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
-                    const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
-                    // ocp_->eval_L(&objective_scale, inputs_k, states_k, &ret, k);
-                    if (ocp->eval_L)
-                        return ocp->eval_L(&objective_scale, inputs_k, states_k, nullptr, nullptr,
-                                           &ret, k, ocp->user_data);
-
-                    res += ret;
-                }
-            }
-            return 0;
-        }
-        Index get_bounds(const ProblemInfo<OcpType> &info, VecRealView &lower_bounds,
-                         VecRealView &upper_bounds) override
-        {
-            if (info.number_of_slack_variables == 0)
-                return 0;
-            Scalar *lower_bounds_p = lower_bounds.data();
-            Scalar *upper_bounds_p = upper_bounds.data();
             for (Index k = 0; k < info.dims.K; k++)
             {
-                Scalar *lower_bounds_k = lower_bounds_p + info.offsets_slack[k];
-                Scalar *upper_bounds_k = upper_bounds_p + info.offsets_slack[k];
-                ocp->get_bounds(lower_bounds_k, upper_bounds_k, k, ocp->user_data);
+                const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
+                const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
+                const Scalar *lam_dyn_k =
+                    (k != info.dims.K - 1) ? lam_ptr + info.offsets_g_eq_dyn[k] : nullptr;
+                const Scalar *lam_eq_k = lam_ptr + info.offsets_g_eq_path[k];
+                const Scalar *lam_eq_ineq_k = lam_ptr + info.offsets_g_eq_slack[k];
+                if (ocp->eval_RSQrqt)
+                    ocp->eval_RSQrqt(&objective_scale, inputs_k, states_k, lam_dyn_k, lam_eq_k,
+                                     lam_eq_ineq_k, nullptr, nullptr, RSQrqt_buff[k], k,
+                                     ocp->user_data);
             }
-            return 0;
         }
-        Index get_initial_primal(const ProblemInfo<OcpType> &info, VecRealView &primal_x) override
+        return 0;
+    }
+    Index FatropOcpCMapping::eval_constr_jac(const ProblemInfo<OcpType> &info,
+                                             const VecRealView &primal_x,
+                                             const VecRealView &primal_s, Jacobian<OcpType> &jac)
+    {
+        // take the matrices from jac and put them in the buffer
+        std::vector<MAT *> &BAbt_buff = matrix_buffer_[0];
+        std::vector<MAT *> &Gg_eqt_buff = matrix_buffer_[1];
+        std::vector<MAT *> &Gg_ineqt_buff = matrix_buffer_[2];
+        // get the double pointers for the vector views
+        const Scalar *primal_x_ptr = primal_x.data();
+        for (Index k = 0; k < K_; k++)
         {
-            Scalar *primal_x_ptr = primal_x.data();
+            BAbt_buff[k] = &jac.BAbt[k].mat();
+            Gg_eqt_buff[k] = &jac.Gg_eqt[k].mat();
+            Gg_ineqt_buff[k] = &jac.Gg_ineqt[k].mat();
+        }
+        // call the C interface
+        int ret = ocp->full_eval_constr_jac(primal_x_ptr, nullptr, nullptr, BAbt_buff[0],
+                                            Gg_eqt_buff[0], Gg_ineqt_buff[0], &s, ocp->user_data);
+        if (ret == 2)
+            return 0;
+        if (ret == 0)
+        {
             for (Index k = 0; k < info.dims.K; k++)
             {
-                if (ocp->get_initial_uk)
-                    ocp->get_initial_uk(primal_x_ptr + info.offsets_primal_u[k], k, ocp->user_data);
-                if (ocp->get_initial_xk)
-                    ocp->get_initial_xk(primal_x_ptr + info.offsets_primal_x[k], k, ocp->user_data);
-            }
-            return 0;
-        }
-        void get_primal_damping(const ProblemInfo<OcpType> &info, VecRealView &damping) override
-        {
-            damping = 0.0;
-        }
-        void apply_jacobian_s_transpose(const ProblemInfo<OcpType> &info,
-                                        const VecRealView &multipliers, const Scalar alpha,
-                                        const VecRealView &y, VecRealView &out) override
-        {
-            out = alpha * y;
-            out.block(info.number_of_slack_variables, 0) =
-                out.block(info.number_of_slack_variables, 0) -
-                multipliers.block(info.number_of_slack_variables, info.offset_g_eq_slack);
-        }
+                const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
+                const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
+                if (ocp->eval_Ggt)
+                    ocp->eval_Ggt(inputs_k, states_k, nullptr, nullptr, Gg_eqt_buff[k], k,
+                                  ocp->user_data);
 
-    private:
-        ProblemDims<OcpType> ocp_dims_;
-        NlpDims nlp_dims_;
-        Index K_;
-        std::vector<MAT *> matrix_buffer_[3];
-    };
+                if (ocp->eval_Ggt_ineq)
+                    ocp->eval_Ggt_ineq(inputs_k, states_k, nullptr, nullptr, Gg_ineqt_buff[k], k,
+                                       ocp->user_data);
+                if (k != info.dims.K - 1)
+                {
+                    const Scalar *states_kp1 = primal_x_ptr + info.offsets_primal_x[k + 1];
+                    if (ocp->eval_BAbt)
+                        ocp->eval_BAbt(states_kp1, inputs_k, states_k, nullptr, nullptr,
+                                       BAbt_buff[k], k, ocp->user_data);
+                }
+            }
+        }
+        return 0;
+    }
+    Index FatropOcpCMapping::eval_constraint_violation(const ProblemInfo<OcpType> &info,
+                                                       const VecRealView &primal_x,
+                                                       const VecRealView &primal_s,
+                                                       VecRealView &res)
+    {
+        // get the double pointers for the vector views
+        const Scalar *primal_x_ptr = primal_x.data();
+        Scalar *res_ptr = res.data();
+        // call the C interface
+        int ret =
+            ocp->full_eval_contr_viol(primal_x_ptr, nullptr, nullptr, res_ptr, &s, ocp->user_data);
+        if (ret == 2)
+            return 0;
+        if (ret == 0)
+        {
+            Scalar *res_p = res.data();
+            for (Index k = 0; k < info.dims.K; k++)
+            {
+                const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
+                const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
+                if (ocp->eval_g)
+                    ocp->eval_g(inputs_k, states_k, nullptr, nullptr,
+                                res_ptr + info.offsets_g_eq_path[k], k, ocp->user_data);
+
+                if (ocp->eval_gineq)
+                    ocp->eval_gineq(inputs_k, states_k, nullptr, nullptr,
+                                    res_ptr + info.offsets_g_eq_slack[k], k, ocp->user_data);
+
+                if (k != info.dims.K - 1)
+                {
+                    const Scalar *states_kp1 = primal_x_ptr + info.offsets_primal_x[k + 1];
+                    if (ocp->eval_b)
+                        ocp->eval_b(states_kp1, inputs_k, states_k, nullptr, nullptr,
+                                    res_ptr + info.offsets_g_eq_dyn[k], k, ocp->user_data);
+                }
+            }
+        }
+        // add -s to the slack constraints
+        res.block(info.number_of_g_eq_slack, info.offset_g_eq_slack) =
+            res.block(info.number_of_g_eq_slack, info.offset_g_eq_slack) -
+            primal_s.block(info.number_of_g_eq_slack, 0);
+        return 0;
+    }
+    Index FatropOcpCMapping::eval_objective_gradient(const ProblemInfo<OcpType> &info,
+                                                     const Scalar objective_scale,
+                                                     const VecRealView &primal_x,
+                                                     const VecRealView &primal_s,
+                                                     VecRealView &grad_x, VecRealView &grad_s)
+    {
+        // get the double pointers for the vector views
+        const Scalar *primal_x_ptr = primal_x.data();
+        Scalar *grad_x_ptr = grad_x.data();
+        // set grad_s to zero
+        grad_s = 0.0;
+        // call the C interface
+        int ret = ocp->full_eval_obj_grad(objective_scale, primal_x.data(), nullptr, nullptr,
+                                          grad_x.data(), &s, ocp->user_data);
+        if (ret == 2)
+            return 0;
+        if (ret == 0)
+        {
+            for (Index k = 0; k < info.dims.K; k++)
+            {
+                const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
+                const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
+                // ocp_->eval_rq(&objective_scale, inputs_k, states_k,
+                //               grad_x_p + info.offsets_primal_u[k], k);
+                if (ocp->eval_rq)
+                    return ocp->eval_rq(&objective_scale, inputs_k, states_k, nullptr, nullptr,
+                                        grad_x_ptr + info.offsets_primal_u[k], k, ocp->user_data);
+            }
+        }
+        return 0;
+    }
+    Index FatropOcpCMapping::eval_objective(const ProblemInfo<OcpType> &info,
+                                            const Scalar objective_scale,
+                                            const VecRealView &primal_x,
+                                            const VecRealView &primal_s, Scalar &res)
+    {
+        // get the double pointers for the vector views
+        const Scalar *primal_x_ptr = primal_x.data();
+        // call the C interface
+        int ret = ocp->full_eval_obj(objective_scale, primal_x.data(), nullptr, nullptr, &res, &s,
+                                     ocp->user_data);
+        if (ret == 2)
+            return 0;
+        if (ret == 0)
+        {
+            res = 0;
+            for (Index k = 0; k < info.dims.K; k++)
+            {
+                Scalar ret = 0;
+                const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
+                const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
+                // ocp_->eval_L(&objective_scale, inputs_k, states_k, &ret, k);
+                if (ocp->eval_L)
+                    return ocp->eval_L(&objective_scale, inputs_k, states_k, nullptr, nullptr, &ret,
+                                       k, ocp->user_data);
+
+                res += ret;
+            }
+        }
+        return 0;
+    }
+    Index FatropOcpCMapping::get_bounds(const ProblemInfo<OcpType> &info, VecRealView &lower_bounds,
+                                        VecRealView &upper_bounds)
+    {
+        if (info.number_of_slack_variables == 0)
+            return 0;
+        Scalar *lower_bounds_p = lower_bounds.data();
+        Scalar *upper_bounds_p = upper_bounds.data();
+        for (Index k = 0; k < info.dims.K; k++)
+        {
+            Scalar *lower_bounds_k = lower_bounds_p + info.offsets_slack[k];
+            Scalar *upper_bounds_k = upper_bounds_p + info.offsets_slack[k];
+            ocp->get_bounds(lower_bounds_k, upper_bounds_k, k, ocp->user_data);
+        }
+        return 0;
+    }
+    Index FatropOcpCMapping::get_initial_primal(const ProblemInfo<OcpType> &info,
+                                                VecRealView &primal_x)
+    {
+        Scalar *primal_x_ptr = primal_x.data();
+        for (Index k = 0; k < info.dims.K; k++)
+        {
+            if (ocp->get_initial_uk)
+                ocp->get_initial_uk(primal_x_ptr + info.offsets_primal_u[k], k, ocp->user_data);
+            if (ocp->get_initial_xk)
+                ocp->get_initial_xk(primal_x_ptr + info.offsets_primal_x[k], k, ocp->user_data);
+        }
+        return 0;
+    }
+    void FatropOcpCMapping::get_primal_damping(const ProblemInfo<OcpType> &info,
+                                               VecRealView &damping)
+    {
+        damping = 0.0;
+    }
+    void FatropOcpCMapping::apply_jacobian_s_transpose(const ProblemInfo<OcpType> &info,
+                                                       const VecRealView &multipliers,
+                                                       const Scalar alpha, const VecRealView &y,
+                                                       VecRealView &out)
+    {
+        out = alpha * y;
+        out.block(info.number_of_slack_variables, 0) =
+            out.block(info.number_of_slack_variables, 0) -
+            multipliers.block(info.number_of_slack_variables, info.offset_g_eq_slack);
+    }
+
     // Stream buffer for std::cout like printing
     class FatropOcpCStreambuf : public std::streambuf
     {

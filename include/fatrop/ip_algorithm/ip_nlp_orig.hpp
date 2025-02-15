@@ -102,6 +102,10 @@ namespace fatrop
         virtual void apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
                                                 const VecRealView &multipliers, const Scalar alpha,
                                                 const VecRealView &y, VecRealView &out) override;
+        virtual void callback(const IpData<ProblemType> &ip_data) override
+        {
+            nlp_->callback(ip_data);
+        };
 
     private:
         NlpSp nlp_;                              ///< Shared pointer to the original NLP problem

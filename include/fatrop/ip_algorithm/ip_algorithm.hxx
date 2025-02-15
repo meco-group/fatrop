@@ -15,6 +15,7 @@
 #include "fatrop/ip_algorithm/ip_mu_update.hpp"
 #include "fatrop/ip_algorithm/ip_search_dir.hpp"
 #include "fatrop/ip_algorithm/ip_timings.hpp"
+#include "fatrop/nlp/nlp.hpp"
 #include "fatrop/ocp/type.hpp"
 namespace fatrop
 {
@@ -60,6 +61,7 @@ namespace fatrop
 
         while (conv_status == IpConvergenceStatus::Continue)
         {
+            ip_data_->get_nlp()->callback(*ip_data_);
             iteration_output_->output_current_iteration();
             mu_update_->update_barrier_parameter();
             search_dir_->compute_search_dir();
@@ -92,7 +94,6 @@ namespace fatrop
     {
         return ip_data_->current_iterate().dual_eq();
     }
-
 
 } // namespace fatrop
 
