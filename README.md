@@ -40,7 +40,7 @@ To cite Fatrop in your academic work, please use the following reference:
 
 ## Developers
 
-Fatrop is developed by [Lander Vanroye](https://lvanroye.github.io) at the [KU Leuven Robotics Research Group](https://www.mech.kuleuven.be/robotics) under supervision of [Wilm Decre](https://www.kuleuven.be/wieiswie/en/person/00052672).
+Fatrop is developed by [Lander Vanroye](https://lvanroye.github.io) (currently at [intermodalics](https://intermodalics.ai)) at the [KU Leuven Robotics Research Group](https://www.mech.kuleuven.be/robotics) under supervision of [Wilm Decre](https://www.kuleuven.be/wieiswie/en/person/00052672).
 
 Contributors:
 - [Ajay Sathya](https://www.kuleuven.be/wieiswie/en/person/00110259) ([rockit](https://gitlab.kuleuven.be/meco-software/rockit) interface)
