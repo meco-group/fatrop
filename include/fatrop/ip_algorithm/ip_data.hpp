@@ -39,7 +39,7 @@ namespace fatrop
         /**
          * @brief Reset the IpData object to its initial state.
          */
-        void reset();
+        void reset(bool is_resto = false);
 
         /**
          * @brief Get the NLP problem associated with this data.

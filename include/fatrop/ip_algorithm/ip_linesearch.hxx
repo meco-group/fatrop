@@ -258,12 +258,12 @@ namespace fatrop
                     if (accept)
                     {
                         (*trial_it).step_info().alpha_primal_type = 's';
-                    }
-                    if (satisfies_original_criterion)
-                    {
-                        in_soft_resto_phase_ = false;
-                        soft_resto_counter_ = 0;
-                        (*trial_it).step_info().alpha_primal_type = 'S';
+                        if (satisfies_original_criterion)
+                        {
+                            in_soft_resto_phase_ = false;
+                            soft_resto_counter_ = 0;
+                            (*trial_it).step_info().alpha_primal_type = 'S';
+                        }
                     }
                 }
             }
@@ -555,7 +555,10 @@ namespace fatrop
         trial.set_primal_s(curr_it.primal_s() + alpha * curr_it.delta_primal_s());
         perform_dual_step(alpha, alpha);
         if (check_acceptability_of_trial_point(0.))
+        {
+            satisfies_original_criterion = true;
             return true;
+        }
 
         Scalar mu = curr_it.mu();
         Scalar trial_pd_error = primal_dual_error(trial);
@@ -563,6 +566,7 @@ namespace fatrop
         // check if there is sufficient reduction in the primal dual error
         if (trial_pd_error <= soft_rest_pd_error_reduction_factor_ * curr_pd_error)
         {
+            update_step_info(alpha, alpha, 0, 's');
             return true;
         }
         return false;

@@ -27,7 +27,7 @@ namespace fatrop
         reset();
     }
 
-    template <typename ProblemType> void IpData<ProblemType>::reset()
+    template <typename ProblemType> void IpData<ProblemType>::reset(bool is_resto /* = false*/)
     {
         // set the bounds
         get_nlp()->get_bounds(info_, lower_bounds_, upper_bounds_);
@@ -46,7 +46,7 @@ namespace fatrop
             single_upper_bounded_[i] = single_bounded && upper_bounded_[i];
         }
         tiny_step_flag_ = false;
-        iteration_number_ = 0;
+        if(!is_resto) iteration_number_ = 0;
         // reset associated iterates
         for (auto &iterate : iterate_data_)
         {

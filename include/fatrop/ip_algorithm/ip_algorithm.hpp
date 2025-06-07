@@ -70,7 +70,7 @@ namespace fatrop
         /**
          * @brief Reset the algorithm to its initial state.
          */
-        void reset();
+        void reset(bool is_resto = false);
 
         /**
          * @brief Run the optimization algorithm.
@@ -78,7 +78,7 @@ namespace fatrop
          * @param is_resto Whether this is a restoration phase (default: false)
          * @return IpSolverReturnFlag The status of the optimization process
          */
-        IpSolverReturnFlag optimize(const bool is_resto = false);
+        IpSolverReturnFlag optimize(bool is_resto = false);
 
         const ProblemInfo<ProblemType> &info() const;
 

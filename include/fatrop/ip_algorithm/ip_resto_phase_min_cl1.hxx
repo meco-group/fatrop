@@ -100,7 +100,7 @@ namespace fatrop
                 curr_it_resto.primal_s().block(info.number_of_slack_variables, 0));
             // run the eq mult initializer
             eq_mult_initializer_->initialize_eq_mult(true);
-            ip_data_orig_->set_iteration_number(ip_data_orig_->iteration_number() - 1);
+            ip_data_orig_->set_iteration_number(ip_data_resto_->iteration_number() - 1);
         }
 
         return (retval == 0);

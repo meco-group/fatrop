@@ -35,7 +35,7 @@ namespace fatrop
     {
     }
 
-    template <typename ProblemType> void IpAlgorithm<ProblemType>::reset()
+    template <typename ProblemType> void IpAlgorithm<ProblemType>::reset(bool is_resto /* = false*/)
     {
         // todo who resets the ipdata?
         search_dir_->reset();
@@ -44,14 +44,14 @@ namespace fatrop
         mu_update_->reset();
         eq_mult_initializer_->reset();
         convergence_check_->reset();
-        ip_data_->reset();
+        ip_data_->reset(is_resto);
         // Note: IpIterationOutput might not need a reset method
     }
 
     template <typename ProblemType>
-    IpSolverReturnFlag IpAlgorithm<ProblemType>::optimize(const bool is_resto)
+    IpSolverReturnFlag IpAlgorithm<ProblemType>::optimize(bool is_resto)
     {
-        reset();
+        reset(is_resto);
         ip_data_->timing_statistics().full_algorithm.start();
         initializer_->initialize();
         IpSolverReturnFlag retval = IpSolverReturnFlag::Unknown;
