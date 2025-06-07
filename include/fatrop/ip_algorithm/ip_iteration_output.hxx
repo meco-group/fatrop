@@ -43,8 +43,8 @@ namespace fatrop
         else
             f_out << std::fixed << std::setprecision(1) << std::log10(rg);
         f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
-              << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr << " "
-              << std::setw(2) << ls << info_alpha_primal_char << std::endl;
+              << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr
+              << info_alpha_primal_char << " " << std::setw(2) << ls << std::endl;
     }
 
     template <typename ProblemType> void IpIterationOutput<ProblemType>::output_current_iteration()
@@ -66,7 +66,7 @@ namespace fatrop
                         alpha_pr, ls, info_alpha_primal_char);
     }
     template <typename ProblemType>
-    void IpIterationOutput<ProblemType>::register_options(OptionRegistry& registry)
+    void IpIterationOutput<ProblemType>::register_options(OptionRegistry &registry)
     {
         // Currently, there are no options to register for IpIterationOutput
         // This function is added for consistency and future extensibility

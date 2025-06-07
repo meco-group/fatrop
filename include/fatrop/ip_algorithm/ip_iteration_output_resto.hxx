@@ -36,8 +36,8 @@ namespace fatrop
         else
             f_out << std::fixed << std::setprecision(1) << std::log10(rg);
         f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
-              << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr << " "
-              << std::setw(2) << ls << info_alpha_primal_char << std::endl;
+              << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr
+              << info_alpha_primal_char << " " << std::setw(2) << ls << std::endl;
     }
 
     template <typename ProblemType>
