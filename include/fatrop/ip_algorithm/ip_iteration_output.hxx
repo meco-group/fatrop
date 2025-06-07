@@ -32,7 +32,7 @@ namespace fatrop
                                                          Scalar alpha_pr, Index ls,
                                                          char info_alpha_primal_char)
     {
-        f_out << std::setw(4) << iter << " " << std::setw(12) << std::scientific
+        f_out << std::setw(4) << iter << "  " << std::setw(12) << std::scientific
               << std::setprecision(8) << objective << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << inf_pr << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << inf_du << " " << std::setw(6) << std::fixed

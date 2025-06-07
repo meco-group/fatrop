@@ -16,6 +16,7 @@ set(FATROP_SOURCES
     ocp/ip_initializer_resto.cpp
     ocp/ip_iterate.cpp
     ocp/ip_iteration_output.cpp
+    ocp/ip_iteration_output_resto.cpp
     ocp/ip_linesearch.cpp
     ocp/ip_nlp_orig.cpp
     ocp/ip_nlp_resto.cpp

@@ -11,6 +11,7 @@
 #include "fatrop/ip_algorithm/ip_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_initializer_resto.hpp"
 #include "fatrop/ip_algorithm/ip_iteration_output.hpp"
+#include "fatrop/ip_algorithm/ip_iteration_output_resto.hpp"
 #include "fatrop/ip_algorithm/ip_linesearch.hpp"
 #include "fatrop/ip_algorithm/ip_mu_update.hpp"
 #include "fatrop/ip_algorithm/ip_nlp_orig.hpp"
@@ -205,8 +206,8 @@ namespace fatrop
             std::make_shared<IpInitializerResto<ProblemType>>(ipdata_, ip_data_resto,
                                                               eq_mult_initializer_resto);
         // create iteration output for the resto phase
-        std::shared_ptr<IpIterationOutput<ProblemType>> iteration_output_resto =
-            std::make_shared<IpIterationOutput<ProblemType>>(ip_data_resto);
+        std::shared_ptr<IpIterationOutputResto<ProblemType>> iteration_output_resto =
+            std::make_shared<IpIterationOutputResto<ProblemType>>(ipdata_, ip_data_resto);
         // create the resto algorithn
         std::shared_ptr<IpAlgorithm<ProblemType>> resto_alg =
             std::make_shared<IpAlgorithm<ProblemType>>(

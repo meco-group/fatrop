@@ -1,0 +1,74 @@
+//
+// Copyright (c) 2024 Lander Vanroye, KU Leuven
+//
+#ifndef __fatrop_ip_iteration_output_resto_hxx__
+#define __fatrop_ip_iteration_output_resto_hxx__
+#include "fatrop/common/printing.hpp"
+#include "fatrop/ip_algorithm/ip_iteration_output_resto.hpp"
+#include <cmath>
+#include <iomanip>
+#include <string>
+
+namespace fatrop
+{
+    template <typename ProblemType>
+    IpIterationOutputResto<ProblemType>::IpIterationOutputResto(const IpDataSp &ipdata_orig,
+                                                                const IpDataSp &ipdata_resto)
+        : ipdata_orig_(ipdata_orig), ipdata_resto_(ipdata_resto)
+    {
+    }
+
+    template <typename ProblemType> void IpIterationOutputResto<ProblemType>::print_header() {}
+
+    template <typename ProblemType>
+    void IpIterationOutputResto<ProblemType>::print_iteration(
+        Index iter, Scalar objective, Scalar inf_pr, Scalar inf_du, Scalar lg_mu, Scalar d_norm,
+        Scalar rg, Scalar alpha_du, Scalar alpha_pr, Index ls, char info_alpha_primal_char)
+    {
+        f_out << std::setw(4) << iter << "r " << std::setw(12) << std::scientific
+              << std::setprecision(8) << objective << " " << std::setw(8) << std::scientific
+              << std::setprecision(2) << inf_pr << " " << std::setw(8) << std::scientific
+              << std::setprecision(2) << inf_du << " " << std::setw(6) << std::fixed
+              << std::setprecision(1) << lg_mu << " " << std::setw(8) << std::scientific
+              << std::setprecision(2) << d_norm << " " << std::setw(6);
+        if (rg == 0.0)
+            f_out << "-";
+        else
+            f_out << std::fixed << std::setprecision(1) << std::log10(rg);
+        f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
+              << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr << " "
+              << std::setw(2) << ls << info_alpha_primal_char << std::endl;
+    }
+
+    template <typename ProblemType>
+    void IpIterationOutputResto<ProblemType>::output_current_iteration()
+    {
+        // the iterate is saved in the trial iterate of the original ip data
+        // (this is set in ip_convergence_check_resto.hxx)
+        IpIterateType &trial_it = ipdata_orig_->trial_iterate();
+        IpIterateType &curr_it_resto = ipdata_resto_->current_iterate();
+        const Index iter = ipdata_resto_->iteration_number();
+        const Scalar objective = trial_it.obj_value();
+        const Scalar inf_pr = norm_inf(trial_it.constr_viol());
+        const Scalar inf_du = std::max(norm_inf(trial_it.dual_infeasibility_x()),
+                                       norm_inf(trial_it.dual_infeasibility_s()));
+        const Scalar mu = curr_it_resto.mu();
+        const Scalar d_norm = curr_it_resto.step_info().step_length;
+        const Scalar rg = curr_it_resto.step_info().inertia_correction_primal;
+        const Scalar alpha_pr = curr_it_resto.step_info().alpha_primal;
+        const Scalar alpha_du = curr_it_resto.step_info().alpha_dual;
+        const Scalar ls = curr_it_resto.step_info().ls_iter + 1;
+        const char info_alpha_primal_char = curr_it_resto.step_info().alpha_primal_type;
+        print_iteration(iter, objective, inf_pr, inf_du, std::log10(mu), d_norm, rg, alpha_du,
+                        alpha_pr, ls, info_alpha_primal_char);
+    }
+    template <typename ProblemType>
+    void IpIterationOutputResto<ProblemType>::register_options(OptionRegistry &registry)
+    {
+        // Currently, there are no options to register for IpIterationOutputResto
+        // This function is added for consistency and future extensibility
+    }
+
+} // namespace fatrop
+
+#endif // __fatrop_ip_iteration_output_resto_hxx__
