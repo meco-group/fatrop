@@ -41,11 +41,11 @@ namespace fatrop
          */
         IpAlgBuilder &create_ipdata();
 
-        // /**
-        //  * @brief Create the restoration phase component.
-        //  * @return Reference to this IpAlgBuilder for method chaining.
-        //  */
-        // IpAlgBuilder &create_restoration_phase();
+        /**
+         * @brief Create the restoration phase component.
+         * @return Reference to this IpAlgBuilder for method chaining.
+         */
+        IpAlgBuilder &create_restoration_phase();
 
         /**
          * @brief Create the ProblemInfo component.

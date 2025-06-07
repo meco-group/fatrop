@@ -14,7 +14,7 @@ namespace fatrop
     template <typename ProblemType>
     IpConvergenceCheckResto<ProblemType>::IpConvergenceCheckResto(const IpDataSp &data_orig,
                                                                   const IpDataSp &data_resto)
-        : Base(data_orig), data_orig_(data_orig), data_resto_(data_resto)
+        : Base(data_resto), data_orig_(data_orig), data_resto_(data_resto)
     {
     }
     template <typename ProblemType>

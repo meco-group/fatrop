@@ -30,16 +30,17 @@ namespace fatrop
         // copy x from the original data to the resto data
         curr_it_resto.set_primal_x(curr_it_orig.primal_x());
         // copy s from the original data to the resto data
-        curr_it_resto.set_primal_s(curr_it_orig.primal_s().block(n_s, 0));
+        // curr_it_resto.set_primal_s(curr_it_orig.primal_s().block(n_s, 0));
+        curr_it_resto.primal_s().block(n_s, 0) = curr_it_orig.primal_s().block(n_s, 0);
         VecRealView constr = curr_it_orig.constr_viol();
         VecRealView p = curr_it_resto.primal_s().block(n_eq, offset_p);
         VecRealView n = curr_it_resto.primal_s().block(n_eq, offset_n);
         // xx =  (mu - rho* constr) / (2*rho)
         // p = xx * sqrt(xx**2 + mu*constr / (2rho))
         // n = constr + n
-        p = (VecRealScalar(n_s, resto_mu) - rho_ * constr) / VecRealScalar(n_s, 2 * rho_);
-        p = p * sqrt(p * p + resto_mu * constr / VecRealScalar(n_s, 2 * rho_));
-        n = constr + n;
+        p = (VecRealScalar(n_eq, resto_mu) - rho_ * constr) / VecRealScalar(n_eq, 2 * rho_);
+        p = p + sqrt(p * p + resto_mu * constr / VecRealScalar(n_eq, 2 * rho_));
+        n = constr + p;
         // intialize the bound multipliers
         VecRealView zl_orig = curr_it_orig.dual_bounds_l();
         VecRealView zu_orig = curr_it_orig.dual_bounds_u();
