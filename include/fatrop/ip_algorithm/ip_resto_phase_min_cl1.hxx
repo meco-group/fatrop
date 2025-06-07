@@ -10,6 +10,7 @@
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/ip_algorithm/ip_resto_phase_min_cl1.hpp"
+#include "fatrop/ip_algorithm/ip_nlp_resto.hpp"
 
 namespace fatrop
 {
@@ -31,6 +32,10 @@ namespace fatrop
         IpIterateType &curr_it_resto = ip_data_resto_->current_iterate();
         IpIterateType &curr_it_orig = ip_data_orig_->current_iterate();
         // todo make sure that step info is set just before restoration phase is called in line
+        const ProblemInfoType &info = curr_it_orig.info();
+        ip_nlp_resto_ -> set_xs_reference(info, curr_it_orig.primal_x(),
+                                          curr_it_orig.primal_s());
+        ip_nlp_resto_ -> set_zeta(sqrt(curr_it_orig.mu()));
         // search
         curr_it_resto.step_info() = curr_it_orig.step_info();
         IpSolverReturnFlag resto_status = resto_ip_algorithm_->optimize(true);
@@ -39,7 +44,6 @@ namespace fatrop
 
         IpIterateType &trial_it_resto = ip_data_resto_->trial_iterate();
         IpIterateType &trial_it_orig = ip_data_orig_->trial_iterate();
-        const ProblemInfoType &info = curr_it_orig.info();
 
         if (resto_status != IpSolverReturnFlag::Success)
         {

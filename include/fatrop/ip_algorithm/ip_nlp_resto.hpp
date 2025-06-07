@@ -112,7 +112,7 @@ namespace fatrop
         VecRealAllocated x_reference_;
         VecRealAllocated dr_;
         Scalar zeta_ = 1.;
-        Scalar rho_ = 1.;
+        Scalar rho_ = 1000.;
 
     public:
         // Register options
