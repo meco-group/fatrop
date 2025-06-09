@@ -21,6 +21,45 @@ namespace fatrop
      */
     typedef std::variant<Index, Scalar, bool, std::string> OptionVariant;
 
+    enum class OptionTypeId
+    {
+        Scalar = 0, ///< Represents a floating-point option.
+        Index = 1,  ///< Represents an integer option.
+        Bool = 2,   ///< Represents a boolean option.
+        String = 3, ///< Represents a string option.
+        Unknown = 4 ///< Represents an unknown option type.
+    };
+
+    template <typename OptionType> class OptionTypeTraits
+    {
+    public:
+        OptionTypeId get_option_type() const { return OptionTypeId::Unknown; }
+    };
+
+    template <> class OptionTypeTraits<Index>
+    {
+    public:
+        OptionTypeId get_option_type() const { return OptionTypeId::Index; }
+    };
+
+    template <> class OptionTypeTraits<Scalar>
+    {
+    public:
+        OptionTypeId get_option_type() const { return OptionTypeId::Scalar; }
+    };
+
+    template <> class OptionTypeTraits<bool>
+    {
+    public:
+        OptionTypeId get_option_type() const { return OptionTypeId::Bool; }
+    };
+
+    template <> class OptionTypeTraits<std::string>
+    {
+    public:
+        OptionTypeId get_option_type() const { return OptionTypeId::String; }
+    };
+
     /**
      * @brief Base class for option setters, implementing the visitor pattern.
      *
@@ -46,6 +85,7 @@ namespace fatrop
         {
             throw std::runtime_error("Invalid type for option, got type string.");
         }
+        virtual OptionTypeId get_option_type() const { return OptionTypeId::Unknown; }
         virtual ~OptionSetterBase() = default;
     };
 
@@ -64,7 +104,7 @@ namespace fatrop
          * @param set_option Function pointer to the setter method in AlgoType.
          * @param algo Pointer to the algorithm object.
          */
-        OptionSetter(void (AlgoType::*set_option)(const OptionType&), AlgoType *algo)
+        OptionSetter(void (AlgoType::*set_option)(const OptionType &), AlgoType *algo)
             : set_option(set_option), algo(algo)
         {
         }
@@ -76,8 +116,13 @@ namespace fatrop
          */
         void operator()(const OptionType &value) override { (algo->*set_option)(value); }
 
+        inline OptionTypeId get_option_type() const
+        {
+            return OptionTypeTraits<OptionType>().get_option_type();
+        }
+
     private:
-        void (AlgoType::*set_option)(const OptionType&);
+        void (AlgoType::*set_option)(const OptionType &);
         AlgoType *algo;
     };
 
@@ -107,14 +152,14 @@ namespace fatrop
          *
          * @param value The bool value to set.
          */
-        void operator()(const bool& value) override { (algo->*set_option)(value); }
+        void operator()(const bool &value) override { (algo->*set_option)(value); }
 
         /**
          * @brief Set the bool option value from an int.
          *
          * @param value The int value to convert to bool and set.
          */
-        void operator()(const Index& value) override { (algo->*set_option)(value != 0); }
+        void operator()(const Index &value) override { (algo->*set_option)(value != 0); }
 
         /**
          * @brief Set the bool option value from a string (yes/no).
@@ -136,6 +181,11 @@ namespace fatrop
                                          "\"yes\" or \"no\", got " +
                                          value + ".");
             }
+        }
+
+        inline OptionTypeId get_option_type() const
+        {
+            return OptionTypeTraits<bool>().get_option_type();
         }
 
     private:
@@ -174,6 +224,13 @@ namespace fatrop
         template <typename AlgoType> void register_options(AlgoType &algo)
         {
             algo.register_options(*this);
+        }
+
+        OptionTypeId get_option_type(const std::string &option_name) const
+        {
+            if (options.find(option_name) == options.end())
+                return OptionTypeId::Unknown;
+            return options.at(option_name)[0]->get_option_type();
         }
 
         /**
@@ -217,7 +274,7 @@ namespace fatrop
         os << "Option registry with registered options :\n";
         for (const auto &[option_name, setters] : registry.options)
         {
-            os << "  " << option_name << "\n";
+            os << "  " << option_name << " of type " << (int) registry.get_option_type(option_name) <<"\n";
         }
         return os;
     }

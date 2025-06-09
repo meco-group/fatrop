@@ -8,6 +8,7 @@
  *
  */
 
+#include "fatrop/common/options.hpp"
 #include "fatrop/common/printing.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_alg_builder.hpp"
@@ -17,6 +18,7 @@
 #include "fatrop/ocp/jacobian.hpp"
 #include "fatrop/ocp/problem_info.hpp"
 #include "fatrop/ocp/type.hpp"
+#include "fatrop/ip_algorithm/ip_data.hpp"
 #include <algorithm>
 #include <limits>
 #include <memory>
@@ -397,7 +399,8 @@ namespace fatrop
                 Printing::set_stream(std::make_unique<FatropOcpCStream>(write, flush));
             }
             IpAlgBuilder<OcpType> builder(m);
-            algo = builder.build();
+            algo = builder.with_options_registry(&options).build();
+            ip_data = builder.get_ipdata();
             m->s.nx = algo->info().dims.number_of_states.data();
             m->s.nu = algo->info().dims.number_of_controls.data();
             m->s.ng = algo->info().dims.number_of_eq_constraints.data();
@@ -423,14 +426,19 @@ namespace fatrop
         {
             auto ret = algo->optimize();
             if (ret == IpSolverReturnFlag::Success)
+            {
+                f_out << ip_data->timing_statistics();
                 return 0;
+            }
             return 1;
         }
         // std::shared_ptr<FatropPrinter> printer() { return app.printer_; }
         FatropOcpCStream stream;
         std::shared_ptr<FatropOcpCMapping> m;
         FatropOcpCStats stats;
+        OptionRegistry options;
         std::shared_ptr<IpAlgorithm<OcpType>> algo;
+        std::shared_ptr<IpData<OcpType>> ip_data;
     };
 
     FatropOcpCSolver *fatrop_ocp_c_create(FatropOcpCInterface *ocp_interface, FatropOcpCWrite write,
@@ -443,25 +451,25 @@ namespace fatrop
 
     int fatrop_ocp_c_set_option_double(FatropOcpCSolver *s, const char *name, double val)
     {
-        // todo implement
+        s->driver->options.set_option<double>(name, val);
         return 0;
     }
 
     int fatrop_ocp_c_set_option_bool(FatropOcpCSolver *s, const char *name, int val)
     {
-        // todo implement
+        s->driver->options.set_option<bool>(name, val);
         return 0;
     }
 
     int fatrop_ocp_c_set_option_int(FatropOcpCSolver *s, const char *name, int val)
     {
-        // todo implement
+        s->driver->options.set_option<int>(name, val);
         return 0;
     }
 
     int fatrop_ocp_c_set_option_string(FatropOcpCSolver *s, const char *name, const char *val)
     {
-        // todo implement
+        s->driver->options.set_option<std::string>(name, std::string(val));
         return 0;
     }
 
@@ -501,102 +509,102 @@ namespace fatrop
     {
         // todo implement
         std::string n = name;
-        if (n == "acceptable_tol")
+        if (n == "acceptable_iter")
+            return 1;
+        if (n == "compl_inf_tol")
+            return 0;
+        if (n == "mu_superlinear_decrease_power")
             return 0;
         if (n == "bound_frac")
             return 0;
-        if (n == "bound_push")
+        if (n == "barrier_tol_factor")
             return 0;
-        if (n == "bound_relax_factor")
+        if (n == "lam_max")
             return 0;
-        if (n == "constr_viol_tol")
+        if (n == "max_soft_resto_iters")
+            return 1;
+        if (n == "soft_rest_pd_error_reduction_factor")
             return 0;
-        if (n == "delta")
+        if (n == "alpha_red_factor")
             return 0;
-        if (n == "delta_c_stripe")
-            return 0;
-        if (n == "delta_w0")
-            return 0;
-        if (n == "delta_wmin")
-            return 0;
-        if (n == "eta_phi")
-            return 0;
-        if (n == "gamma_alpha")
-            return 0;
-        if (n == "gamma_phi")
-            return 0;
-        if (n == "gamma_theta")
-            return 0;
-        if (n == "kappa_c")
-            return 0;
-        if (n == "kappa_d")
-            return 0;
-        if (n == "kappa_eta")
-            return 0;
-        if (n == "kappa_mu")
-            return 0;
-        if (n == "kappa_sigma")
-            return 0;
-        if (n == "kappa_wmin")
-            return 0;
-        if (n == "kappa_wplus")
-            return 0;
-        if (n == "kappa_wplusem")
-            return 0;
-        if (n == "lammax")
-            return 0;
-        if (n == "mu_init")
-            return 0;
-        if (n == "recalc_y_feas_tol")
-            return 0;
-        if (n == "s_phi")
-            return 0;
-        if (n == "s_theta")
-            return 0;
-        if (n == "smax")
-            return 0;
-        if (n == "theta_min")
-            return 0;
-        if (n == "theta_mu")
-            return 0;
-        if (n == "tol")
-            return 0;
-        if (n == "warm_start_mult_bound_push")
-            return 0;
-        if (n == "linsol_perturbed_mode_param")
-            return 0;
-        if (n == "acceptable_iter")
+        if (n == "watchdog_trial_iter_max")
             return 1;
         if (n == "max_iter")
             return 1;
+        if (n == "watchdog_shortened_iter_trigger")
+            return 1;
+        if (n == "obj_max_incr")
+            return 0;
+        if (n == "theta_min")
+            return 0;
+        if (n == "s_phi")
+            return 0;
+        if (n == "tau_min")
+            return 0;
         if (n == "max_soc")
             return 1;
-        if (n == "max_watchdog_steps")
+        if (n == "kappa_c")
+            return 0;
+        if (n == "kappa_wplus")
+            return 0;
+        if (n == "constr_mult_reset_treshold")
+            return 0;
+        if (n == "kappa_wplusem")
+            return 0;
+        if (n == "mu_linear_decrease_factor")
+            return 0;
+        if (n == "resto_failure_feasibility_treshold")
+            return 0;
+        if (n == "s_theta")
+            return 0;
+        if (n == "kappa_wmin")
+            return 0;
+        if (n == "bound_push")
+            return 0;
+        if (n == "delta_c_stripe")
+            return 0;
+        if (n == "delta_wmin")
+            return 0;
+        if (n == "kappa_soc")
+            return 0;
+        if (n == "max_filter_resets")
             return 1;
-        if (n == "print_level")
+        if (n == "bound_mult_reset_treshold")
+            return 0;
+        if (n == "tolerance")
+            return 0;
+        if (n == "theta_max")
+            return 0;
+        if (n == "delta")
+            return 0;
+        if (n == "delta_w0")
+            return 0;
+        if (n == "theta_min_fact")
+            return 0;
+        if (n == "tiny_step_tol")
+            return 0;
+        if (n == "constr_viol_tol")
+            return 0;
+        if (n == "tiny_step_y_tol")
+            return 0;
+        if (n == "mu_init")
+            return 0;
+        if (n == "eta_phi")
+            return 0;
+        if (n == "alpha_min_frac")
+            return 0;
+        if (n == "tol_acceptable")
+            return 0;
+        if (n == "mu_allow_fast_monotone_decrease")
+            return 2;
+        if (n == "gamma_theta")
+            return 0;
+        if (n == "gamma_phi")
+            return 0;
+        if (n == "theta_max_fact")
+            return 0;
+        if (n == "filter_reset_trigger")
             return 1;
-        if (n == "accept_every_trial_step")
-            return 2;
-        if (n == "linsol_min_it_ref")
-            return 2;
-        if (n == "linsol_max_it_ref")
-            return 2;
-        if (n == "linsol_min_it_acc")
-            return 2;
-        if (n == "linsol_lu_fact_tol")
-            return 2;
-        if (n == "ls_scaling")
-            return 2;
-        if (n == "recalc_y")
-            return 2;
-        if (n == "warm_start_init_point")
-            return 2;
-        if (n == "linsol_iterative_refinement")
-            return 2;
-        if (n == "linsol_perturbed_mode")
-            return 2;
-        if (n == "linsol_diagnostic")
-            return 2;
         return -1;
     }
 

@@ -34,7 +34,7 @@ namespace fatrop
         IpDataSp data_orig_;
         IpDataSp data_resto_;
         IpEqMultInitializerSp eq_mult_initializer_resto_;
-        Scalar rho_ = 1.;
+        Scalar rho_ = 1000.;
     };
 
 } // namespace fatrop
