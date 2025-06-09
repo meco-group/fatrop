@@ -9,8 +9,8 @@
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
-#include "fatrop/ip_algorithm/ip_resto_phase_min_cl1.hpp"
 #include "fatrop/ip_algorithm/ip_nlp_resto.hpp"
+#include "fatrop/ip_algorithm/ip_resto_phase_min_cl1.hpp"
 
 namespace fatrop
 {
@@ -33,9 +33,8 @@ namespace fatrop
         IpIterateType &curr_it_orig = ip_data_orig_->current_iterate();
         // todo make sure that step info is set just before restoration phase is called in line
         const ProblemInfoType &info = curr_it_orig.info();
-        ip_nlp_resto_ -> set_xs_reference(info, curr_it_orig.primal_x(),
-                                          curr_it_orig.primal_s());
-        ip_nlp_resto_ -> set_zeta(sqrt(curr_it_orig.mu()));
+        ip_nlp_resto_->set_xs_reference(info, curr_it_orig.primal_x(), curr_it_orig.primal_s());
+        ip_nlp_resto_->set_zeta(sqrt(curr_it_orig.mu()));
         // search
         curr_it_resto.step_info() = curr_it_orig.step_info();
         IpSolverReturnFlag resto_status = resto_ip_algorithm_->optimize(true);
@@ -95,9 +94,11 @@ namespace fatrop
             }
 
             // copy the result to the trial iterate of the original problem
-            trial_it_orig.set_primal_x(curr_it_resto.primal_x());
-            trial_it_orig.set_primal_s(
-                curr_it_resto.primal_s().block(info.number_of_slack_variables, 0));
+            ip_data_orig_->trial_iterate().set_primal_x(
+                ip_data_resto_->current_iterate().primal_x());
+            ip_data_orig_->trial_iterate().set_primal_s(
+                ip_data_resto_->current_iterate().primal_s().block(info.number_of_slack_variables,
+                                                                   0));
             // run the eq mult initializer
             eq_mult_initializer_->initialize_eq_mult(true);
             ip_data_orig_->set_iteration_number(ip_data_resto_->iteration_number() - 1);
