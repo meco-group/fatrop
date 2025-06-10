@@ -61,8 +61,8 @@ namespace fatrop
         timing_statistics().reset();
         current_iterate().set_hessian(hessian_curr_);
         current_iterate().set_jacobian(jacobian_curr_);
-        trial_iterate().set_hessian(nullptr);
-        trial_iterate().set_jacobian(nullptr);
+        trial_iterate().set_hessian(hessian_trial_);
+        trial_iterate().set_jacobian(jacobian_trial_);
         stored_iterate().set_hessian(nullptr);
         stored_iterate().set_jacobian(nullptr);
         stored_iterate_is_valid_ = false;
