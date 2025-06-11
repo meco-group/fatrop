@@ -5,6 +5,4 @@
 #include "fatrop/ocp/hessian.hpp"
 
 
-using namespace fatrop;
-
-template class IpRestoPhaseMinCl1<OcpType>;
+template class fatrop::IpRestoPhaseMinCl1<fatrop::OcpType>;

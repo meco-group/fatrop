@@ -85,7 +85,7 @@ namespace fatrop
 
     std::ostream &operator<<(std::ostream &os, const IpTimingStatistics &timings)
     {
-        os << std::left << std::setw(30) << "Operation" << std::right << std::setw(10) << "Time (s)"
+        os << std::left << std::setw(30) << "operation" << std::right << std::setw(10) << "time (s)"
            << std::endl;
         os << std::string(40, '-') << std::endl;
         os << std::left << std::setw(30) << "initialization" << std::right << std::setw(10)

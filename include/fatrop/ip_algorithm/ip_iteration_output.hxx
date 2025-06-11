@@ -18,7 +18,7 @@ namespace fatrop
 
     template <typename ProblemType> void IpIterationOutput<ProblemType>::print_header()
     {
-        f_out << std::setw(4) << "iter" << " " << std::setw(12) << "objective" << " "
+        PRINT_ITERATIONS << std::setw(4) << "iter" << " " << std::setw(12) << "objective" << " "
               << std::setw(8) << "inf_pr" << " " << std::setw(8) << "inf_du" << " " << std::setw(6)
               << "lg(mu)" << " " << std::setw(8) << "||d||" << " " << std::setw(8) << "lg(rg)"
               << " " << std::setw(10) << "alpha_du" << " " << std::setw(10) << "alpha_pr"
@@ -32,17 +32,17 @@ namespace fatrop
                                                          Scalar alpha_pr, Index ls,
                                                          char info_alpha_primal_char)
     {
-        f_out << std::setw(4) << iter << "  " << std::setw(12) << std::scientific
+        PRINT_ITERATIONS << std::setw(4) << iter << "  " << std::setw(12) << std::scientific
               << std::setprecision(8) << objective << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << inf_pr << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << inf_du << " " << std::setw(6) << std::fixed
               << std::setprecision(1) << lg_mu << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << d_norm << " " << std::setw(6);
         if (rg == 0.0)
-            f_out << "-";
+            PRINT_ITERATIONS << "-";
         else
-            f_out << std::fixed << std::setprecision(1) << std::log10(rg);
-        f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
+            PRINT_ITERATIONS << std::fixed << std::setprecision(1) << std::log10(rg);
+        PRINT_ITERATIONS << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
               << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr
               << info_alpha_primal_char << " " << std::setw(2) << ls << std::endl;
     }

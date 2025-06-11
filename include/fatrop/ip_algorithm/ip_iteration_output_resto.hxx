@@ -25,17 +25,17 @@ namespace fatrop
         Index iter, Scalar objective, Scalar inf_pr, Scalar inf_du, Scalar lg_mu, Scalar d_norm,
         Scalar rg, Scalar alpha_du, Scalar alpha_pr, Index ls, char info_alpha_primal_char)
     {
-        f_out << std::setw(4) << iter << "r " << std::setw(12) << std::scientific
+        PRINT_ITERATIONS << std::setw(4) << iter << "r " << std::setw(12) << std::scientific
               << std::setprecision(8) << objective << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << inf_pr << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << inf_du << " " << std::setw(6) << std::fixed
               << std::setprecision(1) << lg_mu << " " << std::setw(8) << std::scientific
               << std::setprecision(2) << d_norm << " " << std::setw(6);
         if (rg == 0.0)
-            f_out << "-";
+            PRINT_ITERATIONS << "-";
         else
-            f_out << std::fixed << std::setprecision(1) << std::log10(rg);
-        f_out << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
+            PRINT_ITERATIONS << std::fixed << std::setprecision(1) << std::log10(rg);
+        PRINT_ITERATIONS << std::setw(10) << std::scientific << std::setprecision(2) << alpha_du << " "
               << std::setw(10) << std::scientific << std::setprecision(2) << alpha_pr
               << info_alpha_primal_char << " " << std::setw(2) << ls << std::endl;
     }

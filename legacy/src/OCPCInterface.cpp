@@ -396,7 +396,7 @@ namespace fatrop
             // set the stream
             if (write != 0)
             {
-                Printing::set_stream(std::make_unique<FatropOcpCStream>(write, flush));
+                OutputStreamManager::set_stream(std::make_unique<FatropOcpCStream>(write, flush));
             }
             IpAlgBuilder<OcpType> builder(m);
             algo = builder.with_options_registry(&options).build();
@@ -427,7 +427,7 @@ namespace fatrop
             auto ret = algo->optimize();
             if (ret == IpSolverReturnFlag::Success)
             {
-                f_out << ip_data->timing_statistics();
+                PRINT_ITERATIONS << ip_data->timing_statistics();
                 return 0;
             }
             return 1;
@@ -494,7 +494,7 @@ namespace fatrop
         catch (std::exception &e)
         {
             // todo implement
-            f_out << "Uncaught Exception: " << e.what() << std::endl;
+            PRINT_ITERATIONS << "Uncaught Exception: " << e.what() << std::endl;
             return -1;
         }
     }
@@ -530,6 +530,8 @@ namespace fatrop
         if (n == "watchdog_trial_iter_max")
             return 1;
         if (n == "max_iter")
+            return 1;
+        if (n == "print_level")
             return 1;
         if (n == "watchdog_shortened_iter_trigger")
             return 1;

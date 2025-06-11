@@ -17,7 +17,7 @@ namespace fatrop
     class OptionRegistry;
 
     // Forward declarations for printing.hpp
-    class Printing;
+    class OutputStreamManager;
 
     class Timer;
 

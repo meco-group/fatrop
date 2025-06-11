@@ -126,6 +126,21 @@ namespace fatrop
         AlgoType *algo;
     };
 
+    template <typename OptionType> class OptionSetterStatic : public OptionSetterBase
+    {
+    public:
+        OptionSetterStatic(void (*set_option)(const OptionType &)) : set_option_(set_option) {};
+        void operator()(const OptionType &value) override { (*set_option_)(value); }
+
+        inline OptionTypeId get_option_type() const
+        {
+            return OptionTypeTraits<OptionType>().get_option_type();
+        }
+
+    private:
+        void (*set_option_)(const OptionType &);
+    };
+
     /**
      * @brief Specialization of OptionSetter for bool, implementing the visitor pattern.
      *
@@ -221,6 +236,13 @@ namespace fatrop
                 std::make_unique<OptionSetter<OptionType, AlgoType>>(set_option, algo));
         }
 
+        template <typename OptionType>
+        void register_option(const std::string &option_name, void (*set_option)(const OptionType &))
+        {
+            options[option_name].push_back(
+                std::make_unique<OptionSetterStatic<OptionType>>(set_option));
+        }
+
         template <typename AlgoType> void register_options(AlgoType &algo)
         {
             algo.register_options(*this);
@@ -274,7 +296,8 @@ namespace fatrop
         os << "Option registry with registered options :\n";
         for (const auto &[option_name, setters] : registry.options)
         {
-            os << "  " << option_name << " of type " << (int) registry.get_option_type(option_name) <<"\n";
+            os << "  " << option_name << " of type " << (int)registry.get_option_type(option_name)
+               << "\n";
         }
         return os;
     }

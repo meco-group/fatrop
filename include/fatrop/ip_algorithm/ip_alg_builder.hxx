@@ -2,6 +2,7 @@
 #define __fatrop_ip_algorithm_ip_alg_builder_hxx__
 
 #include "fatrop/common/options.hpp"
+#include "fatrop/common/printing.hpp"
 #include "fatrop/ip_algorithm/ip_alg_builder.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/ip_algorithm/ip_convergence_check.hpp"
@@ -269,6 +270,8 @@ namespace fatrop
         nlp_orig_->set_timing_statistics(&ipdata_->timing_statistics());
         if (resto_phase_)
             convergence_check_resto_->set_line_search_orig(linesearch_);
+
+        options_registry_->register_option<Index>("print_level", &PrintLevelManager::set_print_level);
 
         return std::make_shared<IpAlgorithm<ProblemType>>(
             search_dir_, linesearch_, initializer_, mu_update_, eq_mult_initializer_,
