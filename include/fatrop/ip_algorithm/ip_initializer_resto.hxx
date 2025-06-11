@@ -54,8 +54,8 @@ namespace fatrop
         // also set the upper bounds to 0. for convention
         zu_resto.block(n_eq, offset_p) = VecRealScalar(n_eq, 0.);
         zu_resto.block(n_eq, offset_n) = VecRealScalar(n_eq, 0.);
-        // initialize the dual multipliers
-        eq_mult_initializer_resto_->initialize_eq_mult();
+        // initialize the dual multipliers to zero
+        curr_it_resto.set_dual_eq(VecRealScalar(info.number_of_eq_constraints, 0.));
     }
 
     template <typename ProblemType> void IpInitializerResto<ProblemType>::reset() {}

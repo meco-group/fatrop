@@ -15,13 +15,12 @@ namespace fatrop
     {
         typedef IpData<ProblemType> IpDataType;
         typedef std::shared_ptr<IpDataType> IpDataSp;
-        typedef std::shared_ptr<IpEqMultInitializerBase> IpEqMultInitializerSp;
         typedef IpIterate<ProblemType> IpIterateType;
         typedef ProblemInfo<ProblemType> InfoType;
 
     public:
-        IpInitializerResto(const IpDataSp &data_orig, const IpDataSp &data_resto, const IpEqMultInitializerSp &eq_mult_initializer_resto)
-            : data_orig_(data_orig), data_resto_(data_resto), eq_mult_initializer_resto_(eq_mult_initializer_resto)
+        IpInitializerResto(const IpDataSp &data_orig, const IpDataSp &data_resto)
+            : data_orig_(data_orig), data_resto_(data_resto)
         {
         }
         virtual void initialize() override;
@@ -33,7 +32,6 @@ namespace fatrop
     private:
         IpDataSp data_orig_;
         IpDataSp data_resto_;
-        IpEqMultInitializerSp eq_mult_initializer_resto_;
         Scalar rho_ = 1000.;
     };
 

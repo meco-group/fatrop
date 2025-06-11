@@ -178,9 +178,13 @@ namespace fatrop
         // create the resto nlp
         std::shared_ptr<IpNlpResto<ProblemType>> ip_nlp_resto =
             std::make_shared<IpNlpResto<ProblemType>>(nlp_orig_);
+        if (options_registry_)
+            options_registry_->register_options(*ip_nlp_resto);
         // create the resto ipdata
         std::shared_ptr<IpData<ProblemType>> ip_data_resto =
             std::make_shared<IpData<ProblemType>>(ip_nlp_resto);
+        if (options_registry_)
+            options_registry_->register_options(*ip_data_resto);
         // create the PdSolverResto
         std::shared_ptr<PdSolverResto<ProblemType>> pd_solver_resto =
             std::make_shared<PdSolverResto<ProblemType>>(*problem_info_, pd_solver_);
@@ -188,31 +192,45 @@ namespace fatrop
         typedef IpSearchDirImpl<PdSolverResto<ProblemType>, ProblemType> RestoSDType;
         std::shared_ptr<RestoSDType> search_dir_resto =
             std::make_shared<RestoSDType>(ip_data_resto, pd_solver_resto);
+        if (options_registry_)
+            options_registry_->register_options(*search_dir_resto);
         // create the resto linesearch
         typedef IpLinesearch<PdSolverResto<ProblemType>, ProblemType> RestoLSType;
         std::shared_ptr<RestoLSType> linesearch_resto =
             std::make_shared<RestoLSType>(ip_data_resto, pd_solver_resto, nullptr);
+        if (options_registry_)
+            options_registry_->register_options(*linesearch_resto);
         // create the convergence check for the resto phase
         convergence_check_resto_ =
             std::make_shared<IpConvergenceCheckResto<ProblemType>>(ipdata_, ip_data_resto);
+        if (options_registry_)
+            options_registry_->register_options(*convergence_check_resto_);
         // create the mu update for the resto phase
         std::shared_ptr<IpMonotoneMuUpdate<ProblemType>> mu_update_resto =
             std::make_shared<IpMonotoneMuUpdate<ProblemType>>(ip_data_resto, linesearch_resto);
+        if (options_registry_)
+            options_registry_->register_options(*mu_update_resto);
         // create eq mult initializer
         std::shared_ptr<IpEqMultInitializer<ProblemType>> eq_mult_initializer_resto =
             std::make_shared<IpEqMultInitializer<ProblemType>>(ip_data_resto, pd_solver_);
+        if (options_registry_)
+            options_registry_->register_options(*eq_mult_initializer_resto);
         // create the resto initializer
         std::shared_ptr<IpInitializerResto<ProblemType>> initializer_resto =
-            std::make_shared<IpInitializerResto<ProblemType>>(ipdata_, ip_data_resto,
-                                                              eq_mult_initializer_resto);
+            std::make_shared<IpInitializerResto<ProblemType>>(ipdata_, ip_data_resto);
+        if (options_registry_)
+            options_registry_->register_options(*initializer_resto);
         // create iteration output for the resto phase
         std::shared_ptr<IpIterationOutputResto<ProblemType>> iteration_output_resto =
             std::make_shared<IpIterationOutputResto<ProblemType>>(ipdata_, ip_data_resto);
+        if (options_registry_)
+            options_registry_->register_options(*iteration_output_resto);
         // create the resto algorithn
         std::shared_ptr<IpAlgorithm<ProblemType>> resto_alg =
             std::make_shared<IpAlgorithm<ProblemType>>(
                 search_dir_resto, linesearch_resto, initializer_resto, mu_update_resto,
-                eq_mult_initializer_resto, convergence_check_resto_, iteration_output_resto, ip_data_resto);
+                eq_mult_initializer_resto, convergence_check_resto_, iteration_output_resto,
+                ip_data_resto);
         resto_phase_ = std::make_shared<IpRestoPhaseMinCl1<ProblemType>>(
             resto_alg, eq_mult_initializer_resto, ipdata_, ip_data_resto, ip_nlp_resto);
         if (options_registry_)
