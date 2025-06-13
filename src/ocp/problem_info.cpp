@@ -61,6 +61,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(), 0,
                     offsets_eq.begin());
     offsets_dyn = std::vector<Index>(dims.K - 1, 0);
+    if (!offsets_dyn.empty())
     compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0,
                     offsets_dyn.begin());
     // compute the number of (dyn, path, slack)-equality constraints
@@ -75,6 +76,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     offset_g_eq_path = 0;
     offset_g_eq_dyn = number_of_g_eq_path;
     offset_g_eq_slack = offset_g_eq_dyn + number_of_g_eq_dyn;
+    if (!offsets_g_eq_dyn.empty())
     compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), offset_g_eq_dyn,
                     offsets_g_eq_dyn.begin());
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(),
