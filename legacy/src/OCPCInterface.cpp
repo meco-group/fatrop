@@ -451,6 +451,11 @@ namespace fatrop
 
     int fatrop_ocp_c_set_option_double(FatropOcpCSolver *s, const char *name, double val)
     {
+        // Backwards compatibility with v0.0.4
+        if (std::string(name)=="tol") {
+            s->driver->options.set_option<double>("tolerance", val);
+            return 0;
+        }
         s->driver->options.set_option<double>(name, val);
         return 0;
     }
@@ -573,7 +578,7 @@ namespace fatrop
             return 1;
         if (n == "bound_mult_reset_treshold")
             return 0;
-        if (n == "tolerance")
+        if (n == "tolerance" || n == "tol")
             return 0;
         if (n == "theta_max")
             return 0;
