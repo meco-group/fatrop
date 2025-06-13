@@ -20,6 +20,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 # Option to build tests (default is ON)
 option(BUILD_TESTS "Build the tests" ON)
+option(BUILD_EXAMPLES "Build the examples" ON)
 option(BUILD_WITH_LEGACY "Build with legacy support" ON)
 
 # Define installation directories
@@ -53,7 +54,9 @@ if(BUILD_WITH_LEGACY)
 endif()
 
 # Add the examples directory
-add_subdirectory(examples)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 # Build tests if the option is enabled
 if(BUILD_TESTS)
