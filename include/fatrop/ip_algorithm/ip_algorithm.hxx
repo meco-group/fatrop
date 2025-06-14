@@ -65,7 +65,8 @@ namespace fatrop
             iteration_output_->output_current_iteration();
             mu_update_->update_barrier_parameter();
             search_dir_->compute_search_dir();
-            linesearch_->find_acceptable_trial_point();
+            bool success = linesearch_->find_acceptable_trial_point();
+            if(!success) return IpSolverReturnFlag::LineSearchFailed;
             ip_data_->accept_trial_iterate();
             conv_status = convergence_check_->check_converged();
             ip_data_->set_iteration_number(ip_data_->iteration_number() + 1);

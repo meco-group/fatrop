@@ -22,6 +22,7 @@ namespace fatrop
         StopAtTinyStep,         ///< Algorithm stopped due to tiny step size
         StopAtAcceptablePoint,  ///< Algorithm stopped at an acceptable point
         LocalInfeasibility,     ///< Problem is locally infeasible
+        LineSearchFailed,
         FeasiblePointFound,     ///< A feasible point was found
         DivergingIterates,      ///< Iterates are diverging
         ErrorInStepComputation, ///< Error occurred during step computation

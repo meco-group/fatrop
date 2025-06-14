@@ -52,7 +52,7 @@ namespace fatrop
                 curr_it_resto.primal_s().block(info.number_of_slack_variables, 0));
             // what to do with the duals?
             // Ipopt returns them but they dont really make sense for the original problem.
-            fatrop_assert(false && "Restoration phase failed");
+            return false;
         }
         if (resto_status == IpSolverReturnFlag::Success)
         {

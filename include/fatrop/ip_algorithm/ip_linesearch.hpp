@@ -24,7 +24,7 @@ namespace fatrop
         /**
          * @brief Find an acceptable trial point.
          */
-        virtual void find_acceptable_trial_point() = 0;
+        virtual bool find_acceptable_trial_point() = 0;
 
         /**
          * @brief Reset the line search algorithm.
@@ -76,7 +76,7 @@ namespace fatrop
         IpLinesearch(const IpDataSp &ipdata, const LinearSolverSp &linear_solver,
                      const RestorationPhaseSp &restoration_phase);
 
-        void find_acceptable_trial_point() override;
+        bool find_acceptable_trial_point() override;
         void reset() override;
         void reset_linesearch() override;
         // Setter methods for options
