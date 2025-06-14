@@ -57,7 +57,7 @@ for k in range(K):
     J += cost(u[k], x[k], k)
 opti.minimize(J)
 
-opti.solver('fatrop', {'structure_detection': 'auto', 'fatrop.mu_init': 1e-1, "expand":True})
+opti.solver('fatrop', {'structure_detection':'manual', 'nx': nx, 'nu':nu, 'ng':ng, 'N':K-1, "expand": True, "fatrop.mu_init":1e-1, "jit":False, "jit_options": {"flags": "-O3", "verbose": True}})
 opti.to_function("opti_func", [], [opti.x]).generate('casadi_generated.c', {"with_header": True})
 # opti.solver('ipopt', {'ipopt.print_info_string': 'yes', 'ipopt.kappa_d':0.})
 opti.solve()
