@@ -14,6 +14,7 @@ namespace fatrop
         {
             Index K = std::distance(begin, end) + 1;
             out[0] = 0;
+            if(K==1) return;
             std::partial_sum(begin, end - 1, out + 1);
             // add the offset to each element
             std::transform(out, out + K - 1, out, [offset](Index x) { return x + offset; });
@@ -21,7 +22,7 @@ namespace fatrop
     }
 }
 ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
-    : dims(dims), offsets_primal_u(dims.K), offsets_primal_x(dims.K), offsets_g_eq_dyn(dims.K - 1),
+    : dims(dims), offsets_primal_u(dims.K), offsets_primal_x(dims.K), offsets_g_eq_dyn(dims.K),
       offsets_g_eq_path(dims.K), offsets_g_eq_slack(dims.K)
 {
     using namespace internal;
@@ -60,8 +61,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     offsets_eq = std::vector<Index>(dims.K, 0);
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(), 0,
                     offsets_eq.begin());
-    offsets_dyn = std::vector<Index>(dims.K - 1, 0);
-    if (!offsets_dyn.empty())
+    offsets_dyn = std::vector<Index>(dims.K, 0);
     compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0,
                     offsets_dyn.begin());
     // compute the number of (dyn, path, slack)-equality constraints
@@ -76,7 +76,6 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     offset_g_eq_path = 0;
     offset_g_eq_dyn = number_of_g_eq_path;
     offset_g_eq_slack = offset_g_eq_dyn + number_of_g_eq_dyn;
-    if (!offsets_g_eq_dyn.empty())
     compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), offset_g_eq_dyn,
                     offsets_g_eq_dyn.begin());
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(),
