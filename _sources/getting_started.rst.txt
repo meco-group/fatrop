@@ -37,6 +37,4 @@ Next Steps
 ----------
 
 - Explore the `examples` directory for more detailed examples
-- Read the API Reference for in-depth information on Fatrop's classes and methods
-- Experiment with your own optimization problems using both interfaces
 - Read the `fatrop CasADi cookbook`
