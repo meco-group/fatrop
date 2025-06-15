@@ -17,10 +17,6 @@ If you plan to use Fatrop from the CasADi interface, there are two main methods 
 
       conda install libfatrop
 
-
-   .. note::
-      Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest features and improvements.
-   
    Fatrop is shipped by default with the conda CasADi package.
    To install, simply run:
 
@@ -28,7 +24,8 @@ If you plan to use Fatrop from the CasADi interface, there are two main methods 
 
       conda install casadi
    
-
+   .. note::
+      Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest features and improvements.
 
 2. Using PyPI:
    

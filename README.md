@@ -10,11 +10,15 @@ The main features of the solver are:
 
 ## Usage
 - fatrop can be used using the "low-level" interface by implementing an OcpAbstract class. See inlcude/ocp/ocp_abstract.hpp
-- fatrop is also interfaced with CasADi. A usage example can be found [here](https://github.com/jgillis/fatrop_demo). 
-- usage examples of both interfaces can be found in the examples folder.
+- fatrop is also interfaced with CasADi. A usage example can be found [here](https://github.com/jgillis/fatrop_demo)
+- usage examples of both interfaces can be found in the examples folder
+
+## Getting Started
+
+Refer to [github pages](https://meco-group.github.io/fatrop/) as a reference to help getting started.
 
 ## Citing
-To cite Fatrop in your academic work, please use the following reference:
+To cite Fatrop in your academic work, please use the following reference of the [fatrop paper](https://arxiv.org/abs/2303.16746):
 
 ```
 @inproceedings{vanroye2023fatrop,
@@ -25,3 +29,4 @@ To cite Fatrop in your academic work, please use the following reference:
   year={2023},
   organization={IEEE}
 }
+```

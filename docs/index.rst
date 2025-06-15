@@ -1,8 +1,5 @@
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+Fatrop
+===============
 
 .. toctree::
    :maxdepth: 2
@@ -12,9 +9,7 @@ documentation for details.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Fatrop Documentation
-
-Welcome to the Fatrop documentation. Fatrop is a fast trajectory optimization package developed by Lander Vanroye.
+Welcome to the Fatrop documentation.
 
 .. toctree::
    :maxdepth: 2
@@ -23,20 +18,3 @@ Welcome to the Fatrop documentation. Fatrop is a fast trajectory optimization pa
    installation
    getting_started
    fatrop_casadi_cookbook
-
-Indices and tables
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-====================
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
