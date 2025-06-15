@@ -1,9 +1,3 @@
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -14,7 +8,7 @@ documentation for details.
 
 Fatrop Documentation
 
-Welcome to the Fatrop documentation. Fatrop is a fast trajectory optimization package developed by Lander Vanroye.
+Welcome to the Fatrop documentation.
 
 .. toctree::
    :maxdepth: 2
@@ -31,11 +25,6 @@ Indices and tables
 * :ref:`search`
 
 ====================
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
 
 .. toctree::
    :maxdepth: 2
