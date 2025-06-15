@@ -46,24 +46,22 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Fatrop CasADi Cookbook</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#interfacing-with-casadi-opti">Interfacing with CasADi Opti</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#example-quadcopter-optimization">Example: Quadcopter Optimization</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#problem-setup-and-dynamics">1. Problem Setup and Dynamics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#constraints-and-objective">2. Constraints and Objective</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#problem-dimensions-and-opti-setup">3. Problem Dimensions and Opti Setup</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#constraints-objective-and-initial-guess">4. Constraints, Objective, and Initial Guess</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#solving-with-ipopt">5. Solving with Ipopt</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#solving-with-fatrop">5. Solving with Fatrop</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#results-and-visualization">6. Results and Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#problem-setup-and-dynamics">1. Problem Setup and Dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constraints-and-objective">2. Constraints and Objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#problem-dimensions-and-opti-setup">3. Problem Dimensions and Opti Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constraints-objective-and-initial-guess">4. Constraints, Objective, and Initial Guess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solving-with-ipopt">5. Solving with Ipopt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solving-with-fatrop">5. Solving with Fatrop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#results-and-visualization">6. Results and Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-usage-and-performance-considerations">Advanced Usage and Performance Considerations</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-usage-and-performance-considerations">Advanced Usage and Performance Considerations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#expanding-functions">Expanding Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#just-in-time-jit-compilation-of-functions">Just-in Time (JIT) Compilation of Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#code-generation">Code Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expanding-functions">Expanding Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#just-in-time-jit-compilation-of-functions">Just-in Time (JIT) Compilation of Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-generation">Code Generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#further-references">Further References</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#further-references">Further References</a></li>
 </ul>
 </li>
 </ul>
@@ -94,18 +92,12 @@
              
   <section id="fatrop-casadi-cookbook">
 <h1>Fatrop CasADi Cookbook<a class="headerlink" href="#fatrop-casadi-cookbook" title="Link to this heading"></a></h1>
-<p>This cookbook will guide you through using Fatrop with CasADi, using a quadcopter optimization problem as an example.</p>
-<section id="interfacing-with-casadi-opti">
-<h2>Interfacing with CasADi Opti<a class="headerlink" href="#interfacing-with-casadi-opti" title="Link to this heading"></a></h2>
-<p>Fatrop is interfaced with CasADi’s Opti framework, which provides a user-friendly way to define and solve optimization problems.</p>
-</section>
-<section id="example-quadcopter-optimization">
-<h2>Example: Quadcopter Optimization<a class="headerlink" href="#example-quadcopter-optimization" title="Link to this heading"></a></h2>
-<p>We’ll walk through the process of setting up and solving a quadcopter trajectory optimization problem, focusing on key aspects and best practices.
+<p>Fatrop is interfaced with CasADi’s Opti framework, which provides a user-friendly way to define and solve optimization problems.
+We’ll walk through the process of setting up and solving a quadcopter trajectory optimization problem, focusing on key aspects and best practices.
 This document is based on the example provided in the Fatrop repository, specifically <cite>examples/ocp_quadrotor_example.py</cite>.
 It is not a complete copy of the example, but rather a guide to the key steps involved in using Fatrop with CasADi.</p>
 <section id="problem-setup-and-dynamics">
-<h3>1. Problem Setup and Dynamics<a class="headerlink" href="#problem-setup-and-dynamics" title="Link to this heading"></a></h3>
+<h2>1. Problem Setup and Dynamics<a class="headerlink" href="#problem-setup-and-dynamics" title="Link to this heading"></a></h2>
 <p>First, we import the necessary libraries, define the physical parameters, and set up the dynamics of our quadcopter:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">casadi</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ca</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -159,7 +151,7 @@ Refer to the CasADi documentation for more details.</p>
 </div>
 </section>
 <section id="constraints-and-objective">
-<h3>2. Constraints and Objective<a class="headerlink" href="#constraints-and-objective" title="Link to this heading"></a></h3>
+<h2>2. Constraints and Objective<a class="headerlink" href="#constraints-and-objective" title="Link to this heading"></a></h2>
 <p>Define constraints and the objective function:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Control and state constraints</span>
 <span class="n">omega_min</span><span class="p">,</span> <span class="n">omega_max</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1000.0</span>
@@ -181,7 +173,7 @@ Refer to the CasADi documentation for more details.</p>
 </div>
 </section>
 <section id="problem-dimensions-and-opti-setup">
-<h3>3. Problem Dimensions and Opti Setup<a class="headerlink" href="#problem-dimensions-and-opti-setup" title="Link to this heading"></a></h3>
+<h2>3. Problem Dimensions and Opti Setup<a class="headerlink" href="#problem-dimensions-and-opti-setup" title="Link to this heading"></a></h2>
 <p>Maintain a list of problem dimensions and set up the optimization problem.
 For the CasADi’s fatrop interface, it is important to define the optimization variables in a specific order:
 x0, u0, x1, u1, …, xK-1, uK-1.</p>
@@ -200,7 +192,7 @@ x0, u0, x1, u1, …, xK-1, uK-1.</p>
 </div>
 </section>
 <section id="constraints-objective-and-initial-guess">
-<h3>4. Constraints, Objective, and Initial Guess<a class="headerlink" href="#constraints-objective-and-initial-guess" title="Link to this heading"></a></h3>
+<h2>4. Constraints, Objective, and Initial Guess<a class="headerlink" href="#constraints-objective-and-initial-guess" title="Link to this heading"></a></h2>
 <p>Set up constraints, objective, and provide an initial guess.
 The constraints should be defined in the following order:
 discrete_dynamics_0, path_constraints_0, …, discrete_dynamics_K-2, path_constraints_K-2, path_constraints_K-1</p>
@@ -230,7 +222,7 @@ discrete_dynamics_0, path_constraints_0, …, discrete_dynamics_K-2, path_constr
 <p>The <cite>ng</cite> list keeps track of the number of constraints at each time step, which is important for the manual structure detection when using Fatrop.</p>
 </section>
 <section id="solving-with-ipopt">
-<h3>5. Solving with Ipopt<a class="headerlink" href="#solving-with-ipopt" title="Link to this heading"></a></h3>
+<h2>5. Solving with Ipopt<a class="headerlink" href="#solving-with-ipopt" title="Link to this heading"></a></h2>
 <p>Solve the problem using both Ipopt (reference solve):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Solve with Ipopt</span>
 <span class="n">opti</span><span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="s1">&#39;ipopt&#39;</span><span class="p">,</span> <span class="p">{})</span>
@@ -239,7 +231,7 @@ discrete_dynamics_0, path_constraints_0, …, discrete_dynamics_K-2, path_constr
 </div>
 </section>
 <section id="solving-with-fatrop">
-<h3>5. Solving with Fatrop<a class="headerlink" href="#solving-with-fatrop" title="Link to this heading"></a></h3>
+<h2>5. Solving with Fatrop<a class="headerlink" href="#solving-with-fatrop" title="Link to this heading"></a></h2>
 <p>Solve the problem using both Ipopt and Fatrop:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Solve with Fatrop</span>
 <span class="n">opti</span><span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="s1">&#39;fatrop&#39;</span><span class="p">,</span> <span class="p">{</span>
@@ -251,7 +243,7 @@ discrete_dynamics_0, path_constraints_0, …, discrete_dynamics_K-2, path_constr
 </div>
 </section>
 <section id="results-and-visualization">
-<h3>6. Results and Visualization<a class="headerlink" href="#results-and-visualization" title="Link to this heading"></a></h3>
+<h2>6. Results and Visualization<a class="headerlink" href="#results-and-visualization" title="Link to this heading"></a></h2>
 <p>Retrieve and visualize the results:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">X_sol</span> <span class="o">=</span> <span class="n">sol_fatrop</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">ca</span><span class="o">.</span><span class="n">horzcat</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span>
 
@@ -260,12 +252,12 @@ discrete_dynamics_0, path_constraints_0, …, discrete_dynamics_K-2, path_constr
 </pre></div>
 </div>
 <p>For the complete visualization code, please refer to the full example in ‘examples/ocp_quadrotor_example.py’.</p>
-</section>
-</section>
 <section id="advanced-usage-and-performance-considerations">
-<h2>Advanced Usage and Performance Considerations<a class="headerlink" href="#advanced-usage-and-performance-considerations" title="Link to this heading"></a></h2>
+<h3>Advanced Usage and Performance Considerations<a class="headerlink" href="#advanced-usage-and-performance-considerations" title="Link to this heading"></a></h3>
+</section>
+</section>
 <section id="expanding-functions">
-<h3>Expanding Functions<a class="headerlink" href="#expanding-functions" title="Link to this heading"></a></h3>
+<h2>Expanding Functions<a class="headerlink" href="#expanding-functions" title="Link to this heading"></a></h2>
 <p>To potentially speed up your optimization, we’ve used expanded functions throughout this example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">f_dyn</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">state</span><span class="p">,</span> <span class="n">omega</span><span class="p">],</span> <span class="p">[</span><span class="n">state_dot</span><span class="p">])</span><span class="o">.</span><span class="n">expand</span><span class="p">()</span>
 <span class="n">f_cost</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;f_cost&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">omega</span><span class="p">],</span> <span class="p">[</span><span class="n">ca</span><span class="o">.</span><span class="n">sum1</span><span class="p">((</span><span class="n">omega</span><span class="o">/</span><span class="n">omega_max</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)])</span><span class="o">.</span><span class="n">expand</span><span class="p">()</span>
@@ -277,7 +269,7 @@ This can be done by setting the <cite>expand</cite> option to <cite>True</cite> 
 This can speed up the function evaluation, sometimes at the cost of having larger expressions with duplicated code.</p>
 </section>
 <section id="just-in-time-jit-compilation-of-functions">
-<h3>Just-in Time (JIT) Compilation of Functions<a class="headerlink" href="#just-in-time-jit-compilation-of-functions" title="Link to this heading"></a></h3>
+<h2>Just-in Time (JIT) Compilation of Functions<a class="headerlink" href="#just-in-time-jit-compilation-of-functions" title="Link to this heading"></a></h2>
 <p>CasADi supports Just-in-Time (JIT) compilation, which can significantly speed up the evaluation of functions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">opti</span><span class="o">.</span><span class="n">solver</span><span class="p">(</span><span class="s1">&#39;fatrop&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;structure_detection&#39;</span><span class="p">:</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> <span class="s1">&#39;nx&#39;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span> <span class="s1">&#39;nu&#39;</span><span class="p">:</span><span class="n">nu</span><span class="p">,</span> <span class="s1">&#39;ng&#39;</span><span class="p">:</span><span class="n">ng</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span><span class="n">K</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;expand&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;jit&quot;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;jit_options&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;flags&quot;</span><span class="p">:</span> <span class="s2">&quot;-O3&quot;</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}})</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">opti</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
@@ -285,7 +277,7 @@ This can speed up the function evaluation, sometimes at the cost of having large
 </div>
 </section>
 <section id="code-generation">
-<h3>Code Generation<a class="headerlink" href="#code-generation" title="Link to this heading"></a></h3>
+<h2>Code Generation<a class="headerlink" href="#code-generation" title="Link to this heading"></a></h2>
 <p>Code generation is a powerful technique to improve the performance of your optimization problem.
 CasADi provides tools to generate C code for any CasADi function.
 This means that we can put the full solver in a CasADi function and generate C code for it.</p>
@@ -308,16 +300,13 @@ The generated code can be compiled with:</p>
 </div></blockquote>
 <p>This shared library can be imported into casadi using CasADi’s <cite>external</cite> function interface.</p>
 <p>For an example of how to use the generated code in a C++ application without CasADi, refer to the file ‘examples/casadi_codegen/ocp_impl_example_codegen.cpp’ in the Fatrop repository.</p>
-</section>
-</section>
 <section id="further-references">
-<h2>Further References<a class="headerlink" href="#further-references" title="Link to this heading"></a></h2>
-<p>For more information on using Fatrop with CasADi, refer to the following resources:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://www.youtube.com/watch?v=example">Fatrop CasADi video tutorial on YouTube</a></p></li>
-<li><p><a class="reference external" href="https://github.com/jgillis/fatrop_demo">Fatrop CasADi demo Github repo</a></p></li>
-<li><p><a class="reference external" href="https://web.casadi.org/">CasADi website</a></p></li>
-</ul>
+<h3>Further References<a class="headerlink" href="#further-references" title="Link to this heading"></a></h3>
+<p>For more information on using Fatrop with CasADi, refer to the following resources:
+- <a class="reference external" href="https://www.youtube.com/watch?v=example">Fatrop CasADi video tutorial on YouTube</a>
+- <a class="reference external" href="https://github.com/jgillis/fatrop_demo">Fatrop CasADi demo Github repo</a>
+- <a class="reference external" href="https://web.casadi.org/">CasADi website</a></p>
+</section>
 </section>
 </section>
 

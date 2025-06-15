@@ -1,16 +1,7 @@
 Fatrop CasADi Cookbook
 ======================
 
-This cookbook will guide you through using Fatrop with CasADi, using a quadcopter optimization problem as an example.
-
-Interfacing with CasADi Opti
-------------------------------
-
 Fatrop is interfaced with CasADi's Opti framework, which provides a user-friendly way to define and solve optimization problems.
-
-Example: Quadcopter Optimization
---------------------------------
-
 We'll walk through the process of setting up and solving a quadcopter trajectory optimization problem, focusing on key aspects and best practices.
 This document is based on the example provided in the Fatrop repository, specifically `examples/ocp_quadrotor_example.py`.
 It is not a complete copy of the example, but rather a guide to the key steps involved in using Fatrop with CasADi.
@@ -250,7 +241,6 @@ Further References
 --------------------------------
 
 For more information on using Fatrop with CasADi, refer to the following resources:
-
 - `Fatrop CasADi video tutorial on YouTube <https://www.youtube.com/watch?v=example>`_
 - `Fatrop CasADi demo Github repo <https://github.com/jgillis/fatrop_demo>`_
 - `CasADi website <https://web.casadi.org/>`_
