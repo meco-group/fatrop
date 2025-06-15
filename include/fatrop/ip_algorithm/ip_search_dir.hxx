@@ -77,6 +77,8 @@ namespace fatrop
                 solved = false;
                 break;
             case (LinsolReturnFlag::NOFULL_RANK):
+                PRINT_DIAGNOSTIC << "Constraint Jacobian is not full rank, "
+                                    "adding dual inertia correction." << std::endl;
                 update_delta_c = true;
                 solved = false;
                 break;

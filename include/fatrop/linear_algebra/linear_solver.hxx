@@ -8,6 +8,7 @@
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/linear_algebra/linear_system.hpp"
 #include "linear_solver.hpp"
+#include "fatrop/common/printing.hpp"
 #include <limits> // for std::numeric_limits
 
 namespace fatrop
@@ -42,6 +43,9 @@ namespace fatrop
             if (res_norm >= res_prev)
             {
                 ls.set_rhs(x);
+                PRINT_DIAGNOSTIC << "Iterative refinement stopped at iteration: " << i
+                            << " with residual norm: " << res_norm
+                            << " because the residual norm did not decrease." << std::endl;
                 return LinsolReturnFlag::ITREF_INCREASE;
             }
             else
@@ -56,6 +60,8 @@ namespace fatrop
             }
             if (i == max_it_ref - 1)
             {
+                PRINT_DIAGNOSTIC << "Iterative refinement reached maximum iterations: " << max_it_ref
+                            << " with residual norm: " << res_norm << std::endl;
                 ls.set_rhs(x);
                 return LinsolReturnFlag::ITREF_MAX_ITER;
             }
