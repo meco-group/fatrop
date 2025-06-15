@@ -250,6 +250,7 @@ Further References
 --------------------------------
 
 For more information on using Fatrop with CasADi, refer to the following resources:
- - `Fatrop CasADi video tutorial on YouTube  <https://www.youtube.com/watch?v=example>` 
- - `Fatrop CasADi demo Github repo <https://github.com/jgillis/fatrop_demo>`
- - `CasADi website <https://web.casadi.org/>`
+
+- `Fatrop CasADi video tutorial on YouTube <https://www.youtube.com/watch?v=example>`_
+- `Fatrop CasADi demo Github repo <https://github.com/jgillis/fatrop_demo>`_
+- `CasADi website <https://web.casadi.org/>`_
