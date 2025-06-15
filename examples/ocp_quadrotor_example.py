@@ -136,7 +136,7 @@ lb_tN = ca.DM.zeros(12)  # Equality constraints for final state
 ub_tN = ca.DM.zeros(12)  # Equality constraints for final state
 
 # cost function
-f_cost = ca.Function('f_cost', [omega], [ca.sum1((omega/omega_max)**2)]).expand()
+f_cost = ca.Function('f_cost', [omega], [ca.sumsqr(omega/omega_max)]).expand()
 
 # set up the optimization problem
 

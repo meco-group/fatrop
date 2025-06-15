@@ -22,6 +22,7 @@ Welcome to the Fatrop documentation. Fatrop is a fast trajectory optimization pa
 
    installation
    getting_started
+   fatrop_casadi_cookbook
 
 Indices and tables
 
