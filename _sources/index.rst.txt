@@ -17,15 +17,3 @@ Welcome to the Fatrop documentation.
    installation
    getting_started
    fatrop_casadi_cookbook
-
-Indices and tables
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-====================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
