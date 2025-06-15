@@ -13,6 +13,10 @@ The main features of the solver are:
 - fatrop is also interfaced with CasADi. A usage example can be found [here](https://github.com/jgillis/fatrop_demo). 
 - usage examples of both interfaces can be found in the examples folder.
 
+## Getting Started
+
+Refer to [github pages](https://meco-group.github.io/fatrop/) as a reference to help getting started.
+
 ## Citing
 To cite Fatrop in your academic work, please use the following reference:
 
