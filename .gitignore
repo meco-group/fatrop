@@ -81,3 +81,10 @@ vimsession
 *.exe
 *.out
 *.app
+
+# Sphinx documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+*.doctree
+*.pickle
