@@ -3,7 +3,7 @@ Fatrop CasADi Cookbook
 
 This cookbook will guide you through using Fatrop with CasADi, using a quadcopter optimization problem as an example.
 
-Interfacing with NLPSol (Opti)
+Interfacing with CasADi Opti
 ------------------------------
 
 Fatrop is interfaced with CasADi's Opti framework, which provides a user-friendly way to define and solve optimization problems.
@@ -176,7 +176,7 @@ Solve the problem using both Ipopt and Fatrop:
    sol_fatrop = opti.solve()
 
 6. Results and Visualization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Retrieve and visualize the results:
 
@@ -193,7 +193,7 @@ Advanced Usage and Performance Considerations
 ---------------------------------------------
 
 Expanding Functions
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To potentially speed up your optimization, we've used expanded functions throughout this example:
 
@@ -208,16 +208,17 @@ This can be done by setting the `expand` option to `True` when creating the func
 This can speed up the function evaluation, sometimes at the cost of having larger expressions with duplicated code.
 
 Just-in Time (JIT) Compilation of Functions 
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CasADi supports Just-in-Time (JIT) compilation, which can significantly speed up the evaluation of functions.
 
 .. code-block:: python
+
    opti.solver('fatrop', {'structure_detection':'manual', 'nx': nx, 'nu':nu, 'ng':ng, 'N':K-1, "expand": True, "jit":True, "jit_options": {"flags": "-O3", "verbose": True}})
    res = opti.solve()
 
 Code Generation
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Code generation is a powerful technique to improve the performance of your optimization problem.
 CasADi provides tools to generate C code for any CasADi function.
@@ -238,7 +239,7 @@ The generated code can be compiled with:
 
    .. code-block:: bash
 
-   g++ -fPIC -shared quadcopter.c -g -O3 -march=native -lfatrop -lblasfeo -I `fatrop path` -I`blasfeo path`/include/blasfeo/include 
+      g++ -fPIC -shared quadcopter.c -g -O3 -march=native -lfatrop -lblasfeo -I`fatrop path` -I`blasfeo path`/include/blasfeo/include 
 
 This shared library can be imported into casadi using CasADi's `external` function interface.
 
