@@ -46,7 +46,11 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#binaries">Binaries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation-from-source">Installation from source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-from-source">Installation from source</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fatrop">Fatrop</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
@@ -82,7 +86,6 @@
 <p>This page will guide you through the process of installing Fatrop.</p>
 <section id="binaries">
 <h2>Binaries<a class="headerlink" href="#binaries" title="Link to this heading"></a></h2>
-<p>If you plan to use Fatrop from the CasADi interface, there are two main methods for installation:</p>
 <ol class="arabic">
 <li><p>Using Conda (Recommended):</p>
 <p>Fatrop binaries are available on conda:</p>
@@ -99,16 +102,15 @@ To install, simply run:</p>
 <p>Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest features and improvements.</p>
 </div>
 </li>
-<li><p>Using PyPI:</p>
-<p>While it’s possible to install Fatrop via PyPI, this method is not recommended as it doesn’t enable the CPU-specific optimizations:</p>
-</li>
 </ol>
+<p>While it’s possible to install Fatrop via PyPI, this method is not recommended as it currently doesn’t enable the CPU-specific optimizations:</p>
 </section>
 <section id="installation-from-source">
 <h2>Installation from source<a class="headerlink" href="#installation-from-source" title="Link to this heading"></a></h2>
-<p>Before installing fatrop, ensure you have the following prerequisites:</p>
-<p>BLASFEO can be found at <cite>https://github.com/giaf/blasfeo</cite>.
-Alternatively, binaries are available in conda as <cite>libblasfeo</cite>.</p>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<p>The only dependency of fatrop is <a class="reference external" href="https://github.com/giaf/blasfeo">Blasfeo</a>.
+Blasfeo is a high-perfomance library for linear algebra operations.</p>
 <ol class="arabic">
 <li><p>Clone the blasfeo repository</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/giaf/blasfeo
@@ -131,6 +133,11 @@ A list of available targets can be found on the
 <a class="reference external" href="https://github.com/giaf/blasfeo?tab=readme-ov-file#supported-computer-architectures">BLASFEO GitHub page</a>.</p>
 <p>Note: You can use <cite>$CONDA_PREFIX</cite> as the installation directory if you’re using a Conda environment.</p>
 </li>
+</ol>
+</section>
+<section id="fatrop">
+<h3>Fatrop<a class="headerlink" href="#fatrop" title="Link to this heading"></a></h3>
+<ol class="arabic">
 <li><p>Clone the Fatrop repository:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/lvanroye/fatrop.git
 <span class="nb">cd</span><span class="w"> </span>fatrop
@@ -162,6 +169,7 @@ A list of available targets can be found on the
 <p>To verify that Fatrop has been installed correctly, you can run one of the example programs provided in the <cite>examples</cite> directory.</p>
 </li>
 </ol>
+</section>
 </section>
 </section>
 
