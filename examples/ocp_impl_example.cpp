@@ -1,11 +1,6 @@
-#include "fatrop/common/timing.hpp"
-#include "fatrop/ip_algorithm/ip_alg_builder.hpp"
-#include "fatrop/ip_algorithm/ip_algorithm.hpp"
-#include "fatrop/linear_algebra/linear_algebra.hpp"
-#include "fatrop/ocp/nlp_ocp.hpp"
-#include "fatrop/ocp/ocp_abstract.hpp"
 #include <limits>
 #include <memory>
+#include <fatrop/fatrop.hpp>
 using namespace fatrop;
 
 // example problem 2D point mass with a small nonlinearity in the dynamics
@@ -230,9 +225,6 @@ private:
     const Scalar m_ = 1.0;
     const Scalar dt_ = 0.05;
 };
-
-#include "fatrop/common/options.hpp"
-#include "fatrop/fatrop.hpp"
 
 int main()
 {

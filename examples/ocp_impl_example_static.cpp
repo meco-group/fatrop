@@ -1,11 +1,7 @@
-#include "fatrop/ip_algorithm/ip_alg_builder.hpp"
-#include "fatrop/ip_algorithm/ip_algorithm.hpp"
-#include "fatrop/linear_algebra/linear_algebra.hpp"
-#include "fatrop/ocp/nlp_ocp.hxx"
-#include "fatrop/ocp/ocp_abstract.hpp"
-#include "fatrop/ocp/ocp_eval.hpp"
 #include <limits>
 #include <memory>
+#include <fatrop/fatrop.hpp>
+#include "fatrop/ocp/nlp_ocp.hxx"
 using namespace fatrop;
 
 /**
