@@ -7,8 +7,6 @@ This page will guide you through the process of installing Fatrop.
 Binaries
 -------------------------------
 
-If you plan to use Fatrop from the CasADi interface, there are two main methods for installation:
-
 1. Using Conda (Recommended):
 
    Fatrop binaries are available on conda:
@@ -27,17 +25,17 @@ If you plan to use Fatrop from the CasADi interface, there are two main methods 
    .. note::
       Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest features and improvements.
 
-2. Using PyPI:
    
-   While it's possible to install Fatrop via PyPI, this method is not recommended as it doesn't enable the CPU-specific optimizations:
+While it's possible to install Fatrop via PyPI, this method is not recommended as it currently doesn't enable the CPU-specific optimizations:
 
 Installation from source
 -------------------------------
 
-Before installing fatrop, ensure you have the following prerequisites:
+Dependencies
+^^^^^^^^^^^^
 
-BLASFEO can be found at `https://github.com/giaf/blasfeo`.
-Alternatively, binaries are available in conda as `libblasfeo`.
+The only dependency of fatrop is `Blasfeo <https://github.com/giaf/blasfeo>`_.
+Blasfeo is a high-perfomance library for linear algebra operations.
 
 1. Clone the blasfeo repository
 
@@ -65,22 +63,24 @@ Alternatively, binaries are available in conda as `libblasfeo`.
 
    Note: You can use `$CONDA_PREFIX` as the installation directory if you're using a Conda environment.
 
+Fatrop
+^^^^^^^^^^^^
 
-4. Clone the Fatrop repository:
+1. Clone the Fatrop repository:
 
    .. code-block:: bash
 
       git clone https://github.com/lvanroye/fatrop.git
       cd fatrop
 
-5. Create a build directory and navigate to it:
+2. Create a build directory and navigate to it:
 
    .. code-block:: bash
 
       mkdir build
       cd build
 
-6. Configure the project with CMake, specifying the installation prefix:
+3. Configure the project with CMake, specifying the installation prefix:
 
    .. code-block:: bash
 
@@ -89,13 +89,13 @@ Alternatively, binaries are available in conda as `libblasfeo`.
    Note: You can use `$CONDA_PREFIX` as the installation directory if you're using a Conda environment:
 
 
-7. Build the project:
+4. Build the project:
 
    .. code-block:: bash
 
       make
 
-8. Install Fatrop:
+5. Install Fatrop:
 
    .. code-block:: bash
 
