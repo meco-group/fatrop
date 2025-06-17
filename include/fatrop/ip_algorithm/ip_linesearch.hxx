@@ -639,7 +639,7 @@ namespace fatrop
         {
             reference_grad_bar_delta_ = -mach_eps;
         }
-        return (reference_grad_bar_delta_ > 0. &&
+        return (reference_grad_bar_delta_ < 0. &&
                 alpha_primal * std::pow(-reference_grad_bar_delta_, s_phi_) >
                     delta_ * std::pow(reference_theta_, s_theta_));
     }
