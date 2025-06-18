@@ -97,13 +97,14 @@ To install, simply run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>casadi
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest features and improvements.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.</p>
 </div>
 </li>
 </ol>
-<p>While it’s possible to install Fatrop via PyPI, this method is not recommended as it currently doesn’t enable the CPU-specific optimizations:</p>
+<p>While it’s possible to install Fatrop via PyPI, this method is not recommended as it currently doesn’t enable the CPU-specific optimizations.
+This means that the performance of the PyPI binaries are significantly lower than the performance of the binaries installed via conda or from source.</p>
 </section>
 <section id="installation-from-source">
 <h2>Installation from source<a class="headerlink" href="#installation-from-source" title="Link to this heading"></a></h2>
