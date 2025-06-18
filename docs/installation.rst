@@ -22,11 +22,12 @@ Binaries
 
       conda install casadi
    
-   .. note::
-      Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest features and improvements.
+   .. warning::
+      Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
 
    
-While it's possible to install Fatrop via PyPI, this method is not recommended as it currently doesn't enable the CPU-specific optimizations:
+While it's possible to install Fatrop via PyPI, this method is not recommended as it currently doesn't enable the CPU-specific optimizations.
+This means that the performance of the PyPI binaries are significantly lower than the performance of the binaries installed via conda or from source.
 
 Installation from source
 -------------------------------
