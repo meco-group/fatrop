@@ -451,6 +451,7 @@ namespace fatrop
                                    alpha_dual * curr_it.delta_dual_bounds_l());
         trial_it.set_dual_bounds_u(curr_it.dual_bounds_u() +
                                    alpha_dual * curr_it.delta_dual_bounds_u());
+        trial_it.modify_dual_bounds(curr_it.mu());
     }
 
     template <typename LinearSolverType, typename ProblemType>

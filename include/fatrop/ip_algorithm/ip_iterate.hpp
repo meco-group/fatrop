@@ -178,6 +178,8 @@ namespace fatrop
          */
         template <typename Derived> void set_dual_bounds_u(const VecReal<Derived> &dual_bounds_u);
 
+        void modify_dual_bounds(Scalar mu);
+
         /**
          * @brief Sets the search direction for primal variables x.
          * @param delta_primal_x The new delta primal x vector.
@@ -544,11 +546,13 @@ namespace fatrop
         Index *number_of_bounds_; ///< Total number of bounds in the problem
         Scalar kappa_d_ = 1e-5;
         Scalar smax_ = 100.;
+        Scalar kappa_sigma_ = 1e10;
 
     public:
         // Setter methods for options
         void set_kappa_d(const Scalar &value) { kappa_d_ = value; }
         void set_smax(const Scalar &value) { smax_ = value; }
+        void set_kappa_sigma(const Scalar &value) { kappa_sigma_ = value; }
 
         // Register options
         void register_options(OptionRegistry &registry);
@@ -593,6 +597,27 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &d
     dual_infeasibility_s_evaluated_ = false;
     dual_bounds_u_ = if_else(upper_bounded(), dual_bounds_u, VecRealScalar(dual_bounds_u_.m(), 0.));
 }
+
+template <typename ProblemType>
+void fatrop::IpIterate<ProblemType>::modify_dual_bounds(Scalar mu)
+{
+    complementarity_l_evaluated_ = false;
+    complementarity_u_evaluated_ = false;
+    dual_infeasibility_s_evaluated_ = false;
+    dual_bounds_l_ =
+        if_else(lower_bounded(),
+                max(min(dual_bounds_l_,
+                        VecRealScalar(dual_bounds_l_.m(), kappa_sigma_ * mu) / delta_lower()),
+                    VecRealScalar(dual_bounds_l_.m(), mu) / (kappa_sigma_ * delta_lower())),
+                VecRealScalar(dual_bounds_l_.m(), 0.));
+    dual_bounds_u_ =
+        if_else(upper_bounded(),
+                max(min(dual_bounds_u_,
+                        VecRealScalar(dual_bounds_u_.m(), kappa_sigma_ * mu) / delta_upper()),
+                    VecRealScalar(dual_bounds_u_.m(), mu) / (kappa_sigma_ * delta_upper())),
+                VecRealScalar(dual_bounds_u_.m(), 0.));
+}
+
 template <typename ProblemType>
 template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_delta_primal_x(const VecReal<Derived> &delta_primal_x)

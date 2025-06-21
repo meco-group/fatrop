@@ -120,8 +120,8 @@ namespace fatrop
                              min(VecRealScalar(number_of_slacks, constr_viol_tol_),
                                  bound_relax_factor_ * max(VecRealScalar(number_of_slacks, 1.),
                                                            abs(modified_bounds_upper_)));
-        lower_bounds = modified_bounds_lower_;
-        upper_bounds = modified_bounds_upper_;
+        lower_bounds = updated_lower;
+        upper_bounds = updated_upper;
         return 0;
     }
 
