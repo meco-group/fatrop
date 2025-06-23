@@ -9,7 +9,10 @@ Binaries
 Using Conda (Recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Fatrop v0 binaries are available on conda. It is recommended to install the newest version from source for the latest improvements.
+Fatrop v0 binaries are available on conda.
+
+.. warning::
+   Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
 
 Fatrop is shipped by default with the conda CasADi package. To install, simply run:
 
@@ -23,13 +26,21 @@ Alternatively, you can install the `libfatrop` package directly:
 
    conda install libfatrop
 
-.. warning::
-   Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
 
 Using PyPI (Not Recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 While it's possible to install Fatrop v0 via PyPI, this method is not recommended as it currently doesn't enable CPU-specific optimizations. This means that the performance of the PyPI binaries is significantly lower than the performance of the binaries installed via conda or from source.
+
+Using Docker
+------------
+
+A Dockerfile is available in the root directory of the repository. It can be built and run using the following commands, which should be sufficient to try out the Python examples:
+
+.. code-block:: bash
+
+   docker build -t my-fatrop-image .
+   docker run -it --rm -v "$PWD":/workspace -w /workspace my-fatrop-image bash
 
 Installation from Source
 ------------------------
@@ -145,6 +156,7 @@ While not required for Fatrop itself, CasADi is often used alongside Fatrop for 
        cmake .. \
            -DWITH_IPOPT=ON -DWITH_BUILD_IPOPT=ON \
            -DWITH_BUILD_MUMPS=ON -DWITH_BUILD_METIS=ON \
+           -DWITH_FATROP=ON \
            -DWITH_PYTHON=ON -DWITH_PYTHON3=ON \
            -DPYTHON_PREFIX=$(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())') \
            -DCMAKE_INSTALL_PREFIX=</path/to/install/directory> \

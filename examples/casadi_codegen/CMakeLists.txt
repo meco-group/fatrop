@@ -19,6 +19,6 @@ else()
     target_link_libraries(casadi_generated PRIVATE fatrop)
 
     add_executable(ocp_impl_example_codegen ocp_impl_example_codegen.cpp)
-    target_link_libraries(ocp_impl_example_codegen PRIVATE casadi_generated)
+    target_link_libraries(ocp_impl_example_codegen PRIVATE casadi_generated fatrop)
     target_include_directories(ocp_impl_example_codegen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
