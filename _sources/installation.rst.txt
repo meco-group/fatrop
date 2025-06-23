@@ -9,7 +9,10 @@ Binaries
 Using Conda (Recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Fatrop v0 binaries are available on conda. It is recommended to install the newest version from source for the latest improvements.
+Fatrop v0 binaries are available on conda.
+
+.. warning::
+   Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
 
 Fatrop is shipped by default with the conda CasADi package. To install, simply run:
 
@@ -23,8 +26,6 @@ Alternatively, you can install the `libfatrop` package directly:
 
    conda install libfatrop
 
-.. warning::
-   Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
 
 Using PyPI (Not Recommended)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
