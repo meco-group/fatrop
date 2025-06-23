@@ -71,7 +71,7 @@ Fatrop
 
    .. code-block:: bash
 
-      git clone https://github.com/lvanroye/fatrop.git
+      git clone git@github.com:meco-group/fatrop.git
       cd fatrop
 
 2. Create a build directory and navigate to it:

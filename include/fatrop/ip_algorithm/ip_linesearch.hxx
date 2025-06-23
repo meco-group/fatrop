@@ -343,7 +343,8 @@ namespace fatrop
                  * todo set the step info
                  */
                 accept = restoration_phase_->perform_restoration();
-                PRINT_DEBUG << "Restoration phase failed" << std::endl;
+                if (!accept)
+                    PRINT_DEBUG << "Restoration phase failed" << std::endl;
 
                 in_soft_resto_phase_ = false;
                 soft_resto_counter_ = 0;
@@ -444,8 +445,8 @@ namespace fatrop
     void IpLinesearch<LinearSolverType, ProblemType>::perform_dual_step(const Scalar alpha_primal,
                                                                         const Scalar alpha_dual)
     {
-        IpIterateType& curr_it = ipdata_->current_iterate();
-        IpIterateType& trial_it = ipdata_->trial_iterate();
+        IpIterateType &curr_it = ipdata_->current_iterate();
+        IpIterateType &trial_it = ipdata_->trial_iterate();
         trial_it.set_dual_eq(curr_it.dual_eq() + alpha_primal * curr_it.delta_dual_eq());
         trial_it.set_dual_bounds_l(curr_it.dual_bounds_l() +
                                    alpha_dual * curr_it.delta_dual_bounds_l());
