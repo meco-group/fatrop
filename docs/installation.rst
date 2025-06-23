@@ -3,105 +3,161 @@ Installation
 
 This page will guide you through the process of installing Fatrop.
 
-
 Binaries
--------------------------------
+--------
 
-1. Using Conda (Recommended):
+Using Conda (Recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   Fatrop binaries are available on conda:
+Fatrop v0 binaries are available on conda. It is recommended to install the newest version from source for the latest improvements.
 
-   .. code-block:: bash
+Fatrop is shipped by default with the conda CasADi package. To install, simply run:
 
-      conda install libfatrop
+.. code-block:: bash
 
-   Fatrop is shipped by default with the conda CasADi package.
-   To install, simply run:
+   conda install casadi
 
-   .. code-block:: bash
+Alternatively, you can install the `libfatrop` package directly:
 
-      conda install casadi
-   
-   .. warning::
-      Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
+.. code-block:: bash
 
-   
-While it's possible to install Fatrop via PyPI, this method is not recommended as it currently doesn't enable the CPU-specific optimizations.
-This means that the performance of the PyPI binaries are significantly lower than the performance of the binaries installed via conda or from source.
+   conda install libfatrop
 
-Installation from source
--------------------------------
+.. warning::
+   Currently, only Fatrop v0 is available on conda. It is recommended to install the newest version from source for the latest improvements.
+
+Using PyPI (Not Recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+While it's possible to install Fatrop v0 via PyPI, this method is not recommended as it currently doesn't enable CPU-specific optimizations. This means that the performance of the PyPI binaries is significantly lower than the performance of the binaries installed via conda or from source.
+
+Installation from Source
+------------------------
 
 Dependencies
 ^^^^^^^^^^^^
 
-The only dependency of fatrop is `Blasfeo <https://github.com/giaf/blasfeo>`_.
-Blasfeo is a high-perfomance library for linear algebra operations.
+The only dependency of Fatrop is `Blasfeo <https://github.com/giaf/blasfeo>`_, a high-performance library for linear algebra operations.
 
-1. Clone the blasfeo repository
+To install Blasfeo from source:
 
-   .. code-block:: bash
+1.  Clone the Blasfeo repository:
 
-      git clone https://github.com/giaf/blasfeo
-      cd blasfeo
+    .. code-block:: bash
 
-2. Create a build directory and navigate to it:
+       git clone https://github.com/giaf/blasfeo.git
+       cd blasfeo
 
-   .. code-block:: bash
+2.  Create a build directory and navigate into it:
 
-      mkdir build
-      cd build
+    .. code-block:: bash
 
-3. Configure the project with CMake, specifying the installation prefix:
+       mkdir build
+       cd build
 
-   .. code-block:: bash
+3.  Configure the project with CMake, specifying the installation prefix:
 
-      cmake .. -DTARGET=`blasfeo target` -DCMAKE_INSTALL_PREFIX=/path/to/install/directory
-   
-   Here, ``blasfeo target`` should be replaced with the target CPU architecture you want to build for.  
-   A list of available targets can be found on the
-   `BLASFEO GitHub page <https://github.com/giaf/blasfeo?tab=readme-ov-file#supported-computer-architectures>`_.
+    .. code-block:: bash
 
-   Note: You can use `$CONDA_PREFIX` as the installation directory if you're using a Conda environment.
+       cmake .. -DTARGET=<blasfeo target> -DCMAKE_INSTALL_PREFIX=</path/to/install/directory>
+    
+    Here, ``<blasfeo target>`` should be replaced with the target CPU architecture you want to build for. A list of available targets can be found on the `BLASFEO GitHub page <https://github.com/giaf/blasfeo?tab=readme-ov-file#supported-computer-architectures>`_.
+
+    .. note::
+       You can use ``$CONDA_PREFIX`` as the installation directory if you're using a Conda environment.
+
+4.  Build the project:
+
+    .. code-block:: bash
+
+       make -j$(nproc)
+
+5.  Install Blasfeo:
+
+    .. code-block:: bash
+
+       make install
 
 Fatrop
-^^^^^^^^^^^^
+^^^^^^
 
-1. Clone the Fatrop repository:
+To install Fatrop from source:
 
-   .. code-block:: bash
+1.  Clone the Fatrop repository:
 
-      git clone git@github.com:meco-group/fatrop.git
-      cd fatrop
+    .. code-block:: bash
 
-2. Create a build directory and navigate to it:
+       git clone https://github.com/meco-group/fatrop.git
+       cd fatrop
 
-   .. code-block:: bash
+2.  Create a build directory and navigate into it:
 
-      mkdir build
-      cd build
+    .. code-block:: bash
 
-3. Configure the project with CMake, specifying the installation prefix:
+       mkdir build
+       cd build
 
-   .. code-block:: bash
+3.  Configure the project with CMake, specifying the installation prefix:
 
-      cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install/directory
+    .. code-block:: bash
 
-   Note: You can use `$CONDA_PREFIX` as the installation directory if you're using a Conda environment:
+       cmake .. -DCMAKE_INSTALL_PREFIX=</path/to/install/directory>
 
+4.  Build the project:
 
-4. Build the project:
+    .. code-block:: bash
 
-   .. code-block:: bash
+       make -j$(nproc)
 
-      make
+5.  Install Fatrop:
 
-5. Install Fatrop:
+    .. code-block:: bash
 
-   .. code-block:: bash
+       make install
 
-      make install
+    This will install Fatrop to the directory specified by ``CMAKE_INSTALL_PREFIX``.
 
-   This will install Fatrop to the directory specified by `CMAKE_INSTALL_PREFIX`.
+    To verify that Fatrop has been installed correctly, you can run one of the example programs provided in the ``examples`` directory.
 
-   To verify that Fatrop has been installed correctly, you can run one of the example programs provided in the `examples` directory.
+CasADi (Optional)
+^^^^^^^^^^^^^^^^^
+
+While not required for Fatrop itself, CasADi is often used alongside Fatrop for modeling and optimization. To install CasADi from source:
+
+1.  Clone the CasADi repository:
+
+    .. code-block:: bash
+
+       git clone https://github.com/casadi/casadi.git
+       cd casadi
+
+2.  Create a build directory and navigate into it:
+
+    .. code-block:: bash
+
+       mkdir build
+       cd build
+
+3.  Configure the project with CMake, specifying the desired options:
+
+    .. code-block:: bash
+
+       cmake .. \
+           -DWITH_IPOPT=ON -DWITH_BUILD_IPOPT=ON \
+           -DWITH_BUILD_MUMPS=ON -DWITH_BUILD_METIS=ON \
+           -DWITH_PYTHON=ON -DWITH_PYTHON3=ON \
+           -DPYTHON_PREFIX=$(python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())') \
+           -DCMAKE_INSTALL_PREFIX=</path/to/install/directory> \
+           -DCMAKE_BUILD_TYPE=Release
+
+4.  Build the project:
+
+    .. code-block:: bash
+
+       make -j$(nproc)
+
+5.  Install CasADi:
+
+    .. code-block:: bash
+
+       make install
