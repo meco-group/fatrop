@@ -622,8 +622,6 @@ namespace fatrop
 
     const FatropOcpCStats *fatrop_ocp_c_get_stats(struct FatropOcpCSolver *s)
     {
-        // todo implement
-        // FatropStats stats_solver = s->driver->app.get_stats();
         FatropOcpCStats *stats = &s->driver->stats;
 
         stats->compute_sd_time = 0.;
@@ -640,10 +638,10 @@ namespace fatrop
         stats->eval_cv_count = 0.;
         stats->eval_grad_count = 0.;
         stats->eval_obj_count = 0.;
-        stats->iterations_count = 0.;
+        stats->iterations_count = s->driver->ip_data->iteration_number();
         stats->return_flag = 0.;
 
-        return &s->driver->stats;
+        return stats;
     }
 
 }
