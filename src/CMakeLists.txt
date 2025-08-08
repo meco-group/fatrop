@@ -33,6 +33,9 @@ set(FATROP_SOURCES
     ip_algorithm/ip_utils.cpp
 )
 
+# Create the header with version information
+configure_file(${CMAKE_SOURCE_DIR}/include/fatrop/version.hpp.in ${CMAKE_SOURCE_DIR}/include/fatrop/version.hpp @ONLY)
+
 # Create the fatrop shared library
 add_library(fatrop SHARED ${FATROP_SOURCES})
 
