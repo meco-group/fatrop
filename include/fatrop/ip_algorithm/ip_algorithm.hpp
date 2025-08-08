@@ -69,6 +69,11 @@ namespace fatrop
                     const IpIterationOutputSp &iteration_output, const IpDataSp &ip_data);
 
         /**
+         * @brief Print version.
+         */
+        static void print_version();
+
+        /**
          * @brief Reset the algorithm to its initial state.
          */
         void reset(bool is_resto = false);
