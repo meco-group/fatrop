@@ -45,9 +45,6 @@ namespace fatrop
         bool owns_stream_;
     };
 
-    // Global stream accessor
-    inline std::ostream &f_out = OutputStreamManager::get_stream();
-
     enum class PrintLevel
     {
         None = 0,
@@ -77,7 +74,7 @@ namespace fatrop
         template <typename T> std::ostream &operator<<(const T &value)
         {
             if (global_print_level_ >= this_print_level_)
-                return f_out << value;
+                return OutputStreamManager::get_stream() << value;
             return null_stream_;
         };
 

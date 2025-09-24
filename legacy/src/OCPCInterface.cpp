@@ -424,8 +424,8 @@ namespace fatrop
         }
         fatrop_int solve()
         {
-            auto ret = algo->optimize();
-            if (ret == IpSolverReturnFlag::Success)
+            flag = algo->optimize();
+            if (flag == IpSolverReturnFlag::Success)
             {
                 PRINT_ITERATIONS << ip_data->timing_statistics();
                 return 0;
@@ -439,6 +439,7 @@ namespace fatrop
         OptionRegistry options;
         std::shared_ptr<IpAlgorithm<OcpType>> algo;
         std::shared_ptr<IpData<OcpType>> ip_data;
+        IpSolverReturnFlag flag;
     };
 
     FatropOcpCSolver *fatrop_ocp_c_create(FatropOcpCInterface *ocp_interface, FatropOcpCWrite write,
@@ -622,28 +623,26 @@ namespace fatrop
 
     const FatropOcpCStats *fatrop_ocp_c_get_stats(struct FatropOcpCSolver *s)
     {
-        // todo implement
-        // FatropStats stats_solver = s->driver->app.get_stats();
         FatropOcpCStats *stats = &s->driver->stats;
 
-        stats->compute_sd_time = 0.;
+        stats->compute_sd_time = s->driver->ip_data->timing_statistics().compute_search_dir.elapsed();
         stats->duinf_time = 0.;
-        stats->eval_hess_time = 0.;
-        stats->eval_jac_time = 0.;
-        stats->eval_cv_time = 0.;
-        stats->eval_grad_time = 0.;
-        stats->eval_obj_time = 0.;
-        stats->initialization_time = 0.;
-        stats->time_total = 0.;
+        stats->eval_hess_time = s->driver->ip_data->timing_statistics().eval_hessian.elapsed();
+        stats->eval_jac_time = s->driver->ip_data->timing_statistics().eval_jacobian.elapsed();
+        stats->eval_cv_time = s->driver->ip_data->timing_statistics().eval_constraint_violation.elapsed();
+        stats->eval_grad_time = s->driver->ip_data->timing_statistics().eval_gradient.elapsed();
+        stats->eval_obj_time = s->driver->ip_data->timing_statistics().eval_objective.elapsed();
+        stats->initialization_time = s->driver->ip_data->timing_statistics().initialization.elapsed();
+        stats->time_total = s->driver->ip_data->timing_statistics().full_algorithm.elapsed();
         stats->eval_hess_count = 0.;
         stats->eval_jac_count = 0.;
         stats->eval_cv_count = 0.;
         stats->eval_grad_count = 0.;
         stats->eval_obj_count = 0.;
-        stats->iterations_count = 0.;
-        stats->return_flag = 0.;
+        stats->iterations_count = s->driver->ip_data->iteration_number();
+        stats->return_flag = int(s->driver->flag);
 
-        return &s->driver->stats;
+        return stats;
     }
 
 }
