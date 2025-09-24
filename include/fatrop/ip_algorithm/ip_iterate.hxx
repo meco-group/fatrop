@@ -62,9 +62,9 @@ namespace fatrop
                                          VecRealScalar(primal_s_.m(), 0.)) +
                                  if_else((*upper_bounded_), -1. * log(delta_upper()),
                                          VecRealScalar(primal_s_.m(), 0.)) +
-                                 if_else((*single_lower_bounded_), kappa_d_ * delta_lower(),
+                                 if_else((*single_lower_bounded_), kappa_d_*mu()*delta_lower(),
                                          VecRealScalar(primal_s_.m(), 0.)) +
-                                 if_else((*single_upper_bounded_), kappa_d_ * delta_upper(),
+                                 if_else((*single_upper_bounded_), kappa_d_*mu()*delta_upper(),
                                          VecRealScalar(primal_s_.m(), 0.)));
             barrier_value_ *= mu();
         }
@@ -425,6 +425,7 @@ namespace fatrop
     {
         registry.register_option("kappa_d", &IpIterate::set_kappa_d, this);
         registry.register_option("smax", &IpIterate::set_smax, this);
+        registry.register_option("kappa_sigma", &IpIterate::set_kappa_sigma, this);
     }
 
 } // namespace fatrop

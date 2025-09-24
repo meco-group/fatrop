@@ -1,18 +1,9 @@
 Fatrop CasADi Cookbook
 ======================
 
-This cookbook will guide you through using Fatrop with CasADi, using a quadcopter optimization problem as an example.
-
-Interfacing with CasADi Opti
-------------------------------
-
 Fatrop is interfaced with CasADi's Opti framework, which provides a user-friendly way to define and solve optimization problems.
-
-Example: Quadcopter Optimization
---------------------------------
-
 We'll walk through the process of setting up and solving a quadcopter trajectory optimization problem, focusing on key aspects and best practices.
-This document is based on the example provided in the Fatrop repository, specifically `examples/ocp_quadrotor_example.py`.
+This document is based on the example provided in the Fatrop repository, specifically `examples/ocp_quadrotor_example.py <https://github.com/meco-group/fatrop/blob/main/examples/ocp_quadrotor_example.py>`_.
 It is not a complete copy of the example, but rather a guide to the key steps involved in using Fatrop with CasADi.
 
 1. Problem Setup and Dynamics
@@ -148,7 +139,7 @@ discrete_dynamics_0, path_constraints_0, ..., discrete_dynamics_K-2, path_constr
        opti.set_initial(u[k], u_init)
        opti.set_initial(x[k], x_init)
 
-The `ng` list keeps track of the number of constraints at each time step, which is important for the manual structure detection when using Fatrop.
+The `ng` list keeps track of the number of path constraints at each time step, which is important for the manual structure detection when using Fatrop.
 
 5. Solving with Ipopt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,15 +178,15 @@ Retrieve and visualize the results:
    # Visualization code
    # ... (3D trajectory plotting)
 
-For the complete visualization code, please refer to the full example in 'examples/ocp_quadrotor_example.py'.
+For the complete visualization code, please refer to the full example in `examples/ocp_quadrotor_example.py <https://github.com/meco-group/fatrop/blob/main/examples/ocp_quadrotor_example.py>`_.
 
 Advanced Usage and Performance Considerations
----------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Expanding Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------
 
-To potentially speed up your optimization, we've used expanded functions throughout this example:
+To potentially speed up function evaluation, we've used expanded functions throughout this example:
 
 .. code-block:: python
 
@@ -204,21 +195,32 @@ To potentially speed up your optimization, we've used expanded functions through
    f_control = ca.Function('f_control', [state, omega], [ca.vertcat(omega, phi, theta)]).expand()
 
 Performance might also improve by expanding the full functions, used by fatrop internally.
-This can be done by setting the `expand` option to `True` when creating the function, as shown above.
+This can be done by setting the `expand` option to `True` when creating the function.
+
+.. code-block:: python
+
+   # Solve with Fatrop
+   opti.solver('fatrop', {
+       'structure_detection': 'manual',
+       'nx': nx, 'nu': nu, 'ng': ng, 'N': K-1,
+       "expand": True})
+   sol_fatrop = opti.solve()
+
 This can speed up the function evaluation, sometimes at the cost of having larger expressions with duplicated code.
+These large expressions can result in long compilation times when using code generation / JIT compilation.
 
 Just-in Time (JIT) Compilation of Functions 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------
 
 CasADi supports Just-in-Time (JIT) compilation, which can significantly speed up the evaluation of functions.
 
 .. code-block:: python
 
-   opti.solver('fatrop', {'structure_detection':'manual', 'nx': nx, 'nu':nu, 'ng':ng, 'N':K-1, "expand": True, "jit":True, "jit_options": {"flags": "-O3", "verbose": True}})
+   opti.solver('fatrop', {'structure_detection':'manual', 'nx': nx, 'nu':nu, 'ng':ng, 'N':K-1, "expand": False, "jit":True, "jit_options": {"flags": "-O3", "verbose": True}})
    res = opti.solve()
 
 Code Generation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------
 
 Code generation is a powerful technique to improve the performance of your optimization problem.
 CasADi provides tools to generate C code for any CasADi function.
@@ -239,17 +241,17 @@ The generated code can be compiled with:
 
    .. code-block:: bash
 
-      g++ -fPIC -shared quadcopter.c -g -O3 -march=native -lfatrop -lblasfeo -I`fatrop path` -I`blasfeo path`/include/blasfeo/include 
+      gcc -fPIC -shared quadcopter.c -g -O3 -march=native -lfatrop -lblasfeo -I`fatrop path` -I`blasfeo path`/include/blasfeo/include 
 
 This shared library can be imported into casadi using CasADi's `external` function interface.
 
-For an example of how to use the generated code in a C++ application without CasADi, refer to the file 'examples/casadi_codegen/ocp_impl_example_codegen.cpp' in the Fatrop repository.
+For more information refer to the directory `examples/casadi_codegen/ <https://github.com/meco-group/fatrop/tree/main/examples/casadi_codegen>`_ in the Fatrop repository.
 
 
 Further References
 --------------------------------
 
 For more information on using Fatrop with CasADi, refer to the following resources:
- - `Fatrop CasADi video tutorial on YouTube  <https://www.youtube.com/watch?v=example>` 
- - `Fatrop CasADi demo Github repo <https://github.com/jgillis/fatrop_demo>`
- - `CasADi website <https://web.casadi.org/>`
+ - `Fatrop CasADi video tutorial on YouTube <https://www.youtube.com/watch?v=example>`_
+ - `Fatrop CasADi demo Github repo <https://github.com/jgillis/fatrop_demo>`_
+ - `CasADi website <https://web.casadi.org/>`_

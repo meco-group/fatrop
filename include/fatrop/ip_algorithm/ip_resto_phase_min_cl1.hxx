@@ -92,6 +92,7 @@ namespace fatrop
                 trial_it_orig.set_dual_bounds_u(
                     VecRealScalar(trial_it_orig.dual_bounds_u().m(), 1.));
             }
+            trial_it_orig.modify_dual_bounds(curr_it_orig.mu());
 
             // copy the result to the trial iterate of the original problem
             ip_data_orig_->trial_iterate().set_primal_x(

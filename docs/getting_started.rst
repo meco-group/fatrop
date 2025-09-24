@@ -13,14 +13,10 @@ Fatrop offers two main interfaces:
 
 The low-level interface is suitable for:
 
-- Power users who want to implement overhead-less function evaluation
+- Power users who want to implement low-overhead function evaluation
 - Users who want to interface their own framework
-- Working with OCP interface at NLP level or small-scale level
-- Implementing custom Jacobians and Hessians
 
-Dependencies: BLASFEO and stdc++
-
-For examples, refer to the C++ examples in the `examples` directory.
+For examples, refer to the C++ examples in the `examples <https://github.com/meco-group/fatrop/tree/main/examples>`_ directory.
 
 2. CasADi Interface
 -------------------
@@ -29,15 +25,13 @@ The CasADi interface is recommended for most users, offering:
 
 - Easy-to-use symbolic manipulation
 - State-of-the-art automatic differentiation
-- Access to different solvers
-- Some overhead compared to the low-level interface
+- Access to different solvers beyond fatrop
 
-This interface is recommended for beginners. Refer to the examples and cookbook for usage.
+This interface is recommended for most users.
+Refer to the examples and cookbook for usage.
 
 Next Steps
 ----------
 
-- Explore the `examples` directory for more detailed examples
-- Read the API Reference for in-depth information on Fatrop's classes and methods
-- Experiment with your own optimization problems using both interfaces
-- Read the `fatrop CasADi cookbook`
+- Explore the `examples  <https://github.com/meco-group/fatrop/tree/main/examples>`_ directory for more detailed examples
+- Read the :doc:`fatrop CasADi cookbook <fatrop_casadi_cookbook>`

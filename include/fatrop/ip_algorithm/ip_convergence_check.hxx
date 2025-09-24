@@ -6,12 +6,12 @@
 #ifndef __fatrop_ip_algorithm_ip_convergence_check_hxx__
 #define __fatrop_ip_algorithm_ip_convergence_check_hxx__
 
+#include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_convergence_check.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/dims.hpp"
 #include "fatrop/ocp/nlp_ocp.hpp"
-#include "fatrop/common/options.hpp"
 
 namespace fatrop
 {
@@ -27,7 +27,8 @@ namespace fatrop
 
     template <typename ProblemType> bool IpConvergenceCheck<ProblemType>::check_acceptable() const
     {
-        return (ipdata_->current_iterate().e_mu(0.) <= tol_acceptable_);
+        return (ipdata_->current_iterate().e_mu(0.) <= tol_acceptable_ &&
+                norm_inf(ipdata_->current_iterate().constr_viol()) <= constr_viol_tol_);
     }
 
     template <typename ProblemType>
@@ -35,7 +36,8 @@ namespace fatrop
     {
         Scalar tol = ipdata_->tolerance();
 
-        if (ipdata_->current_iterate().e_mu(0.) <= tol)
+        if (ipdata_->current_iterate().e_mu(0.) <= tol &&
+            norm_inf(ipdata_->current_iterate().constr_viol()) <= constr_viol_tol_)
             return IpConvergenceStatus::Converged;
         if (check_acceptable())
         {
@@ -53,11 +55,12 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    void IpConvergenceCheck<ProblemType>::register_options(OptionRegistry& registry)
+    void IpConvergenceCheck<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("tol_acceptable", &IpConvergenceCheck::set_tol_acceptable, this);
         registry.register_option("acceptable_iter", &IpConvergenceCheck::set_acceptable_iter, this);
         registry.register_option("max_iter", &IpConvergenceCheck::set_max_iter, this);
+        registry.register_option("constr_viol_tol", &IpConvergenceCheck::set_constr_viol_tol, this);
     }
 
 } // namespace fatrop

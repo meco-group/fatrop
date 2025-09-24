@@ -77,12 +77,14 @@ namespace fatrop
         Index acceptable_counter_ = 0; ///< Counter for consecutive acceptable iterations
         Index acceptable_iter_ = 15;   ///< Number of consecutive acceptable iterations required
         Index max_iter_ = 1000;        ///< Maximum number of iterations allowed
+        Scalar constr_viol_tol_ = 1e-4; ///< Tolerance for constraint violation
 
     public:
         // Setter methods for options
         void set_tol_acceptable(const Scalar &value) { tol_acceptable_ = value; }
         void set_acceptable_iter(const Index &value) { acceptable_iter_ = value; }
         void set_max_iter(const Index &value) { max_iter_ = value; }
+        void set_constr_viol_tol(const Scalar &value) { constr_viol_tol_ = value; }
 
         // Register options
         void register_options(OptionRegistry &registry);

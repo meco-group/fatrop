@@ -29,11 +29,11 @@ namespace fatrop
         const std::vector<bool> &lower_bounded = ipdata_->current_iterate().lower_bounded();
         const std::vector<bool> &upper_bounded = ipdata_->current_iterate().upper_bounded();
         // set z to 1. if bounded and 0. otherwise
+        initialize_slacks();
         ipdata_->current_iterate().set_dual_bounds_l(
             if_else(lower_bounded, VecRealScalar(m, 1.0), VecRealScalar(m, 0.0)));
         ipdata_->current_iterate().set_dual_bounds_u(
             if_else(upper_bounded, VecRealScalar(m, 1.0), VecRealScalar(m, 0.0)));
-        initialize_slacks();
         eq_mult_initializer_->initialize_eq_mult();
     }
     template <typename ProblemType> void IpInitializer<ProblemType>::initialize_slacks()
