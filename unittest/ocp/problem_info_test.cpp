@@ -49,7 +49,7 @@ TEST_F(ProblemInfoTest, ConstructorAndOffsets)
             EXPECT_EQ(problem_info.offset_g_eq_slack, 17);
 
             EXPECT_EQ(problem_info.offsets_g_eq_path, std::vector<Index>({0, 1, 3}));
-            EXPECT_EQ(problem_info.offsets_g_eq_dyn, std::vector<Index>({6, 11}));
+            EXPECT_EQ(problem_info.offsets_g_eq_dyn, std::vector<Index>({6, 11, 0}));
             EXPECT_EQ(problem_info.offsets_g_eq_slack, std::vector<Index>({17, 23, 30}));
         }
 
