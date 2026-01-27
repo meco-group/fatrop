@@ -57,14 +57,15 @@ namespace fatrop
         else
         {
             Scalar orig_trial_barr = trial_it_orig.obj_value() + trial_it_orig.barrier_value();
+            auto line_search_orig = line_search_orig_.lock();
             fatrop_assert_msg(
-                line_search_orig_,
+                line_search_orig,
                 "No line search object set for original problem in resto convergence check.");
-            if (!line_search_orig_->is_acceptable_to_filter(orig_trial_barr, orig_trial_theta))
+            if (!line_search_orig->is_acceptable_to_filter(orig_trial_barr, orig_trial_theta))
             {
                 status = IpConvergenceStatus::Continue;
             }
-            else if (!line_search_orig_->is_acceptable_to_current_iterate(orig_trial_barr,
+            else if (!line_search_orig->is_acceptable_to_current_iterate(orig_trial_barr,
                                                                           orig_trial_theta, true))
             {
                 status = IpConvergenceStatus::Continue;

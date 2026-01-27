@@ -19,6 +19,7 @@ namespace fatrop
         typedef ProblemInfo<ProblemType> ProblemInfoType;
         typedef IpIterate<ProblemType> IpIterateType;
         typedef std::shared_ptr<IpLineSearchBase> IpLineSearchSp;
+        typedef std::weak_ptr<IpLineSearchBase> IpLineSearchWp;
 
     public:
         IpConvergenceCheckResto(const IpDataSp &data_orig, const IpDataSp &data_resto);
@@ -36,7 +37,7 @@ namespace fatrop
         Index successive_resto_iter_;
         IpDataSp data_orig_;
         IpDataSp data_resto_;
-        IpLineSearchSp line_search_orig_;
+        IpLineSearchWp line_search_orig_;
     };
 
     template <typename ProblemType>
