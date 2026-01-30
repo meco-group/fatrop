@@ -32,6 +32,7 @@ RUN git clone https://github.com/meco-group/fatrop.git && \
 # # # Build and install CasADi
 RUN git clone https://github.com/casadi/casadi.git && \
     mkdir casadi/build && cd casadi/build && \
+    git checkout 3.7.2 && \
     cmake .. \
     -DWITH_IPOPT=ON -DWITH_BUILD_IPOPT=ON \
     -DWITH_FATROP=ON\
