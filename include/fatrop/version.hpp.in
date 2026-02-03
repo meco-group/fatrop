@@ -1,6 +1,0 @@
-#ifndef VERSION_HPP_IN
-#define VERSION_HPP_IN
-
-const std::string project_version = "@CMAKE_PROJECT_VERSION@";
-
-#endif // VERSION_HPP_IN
