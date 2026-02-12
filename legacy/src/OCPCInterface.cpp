@@ -613,6 +613,18 @@ namespace fatrop
             return 0;
         if (n == "filter_reset_trigger")
             return 1;
+        if (n == "linsol_it_ref")
+            return 2;
+        if (n == "linsol_perturbed_mode")
+            return 2;
+        if (n == "linsol_perturbed_mode_param")
+            return 0;
+        if (n == "linsol_lu_fact_tol")
+            return 0;
+        if (n == "linsol_diagnostic")
+            return 2;
+        if (n == "linsol_increased_accuracy")
+            return 2;
         return -1;
     }
 

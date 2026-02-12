@@ -65,6 +65,8 @@ namespace fatrop
         if (!problem_info_)
             create_problem_info();
         aug_system_solver_ = std::make_shared<AugSystemSolver<ProblemType>>(*problem_info_);
+        if (options_registry_)
+            aug_system_solver_->register_options(*options_registry_);
         return *this;
     }
 
