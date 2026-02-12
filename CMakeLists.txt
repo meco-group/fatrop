@@ -21,7 +21,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 # Option to build tests (default is ON)
 option(BUILD_TESTS "Build the tests" ON)
 option(BUILD_EXAMPLES "Build the examples" ON)
-option(BUILD_WITH_LEGACY "Build with legacy support" ON)
+option(BUILD_WITH_C_INTERFACE "Build with C interface support" ON)
 
 # Define installation directories
 set(LIBRARY_INSTALL_DIR lib)
@@ -48,9 +48,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Add the fatrop source directory
 add_subdirectory(src)
 
-# Add the legacy directory if BUILD_WITH_LEGACY is enabled
-if(BUILD_WITH_LEGACY)
-    add_subdirectory(legacy)
+# Add the c_interface directory if BUILD_WITH_C_INTERFACE is enabled
+if(BUILD_WITH_C_INTERFACE)
+    add_subdirectory(c_interface)
 endif()
 
 # Add the examples directory
