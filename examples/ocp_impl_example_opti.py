@@ -41,6 +41,7 @@ def path_constraints(uk, xk ,k):
 opti = cs.Opti()
 x = []
 u = []
+ng = []
 for k in range(K):
     x.append(opti.variable(nx[k]))
     u.append(opti.variable(nu[k]))
@@ -51,6 +52,7 @@ for k in range(K):
     path_constr = path_constraints(u[k], x[k], k)
     for constr in path_constr:
         opti.subject_to(constr)
+    ng.append(cs.vvcat(path_constr).nnz())
 # set the objective
 J = 0
 for k in range(K):
