@@ -147,7 +147,10 @@ namespace fatrop
         const Scalar *primal_x_ptr = primal_x.data();
         for (Index k = 0; k < K_; k++)
         {
-            BAbt_buff[k] = jac.BAbt[k].mat();
+            if (k != info.dims.K - 1)
+            {
+                BAbt_buff[k] = jac.BAbt[k].mat();
+            }
             Gg_eqt_buff[k] = jac.Gg_eqt[k].mat();
             Gg_ineqt_buff[k] = jac.Gg_ineqt[k].mat();
         }
