@@ -79,7 +79,7 @@ namespace fatrop
     FatropOcpCMapping::FatropOcpCMapping(FatropOcpCInterface *ocp)
         : ocp(ocp), ocp_dims_(FatropOcpCAuxiliary::get_ocp_dims(*ocp)),
           nlp_dims_(FatropOcpCAuxiliary::get_nlp_dims(ocp_dims_)), K_(ocp_dims_.K),
-          matrix_buffer_{std::vector<MAT *>(K_), std::vector<MAT *>(K_), std::vector<MAT *>(K_)}
+          matrix_buffer_{std::vector<MAT>(K_), std::vector<MAT>(K_), std::vector<MAT>(K_)}
     {
         // check if no parameters are used by the ocp, because this is not supported anymore
         if (ocp->get_n_global_params && ocp->get_n_global_params(ocp->user_data) > 0)
@@ -103,10 +103,10 @@ namespace fatrop
                                            const VecRealView &lam, Hessian<OcpType> &hess)
     {
         // take the matrices from hess and put them in the buffer
-        std::vector<MAT *> &RSQrqt_buff = matrix_buffer_[0];
+        std::vector<MAT> &RSQrqt_buff = matrix_buffer_[0];
         for (Index k = 0; k < K_; k++)
         {
-            RSQrqt_buff[k] = &hess.RSQrqt[k].mat();
+            RSQrqt_buff[k] = hess.RSQrqt[k].mat();
         }
         // get the double pointers for the vector views
         const Scalar *primal_x_ptr = primal_x.data();
@@ -114,7 +114,7 @@ namespace fatrop
         const Scalar *lam_ptr = lam.data();
         // call the C interface
         int ret = ocp->full_eval_lag_hess(objective_scale, primal_x_ptr, lam_ptr, nullptr, nullptr,
-                                          RSQrqt_buff[0], &s, ocp->user_data);
+                                          &RSQrqt_buff[0], &s, ocp->user_data);
         if (ret == 2)
             return 0;
         if (ret == 0)
@@ -129,7 +129,7 @@ namespace fatrop
                 const Scalar *lam_eq_ineq_k = lam_ptr + info.offsets_g_eq_slack[k];
                 if (ocp->eval_RSQrqt)
                     ocp->eval_RSQrqt(&objective_scale, inputs_k, states_k, lam_dyn_k, lam_eq_k,
-                                     lam_eq_ineq_k, nullptr, nullptr, RSQrqt_buff[k], k,
+                                     lam_eq_ineq_k, nullptr, nullptr, &RSQrqt_buff[k], k,
                                      ocp->user_data);
             }
         }
@@ -140,20 +140,20 @@ namespace fatrop
                                              const VecRealView &primal_s, Jacobian<OcpType> &jac)
     {
         // take the matrices from jac and put them in the buffer
-        std::vector<MAT *> &BAbt_buff = matrix_buffer_[0];
-        std::vector<MAT *> &Gg_eqt_buff = matrix_buffer_[1];
-        std::vector<MAT *> &Gg_ineqt_buff = matrix_buffer_[2];
+        std::vector<MAT> &BAbt_buff = matrix_buffer_[0];
+        std::vector<MAT> &Gg_eqt_buff = matrix_buffer_[1];
+        std::vector<MAT> &Gg_ineqt_buff = matrix_buffer_[2];
         // get the double pointers for the vector views
         const Scalar *primal_x_ptr = primal_x.data();
         for (Index k = 0; k < K_; k++)
         {
-            BAbt_buff[k] = &jac.BAbt[k].mat();
-            Gg_eqt_buff[k] = &jac.Gg_eqt[k].mat();
-            Gg_ineqt_buff[k] = &jac.Gg_ineqt[k].mat();
+            BAbt_buff[k] = jac.BAbt[k].mat();
+            Gg_eqt_buff[k] = jac.Gg_eqt[k].mat();
+            Gg_ineqt_buff[k] = jac.Gg_ineqt[k].mat();
         }
         // call the C interface
-        int ret = ocp->full_eval_constr_jac(primal_x_ptr, nullptr, nullptr, BAbt_buff[0],
-                                            Gg_eqt_buff[0], Gg_ineqt_buff[0], &s, ocp->user_data);
+        int ret = ocp->full_eval_constr_jac(primal_x_ptr, nullptr, nullptr, &BAbt_buff[0],
+                                            &Gg_eqt_buff[0], &Gg_ineqt_buff[0], &s, ocp->user_data);
         if (ret == 2)
             return 0;
         if (ret == 0)
@@ -163,18 +163,18 @@ namespace fatrop
                 const Scalar *inputs_k = primal_x_ptr + info.offsets_primal_u[k];
                 const Scalar *states_k = primal_x_ptr + info.offsets_primal_x[k];
                 if (ocp->eval_Ggt)
-                    ocp->eval_Ggt(inputs_k, states_k, nullptr, nullptr, Gg_eqt_buff[k], k,
+                    ocp->eval_Ggt(inputs_k, states_k, nullptr, nullptr, &Gg_eqt_buff[k], k,
                                   ocp->user_data);
 
                 if (ocp->eval_Ggt_ineq)
-                    ocp->eval_Ggt_ineq(inputs_k, states_k, nullptr, nullptr, Gg_ineqt_buff[k], k,
+                    ocp->eval_Ggt_ineq(inputs_k, states_k, nullptr, nullptr, &Gg_ineqt_buff[k], k,
                                        ocp->user_data);
                 if (k != info.dims.K - 1)
                 {
                     const Scalar *states_kp1 = primal_x_ptr + info.offsets_primal_x[k + 1];
                     if (ocp->eval_BAbt)
                         ocp->eval_BAbt(states_kp1, inputs_k, states_k, nullptr, nullptr,
-                                       BAbt_buff[k], k, ocp->user_data);
+                                       &BAbt_buff[k], k, ocp->user_data);
                 }
             }
         }
