@@ -9,6 +9,19 @@ The main features of the solver are:
 - ability to incorporate exact Lagrangian Hessian information
 - ability to be initialized from any, possibly infeasible, solution estimate
 
+## Problem Formulation
+
+The solver solves the following general class of constrained nonlinear optimal control problems:
+
+$$
+\begin{align}
+\underset{\mathbf{x}_k, \mathbf{u}_k}{\operatorname{minimize}} \quad & \sum_{k=0}^{K-1} l_k(\mathbf{u}_k, \mathbf{x}_k) \\
+\text{subject to} \quad & \mathbf{x}_{k+1} = \mathbf{f}_k(\mathbf{u}_k, \mathbf{x}_k), \quad k = 0, \dots, K-2 \\
+& \mathbf{L}_k \leq \mathbf{g}_k(\mathbf{u}_k, \mathbf{x}_k) \leq \mathbf{U}_k \\
+& \mathbf{h}_k(\mathbf{u}_k, \mathbf{x}_k) = \mathbf{0}, \quad k = 0, \dots, K-1
+\end{align}
+$$
+
 ## Getting Started
 
 Refer to the Fatrop [GitHub Pages](https://meco-group.github.io/fatrop/) as a reference to help getting started.
