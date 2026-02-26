@@ -1,17 +1,6 @@
 ## FATROP
+
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
-
-The main features of the solver are:
-- high numerical robustness thanks to advanced numerical optimization techniques, inspired by [Ipopt](https://coin-or.github.io/Ipopt/)
-- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://onlinelibrary.wiley.com/doi/full/10.1002/oca.3064)
-- high performance linear algebra through integration of [BLASFEO](https://github.com/giaf/blasfeo)
-- effective handling of path equality and inequality constraints, without relying on penalty methods
-- ability to incorporate exact Lagrangian Hessian information
-- ability to be initialized from any, possibly infeasible, solution estimate
-
-## Problem Formulation
-
-The solver solves the following general class of constrained nonlinear optimal control problems:
 
 $$
 \begin{align}
@@ -21,6 +10,14 @@ $$
 & \mathbf{h}_k(\mathbf{u}_k, \mathbf{x}_k) = \mathbf{0}, \quad k = 0, \dots, K-1
 \end{align}
 $$
+
+The main features of the solver are:
+- high numerical robustness thanks to advanced numerical optimization techniques, inspired by [Ipopt](https://coin-or.github.io/Ipopt/)
+- fast by exploiting the optimal control problem structure through a specialized linear solver, based on a [generalized Riccati recursion](https://onlinelibrary.wiley.com/doi/full/10.1002/oca.3064)
+- high performance linear algebra through integration of [BLASFEO](https://github.com/giaf/blasfeo)
+- effective handling of path equality and inequality constraints, without relying on penalty methods
+- ability to incorporate exact Lagrangian Hessian information
+- ability to be initialized from any, possibly infeasible, solution estimate
 
 ## Getting Started
 
