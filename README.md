@@ -15,7 +15,7 @@ The solver solves the following general class of constrained nonlinear optimal c
 
 $$
 \begin{align}
-\underset{\mathbf{x}_k, \mathbf{u}_k}{\operatorname{minimize}} \quad & \sum_{k=0}^{K-1} l_k(\mathbf{u}_k, \mathbf{x}_k) \\
+\underset{\mathbf{x}_k, \mathbf{u}_k}{\min} \quad & \sum_{k=0}^{K-1} l_k(\mathbf{u}_k, \mathbf{x}_k) \\
 \text{subject to} \quad & \mathbf{x}_{k+1} = \mathbf{f}_k(\mathbf{u}_k, \mathbf{x}_k), \quad k = 0, \dots, K-2 \\
 & \mathbf{L}_k \leq \mathbf{g}_k(\mathbf{u}_k, \mathbf{x}_k) \leq \mathbf{U}_k \\
 & \mathbf{h}_k(\mathbf{u}_k, \mathbf{x}_k) = \mathbf{0}, \quad k = 0, \dots, K-1
