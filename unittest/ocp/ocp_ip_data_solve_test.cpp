@@ -65,13 +65,14 @@ TEST_F(OcpImplExampleTest, SolveLinearSystem)
 
 TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
 {
+    Scalar mu = data.current_iterate().mu();
     rhs_x.block(rhs_x.m(), 0) = data.current_iterate().dual_infeasibility_x();
-    rhs_s.block(rhs_s.m(), 0) = data.current_iterate().dual_infeasibility_s();
+    rhs_s.block(rhs_s.m(), 0) = data.current_iterate().lagrangian_gradient_s();
     rhs_g.block(rhs_g.m(), 0) = data.current_iterate().constr_viol();
     rhs_cl.block(rhs_cl.m(), 0) =
-        data.current_iterate().delta_lower() * data.current_iterate().dual_bounds_l();
+        if_else(data.current_iterate().lower_bounded(), VecRealScalar(rhs_cl.m(), -mu), VecRealScalar(rhs_cl.m(), 0.));
     rhs_cu.block(rhs_cu.m(), 0) =
-        data.current_iterate().delta_upper() * data.current_iterate().dual_bounds_u();
+        if_else(data.current_iterate().upper_bounded(), VecRealScalar(rhs_cu.m(), -mu), VecRealScalar(rhs_cu.m(), 0.));
     LinearSystem<PdSystemType<OcpType>> ls(
         info, data.current_iterate().jacobian(), data.current_iterate().hessian(), D_x, true, D_eq,
         data.current_iterate().delta_lower(), data.current_iterate().delta_upper(),
@@ -83,6 +84,9 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
     VecRealAllocated x_full(ls.m());
     ls.get_rhs(x_full);
     EXPECT_TRUE(x_full.is_finite());
+
+    rhs_cl = rhs_cl - data.current_iterate().dual_bounds_l();
+    rhs_cu = rhs_cu - data.current_iterate().dual_bounds_u();
 
     Scalar alpha = 1.0;
     Scalar alpha_z = 1.0;
@@ -101,6 +105,8 @@ TEST_F(OcpImplExampleTest, UpdateIterateAndCheckInfeasibility)
     EXPECT_LT(norm_inf(data.current_iterate().constr_viol()), 1e-6);
 
     data.restore_current_iterate();
+    const Index m = data.current_iterate().primal_s().m();
+
     // the complementarity constraints are nonlinear so we test the linearized version
     EXPECT_LT(
         norm_inf(data.current_iterate().delta_lower() * data.current_iterate().dual_bounds_l() +
