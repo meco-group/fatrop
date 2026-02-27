@@ -34,6 +34,13 @@ namespace fatrop
         rhs_cl_.block(rhs_cl_.m(), 0) = if_else(curr_it.lower_bounded(), VecRealScalar(rhs_cl_.m(), -mu), VecRealScalar(rhs_cl_.m(), 0.));
         rhs_cu_.block(rhs_cu_.m(), 0) = if_else(curr_it.upper_bounded(), VecRealScalar(rhs_cu_.m(), -mu), VecRealScalar(rhs_cu_.m(), 0.));
 
+        // the code makes use of the special property of the PD system that
+        // PD [x s z'] = -[rhs_x, rhs_s, rhs_z]
+        // after of z' = z - Z we have
+        // PD [x s z] = -[rhs_x, rhs_s + Z, rhs_z + ZS]
+        // this is the system we really want to solve
+        // but solving the former system is numerically more stable
+
         curr_it.set_Dx(curr_it.primal_damping());
         curr_it.set_De(VecRealScalar(curr_it.De().m(), 0.));
         curr_it.set_De_is_zero(true);
