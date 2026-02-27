@@ -161,6 +161,23 @@ protected:
     };
 };
 
+TEST_F(PdTest, TestSolveNoItRef)
+{
+    // Test the raw solve (no iterative refinement) to verify the reduction is correct
+    LinearSystem<PdSystemResto<OcpType>> ls(info, jacobian, hessian, D_x, false, D_eq, sl, su, zl,
+                                            zu, rhs_x, rhs_s, rhs_g, rhs_cl, rhs_cu);
+    VecRealAllocated x_full(ls.m());
+    VecRealAllocated rhs_save(ls.m());
+    VecRealAllocated tmp(ls.m());
+    ls.get_rhs(rhs_save);
+    // Use solve_once directly (bypasses iterative refinement)
+    LinsolReturnFlag ret = pd_solver_resto.solve_once(ls, x_full);
+    EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
+    ls.set_rhs(rhs_save);
+    ls.apply_on_right(x_full, 1.0, rhs_save, tmp);
+    EXPECT_NEAR(norm_inf(tmp), 0, 1e-6);
+}
+
 TEST_F(PdTest, TestSolve)
 {
     LinearSystem<PdSystemResto<OcpType>> ls(info, jacobian, hessian, D_x, false, D_eq, sl, su, zl,

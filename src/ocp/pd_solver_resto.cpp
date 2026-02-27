@@ -69,7 +69,7 @@ PdSolverResto<OcpType>::PdSolverResto(const ProblemInfo<OcpType> &info,
 // [ A   -D_ee ] [l]  = - [  gg  ]
 
 // where D_ee = D_e + Xp^{-1} + Xn^{-1}
-//       gg = g + Xp^{-1} f_pp + Xn^{-1} f_nn
+//       gg = g - Xp^{-1} f_pp + Xn^{-1} f_nn
 
 //  X_p^{-1} = 1/ (D_x + P^{-1} Zp) = P / (P D_x + Zp)
 //  X_n^{-1} = 1/ (D_x + N^{-1} Zn) = N / (N D_x + Zn)
@@ -107,7 +107,7 @@ void PdSolverResto<OcpType>::reduce(LinearSystem<PdSystemResto<OcpType>> &ls)
                     VecRealScalar(Xnm1_.m(), 0.));
 
     D_e_orig_ = ls.D_e_ + Xpm1_ + Xnm1_;
-    rhs_g_orig_ = ls.rhs_g_ + Xpm1_ * f_pp_ + Xnm1_ * f_nn_;
+    rhs_g_orig_ = ls.rhs_g_ - Xpm1_ * f_pp_ + Xnm1_ * f_nn_;
 }
 void PdSolverResto<OcpType>::dereduce(LinearSystem<PdSystemResto<OcpType>> &ls, VecRealView &x)
 {
