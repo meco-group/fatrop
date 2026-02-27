@@ -262,6 +262,14 @@ namespace fatrop
         const VecRealView &dual_infeasibility_s();
 
         /**
+         * @brief Computes and returns the Lagrangian gradient with respect to s.
+         * This is the gradient of the Lagrangian without the barrier dual terms (-zl + zu).
+         * i.e. grad_obj_s + J_s^T * lambda
+         * @return Constant reference to the Lagrangian gradient w.r.t. s.
+         */
+        const VecRealView &lagrangian_gradient_s();
+
+        /**
          * @brief Computes and returns the gradient of the barrier function.
          * @return Constant reference to the barrier function gradient.
          */
@@ -484,6 +492,7 @@ namespace fatrop
         VecRealAllocated constr_viol_;          ///< Residual of the equality constraints.
         VecRealAllocated dual_infeasibility_x_; ///< Residual of the equality constraints.
         VecRealAllocated dual_infeasibility_s_; ///< Residual of the equality constraints.
+        VecRealAllocated lagrangian_gradient_s_;  ///< Lagrangian gradient w.r.t. s (without barrier duals).
         // Derived quantities
         Scalar mu_;                         ///< Barrier value of the NLP.
         VecRealAllocated barrier_gradient_; ///< Gradient of the barrier function.
@@ -527,6 +536,8 @@ namespace fatrop
             false; ///< Flag for dual infeasibility (x) evaluation
         bool dual_infeasibility_s_evaluated_ =
             false;                                ///< Flag for dual infeasibility (s) evaluation
+        bool lagrangian_gradient_s_evaluated_ =
+            false;                                ///< Flag for Lagrangian gradient (s) evaluation
         bool jacobian_evaluated_ = false;         ///< Flag for Jacobian evaluation
         bool hessian_evaluated_ = false;          ///< Flag for Hessian evaluation
         bool barrier_value_evaluated_ = false;    ///< Flag for barrier value evaluation

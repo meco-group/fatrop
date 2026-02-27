@@ -29,10 +29,10 @@ namespace fatrop
         IpIterateType &curr_it = ipdata_->current_iterate();
         Scalar mu = curr_it.mu();
         rhs_x_.block(rhs_x_.m(), 0) = curr_it.dual_infeasibility_x();
-        rhs_s_.block(rhs_s_.m(), 0) = curr_it.dual_infeasibility_s();
+        rhs_s_.block(rhs_s_.m(), 0) = curr_it.lagrangian_gradient_s();
         rhs_g_.block(rhs_g_.m(), 0) = curr_it.constr_viol();
-        rhs_cl_.block(rhs_cl_.m(), 0) = curr_it.relaxed_complementarity_l();
-        rhs_cu_.block(rhs_cu_.m(), 0) = curr_it.relaxed_complementarity_u();
+        rhs_cl_.block(rhs_cl_.m(), 0) = if_else(curr_it.lower_bounded(), VecRealScalar(rhs_cl_.m(), -mu), VecRealScalar(rhs_cl_.m(), 0.));
+        rhs_cu_.block(rhs_cu_.m(), 0) = if_else(curr_it.upper_bounded(), VecRealScalar(rhs_cu_.m(), -mu), VecRealScalar(rhs_cu_.m(), 0.));
 
         curr_it.set_Dx(curr_it.primal_damping());
         curr_it.set_De(VecRealScalar(curr_it.De().m(), 0.));
@@ -113,8 +113,8 @@ namespace fatrop
         curr_it.set_delta_primal_x(rhs_x_);
         curr_it.set_delta_primal_s(rhs_s_);
         curr_it.set_delta_dual_eq(rhs_g_);
-        curr_it.set_delta_dual_bounds_l(rhs_cl_);
-        curr_it.set_delta_dual_bounds_u(rhs_cu_);
+        curr_it.set_delta_dual_bounds_l(rhs_cl_ - curr_it.dual_bounds_l());
+        curr_it.set_delta_dual_bounds_u(rhs_cu_ - curr_it.dual_bounds_u());
         curr_it.search_dir_info().inertia_correction_primal = delta_w;
         curr_it.search_dir_info().inertia_correction_dual = delta_c;
         return ret;
