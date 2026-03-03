@@ -588,6 +588,7 @@ template <typename ProblemType>
 template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_dual_eq(const VecReal<Derived> &dual_eq)
 {
+    lagrangian_gradient_s_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
     dual_infeasibility_x_evaluated_ = false;
     dual_eq_ = dual_eq;
@@ -596,6 +597,7 @@ template <typename ProblemType>
 template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_dual_bounds_l(const VecReal<Derived> &dual_bounds_l)
 {
+    lagrangian_gradient_s_evaluated_ = false;
     complementarity_l_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
     dual_bounds_l_ = if_else(lower_bounded(), dual_bounds_l, VecRealScalar(dual_bounds_l_.m(), 0.));
@@ -604,6 +606,7 @@ template <typename ProblemType>
 template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &dual_bounds_u)
 {
+    lagrangian_gradient_s_evaluated_ = false;
     complementarity_u_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
     dual_bounds_u_ = if_else(upper_bounded(), dual_bounds_u, VecRealScalar(dual_bounds_u_.m(), 0.));
@@ -612,6 +615,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &d
 template <typename ProblemType>
 void fatrop::IpIterate<ProblemType>::modify_dual_bounds(Scalar mu)
 {
+    lagrangian_gradient_s_evaluated_ = false;
     complementarity_l_evaluated_ = false;
     complementarity_u_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
