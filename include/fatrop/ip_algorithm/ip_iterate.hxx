@@ -29,6 +29,7 @@ namespace fatrop
         constr_viol_evaluated_ = false;
         dual_infeasibility_x_evaluated_ = false;
         dual_infeasibility_s_evaluated_ = false;
+        lagrangian_gradient_s_evaluated_ = false;
         jacobian_evaluated_ = false;
         hessian_evaluated_ = false;
         barrier_value_evaluated_ = false;
@@ -125,12 +126,23 @@ namespace fatrop
         // zero
         if (!dual_infeasibility_s_evaluated_)
         {
-            dual_infeasibility_s_ = obj_gradient_s() + dual_bounds_u_ - dual_bounds_l_;
-            nlp_->apply_jacobian_s_transpose(info(), dual_eq_, 1.0, dual_infeasibility_s_,
-                                             dual_infeasibility_s_);
+            dual_infeasibility_s_ = lagrangian_gradient_s() + dual_bounds_u_ - dual_bounds_l_;
             dual_infeasibility_s_evaluated_ = true;
         }
         return dual_infeasibility_s_;
+    }
+
+    template <typename ProblemType>
+    const VecRealView &IpIterate<ProblemType>::lagrangian_gradient_s()
+    {
+        if (!lagrangian_gradient_s_evaluated_)
+        {
+            lagrangian_gradient_s_.block(lagrangian_gradient_s_.m(), 0) = obj_gradient_s();
+            nlp_->apply_jacobian_s_transpose(info(), dual_eq_, 1.0, lagrangian_gradient_s_,
+                                             lagrangian_gradient_s_);
+            lagrangian_gradient_s_evaluated_ = true;
+        }
+        return lagrangian_gradient_s_;
     }
 
     template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::barrier_gradient()
@@ -372,6 +384,7 @@ namespace fatrop
           constr_viol_(nlp_->nlp_dims().number_of_eq_constraints),
           dual_infeasibility_x_(nlp_->nlp_dims().number_of_variables),
           dual_infeasibility_s_(nlp_->nlp_dims().number_of_ineq_constraints),
+          lagrangian_gradient_s_(nlp_->nlp_dims().number_of_ineq_constraints),
           barrier_gradient_(nlp_->nlp_dims().number_of_ineq_constraints),
           delta_lower_(nlp_->nlp_dims().number_of_ineq_constraints),
           delta_upper_(nlp_->nlp_dims().number_of_ineq_constraints), jacobian_(nullptr),
