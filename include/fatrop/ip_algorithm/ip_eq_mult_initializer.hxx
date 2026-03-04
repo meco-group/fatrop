@@ -72,7 +72,13 @@ namespace fatrop
             solved = false;
             break;
         case (LinsolReturnFlag::UNKNOWN):
+            PRINT_DIAGNOSTIC << "Unexpected return flag from linear solver" << std::endl;
             fatrop_assert_msg(false, "Unexpected return flag from linear solver");
+            solved = false;
+            break;
+        case (LinsolReturnFlag::NAN_SOLUTION):
+            PRINT_DIAGNOSTIC << "Linear solver returned NaN solution" << std::endl;
+            solved = false;
             break;
         }
         if (solved && norm_inf(rhs_g_) < lam_max_)

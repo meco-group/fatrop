@@ -14,7 +14,8 @@ namespace fatrop
         ITREF_MAX_ITER =
             3, ///<  Iterative refinement did not converge within the maximum number of iterations.
         ITREF_INCREASE = 4, ///< Iterative refinement did not converge due to increased residual.
-        UNKNOWN = 5         ///< An unknown error occurred during the solving process.
+        UNKNOWN = 5,        ///< An unknown error occurred during the solving process.
+        NAN_SOLUTION = 6    ///< The solver returned NaN values.
     };
 } // namespace fatrop
 #endif //__fatrop_linear_algebra_linear_solver_return_flags_hpp__

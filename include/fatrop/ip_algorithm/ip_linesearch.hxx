@@ -335,9 +335,12 @@ namespace fatrop
             }
             if (!accept) // go to restoration phase
             {
-                fatrop_assert_msg(restoration_phase_,
-                                  "Restoration phase not set in line search object. Maybe called "
-                                  "from restoration phase algorithm.");
+                if (!restoration_phase_)
+                {
+                    PRINT_DEBUG << "Restoration phase not set in line search object. "
+                                   "Maybe called from restoration phase algorithm." << std::endl;
+                    return false;
+                }
                 /**
                  * todo set the step info
                  */

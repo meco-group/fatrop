@@ -83,8 +83,11 @@ namespace fatrop
                 solved = false;
                 break;
             case (LinsolReturnFlag::UNKNOWN):
-                fatrop_assert_msg(false, "Unexpected return flag from linear solver");
-                break;
+                PRINT_DIAGNOSTIC << "Unexpected return flag from linear solver" << std::endl;
+                return LinsolReturnFlag::UNKNOWN;
+            case (LinsolReturnFlag::NAN_SOLUTION):
+                PRINT_DIAGNOSTIC << "Linear solver returned NaN solution" << std::endl;
+                return LinsolReturnFlag::NAN_SOLUTION;
             }
 
             if (update_delta_w)

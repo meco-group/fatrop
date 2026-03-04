@@ -19,15 +19,10 @@ namespace fatrop
     {
         Success,                ///< Optimization successful
         MaxIterExceeded,        ///< Maximum number of iterations exceeded
-        StopAtTinyStep,         ///< Algorithm stopped due to tiny step size
         StopAtAcceptablePoint,  ///< Algorithm stopped at an acceptable point
         LocalInfeasibility,     ///< Problem is locally infeasible
-        LineSearchFailed,
-        FeasiblePointFound,     ///< A feasible point was found
-        DivergingIterates,      ///< Iterates are diverging
+        LineSearchFailed,       ///< Line search failed to find acceptable point
         ErrorInStepComputation, ///< Error occurred during step computation
-        InvalidOption,          ///< An invalid option was provided
-        InternalError,          ///< An internal error occurred
         Unknown                 ///< Unknown error or status
     };
 

@@ -64,7 +64,11 @@ namespace fatrop
             ip_data_->get_nlp()->callback(*ip_data_);
             iteration_output_->output_current_iteration();
             mu_update_->update_barrier_parameter();
-            search_dir_->compute_search_dir();
+            {
+                LinsolReturnFlag sd_ret = search_dir_->compute_search_dir();
+                if (sd_ret == LinsolReturnFlag::UNKNOWN || sd_ret == LinsolReturnFlag::NAN_SOLUTION)
+                    return IpSolverReturnFlag::ErrorInStepComputation;
+            }
             bool success = linesearch_->find_acceptable_trial_point();
             if(!success) return IpSolverReturnFlag::LineSearchFailed;
             ip_data_->accept_trial_iterate();
@@ -74,8 +78,12 @@ namespace fatrop
         iteration_output_->output_current_iteration();
         if (conv_status == IpConvergenceStatus::Converged)
             retval = IpSolverReturnFlag::Success;
-        if (conv_status == IpConvergenceStatus::ConvergedToAcceptablePoint)
+        else if (conv_status == IpConvergenceStatus::ConvergedToAcceptablePoint)
             retval = IpSolverReturnFlag::StopAtAcceptablePoint;
+        else if (conv_status == IpConvergenceStatus::MaxIterExceeded)
+            retval = IpSolverReturnFlag::MaxIterExceeded;
+        else if (conv_status == IpConvergenceStatus::RestoFail)
+            retval = IpSolverReturnFlag::LocalInfeasibility;
         ip_data_->timing_statistics().full_algorithm.pause();
         return retval;
     }

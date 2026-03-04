@@ -34,8 +34,11 @@ namespace fatrop
         const Scalar b_norm = std::max(norm_inf(tmp_), 1.0);
         for (Index i = 0; i < max_it_ref; i++)
         {
-            fatrop_assert_msg(x_.is_finite(),
-                              "Problem in solving linear solver: solver returned NaN.");
+            if (!x_.is_finite())
+            {
+                PRINT_DIAGNOSTIC << "Problem in solving linear solver: solver returned NaN." << std::endl;
+                return LinsolReturnFlag::NAN_SOLUTION;
+            }
             // compute residual residual = Ax + b
             ls.apply_on_right(x_, 1.0, tmp_, residual_);
             // compute residual inf norm
