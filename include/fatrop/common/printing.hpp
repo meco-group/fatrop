@@ -16,6 +16,15 @@ namespace fatrop
         // Delete copy constructor and assignment operator
         OutputStreamManager(const OutputStreamManager &) = delete;
         OutputStreamManager &operator=(const OutputStreamManager &) = delete;
+        ~OutputStreamManager()
+        {
+            if (owns_stream_)
+            {
+                delete stream_;
+                stream_ = nullptr;
+                owns_stream_ = false;
+            }
+        }
 
         // Get the singleton instance
         static OutputStreamManager &get_instance()
