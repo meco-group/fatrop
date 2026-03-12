@@ -57,6 +57,7 @@ namespace fatrop
     enum class PrintLevel
     {
         None = 0,
+        Error = 1,
         Iterations = 5, // consistent with Ipopt and legacy fatrop
         Debug = 6,
         Diagnostic = 7,
@@ -96,6 +97,7 @@ namespace fatrop
         inline static NullStream null_stream_;
     };
 
+#define PRINT_ERROR PrintLevelManager(PrintLevel::Error)
 #define PRINT_ITERATIONS PrintLevelManager(PrintLevel::Iterations)
 #define PRINT_DEBUG PrintLevelManager(PrintLevel::Debug)
 #define PRINT_DIAGNOSTIC PrintLevelManager(PrintLevel::Diagnostic)

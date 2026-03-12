@@ -502,8 +502,7 @@ namespace fatrop
         }
         catch (std::exception &e)
         {
-            // todo implement
-            PRINT_NONE << "Uncaught Exception: " << e.what() << std::endl;
+            PRINT_ERROR << "Uncaught Exception: " << e.what() << std::endl;
             return -1;
         }
     }
