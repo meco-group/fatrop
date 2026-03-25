@@ -700,8 +700,6 @@ namespace fatrop
             accept = armijo_holds(alpha_primal);
         else
             accept = is_acceptable_to_current_iterate(trial_barr, trial_theta);
-
-        last_rejection_due_to_filter_ = false;
         if (!accept)
         {
             return false;
@@ -715,28 +713,26 @@ namespace fatrop
         }
         // accept == true
         // Filter reset heuristic
-        if (max_filter_resets_ <= 0 || filter_reset_count_ <= max_filter_resets_ ||
-            filter_reject_count_ <= filter_reset_trigger_)
+        if (max_filter_resets_ > 0)
         {
-            return true;
+            // if (filter_reset_count_ < max_filter_resets_)
+            // {
+                if (last_rejection_due_to_filter_)
+                {
+                    filter_reject_count_++;
+                    if (filter_reject_count_ >= filter_reset_trigger_)
+                    {
+                        filter().reset();
+                        filter_reset_count_++;
+                    }
+                }
+                else
+                {
+                    filter_reject_count_ = 0;
+                }
+            // }
         }
-
-        if (!last_rejection_due_to_filter_)
-        {
-            filter_reject_count_ = 0;
-            return true;
-        }
-        else
-        {
-            filter_reject_count_++;
-        }
-
-        if (filter_reject_count_ >= filter_reset_trigger_)
-        {
-            filter().reset();
-            // filter_reset_count_++; // TODO: Ipopt implementation does not seem to
-            // increment this while I would expect it to
-        }
+        last_rejection_due_to_filter_ = false;
         return true;
     }
 
