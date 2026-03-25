@@ -408,6 +408,7 @@ namespace fatrop
         char info_alpha_primal_char;
         if (!is_f_type(alpha_primal_test) || !armijo_holds(alpha_primal_test))
         {
+            augment_filter();
             info_alpha_primal_char = 'h';
         }
         else
