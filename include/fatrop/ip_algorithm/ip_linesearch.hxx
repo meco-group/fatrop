@@ -715,8 +715,8 @@ namespace fatrop
         // Filter reset heuristic
         if (max_filter_resets_ > 0)
         {
-            // if (filter_reset_count_ < max_filter_resets_)
-            // {
+            if (filter_reset_count_ < max_filter_resets_)
+            {
                 if (last_rejection_due_to_filter_)
                 {
                     filter_reject_count_++;
@@ -730,7 +730,7 @@ namespace fatrop
                 {
                     filter_reject_count_ = 0;
                 }
-            // }
+            }
         }
         last_rejection_due_to_filter_ = false;
         return true;

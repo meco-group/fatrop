@@ -168,7 +168,7 @@ namespace fatrop
         Scalar eta_phi_ = 1e-8;
         Scalar alpha_min_frac_ = 0.05;
         Scalar theta_max_fact_ = 1e4;
-        Index max_filter_resets_ = 5;
+        Index max_filter_resets_ = -1; 
         Index filter_reset_trigger_ = 5;
         Scalar obj_max_incr_ = 5.;
         Index watchdog_shortened_iter_trigger_ = 10;
