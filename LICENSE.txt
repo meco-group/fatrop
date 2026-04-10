@@ -2,6 +2,20 @@ Copyright (c) Lander Vanroye, KU Leuven.
 
 This file is part of fatrop.
 
+fatrop is distributed under two licenses:
+
+1. Most of the codebase is licensed under the 2-Clause BSD License (below).
+
+2. Some files in the ip_algorithm module (include/fatrop/ip_algorithm/ and
+   src/ip_algorithm/) contain work derived from
+   Ipopt (https://github.com/coin-or/Ipopt), Copyright (C) 2004, 2010
+   International Business Machines and others. These files are licensed under the
+   Eclipse Public License 2.0 (EPL-2.0). See LICENSE-EPL-2.0.txt for the full
+   EPL-2.0 license text. Each such file is individually marked with an
+   appropriate header.
+
+================================================================================
+
 The 2-Clause BSD License
 
 Redistribution and use in source and binary forms, with or without
