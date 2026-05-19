@@ -8,6 +8,7 @@
 #include "fatrop/common/fwd.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
+#include "fatrop/ip_algorithm/ip_timings.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/fwd.hpp"
 #include <memory>
@@ -498,6 +499,7 @@ namespace fatrop
         VecRealAllocated primal_damping_;
         Jacobian<ProblemType> *jacobian_; ///< Jacobian of the NLP.
         Hessian<ProblemType> *hessian_;   ///< Hessian of the NLP.
+        IpTimingStatistics *timings_;     ///< Pointer to the timing statistics owned by IpData.
         // Problem information
         const VecRealAllocated *lower_bounds_; ///< Lower bounds of the variables.
         const VecRealAllocated *upper_bounds_; ///< Upper bounds of the variables.
@@ -601,6 +603,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &d
 template <typename ProblemType>
 void fatrop::IpIterate<ProblemType>::modify_dual_bounds(Scalar mu)
 {
+    fatrop::ScopedTimer _t(timings_->compute_modify_dual_bounds, *timings_);
     complementarity_l_evaluated_ = false;
     complementarity_u_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;

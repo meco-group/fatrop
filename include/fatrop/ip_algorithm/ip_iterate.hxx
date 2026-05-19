@@ -8,6 +8,7 @@
 #include "fatrop/common/options.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
+#include "fatrop/ip_algorithm/ip_timings.hpp"
 #include <algorithm>
 #include <cmath>
 namespace fatrop
@@ -46,6 +47,7 @@ namespace fatrop
     {
         if (!obj_value_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_obj_value, *timings_);
             Index status =
                 nlp_->eval_objective(info(), objective_scale, primal_x_, primal_s_, obj_value_);
             fatrop_assert_msg(status == 0, "Error in evaluating the objective function.");
@@ -58,6 +60,7 @@ namespace fatrop
     {
         if (!barrier_value_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_barrier_value, *timings_);
             barrier_value_ = sum(if_else((*lower_bounded_), -1. * log(delta_lower()),
                                          VecRealScalar(primal_s_.m(), 0.)) +
                                  if_else((*upper_bounded_), -1. * log(delta_upper()),
@@ -74,6 +77,7 @@ namespace fatrop
     {
         if (!obj_gradient_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_obj_gradient, *timings_);
             Index status = nlp_->eval_objective_gradient(
                 info(), objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
@@ -86,6 +90,7 @@ namespace fatrop
     {
         if (!obj_gradient_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_obj_gradient, *timings_);
             Index status = nlp_->eval_objective_gradient(
                 info(), objective_scale, primal_x_, primal_s_, obj_gradient_x_, obj_gradient_s_);
             fatrop_assert_msg(status == 0,
@@ -98,6 +103,7 @@ namespace fatrop
     {
         if (!constr_viol_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_constr_viol, *timings_);
             Index status =
                 nlp_->eval_constraint_violation(info(), primal_x_, primal_s_, constr_viol_);
             fatrop_assert_msg(status == 0, "Error in evaluating the constraint violation.");
@@ -110,6 +116,7 @@ namespace fatrop
     {
         if (!dual_infeasibility_x_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_dual_infeasibility_x, *timings_);
             dual_infeasibility_x_.block(dual_infeasibility_x_.m(), 0) = obj_gradient_x();
             jacobian().transpose_apply_on_right(info(), dual_eq_, 1.0, dual_infeasibility_x_,
                                                 dual_infeasibility_x_);
@@ -125,6 +132,7 @@ namespace fatrop
         // zero
         if (!dual_infeasibility_s_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_dual_infeasibility_s, *timings_);
             dual_infeasibility_s_ = obj_gradient_s() + dual_bounds_u_ - dual_bounds_l_;
             nlp_->apply_jacobian_s_transpose(info(), dual_eq_, 1.0, dual_infeasibility_s_,
                                              dual_infeasibility_s_);
@@ -137,6 +145,7 @@ namespace fatrop
     {
         if (!barrier_gradient_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_barrier_gradient, *timings_);
             const Index m = primal_s_.m();
             barrier_gradient_ =
                 if_else((*lower_bounded_), -mu() / delta_lower(), VecRealScalar(m, 0.)) +
@@ -153,6 +162,7 @@ namespace fatrop
     {
         if (!delta_lower_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_delta_lower, *timings_);
             delta_lower_ = if_else((*lower_bounded_), primal_s() - (*lower_bounds_),
                                    VecRealScalar((*lower_bounds_).m(), 1.));
             delta_lower_evaluated_ = true;
@@ -163,6 +173,7 @@ namespace fatrop
     {
         if (!delta_upper_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_delta_upper, *timings_);
             delta_upper_ = if_else((*upper_bounded_), (*upper_bounds_) - primal_s(),
                                    VecRealScalar((*upper_bounds_).m(), 1.));
             delta_upper_evaluated_ = true;
@@ -173,6 +184,7 @@ namespace fatrop
     template <typename ProblemType>
     const VecRealView &IpIterate<ProblemType>::relaxed_complementarity_l(const Scalar mu_in)
     {
+        ScopedTimer _t(timings_->compute_relaxed_compl_l, *timings_);
         relaxed_complementarity_l_ = if_else(lower_bounded(), complementarity_l() - mu_in,
                                              VecRealScalar(dual_bounds_l_.m(), 0.));
         return relaxed_complementarity_l_;
@@ -181,6 +193,7 @@ namespace fatrop
     template <typename ProblemType>
     const VecRealView &IpIterate<ProblemType>::relaxed_complementarity_u(const Scalar mu_in)
     {
+        ScopedTimer _t(timings_->compute_relaxed_compl_u, *timings_);
         relaxed_complementarity_u_ = if_else(upper_bounded(), complementarity_u() - mu_in,
                                              VecRealScalar(dual_bounds_l_.m(), 0.));
         return relaxed_complementarity_u_;
@@ -202,6 +215,7 @@ namespace fatrop
     {
         if (!complementarity_l_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_complementarity_l, *timings_);
             complementarity_l_ = if_else(lower_bounded(), dual_bounds_l_ * delta_lower(),
                                          VecRealScalar(dual_bounds_l_.m(), 0.));
             complementarity_l_evaluated_ = true;
@@ -213,6 +227,7 @@ namespace fatrop
     {
         if (!complementarity_u_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_complementarity_u, *timings_);
             complementarity_u_ = if_else(upper_bounded(), dual_bounds_u_ * delta_upper(),
                                          VecRealScalar(dual_bounds_u_.m(), 0.));
             complementarity_u_evaluated_ = true;
@@ -233,6 +248,7 @@ namespace fatrop
     {
         if (!primal_damping_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_primal_damping, *timings_);
             nlp_->get_primal_damping(info(), primal_damping_);
             primal_damping_evaluated_ = true;
         }
@@ -242,6 +258,7 @@ namespace fatrop
     {
         if (!linear_decrease_objective_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_linear_decrease_obj, *timings_);
             linear_decrease_objective_ =
                 dot(obj_gradient_x(), delta_primal_x()) + dot(obj_gradient_s(), delta_primal_s());
             linear_decrease_objective_evaluated_ = true;
@@ -252,6 +269,7 @@ namespace fatrop
     {
         if (!linear_decrease_barrier_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_linear_decrease_bar, *timings_);
             linear_decrease_barrier_ = dot(barrier_gradient(), delta_primal_s());
             linear_decrease_barrier_evaluated_ = true;
         }
@@ -260,6 +278,7 @@ namespace fatrop
 
     template <typename ProblemType> Scalar IpIterate<ProblemType>::e_mu(Scalar mu)
     {
+        ScopedTimer _t(timings_->compute_e_mu, *timings_);
         Scalar zl1 = norm_l1(dual_bounds_l()) + norm_l1(dual_bounds_u());
         Index number_of_eq_constraints = nlp()->nlp_dims().number_of_eq_constraints;
         Index number_of_dual_vars = (*number_of_bounds_) + number_of_eq_constraints;
@@ -300,6 +319,7 @@ namespace fatrop
     Scalar IpIterate<ProblemType>::maximum_step_size_primal(const Scalar tau,
                                                             const VecRealView &delta_s)
     {
+        ScopedTimer _t(timings_->compute_max_step_primal, *timings_);
         Scalar alpha_max_pr = 1.;
         delta_lower();
         delta_upper();
@@ -331,6 +351,7 @@ namespace fatrop
                                                           const VecRealView &delta_dual_bounds_l,
                                                           const VecRealView &delta_dual_bounds_u)
     {
+        ScopedTimer _t(timings_->compute_max_step_dual, *timings_);
         Scalar alpha_max_du = 1.;
         for (Index i = 0; i < primal_s_.m(); i++)
         {
@@ -388,6 +409,7 @@ namespace fatrop
           Dx_(nlp_->nlp_dims().number_of_variables + nlp_->nlp_dims().number_of_ineq_constraints),
           De_(nlp_->nlp_dims().number_of_eq_constraints), number_of_bounds_(&data.number_of_bounds_)
     {
+        timings_ = &data.timing_statistics();
         reset();
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
@@ -395,6 +417,7 @@ namespace fatrop
         fatrop_assert_msg(hessian_ != nullptr, "Hessian not set.");
         if (!hessian_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_hessian, *timings_);
             Index status = nlp_->eval_lag_hess(info(), objective_scale, primal_x_, primal_s_,
                                                dual_eq_, *hessian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
@@ -414,6 +437,7 @@ namespace fatrop
         fatrop_assert_msg(jacobian_ != nullptr, "Jacobian not set.");
         if (!jacobian_evaluated_)
         {
+            ScopedTimer _t(timings_->compute_jacobian, *timings_);
             Index status = nlp_->eval_constr_jac(info(), primal_x_, primal_s_, *jacobian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Jacobian of the constraints.");
             jacobian_evaluated_ = true;

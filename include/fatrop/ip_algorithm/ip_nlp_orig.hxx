@@ -39,11 +39,11 @@ namespace fatrop
                                                 Hessian<ProblemType> &hess)
     {
         if (timings_)
-            timings_->eval_hessian.start();
-        Index ret = nlp_->eval_lag_hess(info, objective_scale, primal_x, primal_s, lam, hess);
-        if (timings_)
-            timings_->eval_hessian.pause();
-        return ret;
+        {
+            ScopedTimer _t(timings_->eval_hessian, *timings_);
+            return nlp_->eval_lag_hess(info, objective_scale, primal_x, primal_s, lam, hess);
+        }
+        return nlp_->eval_lag_hess(info, objective_scale, primal_x, primal_s, lam, hess);
     }
 
     template <typename ProblemType>
@@ -53,11 +53,11 @@ namespace fatrop
                                                   Jacobian<ProblemType> &jac)
     {
         if (timings_)
-            timings_->eval_jacobian.start();
-        Index ret = nlp_->eval_constr_jac(info, primal_x, primal_s, jac);
-        if (timings_)
-            timings_->eval_jacobian.pause();
-        return ret;
+        {
+            ScopedTimer _t(timings_->eval_jacobian, *timings_);
+            return nlp_->eval_constr_jac(info, primal_x, primal_s, jac);
+        }
+        return nlp_->eval_constr_jac(info, primal_x, primal_s, jac);
     }
 
     template <typename ProblemType>
@@ -67,11 +67,11 @@ namespace fatrop
                                                             VecRealView &res)
     {
         if (timings_)
-            timings_->eval_constraint_violation.start();
-        Index ret = nlp_->eval_constraint_violation(info, primal_x, primal_s, res);
-        if (timings_)
-            timings_->eval_constraint_violation.pause();
-        return ret;
+        {
+            ScopedTimer _t(timings_->eval_constraint_violation, *timings_);
+            return nlp_->eval_constraint_violation(info, primal_x, primal_s, res);
+        }
+        return nlp_->eval_constraint_violation(info, primal_x, primal_s, res);
     }
 
     template <typename ProblemType>
@@ -82,12 +82,13 @@ namespace fatrop
                                                           VecRealView &grad_x, VecRealView &grad_s)
     {
         if (timings_)
-            timings_->eval_gradient.start();
-        Index ret = nlp_->eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x,
-                                                  grad_s);
-        if (timings_)
-            timings_->eval_gradient.pause();
-        return ret;
+        {
+            ScopedTimer _t(timings_->eval_gradient, *timings_);
+            return nlp_->eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x,
+                                                 grad_s);
+        }
+        return nlp_->eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x,
+                                             grad_s);
     }
 
     template <typename ProblemType>
@@ -97,11 +98,11 @@ namespace fatrop
                                                  const VecRealView &primal_s, Scalar &res)
     {
         if (timings_)
-            timings_->eval_objective.start();
-        Index ret = nlp_->eval_objective(info, objective_scale, primal_x, primal_s, res);
-        if (timings_)
-            timings_->eval_objective.pause();
-        return ret;
+        {
+            ScopedTimer _t(timings_->eval_objective, *timings_);
+            return nlp_->eval_objective(info, objective_scale, primal_x, primal_s, res);
+        }
+        return nlp_->eval_objective(info, objective_scale, primal_x, primal_s, res);
     }
 
     template <typename ProblemType>

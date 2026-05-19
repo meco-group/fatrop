@@ -60,7 +60,11 @@ namespace fatrop
     {
         reset(is_resto);
         ip_data_->timing_statistics().full_algorithm.start();
-        initializer_->initialize();
+        {
+            ScopedTimer _t(ip_data_->timing_statistics().initialization,
+                           ip_data_->timing_statistics());
+            initializer_->initialize();
+        }
         IpSolverReturnFlag retval = IpSolverReturnFlag::Unknown;
         IpConvergenceStatus conv_status = convergence_check_->check_converged();
 
