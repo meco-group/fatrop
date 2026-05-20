@@ -4,17 +4,32 @@ using namespace fatrop;
 ProblemDims<OcpType>::ProblemDims(int K, const std::vector<Index> &nu, const std::vector<Index> &nx,
                  const std::vector<Index> &ng, const std::vector<Index> &ng_ineq)
     : K(K), number_of_controls(nu), number_of_states(nx), number_of_eq_constraints(ng),
-      number_of_ineq_constraints(ng_ineq)
+      number_of_ineq_constraints(ng_ineq), number_of_tangent_controls(nu),
+      number_of_tangent_states(nx)
 {
   check_problem_dimensions();
 }
 
 ProblemDims<OcpType>::ProblemDims(int K, std::vector<Index> &&nu, std::vector<Index> &&nx, std::vector<Index> &&ng,
                  std::vector<Index> &&ng_ineq)
-    : K(K), number_of_controls(std::move(nu)), number_of_states(std::move(nx)),
-      number_of_eq_constraints(std::move(ng)), number_of_ineq_constraints(std::move(ng_ineq))
+    : K(K), number_of_controls(nu), number_of_states(nx),
+      number_of_eq_constraints(std::move(ng)), number_of_ineq_constraints(std::move(ng_ineq)),
+      number_of_tangent_controls(number_of_controls),
+      number_of_tangent_states(number_of_states)
 {
   check_problem_dimensions();
+}
+
+ProblemDims<OcpType>::ProblemDims(int K, const std::vector<Index> &nu,
+                                  const std::vector<Index> &nx, const std::vector<Index> &ng,
+                                  const std::vector<Index> &ng_ineq,
+                                  const std::vector<Index> &nu_tan,
+                                  const std::vector<Index> &nx_tan)
+    : K(K), number_of_controls(nu), number_of_states(nx), number_of_eq_constraints(ng),
+      number_of_ineq_constraints(ng_ineq), number_of_tangent_controls(nu_tan),
+      number_of_tangent_states(nx_tan)
+{
+    check_problem_dimensions();
 }
 
 void ProblemDims<OcpType>::check_problem_dimensions() const {
@@ -23,13 +38,22 @@ void ProblemDims<OcpType>::check_problem_dimensions() const {
     fatrop_assert_msg(number_of_states.size() == K, "The number of states is not of size K.");
     fatrop_assert_msg(number_of_eq_constraints.size() == K, "The number of equality constraints is not of size K.");
     fatrop_assert_msg(number_of_ineq_constraints.size() == K, "The number of inequality constraints is not of size K.");
+    fatrop_assert_msg(number_of_tangent_controls.size() == K,
+                      "The number of tangent controls is not of size K.");
+    fatrop_assert_msg(number_of_tangent_states.size() == K,
+                      "The number of tangent states is not of size K.");
     // iterate over every time step and do some checks
     for (Index i = 0; i < K; i++) {
         fatrop_assert_msg(number_of_controls[i] >= 0, "The number of controls must be non-negative.");
         fatrop_assert_msg(number_of_states[i] >= 0, "The number of states must be non-negative.");
         fatrop_assert_msg(number_of_eq_constraints[i] >= 0, "The number of equality constraints must be non-negative.");
         fatrop_assert_msg(number_of_ineq_constraints[i] >= 0, "The number of inequality constraints must be non-negative.");
-        fatrop_assert_msg(number_of_eq_constraints[i] <= number_of_states[i] + number_of_controls[i],
-                          "The number of eq constraints exceeds the number of variables.");
+        fatrop_assert_msg(number_of_tangent_controls[i] >= 0,
+                          "The number of tangent controls must be non-negative.");
+        fatrop_assert_msg(number_of_tangent_states[i] >= 0,
+                          "The number of tangent states must be non-negative.");
+        fatrop_assert_msg(number_of_eq_constraints[i] <=
+                              number_of_tangent_states[i] + number_of_tangent_controls[i],
+                          "The number of eq constraints exceeds the number of tangent variables.");
     }
 }

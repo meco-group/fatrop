@@ -100,6 +100,14 @@ namespace fatrop
         virtual void apply_jacobian_s_transpose(const ProblemInfo<ProblemType> &info,
                                                 const VecRealView &multipliers, const Scalar alpha,
                                                 const VecRealView &y, VecRealView &out) override;
+        virtual void apply_retraction(const ProblemInfo<ProblemType> &info,
+                                      const VecRealView &primal_x,
+                                      const VecRealView &delta_primal_x, const Scalar alpha,
+                                      VecRealView &primal_x_next) override;
+        virtual void apply_dual_eq_transformation(const ProblemInfo<ProblemType> &info,
+                                                  const VecRealView &primal_x,
+                                                  const VecRealView &dual_eq_in,
+                                                  VecRealView &dual_eq_out) override;
         void set_xs_reference(const ProblemInfo<ProblemType> &info, const VecRealView &x_reference,
                               const VecRealView &s_reference);
         void set_zeta(const Scalar zeta) { zeta_ = zeta; };

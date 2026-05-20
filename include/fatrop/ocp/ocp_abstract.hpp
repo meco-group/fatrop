@@ -257,6 +257,126 @@ namespace fatrop
         virtual Index get_initial_uk(Scalar *uk, const Index k) const = 0;
 
         /**
+         * @brief Get the tangent-space (search-direction) dimension of the state at stage k.
+         *
+         * Defaults to @c get_nx(k). Override this to support Lie-group / manifold states
+         * where the primal state lives on a manifold (size @c get_nx(k)) but the search
+         * direction lives in the corresponding tangent / Lie algebra (size
+         * @c get_nx_tangent(k)). Example: quaternion state with @c get_nx(k) = 4 and
+         * @c get_nx_tangent(k) = 3 (so(3)).
+         *
+         * @param k Time step
+         * @return Tangent-space dimension of the state
+         */
+        virtual Index get_nx_tangent(const Index k) const { return get_nx(k); }
+
+        /**
+         * @brief Get the tangent-space dimension of the controls at stage k.
+         *
+         * Defaults to @c get_nu(k). Override for manifold-valued inputs.
+         *
+         * @param k Time step
+         * @return Tangent-space dimension of the controls
+         */
+        virtual Index get_nu_tangent(const Index k) const { return get_nu(k); }
+
+        /**
+         * @brief State retraction at stage k: x_next = retract(x, alpha * delta_x).
+         *
+         * Default: Euclidean update. Override to retract a state living on a manifold by
+         * a tangent vector. @c delta_xk has size @c get_nx_tangent(k); @c xk and
+         * @c xk_next have size @c get_nx(k).
+         *
+         * @param k Time step
+         * @param xk Pointer to current state of size @c get_nx(k)
+         * @param delta_xk Pointer to tangent step of size @c get_nx_tangent(k)
+         * @param alpha Step size
+         * @param xk_next Pointer to retracted state of size @c get_nx(k) (output)
+         */
+        virtual void apply_retraction_xk(const Index k, const Scalar *xk,
+                                         const Scalar *delta_xk, const Scalar alpha,
+                                         Scalar *xk_next)
+        {
+            const Index n = get_nx(k);
+            for (Index i = 0; i < n; ++i)
+                xk_next[i] = xk[i] + alpha * delta_xk[i];
+        }
+
+        /**
+         * @brief Control retraction at stage k: u_next = retract(u, alpha * delta_u).
+         *
+         * Default: Euclidean update. Override for manifold-valued inputs. @c delta_uk has
+         * size @c get_nu_tangent(k); @c uk and @c uk_next have size @c get_nu(k).
+         */
+        virtual void apply_retraction_uk(const Index k, const Scalar *uk,
+                                         const Scalar *delta_uk, const Scalar alpha,
+                                         Scalar *uk_next)
+        {
+            const Index n = get_nu(k);
+            for (Index i = 0; i < n; ++i)
+                uk_next[i] = uk[i] + alpha * delta_uk[i];
+        }
+
+        /**
+         * @brief Transform the dynamics equality multiplier at stage k.
+         *
+         * Use this when @c eval_BAbt / @c eval_b pre-multiplied the linearized
+         * dynamics by some user-defined matrix @c M_k(x, u) (a common trick for
+         * Lie-group dynamics so the Riccati recursion sees the expected
+         * @c -I*delta_x_{k+1} + ... form). fatrop computes the dual of the scaled
+         * dynamics constraint; this hook recovers the dual of the original
+         * dynamics @c lambda_dyn = M_k^T lambda_dyn_tilde so that @c eval_RSQrqt
+         * can use the physical multiplier.
+         *
+         * Default: identity (copy through @c get_nx_tangent(k+1) entries).
+         *
+         * @param k Time step
+         * @param xk State at stage k (primal, size @c get_nx(k))
+         * @param xkp1 State at stage k+1 (primal, size @c get_nx(k+1))
+         * @param uk Control at stage k (primal, size @c get_nu(k))
+         * @param dual_in Input dual block, size @c get_nx_tangent(k+1)
+         * @param dual_out Output dual block, size @c get_nx_tangent(k+1)
+         */
+        virtual void apply_dual_eq_dyn_transformation_k(const Index k, const Scalar *xk,
+                                                       const Scalar *xkp1, const Scalar *uk,
+                                                       const Scalar *dual_in,
+                                                       Scalar *dual_out)
+        {
+            const Index n = get_nx_tangent(k + 1);
+            for (Index i = 0; i < n; ++i)
+                dual_out[i] = dual_in[i];
+        }
+
+        /**
+         * @brief Transform the equality-path multiplier at stage k. Default: identity.
+         */
+        virtual void apply_dual_eq_path_transformation_k(const Index k, const Scalar *uk,
+                                                        const Scalar *xk,
+                                                        const Scalar *dual_in,
+                                                        Scalar *dual_out)
+        {
+            const Index n = get_ng(k);
+            for (Index i = 0; i < n; ++i)
+                dual_out[i] = dual_in[i];
+        }
+
+        /**
+         * @brief Transform the slack (inequality-as-equality) multiplier at stage k.
+         *
+         * Default: identity. Override only if your @c eval_Ggt_ineq / @c eval_gineq
+         * pre-scaled the slack equation row.
+         */
+        virtual void apply_dual_eq_slack_transformation_k(const Index k, const Scalar *uk,
+                                                         const Scalar *xk,
+                                                         const Scalar *dual_in,
+                                                         Scalar *dual_out)
+        {
+            const Index n = get_ng_ineq(k);
+            for (Index i = 0; i < n; ++i)
+                dual_out[i] = dual_in[i];
+        }
+
+        /**
          * @brief Virtual destructor for OcpAbstract.
          *
          * This virtual destructor ensures proper cleanup of derived classes.

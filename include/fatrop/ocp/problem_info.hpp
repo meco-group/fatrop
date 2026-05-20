@@ -29,6 +29,18 @@ namespace fatrop
         /// The dimensions of the OCP
         const ProblemDims<OcpType> dims;
 
+        // =====================================================================
+        // Primal (manifold) variable space
+        //
+        // These offsets and sizes refer to the *primal* (manifold) variable
+        // vector x = [u_0, x_0, ..., u_{K-1}, x_{K-1}]. They are used when
+        // reading or writing the actual state / control values during the NLP
+        // evaluation functions: eval_objective, eval_constraint_violation,
+        // eval_b / eval_g / eval_gineq, get_initial_xk / get_initial_uk and
+        // get_bounds. For Lie-group / manifold optimization a quaternion state
+        // would have @c dims.number_of_states[k] == 4 (its primal size).
+        // =====================================================================
+
         // Number of primal variables
         Index number_of_primal_variables;
 
@@ -36,7 +48,7 @@ namespace fatrop
         Index number_of_slack_variables;
 
         // Number of equality constraints
-        Index number_of_eq_constraints; 
+        Index number_of_eq_constraints;
 
         /// Offset for the primal variables in the overall variable vector
         Index offset_primal;
@@ -48,6 +60,39 @@ namespace fatrop
          */
         std::vector<Index> offsets_primal_u;
         std::vector<Index> offsets_primal_x;
+
+        // =====================================================================
+        // Tangent (linearized / Newton) variable space
+        //
+        // These offsets and sizes refer to the *tangent* (search-direction)
+        // vector dx = [du_0, dx_0, ..., du_{K-1}, dx_{K-1}]. They are used
+        // when writing the objective gradient, the constraint Jacobian columns
+        // and the Lagrangian Hessian rows / columns (eval_rq, eval_Ggt,
+        // eval_Ggt_ineq, eval_BAbt, eval_RSQrqt), and when indexing into
+        // delta_primal_x / dual_infeasibility_x / primal_damping_x inside the
+        // IP algorithm. For a quaternion state with so(3) tangent we would
+        // have @c dims.number_of_tangent_states[k] == 3.
+        //
+        // For standard Euclidean problems the tangent offsets and sizes are
+        // identical to their primal counterparts.
+        // =====================================================================
+
+        /// Total tangent-space dimension (sum of @c dims.number_of_tangent_states[k]
+        /// + @c dims.number_of_tangent_controls[k] over k).
+        Index number_of_tangent_variables;
+
+        /// Number of tangent variables at each stage: nu_tan(k) + nx_tan(k).
+        std::vector<Index> number_of_stage_tangent_variables;
+
+        /// Offsets for the tangent controls (du_k) at each stage.
+        std::vector<Index> offsets_tangent_u;
+
+        /// Offsets for the tangent states (dx_k) at each stage.
+        std::vector<Index> offsets_tangent_x;
+
+        /// Offset of the tangent block inside any (tangent, slack) concatenated vector.
+        /// Currently 0 — the tangent block is at the front.
+        Index offset_tangent;
 
         /// Offset for the slack variables in the overall variable vector (combined x and s vector)
         Index offset_slack;

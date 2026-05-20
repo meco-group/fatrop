@@ -8,6 +8,10 @@
 #include "fatrop/ocp/problem_info.hpp"
 using namespace fatrop;
 
+// The constraint Jacobian lives in tangent space: its columns multiply delta_u, delta_x
+// (sized by number_of_tangent_{controls,states}). For standard Euclidean problems the
+// tangent dims coincide with the primal dims so behavior is unchanged.
+
 Jacobian<OcpType>::Jacobian(const ProblemDims<OcpType> &dims)
 {
     // reserve memory for the Jacobian matrices
@@ -16,16 +20,19 @@ Jacobian<OcpType>::Jacobian(const ProblemDims<OcpType> &dims)
     Gg_ineqt.reserve(dims.K);
     // allocate memory for the Jacobian matrices
     for (int k = 0; k < dims.K - 1; ++k)
-        BAbt.emplace_back(dims.number_of_states[k] + dims.number_of_controls[k] + 1,
-                          dims.number_of_states[k + 1]);
+        BAbt.emplace_back(
+            dims.number_of_tangent_states[k] + dims.number_of_tangent_controls[k] + 1,
+            dims.number_of_tangent_states[k + 1]);
     for (int k = 0; k < dims.K; ++k)
     {
-        Gg_eqt.emplace_back(dims.number_of_states[k] + dims.number_of_controls[k] + 1,
-                            dims.number_of_eq_constraints[k]);
+        Gg_eqt.emplace_back(
+            dims.number_of_tangent_states[k] + dims.number_of_tangent_controls[k] + 1,
+            dims.number_of_eq_constraints[k]);
     }
     for (int k = 0; k < dims.K; ++k)
-        Gg_ineqt.emplace_back(dims.number_of_states[k] + dims.number_of_controls[k] + 1,
-                              dims.number_of_ineq_constraints[k]);
+        Gg_ineqt.emplace_back(
+            dims.number_of_tangent_states[k] + dims.number_of_tangent_controls[k] + 1,
+            dims.number_of_ineq_constraints[k]);
 };
 void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x, Scalar alpha,
                                        const VecRealView &y, VecRealView &out) const
@@ -34,11 +41,11 @@ void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x
     // dynamics constraints BA*ux - x_next
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
-        Index nx_next = info.dims.number_of_states[k + 1];
-        Index offset_ux = info.offsets_primal_u[k];
-        Index offset_x_next = info.offsets_primal_x[k + 1];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
+        Index nx_next = info.dims.number_of_tangent_states[k + 1];
+        Index offset_ux = info.offsets_tangent_u[k];
+        Index offset_x_next = info.offsets_tangent_x[k + 1];
         Index offset_dyn_eq = info.offsets_g_eq_dyn[k];
         // apply out[offs:offs+nx] =  BAbt.T @ x[offs:offs+nu+nx] - x_next[offs:offs+nx]
         gemv_t(nu + nx, nx_next, 1.0, BAbt[k], 0, 0, x, offset_ux, 1.0, out, offset_dyn_eq, out,
@@ -48,10 +55,10 @@ void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x
     // equality path constraints
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng = info.dims.number_of_eq_constraints[k];
-        Index offset_ux = info.offsets_primal_u[k];
+        Index offset_ux = info.offsets_tangent_u[k];
         Index offset_g_eq = info.offsets_g_eq_path[k];
         // apply out[offs:offs+ng] =  Gg_eqt.T @ x[offs:offs+nu+nx]
         gemv_t(nu + nx, ng, 1.0, Gg_eqt[k], 0, 0, x, offset_ux, 1.0, out, offset_g_eq, out,
@@ -60,10 +67,10 @@ void Jacobian<OcpType>::apply_on_right(const OcpInfo &info, const VecRealView &x
     // slack equality path constraints Gg_ineqt @ x
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng_ineq = info.dims.number_of_ineq_constraints[k];
-        Index offset_ux = info.offsets_primal_u[k];
+        Index offset_ux = info.offsets_tangent_u[k];
         Index offset_g_ineq = info.offsets_g_eq_slack[k];
         // apply out[offs:offs+ng_ineq] =  Gg_ineqt.T @ x[offs:offs+nu+nx]
         gemv_t(nu + nx, ng_ineq, 1.0, Gg_ineqt[k], 0, 0, x, offset_ux, 1.0, out, offset_g_ineq, out,
@@ -79,11 +86,11 @@ void Jacobian<OcpType>::transpose_apply_on_right(const OcpInfo &info, const VecR
     out = alpha * y;
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
-        Index offs_ux = info.offsets_primal_u[k];
-        Index offs_x_next = info.offsets_primal_x[k + 1];
-        Index nx_next = info.dims.number_of_states[k + 1];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
+        Index offs_ux = info.offsets_tangent_u[k];
+        Index offs_x_next = info.offsets_tangent_x[k + 1];
+        Index nx_next = info.dims.number_of_tangent_states[k + 1];
         Index offset_g_dyn = info.offsets_g_eq_dyn[k];
         // apply out[offs_ux:offs_ux + nu + nx] +=  BAbt @ mult_eq[offs_g_dyn:offs_g_dyn + nx_next]
         gemv_n(nu + nx, nx_next, 1.0, BAbt[k], 0, 0, mult_eq, offset_g_dyn, 1.0, out, offs_ux, out,
@@ -94,10 +101,10 @@ void Jacobian<OcpType>::transpose_apply_on_right(const OcpInfo &info, const VecR
     // equality path constraints' contributions Gg_eqt @ mult_eq
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng = info.dims.number_of_eq_constraints[k];
-        Index offset_ux = info.offsets_primal_u[k];
+        Index offset_ux = info.offsets_tangent_u[k];
         Index offset_g_eq = info.offsets_g_eq_path[k];
         // apply out[offs:offs+nu+nx] +=  Gg_eqt @ mult_eq[offs:offs+ng]
         gemv_n(nu + nx, ng, 1.0, Gg_eqt[k], 0, 0, mult_eq, offset_g_eq, 1.0, out, offset_ux, out,
@@ -106,10 +113,10 @@ void Jacobian<OcpType>::transpose_apply_on_right(const OcpInfo &info, const VecR
     // inequality path constraints' contributions Gg_ineqt @ mult_eq
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng_ineq = info.dims.number_of_ineq_constraints[k];
-        Index offset_ux = info.offsets_primal_u[k];
+        Index offset_ux = info.offsets_tangent_u[k];
         Index offset_g_ineq = info.offsets_g_eq_slack[k];
         // apply out[offs:offs+nu+nx] +=  Gg_ineqt @ mult_eq[offs:offs+ng_ineq]
         gemv_n(nu + nx, ng_ineq, 1.0, Gg_ineqt[k], 0, 0, mult_eq, offset_g_ineq, 1.0, out,
@@ -121,9 +128,9 @@ void Jacobian<OcpType>::get_rhs(const OcpInfo &info, VecRealView &rhs) const
     // dynamics constraints' right-hand side
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
-        Index nx_next = info.dims.number_of_states[k + 1];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
+        Index nx_next = info.dims.number_of_tangent_states[k + 1];
         Index offset_eq_dyn = info.offsets_g_eq_dyn[k];
         // the rhs is the last row of the BAbt[k] matrix
         rowex(nx_next, 1.0, BAbt[k], nu + nx, 0, rhs, offset_eq_dyn);
@@ -131,8 +138,8 @@ void Jacobian<OcpType>::get_rhs(const OcpInfo &info, VecRealView &rhs) const
     // equality path constraints' right-hand side
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng = info.dims.number_of_eq_constraints[k];
         Index offset_eq_path = info.offsets_g_eq_path[k];
         // the rhs is the last row of the Gg_eqt[k] matrix
@@ -141,8 +148,8 @@ void Jacobian<OcpType>::get_rhs(const OcpInfo &info, VecRealView &rhs) const
     // inequality path constraints' right-hand side
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         Index offset_eq_ineq = info.offsets_g_eq_slack[k];
         // the rhs is the last row of the Gg_ineqt[k] matrix
@@ -154,9 +161,9 @@ void Jacobian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &rhs)
     // dynamics constraints' right-hand side
     for (Index k = 0; k < info.dims.K - 1; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
-        Index nx_next = info.dims.number_of_states[k + 1];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
+        Index nx_next = info.dims.number_of_tangent_states[k + 1];
         Index offset_eq_dyn = info.offsets_g_eq_dyn[k];
         // the rhs is the last row of the BAbt[k] matrix
         rowin(nx_next, 1.0, rhs, offset_eq_dyn, BAbt[k], nu + nx, 0);
@@ -164,8 +171,8 @@ void Jacobian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &rhs)
     // equality path constraints' right-hand side
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng = info.dims.number_of_eq_constraints[k];
         Index offset_eq_path = info.offsets_g_eq_path[k];
         // the rhs is the last row of the Gg_eqt[k] matrix
@@ -174,8 +181,8 @@ void Jacobian<OcpType>::set_rhs(const OcpInfo &info, const VecRealView &rhs)
     // inequality path constraints' right-hand side
     for (Index k = 0; k < info.dims.K; ++k)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         Index offset_eq_ineq = info.offsets_g_eq_slack[k];
         // the rhs is the last row of the Gg_ineqt[k] matrix

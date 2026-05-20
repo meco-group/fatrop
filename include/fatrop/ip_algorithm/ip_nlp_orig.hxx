@@ -149,6 +149,23 @@ namespace fatrop
     }
 
     template <typename ProblemType>
+    void IpNlpOrig<ProblemType>::apply_retraction(const ProblemInfo<ProblemType> &info,
+                                                  const VecRealView &primal_x,
+                                                  const VecRealView &delta_primal_x,
+                                                  const Scalar alpha, VecRealView &primal_x_next)
+    {
+        nlp_->apply_retraction(info, primal_x, delta_primal_x, alpha, primal_x_next);
+    }
+
+    template <typename ProblemType>
+    void IpNlpOrig<ProblemType>::apply_dual_eq_transformation(
+        const ProblemInfo<ProblemType> &info, const VecRealView &primal_x,
+        const VecRealView &dual_eq_in, VecRealView &dual_eq_out)
+    {
+        nlp_->apply_dual_eq_transformation(info, primal_x, dual_eq_in, dual_eq_out);
+    }
+
+    template <typename ProblemType>
     void IpNlpOrig<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("constr_viol_tol", &IpNlpOrig::set_constr_viol_tol, this);

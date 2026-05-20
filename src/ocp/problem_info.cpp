@@ -22,8 +22,9 @@ namespace fatrop
     }
 }
 ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
-    : dims(dims), offsets_primal_u(dims.K), offsets_primal_x(dims.K), offsets_g_eq_dyn(dims.K),
-      offsets_g_eq_path(dims.K), offsets_g_eq_slack(dims.K)
+    : dims(dims), offsets_primal_u(dims.K), offsets_primal_x(dims.K),
+      offsets_tangent_u(dims.K), offsets_tangent_x(dims.K),
+      offsets_g_eq_dyn(dims.K), offsets_g_eq_path(dims.K), offsets_g_eq_slack(dims.K)
 {
     using namespace internal;
     // compute the number of primal variables
@@ -33,9 +34,12 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     // compute the number of slack variables
     number_of_slack_variables = std::accumulate(dims.number_of_ineq_constraints.begin(),
                                                 dims.number_of_ineq_constraints.end(), 0);
-    // compute the number of equality constraints
+    // compute the number of equality constraints.
+    // Dynamics residuals are written in tangent space (e.g. so(3) for orientation
+    // states), so their block size is set by number_of_tangent_states[k+1].
     number_of_eq_constraints =
-        std::accumulate(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0) +
+        std::accumulate(dims.number_of_tangent_states.begin() + 1,
+                        dims.number_of_tangent_states.end(), 0) +
         std::accumulate(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(),
                         0) +
         std::accumulate(dims.number_of_ineq_constraints.begin(),
@@ -53,6 +57,21 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     // of controls
     std::transform(offsets_primal_u.begin(), offsets_primal_u.end(),
                    dims.number_of_controls.begin(), offsets_primal_x.begin(), std::plus<Index>());
+    // Tangent-space offsets follow the same pattern but use the tangent stage sizes.
+    // For standard Euclidean problems these are identical to the primal offsets.
+    number_of_stage_tangent_variables.resize(dims.K);
+    std::transform(dims.number_of_tangent_states.begin(), dims.number_of_tangent_states.end(),
+                   dims.number_of_tangent_controls.begin(),
+                   number_of_stage_tangent_variables.begin(), std::plus<Index>());
+    number_of_tangent_variables = std::accumulate(number_of_stage_tangent_variables.begin(),
+                                                  number_of_stage_tangent_variables.end(), 0);
+    offset_tangent = 0;
+    compute_offsets(number_of_stage_tangent_variables.begin(),
+                    number_of_stage_tangent_variables.end(), offset_tangent,
+                    offsets_tangent_u.begin());
+    std::transform(offsets_tangent_u.begin(), offsets_tangent_u.end(),
+                   dims.number_of_tangent_controls.begin(), offsets_tangent_x.begin(),
+                   std::plus<Index>());
     // set up the offsets for the slack variables
     offset_slack = number_of_primal_variables;
     offsets_slack = std::vector<Index>(dims.K, 0);
@@ -62,11 +81,12 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(), 0,
                     offsets_eq.begin());
     offsets_dyn = std::vector<Index>(dims.K, 0);
-    compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0,
-                    offsets_dyn.begin());
+    // Dynamics residual blocks are tangent-sized.
+    compute_offsets(dims.number_of_tangent_states.begin() + 1, dims.number_of_tangent_states.end(),
+                    0, offsets_dyn.begin());
     // compute the number of (dyn, path, slack)-equality constraints
-    number_of_g_eq_dyn =
-        std::accumulate(dims.number_of_states.begin() + 1, dims.number_of_states.end(), 0);
+    number_of_g_eq_dyn = std::accumulate(dims.number_of_tangent_states.begin() + 1,
+                                         dims.number_of_tangent_states.end(), 0);
     number_of_g_eq_path = std::accumulate(dims.number_of_eq_constraints.begin(),
                                           dims.number_of_eq_constraints.end(), 0);
     number_of_g_eq_slack = std::accumulate(dims.number_of_ineq_constraints.begin(),
@@ -76,8 +96,8 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     offset_g_eq_path = 0;
     offset_g_eq_dyn = number_of_g_eq_path;
     offset_g_eq_slack = offset_g_eq_dyn + number_of_g_eq_dyn;
-    compute_offsets(dims.number_of_states.begin() + 1, dims.number_of_states.end(), offset_g_eq_dyn,
-                    offsets_g_eq_dyn.begin());
+    compute_offsets(dims.number_of_tangent_states.begin() + 1, dims.number_of_tangent_states.end(),
+                    offset_g_eq_dyn, offsets_g_eq_dyn.begin());
     compute_offsets(dims.number_of_eq_constraints.begin(), dims.number_of_eq_constraints.end(),
                     offset_g_eq_path, offsets_g_eq_path.begin());
     compute_offsets(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(),

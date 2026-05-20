@@ -20,6 +20,9 @@ namespace fatrop
     {
         const NlpDims &orig_dims = nlp->nlp_dims();
         dims_.number_of_variables = orig_dims.number_of_variables;
+        // The restoration phase reuses the original primal space (it only adds n and p slack
+        // variables), so the tangent dimension is inherited unchanged.
+        dims_.number_of_tangent_variables = orig_dims.number_of_tangent_variables;
         /* this is really the number of slack variables, here we add for the n and p variables */
         dims_.number_of_ineq_constraints =
             orig_dims.number_of_ineq_constraints + 2 * orig_dims.number_of_eq_constraints;
@@ -191,6 +194,26 @@ namespace fatrop
                                       VecRealScalar(y_p.m(), 0.));
         out_n = alpha * y_n - if_else(info.constraint_allows_dual_damping, multipliers,
                                       VecRealScalar(y_n.m(), 0.));
+    }
+
+    template <typename ProblemType>
+    void IpNlpResto<ProblemType>::apply_retraction(const ProblemInfo<ProblemType> &info,
+                                                   const VecRealView &primal_x,
+                                                   const VecRealView &delta_primal_x,
+                                                   const Scalar alpha, VecRealView &primal_x_next)
+    {
+        // The restoration NLP reuses the original primal space, so we forward verbatim.
+        nlp_orig_->apply_retraction(info, primal_x, delta_primal_x, alpha, primal_x_next);
+    }
+
+    template <typename ProblemType>
+    void IpNlpResto<ProblemType>::apply_dual_eq_transformation(
+        const ProblemInfo<ProblemType> &info, const VecRealView &primal_x,
+        const VecRealView &dual_eq_in, VecRealView &dual_eq_out)
+    {
+        // Resto adds slack-side variables but does not touch the equality multipliers,
+        // so the original NLP's dual transformation applies unchanged.
+        nlp_orig_->apply_dual_eq_transformation(info, primal_x, dual_eq_in, dual_eq_out);
     }
 
     template <typename ProblemType>

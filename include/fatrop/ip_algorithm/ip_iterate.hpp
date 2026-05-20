@@ -84,6 +84,20 @@ namespace fatrop
         const VecRealView &dual_eq() const { return dual_eq_; }
 
         /**
+         * @brief Returns the equality dual after passing it through
+         *        @c Nlp::apply_dual_eq_transformation.
+         *
+         * fatrop computes the equality multipliers @c dual_eq() by solving the Newton
+         * system with whatever (possibly pre-scaled) Jacobian the NLP returned, so
+         * those multipliers correspond to the scaled constraints. The transformed
+         * dual is what the NLP wants its @c eval_lag_hess implementation to see —
+         * typically @c M(x)^T dual_eq() when the user pre-multiplied the constraint
+         * row by @c M(x). Cached lazily and invalidated whenever @c dual_eq_ or
+         * @c primal_x_ changes.
+         */
+        const VecRealView &transformed_dual_eq();
+
+        /**
          * @brief Returns the dual variables for lower bound constraints.
          * @return Constant reference to the dual lower bounds vector.
          */
@@ -154,6 +168,18 @@ namespace fatrop
          * @param primal_x The new primal x vector.
          */
         template <typename Derived> void set_primal_x(const VecReal<Derived> &primal_x);
+
+        /**
+         * @brief Set the primal variables x by retracting along delta_x.
+         *
+         * Computes @c primal_x = retract(base_x, alpha * delta_x) via the NLP's
+         * @c apply_retraction. The default retraction is Euclidean
+         * @c primal_x = base_x + alpha * delta_x. Override @c Nlp::apply_retraction to
+         * support Lie-group / manifold optimization where @c base_x and @c delta_x
+         * may live in spaces of different dimension.
+         */
+        void set_primal_x_from_step(const VecRealView &base_x, const VecRealView &delta_x,
+                                    const Scalar alpha);
 
         /**
          * @brief Sets the primal slack variables s.
@@ -485,6 +511,7 @@ namespace fatrop
         VecRealAllocated constr_viol_;          ///< Residual of the equality constraints.
         VecRealAllocated dual_infeasibility_x_; ///< Residual of the equality constraints.
         VecRealAllocated dual_infeasibility_s_; ///< Residual of the equality constraints.
+        VecRealAllocated transformed_dual_eq_;  ///< Cache for Nlp::apply_dual_eq_transformation.
         // Derived quantities
         Scalar mu_;                         ///< Barrier value of the NLP.
         VecRealAllocated barrier_gradient_; ///< Gradient of the barrier function.
@@ -533,6 +560,7 @@ namespace fatrop
         bool hessian_evaluated_ = false;          ///< Flag for Hessian evaluation
         bool barrier_value_evaluated_ = false;    ///< Flag for barrier value evaluation
         bool barrier_gradient_evaluated_ = false; ///< Flag for barrier gradient evaluation
+        bool transformed_dual_eq_evaluated_ = false; ///< Flag for transformed dual_eq cache
         bool delta_lower_evaluated_ = false;      ///< Flag for delta_lower evaluation
         bool delta_upper_evaluated_ = false;      ///< Flag for delta_upper evaluation
         bool linear_decrease_objective_evaluated_ =
@@ -569,6 +597,14 @@ void fatrop::IpIterate<ProblemType>::set_primal_x(const VecReal<Derived> &primal
     primal_x_ = primal_x;
 }
 template <typename ProblemType>
+void fatrop::IpIterate<ProblemType>::set_primal_x_from_step(const VecRealView &base_x,
+                                                            const VecRealView &delta_x,
+                                                            const Scalar alpha)
+{
+    reset_evaluated_quantities();
+    nlp_->apply_retraction(info(), base_x, delta_x, alpha, primal_x_);
+}
+template <typename ProblemType>
 template <typename Derived>
 void fatrop::IpIterate<ProblemType>::set_primal_s(const VecReal<Derived> &primal_s)
 {
@@ -581,6 +617,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_eq(const VecReal<Derived> &dual_eq
 {
     dual_infeasibility_s_evaluated_ = false;
     dual_infeasibility_x_evaluated_ = false;
+    transformed_dual_eq_evaluated_ = false;
     dual_eq_ = dual_eq;
 }
 template <typename ProblemType>

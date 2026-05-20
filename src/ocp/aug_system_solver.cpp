@@ -23,11 +23,11 @@ bool check_reg(const Index m, MAT *sA, const Index ai, const Index aj)
 AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
 {
     Index max_number_of_controls =
-        *std::max_element(info.dims.number_of_controls.begin(), info.dims.number_of_controls.end());
+        *std::max_element(info.dims.number_of_tangent_controls.begin(), info.dims.number_of_tangent_controls.end());
     Index max_number_of_states =
-        *std::max_element(info.dims.number_of_states.begin(), info.dims.number_of_states.end());
-    Index max_number_of_variables = *std::max_element(info.number_of_stage_variables.begin(),
-                                                      info.number_of_stage_variables.end());
+        *std::max_element(info.dims.number_of_tangent_states.begin(), info.dims.number_of_tangent_states.end());
+    Index max_number_of_variables = *std::max_element(info.number_of_stage_tangent_variables.begin(),
+                                                      info.number_of_stage_tangent_variables.end());
     Index max_number_of_ineq_constraints = *std::max_element(
         info.dims.number_of_ineq_constraints.begin(), info.dims.number_of_ineq_constraints.end());
     Index max_number_of_eq_consttraints = *std::max_element(
@@ -38,11 +38,11 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
     GgLt.emplace_back(max_number_of_variables + 1, max_number_of_variables);
     RSQrqt_hat.emplace_back(max_number_of_variables + 1, max_number_of_variables);
     Llt_shift.emplace_back(max_number_of_variables + 1, max_number_of_controls);
-    GgIt_tilde.emplace_back(info.dims.number_of_states[0] + 1, info.dims.number_of_states[0]);
-    GgLIt.emplace_back(info.dims.number_of_states[0] + 1, info.dims.number_of_states[0]);
-    HhIt.emplace_back(info.dims.number_of_states[0] + 1, info.dims.number_of_states[0]);
-    PpIt_hat.emplace_back(info.dims.number_of_states[0] + 1, info.dims.number_of_states[0]);
-    LlIt.emplace_back(info.dims.number_of_states[0] + 1, info.dims.number_of_states[0]);
+    GgIt_tilde.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
+    GgLIt.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
+    HhIt.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
+    PpIt_hat.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
+    LlIt.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
     Ggt_ineq_temp.emplace_back(max_number_of_variables + 1, max_number_of_ineq_constraints);
 
     Ppt.reserve(info.dims.K);
@@ -52,8 +52,8 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
     Llt.reserve(info.dims.K);
     for (Index k = 0; k < info.dims.K; k++)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         Index ng_eq = info.dims.number_of_eq_constraints[k];
         Ppt.emplace_back(nx + 1, nx);
@@ -68,11 +68,11 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
     v_GgLt.emplace_back(max_number_of_variables);
     v_RSQrqt_hat.emplace_back(max_number_of_variables);
     v_Llt_shift.emplace_back(max_number_of_controls);
-    v_GgIt_tilde.emplace_back(info.dims.number_of_states[0]);
-    v_GgLIt.emplace_back(info.dims.number_of_states[0]);
-    v_HhIt.emplace_back(info.dims.number_of_states[0]);
-    v_PpIt_hat.emplace_back(info.dims.number_of_states[0]);
-    v_LlIt.emplace_back(info.dims.number_of_states[0]);
+    v_GgIt_tilde.emplace_back(info.dims.number_of_tangent_states[0]);
+    v_GgLIt.emplace_back(info.dims.number_of_tangent_states[0]);
+    v_HhIt.emplace_back(info.dims.number_of_tangent_states[0]);
+    v_PpIt_hat.emplace_back(info.dims.number_of_tangent_states[0]);
+    v_LlIt.emplace_back(info.dims.number_of_tangent_states[0]);
     v_Ggt_ineq_temp.emplace_back(max_number_of_ineq_constraints);
     v_tmp.emplace_back(max_number_of_variables);
 
@@ -84,8 +84,8 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
 
     for (Index k = 0; k < info.dims.K; k++)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         v_Ppt.emplace_back(nx);
         v_Hh.emplace_back(nx);
         v_RSQrqt_tilde.emplace_back(nu + nx);
@@ -93,16 +93,16 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
         v_Llt.emplace_back(nu + nx);
     }
 
-    PlI.emplace_back(info.dims.number_of_states[0]);
-    PrI.emplace_back(info.dims.number_of_states[0]);
+    PlI.emplace_back(info.dims.number_of_tangent_states[0]);
+    PrI.emplace_back(info.dims.number_of_tangent_states[0]);
 
     Pl.reserve(info.dims.K);
     Pr.reserve(info.dims.K);
 
     for (Index k = 0; k < info.dims.K; k++)
     {
-        Index nu = info.dims.number_of_controls[k];
-        Index nx = info.dims.number_of_states[k];
+        Index nu = info.dims.number_of_tangent_controls[k];
+        Index nx = info.dims.number_of_tangent_states[k];
         Pl.emplace_back(max_number_of_controls);
         Pr.emplace_back(max_number_of_controls);
     }
@@ -132,12 +132,12 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     /////////////// recursion ///////////////
     for (Index k = info.dims.K - 1; k >= 0; --k)
     {
-        const Index nu = info.dims.number_of_controls[k];
-        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         const Index offset_ineq_k = info.offsets_slack[k];
-        const Index offset_u = info.offsets_primal_u[k];
+        const Index offset_u = info.offsets_tangent_u[k];
         const Index offset_eq_path = info.offsets_g_eq_path[k];
         const Index offset_eq_slack = info.offsets_g_eq_slack[k];
         //////// SUBSDYN
@@ -154,7 +154,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         else
         {
             const Index offset_eq_dyn = info.offsets_g_eq_dyn[k];
-            const Index nxp1 = info.dims.number_of_states[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
             const Index Hp1_size = gamma[k + 1] - rho[k + 1];
             if (Hp1_size + ng > nu + nx)
                 return LinsolReturnFlag::NOFULL_RANK;
@@ -318,7 +318,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     rankI = 0;
     //////// FIRST_STAGE
     {
-        const Index nx = info.dims.number_of_states[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
         Index gamma_I = gamma[0] - rho[0];
         if (gamma_I > nx)
         {
@@ -365,10 +365,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     ////// FORWARD_SUBSTITUTION:
     // first stage
     {
-        const Index nx = info.dims.number_of_states[0];
-        const Index nu = info.dims.number_of_controls[0];
-        const Index offs_u = info.offsets_primal_u[0];
-        const Index offs_x = info.offsets_primal_x[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
+        const Index nu = info.dims.number_of_tangent_controls[0];
+        const Index offs_u = info.offsets_tangent_u[0];
+        const Index offs_x = info.offsets_tangent_x[0];
         const Index offs_g = info.offsets_g_eq_path[0];
         // calculate xIb
         rowex(nx - rankI, -1.0, LlIt[0], nx - rankI, 0, x, offs_x + rankI);
@@ -394,10 +394,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     // other stages
     for (Index k = 0; k < info.dims.K; k++)
     {
-        const Index nx = info.dims.number_of_states[k];
-        const Index nu = info.dims.number_of_controls[k];
-        const Index offs = info.offsets_primal_u[k];
-        const Index offs_x = info.offsets_primal_x[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index offs = info.offsets_tangent_u[k];
+        const Index offs_x = info.offsets_tangent_x[k];
         const Index rho_k = rho[k];
         const Index numrho_k = nu - rho_k;
         const Index offs_g_k = info.offsets_g_eq_path[k];
@@ -455,10 +455,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         if (k != info.dims.K - 1)
         {
             const Index offs_dyn_eq_k = info.offsets_g_eq_dyn[k];
-            const Index nxp1 = info.dims.number_of_states[k + 1];
-            const Index nup1 = info.dims.number_of_controls[k + 1];
-            const Index offsp1 = info.offsets_primal_u[k + 1];
-            const Index offsxp1 = info.offsets_primal_x[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
+            const Index nup1 = info.dims.number_of_tangent_controls[k + 1];
+            const Index offsp1 = info.offsets_tangent_u[k + 1];
+            const Index offsxp1 = info.offsets_tangent_x[k + 1];
             const Index offs_g_kp1 = info.offsets_g_eq_path[k + 1];
             const Index gammamrho_kp1 = gamma[k + 1] - rho[k + 1];
             // calculate xkp1
@@ -485,12 +485,12 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     MatRealView *RSQrq_hat_curr_p;
     for (Index k = info.dims.K - 1; k >= 0; --k)
     {
-        const Index nu = info.dims.number_of_controls[k];
-        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         const Index offs_ineq_k = info.offsets_slack[k];
-        const Index offset_u = info.offsets_primal_u[k];
+        const Index offset_u = info.offsets_tangent_u[k];
         const Index offset_eq_k = info.offsets_eq[k];
         const Index offset_g_eq_k = info.offsets_g_eq_path[k];
         const Index offset_g_ineq_k = info.offsets_g_eq_slack[k];
@@ -504,7 +504,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         else
         {
             const Index offset_eq_dyn = info.offsets_g_eq_dyn[k];
-            const Index nxp1 = info.dims.number_of_states[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
             // AL <- [BAb]^T_k P_kp1
             rowin(nxp1, 1.0, g, offset_eq_dyn, jacobian.BAbt[k], nu + nx, 0);
             gemm_nt(nu + nx + 1, nxp1, nxp1, 1.0, jacobian.BAbt[k], 0, 0, Ppt[k + 1], 0, 0, 0.0,
@@ -571,7 +571,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     }
     //////// FIRST_STAGE
     {
-        const Index nx = info.dims.number_of_states[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
         {
             potrf_l_mn(nx + 1, nx, Ppt[0], 0, 0, LlIt[0], 0, 0);
             if (!check_reg(nx, &LlIt[0].mat(), 0, 0))
@@ -581,9 +581,9 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     ////// FORWARD_SUBSTITUTION:
     // first stage
     {
-        const Index nx = info.dims.number_of_states[0];
-        const Index nu = info.dims.number_of_controls[0];
-        const Index offs_x = info.offsets_primal_x[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
+        const Index nu = info.dims.number_of_tangent_controls[0];
+        const Index offs_x = info.offsets_tangent_x[0];
         // calculate xIb
         rowex(nx, -1.0, LlIt[0], nx, 0, x, offs_x);
         // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
@@ -591,18 +591,18 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
     }
     for (Index k = 0; k < info.dims.K; k++)
     {
-        const Index nx = info.dims.number_of_states[k];
-        const Index nu = info.dims.number_of_controls[k];
-        const Index offs = info.offsets_primal_u[k];
-        const Index offs_x = info.offsets_primal_x[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index offs = info.offsets_tangent_u[k];
+        const Index offs_x = info.offsets_tangent_x[k];
         rowex(nu, -1.0, Llt[k], nu + nx, 0, x, offs);
         gemv_t(nx, nu, -1.0, Llt[k], nu, 0, x, offs_x, 1.0, x, offs, x, offs);
         trsv_ltn(nu, Llt[k], 0, 0, x, offs, x, offs);
         if (k != info.dims.K - 1)
         {
-            const Index nxp1 = info.dims.number_of_states[k + 1];
-            const Index nup1 = info.dims.number_of_controls[k + 1];
-            const Index offs_x_p1 = info.offsets_primal_x[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
+            const Index nup1 = info.dims.number_of_tangent_controls[k + 1];
+            const Index offs_x_p1 = info.offsets_tangent_x[k + 1];
             const Index offs_dyn_eq_k = info.offsets_g_eq_dyn[k];
             // calculate xkp1
             rowex(nxp1, 1.0, jacobian.BAbt[k], nu + nx, 0, x, offs_x_p1);
@@ -650,14 +650,14 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
 
     for (Index k = info.dims.K - 1; k >= 0; --k)
     {
-        const Index nu = info.dims.number_of_controls[k];
-        const Index nx = info.dims.number_of_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         const Index offset_ineq_k = info.offsets_slack[k];
         const Index offs_g_ineq_k = info.offsets_g_eq_slack[k];
         const Index offs_g_k = info.offsets_g_eq_path[k];
-        const Index offs = info.offsets_primal_u[k];
+        const Index offs = info.offsets_tangent_u[k];
         //         //////// SUBSDYN
         Index gamma_k;
         if (k == info.dims.K - 1)
@@ -670,7 +670,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         else
         {
             const Index offs_dyn_k = info.offsets_g_eq_dyn[k];
-            const Index nxp1 = info.dims.number_of_states[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
             const Index Hp1_size = gamma[k + 1] - rho[k + 1];
             gamma_k = Hp1_size + ng;
             gemv_n(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, g, offs_dyn_k, 0.0, v_AL[0], 0, v_AL[0], 0);
@@ -759,7 +759,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         }
     }
     {
-        const Index nx = info.dims.number_of_states[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
         Index gamma_I = gamma[0] - rho[0];
         if (gamma_I > 0)
         {
@@ -784,10 +784,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         }
     }
     {
-        const Index nx = info.dims.number_of_states[0];
-        const Index nu = info.dims.number_of_controls[0];
-        const Index offs_u = info.offsets_primal_u[0];
-        const Index offs_x = info.offsets_primal_x[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
+        const Index nu = info.dims.number_of_tangent_controls[0];
+        const Index offs_u = info.offsets_tangent_u[0];
+        const Index offs_x = info.offsets_tangent_x[0];
         const Index offs_g = info.offsets_g_eq_path[0];
         veccpsc(nx - rankI, -1.0, v_LlIt[0], 0, x, offs_x + rankI);
         trsv_ltn(nx - rankI, LlIt[0], 0, 0, x, offs_x + rankI, x, offs_x + rankI);
@@ -804,10 +804,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
     for (Index k = 0; k < info.dims.K; k++)
     {
 
-        const Index nx = info.dims.number_of_states[k];
-        const Index nu = info.dims.number_of_controls[k];
-        const Index offs = info.offsets_primal_u[k];
-        const Index offs_x = info.offsets_primal_x[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index offs = info.offsets_tangent_u[k];
+        const Index offs_x = info.offsets_tangent_x[k];
         const Index rho_k = rho[k];
         const Index numrho_k = nu - rho_k;
         const Index offs_g_k = info.offsets_g_eq_path[k];
@@ -855,10 +855,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         }
         if (k != info.dims.K - 1)
         {
-            const Index nxp1 = info.dims.number_of_states[k + 1];
-            const Index nup1 = info.dims.number_of_controls[k + 1];
-            const Index offsp1 = info.offsets_primal_u[k + 1];
-            const Index offsxp1 = info.offsets_primal_x[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
+            const Index nup1 = info.dims.number_of_tangent_controls[k + 1];
+            const Index offsp1 = info.offsets_tangent_u[k + 1];
+            const Index offsxp1 = info.offsets_tangent_x[k + 1];
             const Index offs_g_kp1 = info.offsets_g_eq_path[k + 1];
             const Index offs_dyn_k = info.offsets_g_eq_dyn[k];
             const Index gammamrho_kp1 = gamma[k + 1] - rho[k + 1];
@@ -884,9 +884,9 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
     VecRealView *v_RSQrq_hat_curr_p;
     for (Index k = info.dims.K - 1; k >= 0; --k)
     {
-        const Index offs_ux_k = info.offsets_primal_u[k];
-        const Index nu = info.dims.number_of_controls[k];
-        const Index nx = info.dims.number_of_states[k];
+        const Index offs_ux_k = info.offsets_tangent_u[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
         const Index offs_g_dyn = info.offsets_g_eq_dyn[k];
@@ -899,7 +899,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         }
         else
         {
-            const Index nxp1 = info.dims.number_of_states[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
             gemv_n(nxp1, nxp1, 1.0, Ppt[k + 1], 0, 0, g, offs_g_dyn, 0.0, v_AL[0], 0, v_AL[0], 0);
             axpy(nxp1, 1.0, v_Ppt[k + 1], 0, v_AL[0], 0, v_AL[0], 0);
             gemv_n(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, v_AL[0], 0, 1.0, f, offs_ux_k,
@@ -938,33 +938,33 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         }
     }
     {
-        const Index nx = info.dims.number_of_states[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
         {
             trsv_lnn(nx, LlIt[0], 0, 0, v_Ppt[0], 0, v_LlIt[0], 0);
         }
     }
     {
-        const Index nx = info.dims.number_of_states[0];
-        const Index nu = info.dims.number_of_controls[0];
-        const Index offs_x = info.offsets_primal_x[0];
+        const Index nx = info.dims.number_of_tangent_states[0];
+        const Index nu = info.dims.number_of_tangent_controls[0];
+        const Index offs_x = info.offsets_tangent_x[0];
         veccpsc(nx, -1.0, v_LlIt[0], 0, x, offs_x);
         trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, x, offs_x);
     }
     for (Index k = 0; k < info.dims.K; k++)
     {
-        const Index nx = info.dims.number_of_states[k];
-        const Index nu = info.dims.number_of_controls[k];
-        const Index offs = info.offsets_primal_u[k];
-        const Index offs_x = info.offsets_primal_x[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
+        const Index offs = info.offsets_tangent_u[k];
+        const Index offs_x = info.offsets_tangent_x[k];
         const Index offs_dyn_eq_k = info.offsets_g_eq_dyn[k];
         veccpsc(nu, -1.0, v_Llt[k], 0, x, offs);
         gemv_t(nx, nu, -1.0, Llt[k], nu, 0, x, offs_x, 1.0, x, offs, x, offs);
         trsv_ltn(nu, Llt[k], 0, 0, x, offs, x, offs);
         if (k != info.dims.K - 1)
         {
-            const Index nxp1 = info.dims.number_of_states[k + 1];
-            const Index offsp1 = info.offsets_primal_u[k + 1];
-            const Index offs_x_p1 = info.offsets_primal_x[k + 1];
+            const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
+            const Index offsp1 = info.offsets_tangent_u[k + 1];
+            const Index offs_x_p1 = info.offsets_tangent_x[k + 1];
             veccp(nxp1, g, offs_dyn_eq_k, x, offs_x_p1);
             gemv_t(nu + nx, nxp1, 1.0, jacobian.BAbt[k], 0, 0, x, offs, 1.0, x, offs_x_p1, x,
                    offs_x_p1);
@@ -976,10 +976,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
     // // calculate lam_eq xk
     for (Index k = 0; k < info.dims.K; k++)
     {
-        const Index nx = info.dims.number_of_states[k];
-        const Index nu = info.dims.number_of_controls[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
         const Index ng = info.dims.number_of_eq_constraints[k];
-        const Index offs = info.offsets_primal_u[k];
+        const Index offs = info.offsets_tangent_u[k];
         const Index offs_g_k = info.offsets_g_eq_path[k];
         const Index offs_eq = info.offsets_eq[k];
         if (ng > 0)
@@ -993,10 +993,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
 
     for (Index k = 0; k < info.dims.K; k++)
     {
-        const Index nx = info.dims.number_of_states[k];
-        const Index nu = info.dims.number_of_controls[k];
+        const Index nx = info.dims.number_of_tangent_states[k];
+        const Index nu = info.dims.number_of_tangent_controls[k];
         const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
-        const Index offs = info.offsets_primal_u[k];
+        const Index offs = info.offsets_tangent_u[k];
         const Index offs_gineq_k = info.offsets_g_eq_slack[k];
         const Index offs_slack = info.offsets_slack[k];
         if (ng_ineq > 0)

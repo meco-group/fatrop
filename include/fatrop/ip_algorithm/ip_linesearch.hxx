@@ -29,7 +29,7 @@ namespace fatrop
         const IpDataSp &ipdata, const LinearSolverSp &linear_solver,
         const RestorationPhaseSp &restoration_phase)
         : ipdata_(ipdata), linear_solver_(linear_solver), restoration_phase_(restoration_phase),
-          soc_rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
+          soc_rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_tangent_variables),
           soc_rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           soc_rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           soc_g_accumulate_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
@@ -81,7 +81,8 @@ namespace fatrop
         {
             // set the trial point
             IpIterateType &trial_it = ipdata_->trial_iterate();
-            trial_it.set_primal_x(curr_it.primal_x() + alpha_primal * curr_it.delta_primal_x());
+            trial_it.set_primal_x_from_step(curr_it.primal_x(), curr_it.delta_primal_x(),
+                                            alpha_primal);
             trial_it.set_primal_s(curr_it.primal_s() + alpha_primal * curr_it.delta_primal_s());
             bool eval_success =
                 (trial_it.constr_viol().is_finite() && std::isfinite(trial_it.obj_value()) &&
@@ -220,8 +221,8 @@ namespace fatrop
         if (tiny_step)
         {
             Scalar alpha_primal = (*curr_it).maximum_step_size_primal((*curr_it).tau());
-            (*trial_it).set_primal_x((*curr_it).primal_x() +
-                                     alpha_primal * (*curr_it).delta_primal_x()); // x
+            (*trial_it).set_primal_x_from_step((*curr_it).primal_x(),
+                                               (*curr_it).delta_primal_x(), alpha_primal); // x
             (*trial_it).set_primal_s((*curr_it).primal_s() +
                                      alpha_primal * (*curr_it).delta_primal_s()); // s
             // let's see if we can evaluate objective barrier and contraints and if they are finite
@@ -512,7 +513,7 @@ namespace fatrop
             // compute the maximum step size for the second order correction
             alpha_primal_soc = curr_it.maximum_step_size_primal(curr_it.tau(), soc_rhs_s_);
             // set the new trial iterate
-            trial_it.set_primal_x(curr_it.primal_x() + alpha_primal_soc * soc_rhs_x_);
+            trial_it.set_primal_x_from_step(curr_it.primal_x(), soc_rhs_x_, alpha_primal_soc);
             trial_it.set_primal_s(curr_it.primal_s() + alpha_primal_soc * soc_rhs_s_);
             // check if the trial point is acceptable
             accept = check_acceptability_of_trial_point(alpha_primal_test);
@@ -564,7 +565,7 @@ namespace fatrop
         // todo: in contrast to Ipopt, we dont check for evaluation errors, we will however throw an
         // exception at check_acceptability_of_trial_point but we dont have a mechanism to catch
         // this exception
-        trial.set_primal_x(curr_it.primal_x() + alpha * curr_it.delta_primal_x());
+        trial.set_primal_x_from_step(curr_it.primal_x(), curr_it.delta_primal_x(), alpha);
         trial.set_primal_s(curr_it.primal_s() + alpha * curr_it.delta_primal_s());
         perform_dual_step(alpha, alpha);
         if (check_acceptability_of_trial_point(0.))
@@ -629,7 +630,12 @@ namespace fatrop
             return false;
         const VecRealView &curr_x = ipdata_->current_iterate().primal_x();
         const VecRealView &delta_x = ipdata_->current_iterate().delta_primal_x();
-        const Scalar max_step_x = max_el(abs(delta_x) / (abs(curr_x) + 1.));
+        // When the primal and tangent spaces have different dimensions (e.g. Lie-group
+        // optimization) the element-wise division does not make sense, so we fall back to
+        // a plain norm of the tangent step.
+        const Scalar max_step_x = (curr_x.m() == delta_x.m())
+                                      ? max_el(abs(delta_x) / (abs(curr_x) + 1.))
+                                      : max_el(abs(delta_x));
         if (max_step_x > tiny_step_tol_)
             return false;
         const VecRealView &curr_s = ipdata_->current_iterate().primal_s();

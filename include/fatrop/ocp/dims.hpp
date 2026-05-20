@@ -45,6 +45,18 @@ namespace fatrop
          */
         ProblemDims(int K, std::vector<Index> &&nu, std::vector<Index> &&nx, std::vector<Index> &&ng,
                 std::vector<Index> &&ng_ineq);
+        /**
+         * @brief Constructs a ProblemDims object with separate tangent-space dimensions.
+         *
+         * Use this overload for Lie-group / manifold optimization where the primal state /
+         * control lives on a manifold of dimension @c nx[k] / @c nu[k] but the
+         * search-direction (tangent) lives in a space of dimension @c nx_tan[k] /
+         * @c nu_tan[k]. Pass equal vectors (or use the other constructors) for standard
+         * Euclidean problems.
+         */
+        ProblemDims(int K, const std::vector<Index> &nu, const std::vector<Index> &nx,
+                    const std::vector<Index> &ng, const std::vector<Index> &ng_ineq,
+                    const std::vector<Index> &nu_tan, const std::vector<Index> &nx_tan);
         void check_problem_dimensions() const;
 
         const int K;                                  ///< Number of stages in the OCP.
@@ -54,6 +66,12 @@ namespace fatrop
             number_of_eq_constraints; ///< Number of path equality constraints for each stage.
         const std::vector<Index>
             number_of_ineq_constraints; ///< Number of path inequality constraints for each stage.
+        /// Tangent-space dimension of the controls at each stage. Equal to
+        /// @c number_of_controls unless an OCP overrides @c get_nu_tangent.
+        const std::vector<Index> number_of_tangent_controls;
+        /// Tangent-space dimension of the state at each stage. Equal to
+        /// @c number_of_states unless an OCP overrides @c get_nx_tangent.
+        const std::vector<Index> number_of_tangent_states;
     };
 
 } // namespace fatrop

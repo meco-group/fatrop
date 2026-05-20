@@ -7,5 +7,11 @@ target_link_libraries(ocp_impl_example PRIVATE fatrop)
 add_executable(ocp_impl_example_static ocp_impl_example_static.cpp)
 target_link_libraries(ocp_impl_example_static PRIVATE fatrop)
 
+add_executable(quaternion_lie_example quaternion_lie_example.cpp)
+target_link_libraries(quaternion_lie_example PRIVATE fatrop)
+
+add_executable(quaternion_lie_multistep_example quaternion_lie_multistep_example.cpp)
+target_link_libraries(quaternion_lie_multistep_example PRIVATE fatrop)
+
 # Include the casadi_codegen subdirectory
 add_subdirectory(casadi_codegen)

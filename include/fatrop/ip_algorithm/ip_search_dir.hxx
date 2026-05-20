@@ -11,7 +11,7 @@ namespace fatrop
     IpSearchDirImpl<LinearSolverType, ProblemType>::IpSearchDirImpl(
         const IpDataSp &ipdata, const LinearSolverSp &linear_solver)
         : ipdata_(ipdata), linear_solver_(linear_solver),
-          rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_variables),
+          rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_tangent_variables),
           rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
