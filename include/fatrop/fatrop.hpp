@@ -11,6 +11,7 @@
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
+#include "fatrop/qp/fatrop_qp.hpp"
 #include "fatrop/ocp/hessian.hpp"
 #include "fatrop/ocp/jacobian.hpp"
 #include "fatrop/ocp/nlp_ocp.hpp"

@@ -28,6 +28,7 @@ set(FATROP_SOURCES
     ocp/pd_solver_orig.cpp
     ocp/pd_solver_resto.cpp
     ocp/problem_info.cpp
+    ocp/mehrotra_qp.cpp
     ip_algorithm/ip_filter.cpp
     ip_algorithm/ip_mu_update.cpp
     ip_algorithm/ip_utils.cpp
