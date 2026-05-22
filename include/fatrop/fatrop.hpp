@@ -16,5 +16,9 @@
 #include "fatrop/ocp/jacobian.hpp"
 #include "fatrop/ocp/nlp_ocp.hpp"
 #include "fatrop/ocp/ocp_abstract.hpp"
+#include "fatrop/dense/dense_abstract.hpp"
+#include "fatrop/dense/hessian.hpp"
+#include "fatrop/dense/jacobian.hpp"
+#include "fatrop/dense/nlp_dense.hpp"
 
 #endif // __fatrop_fatrop_hpp__

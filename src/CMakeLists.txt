@@ -32,6 +32,34 @@ set(FATROP_SOURCES
     ip_algorithm/ip_filter.cpp
     ip_algorithm/ip_mu_update.cpp
     ip_algorithm/ip_utils.cpp
+    dense/dims.cpp
+    dense/problem_info.cpp
+    dense/jacobian.cpp
+    dense/hessian.cpp
+    dense/aug_system_solver.cpp
+    dense/pd_system_orig.cpp
+    dense/pd_solver_orig.cpp
+    dense/pd_system_resto.cpp
+    dense/pd_solver_resto.cpp
+    dense/nlp_dense.cpp
+    dense/ip_alg_builder.cpp
+    dense/ip_algorithm.cpp
+    dense/ip_convergence_check.cpp
+    dense/ip_convergence_check_resto.cpp
+    dense/ip_data.cpp
+    dense/ip_eq_mult_initializer.cpp
+    dense/ip_initializer.cpp
+    dense/ip_initializer_resto.cpp
+    dense/ip_iterate.cpp
+    dense/ip_iteration_output.cpp
+    dense/ip_iteration_output_resto.cpp
+    dense/ip_linesearch.cpp
+    dense/ip_mu_update.cpp
+    dense/ip_nlp_orig.cpp
+    dense/ip_nlp_resto.cpp
+    dense/ip_resto_phase_min_cl1.cpp
+    dense/ip_search_dir.cpp
+    dense/mehrotra_qp.cpp
 )
 
 # Create the fatrop shared library

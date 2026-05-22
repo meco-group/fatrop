@@ -25,101 +25,12 @@
 
 using namespace fatrop;
 
+#include "so3_helpers.hpp"
+
+using namespace fatrop::examples;
+
 namespace
 {
-inline void mat3_identity(Scalar M[9])
-{
-    for (int i = 0; i < 9; ++i) M[i] = 0.;
-    M[0] = M[4] = M[8] = 1.;
-}
-inline void mat3_mul(const Scalar A[9], const Scalar B[9], Scalar C[9])
-{
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-        {
-            Scalar s = 0.;
-            for (int k = 0; k < 3; ++k) s += A[i * 3 + k] * B[k * 3 + j];
-            C[i * 3 + j] = s;
-        }
-}
-inline void hat3(const Scalar v[3], Scalar M[9])
-{
-    M[0] = 0.;     M[1] = -v[2]; M[2] = v[1];
-    M[3] = v[2];   M[4] = 0.;    M[5] = -v[0];
-    M[6] = -v[1];  M[7] = v[0];  M[8] = 0.;
-}
-inline void quat_mul(const Scalar *a, const Scalar *b, Scalar *r)
-{
-    const Scalar aw = a[0], ax = a[1], ay = a[2], az = a[3];
-    const Scalar bw = b[0], bx = b[1], by = b[2], bz = b[3];
-    r[0] = aw * bw - ax * bx - ay * by - az * bz;
-    r[1] = aw * bx + ax * bw + ay * bz - az * by;
-    r[2] = aw * by - ax * bz + ay * bw + az * bx;
-    r[3] = aw * bz + ax * by - ay * bx + az * bw;
-}
-inline void quat_normalize(Scalar *q)
-{
-    const Scalar n = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
-    if (n > 0.) { q[0] /= n; q[1] /= n; q[2] /= n; q[3] /= n; }
-}
-inline void quat_exp(const Scalar v[3], Scalar q[4])   // q = Exp_q(v) for v in so(3)
-{
-    const Scalar half = 0.5 * std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-    if (half < 1e-12)
-    {
-        q[0] = 1. - 0.5 * half * half;
-        q[1] = 0.5 * v[0]; q[2] = 0.5 * v[1]; q[3] = 0.5 * v[2];
-        quat_normalize(q);
-        return;
-    }
-    const Scalar s = std::sin(half) / (2. * half);
-    q[0] = std::cos(half);
-    q[1] = s * v[0]; q[2] = s * v[1]; q[3] = s * v[2];
-}
-inline void quat_log(const Scalar *q, Scalar v[3])
-{
-    Scalar w = q[0], x = q[1], y = q[2], z = q[3];
-    if (w < 0.) { w = -w; x = -x; y = -y; z = -z; }
-    const Scalar vec = std::sqrt(x * x + y * y + z * z);
-    if (vec < 1e-12) { v[0] = 2. * x; v[1] = 2. * y; v[2] = 2. * z; return; }
-    const Scalar angle = 2. * std::atan2(vec, w);
-    const Scalar s = angle / vec;
-    v[0] = s * x; v[1] = s * y; v[2] = s * z;
-}
-inline void quat_inv(const Scalar *q, Scalar *qi)
-{
-    qi[0] = q[0]; qi[1] = -q[1]; qi[2] = -q[2]; qi[3] = -q[3];
-}
-inline void quat_to_rotmat(const Scalar *q, Scalar R[9])
-{
-    const Scalar w = q[0], x = q[1], y = q[2], z = q[3];
-    R[0] = 1 - 2 * (y * y + z * z); R[1] = 2 * (x * y - z * w); R[2] = 2 * (x * z + y * w);
-    R[3] = 2 * (x * y + z * w);     R[4] = 1 - 2 * (x * x + z * z); R[5] = 2 * (y * z - x * w);
-    R[6] = 2 * (x * z - y * w);     R[7] = 2 * (y * z + x * w); R[8] = 1 - 2 * (x * x + y * y);
-}
-// SO(3) left / right Jacobians (closed-form, with the small-angle Taylor near zero).
-inline void so3_left_jacobian(const Scalar v[3], Scalar J[9])
-{
-    const Scalar theta2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-    mat3_identity(J);
-    Scalar vh[9]; hat3(v, vh);
-    Scalar vh2[9]; mat3_mul(vh, vh, vh2);
-    if (theta2 < 1e-8)
-    {
-        for (int i = 0; i < 9; ++i) J[i] += 0.5 * vh[i] + (1. / 6.) * vh2[i];
-        return;
-    }
-    const Scalar theta = std::sqrt(theta2);
-    const Scalar a = (1. - std::cos(theta)) / theta2;
-    const Scalar b = (theta - std::sin(theta)) / (theta2 * theta);
-    for (int i = 0; i < 9; ++i) J[i] += a * vh[i] + b * vh2[i];
-}
-inline void so3_right_jacobian(const Scalar v[3], Scalar J[9])
-{
-    const Scalar nv[3] = {-v[0], -v[1], -v[2]};
-    so3_left_jacobian(nv, J);
-}
-
 // b_k = log( q_{k+1}^{-1} (q_k (x) Exp_q(omega dt)) )^v
 inline void compute_residual(const Scalar *q_kp1, const Scalar *q_k, const Scalar omega[3],
                              const Scalar dt, Scalar b[3])
@@ -131,6 +42,7 @@ inline void compute_residual(const Scalar *q_kp1, const Scalar *q_k, const Scala
     Scalar t[4]; quat_mul(q_kp1_inv, f, t);
     quat_log(t, b);
 }
+
 } // namespace
 
 class QuaternionLieMultistepOcp : public OcpAbstract

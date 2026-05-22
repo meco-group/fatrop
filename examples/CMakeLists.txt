@@ -19,5 +19,8 @@ target_link_libraries(pnp_lie_example PRIVATE fatrop)
 add_executable(mehrotra_qp_example mehrotra_qp_example.cpp)
 target_link_libraries(mehrotra_qp_example PRIVATE fatrop)
 
+add_executable(dense_example dense_example.cpp)
+target_link_libraries(dense_example PRIVATE fatrop)
+
 # Include the casadi_codegen subdirectory
 add_subdirectory(casadi_codegen)
