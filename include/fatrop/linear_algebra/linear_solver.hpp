@@ -72,6 +72,21 @@ namespace fatrop
         LinsolReturnFlag solve_in_place_rhs(LinearSystem<LsType> &ls);
 
 
+        // Iterative-refinement tuning + monitoring.
+        void set_min_it_ref(const Index &value) { min_it_ref = value; }
+        void set_max_it_ref(const Index &value) { max_it_ref = value; }
+        void set_iref_tol(const Scalar &value) { tol_ = value; }
+        /// Last (final) residual norm = ||A x + b||_inf / max(||b||, 1)
+        /// produced by `apply_iterative_refinement`.
+        Scalar last_iref_residual() const { return last_residual_; }
+        /// Number of iterative-refinement iterations actually performed by
+        /// the last call to `apply_iterative_refinement`.
+        Index last_iref_iters() const { return last_iref_iters_; }
+        /// Largest iterative-refinement residual seen since construction
+        /// (or since @c reset_iref_stats()).
+        Scalar worst_iref_residual() const { return worst_residual_; }
+        void reset_iref_stats() { worst_residual_ = 0.0; }
+
     protected:
         /**
          * @brief Apply iterative refinement to improve the solution accuracy.
@@ -89,6 +104,10 @@ namespace fatrop
         VecRealAllocated x_;        ///< Allocated vector for intermediate solution.
         VecRealAllocated residual_; ///< Allocated vector for residual.
         VecRealAllocated tmp_;      ///< Allocated vector for temporary calculations.
+        // Monitoring stats (updated by apply_iterative_refinement).
+        Scalar last_residual_ = 0.0;
+        Index last_iref_iters_ = 0;
+        Scalar worst_residual_ = 0.0;
     };
 } // namespace fatrop
 

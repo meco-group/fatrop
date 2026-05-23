@@ -679,11 +679,22 @@ namespace fatrop
         Scalar alpha_min = gamma_theta_;
         if (gBD < 0.)
         {
-            alpha_min = std::min(gamma_theta_, gamma_phi_ * curr_theta / (-gBD));
-            if (curr_theta <= theta_min_)
+            // The theta-scaled formulas below would collapse to 0 when the
+            // constraint violation theta is identically zero (purely
+            // unconstrained problems, or a feasible iterate of a
+            // constrained problem). In that case fall back to the
+            // gamma_theta_ floor instead of letting alpha_min underflow,
+            // otherwise the backtracking line search runs alpha all the
+            // way down to subnormal floats (~1076 halvings of 0.5) before
+            // giving up.
+            if (curr_theta > 0.)
             {
-                alpha_min = std::min(alpha_min, delta_ * std::pow(curr_theta, s_theta_) /
-                                                    std::pow(-gBD, s_phi_));
+                alpha_min = std::min(gamma_theta_, gamma_phi_ * curr_theta / (-gBD));
+                if (curr_theta <= theta_min_)
+                {
+                    alpha_min = std::min(alpha_min, delta_ * std::pow(curr_theta, s_theta_) /
+                                                        std::pow(-gBD, s_phi_));
+                }
             }
         }
         return alpha_min_frac_ * alpha_min;

@@ -115,6 +115,7 @@ namespace fatrop
         IpAlgBuilder &create_iteration_output();
 
         std::shared_ptr<IpData<ProblemType>> get_ipdata() { return ipdata_; }
+        std::shared_ptr<PdSolverOrig<ProblemType>> get_pd_solver() { return pd_solver_; }
         /**
          * @brief Build and return the fully constructed IpAlgorithm.
          *

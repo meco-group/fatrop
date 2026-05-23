@@ -60,6 +60,39 @@ set(FATROP_SOURCES
     dense/ip_resto_phase_min_cl1.cpp
     dense/ip_search_dir.cpp
     dense/mehrotra_qp.cpp
+    graph/block_sparsity.cpp
+    graph/block_pd_matrix.cpp
+    graph/linear_system.cpp
+    graph/elimination_order.cpp
+    graph/symbolic_factorization.cpp
+    graph/linear_solver.cpp
+    graph/dims.cpp
+    graph/problem_info.cpp
+    graph/hessian.cpp
+    graph/jacobian.cpp
+    graph/nlp_graph.cpp
+    graph/aug_system_solver.cpp
+    graph/pd_system_orig.cpp
+    graph/pd_solver_orig.cpp
+    graph/pd_system_resto.cpp
+    graph/pd_solver_resto.cpp
+    graph/ip_iterate.cpp
+    graph/ip_data.cpp
+    graph/ip_nlp_orig.cpp
+    graph/ip_nlp_resto.cpp
+    graph/ip_search_dir.cpp
+    graph/ip_linesearch.cpp
+    graph/ip_mu_update.cpp
+    graph/ip_convergence_check.cpp
+    graph/ip_convergence_check_resto.cpp
+    graph/ip_iteration_output.cpp
+    graph/ip_iteration_output_resto.cpp
+    graph/ip_eq_mult_initializer.cpp
+    graph/ip_initializer.cpp
+    graph/ip_initializer_resto.cpp
+    graph/ip_resto_phase_min_cl1.cpp
+    graph/ip_algorithm.cpp
+    graph/ip_alg_builder.cpp
 )
 
 # Create the fatrop shared library

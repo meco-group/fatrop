@@ -32,23 +32,32 @@ namespace fatrop
         Scalar res_prev = std::numeric_limits<Scalar>::max();
         ls.get_rhs(tmp_);
         const Scalar b_norm = std::max(norm_inf(tmp_), 1.0);
-        for (Index i = 0; i < max_it_ref; i++)
+        Scalar res_norm = 0.0;
+        Index i;
+        for (i = 0; i < max_it_ref; i++)
         {
             if (!x_.is_finite())
             {
                 PRINT_DIAGNOSTIC << "Problem in solving linear solver: solver returned NaN." << std::endl;
+                last_residual_ = std::numeric_limits<Scalar>::infinity();
+                worst_residual_ = std::max(worst_residual_, last_residual_);
+                last_iref_iters_ = i;
                 return LinsolReturnFlag::NAN_SOLUTION;
             }
             // compute residual residual = Ax + b
             ls.apply_on_right(x_, 1.0, tmp_, residual_);
             // compute residual inf norm
-            const Scalar res_norm = norm_inf(residual_) / std::min(b_norm, 1.0);
+            res_norm = norm_inf(residual_) / std::min(b_norm, 1.0);
+            PRINT_DEBUG << "  iref iter " << i << "  residual = " << res_norm << std::endl;
             if (res_norm >= res_prev)
             {
                 ls.set_rhs(x);
                 PRINT_DIAGNOSTIC << "Iterative refinement stopped at iteration: " << i
                             << " with residual norm: " << res_norm
                             << " because the residual norm did not decrease." << std::endl;
+                last_residual_ = res_prev; // last accepted residual
+                worst_residual_ = std::max(worst_residual_, last_residual_);
+                last_iref_iters_ = i;
                 return LinsolReturnFlag::ITREF_INCREASE;
             }
             else
@@ -59,6 +68,9 @@ namespace fatrop
             if (res_norm < tol_ && i >= min_it_ref)
             {
                 ls.set_rhs(x);
+                last_residual_ = res_norm;
+                worst_residual_ = std::max(worst_residual_, last_residual_);
+                last_iref_iters_ = i + 1;
                 return LinsolReturnFlag::SUCCESS;
             }
             if (i == max_it_ref - 1)
@@ -66,6 +78,9 @@ namespace fatrop
                 PRINT_DIAGNOSTIC << "Iterative refinement reached maximum iterations: " << max_it_ref
                             << " with residual norm: " << res_norm << std::endl;
                 ls.set_rhs(x);
+                last_residual_ = res_norm;
+                worst_residual_ = std::max(worst_residual_, last_residual_);
+                last_iref_iters_ = i + 1;
                 return LinsolReturnFlag::ITREF_MAX_ITER;
             }
             ls.set_rhs(residual_);
@@ -76,6 +91,9 @@ namespace fatrop
             res_prev = res_norm;
         }
         ls.set_rhs(x);
+        last_residual_ = res_norm;
+        worst_residual_ = std::max(worst_residual_, last_residual_);
+        last_iref_iters_ = i;
         return LinsolReturnFlag::UNKNOWN;
     }
 
