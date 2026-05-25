@@ -25,19 +25,15 @@ namespace fatrop
      * @brief Block-supernodal Cholesky solver for symmetric positive definite
      *        block-sparse linear systems.
      *
-     * The solver carries:
-     *   - a (block-)minimum-degree elimination order computed once at
-     *     construction time (symbolic phase 1);
-     *   - the elimination tree and the column-wise fill pattern of the
-     *     Cholesky factor (symbolic phase 2);
-     *   - persistent storage for the lower-triangular factor @c L, laid out
-     *     as one BLASFEO @c MAT per (filled) block.
-     *
-     * Calling @c solve_in_place / @c solve_in_place_rhs from the
-     * @ref LinearSolver base class drives a numerical refactorisation and a
-     * forward/backward substitution. Iterative refinement is provided by the
-     * base class. @c solve_once recomputes the numerical factorisation;
-     * @c solve_rhs reuses the factor.
+     * Storage is supernode-major: one BLASFEO @c MAT per supernode, shape
+     *   (t_total + ext_total + 1) x t_total.
+     * The top @c t_total x t_total block is the supernode's internal
+     * lower-triangular factor; the next @c ext_total rows hold the external
+     * L strip (L[i, S] for i in @c ext_set(S)); the trailing +1 row is scratch
+     * used by the aug-row forward-substitution fusion during factor and is
+     * untouched during back-substitution. With this layout the per-supernode
+     * gather and scatter that the per-block layout required disappear — the
+     * supernode panel IS the storage.
      */
     class BlockCholeskySolver : public LinearSolver<BlockCholeskySolver, GraphType>
     {
@@ -55,51 +51,67 @@ namespace fatrop
         const BlockSymbolicFactorization &symbolic() const { return symbolic_; }
 
     private:
-        // Permute / unpermute a flat vector (length total_size) by mapping
-        // per-block segments according to the elimination order.
-        // No heap allocation.
+        struct LBlockLoc
+        {
+            Index sn;      ///< owning supernode (index into @c L_supernode_)
+            Index row_off; ///< scalar row offset of the block within the panel
+            Index col_off; ///< scalar column offset of the block within the panel
+        };
+        // Locate the L-block at permuted block coordinates (i, j) with i >= j
+        // in the supernode-major storage. O(1) for internal blocks; O(log
+        // |ext_set|) binary search for external blocks (ext_set is sorted).
+        LBlockLoc l_loc_(Index i, Index j) const;
+
         void permute_to_order_(const VecRealView &src, VecRealView &dst) const;
         void permute_from_order_(const VecRealView &src, VecRealView &dst) const;
 
-        // Numerical factorisation of the matrix held by @c ls into @c L_.
-        // Returns SUCCESS or INDEFINITE. No heap allocation.
-        LinsolReturnFlag factorize_(const BlockPdMatrix &matrix);
+        // Combined numerical factorisation + forward substitution. The
+        // "aug row" trick (mirroring the dense aug_system_solver — see
+        // src/dense/aug_system_solver.cpp) carries the rhs strip as an extra
+        // row through each supernode's partial potrf_l_mn so the forward
+        // solve is absorbed into the factor kernel.
+        LinsolReturnFlag factorize_with_rhs_(const BlockPdMatrix &matrix,
+                                             const VecRealView &rhs_orig);
 
-        // Triangular solves on @c x (in permuted block layout) using @c L_.
-        // No heap allocation.
+        // Supernodal triangular solves on @c x (in permuted block layout).
+        // Used by @c solve_rhs_impl to reuse the factor without redoing it.
         void forward_solve_(VecRealView &x_perm);
         void backward_solve_(VecRealView &x_perm);
-
-        // O(1) lookup of the L-block index for (i, j) in permuted coordinates
-        // (i >= j). Returns -1 if the block is structurally absent.
-        Index l_lookup_(Index i, Index j) const;
 
         const BlockSparsityPattern &sp_;
         BlockEliminationOrder order_;
         BlockSymbolicFactorization symbolic_;
 
-        // Block sizes / offsets in permuted order. Per-block: size matches
-        // sp_.block_size(perm_[k]); per-block offset is a prefix sum over the
-        // permuted sizes.
+        // Block sizes / offsets in permuted order.
         std::vector<Index> perm_block_sizes_;
         std::vector<Index> perm_block_offsets_;
 
-        // Cholesky factor @c L, one MatRealAllocated per filled lower-triangle
-        // block (i, j) with i >= j in PERMUTED coordinates. The capacity is
-        // sized exactly at construction time; no reallocation happens later.
-        std::vector<MatRealAllocated> L_;
-        // For each column j (in permuted coordinates): list of (row i, index
-        // into L_) for the stored blocks in column j, sorted by row index.
-        // l_col_entries_[j] always starts with the diagonal entry (i == j).
-        std::vector<std::vector<std::pair<Index, Index>>> l_col_entries_;
-        // Dense N x N lookup table: l_index_table_[i * N + j] = index in L_
-        // for the permuted lower-triangle block (i, j) with i >= j, or -1.
-        // Built at construction time; read-only thereafter.
-        std::vector<Index> l_index_table_;
+        // The Cholesky factor, supernode-major. One MAT per supernode, sized
+        // (sn_t_total_[s] + sn_ext_total_[s] + 1) x sn_t_total_[s].
+        std::vector<MatRealAllocated> L_supernode_;
 
-        // Workspace for solve: vector of length total_size in permuted layout.
+        // Per-supernode dimensions:
+        //   sn_t_total_[s]   = sum of internal block sizes for supernode s
+        //   sn_ext_total_[s] = sum of external block sizes for supernode s
+        std::vector<Index> sn_t_total_;
+        std::vector<Index> sn_ext_total_;
+        // sn_ext_row_off_[s][a] = scalar row offset of the a-th external
+        // block (indexed against lower_pattern_[s_end - 1]) within the
+        // bottom (ext_total) strip of supernode s's panel. The absolute row
+        // index in the panel is sn_t_total_[s] + sn_ext_row_off_[s][a].
+        std::vector<std::vector<Index>> sn_ext_row_off_;
+
+        // Per-(permuted)-column lookup:
+        //   col_to_sn_[j]        = supernode index owning column j
+        //   col_to_off_in_sn_[j] = scalar column offset of column j within
+        //                          its owning supernode's panel (also equal
+        //                          to the row offset for blocks whose row
+        //                          index equals j, i.e. diagonal blocks).
+        std::vector<Index> col_to_sn_;
+        std::vector<Index> col_to_off_in_sn_;
+
+        // Workspace for solve.
         VecRealAllocated x_perm_;
-        // Workspace for the right-hand side (in non-permuted layout).
         VecRealAllocated rhs_;
 
         Scalar pivot_tol_ = 1e-12;

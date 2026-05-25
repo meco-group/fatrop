@@ -93,4 +93,21 @@ BlockSymbolicFactorization::BlockSymbolicFactorization(const BlockSparsityPatter
         lower_pattern_[j].assign(col.begin(), col.end());
         std::sort(lower_pattern_[j].begin(), lower_pattern_[j].end());
     }
+
+    // Fundamental-supernode partition. Walk columns left-to-right; column k
+    // joins the previous column's supernode iff parent(k-1) = k AND the
+    // patterns line up so that |lp(k)| = |lp(k-1)| - 1 (the parent condition
+    // forces lp(k) ⊇ lp(k-1) \ {k}, so the count check seals equality).
+    supernode_start_.push_back(0);
+    for (Index k = 1; k < N; ++k)
+    {
+        const Index prev = k - 1;
+        const bool can_merge =
+            parent_[prev] == k &&
+            static_cast<Index>(lower_pattern_[k].size()) + 1 ==
+                static_cast<Index>(lower_pattern_[prev].size());
+        if (!can_merge)
+            supernode_start_.push_back(k);
+    }
+    supernode_start_.push_back(N); // sentinel
 }
