@@ -58,8 +58,10 @@ namespace fatrop
             Index col_off; ///< scalar column offset of the block within the panel
         };
         // Locate the L-block at permuted block coordinates (i, j) with i >= j
-        // in the supernode-major storage. O(1) for internal blocks; O(log
-        // |ext_set|) binary search for external blocks (ext_set is sorted).
+        // in the supernode-major storage. Called only during the symbolic
+        // phase (the numeric hot path uses the cached @c sn_syrk_ /
+        // @c sn_gemm_ / @c load_ops_ tables instead, so the binary search
+        // here does not appear in solve-time cost).
         LBlockLoc l_loc_(Index i, Index j) const;
 
         void permute_to_order_(const VecRealView &src, VecRealView &dst) const;
@@ -109,6 +111,74 @@ namespace fatrop
         //                          index equals j, i.e. diagonal blocks).
         std::vector<Index> col_to_sn_;
         std::vector<Index> col_to_off_in_sn_;
+
+        // Symbolic phase precomputes everything the per-iteration numeric
+        // factorisation kernels need, in a flat layout. Each `*_ops_` vector
+        // is indexed by supernode and stores plain-old-data per kernel
+        // invocation, so the hot loop never touches `symbolic_`, never
+        // searches an ext_set, and never recomputes panel offsets.
+        struct LoadOp
+        {
+            Index src_i;      ///< original block row (source matrix coords)
+            Index src_j;      ///< original block col (source matrix coords)
+            Index dst_sn;     ///< owning supernode of destination
+            Index dst_row;    ///< row offset within destination panel
+            Index dst_col;    ///< column offset within destination panel
+            Index ni;         ///< source block row count
+            Index nj;         ///< source block column count
+            bool  transpose;  ///< true: transpose-copy (upper -> lower); false: direct copy
+        };
+        std::vector<LoadOp> load_ops_;
+
+        struct RhsLoadOp
+        {
+            Index nk;          ///< column block size (rows of rhs strip)
+            Index x_off;       ///< offset into x_perm_
+            Index panel_col;   ///< column offset inside supernode panel (includes kColPad)
+        };
+        // For each supernode s, the per-column rhs in/out + propagation list.
+        std::vector<std::vector<RhsLoadOp>> sn_rhs_cols_;
+
+        struct ExtOp
+        {
+            Index ni;          ///< external block row count
+            Index x_off_i;     ///< offset into x_perm_ for block i
+            Index panel_row;   ///< absolute row offset in supernode panel (t_total + sn_ext_row_off[a])
+        };
+        // For each supernode s, list of external blocks (one per ext_set entry).
+        std::vector<std::vector<ExtOp>> sn_ext_ops_;
+
+        struct SyrkOp
+        {
+            Index target_sn;   ///< owner supernode of L[i, i] block
+            Index dst_row;     ///< row offset in target panel
+            Index dst_col;     ///< column offset in target panel
+            Index ni;          ///< block size
+            Index src_row;     ///< absolute row offset in source panel
+        };
+        struct GemmOp
+        {
+            Index target_sn;   ///< owner supernode of L[i, j] block
+            Index dst_row;     ///< row offset in target panel
+            Index dst_col;     ///< column offset in target panel
+            Index ni;
+            Index nj;
+            Index src_row_a;   ///< absolute row offset in source panel for L_ext[i, :]
+            Index src_row_b;   ///< absolute row offset in source panel for L_ext[j, :]
+        };
+        // Schur trailing update operations, one list per source supernode.
+        // sn_syrk_[s][a] -> the diagonal contribution for ext_set[a].
+        // sn_gemm_[s] is the flat (a, b) list with b < a.
+        std::vector<std::vector<SyrkOp>> sn_syrk_;
+        std::vector<std::vector<GemmOp>> sn_gemm_;
+
+        // Per-supernode constants used by every per-iteration kernel: the
+        // internal block dimension, the external strip dimension, the aug-row
+        // row index (= t_total + ext_total), and the offset of the supernode's
+        // first column in x_perm_. Cached so the hot loop reads them straight
+        // out of a flat array.
+        std::vector<Index> sn_aug_row_;
+        std::vector<Index> sn_off_S_;
 
         // Workspace for solve.
         VecRealAllocated x_perm_;
