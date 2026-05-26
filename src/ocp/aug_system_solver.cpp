@@ -302,7 +302,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
                     // ([S^T \\ r^T] L^-T) @ (L^-1 eta^T)
                     // (eta L^-T) @ ([S^T \\ r^T] L^-T)^T
                     gemm_nt(gamma_k - rank_k, nx + 1, nu - rank_k, -1.0, Ggt_stripe[0], 0, 0,
-                            Llt[k], nu - rank_k, 0, 1.0, Hh[k], 0, 0, Hh[k], 0, 0);
+                            Llt_shift[0], 0, 0, 1.0, Hh[k], 0, 0, Hh[k], 0, 0);
                     // keep (L^-1 eta^T) for forward recursion
                     getr(gamma_k - rank_k, nu - rank_k, Ggt_stripe[0], 0, 0, Ggt_tilde[k], 0,
                          rank_k);
