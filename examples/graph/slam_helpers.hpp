@@ -142,6 +142,47 @@ inline Quat rot_to_quat(const Mat3 &R)
     return q;
 }
 
+// Inverse right Jacobian of SO(3) at phi (3x3, row-major into out):
+//
+//   J_r^{-1}(phi) = I + (1/2)[phi]_x + c(theta) [phi]_x^2 ,
+//   c(theta)      = 1/theta^2 - cos(theta/2) / (2 theta sin(theta/2)) ,
+//
+// with a Taylor branch below |phi|^2 < 1e-8 to avoid the 0/0 form. The
+// inverse *left* Jacobian is simply the transpose:
+//   J_l^{-1}(phi) = J_r^{-1}(phi)^T .
+inline void right_jac_inv_so3(const Scalar phi[3], Scalar out[3][3])
+{
+    const Scalar theta2 = phi[0] * phi[0] + phi[1] * phi[1] + phi[2] * phi[2];
+    Scalar c;
+    if (theta2 < 1e-8)
+    {
+        // Taylor: c(theta) = 1/12 + theta^2/720 + O(theta^4)
+        c = (1.0 / 12.0) + theta2 * (1.0 / 720.0);
+    }
+    else
+    {
+        const Scalar theta = std::sqrt(theta2);
+        const Scalar half = 0.5 * theta;
+        c = 1.0 / theta2 - std::cos(half) / (2.0 * theta * std::sin(half));
+    }
+    for (Index i = 0; i < 3; ++i)
+        for (Index j = 0; j < 3; ++j)
+            out[i][j] = (i == j) ? 1.0 : 0.0;
+    // + (1/2) [phi]_x
+    out[0][1] += -0.5 * phi[2];
+    out[0][2] += 0.5 * phi[1];
+    out[1][0] += 0.5 * phi[2];
+    out[1][2] += -0.5 * phi[0];
+    out[2][0] += -0.5 * phi[1];
+    out[2][1] += 0.5 * phi[0];
+    // + c * [phi]_x^2 == c * (phi phi^T - theta^2 I)
+    for (Index i = 0; i < 3; ++i)
+        for (Index j = 0; j < 3; ++j)
+            out[i][j] += c * phi[i] * phi[j];
+    for (Index i = 0; i < 3; ++i)
+        out[i][i] -= c * theta2;
+}
+
 // ============================================================================
 // Body-frame relative-pose residual (odometry edges)
 // ============================================================================
@@ -163,10 +204,7 @@ inline void rel_pose_raw(const Scalar *xi, const Scalar *xj, Scalar *out)
 }
 
 // Jacobian of rel_pose_raw w.r.t. the 6D Euclidean / right-trivialised
-// tangent perturbations of xi (Ji) and xj (Jj). Uses the small-angle
-// approximation J_l^{-1}(delta) ≈ I for the rotation rows — accurate to
-// O(||delta||^2), which is well below the noise floor for typical
-// odometry-step rotations (~0.1 rad).
+// tangent perturbations of xi (Ji) and xj (Jj). 
 inline void rel_pose_jacobian(const Scalar *xi, const Scalar *xj, Scalar Ji[6][6],
                               Scalar Jj[6][6])
 {
@@ -194,11 +232,22 @@ inline void rel_pose_jacobian(const Scalar *xi, const Scalar *xj, Scalar Ji[6][6
         for (Index c = 0; c < 3; ++c)
             Ji[r][3 + c] = dp_body_hat[r][c];
     }
+    // ---- Rotation rows (exact via right/left SO(3) Jacobian inverses) --
+    //   r_phi = log( q_i^{-1} q_j )
+    //   d r_phi / d delta_phi_b =  J_r^{-1}(r_phi)
+    //   d r_phi / d delta_phi_a = -J_l^{-1}(r_phi) = -J_r^{-1}(r_phi)^T
+    Scalar q_rel[4];
+    quat_inv_mul(xi + 3, xj + 3, q_rel);
+    Scalar r_phi[3];
+    quat_log(q_rel, r_phi);
+    Scalar Jri[3][3];
+    right_jac_inv_so3(r_phi, Jri);
     for (Index i = 0; i < 3; ++i)
-    {
-        Ji[3 + i][3 + i] = -1.0; // d r_rot / d delta_phi_a ≈ -I
-        Jj[3 + i][3 + i] = 1.0;  // d r_rot / d delta_phi_b ≈ +I
-    }
+        for (Index j = 0; j < 3; ++j)
+        {
+            Jj[3 + i][3 + j] = Jri[i][j];  //  J_r^{-1}(r_phi)
+            Ji[3 + i][3 + j] = -Jri[j][i]; // -J_l^{-1}(r_phi) = -J_r^{-1}(r_phi)^T
+        }
 }
 
 // ============================================================================
