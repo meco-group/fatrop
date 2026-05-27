@@ -207,16 +207,6 @@ namespace fatrop
     }
 
     template <typename ProblemType>
-    void IpNlpResto<ProblemType>::apply_dual_eq_transformation(
-        const ProblemInfo<ProblemType> &info, const VecRealView &primal_x,
-        const VecRealView &dual_eq_in, VecRealView &dual_eq_out)
-    {
-        // Resto adds slack-side variables but does not touch the equality multipliers,
-        // so the original NLP's dual transformation applies unchanged.
-        nlp_orig_->apply_dual_eq_transformation(info, primal_x, dual_eq_in, dual_eq_out);
-    }
-
-    template <typename ProblemType>
     void IpNlpResto<ProblemType>::register_options(OptionRegistry &registry)
     {
         /**

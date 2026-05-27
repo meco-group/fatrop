@@ -13,10 +13,22 @@
 //
 // In so(3) coordinates the dynamics residual is
 //     b_k = log( q_{k+1}^{-1} (q_k (x) Exp_q(omega_k * dt)) )^v
-// and its body-frame Jacobian on d_theta_{k+1} is -J_l^{-1}(b_k), not -I. To make
-// fatrop's Riccati recursion see the standard -I*delta_x_{k+1} + ... form we
-// pre-multiply the linearized dynamics row by M = J_l(b_k); the dual hook then
-// recovers the physical multiplier J_l(b_k)^T * lambda_tilde.
+// and its body-frame Jacobian on delta_theta_{k+1} is -J_l(b_k)^{-1}, not -I. We SCALE the
+// linearized dynamics row by the left Jacobian J_l(b_k), which puts it in the form fatrop's
+// Riccati recursion expects (coefficient -I on delta_theta_{k+1}) with the blocks
+//     A = R_{k+1}^T R_k,   B = R_{k+1}^T R_k Exp(omega_k dt) J_r(omega_k dt) dt.
+// The right-hand side is left unchanged by the scaling because J_l(b_k) b_k = b_k, so
+// eval_b returns the physical defect b_k and the primal side (feasibility, line search,
+// converged trajectory) is exact.
+// The scaling does, however, change the dynamics multiplier: the physical dual is the
+// J_l(b_k)-scaling of the one fatrop computes. We OMIT that dual scaling. Because
+// J_l(0) = I, the omission vanishes at the solution (b_k = 0), so the converged
+// multipliers are exact -- only the intermediate-iterate duals are approximate.
+// The initial-condition path constraint q_0 == q_init is handled the same way, but with the
+// right Jacobian (q_0 enters un-inverted): its residual g = log(q_init^{-1} q_0) has exact
+// Jacobian d g / d theta_0 = J_r(g)^{-1}, so scaling the row by J_r(g) makes the Jacobian I
+// and leaves the residual unchanged (J_r(g) g = g). We OMIT the matching J_r(g) dual scaling
+// too; because J_r(0) = I, it is exact at the solution (g = 0).
 
 #include <cmath>
 #include <iostream>
@@ -80,54 +92,26 @@ public:
         for (int i = 0; i < 4; ++i) xk_next[i] = q_new[i];
     }
 
-    // ---- Dual transformations: physical_dual = M^T tilde_dual ----
-    void apply_dual_eq_dyn_transformation_k(const Index /*k*/, const Scalar *xk,
-                                            const Scalar *xkp1, const Scalar *uk,
-                                            const Scalar *dual_in, Scalar *dual_out) override
-    {
-        Scalar b[3]; compute_residual(xkp1, xk, uk, dt_, b);
-        Scalar Jl[9]; so3_left_jacobian(b, Jl);
-        for (int i = 0; i < 3; ++i)
-        {
-            Scalar s = 0.;
-            for (int j = 0; j < 3; ++j) s += Jl[j * 3 + i] * dual_in[j];
-            dual_out[i] = s;
-        }
-    }
-    void apply_dual_eq_path_transformation_k(const Index k, const Scalar * /*uk*/,
-                                             const Scalar *xk, const Scalar *dual_in,
-                                             Scalar *dual_out) override
-    {
-        if (k != 0) return;
-        Scalar q_init_inv[4]; quat_inv(q_init_, q_init_inv);
-        Scalar t[4]; quat_mul(q_init_inv, xk, t);
-        Scalar g[3]; quat_log(t, g);
-        Scalar Jr[9]; so3_right_jacobian(g, Jr);
-        for (int i = 0; i < 3; ++i)
-        {
-            Scalar s = 0.;
-            for (int j = 0; j < 3; ++j) s += Jr[j * 3 + i] * dual_in[j];
-            dual_out[i] = s;
-        }
-    }
-
-    // ---- Dynamics linearization ----
+    // ---- Dynamics linearization (row scaled by J_l(b)) ----
     // BAbt layout: (nu + nx_tan + 1) x nx_tan_next = 7 x 3.
-    //   rows 0..2 : d_omega_k        cols 0..2 : b (3 outputs)
+    //   rows 0..2 : d_omega_k        cols 0..2 : delta_theta_{k+1} (3 outputs)
     //   rows 3..5 : d_theta_k
     //   row  6    : (reserved for b residual, written by fatrop)
     //
-    // After pre-multiplying the row by M = J_l(b), and using the SO(3) identity
-    // J_l(b) * J_r^{-1}(b) = Exp(b) on so(3):
-    //   A_scaled (d theta_k -> b)   = R_{k+1}^T R_k
-    //   B_scaled (d omega_k -> b)   = R_{k+1}^T R_k * Exp(omega_k dt) * J_r(omega_k dt) * dt
+    // Scaling the linearized dynamics row by J_l(b) (see the file header) turns the
+    // delta_theta_{k+1} block into -I and, with the SO(3) identity J_l(b) J_r^{-1}(b) = Exp(b),
+    // gives the blocks
+    //     A (d theta_k)  = R_{k+1}^T R_k
+    //     B (d omega_k)  = R_{k+1}^T R_k Exp(omega_k dt) J_r(omega_k dt) dt
+    // The matching J_l(b) scaling of the dynamics multiplier is omitted (it is the identity
+    // at the solution, where b = 0).
     Index eval_BAbt(const Scalar *q_kp1, const Scalar *u_k, const Scalar *q_k, MAT *res,
                     const Index /*k*/) override
     {
         blasfeo_gese_wrap(7, 3, 0., res, 0, 0);
         Scalar R_k[9]; quat_to_rotmat(q_k, R_k);
         Scalar R_kp1[9]; quat_to_rotmat(q_kp1, R_kp1);
-        // A_scaled = R_{k+1}^T R_k
+        // A = R_{k+1}^T R_k
         Scalar A[9];
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
@@ -147,33 +131,33 @@ public:
         Scalar tmp[9]; mat3_mul(A, R_dt, tmp);
         Scalar B[9]; mat3_mul(tmp, Jr_omega, B);
         for (int i = 0; i < 9; ++i) B[i] *= dt_;
-        // write B (rows 0..2) and A (rows 3..5)
+        // BAbt stores the transpose of the (output x input) blocks: the entry at
+        // (input r, output c) is coeff[c][r], so write B (rows 0..2) and A (rows 3..5)
+        // transposed.
         for (int r = 0; r < 3; ++r)
             for (int c = 0; c < 3; ++c)
             {
-                blasfeo_matel_wrap(res, 0 + r, c) = B[r * 3 + c];
-                blasfeo_matel_wrap(res, 3 + r, c) = A[r * 3 + c];
+                blasfeo_matel_wrap(res, 0 + r, c) = B[c * 3 + r];
+                blasfeo_matel_wrap(res, 3 + r, c) = A[c * 3 + r];
             }
         return 0;
     }
     Index eval_b(const Scalar *q_kp1, const Scalar *u_k, const Scalar *q_k, Scalar *res,
                  const Index /*k*/) override
     {
-        Scalar b[3]; compute_residual(q_kp1, q_k, u_k, dt_, b);
-        // Pre-multiply residual by J_l(b) so the linearization matches A_scaled / B_scaled.
-        Scalar Jl[9]; so3_left_jacobian(b, Jl);
-        for (int i = 0; i < 3; ++i)
-        {
-            Scalar s = 0.;
-            for (int j = 0; j < 3; ++j) s += Jl[i * 3 + j] * b[j];
-            res[i] = s;
-        }
+        // Physical dynamics residual: the row scaling by J_l(b) leaves it unchanged
+        // (J_l(b) b = b), so feasibility and the line search use the true defect.
+        compute_residual(q_kp1, q_k, u_k, dt_, res);
         return 0;
     }
 
-    // ---- Initial-condition equality: q_0 == q_init (pre-scaled by J_r) ----
-    Index eval_Ggt(const Scalar * /*u_k*/, const Scalar * /*x_k*/, MAT *res,
-                   const Index k) override
+    // ---- Initial-condition equality: q_0 == q_init ----
+    // Residual g = log(q_init^{-1} q_0); its exact Jacobian d g / d theta_0 = J_r(g)^{-1}
+    // (right Jacobian, since q_0 enters un-inverted). Scaling the row by J_r(g) makes that
+    // Jacobian I (written below) and leaves the residual unchanged (J_r(g) g = g, returned by
+    // eval_g). The matching J_r(g) dual scaling is omitted -- the identity at the solution,
+    // where g = 0.
+    Index eval_Ggt(const Scalar * /*u_k*/, const Scalar * /*q_k*/, MAT *res, const Index k) override
     {
         const Index nu = get_nu_tangent(k);
         const Index nx = get_nx_tangent(k);
@@ -183,7 +167,7 @@ public:
             return 0;
         }
         blasfeo_gese_wrap(nu + nx + 1, 3, 0., res, 0, 0);
-        // After pre-scaling by J_r(g_theta), the Jacobian on d_theta_0 is identity.
+        // d g / d theta_0 scaled to I  (= J_r(g) J_r(g)^{-1})
         for (int i = 0; i < 3; ++i)
             blasfeo_matel_wrap(res, nu + i, i) = 1.0;
         return 0;
@@ -193,14 +177,7 @@ public:
         if (k != 0) return 0;
         Scalar q_init_inv[4]; quat_inv(q_init_, q_init_inv);
         Scalar t[4]; quat_mul(q_init_inv, q_k, t);
-        Scalar g[3]; quat_log(t, g);
-        Scalar Jr[9]; so3_right_jacobian(g, Jr);
-        for (int i = 0; i < 3; ++i)
-        {
-            Scalar s = 0.;
-            for (int j = 0; j < 3; ++j) s += Jr[i * 3 + j] * g[j];
-            res[i] = s;
-        }
+        quat_log(t, res);
         return 0;
     }
 
@@ -278,6 +255,7 @@ public:
     }
 
     Index get_bounds(Scalar *, Scalar *, const Index) const override { return 0; }
+
     Index get_initial_xk(Scalar *xk, const Index /*k*/) const override
     {
         for (int i = 0; i < 4; ++i) xk[i] = q_init_[i];
@@ -286,7 +264,7 @@ public:
     Index get_initial_uk(Scalar *uk, const Index k) const override
     {
         if (k == K_ - 1) return 0;
-        uk[0] = 0.; uk[1] = 0.; uk[2] = 0.;
+        uk[0] = .6; uk[1] = -0.8; uk[2] = 1.5;
         return 0;
     }
 

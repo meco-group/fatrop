@@ -89,80 +89,6 @@ namespace fatrop
             }
         }
 
-        template <typename, typename = void>
-        struct has_apply_dual_eq_dyn_transformation_k : std::false_type {};
-        template <typename T>
-        struct has_apply_dual_eq_dyn_transformation_k<
-            T, std::void_t<decltype(std::declval<T &>().apply_dual_eq_dyn_transformation_k(
-                   Index{}, (const Scalar *)nullptr, (const Scalar *)nullptr,
-                   (const Scalar *)nullptr, (const Scalar *)nullptr,
-                   (Scalar *)nullptr))>> : std::true_type {};
-        template <typename, typename = void>
-        struct has_apply_dual_eq_path_transformation_k : std::false_type {};
-        template <typename T>
-        struct has_apply_dual_eq_path_transformation_k<
-            T, std::void_t<decltype(std::declval<T &>().apply_dual_eq_path_transformation_k(
-                   Index{}, (const Scalar *)nullptr, (const Scalar *)nullptr,
-                   (const Scalar *)nullptr, (Scalar *)nullptr))>> : std::true_type {};
-        template <typename, typename = void>
-        struct has_apply_dual_eq_slack_transformation_k : std::false_type {};
-        template <typename T>
-        struct has_apply_dual_eq_slack_transformation_k<
-            T, std::void_t<decltype(std::declval<T &>().apply_dual_eq_slack_transformation_k(
-                   Index{}, (const Scalar *)nullptr, (const Scalar *)nullptr,
-                   (const Scalar *)nullptr, (Scalar *)nullptr))>> : std::true_type {};
-
-        template <typename Ocp>
-        void call_apply_dual_eq_dyn_transformation_k(Ocp &ocp, const Index k, const Scalar *xk,
-                                                    const Scalar *xkp1, const Scalar *uk,
-                                                    const Scalar *dual_in, Scalar *dual_out)
-        {
-            if constexpr (has_apply_dual_eq_dyn_transformation_k<Ocp>::value)
-            {
-                ocp.apply_dual_eq_dyn_transformation_k(k, xk, xkp1, uk, dual_in, dual_out);
-            }
-            else
-            {
-                const Index n = call_get_nx_tangent(ocp, k + 1);
-                for (Index i = 0; i < n; ++i)
-                    dual_out[i] = dual_in[i];
-            }
-        }
-
-        template <typename Ocp>
-        void call_apply_dual_eq_path_transformation_k(Ocp &ocp, const Index k, const Scalar *uk,
-                                                     const Scalar *xk, const Scalar *dual_in,
-                                                     Scalar *dual_out)
-        {
-            if constexpr (has_apply_dual_eq_path_transformation_k<Ocp>::value)
-            {
-                ocp.apply_dual_eq_path_transformation_k(k, uk, xk, dual_in, dual_out);
-            }
-            else
-            {
-                const Index n = ocp.get_ng(k);
-                for (Index i = 0; i < n; ++i)
-                    dual_out[i] = dual_in[i];
-            }
-        }
-
-        template <typename Ocp>
-        void call_apply_dual_eq_slack_transformation_k(Ocp &ocp, const Index k, const Scalar *uk,
-                                                      const Scalar *xk, const Scalar *dual_in,
-                                                      Scalar *dual_out)
-        {
-            if constexpr (has_apply_dual_eq_slack_transformation_k<Ocp>::value)
-            {
-                ocp.apply_dual_eq_slack_transformation_k(k, uk, xk, dual_in, dual_out);
-            }
-            else
-            {
-                const Index n = ocp.get_ng_ineq(k);
-                for (Index i = 0; i < n; ++i)
-                    dual_out[i] = dual_in[i];
-            }
-        }
-
         template <typename OcpAbstractTag> struct NlpOcpAuxiliary
         {
             static ProblemDims<OcpType> get_ocp_dims(const OcpAbstractTpl<OcpAbstractTag> &ocp)
@@ -374,44 +300,6 @@ namespace fatrop
         out.block(info.number_of_slack_variables, 0) =
             out.block(info.number_of_slack_variables, 0) -
             multipliers.block(info.number_of_slack_variables, info.offset_g_eq_slack);
-    }
-
-    template <typename OcpAbstractTag>
-    void NlpOcpTpl<OcpAbstractTag>::apply_dual_eq_transformation(
-        const ProblemInfo<OcpType> &info, const VecRealView &primal_x,
-        const VecRealView &dual_eq_in, VecRealView &dual_eq_out)
-    {
-        const Scalar *primal_x_p = primal_x.data();
-        const Scalar *dual_in_p = dual_eq_in.data();
-        Scalar *dual_out_p = dual_eq_out.data();
-        // Dynamics multipliers (one block per inter-stage transition).
-        for (Index k = 0; k < info.dims.K - 1; k++)
-        {
-            const Scalar *xk = primal_x_p + info.offsets_primal_x[k];
-            const Scalar *xkp1 = primal_x_p + info.offsets_primal_x[k + 1];
-            const Scalar *uk = primal_x_p + info.offsets_primal_u[k];
-            const Scalar *lin = dual_in_p + info.offsets_g_eq_dyn[k];
-            Scalar *lout = dual_out_p + info.offsets_g_eq_dyn[k];
-            internal::call_apply_dual_eq_dyn_transformation_k(*ocp_, k, xk, xkp1, uk, lin, lout);
-        }
-        // Equality-path multipliers per stage.
-        for (Index k = 0; k < info.dims.K; k++)
-        {
-            const Scalar *xk = primal_x_p + info.offsets_primal_x[k];
-            const Scalar *uk = primal_x_p + info.offsets_primal_u[k];
-            const Scalar *lin = dual_in_p + info.offsets_g_eq_path[k];
-            Scalar *lout = dual_out_p + info.offsets_g_eq_path[k];
-            internal::call_apply_dual_eq_path_transformation_k(*ocp_, k, uk, xk, lin, lout);
-        }
-        // Slack (inequality-as-equality) multipliers per stage.
-        for (Index k = 0; k < info.dims.K; k++)
-        {
-            const Scalar *xk = primal_x_p + info.offsets_primal_x[k];
-            const Scalar *uk = primal_x_p + info.offsets_primal_u[k];
-            const Scalar *lin = dual_in_p + info.offsets_g_eq_slack[k];
-            Scalar *lout = dual_out_p + info.offsets_g_eq_slack[k];
-            internal::call_apply_dual_eq_slack_transformation_k(*ocp_, k, uk, xk, lin, lout);
-        }
     }
 
     template <typename OcpAbstractTag>

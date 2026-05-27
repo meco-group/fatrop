@@ -107,9 +107,3 @@ void NlpDense::apply_retraction(const DenseInfo &info, const VecRealView &primal
     dense_->apply_retraction(primal_x.data(), delta_primal_x.data(), alpha, primal_x_next.data());
 }
 
-void NlpDense::apply_dual_eq_transformation(const DenseInfo &info, const VecRealView &primal_x,
-                                            const VecRealView &dual_eq_in,
-                                            VecRealView &dual_eq_out)
-{
-    dense_->apply_dual_eq_transformation(primal_x.data(), dual_eq_in.data(), dual_eq_out.data());
-}

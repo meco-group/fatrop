@@ -318,65 +318,6 @@ namespace fatrop
         }
 
         /**
-         * @brief Transform the dynamics equality multiplier at stage k.
-         *
-         * Use this when @c eval_BAbt / @c eval_b pre-multiplied the linearized
-         * dynamics by some user-defined matrix @c M_k(x, u) (a common trick for
-         * Lie-group dynamics so the Riccati recursion sees the expected
-         * @c -I*delta_x_{k+1} + ... form). fatrop computes the dual of the scaled
-         * dynamics constraint; this hook recovers the dual of the original
-         * dynamics @c lambda_dyn = M_k^T lambda_dyn_tilde so that @c eval_RSQrqt
-         * can use the physical multiplier.
-         *
-         * Default: identity (copy through @c get_nx_tangent(k+1) entries).
-         *
-         * @param k Time step
-         * @param xk State at stage k (primal, size @c get_nx(k))
-         * @param xkp1 State at stage k+1 (primal, size @c get_nx(k+1))
-         * @param uk Control at stage k (primal, size @c get_nu(k))
-         * @param dual_in Input dual block, size @c get_nx_tangent(k+1)
-         * @param dual_out Output dual block, size @c get_nx_tangent(k+1)
-         */
-        virtual void apply_dual_eq_dyn_transformation_k(const Index k, const Scalar *xk,
-                                                       const Scalar *xkp1, const Scalar *uk,
-                                                       const Scalar *dual_in,
-                                                       Scalar *dual_out)
-        {
-            const Index n = get_nx_tangent(k + 1);
-            for (Index i = 0; i < n; ++i)
-                dual_out[i] = dual_in[i];
-        }
-
-        /**
-         * @brief Transform the equality-path multiplier at stage k. Default: identity.
-         */
-        virtual void apply_dual_eq_path_transformation_k(const Index k, const Scalar *uk,
-                                                        const Scalar *xk,
-                                                        const Scalar *dual_in,
-                                                        Scalar *dual_out)
-        {
-            const Index n = get_ng(k);
-            for (Index i = 0; i < n; ++i)
-                dual_out[i] = dual_in[i];
-        }
-
-        /**
-         * @brief Transform the slack (inequality-as-equality) multiplier at stage k.
-         *
-         * Default: identity. Override only if your @c eval_Ggt_ineq / @c eval_gineq
-         * pre-scaled the slack equation row.
-         */
-        virtual void apply_dual_eq_slack_transformation_k(const Index k, const Scalar *uk,
-                                                         const Scalar *xk,
-                                                         const Scalar *dual_in,
-                                                         Scalar *dual_out)
-        {
-            const Index n = get_ng_ineq(k);
-            for (Index i = 0; i < n; ++i)
-                dual_out[i] = dual_in[i];
-        }
-
-        /**
          * @brief Virtual destructor for OcpAbstract.
          *
          * This virtual destructor ensures proper cleanup of derived classes.

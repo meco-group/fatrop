@@ -60,9 +60,6 @@ namespace fatrop
         void apply_retraction(const DenseInfo &info, const VecRealView &primal_x,
                               const VecRealView &delta_primal_x, const Scalar alpha,
                               VecRealView &primal_x_next) override;
-        void apply_dual_eq_transformation(const DenseInfo &info, const VecRealView &primal_x,
-                                          const VecRealView &dual_eq_in,
-                                          VecRealView &dual_eq_out) override;
 
     private:
         DenseAbstractSp dense_;

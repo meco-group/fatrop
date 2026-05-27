@@ -47,33 +47,6 @@ namespace fatrop
                                                 const VecRealView &multipliers, const Scalar alpha,
                                                 const VecRealView &y, VecRealView &out) = 0;
         /**
-         * @brief Transform the equality multipliers before they are consumed by
-         *        @c eval_lag_hess.
-         *
-         * If your @c eval_constr_jac / @c eval_constraint_violation pre-scaled the
-         * linearized equality constraints by some user-defined matrix @c M(x)
-         * (a common trick: e.g. multiply the Lie-group dynamics row by the left/right
-         * Jacobian so the Riccati recursion sees the expected
-         * @c -I*delta_x_{k+1} + ... form), then fatrop's Newton solver computes the
-         * dual @c lambda_tilde of the *scaled* constraint. The dual of the original
-         * (un-scaled) constraint is @c lambda = M(x)^T lambda_tilde — this hook is
-         * where you apply that map so your Lagrangian-Hessian formulas can keep using
-         * the physical dual.
-         *
-         * The hook is purely a post-processing step on the dual; fatrop itself works
-         * entirely in scaled-dual space for the Newton system, the KKT residuals and
-         * the search direction. Only @c eval_lag_hess receives the transformed dual.
-         *
-         * Default: identity (no scaling).
-         */
-        virtual void apply_dual_eq_transformation(const ProblemInfo<ProblemType> &info,
-                                                  const VecRealView &primal_x,
-                                                  const VecRealView &dual_eq_in,
-                                                  VecRealView &dual_eq_out)
-        {
-            dual_eq_out = dual_eq_in;
-        }
-        /**
          * @brief Compute the retracted primal variable
          *        primal_x_next = retract(primal_x, alpha * delta_primal_x).
          *

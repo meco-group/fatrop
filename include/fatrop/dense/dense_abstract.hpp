@@ -85,27 +85,6 @@ namespace fatrop
                 x_next[i] = x[i] + alpha * delta_x[i];
         }
 
-        /**
-         * @brief Map the dual of the *scaled* equality constraints to the
-         *        dual of the unscaled constraints before @c eval_Hh sees it.
-         *
-         * If @c eval_Ggt or @c eval_g pre-scaled the linearised constraints by
-         * some matrix @c M(x), fatrop's Newton solver returns
-         * @c lambda_tilde of the scaled constraint and this hook recovers
-         * @c lambda = M(x)^T lambda_tilde. The default is the identity.
-         *
-         * @param x         current primal, size @c get_nx()
-         * @param dual_in   dual of the scaled constraint, length ng + ng_ineq
-         * @param dual_out  dual of the unscaled constraint, length ng + ng_ineq
-         */
-        virtual void apply_dual_eq_transformation(const Scalar *x, const Scalar *dual_in,
-                                                  Scalar *dual_out)
-        {
-            const Index n = get_ng() + get_ng_ineq();
-            for (Index i = 0; i < n; ++i)
-                dual_out[i] = dual_in[i];
-        }
-
         virtual ~DenseAbstract() = default;
     };
 } // namespace fatrop

@@ -106,10 +106,6 @@ namespace fatrop
                                       const VecRealView &primal_x,
                                       const VecRealView &delta_primal_x, const Scalar alpha,
                                       VecRealView &primal_x_next) override;
-        virtual void apply_dual_eq_transformation(const ProblemInfo<ProblemType> &info,
-                                                  const VecRealView &primal_x,
-                                                  const VecRealView &dual_eq_in,
-                                                  VecRealView &dual_eq_out) override;
         virtual void callback(const IpData<ProblemType> &ip_data) override
         {
             nlp_->callback(ip_data);

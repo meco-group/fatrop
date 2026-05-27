@@ -53,10 +53,6 @@ namespace fatrop
         void apply_retraction(const ProblemInfo<OcpType> &info, const VecRealView &primal_x,
                               const VecRealView &delta_primal_x, const Scalar alpha,
                               VecRealView &primal_x_next) override;
-        void apply_dual_eq_transformation(const ProblemInfo<OcpType> &info,
-                                          const VecRealView &primal_x,
-                                          const VecRealView &dual_eq_in,
-                                          VecRealView &dual_eq_out) override;
 
     private:
         const OcpAbstractSp ocp_;

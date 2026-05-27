@@ -41,7 +41,6 @@ namespace fatrop
         complementarity_l_evaluated_ = false;
         complementarity_u_evaluated_ = false;
         primal_damping_evaluated_ = false;
-        transformed_dual_eq_evaluated_ = false;
     }
 
     template <typename ProblemType> Scalar IpIterate<ProblemType>::obj_value()
@@ -394,7 +393,6 @@ namespace fatrop
           constr_viol_(nlp_->nlp_dims().number_of_eq_constraints),
           dual_infeasibility_x_(nlp_->nlp_dims().number_of_tangent_variables),
           dual_infeasibility_s_(nlp_->nlp_dims().number_of_ineq_constraints),
-          transformed_dual_eq_(nlp_->nlp_dims().number_of_eq_constraints),
           barrier_gradient_(nlp_->nlp_dims().number_of_ineq_constraints),
           delta_lower_(nlp_->nlp_dims().number_of_ineq_constraints),
           delta_upper_(nlp_->nlp_dims().number_of_ineq_constraints), jacobian_(nullptr),
@@ -415,28 +413,14 @@ namespace fatrop
         timings_ = &data.timing_statistics();
         reset();
     }
-    template <typename ProblemType>
-    const VecRealView &IpIterate<ProblemType>::transformed_dual_eq()
-    {
-        if (!transformed_dual_eq_evaluated_)
-        {
-            nlp_->apply_dual_eq_transformation(info(), primal_x_, dual_eq_, transformed_dual_eq_);
-            transformed_dual_eq_evaluated_ = true;
-        }
-        return transformed_dual_eq_;
-    }
-
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
     {
         fatrop_assert_msg(hessian_ != nullptr, "Hessian not set.");
         if (!hessian_evaluated_)
         {
             ScopedTimer _t(timings_->compute_hessian, *timings_);
-            // eval_lag_hess gets the dual that the NLP wants to use for its Hessian
-            // formulas — see Nlp::apply_dual_eq_transformation. Default is the identity
-            // transformation, so for standard NLPs this matches the previous behavior.
             Index status = nlp_->eval_lag_hess(info(), objective_scale, primal_x_, primal_s_,
-                                               transformed_dual_eq(), *hessian_);
+                                               dual_eq_, *hessian_);
             fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
             hessian_evaluated_ = true;
         }
