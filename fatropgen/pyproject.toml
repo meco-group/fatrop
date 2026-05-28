@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fatropgen"
+version = "0.1.0"
+description = "Generate compiled Fatrop OCP solvers from CasADi expressions"
+authors = [
+    {name = "Lander Vanroye"},
+]
+requires-python = ">=3.8"
+# Native deps (casadi, fatrop, blasfeo) come from the system / conda env.
+dependencies = [
+    "numpy",
+    "casadi",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["fatropgen*"]
+
+[tool.setuptools.package-data]
+fatropgen = [
+    "casadi_utils/*.hpp",
+]
