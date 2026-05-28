@@ -65,8 +65,7 @@ public:
         b[1] = -states_kp1[1] + states_k[1] + dt_ * states_k[3];
         b[2] = -states_kp1[2] + states_k[2] + dt_ * inputs_k[0] / m_;
         b[3] = -states_kp1[3] + states_k[3] + dt_ * inputs_k[1] / m_;
-        for (Index c = 0; c < 4; ++c)
-            blasfeo_matel_wrap(res, 6, c) = b[c];
+        blasfeo_pack_mat_wrap(1, 4, b, 1, res, 6, 0);
         return 0;
     }
 
@@ -92,13 +91,13 @@ public:
         if (k == K_ - 1)
         {
             // Hessian: q_T * I_4 on the 4x4 state block
-            for (Index i = 0; i < 4; ++i)
-                blasfeo_matel_wrap(res, i, i) = s * q_T_;
+            blasfeo_diare_wrap(4, s * q_T_, res, 0, 0);
             // Gradient: q_T*(x - x_target) on the bottom row
-            blasfeo_matel_wrap(res, 4, 0) = s * q_T_ * (states_k[0] - ref_x_);
-            blasfeo_matel_wrap(res, 4, 1) = s * q_T_ * (states_k[1] - ref_y_);
-            blasfeo_matel_wrap(res, 4, 2) = s * q_T_ * states_k[2];
-            blasfeo_matel_wrap(res, 4, 3) = s * q_T_ * states_k[3];
+            Scalar grad[4] = {s * q_T_ * (states_k[0] - ref_x_),
+                              s * q_T_ * (states_k[1] - ref_y_),
+                              s * q_T_ * states_k[2],
+                              s * q_T_ * states_k[3]};
+            blasfeo_pack_mat_wrap(1, 4, grad, 1, res, 4, 0);
         }
         else
         {

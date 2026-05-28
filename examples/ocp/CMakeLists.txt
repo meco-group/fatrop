@@ -8,5 +8,9 @@ add_executable(quaternion_lie_multistep_example quaternion_lie_multistep_example
 target_link_libraries(quaternion_lie_multistep_example PRIVATE fatrop)
 target_include_directories(quaternion_lie_multistep_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+add_executable(quadrotor_lie_example quadrotor_lie_example.cpp)
+target_link_libraries(quadrotor_lie_example PRIVATE fatrop)
+target_include_directories(quadrotor_lie_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 add_executable(mehrotra_qp_example mehrotra_qp_example.cpp)
 target_link_libraries(mehrotra_qp_example PRIVATE fatrop)

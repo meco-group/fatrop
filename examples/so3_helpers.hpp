@@ -188,6 +188,34 @@ inline void so3_right_jacobian(const Scalar v[3], Scalar J[9])
     so3_left_jacobian(nv, J);
 }
 
+// SO(3) inverse right Jacobian (closed form, small-angle Taylor near v = 0).
+//     J_r^{-1}(v) = I + (1/2) [v]_x + c(|v|) [v]_x^2,
+//     c(theta)    = 1 / theta^2 - (1 + cos theta) / (2 theta sin theta)
+//                 = 1 / theta^2 - cot(theta / 2) / (2 theta).
+// Taylor at |v| -> 0:  c -> 1/12 + |v|^2 / 720 + ...
+inline void so3_right_jacobian_inv(const Scalar v[3], Scalar Ji[9])
+{
+    const Scalar theta2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+    mat3_identity(Ji);
+    Scalar vh[9]; hat3(v, vh);
+    Scalar vh2[9]; mat3_mul(vh, vh, vh2);
+    if (theta2 < 1e-8)
+    {
+        for (int i = 0; i < 9; ++i) Ji[i] += 0.5 * vh[i] + (1. / 12.) * vh2[i];
+        return;
+    }
+    const Scalar theta = std::sqrt(theta2);
+    const Scalar c = 1. / theta2 - (1. + std::cos(theta)) / (2. * theta * std::sin(theta));
+    for (int i = 0; i < 9; ++i) Ji[i] += 0.5 * vh[i] + c * vh2[i];
+}
+
+// SO(3) inverse left Jacobian J_l^{-1}(v) = J_r^{-1}(-v).
+inline void so3_left_jacobian_inv(const Scalar v[3], Scalar Ji[9])
+{
+    const Scalar nv[3] = {-v[0], -v[1], -v[2]};
+    so3_right_jacobian_inv(nv, Ji);
+}
+
 } // namespace examples
 } // namespace fatrop
 

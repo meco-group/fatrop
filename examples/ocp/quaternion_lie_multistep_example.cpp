@@ -132,14 +132,10 @@ public:
         Scalar B[9]; mat3_mul(tmp, Jr_omega, B);
         for (int i = 0; i < 9; ++i) B[i] *= dt_;
         // BAbt stores the transpose of the (output x input) blocks: the entry at
-        // (input r, output c) is coeff[c][r], so write B (rows 0..2) and A (rows 3..5)
-        // transposed.
-        for (int r = 0; r < 3; ++r)
-            for (int c = 0; c < 3; ++c)
-            {
-                blasfeo_matel_wrap(res, 0 + r, c) = B[c * 3 + r];
-                blasfeo_matel_wrap(res, 3 + r, c) = A[c * 3 + r];
-            }
+        // (input r, output c) is coeff[c][r]. Reading the row-major buffers A, B as
+        // column-major (lda = 3) yields their transpose, which is what pack_mat writes.
+        blasfeo_pack_mat_wrap(3, 3, B, 3, res, 0, 0);
+        blasfeo_pack_mat_wrap(3, 3, A, 3, res, 3, 0);
         return 0;
     }
     Index eval_b(const Scalar *q_kp1, const Scalar *u_k, const Scalar *q_k, Scalar *res,
@@ -168,8 +164,7 @@ public:
         }
         blasfeo_gese_wrap(nu + nx + 1, 3, 0., res, 0, 0);
         // d g / d theta_0 scaled to I  (= J_r(g) J_r(g)^{-1})
-        for (int i = 0; i < 3; ++i)
-            blasfeo_matel_wrap(res, nu + i, i) = 1.0;
+        blasfeo_diare_wrap(3, 1.0, res, nu, 0);
         return 0;
     }
     Index eval_g(const Scalar * /*u_k*/, const Scalar *q_k, Scalar *res, const Index k) override
@@ -213,10 +208,20 @@ public:
     {
         if (k == K_ - 1)
         {
+            // For the terminal cost 0.5 b_terminal |Log(q_t^{-1} q)|^2:
+            //   d/d(delta_theta) Log(q_t^{-1} q Exp(delta_theta))|_0 = J_r(v)^{-1},
+            // so the gradient w.r.t. delta_theta is b_terminal * J_r(v)^{-T} v (which reduces
+            // to b_terminal * v only at v = 0).
             Scalar q_t_inv[4]; quat_inv(q_target_, q_t_inv);
             Scalar t[4]; quat_mul(q_t_inv, q_k, t);
             Scalar v[3]; quat_log(t, v);
-            for (int i = 0; i < 3; ++i) res[i] = objective_scale[0] * bQ_ * v[i];
+            Scalar Jr_inv[9]; so3_right_jacobian_inv(v, Jr_inv);
+            for (int i = 0; i < 3; ++i)
+            {
+                Scalar s = 0.;
+                for (int j = 0; j < 3; ++j) s += Jr_inv[j * 3 + i] * v[j]; // (J_r^{-T} v)_i
+                res[i] = objective_scale[0] * bQ_ * s;
+            }
         }
         else
         {
@@ -225,8 +230,10 @@ public:
         }
         return 0;
     }
-    // Gauss-Newton Hessian: stage cost is a_omega*I on omega; terminal cost is b_terminal*I
-    // in the so(3) tangent at the current orientation. No state cost at running stages.
+    // Gauss-Newton Hessian: stage cost is a_omega*I on omega; terminal cost uses the right-
+    // Jacobian-aware GN Hessian b_terminal * J_r(v)^{-T} J_r(v)^{-1} (and matching gradient
+    // b_terminal * J_r(v)^{-T} v), since d/d(delta_theta) Log(q_t^{-1} q Exp(delta_theta))|_0
+    // = J_r(v)^{-1}. Both reduce to b_terminal * I / b_terminal * v only at v = 0.
     Index eval_RSQrqt(const Scalar *objective_scale, const Scalar *u_k, const Scalar *q_k,
                       const Scalar * /*lam_dyn_k*/, const Scalar * /*lam_eq_k*/,
                       const Scalar * /*lam_eq_ineq_k*/, MAT *res, const Index k) override
@@ -236,20 +243,37 @@ public:
         blasfeo_gese_wrap(nu + nx + 1, nu + nx, 0., res, 0, 0);
         if (k == K_ - 1)
         {
-            for (int i = 0; i < 3; ++i)
-                blasfeo_matel_wrap(res, i, i) = objective_scale[0] * bQ_;
             Scalar q_t_inv[4]; quat_inv(q_target_, q_t_inv);
             Scalar t[4]; quat_mul(q_t_inv, q_k, t);
             Scalar v[3]; quat_log(t, v);
+            Scalar Jr_inv[9]; so3_right_jacobian_inv(v, Jr_inv);
+            // H_theta = b_terminal (J_r^{-1})^T (J_r^{-1})  -- symmetric 3x3.
+            Scalar H_theta[9]; // column-major: H_theta[i + 3*j] = (i, j)
             for (int i = 0; i < 3; ++i)
-                blasfeo_matel_wrap(res, nx, i) = objective_scale[0] * bQ_ * v[i];
+                for (int j = 0; j < 3; ++j)
+                {
+                    Scalar s = 0.;
+                    for (int kk = 0; kk < 3; ++kk) s += Jr_inv[kk * 3 + i] * Jr_inv[kk * 3 + j];
+                    H_theta[i + 3 * j] = objective_scale[0] * bQ_ * s;
+                }
+            blasfeo_pack_mat_wrap(3, 3, H_theta, 3, res, 0, 0);
+            // grad row: b_terminal * J_r^{-T} v
+            Scalar grad_th[3];
+            for (int i = 0; i < 3; ++i)
+            {
+                Scalar s = 0.;
+                for (int j = 0; j < 3; ++j) s += Jr_inv[j * 3 + i] * v[j];
+                grad_th[i] = objective_scale[0] * bQ_ * s;
+            }
+            blasfeo_pack_mat_wrap(1, 3, grad_th, 1, res, nx, 0);
         }
         else
         {
-            for (int i = 0; i < 3; ++i)
-                blasfeo_matel_wrap(res, i, i) = objective_scale[0] * aO_;
-            for (int i = 0; i < 3; ++i)
-                blasfeo_matel_wrap(res, nu + nx, i) = objective_scale[0] * aO_ * u_k[i];
+            blasfeo_diare_wrap(3, objective_scale[0] * aO_, res, 0, 0);
+            Scalar grad_om[3] = {objective_scale[0] * aO_ * u_k[0],
+                                 objective_scale[0] * aO_ * u_k[1],
+                                 objective_scale[0] * aO_ * u_k[2]};
+            blasfeo_pack_mat_wrap(1, 3, grad_om, 1, res, nu + nx, 0);
         }
         return 0;
     }
