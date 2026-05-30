@@ -18,7 +18,7 @@ PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
           LinearSystem<PdSystemType<OcpType>>::m(info)),
       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),
       g_ii_(info.number_of_slack_variables), D_ii_(info.number_of_slack_variables),
-      gg_(info.number_of_eq_constraints), x_aug_(info.number_of_primal_variables),
+      gg_(info.number_of_eq_constraints), x_aug_(info.number_of_tangent_variables),
       mult_aug_(info.number_of_eq_constraints), aug_system_solver_(aug_system_solver)
 {
 }
@@ -42,7 +42,7 @@ void PdSolverOrig<OcpType>::reduce(LinearSystem<PdSystemType<OcpType>> &ls)
 void PdSolverOrig<OcpType>::dereduce(LinearSystem<PdSystemType<OcpType>> &ls, VecRealView &x)
 {
     // set x
-    x.block(ls.info_.number_of_primal_variables, ls.info_.pd_orig_offset_primal) = x_aug_;
+    x.block(ls.info_.number_of_tangent_variables, ls.info_.pd_orig_offset_primal) = x_aug_;
     // set mult
     x.block(ls.info_.number_of_eq_constraints, ls.info_.pd_orig_offset_mult) = mult_aug_;
     // set s

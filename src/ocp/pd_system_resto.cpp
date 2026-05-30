@@ -23,13 +23,13 @@ LinearSystem<PdSystemResto<OcpType>>::LinearSystem(
 }
 Index LinearSystem<PdSystemResto<OcpType>>::m(const ProblemInfo<OcpType> &info)
 {
-    return info.number_of_primal_variables + info.number_of_eq_constraints +
+    return info.number_of_tangent_variables + info.number_of_eq_constraints +
            3 * info.number_of_slack_variables_resto /* grad_s rhs_zl rhs_zu*/;
 }
 
 void LinearSystem<PdSystemResto<OcpType>>::get_rhs(VecRealView &out)
 {
-    out.block(info_.number_of_primal_variables, info_.pd_resto_offset_primal) = rhs_f_x_;
+    out.block(info_.number_of_tangent_variables, info_.pd_resto_offset_primal) = rhs_f_x_;
     out.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_slack) = rhs_f_s_;
     out.block(info_.number_of_eq_constraints, info_.pd_resto_offset_mult) = rhs_g_;
     out.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_zl) = rhs_cl_;
@@ -37,7 +37,7 @@ void LinearSystem<PdSystemResto<OcpType>>::get_rhs(VecRealView &out)
 }
 void LinearSystem<PdSystemResto<OcpType>>::set_rhs(const VecRealView &in)
 {
-    rhs_f_x_ = in.block(info_.number_of_primal_variables, info_.pd_resto_offset_primal);
+    rhs_f_x_ = in.block(info_.number_of_tangent_variables, info_.pd_resto_offset_primal);
     rhs_f_s_ = in.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_slack);
     rhs_g_ = in.block(info_.number_of_eq_constraints, info_.pd_resto_offset_mult);
     rhs_cl_ = in.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_zl);
@@ -54,7 +54,7 @@ void LinearSystem<PdSystemResto<OcpType>>::set_rhs(const VecRealView &in)
 void LinearSystem<PdSystemResto<OcpType>>::apply_on_right(const VecRealView &x, Scalar alpha,
                                                           const VecRealView &y, VecRealView &out)
 {
-    VecRealView x_primal = x.block(info_.number_of_primal_variables, info_.pd_resto_offset_primal);
+    VecRealView x_primal = x.block(info_.number_of_tangent_variables, info_.pd_resto_offset_primal);
     VecRealView x_slack =
         x.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_slack);
     VecRealView mult = x.block(info_.number_of_eq_constraints, info_.pd_resto_offset_mult);
@@ -64,7 +64,7 @@ void LinearSystem<PdSystemResto<OcpType>>::apply_on_right(const VecRealView &x, 
     VecRealView zl = x.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_zl);
     VecRealView zu = x.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_zu);
 
-    VecRealView out_x = out.block(info_.number_of_primal_variables, info_.pd_resto_offset_primal);
+    VecRealView out_x = out.block(info_.number_of_tangent_variables, info_.pd_resto_offset_primal);
     VecRealView out_s =
         out.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_slack);
     VecRealView out_mult = out.block(info_.number_of_eq_constraints, info_.pd_resto_offset_mult);
@@ -74,7 +74,7 @@ void LinearSystem<PdSystemResto<OcpType>>::apply_on_right(const VecRealView &x, 
     VecRealView out_zl = out.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_zl);
     VecRealView out_zu = out.block(info_.number_of_slack_variables_resto, info_.pd_resto_offset_zu);
 
-    VecRealView D_x_x = D_x_.block(info_.number_of_primal_variables, info_.offset_primal);
+    VecRealView D_x_x = D_x_.block(info_.number_of_tangent_variables, info_.offset_primal);
     VecRealView D_x_s = D_x_.block(info_.number_of_slack_variables_resto, info_.offset_slack);
 
     VecRealView s = x_slack.block(info_.number_of_slack_variables, info_.offset_s);

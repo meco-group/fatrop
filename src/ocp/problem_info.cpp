@@ -73,7 +73,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
                    dims.number_of_tangent_controls.begin(), offsets_tangent_x.begin(),
                    std::plus<Index>());
     // set up the offsets for the slack variables
-    offset_slack = number_of_primal_variables;
+    offset_slack = number_of_tangent_variables;
     offsets_slack = std::vector<Index>(dims.K, 0);
     compute_offsets(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(),
                     0, offsets_slack.begin());
@@ -103,7 +103,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     compute_offsets(dims.number_of_ineq_constraints.begin(), dims.number_of_ineq_constraints.end(),
                     offset_g_eq_slack, offsets_g_eq_slack.begin());
     pd_orig_offset_primal = 0;
-    pd_orig_offset_slack = pd_orig_offset_primal + number_of_primal_variables;
+    pd_orig_offset_slack = pd_orig_offset_primal + number_of_tangent_variables;
     pd_orig_offset_mult = pd_orig_offset_slack + number_of_slack_variables;
     pd_orig_offset_zl = pd_orig_offset_mult + number_of_eq_constraints;
     pd_orig_offset_zu = pd_orig_offset_zl + number_of_slack_variables;
@@ -111,7 +111,7 @@ ProblemInfo<OcpType>::ProblemInfo(const ProblemDims<OcpType> &dims)
     number_of_slack_variables_resto = number_of_slack_variables + 2 * number_of_eq_constraints;
 
     pd_resto_offset_primal = 0;
-    pd_resto_offset_slack = pd_resto_offset_primal + number_of_primal_variables;
+    pd_resto_offset_slack = pd_resto_offset_primal + number_of_tangent_variables;
     pd_resto_offset_mult = pd_resto_offset_slack + number_of_slack_variables_resto;
     pd_resto_offset_zl = pd_resto_offset_mult + number_of_eq_constraints;
     pd_resto_offset_zu = pd_resto_offset_zl + number_of_slack_variables_resto;

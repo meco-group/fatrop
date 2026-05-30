@@ -114,14 +114,14 @@ void PdSolverResto<OcpType>::dereduce(LinearSystem<PdSystemResto<OcpType>> &ls, 
     const ProblemInfo<OcpType> &info = ls.info_;
 
     VecRealView orig_primal_x =
-        x_orig_.block(info.number_of_primal_variables, info.pd_orig_offset_primal);
+        x_orig_.block(info.number_of_tangent_variables, info.pd_orig_offset_primal);
     VecRealView orig_primal_s =
         x_orig_.block(info.number_of_slack_variables, info.pd_orig_offset_slack);
     VecRealView orig_mult = x_orig_.block(info.number_of_eq_constraints, info.pd_orig_offset_mult);
     VecRealView orig_zl = x_orig_.block(info.number_of_slack_variables, info.pd_orig_offset_zl);
     VecRealView orig_zu = x_orig_.block(info.number_of_slack_variables, info.pd_orig_offset_zu);
     // set x
-    x.block(info.number_of_primal_variables, info.pd_resto_offset_primal) = orig_primal_x;
+    x.block(info.number_of_tangent_variables, info.pd_resto_offset_primal) = orig_primal_x;
     x.block(info.number_of_slack_variables, info.pd_resto_offset_slack) = orig_primal_s;
     x.block(info.number_of_eq_constraints, info.pd_resto_offset_mult) = orig_mult;
     x.block(info.number_of_slack_variables, info.pd_resto_offset_zl) = orig_zl;
@@ -164,7 +164,7 @@ LinsolReturnFlag PdSolverResto<OcpType>::solve_once_impl(LinearSystem<PdSystemRe
 
     LinearSystem<PdSystemType<OcpType>> ls_orig(
         ls.info_, ls.jac_, ls.hess_,
-        ls.D_x_.block(info.number_of_primal_variables + info.number_of_slack_variables, 0), false,
+        ls.D_x_.block(info.number_of_tangent_variables + info.number_of_slack_variables, 0), false,
         D_e_orig_, ls.Sl_i_.block(info.number_of_slack_variables, 0),
         ls.Su_i_.block(info.number_of_slack_variables, 0),
         ls.Zl_i_.block(info.number_of_slack_variables, 0),
@@ -186,7 +186,7 @@ void PdSolverResto<OcpType>::solve_rhs_impl(LinearSystem<PdSystemResto<OcpType>>
 
     LinearSystem<PdSystemType<OcpType>> ls_orig(
         ls.info_, ls.jac_, ls.hess_,
-        ls.D_x_.block(info.number_of_primal_variables + info.number_of_slack_variables, 0), false,
+        ls.D_x_.block(info.number_of_tangent_variables + info.number_of_slack_variables, 0), false,
         D_e_orig_, ls.Sl_i_.block(info.number_of_slack_variables, 0),
         ls.Su_i_.block(info.number_of_slack_variables, 0),
         ls.Zl_i_.block(info.number_of_slack_variables, 0),

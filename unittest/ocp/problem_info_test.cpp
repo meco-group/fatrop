@@ -53,5 +53,28 @@ TEST_F(ProblemInfoTest, ConstructorAndOffsets)
             EXPECT_EQ(problem_info.offsets_g_eq_slack, std::vector<Index>({17, 23, 30}));
         }
 
+TEST_F(ProblemInfoTest, ManifoldSlackOffsetsAreTangentSized)
+{
+    ProblemDims<OcpType> dims(
+        2,
+        std::vector<Index>{2, 0},
+        std::vector<Index>{4, 5},
+        std::vector<Index>{0, 0},
+        std::vector<Index>{3, 0},
+        std::vector<Index>{2, 0},
+        std::vector<Index>{3, 4});
+    ProblemInfo<OcpType> info(dims);
+
+    const Index n_primal = 4 + 2 + 5;
+    const Index n_tangent = 3 + 2 + 4;
+    const Index n_slack = 3;
+    EXPECT_EQ(info.number_of_primal_variables, n_primal);
+    EXPECT_EQ(info.number_of_tangent_variables, n_tangent);
+    EXPECT_EQ(info.number_of_slack_variables, n_slack);
+    EXPECT_EQ(info.offset_slack, n_tangent);
+    EXPECT_EQ(info.pd_orig_offset_slack, n_tangent);
+    EXPECT_LE(info.offset_slack + info.number_of_slack_variables, n_tangent + n_slack);
+}
+
     } // namespace test
 } // namespace fatrop

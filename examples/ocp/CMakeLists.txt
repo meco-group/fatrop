@@ -12,5 +12,9 @@ add_executable(quadrotor_lie_example quadrotor_lie_example.cpp)
 target_link_libraries(quadrotor_lie_example PRIVATE fatrop)
 target_include_directories(quadrotor_lie_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
+add_executable(quadrotor_mpc_example quadrotor_mpc_example.cpp)
+target_link_libraries(quadrotor_mpc_example PRIVATE fatrop)
+target_include_directories(quadrotor_mpc_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 add_executable(mehrotra_qp_example mehrotra_qp_example.cpp)
 target_link_libraries(mehrotra_qp_example PRIVATE fatrop)
