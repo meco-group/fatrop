@@ -83,9 +83,12 @@ class StageProxy:
     u0: Optional["ca.SX | ca.MX"] = None  # (nu, 1)
 
     # --- optional derivative overrides ---
-    # Map from kind in {"babt", "ggt", "ggt_ineq", "rsqrqt"} to a pre-built
-    # ca.Function with the exact codegen I/O signature (see ocp_codegen). When
-    # present the codegen uses it verbatim instead of AD-deriving it.
+    # Map from kind in {"val", "jac", "obj", "rsqrqt"} to a pre-built
+    # ca.Function with the exact codegen I/O signature (see ocp_codegen).
+    # Multi-output kinds (``val``/``jac``) must produce outputs in the order
+    # described in ocp_codegen (b? + g? + gineq? for val; babt? + ggt? + ggt_ineq?
+    # for jac; the ``?`` block is absent when its dimension is zero).  When an
+    # override is present the codegen uses it verbatim instead of AD-deriving.
     deriv_overrides: Dict[str, ca.Function] = field(default_factory=dict)
 
     def __post_init__(self):

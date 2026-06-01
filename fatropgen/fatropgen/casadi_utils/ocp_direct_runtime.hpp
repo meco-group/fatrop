@@ -1,10 +1,10 @@
-// Header-only runtime for the proxy -> OcpAbstract codegen (see core/ocp_codegen.py).
+// Header-only runtime for the proxy -> Nlp<OcpType> codegen (see ocp_codegen.py).
 //
 // A generated <name>_ocp.cpp wires CasADi-generated C functions (one set per
 // node "template") into the data structures here, and this header provides:
 //   * CFun           : a CasADi C function + reusable arg/res buffers
 //   * TemplateData   : per-template metadata + the CFuns for each eval kind
-//   * GeneratedOcp   : a generic fatrop::OcpAbstract that dispatches node k to
+//   * GeneratedNlp   : a generic fatrop::Nlp<OcpType> that dispatches node k to
 //                      node_to_template[k] and packs results into blasfeo
 //   * Solver         : cold-start driver (fresh IpAlgBuilder per solve)
 //
@@ -12,25 +12,36 @@
 //   * per-node decision vector z = [u; x]  (controls first)
 //   * eval_* matrices are (nu+nx+1) x ncols; only the top (nu+nx) rows are
 //     filled by the user (Fatrop recomputes the bottom "internal" row from
-//     eval_b / eval_g / eval_gineq / eval_rq, exactly as the reference
-//     hand-written example leaves it zero).
+//     the constraint value vectors, exactly as the reference hand-written
+//     example leaves it zero).
 //   * dynamics defect b = -x_{k+1} + f(x,u)
 //
 // CasADi function I/O conventions the codegen must honor (inputs in this order):
-//   b,babt,g,ggt,gineq,ggt_ineq,L,rq : (x, u, param0, param1, ...)
-//   rsqrqt                            : (x, u, lam_dyn, lam_eq, lam_ineq, obj_scale, params...)
-//   x0,u0                             : (param0, param1, ...)
-// Outputs (single, dense, column-major):
-//   b        -> f                        (nx_next)
-//   babt     -> (d f / d z)^T            (nu+nx, nx_next)
-//   g        -> g_eq                     (ng_eq)
-//   ggt      -> (d g_eq / d z)^T         (nu+nx, ng_eq)
-//   gineq    -> g_ineq                   (ng_ineq)
-//   ggt_ineq -> (d g_ineq / d z)^T       (nu+nx, ng_ineq)
-//   L        -> stage cost               (1)            [scaled by obj_scale in C]
-//   rq       -> d L / d z                (nu+nx)        [scaled by obj_scale in C]
-//   rsqrqt   -> Lagrangian Hessian wrt z (nu+nx, nu+nx) [obj_scale baked in]
-//   x0/u0    -> initial guess            (nx)/(nu)
+//   b,g,gineq             : (x, u, param0, ...) -> single dense vector
+//   jac    (multi-output) : (x, u, param0, ...) -> (babt?, ggt?, ggt_ineq?)
+//   obj    (multi-output) : (x, u, param0, ...) -> (L, rq)
+//   rsqrqt                : (x, u, lam_dyn, lam_eq, lam_ineq, obj_scale, params...)
+//   x0,u0                 : (param0, param1, ...)
+// The constraint *value* functions (b, g, gineq) are emitted separately so
+// CasADi's .expand() doesn't trip over multi-output shared CallSX nodes from
+// the big-function kernel (this happens with nvblox + ca.external inside).
+// The *Jacobian* function (jac) groups every stagewise Jacobian block in one
+// multi-output call — that matches the granularity of fatrop::Nlp::eval_constr_jac
+// and is the main shape change vs. the prior OcpAbstract-based codegen.
+// "?" outputs in jac are omitted when their dimension would be zero
+// (terminal nodes skip ``babt``; templates without (in)equalities skip
+// ``ggt``/``ggt_ineq``).
+// Outputs (each is a single dense column-major buffer):
+//   b        -> f                            (nx_next)
+//   g        -> g_eq                         (ng_eq)
+//   gineq    -> g_ineq                       (ng_ineq)
+//   babt     -> (d f / d z)^T                (nu+nx, nx_next)
+//   ggt      -> (d g_eq / d z)^T             (nu+nx, ng_eq)
+//   ggt_ineq -> (d g_ineq / d z)^T           (nu+nx, ng_ineq)
+//   L        -> stage cost                   (1)            [obj_scale applied in C++]
+//   rq       -> d L / d z                    (nu+nx)        [obj_scale applied in C++]
+//   rsqrqt   -> Lagrangian Hessian wrt z     (nu+nx, nu+nx) [obj_scale baked in]
+//   x0/u0    -> initial guess                (nx)/(nu)
 #pragma once
 
 #include <algorithm>
@@ -39,15 +50,8 @@
 #include <string>
 #include <vector>
 
-#include <cassert>
 #include <fatrop/fatrop.hpp>
-
-// Construct a CFun from a CasADi-generated C function `name`. Expects the
-// standard symbols emitted by `casadi::CodeGenerator` (name, name_n_in, ...).
-#define MK_CFUN(name) std::make_unique<ocp_direct::CFun>( \
-    &name, &name##_work, &name##_sparsity_in, &name##_sparsity_out, \
-    &name##_n_in, &name##_n_out, &name##_incref, &name##_decref, \
-    &name##_checkout, &name##_release)
+#include "casadi_c_wrap.hpp"
 
 namespace ocp_direct
 {
@@ -55,80 +59,24 @@ namespace ocp_direct
     using fatrop::Scalar;
     // NOTE: MAT/VEC are global macros (blasfeo_dmat/dvec), not fatrop types,
     // so they are used unqualified (do not `using fatrop::MAT`).
+    using casadi_c_wrap::CasadiCFunctions;
+    using casadi_c_wrap::CasadiCFunctionWrap;
 
-    // One CasADi C function with reusable I/O buffers. Owns the casadi memory
-    // checkout for its lifetime (incref/checkout in ctor, release/decref in dtor).
+    // One CasADi C function with reusable I/O buffers.
     struct CFun
     {
-        using casadi_int_t = long long int;
-        using eval_t = int (*)(const double **, double **, casadi_int_t *, double *, int);
-        using work_t = int (*)(casadi_int_t *, casadi_int_t *, casadi_int_t *, casadi_int_t *);
-        using sparsity_t = const casadi_int_t *(*)(casadi_int_t);
-        using count_t = casadi_int_t (*)();
-        using void_t = void (*)();
-        using checkout_t = int (*)();
-        using release_t = void (*)(int);
-
-        eval_t eval_;
-        void_t decref_;
-        release_t release_;
-        int mem_id_;
-
-        // User-facing buffers (one vector per input/output, dense storage).
+        CasadiCFunctionWrap wrap;
         std::vector<std::vector<double>> arg;
         std::vector<std::vector<double>> res;
-        // Scratch used by the casadi eval call.
-        std::vector<const double *> arg_ptrs_;
-        std::vector<double *> res_ptrs_;
-        std::vector<casadi_int_t> iw_;
-        std::vector<double> w_;
-
-        CFun(eval_t eval, work_t work, sparsity_t sp_in, sparsity_t sp_out,
-             count_t n_in, count_t n_out, void_t incref, void_t decref,
-             checkout_t checkout, release_t release)
-            : eval_(eval), decref_(decref), release_(release)
-        {
-            incref();
-            mem_id_ = checkout();
-
-            casadi_int_t ni = n_in(), no = n_out();
-            arg.resize(ni);
-            res.resize(no);
-            for (casadi_int_t i = 0; i < ni; ++i)
-            {
-                const casadi_int_t *sp = sp_in(i);
-                arg[i].assign(sp ? sp[0] * sp[1] : 0, 0.0);
-            }
-            for (casadi_int_t i = 0; i < no; ++i)
-            {
-                const casadi_int_t *sp = sp_out(i);
-                res[i].assign(sp ? sp[0] * sp[1] : 0, 0.0);
-            }
-
-            casadi_int_t sz_arg = ni, sz_res = no, sz_iw = 0, sz_w = 0;
-            work(&sz_arg, &sz_res, &sz_iw, &sz_w);
-            arg_ptrs_.resize(sz_arg);
-            res_ptrs_.resize(sz_res);
-            iw_.resize(sz_iw);
-            w_.resize(sz_w);
-        }
-        ~CFun()
-        {
-            release_(mem_id_);
-            decref_();
-        }
-        CFun(const CFun &) = delete;
-        CFun &operator=(const CFun &) = delete;
-
-        void call()
-        {
-            for (size_t i = 0; i < arg.size(); ++i) arg_ptrs_[i] = arg[i].data();
-            for (size_t i = 0; i < res.size(); ++i) res_ptrs_[i] = res[i].data();
-            eval_(arg_ptrs_.data(), res_ptrs_.data(), iw_.data(), w_.data(), mem_id_);
-        }
+        explicit CFun(const CasadiCFunctions &f) : wrap(f) { wrap.allocate_arg_res(arg, res); }
+        void call() { wrap(arg, res); }
     };
 
-    enum Kind { B, BABT, G, GGT, GINEQ, GGT_INEQ, L, RQ, RSQRQT, X0, U0, NKIND };
+    // Kinds the generated <name>_ocp.cpp wires up.  B / G / GINEQ are single-
+    // output value Functions.  JAC is a multi-output Function with up to three
+    // outputs (babt, ggt, ggt_ineq) in a fixed order, skipping any whose
+    // dimension would be zero.  OBJ always emits two outputs (L, rq).
+    enum Kind { B, G, GINEQ, JAC, OBJ, RSQRQT, X0, U0, NKIND };
 
     // Per-template metadata + (optional) CFun for each eval kind.
     struct TemplateData
@@ -137,9 +85,46 @@ namespace ocp_direct
         bool has_dynamics = false;
         std::vector<double> lb, ub;          // size ng_ineq
         std::unique_ptr<CFun> fn[NKIND];     // null if absent
+
+        // Which output index of JAC each Jacobian block lives at.  -1 = absent.
+        // Set in the generated cpp.
+        int jac_idx_babt = -1, jac_idx_ggt = -1, jac_idx_ggt_ineq = -1;
     };
 
-    class GeneratedOcp : public fatrop::OcpAbstract
+    // Build ProblemDims<OcpType> from per-stage nx/nu/ng/ng_ineq.
+    inline fatrop::ProblemDims<fatrop::OcpType> make_ocp_dims(
+        const std::vector<TemplateData> &templates,
+        const std::vector<int> &node_to_template)
+    {
+        const Index K = static_cast<Index>(node_to_template.size());
+        std::vector<Index> nu(K), nx(K), ng(K), ng_ineq(K);
+        for (Index k = 0; k < K; ++k)
+        {
+            const TemplateData &t = templates[node_to_template[k]];
+            nu[k] = t.nu;
+            nx[k] = t.nx;
+            ng[k] = t.ng_eq;
+            ng_ineq[k] = t.ng_ineq;
+        }
+        return fatrop::ProblemDims<fatrop::OcpType>(K, std::move(nu), std::move(nx),
+                                                    std::move(ng), std::move(ng_ineq));
+    }
+
+    // Build NlpDims (number_of_variables / eq / ineq) from ProblemDims.
+    inline fatrop::NlpDims make_nlp_dims(const fatrop::ProblemDims<fatrop::OcpType> &d)
+    {
+        Index nvar = 0, neq = 0, nineq = 0;
+        for (Index k = 0; k < d.K; ++k)
+        {
+            nvar += d.number_of_controls[k] + d.number_of_states[k];
+            neq += d.number_of_eq_constraints[k] + d.number_of_ineq_constraints[k];
+            if (k != d.K - 1) neq += d.number_of_states[k + 1];
+            nineq += d.number_of_ineq_constraints[k];
+        }
+        return fatrop::NlpDims(nvar, neq, nineq);
+    }
+
+    class GeneratedNlp : public fatrop::Nlp<fatrop::OcpType>
     {
     public:
         // Built by the generated .cpp.
@@ -153,14 +138,20 @@ namespace ocp_direct
         std::vector<std::vector<double>> u0_cache;     // per node (nu)
         bool init_overridden = false;
 
+        // Dim caches (filled in `finalize()` once `templates`/`node_to_template`
+        // are populated by the generated cpp).
+        std::unique_ptr<fatrop::ProblemDims<fatrop::OcpType>> ocp_dims_;
+        std::unique_ptr<fatrop::NlpDims> nlp_dims_;
+
         TemplateData &tmpl(Index k) { return templates[node_to_template[k]]; }
         const TemplateData &tmpl(Index k) const { return templates[node_to_template[k]]; }
+        Index horizon() const { return static_cast<Index>(node_to_template.size()); }
 
-        Index get_horizon_length() const override { return (Index)node_to_template.size(); }
-        Index get_nx(const Index k) const override { return tmpl(k).nx; }
-        Index get_nu(const Index k) const override { return tmpl(k).nu; }
-        Index get_ng(const Index k) const override { return tmpl(k).ng_eq; }
-        Index get_ng_ineq(const Index k) const override { return tmpl(k).ng_ineq; }
+        const fatrop::NlpDims &nlp_dims() const override { return *nlp_dims_; }
+        const fatrop::ProblemDims<fatrop::OcpType> &problem_dims() const override
+        {
+            return *ocp_dims_;
+        }
 
         // --- helpers ---
         static void copy_in(std::vector<double> &dst, const Scalar *src)
@@ -186,140 +177,227 @@ namespace ocp_direct
                                               rows, res, 0, 0);
         }
 
-        // --- dynamics ---
-        Index eval_b(const Scalar *x_kp1, const Scalar *u, const Scalar *x,
-                     Scalar *res, const Index k) override
+        // Build the dim caches.  Call after `templates` / `node_to_template`
+        // are populated.
+        void finalize_dims()
         {
-            TemplateData &t = tmpl(k);
-            CFun &cf = *t.fn[B];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            for (int i = 0; i < t.nx_next; ++i) res[i] = -x_kp1[i] + cf.res[0][i];
-            return 0;
+            ocp_dims_ = std::make_unique<fatrop::ProblemDims<fatrop::OcpType>>(
+                make_ocp_dims(templates, node_to_template));
+            nlp_dims_ = std::make_unique<fatrop::NlpDims>(make_nlp_dims(*ocp_dims_));
         }
-        Index eval_BAbt(const Scalar *, const Scalar *u, const Scalar *x,
-                        MAT *res, const Index k) override
+
+        // ------------------------------------------------------------ Nlp API
+
+        Index eval_lag_hess(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                            const Scalar objective_scale, const fatrop::VecRealView &primal_x,
+                            const fatrop::VecRealView &primal_s,
+                            const fatrop::VecRealView &lam,
+                            fatrop::Hessian<fatrop::OcpType> &hess) override
         {
-            TemplateData &t = tmpl(k);
-            CFun &cf = *t.fn[BABT];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            pack(res, t.nu + t.nx, t.nx_next, cf.res[0]);
+            const Scalar *primal_x_p = primal_x.data();
+            const Scalar *lam_p = lam.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                TemplateData &t = tmpl(k);
+                CFun &cf = *t.fn[RSQRQT];
+                const Scalar *u_k = primal_x_p + info.offsets_primal_u[k];
+                const Scalar *x_k = primal_x_p + info.offsets_primal_x[k];
+                const Scalar *lam_dyn_k =
+                    (k != info.dims.K - 1) ? lam_p + info.offsets_g_eq_dyn[k] : nullptr;
+                const Scalar *lam_eq_k = lam_p + info.offsets_g_eq_path[k];
+                const Scalar *lam_ineq_k = lam_p + info.offsets_g_eq_slack[k];
+
+                // CasADi sig: (x, u, lam_dyn, lam_eq, lam_ineq, obj_scale, params...)
+                copy_in(cf.arg[0], x_k);
+                copy_in(cf.arg[1], u_k);
+                copy_in(cf.arg[2], lam_dyn_k);
+                copy_in(cf.arg[3], lam_eq_k);
+                copy_in(cf.arg[4], lam_ineq_k);
+                cf.arg[5][0] = objective_scale;
+                for (size_t i = 0; i < params.size(); ++i) cf.arg[6 + i] = params[i];
+                cf.call();
+                pack(&hess.RSQrqt[k].mat(), t.nu + t.nx, t.nu + t.nx, cf.res[0]);
+            }
             return 0;
         }
 
-        // --- equality constraints ---
-        Index eval_g(const Scalar *u, const Scalar *x, Scalar *res, const Index k) override
+        Index eval_constr_jac(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                              const fatrop::VecRealView &primal_x,
+                              const fatrop::VecRealView &primal_s,
+                              fatrop::Jacobian<fatrop::OcpType> &jac) override
         {
-            TemplateData &t = tmpl(k);
-            if (t.ng_eq == 0) return 0;
-            CFun &cf = *t.fn[G];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            std::copy(cf.res[0].begin(), cf.res[0].end(), res);
-            return 0;
-        }
-        Index eval_Ggt(const Scalar *u, const Scalar *x, MAT *res, const Index k) override
-        {
-            TemplateData &t = tmpl(k);
-            if (t.ng_eq == 0) return 0;
-            CFun &cf = *t.fn[GGT];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            pack(res, t.nu + t.nx, t.ng_eq, cf.res[0]);
-            return 0;
-        }
-
-        // --- inequality constraints ---
-        Index eval_gineq(const Scalar *u, const Scalar *x, Scalar *res, const Index k) override
-        {
-            TemplateData &t = tmpl(k);
-            if (t.ng_ineq == 0) return 0;
-            CFun &cf = *t.fn[GINEQ];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            std::copy(cf.res[0].begin(), cf.res[0].end(), res);
-            return 0;
-        }
-        Index eval_Ggt_ineq(const Scalar *u, const Scalar *x, MAT *res, const Index k) override
-        {
-            TemplateData &t = tmpl(k);
-            if (t.ng_ineq == 0) return 0;
-            CFun &cf = *t.fn[GGT_INEQ];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            pack(res, t.nu + t.nx, t.ng_ineq, cf.res[0]);
-            return 0;
-        }
-        Index get_bounds(Scalar *lower, Scalar *upper, const Index k) const override
-        {
-            const TemplateData &t = tmpl(k);
-            for (int i = 0; i < t.ng_ineq; ++i) { lower[i] = t.lb[i]; upper[i] = t.ub[i]; }
+            const Scalar *primal_x_p = primal_x.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                TemplateData &t = tmpl(k);
+                if (!t.fn[JAC]) continue;       // template has no Jacobian blocks
+                CFun &cf = *t.fn[JAC];
+                fill_xu_p(cf, primal_x_p + info.offsets_primal_x[k],
+                          primal_x_p + info.offsets_primal_u[k]);
+                cf.call();
+                if (t.jac_idx_babt >= 0)
+                    pack(&jac.BAbt[k].mat(), t.nu + t.nx, t.nx_next,
+                         cf.res[t.jac_idx_babt]);
+                if (t.jac_idx_ggt >= 0)
+                    pack(&jac.Gg_eqt[k].mat(), t.nu + t.nx, t.ng_eq,
+                         cf.res[t.jac_idx_ggt]);
+                if (t.jac_idx_ggt_ineq >= 0)
+                    pack(&jac.Gg_ineqt[k].mat(), t.nu + t.nx, t.ng_ineq,
+                         cf.res[t.jac_idx_ggt_ineq]);
+            }
             return 0;
         }
 
-        // --- cost ---
-        Index eval_L(const Scalar *obj_scale, const Scalar *u, const Scalar *x,
-                     Scalar *res, const Index k) override
+        Index eval_constraint_violation(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                                        const fatrop::VecRealView &primal_x,
+                                        const fatrop::VecRealView &primal_s,
+                                        fatrop::VecRealView &res) override
         {
-            CFun &cf = *tmpl(k).fn[L];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            *res = obj_scale[0] * cf.res[0][0];
-            return 0;
-        }
-        Index eval_rq(const Scalar *obj_scale, const Scalar *u, const Scalar *x,
-                      Scalar *res, const Index k) override
-        {
-            TemplateData &t = tmpl(k);
-            CFun &cf = *t.fn[RQ];
-            fill_xu_p(cf, x, u);
-            cf.call();
-            for (int i = 0; i < t.nu + t.nx; ++i) res[i] = obj_scale[0] * cf.res[0][i];
+            const Scalar *primal_x_p = primal_x.data();
+            Scalar *res_p = res.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                TemplateData &t = tmpl(k);
+                const Scalar *x_k = primal_x_p + info.offsets_primal_x[k];
+                const Scalar *u_k = primal_x_p + info.offsets_primal_u[k];
+                if (t.fn[B])
+                {
+                    CFun &cf = *t.fn[B];
+                    fill_xu_p(cf, x_k, u_k);
+                    cf.call();
+                    Scalar *b_out = res_p + info.offsets_g_eq_dyn[k];
+                    const Scalar *x_kp1 = primal_x_p + info.offsets_primal_x[k + 1];
+                    for (int i = 0; i < t.nx_next; ++i) b_out[i] = -x_kp1[i] + cf.res[0][i];
+                }
+                if (t.fn[G])
+                {
+                    CFun &cf = *t.fn[G];
+                    fill_xu_p(cf, x_k, u_k);
+                    cf.call();
+                    std::copy(cf.res[0].begin(), cf.res[0].end(),
+                              res_p + info.offsets_g_eq_path[k]);
+                }
+                if (t.fn[GINEQ])
+                {
+                    CFun &cf = *t.fn[GINEQ];
+                    fill_xu_p(cf, x_k, u_k);
+                    cf.call();
+                    std::copy(cf.res[0].begin(), cf.res[0].end(),
+                              res_p + info.offsets_g_eq_slack[k]);
+                }
+            }
+            // add -s to the slack constraints (g_ineq - s = 0).
+            res.block(info.number_of_g_eq_slack, info.offset_g_eq_slack) =
+                res.block(info.number_of_g_eq_slack, info.offset_g_eq_slack) -
+                primal_s.block(info.number_of_g_eq_slack, 0);
             return 0;
         }
 
-        // --- Lagrangian Hessian ---
-        Index eval_RSQrqt(const Scalar *obj_scale, const Scalar *u, const Scalar *x,
-                          const Scalar *lam_dyn, const Scalar *lam_eq,
-                          const Scalar *lam_eq_ineq, MAT *res, const Index k) override
+        Index eval_objective_gradient(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                                      const Scalar objective_scale,
+                                      const fatrop::VecRealView &primal_x,
+                                      const fatrop::VecRealView &primal_s,
+                                      fatrop::VecRealView &grad_x,
+                                      fatrop::VecRealView &grad_s) override
         {
-            TemplateData &t = tmpl(k);
-            CFun &cf = *t.fn[RSQRQT];
-            // inputs: x, u, lam_dyn, lam_eq, lam_ineq, obj_scale, params...
-            copy_in(cf.arg[0], x);
-            copy_in(cf.arg[1], u);
-            copy_in(cf.arg[2], lam_dyn);       // size nx_next (0 / null at terminal)
-            copy_in(cf.arg[3], lam_eq);        // size ng_eq
-            copy_in(cf.arg[4], lam_eq_ineq);   // size ng_ineq
-            cf.arg[5][0] = obj_scale[0];
-            for (size_t i = 0; i < params.size(); ++i) cf.arg[6 + i] = params[i];
-            cf.call();
-            pack(res, t.nu + t.nx, t.nu + t.nx, cf.res[0]);
+            grad_s.block(info.number_of_g_eq_slack, 0) = 0;
+            const Scalar *primal_x_p = primal_x.data();
+            Scalar *grad_x_p = grad_x.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                TemplateData &t = tmpl(k);
+                CFun &cf = *t.fn[OBJ];
+                fill_xu_p(cf, primal_x_p + info.offsets_primal_x[k],
+                          primal_x_p + info.offsets_primal_u[k]);
+                cf.call();
+                // out[1] = rq, length nu+nx, ordered [u; x] (matches z = [u; x]).
+                Scalar *out = grad_x_p + info.offsets_primal_u[k];
+                const auto &rq = cf.res[1];
+                for (int i = 0; i < t.nu + t.nx; ++i) out[i] = objective_scale * rq[i];
+            }
             return 0;
         }
 
-        // --- initial guess (const; reads cache prepared in prepare()) ---
-        Index get_initial_xk(Scalar *xk, const Index k) const override
+        Index eval_objective(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                             const Scalar objective_scale,
+                             const fatrop::VecRealView &primal_x,
+                             const fatrop::VecRealView &primal_s, Scalar &res) override
         {
-            const auto &v = x0_cache[k];
-            std::copy(v.begin(), v.end(), xk);
+            res = 0;
+            const Scalar *primal_x_p = primal_x.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                CFun &cf = *tmpl(k).fn[OBJ];
+                fill_xu_p(cf, primal_x_p + info.offsets_primal_x[k],
+                          primal_x_p + info.offsets_primal_u[k]);
+                cf.call();
+                res += objective_scale * cf.res[0][0];
+            }
             return 0;
         }
-        Index get_initial_uk(Scalar *uk, const Index k) const override
+
+        Index get_bounds(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                         fatrop::VecRealView &lower_bounds,
+                         fatrop::VecRealView &upper_bounds) override
         {
-            const auto &v = u0_cache[k];
-            std::copy(v.begin(), v.end(), uk);
+            if (info.number_of_slack_variables == 0) return 0;
+            Scalar *lb_p = lower_bounds.data();
+            Scalar *ub_p = upper_bounds.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                const TemplateData &t = tmpl(k);
+                Scalar *lb_k = lb_p + info.offsets_slack[k];
+                Scalar *ub_k = ub_p + info.offsets_slack[k];
+                for (int i = 0; i < t.ng_ineq; ++i)
+                {
+                    lb_k[i] = t.lb[i];
+                    ub_k[i] = t.ub[i];
+                }
+            }
             return 0;
+        }
+
+        Index get_initial_primal(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                                 fatrop::VecRealView &primal_x) override
+        {
+            Scalar *primal_x_p = primal_x.data();
+            for (Index k = 0; k < info.dims.K; ++k)
+            {
+                const TemplateData &t = tmpl(k);
+                const auto &xv = x0_cache[k];
+                const auto &uv = u0_cache[k];
+                std::copy(uv.begin(), uv.end(), primal_x_p + info.offsets_primal_u[k]);
+                std::copy(xv.begin(), xv.end(), primal_x_p + info.offsets_primal_x[k]);
+                (void)t;
+            }
+            return 0;
+        }
+
+        void get_primal_damping(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                                fatrop::VecRealView &damping) override
+        {
+            damping = 0;
+        }
+
+        void apply_jacobian_s_transpose(const fatrop::ProblemInfo<fatrop::OcpType> &info,
+                                        const fatrop::VecRealView &multipliers,
+                                        const Scalar alpha,
+                                        const fatrop::VecRealView &y,
+                                        fatrop::VecRealView &out) override
+        {
+            out = alpha * y;
+            out.block(info.number_of_slack_variables, 0) =
+                out.block(info.number_of_slack_variables, 0) -
+                multipliers.block(info.number_of_slack_variables, info.offset_g_eq_slack);
         }
 
         // Size the x0/u0 caches once (call before the first solve). Idempotent.
         void allocate_caches()
         {
-            int K = get_horizon_length();
+            Index K = horizon();
             x0_cache.resize(K);
             u0_cache.resize(K);
-            for (int k = 0; k < K; ++k)
+            for (Index k = 0; k < K; ++k)
             {
                 TemplateData &t = tmpl(k);
                 if ((int)x0_cache[k].size() != t.nx) x0_cache[k].assign(t.nx, 0.0);
@@ -333,18 +411,26 @@ namespace ocp_direct
         void fill_initial()
         {
             if (init_overridden) return;
-            int K = get_horizon_length();
-            for (int k = 0; k < K; ++k)
+            Index K = horizon();
+            for (Index k = 0; k < K; ++k)
             {
                 TemplateData &t = tmpl(k);
                 std::fill(x0_cache[k].begin(), x0_cache[k].end(), 0.0);
                 std::fill(u0_cache[k].begin(), u0_cache[k].end(), 0.0);
-                if (t.fn[X0]) { fill_p_only(*t.fn[X0]); t.fn[X0]->call();
-                                std::copy(t.fn[X0]->res[0].begin(), t.fn[X0]->res[0].end(),
-                                          x0_cache[k].begin()); }
-                if (t.fn[U0]) { fill_p_only(*t.fn[U0]); t.fn[U0]->call();
-                                std::copy(t.fn[U0]->res[0].begin(), t.fn[U0]->res[0].end(),
-                                          u0_cache[k].begin()); }
+                if (t.fn[X0])
+                {
+                    fill_p_only(*t.fn[X0]);
+                    t.fn[X0]->call();
+                    std::copy(t.fn[X0]->res[0].begin(), t.fn[X0]->res[0].end(),
+                              x0_cache[k].begin());
+                }
+                if (t.fn[U0])
+                {
+                    fill_p_only(*t.fn[U0]);
+                    t.fn[U0]->call();
+                    std::copy(t.fn[U0]->res[0].begin(), t.fn[U0]->res[0].end(),
+                              u0_cache[k].begin());
+                }
             }
         }
     };
@@ -352,19 +438,18 @@ namespace ocp_direct
     // Driver. The interior-point algorithm is built ONCE (build() is where all
     // allocation happens) and reused: Fatrop's optimize() internally calls
     // reset() + initializer_->initialize(), so each call is a fresh cold solve
-    // that re-reads get_initial_xk/uk and the (mutated) parameters. solve() does
+    // that re-reads get_initial_primal and the (mutated) parameters. solve() does
     // no dynamic allocation of its own — params, initial-guess caches and the
     // x_sol/u_sol read-back buffers are all pre-sized during setup().
     struct Solver
     {
-        std::shared_ptr<GeneratedOcp> ocp;
+        std::shared_ptr<GeneratedNlp> nlp;
         std::map<std::string, double> opt_d;
         std::map<std::string, long long> opt_i;
         std::map<std::string, bool> opt_b;
 
         // Built once in setup().
         fatrop::OptionRegistry options;
-        std::shared_ptr<fatrop::NlpOcp> nlp;
         std::unique_ptr<fatrop::IpAlgBuilder<fatrop::OcpType>> builder;
         std::shared_ptr<fatrop::IpAlgorithm<fatrop::OcpType>> ipalg;
         std::shared_ptr<fatrop::IpData<fatrop::OcpType>> ipdata;
@@ -379,22 +464,23 @@ namespace ocp_direct
 
         void setup()
         {
-            ocp->allocate_caches();
-            nlp = std::make_shared<fatrop::NlpOcp>(ocp);
+            nlp->finalize_dims();
+            nlp->allocate_caches();
             builder = std::make_unique<fatrop::IpAlgBuilder<fatrop::OcpType>>(nlp);
             ipalg = builder->with_options_registry(&options).build();
             ipdata = builder->get_ipdata();
             // Options must be applied AFTER build() (the registry is populated then).
             for (auto &kv : opt_d) options.set_option<double>(kv.first, kv.second);
-            for (auto &kv : opt_i) options.set_option<fatrop::Index>(kv.first, (fatrop::Index)kv.second);
+            for (auto &kv : opt_i)
+                options.set_option<fatrop::Index>(kv.first, (fatrop::Index)kv.second);
             for (auto &kv : opt_b) options.set_option<bool>(kv.first, kv.second);
-            int K = ocp->get_horizon_length();
+            Index K = nlp->horizon();
             x_sol.resize(K);
             u_sol.resize(K);
-            for (int k = 0; k < K; ++k)
+            for (Index k = 0; k < K; ++k)
             {
-                x_sol[k].assign(ocp->get_nx(k), 0.0);
-                u_sol[k].assign(ocp->get_nu(k), 0.0);
+                x_sol[k].assign(nlp->tmpl(k).nx, 0.0);
+                u_sol[k].assign(nlp->tmpl(k).nu, 0.0);
             }
             is_setup = true;
         }
@@ -402,17 +488,18 @@ namespace ocp_direct
         int solve()
         {
             if (!is_setup) setup();          // one-time
-            ocp->fill_initial();             // no allocation (caches pre-sized)
+            nlp->fill_initial();             // no allocation (caches pre-sized)
             ret_flag = (int)ipalg->optimize();
             iter_count = (int)ipdata->iteration_number();
             solve_time = ipdata->timing_statistics().full_algorithm.elapsed();
 
             const auto &x = ipalg->solution_primal();
             const auto &info = ipalg->info();
-            int K = ocp->get_horizon_length();
-            for (int k = 0; k < K; ++k)
+            Index K = nlp->horizon();
+            for (Index k = 0; k < K; ++k)
             {
-                int nx = ocp->get_nx(k), nu = ocp->get_nu(k);
+                int nx = nlp->tmpl(k).nx;
+                int nu = nlp->tmpl(k).nu;
                 int ox = info.offsets_primal_x[k], ou = info.offsets_primal_u[k];
                 for (int i = 0; i < nx; ++i) x_sol[k][i] = x(ox + i);
                 for (int i = 0; i < nu; ++i) u_sol[k][i] = x(ou + i);
