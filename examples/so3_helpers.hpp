@@ -45,12 +45,39 @@ inline void mat3_mul(const Scalar A[9], const Scalar B[9], Scalar C[9])
         }
 }
 
+inline void mat3_transpose(const Scalar A[9], Scalar At[9])
+{
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j) At[i * 3 + j] = A[j * 3 + i];
+}
+
+// Matrix-vector product r = A v (row-major 3x3).
+inline void mat3_vec(const Scalar A[9], const Scalar v[3], Scalar r[3])
+{
+    for (int i = 0; i < 3; ++i)
+        r[i] = A[i * 3 + 0] * v[0] + A[i * 3 + 1] * v[1] + A[i * 3 + 2] * v[2];
+}
+
 // Skew-symmetric "hat" map [v]_x.
 inline void hat3(const Scalar v[3], Scalar M[9])
 {
     M[0] = 0.;    M[1] = -v[2]; M[2] = v[1];
     M[3] = v[2];  M[4] = 0.;    M[5] = -v[0];
     M[6] = -v[1]; M[7] = v[0];  M[8] = 0.;
+}
+
+// Rotation matrix about a unit axis by angle theta (Rodrigues' formula):
+//     R = I + sin(theta) [axis]_x + (1 - cos(theta)) [axis]_x^2.
+inline void axis_angle_to_mat(const Scalar axis[3], const Scalar theta, Scalar R[9])
+{
+    Scalar ax[9];
+    hat3(axis, ax);
+    Scalar ax2[9];
+    mat3_mul(ax, ax, ax2);
+    const Scalar s = std::sin(theta);
+    const Scalar c = 1. - std::cos(theta);
+    mat3_identity(R);
+    for (int i = 0; i < 9; ++i) R[i] += s * ax[i] + c * ax2[i];
 }
 
 // ---- Unit quaternion helpers ([w, x, y, z] / Hamilton convention) ----------
@@ -150,6 +177,45 @@ inline void quat_rotate(const Scalar *q, const Scalar *p, Scalar *p_rot)
     p_rot[0] = c * p[0] + 2.0 * vp * x + 2.0 * w * cx;
     p_rot[1] = c * p[1] + 2.0 * vp * y + 2.0 * w * cy;
     p_rot[2] = c * p[2] + 2.0 * vp * z + 2.0 * w * cz;
+}
+
+// Convert a row-major 3x3 rotation matrix to a unit quaternion [w, x, y, z]
+// (Shepperd's method: numerically robust for any rotation, including angle = pi).
+inline void rotmat_to_quat(const Scalar R[9], Scalar q[4])
+{
+    const Scalar tr = R[0] + R[4] + R[8];
+    if (tr > 0.)
+    {
+        const Scalar s = 2. * std::sqrt(tr + 1.); // s = 4 * w
+        q[0] = 0.25 * s;
+        q[1] = (R[7] - R[5]) / s;
+        q[2] = (R[2] - R[6]) / s;
+        q[3] = (R[3] - R[1]) / s;
+    }
+    else if (R[0] > R[4] && R[0] > R[8])
+    {
+        const Scalar s = 2. * std::sqrt(1. + R[0] - R[4] - R[8]); // s = 4 * x
+        q[0] = (R[7] - R[5]) / s;
+        q[1] = 0.25 * s;
+        q[2] = (R[1] + R[3]) / s;
+        q[3] = (R[2] + R[6]) / s;
+    }
+    else if (R[4] > R[8])
+    {
+        const Scalar s = 2. * std::sqrt(1. + R[4] - R[0] - R[8]); // s = 4 * y
+        q[0] = (R[2] - R[6]) / s;
+        q[1] = (R[1] + R[3]) / s;
+        q[2] = 0.25 * s;
+        q[3] = (R[5] + R[7]) / s;
+    }
+    else
+    {
+        const Scalar s = 2. * std::sqrt(1. + R[8] - R[0] - R[4]); // s = 4 * z
+        q[0] = (R[3] - R[1]) / s;
+        q[1] = (R[2] + R[6]) / s;
+        q[2] = (R[5] + R[7]) / s;
+        q[3] = 0.25 * s;
+    }
 }
 
 // Convert a unit quaternion to a row-major 3x3 rotation matrix.
