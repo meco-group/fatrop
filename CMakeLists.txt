@@ -14,8 +14,7 @@ if(NOT CMAKE_BUILD_TYPE)
     "Debug" "Release")
 endif()
 
-# Set compilation flags for Release and Debug
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+# Set compilation flags for Debug
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 # Option to build tests (default is ON)
