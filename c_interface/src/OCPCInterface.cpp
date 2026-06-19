@@ -389,13 +389,14 @@ namespace fatrop
     public:
         OcpSolverDriver(FatropOcpCInterface *ocp_interface, FatropOcpCWrite write,
                         FatropOcpCFlush flush)
-            : stream(write, flush), m(std::make_shared<FatropOcpCMapping>(ocp_interface))
+            : stream(write, flush), use_own_stream_(write != 0),
+              m(std::make_shared<FatropOcpCMapping>(ocp_interface))
         {
-            // set the stream
-            if (write != 0)
-            {
-                OutputStreamManager::set_stream(std::make_unique<FatropOcpCStream>(write, flush));
-            }
+            // Output stream is per-solver (the `stream` member). It is pushed
+            // into the (process-wide) OutputStreamManager at the start of every
+            // solve() rather than here, so a stream left behind by a since-
+            // destroyed solver is never dereferenced and each solve prints
+            // through its own (still-valid) callbacks.
             IpAlgBuilder<OcpType> builder(m);
             algo = builder.with_options_registry(&options).build();
             ip_data = builder.get_ipdata();
@@ -422,6 +423,10 @@ namespace fatrop
         }
         fatrop_int solve()
         {
+            // Re-point the (process-wide) output singleton at this solver's own
+            // stream, so concurrent/previous solvers (incl. since-unloaded ones)
+            // cannot leave it dangling. Non-owning: the driver owns `stream`.
+            if (use_own_stream_) OutputStreamManager::set_stream(&stream);
             flag = algo->optimize();
             if (flag == IpSolverReturnFlag::Success)
             {
@@ -432,6 +437,7 @@ namespace fatrop
         }
         // std::shared_ptr<FatropPrinter> printer() { return app.printer_; }
         FatropOcpCStream stream;
+        bool use_own_stream_;
         std::shared_ptr<FatropOcpCMapping> m;
         FatropOcpCStats stats;
         OptionRegistry options;
