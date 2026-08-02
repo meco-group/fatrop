@@ -98,6 +98,19 @@ int main()
     // Silence the per-iteration solver banner -- the MPC loop solves many OCPs.
     OutputStreamManager::set_stream(std::make_unique<NullStream>());
 
+    // ---- Build the interior-point solver ONCE, outside the control loop ----
+    // optimize() internally reset()s and re-reads the OCP's initial condition + warm-start guess
+    // on every call, so the whole algorithm (KKT factorization workspace, line-search buffers,
+    // ...) is allocated a single time here and reused every control step -- no heap traffic in the
+    // hot path.  Rebuilding the solver inside the loop would re-allocate all of it once per step.
+    OptionRegistry options;
+    IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(ocp));
+    auto ipalg = builder.with_options_registry(&options).build();
+    auto data  = builder.get_ipdata();
+    // Safety cap: with warm starting solves take a handful of iterations; the cap just keeps a
+    // pathological instance from running away.
+    options.set_option("max_iter", Index(80));
+
     std::ofstream csv("quadrotor_mpc.csv");
     csv << std::setprecision(9);
     csv << "step,t,px,py,pz,vx,vy,vz,qw,qx,qy,qz,wx,wy,wz,f0,f1,f2,f3,tilt_deg,omega_norm\n";
@@ -124,16 +137,9 @@ int main()
     {
         const Scalar t_now = step * dt_ctrl;
 
-        // ---- Solve the OCP for the current state ----
+        // ---- Solve the OCP for the current state (reusing the pre-built solver) ----
         ocp->set_init(x, x + 3, x + 6, x + 10);
-        OptionRegistry options;
-        IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(ocp));
-        auto ipalg = builder.with_options_registry(&options).build();
-        // Safety cap: with warm starting solves take a handful of iterations; the cap just keeps
-        // a pathological instance from running away.
-        options.set_option("max_iter", Index(80));
         IpSolverReturnFlag ret = ipalg->optimize();
-        auto data = builder.get_ipdata();
         const Index iters = data->iteration_number();
         total_iters += iters;
         worst_iters = std::max(worst_iters, iters);

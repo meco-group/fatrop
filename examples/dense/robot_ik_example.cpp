@@ -108,16 +108,14 @@ struct FkResult
 {
     Scalar R_ee[9];                       // tool orientation
     Scalar p_ee[3];                       // tool position
-    std::vector<std::array<Scalar, 3>> w; // world joint axes
+    std::vector<std::array<Scalar, 3>> w; // world joint axes (one entry per joint)
     std::vector<std::array<Scalar, 3>> o; // world point on each joint axis
 };
 
-FkResult forward_kinematics(const RobotModel &m, const Scalar *q)
+// Writes the kinematics into the caller-owned `fk`, whose w/o buffers must already be
+// sized to nq. Performs no allocation, so it is safe to call on the solver hot path.
+void forward_kinematics(const RobotModel &m, const Scalar *q, FkResult &fk)
 {
-    FkResult fk;
-    fk.w.resize(m.nq());
-    fk.o.resize(m.nq());
-
     Scalar R[9];
     mat3_identity(R);
     Scalar p[3] = {0., 0., 0.};
@@ -154,7 +152,6 @@ FkResult forward_kinematics(const RobotModel &m, const Scalar *q)
     fk.p_ee[0] = p[0] + Rt[0];
     fk.p_ee[1] = p[1] + Rt[1];
     fk.p_ee[2] = p[2] + Rt[2];
-    return fk;
 }
 
 // ---------------------------------------------------------------------------
@@ -169,6 +166,12 @@ public:
     {
         for (int k = 0; k < 9; ++k) R_des_[k] = R_des[k];
         for (int k = 0; k < 3; ++k) p_des_[k] = p_des[k];
+        // Size the per-evaluation scratch ONCE here. The cost/gradient/Hessian callbacks
+        // run many times per solver iteration, so they reuse these buffers and never allocate.
+        const Index nq = model_.nq();
+        fk_.w.resize(nq);
+        fk_.o.resize(nq);
+        J_.resize(nq);
     }
 
     Index get_nx() const override { return model_.nq(); }
@@ -176,20 +179,20 @@ public:
     Index get_ng_ineq() const override { return model_.nq(); } // joint limits
 
     // Stacked residual r = [e_p (3); e_R (3)] and its 6 x nq Jacobian J.
-    void residual_and_jacobian(const Scalar *q, Scalar r[6],
-                               std::vector<std::array<Scalar, 6>> &J) const
+    // Fills the residual r and the member Jacobian scratch J_ (nq x 6) at joint angles q.
+    void residual_and_jacobian(const Scalar *q, Scalar r[6]) const
     {
         const Index nq = model_.nq();
-        const FkResult fk = forward_kinematics(model_, q);
+        forward_kinematics(model_, q, fk_);
 
         // Position residual e_p = p(q) - p_des (world frame).
-        for (int k = 0; k < 3; ++k) r[k] = fk.p_ee[k] - p_des_[k];
+        for (int k = 0; k < 3; ++k) r[k] = fk_.p_ee[k] - p_des_[k];
 
         // Orientation residual e_R = Log(R_des^T R(q)).
         Scalar Rdt[9];
         mat3_transpose(R_des_, Rdt);
         Scalar R_err[9];
-        mat3_mul(Rdt, fk.R_ee, R_err);
+        mat3_mul(Rdt, fk_.R_ee, R_err);
         Scalar q_err[4];
         rotmat_to_quat(R_err, q_err);
         Scalar e_R[3];
@@ -203,28 +206,27 @@ public:
         Scalar Jri[9];
         so3_right_jacobian_inv(e_R, Jri);
         Scalar Rt[9];
-        mat3_transpose(fk.R_ee, Rt); // R(q)^T
+        mat3_transpose(fk_.R_ee, Rt); // R(q)^T
 
-        J.assign(nq, {0., 0., 0., 0., 0., 0.});
         for (Index i = 0; i < nq; ++i)
         {
-            const Scalar wi[3] = {fk.w[i][0], fk.w[i][1], fk.w[i][2]};
+            const Scalar wi[3] = {fk_.w[i][0], fk_.w[i][1], fk_.w[i][2]};
             // Linear part: J_v,i = omega_i x (p_ee - o_i).
-            const Scalar d[3] = {fk.p_ee[0] - fk.o[i][0], fk.p_ee[1] - fk.o[i][1],
-                                 fk.p_ee[2] - fk.o[i][2]};
+            const Scalar d[3] = {fk_.p_ee[0] - fk_.o[i][0], fk_.p_ee[1] - fk_.o[i][1],
+                                 fk_.p_ee[2] - fk_.o[i][2]};
             Scalar jv[3];
             cross3(wi, d, jv);
-            J[i][0] = jv[0];
-            J[i][1] = jv[1];
-            J[i][2] = jv[2];
+            J_[i][0] = jv[0];
+            J_[i][1] = jv[1];
+            J_[i][2] = jv[2];
             // Angular part: body axis omega_b = R^T omega_i, then J_r^{-1} * omega_b.
             Scalar wb[3];
             mat3_vec(Rt, wi, wb);
             Scalar jr[3];
             mat3_vec(Jri, wb, jr);
-            J[i][3] = jr[0];
-            J[i][4] = jr[1];
-            J[i][5] = jr[2];
+            J_[i][3] = jr[0];
+            J_[i][4] = jr[1];
+            J_[i][5] = jr[2];
         }
     }
 
@@ -236,18 +238,17 @@ public:
         const Index nq = model_.nq();
         blasfeo_gese_wrap(nq + 1, nq, 0.0, res, 0, 0);
         Scalar r[6];
-        std::vector<std::array<Scalar, 6>> J;
-        residual_and_jacobian(x, r, J);
+        residual_and_jacobian(x, r);
         const Scalar s = objective_scale[0];
         for (Index a = 0; a < nq; ++a)
         {
             Scalar g = 0.;
-            for (int k = 0; k < 6; ++k) g += J[a][k] * r[k];
+            for (int k = 0; k < 6; ++k) g += J_[a][k] * r[k];
             blasfeo_matel_wrap(res, nq, a) = s * g;
             for (Index b = 0; b < nq; ++b)
             {
                 Scalar h = 0.;
-                for (int k = 0; k < 6; ++k) h += J[a][k] * J[b][k];
+                for (int k = 0; k < 6; ++k) h += J_[a][k] * J_[b][k];
                 blasfeo_matel_wrap(res, a, b) = s * h;
             }
         }
@@ -258,13 +259,12 @@ public:
     {
         const Index nq = model_.nq();
         Scalar r[6];
-        std::vector<std::array<Scalar, 6>> J;
-        residual_and_jacobian(x, r, J);
+        residual_and_jacobian(x, r);
         const Scalar s = objective_scale[0];
         for (Index a = 0; a < nq; ++a)
         {
             Scalar g = 0.;
-            for (int k = 0; k < 6; ++k) g += J[a][k] * r[k];
+            for (int k = 0; k < 6; ++k) g += J_[a][k] * r[k];
             res[a] = s * g;
         }
         return 0;
@@ -273,8 +273,7 @@ public:
     Index eval_f(const Scalar *objective_scale, const Scalar *x, Scalar *res) override
     {
         Scalar r[6];
-        std::vector<std::array<Scalar, 6>> J;
-        residual_and_jacobian(x, r, J);
+        residual_and_jacobian(x, r);
         Scalar sum_sq = 0.;
         for (int k = 0; k < 6; ++k) sum_sq += r[k] * r[k];
         *res = 0.5 * objective_scale[0] * sum_sq;
@@ -327,6 +326,10 @@ private:
     Scalar R_des_[9];
     Scalar p_des_[3];
     std::vector<Scalar> q_init_;
+    // Per-evaluation scratch, allocated once in the constructor and reused by the
+    // (const) cost/gradient/Hessian callbacks -- hence mutable.
+    mutable FkResult fk_;
+    mutable std::vector<std::array<Scalar, 6>> J_;
 };
 
 int main()
@@ -336,7 +339,10 @@ int main()
 
     // Pick a feasible target by running FK on a known joint configuration.
     const std::vector<Scalar> q_true = {0.4, -0.9, 1.2, -0.6, 0.8, 1.1};
-    const FkResult target = forward_kinematics(model, q_true.data());
+    FkResult target;
+    target.w.resize(nq);
+    target.o.resize(nq);
+    forward_kinematics(model, q_true.data(), target);
 
     // Start the solver from a perturbed initial guess (within the joint limits).
     std::mt19937 rng(1);
@@ -365,7 +371,10 @@ int main()
     for (Index i = 0; i < nq; ++i) q_sol[i] = q_final(i);
 
     // Verify: pose error of the solution, and joint-limit feasibility.
-    const FkResult fk = forward_kinematics(model, q_sol.data());
+    FkResult fk;
+    fk.w.resize(nq);
+    fk.o.resize(nq);
+    forward_kinematics(model, q_sol.data(), fk);
     const Scalar pos_err =
         std::sqrt((fk.p_ee[0] - target.p_ee[0]) * (fk.p_ee[0] - target.p_ee[0]) +
                   (fk.p_ee[1] - target.p_ee[1]) * (fk.p_ee[1] - target.p_ee[1]) +
