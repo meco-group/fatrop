@@ -2,6 +2,7 @@
 
 Fatrop is a constrained nonlinear optimal control problem solver that is fast and achieves a high numerical robustness.
 
+
 $$
 \begin{align}
 \underset{\mathbf{x}_k, \mathbf{u}_k}{\min} \quad & \sum_{k=0}^{K-1} l_k(\mathbf{u}_k, \mathbf{x}_k) \\
@@ -43,6 +44,10 @@ $$
 \text{subject to} \quad & \mathbf{L}_{k} \leq \mathbf{g}_{k}(\mathbf{x}_k) \leq \mathbf{U}_{k}, \quad k = 0, \dots, N-1
 \end{align}
 $$
+
+## Demo
+
+See Fatrop in action in the [Fatrop Playground](https://lvanroye.github.io/fatrop-playground/): it runs Fatrop directly in your browser, compiled to WebAssembly, solving optimal control problems on a set of dynamical systems.
 
 ## Getting Started
 
