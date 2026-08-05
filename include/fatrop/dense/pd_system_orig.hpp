@@ -51,18 +51,18 @@ namespace fatrop
         const Index m_;
         Jacobian<DenseType> &jac_;
         Hessian<DenseType> &hess_;
-        const VecRealView &D_x_;
+        const VecRealView D_x_;
         bool De_is_zero_;
-        const VecRealView &D_e_;
-        const VecRealView &Sl_i_;
-        const VecRealView &Su_i_;
-        const VecRealView &Zl_i_;
-        const VecRealView &Zu_i_;
-        VecRealView &rhs_f_x_;
-        VecRealView &rhs_f_s_;
-        VecRealView &rhs_g_;
-        VecRealView &rhs_cl_;
-        VecRealView &rhs_cu_;
+        const VecRealView D_e_;
+        const VecRealView Sl_i_;
+        const VecRealView Su_i_;
+        const VecRealView Zl_i_;
+        const VecRealView Zu_i_;
+        VecRealView rhs_f_x_;
+        VecRealView rhs_f_s_;
+        VecRealView rhs_g_;
+        VecRealView rhs_cl_;
+        VecRealView rhs_cu_;
     };
 } // namespace fatrop
 
