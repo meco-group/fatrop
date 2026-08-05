@@ -35,15 +35,42 @@ set(RUNTIME_INSTALL_DIR bin)
 set(INCLUDE_INSTALL_DIR include)
 set(CMAKE_INSTALL_DIR cmake)
 
+# Select the linear-algebra backend
+set(FATROP_LA_BACKEND "blasfeo" CACHE STRING "Linear algebra backend (blasfeo or eigen)")
+set_property(CACHE FATROP_LA_BACKEND PROPERTY STRINGS "blasfeo" "eigen")
+
 # Add the external directory
 add_subdirectory(external)
 
-# Add BLASFEO
-if(WITH_BUILD_BLASFEO)
-    # BLASFEO is already available from FetchContent
-    add_library(blasfeo::blasfeo ALIAS blasfeo)
+if(FATROP_LA_BACKEND STREQUAL "eigen")
+    message(STATUS "Building fatrop with the Eigen linear-algebra backend")
+    find_package(Eigen3 3.3 QUIET NO_MODULE)
+    if(NOT TARGET Eigen3::Eigen)
+        message(STATUS "System Eigen3 not found. Fetching Eigen 3.4.0.")
+        include(FetchContent)
+        set(EIGEN_BUILD_DOC OFF)
+        set(EIGEN_BUILD_TESTING OFF)
+        set(EIGEN_BUILD_PKGCONFIG OFF)
+        FetchContent_Declare(
+            eigen
+            GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+            GIT_TAG 3.4.0
+        )
+        FetchContent_MakeAvailable(eigen)
+    endif()
+    if(BUILD_WITH_C_INTERFACE)
+        message(STATUS "The C interface exposes blasfeo types in its ABI and is only available "
+                       "with the blasfeo backend - disabling it")
+        set(BUILD_WITH_C_INTERFACE OFF)
+    endif()
 else()
-    find_package(blasfeo REQUIRED)
+    # Add BLASFEO
+    if(WITH_BUILD_BLASFEO)
+        # BLASFEO is already available from FetchContent
+        add_library(blasfeo::blasfeo ALIAS blasfeo)
+    else()
+        find_package(blasfeo REQUIRED)
+    endif()
 endif()
 
 
