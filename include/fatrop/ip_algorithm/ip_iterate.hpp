@@ -275,6 +275,21 @@ namespace fatrop
         const VecRealView &dual_infeasibility_s();
 
         /**
+         * @brief Cached infinity norm of constr_viol().
+         */
+        Scalar constr_viol_inf();
+
+        /**
+         * @brief Cached infinity norm of dual_infeasibility_x().
+         */
+        Scalar dual_infeasibility_x_inf();
+
+        /**
+         * @brief Cached infinity norm of dual_infeasibility_s().
+         */
+        Scalar dual_infeasibility_s_inf();
+
+        /**
          * @brief Computes and returns the gradient of the barrier function.
          * @return Constant reference to the barrier function gradient.
          */
@@ -556,6 +571,21 @@ namespace fatrop
         bool complementarity_u_evaluated_ =
             false;                              ///< Flag for upper bound complementarity evaluation
         bool primal_damping_evaluated_ = false; ///< Flag for primal damping evaluation
+        bool dual_l1_norms_evaluated_ = false;  ///< Flag for the cached l1 norms of the duals
+
+        // Cached scalar norms of iterate quantities (used by e_mu, which may be
+        // called several times per iteration).  The inf norms are computed
+        // together with their vector inside the accessor, so they share the
+        // corresponding *_evaluated_ flag; the l1 norms of the multipliers have
+        // their own flag which is cleared whenever a dual vector is modified.
+        Scalar constr_viol_inf_ = 0.;          ///< inf norm of constr_viol_
+        Scalar dual_infeasibility_x_inf_ = 0.; ///< inf norm of dual_infeasibility_x_
+        Scalar dual_infeasibility_s_inf_ = 0.; ///< inf norm of dual_infeasibility_s_
+        Scalar dual_bounds_l1_ = 0.;           ///< norm_l1(dual_bounds_l_) + norm_l1(dual_bounds_u_)
+        Scalar dual_eq_l1_ = 0.;               ///< norm_l1(dual_eq_)
+
+        /// Recomputes the cached l1 norms of the multipliers if needed.
+        void update_dual_l1_norms();
 
         Index *number_of_bounds_; ///< Total number of bounds in the problem
         Scalar kappa_d_ = 1e-5;
@@ -601,6 +631,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_eq(const VecReal<Derived> &dual_eq
 {
     dual_infeasibility_s_evaluated_ = false;
     dual_infeasibility_x_evaluated_ = false;
+    dual_l1_norms_evaluated_ = false;
     dual_eq_ = dual_eq;
 }
 template <typename ProblemType>
@@ -609,6 +640,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_l(const VecReal<Derived> &d
 {
     complementarity_l_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
+    dual_l1_norms_evaluated_ = false;
     dual_bounds_l_ = if_else(lower_bounded(), dual_bounds_l, VecRealScalar(dual_bounds_l_.m(), 0.));
 }
 template <typename ProblemType>
@@ -617,6 +649,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_bounds_u(const VecReal<Derived> &d
 {
     complementarity_u_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
+    dual_l1_norms_evaluated_ = false;
     dual_bounds_u_ = if_else(upper_bounded(), dual_bounds_u, VecRealScalar(dual_bounds_u_.m(), 0.));
 }
 
@@ -627,6 +660,7 @@ void fatrop::IpIterate<ProblemType>::modify_dual_bounds(Scalar mu)
     complementarity_l_evaluated_ = false;
     complementarity_u_evaluated_ = false;
     dual_infeasibility_s_evaluated_ = false;
+    dual_l1_norms_evaluated_ = false;
     dual_bounds_l_ =
         if_else(lower_bounded(),
                 max(min(dual_bounds_l_,

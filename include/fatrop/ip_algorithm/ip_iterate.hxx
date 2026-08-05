@@ -41,6 +41,7 @@ namespace fatrop
         complementarity_l_evaluated_ = false;
         complementarity_u_evaluated_ = false;
         primal_damping_evaluated_ = false;
+        dual_l1_norms_evaluated_ = false;
     }
 
     template <typename ProblemType> Scalar IpIterate<ProblemType>::obj_value()
@@ -107,9 +108,16 @@ namespace fatrop
             Index status =
                 nlp_->eval_constraint_violation(info(), primal_x_, primal_s_, constr_viol_);
             fatrop_assert_msg(status == 0, "Error in evaluating the constraint violation.");
+            constr_viol_inf_ = norm_inf(constr_viol_);
             constr_viol_evaluated_ = true;
         }
         return constr_viol_;
+    }
+
+    template <typename ProblemType> Scalar IpIterate<ProblemType>::constr_viol_inf()
+    {
+        constr_viol();
+        return constr_viol_inf_;
     }
     template <typename ProblemType>
     const VecRealView &IpIterate<ProblemType>::dual_infeasibility_x()
@@ -120,9 +128,16 @@ namespace fatrop
             dual_infeasibility_x_.block(dual_infeasibility_x_.m(), 0) = obj_gradient_x();
             jacobian().transpose_apply_on_right(info(), dual_eq_, 1.0, dual_infeasibility_x_,
                                                 dual_infeasibility_x_);
+            dual_infeasibility_x_inf_ = norm_inf(dual_infeasibility_x_);
             dual_infeasibility_x_evaluated_ = true;
         }
         return dual_infeasibility_x_;
+    }
+
+    template <typename ProblemType> Scalar IpIterate<ProblemType>::dual_infeasibility_x_inf()
+    {
+        dual_infeasibility_x();
+        return dual_infeasibility_x_inf_;
     }
 
     template <typename ProblemType>
@@ -136,9 +151,26 @@ namespace fatrop
             dual_infeasibility_s_ = obj_gradient_s() + dual_bounds_u_ - dual_bounds_l_;
             nlp_->apply_jacobian_s_transpose(info(), dual_eq_, 1.0, dual_infeasibility_s_,
                                              dual_infeasibility_s_);
+            dual_infeasibility_s_inf_ = norm_inf(dual_infeasibility_s_);
             dual_infeasibility_s_evaluated_ = true;
         }
         return dual_infeasibility_s_;
+    }
+
+    template <typename ProblemType> Scalar IpIterate<ProblemType>::dual_infeasibility_s_inf()
+    {
+        dual_infeasibility_s();
+        return dual_infeasibility_s_inf_;
+    }
+
+    template <typename ProblemType> void IpIterate<ProblemType>::update_dual_l1_norms()
+    {
+        if (!dual_l1_norms_evaluated_)
+        {
+            dual_bounds_l1_ = norm_l1(dual_bounds_l_) + norm_l1(dual_bounds_u_);
+            dual_eq_l1_ = norm_l1(dual_eq_);
+            dual_l1_norms_evaluated_ = true;
+        }
     }
 
     template <typename ProblemType> const VecRealView &IpIterate<ProblemType>::barrier_gradient()
@@ -279,14 +311,15 @@ namespace fatrop
     template <typename ProblemType> Scalar IpIterate<ProblemType>::e_mu(Scalar mu)
     {
         ScopedTimer _t(timings_->compute_e_mu, *timings_);
-        Scalar zl1 = norm_l1(dual_bounds_l()) + norm_l1(dual_bounds_u());
+        update_dual_l1_norms();
+        Scalar zl1 = dual_bounds_l1_;
         Index number_of_eq_constraints = nlp()->nlp_dims().number_of_eq_constraints;
         Index number_of_dual_vars = (*number_of_bounds_) + number_of_eq_constraints;
-        Scalar lam_mean = (zl1 + norm_l1(dual_eq())) / (number_of_dual_vars);
+        Scalar lam_mean = (zl1 + dual_eq_l1_) / (number_of_dual_vars);
         Scalar z_mean = zl1 / (*number_of_bounds_);
-        Scalar constraint_violation = norm_inf(constr_viol());
-        Scalar dual_infeasibility_x_linf = norm_inf(dual_infeasibility_x());
-        Scalar dual_infeasibility_s_linf = norm_inf(dual_infeasibility_s());
+        Scalar constraint_violation = constr_viol_inf();
+        Scalar dual_infeasibility_x_linf = dual_infeasibility_x_inf();
+        Scalar dual_infeasibility_s_linf = dual_infeasibility_s_inf();
         Scalar dual_infeasibility_linf =
             std::max(dual_infeasibility_x_linf, dual_infeasibility_s_linf);
         Scalar complementarity_l_linf = norm_inf(relaxed_complementarity_l(mu));
