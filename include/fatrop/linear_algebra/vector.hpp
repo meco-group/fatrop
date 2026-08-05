@@ -329,7 +329,7 @@ namespace fatrop
     private:
         const Dep1 a;
         const Dep2 b;
-        const IfElseOp &if_else_op;
+        const IfElseOp if_else_op;
     };
 
     /**
@@ -394,6 +394,10 @@ namespace fatrop
         const Dep2 b;
         const std::vector<bool> &if_else_op;
     };
+
+    template <typename Dep1, typename Dep2>
+    VecRealIfElse<std::vector<bool>, Dep1, Dep2>
+    if_else(std::vector<bool> &&, const VecReal<Dep1> &, const VecReal<Dep2> &) = delete;
 
     template <typename Dep1, typename Dep2>
     class VecRealConcat : public VecReal<VecRealConcat<Dep1, Dep2>>
@@ -725,8 +729,19 @@ namespace fatrop
             other.vec_.mem = nullptr;
         }
         using VecRealView::operator=;
-        VEC &vec() { return vec_; }
-        const VEC &vec() const { return vec_; }
+        VecRealView block(Index size, Index start) const &
+        {
+            return VecRealView::block(size, start);
+        }
+        VecRealView block(Index size, Index start) const && = delete;
+        Scalar *data() & { return VecRealView::data(); }
+        Scalar *data() && = delete;
+        const Scalar *data() const & { return VecRealView::data(); }
+        const Scalar *data() const && = delete;
+        VEC &vec() & { return vec_; }
+        VEC &vec() && = delete;
+        const VEC &vec() const & { return vec_; }
+        const VEC &vec() const && = delete;
 
         Index m() const { return m_; }
         /**

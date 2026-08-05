@@ -58,6 +58,8 @@ namespace fatrop
          */
         Index n() const { return static_cast<const Derived *>(this)->n(); }
 
+        const Derived &derived() const { return static_cast<const Derived &>(*this); }
+
         friend MatRealTranspose<Derived> transpose(const MatReal<Derived> &dep)
         {
             return MatRealTranspose<Derived>(dep);
@@ -87,13 +89,13 @@ namespace fatrop
     template <typename Dep1> class MatRealTranspose : public MatReal<MatRealTranspose<Dep1>>
     {
     public:
-        MatRealTranspose(const MatReal<Dep1> &dep) : dep_(dep) {}
+        MatRealTranspose(const MatReal<Dep1> &dep) : dep_(dep.derived()) {}
         Scalar operator()(const Index i, const Index j) const { return dep_(j, i); }
         Index m() const { return dep_.n(); }
         Index n() const { return dep_.m(); }
 
     private:
-        const MatReal<Dep1> &dep_;
+        const Dep1 dep_;
     };
 
     /**
@@ -370,14 +372,30 @@ namespace fatrop
          *
          * @return MAT& Reference to the BLASFEO matrix.
          */
-        MAT &mat() { return mat_; }
+        MatRealView block(const Index rows, const Index cols, const Index row_start,
+                          const Index col_start) const &
+        {
+            return MatRealView::block(rows, cols, row_start, col_start);
+        }
+        MatRealView block(const Index rows, const Index cols, const Index row_start,
+                          const Index col_start) const && = delete;
+        MatRealRowView row(const Index row) & { return MatRealView::row(row); }
+        MatRealRowView row(const Index row) && = delete;
+        MatRealColView col(const Index col) & { return MatRealView::col(col); }
+        MatRealColView col(const Index col) && = delete;
+        MatRealDiagonalView diagonal() & { return MatRealView::diagonal(); }
+        MatRealDiagonalView diagonal() && = delete;
+
+        MAT &mat() & { return mat_; }
+        MAT &mat() && = delete;
 
         /**
          * @brief Gets a const reference to the underlying BLASFEO matrix.
          *
          * @return const MAT& Const reference to the BLASFEO matrix.
          */
-        const MAT &mat() const { return mat_; }
+        const MAT &mat() const & { return mat_; }
+        const MAT &mat() const && = delete;
 
         using MatRealView::operator=;
 

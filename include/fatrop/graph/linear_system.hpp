@@ -20,15 +20,16 @@ namespace fatrop
      * Mirrors the @c LinearSystem interface used by the OCP and dense
      * formulations: @c get_rhs / @c set_rhs read and write the stored
      * right-hand side @c b, while @c apply_on_right computes
-     * @c out = M x + alpha y. The right-hand side is held by reference (a
-     * @c VecRealView) so iterative refinement can mutate it in place.
+     * @c out = M x + alpha y. The right-hand side is a @c VecRealView stored
+     * by value; writes through it land in the caller's storage, so iterative
+     * refinement can mutate it in place.
      */
     template <> class LinearSystem<GraphType>
     {
         friend class BlockCholeskySolver;
 
     public:
-        LinearSystem(const BlockPdMatrix &matrix, VecRealView &rhs);
+        LinearSystem(const BlockPdMatrix &matrix, const VecRealView &rhs);
 
         Index m() const { return m_; }
 
@@ -41,7 +42,7 @@ namespace fatrop
 
     private:
         const BlockPdMatrix &matrix_;
-        VecRealView &rhs_;
+        VecRealView rhs_;
         const Index m_;
     };
 } // namespace fatrop

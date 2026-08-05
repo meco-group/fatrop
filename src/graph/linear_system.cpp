@@ -9,7 +9,7 @@
 
 using namespace fatrop;
 
-LinearSystem<GraphType>::LinearSystem(const BlockPdMatrix &matrix, VecRealView &rhs)
+LinearSystem<GraphType>::LinearSystem(const BlockPdMatrix &matrix, const VecRealView &rhs)
     : matrix_(matrix), rhs_(rhs), m_(matrix.sparsity().total_size())
 {
 }
