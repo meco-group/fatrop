@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(blasfeo CONFIG)
+
+include("${CMAKE_CURRENT_LIST_DIR}/fatropTargets.cmake")
+
+check_required_components(fatrop)
