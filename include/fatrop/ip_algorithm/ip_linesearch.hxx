@@ -719,7 +719,7 @@ namespace fatrop
         if (theta_max_ > 0 && trial_theta > theta_max_)
             return false;
         Scalar trial_barr = trial_it.barrier_value() + trial_it.obj_value();
-        fatrop_assert_msg(std::isfinite(trial_barr), "trial_barr is not finite");
+        if (!std::isfinite(trial_barr)) return false;
         // check if a poin tis acceptable wrt current iterate
         if (alpha_primal > 0. && is_f_type(alpha_primal) && reference_theta_ < theta_min_)
             accept = armijo_holds(alpha_primal);
