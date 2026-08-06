@@ -119,7 +119,7 @@ set(INSTALL_TARGETS fatrop)
 
 # Export the target
 install(TARGETS ${INSTALL_TARGETS}
-    EXPORT fatropConfig
+    EXPORT fatropTargets
     LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
     ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR}
     RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
@@ -132,6 +132,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/fatrop
         FILES_MATCHING PATTERN "*.hpp")
 
 # Install the export
-install(EXPORT fatropConfig
+install(EXPORT fatropTargets
+        FILE fatropTargets.cmake
         NAMESPACE fatrop::
         DESTINATION ${CMAKE_INSTALL_DIR})

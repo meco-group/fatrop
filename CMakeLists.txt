@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 project(fatrop VERSION 1.0.0 LANGUAGES CXX C)
 
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -29,11 +32,30 @@ if(FATROP_ENABLE_ASAN)
 endif()
 
 # Define installation directories
-set(LIBRARY_INSTALL_DIR lib)
-set(ARCHIVE_INSTALL_DIR lib)
-set(RUNTIME_INSTALL_DIR bin)
-set(INCLUDE_INSTALL_DIR include)
-set(CMAKE_INSTALL_DIR cmake)
+set(LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+set(ARCHIVE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+set(RUNTIME_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
+set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
+set(CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/fatropConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_DIR}"
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION}"
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/fatropConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/fatropConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_DIR}"
+)
 
 # Add the external directory
 add_subdirectory(external)
