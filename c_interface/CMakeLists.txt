@@ -11,10 +11,10 @@ target_sources(fatrop PRIVATE ${LEGACY_SOURCES})
 target_include_directories(fatrop
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Install header files (only .hpp)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-        DESTINATION ${INCLUDE_INSTALL_DIR}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING REGEX ".*\\.(h|hpp)$")
