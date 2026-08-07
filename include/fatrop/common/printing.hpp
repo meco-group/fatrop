@@ -87,6 +87,43 @@ namespace fatrop
         inline static NullStream null_stream_;
     };
 
+#ifndef FATROP_VERSION
+#define FATROP_VERSION "unknown"
+#endif
+
+    /**
+     * @brief Prints the fatrop copyright/version banner.
+     *
+     * The banner is printed at most once per process. It can be suppressed
+     * with the "suppress_banner" option.
+     */
+    class Banner
+    {
+    public:
+        // Print the banner if it has not been printed or suppressed.
+        static void print_once()
+        {
+            if (printed_ || suppressed_)
+                return;
+            printed_ = true;
+            OutputStreamManager::get_stream()
+                << "\n"
+                << "**************************************************************************\n"
+                << "   This program contains Fatrop " FATROP_VERSION ", a nonlinear optimization solver\n"
+                << "                    for optimal control and robotics.\n"
+                << "                 Copyright (c) Lander Vanroye, KU Leuven.\n"
+                << "         Fatrop is dual licensed under BSD-2-Clause and EPL-2.0.\n"
+                << "     For more information visit https://github.com/meco-group/fatrop\n"
+                << "**************************************************************************\n\n";
+        }
+        // Suppress (or re-enable) printing of the banner.
+        static void set_suppress(const bool &suppress) { suppressed_ = suppress; }
+
+    private:
+        inline static bool printed_ = false;
+        inline static bool suppressed_ = false;
+    };
+
 #define PRINT_ITERATIONS PrintLevelManager(PrintLevel::Iterations)
 #define PRINT_DEBUG PrintLevelManager(PrintLevel::Debug)
 #define PRINT_DIAGNOSTIC PrintLevelManager(PrintLevel::Diagnostic)

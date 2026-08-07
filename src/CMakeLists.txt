@@ -97,6 +97,7 @@ set(FATROP_SOURCES
 
 # Create the fatrop shared library
 add_library(fatrop SHARED ${FATROP_SOURCES})
+target_compile_definitions(fatrop PRIVATE FATROP_VERSION="${PROJECT_VERSION}")
 
 # Set properties for the fatrop target
 set_target_properties(fatrop PROPERTIES

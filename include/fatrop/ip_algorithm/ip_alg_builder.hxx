@@ -274,7 +274,12 @@ namespace fatrop
             convergence_check_resto_->set_line_search_orig(linesearch_);
 
         if(options_registry_)
+        {
             options_registry_->register_option<Index>("print_level", &PrintLevelManager::set_print_level);
+            options_registry_->register_option<bool>("suppress_banner", &Banner::set_suppress);
+        }
+
+        Banner::print_once();
 
         return std::make_shared<IpAlgorithm<ProblemType>>(
             search_dir_, linesearch_, initializer_, mu_update_, eq_mult_initializer_,
