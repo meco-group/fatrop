@@ -44,6 +44,7 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
     PpIt_hat.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
     LlIt.emplace_back(info.dims.number_of_tangent_states[0] + 1, info.dims.number_of_tangent_states[0]);
     Ggt_ineq_temp.emplace_back(max_number_of_variables + 1, max_number_of_ineq_constraints);
+    eta_temp.emplace_back(max_number_of_states, max_number_of_controls);
 
     Ppt.reserve(info.dims.K);
     Hh.reserve(info.dims.K);
@@ -293,18 +294,18 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
                 if (increased_accuracy)
                 {
                     // copy eta
-                    getr(nu - rank_k, gamma_k - rank_k, Ggt_stripe[0], rank_k, rank_k,
-                         Ggt_stripe[0], 0, 0);
-                    // blasfeo_print_dmat(gamma_k-rank_k, nu-rank_k, Ggt_stripe[0], 0,0);
+                    getr(nu - rank_k, gamma_k - rank_k, Ggt_stripe[0], rank_k, rank_k, eta_temp[0],
+                         0, 0);
+                    // blasfeo_print_dmat(gamma_k-rank_k, nu-rank_k, eta_temp[0], 0,0);
                     // eta L^-T
-                    trsm_rltn(gamma_k - rank_k, nu - rank_k, 1.0, Llt[k], 0, 0, Ggt_stripe[0], 0, 0,
-                              Ggt_stripe[0], 0, 0);
+                    trsm_rltn(gamma_k - rank_k, nu - rank_k, 1.0, Llt[k], 0, 0, eta_temp[0], 0, 0,
+                              eta_temp[0], 0, 0);
                     // ([S^T \\ r^T] L^-T) @ (L^-1 eta^T)
                     // (eta L^-T) @ ([S^T \\ r^T] L^-T)^T
-                    gemm_nt(gamma_k - rank_k, nx + 1, nu - rank_k, -1.0, Ggt_stripe[0], 0, 0,
+                    gemm_nt(gamma_k - rank_k, nx + 1, nu - rank_k, -1.0, eta_temp[0], 0, 0,
                             Llt_shift[0], 0, 0, 1.0, Hh[k], 0, 0, Hh[k], 0, 0);
                     // keep (L^-1 eta^T) for forward recursion
-                    getr(gamma_k - rank_k, nu - rank_k, Ggt_stripe[0], 0, 0, Ggt_tilde[k], 0,
+                    getr(gamma_k - rank_k, nu - rank_k, eta_temp[0], 0, 0, Ggt_tilde[k], 0,
                          rank_k);
                 }
             }

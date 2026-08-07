@@ -177,6 +177,7 @@ namespace fatrop
         std::vector<MatRealAllocated> PpIt_hat;
         std::vector<MatRealAllocated> LlIt;
         std::vector<MatRealAllocated> Ggt_ineq_temp;
+        std::vector<MatRealAllocated> eta_temp;
         std::vector<VecRealAllocated> v_Ppt;
         std::vector<VecRealAllocated> v_Hh;
         std::vector<VecRealAllocated> v_AL;
