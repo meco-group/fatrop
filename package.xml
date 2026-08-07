@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>fatrop</name>
+  <version>1.1.6</version>
+  <description>Fatrop: a fast trajectory optimization solver.</description>
+  <maintainer email="lander.vanroye@kuleuven.be">Lander Vanroye</maintainer>
+  <license>BSD-2-Clause</license>
+  <license>EPL-2.0</license>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
