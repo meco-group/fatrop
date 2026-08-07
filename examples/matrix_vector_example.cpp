@@ -1,4 +1,4 @@
-#include "fatrop/context/generic.hpp"
+#include "fatrop/context/context.hpp"
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include <iostream>

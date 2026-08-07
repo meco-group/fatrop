@@ -11,11 +11,13 @@
  * use const_casts to this end*/
 
 #include "fatrop/common/exception.hpp"
+#include "fatrop/context/context.hpp"
+#if !defined(FATROP_CONTEXT_EIGEN)
 extern "C"
 {
 #include <blasfeo.h>
 }
-#include "fatrop/context/context.hpp"
+#endif
 
 namespace fatrop
 {

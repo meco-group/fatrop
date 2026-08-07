@@ -1,5 +1,5 @@
-#ifndef __fatrop_context_generic_hpp__
-#define __fatrop_context_generic_hpp__
+#ifndef __fatrop_context_blasfeo_hpp__
+#define __fatrop_context_blasfeo_hpp__
 
 #include "fatrop/common/exception.hpp"
 
@@ -77,4 +77,4 @@ namespace fatrop
 #define FREE_MAT blasfeo_free_dmat
 #define MEMSIZE_MAT blasfeo_memsize_dmat
 
-#endif // __fatrop_context_generic_hpp__
+#endif // __fatrop_context_blasfeo_hpp__
