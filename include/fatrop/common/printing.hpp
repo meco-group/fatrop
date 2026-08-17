@@ -57,6 +57,7 @@ namespace fatrop
     enum class PrintLevel
     {
         None = 0,
+        Error = 1,
         Iterations = 5, // consistent with Ipopt and legacy fatrop
         Debug = 6,
         Diagnostic = 7,
@@ -146,6 +147,7 @@ namespace fatrop
         ? (void)0                                                                                  \
         : fatrop::OStreamVoidify() & fatrop::OutputStreamManager::get_stream()
 
+#define PRINT_ERROR FATROP_PRINT(fatrop::PrintLevel::Error)
 #define PRINT_ITERATIONS FATROP_PRINT(fatrop::PrintLevel::Iterations)
 #define PRINT_DEBUG FATROP_PRINT(fatrop::PrintLevel::Debug)
 #define PRINT_DIAGNOSTIC FATROP_PRINT(fatrop::PrintLevel::Diagnostic)
