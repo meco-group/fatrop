@@ -392,11 +392,7 @@ namespace fatrop
             : stream(write, flush), use_own_stream_(write != 0),
               m(std::make_shared<FatropOcpCMapping>(ocp_interface))
         {
-            // Output stream is per-solver (the `stream` member). It is pushed
-            // into the (process-wide) OutputStreamManager at the start of every
-            // solve() rather than here, so a stream left behind by a since-
-            // destroyed solver is never dereferenced and each solve prints
-            // through its own (still-valid) callbacks.
+            // The per-solver stream is installed at each solve(), never here
             IpAlgBuilder<OcpType> builder(m);
             algo = builder.with_options_registry(&options).build();
             ip_data = builder.get_ipdata();
@@ -423,10 +419,10 @@ namespace fatrop
         }
         fatrop_int solve()
         {
-            // Re-point the (process-wide) output singleton at this solver's own
-            // stream, so concurrent/previous solvers (incl. since-unloaded ones)
-            // cannot leave it dangling. Non-owning: the driver owns `stream`.
+            // Re-point the global stream at ours so a destroyed solver's stream never dangles
             if (use_own_stream_) OutputStreamManager::set_stream(&stream);
+            // Options are live only now, so the banner honours print_level here
+            if (PrintLevelManager::is_enabled(PrintLevel::Iterations)) Banner::print_once();
             flag = algo->optimize();
             if (flag == IpSolverReturnFlag::Success)
             {
