@@ -104,8 +104,13 @@ set_target_properties(fatrop PROPERTIES
     VERSION ${PROJECT_VERSION}
 )
 
-# Link fatrop with blasfeo
-target_link_libraries(fatrop PUBLIC blasfeo)
+# Link fatrop with the selected linear-algebra backend
+if(FATROP_LA_BACKEND STREQUAL "eigen")
+    target_link_libraries(fatrop PUBLIC Eigen3::Eigen)
+    target_compile_definitions(fatrop PUBLIC FATROP_CONTEXT_EIGEN)
+else()
+    target_link_libraries(fatrop PUBLIC blasfeo)
+endif()
 
 # Specify include directories for the target
 target_include_directories(fatrop
