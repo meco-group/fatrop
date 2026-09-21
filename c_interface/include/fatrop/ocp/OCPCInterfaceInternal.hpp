@@ -46,7 +46,7 @@ namespace fatrop
         ProblemDims<OcpType> ocp_dims_;
         NlpDims nlp_dims_;
         Index K_;
-        std::vector<MAT *> matrix_buffer_[3];
+        std::vector<MAT> matrix_buffer_[3];
     };
 }
 #endif // __fatrop_ocp_solver_ocp_c_interface_internal_hpp__

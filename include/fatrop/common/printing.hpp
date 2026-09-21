@@ -16,6 +16,15 @@ namespace fatrop
         // Delete copy constructor and assignment operator
         OutputStreamManager(const OutputStreamManager &) = delete;
         OutputStreamManager &operator=(const OutputStreamManager &) = delete;
+        ~OutputStreamManager()
+        {
+            if (owns_stream_)
+            {
+                delete stream_;
+                stream_ = nullptr;
+                owns_stream_ = false;
+            }
+        }
 
         // Get the singleton instance
         static OutputStreamManager &get_instance()
@@ -27,7 +36,7 @@ namespace fatrop
         // Get the current printing stream
         static std::ostream &get_stream() { return *get_instance().stream_; }
 
-        // Set a new printing stream
+        // Set a new printing stream (ownership transferred to the manager)
         static void set_stream(std::unique_ptr<std::ostream> stream)
         {
             if (get_instance().owns_stream_)
@@ -36,6 +45,17 @@ namespace fatrop
             }
             get_instance().stream_ = stream.release();
             get_instance().owns_stream_ = true;
+        }
+
+        // Set a non-owning printing stream; the caller keeps it alive while active
+        static void set_stream(std::ostream *stream)
+        {
+            if (get_instance().owns_stream_)
+            {
+                delete get_instance().stream_;
+            }
+            get_instance().stream_ = stream;
+            get_instance().owns_stream_ = false;
         }
 
     private:
@@ -48,6 +68,7 @@ namespace fatrop
     enum class PrintLevel
     {
         None = 0,
+        Error = 1,
         Iterations = 5, // consistent with Ipopt and legacy fatrop
         Debug = 6,
         Diagnostic = 7,
@@ -137,6 +158,7 @@ namespace fatrop
         ? (void)0                                                                                  \
         : fatrop::OStreamVoidify() & fatrop::OutputStreamManager::get_stream()
 
+#define PRINT_ERROR FATROP_PRINT(fatrop::PrintLevel::Error)
 #define PRINT_ITERATIONS FATROP_PRINT(fatrop::PrintLevel::Iterations)
 #define PRINT_DEBUG FATROP_PRINT(fatrop::PrintLevel::Debug)
 #define PRINT_DIAGNOSTIC FATROP_PRINT(fatrop::PrintLevel::Diagnostic)

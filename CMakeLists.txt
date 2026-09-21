@@ -24,6 +24,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 option(BUILD_TESTS "Build the tests" ON)
 option(BUILD_EXAMPLES "Build the examples" ON)
 option(BUILD_WITH_C_INTERFACE "Build with C interface support" ON)
+option(BUILD_SHARED_LIBS "Build fatrop as a shared library" ON)
 option(FATROP_ENABLE_ASAN "Build with AddressSanitizer/UBSan and force-enable assertions" OFF)
 
 if(FATROP_ENABLE_ASAN)

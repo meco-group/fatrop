@@ -279,7 +279,7 @@ namespace fatrop
             options_registry_->register_option<bool>("suppress_banner", &Banner::set_suppress);
         }
 
-        Banner::print_once();
+        // No banner here: options are not applied yet, callers print it at solve time
 
         return std::make_shared<IpAlgorithm<ProblemType>>(
             search_dir_, linesearch_, initializer_, mu_update_, eq_mult_initializer_,
