@@ -117,7 +117,7 @@ namespace fatrop
             }
             if (update_delta_c)
             {
-                const Scalar delta_c_new = delta_c_stripe_ * pow(mu, kappa_c_);
+                const Scalar delta_c_new = delta_c_stripe_ * std::pow(mu, kappa_c_);
                 // A function of mu alone, so a second rank deficiency at the same mu recomputes
                 // the same value: there is nothing to escalate, and repeating it would spin here
                 // forever. Likewise for an underflow to zero, which regularizes nothing.
