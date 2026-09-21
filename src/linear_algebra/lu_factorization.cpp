@@ -5,6 +5,7 @@
 #include "fatrop/common/exception.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include <algorithm>
+#include <cmath>
 #include <utility>
 
 namespace fatrop
@@ -53,14 +54,14 @@ namespace fatrop
         std::pair<Index, Index> max_indices{ai, aj};
 
         // Set the initial maximum value to the absolute value at the starting position
-        double max_value = abs(blasfeo_matel_wrap(matr, ai, aj));
+        double max_value = std::abs(blasfeo_matel_wrap(matr, ai, aj));
 
         // Iterate over the submatrix to find the maximum element
         for (Index col = aj; col < n; ++col)
         {
             for (Index row = ai; row < m; ++row)
             {
-                double current_value = abs(blasfeo_matel_wrap(matr, row, col));
+                double current_value = std::abs(blasfeo_matel_wrap(matr, row, col));
                 if (current_value > max_value)
                 {
                     max_value = current_value;
@@ -84,7 +85,7 @@ namespace fatrop
         for (Index i = 0; i < minmn; i++)
         {
             std::pair<Index, Index> max_curr = max_el(n_max, m, At, i, i);
-            if (abs(blasfeo_matel_wrap(At, max_curr.first, max_curr.second)) < tol)
+            if (std::abs(blasfeo_matel_wrap(At, max_curr.first, max_curr.second)) < tol)
             {
                 break;
             }
