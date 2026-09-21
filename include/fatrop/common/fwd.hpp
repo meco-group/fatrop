@@ -19,7 +19,7 @@ namespace fatrop
     // Forward declarations for printing.hpp
     class OutputStreamManager;
 
-    class Timer;
+    struct Timer;
 
     // Forward declarations for timing.hpp
     // No forward declarations needed as it only includes external headers and defines macros

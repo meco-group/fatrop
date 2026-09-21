@@ -13,7 +13,7 @@
 namespace fatrop
 {
     // forward declaration
-    template <typename ProblemType> class IpData;
+    template <typename ProblemType> struct IpData;
     template <typename ProblemType> class Nlp
     {
     public:
