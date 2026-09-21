@@ -95,8 +95,8 @@ set(FATROP_SOURCES
     graph/ip_alg_builder.cpp
 )
 
-# Create the fatrop shared library
-add_library(fatrop SHARED ${FATROP_SOURCES})
+# Create the fatrop library (shared or static, per BUILD_SHARED_LIBS)
+add_library(fatrop ${FATROP_SOURCES})
 target_compile_definitions(fatrop PRIVATE FATROP_VERSION="${PROJECT_VERSION}")
 
 # Set properties for the fatrop target
