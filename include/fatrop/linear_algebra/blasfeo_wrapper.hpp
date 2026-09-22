@@ -11,10 +11,20 @@
  * use const_casts to this end*/
 
 #include "fatrop/common/exception.hpp"
+// blasfeo_timing.h includes Windows.h under MSVC; its min/max macros break the min/max friend functions
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 extern "C"
 {
 #include <blasfeo.h>
 }
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include "fatrop/context/context.hpp"
 
 namespace fatrop

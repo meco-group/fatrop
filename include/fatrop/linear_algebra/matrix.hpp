@@ -359,7 +359,7 @@ namespace fatrop
          *
          * @param other The MatRealAllocated object to move from.
          */
-        inline MatRealAllocated(MatRealAllocated &&other);
+        inline MatRealAllocated(MatRealAllocated &&other) noexcept;
 
         template <typename Derived>
         MatRealAllocated(const MatReal<Derived> &mat_in) : MatRealAllocated(mat_in.m(), mat_in.n())
@@ -490,7 +490,7 @@ namespace fatrop
         std::memset(mat_.mem, 0, mat_.memsize * sizeof(char));
     }
 
-    MatRealAllocated::MatRealAllocated(MatRealAllocated &&other)
+    MatRealAllocated::MatRealAllocated(MatRealAllocated &&other) noexcept
         : MatRealView(*this, other.m(), other.n(), 0, 0), mat_(other.mat_)
     {
         // Nullify the moved-from object's mat_ to prevent double deletion

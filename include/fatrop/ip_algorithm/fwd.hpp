@@ -24,7 +24,7 @@ namespace fatrop
     template <typename ProblemType> class IpNlpResto;
     template <typename ProblemType> class AugSystemSolver;
     template <typename ProblemType> class IpAlgorithm;
-    class IpFilterData;
+    struct IpFilterData;
     class IpFilter;
     // base classes
     class IpSearchDirBase;
@@ -36,7 +36,7 @@ namespace fatrop
     class IpIterationOutputBase;
     class IpRestoPhaseBase; 
     template <typename ProblemType> class IpRestoPhaseMinCl1;
-    class IpTimingStatistics;
+    struct IpTimingStatistics;
 
 } // namespace fatrop
 

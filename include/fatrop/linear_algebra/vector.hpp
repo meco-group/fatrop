@@ -722,7 +722,7 @@ namespace fatrop
         /**
          * @brief Move constructor for VecRealAllocated.
          */
-        VecRealAllocated(VecRealAllocated &&other)
+        VecRealAllocated(VecRealAllocated &&other) noexcept
             : VecRealView(*this, other.m(), 0), vec_(other.vec()), m_(other.m())
         {
             // Nullify the moved-from object's vec_ to prevent double deletion

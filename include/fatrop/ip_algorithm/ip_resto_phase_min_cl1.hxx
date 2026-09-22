@@ -13,6 +13,7 @@
 #ifndef __fatrop_ip_resto_phase_min_cl1_hxx__
 #define __fatrop_ip_resto_phase_min_cl1_hxx__
 #include "fatrop/common/options.hpp"
+#include <cmath>
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
@@ -42,7 +43,7 @@ namespace fatrop
         // todo make sure that step info is set just before restoration phase is called in line
         const ProblemInfoType &info = curr_it_orig.info();
         ip_nlp_resto_->set_xs_reference(info, curr_it_orig.primal_x(), curr_it_orig.primal_s());
-        ip_nlp_resto_->set_zeta(sqrt(curr_it_orig.mu()));
+        ip_nlp_resto_->set_zeta(std::sqrt(curr_it_orig.mu()));
         // search
         curr_it_resto.step_info() = curr_it_orig.step_info();
         IpSolverReturnFlag resto_status = resto_ip_algorithm_->optimize(true);
