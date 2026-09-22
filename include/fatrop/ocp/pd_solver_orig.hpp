@@ -27,6 +27,8 @@ namespace fatrop
         void solve_rhs_impl(LinearSystem<PdSystemType<OcpType>> &ls, VecRealView &x);
 
     private:
+        VecRealAllocated sl_inverse_;
+        VecRealAllocated su_inverse_;
         VecRealAllocated sigma_inverse_;
         VecRealAllocated ss_;
         VecRealAllocated g_ii_;

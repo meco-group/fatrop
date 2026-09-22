@@ -16,6 +16,7 @@ PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
                                     const std::shared_ptr<AugSystemSolver<OcpType>> &aug_system_solver)
     : LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>(
           LinearSystem<PdSystemType<OcpType>>::m(info)),
+      sl_inverse_(info.number_of_slack_variables), su_inverse_(info.number_of_slack_variables),
       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),
       g_ii_(info.number_of_slack_variables), D_ii_(info.number_of_slack_variables),
       gg_(info.number_of_eq_constraints), x_aug_(info.number_of_tangent_variables),
@@ -26,10 +27,13 @@ void PdSolverOrig<OcpType>::reduce(LinearSystem<PdSystemType<OcpType>> &ls)
 {
     VecRealView gi =
         ls.rhs_g_.block(ls.info_.number_of_slack_variables, ls.info_.offset_g_eq_slack);
+    // Cache the bound-slack reciprocals for reuse here and in dereduce().
+    sl_inverse_ = 1. / ls.Sl_i_;
+    su_inverse_ = 1. / ls.Su_i_;
     sigma_inverse_ =
         1. / (ls.D_x_.block(ls.info_.number_of_slack_variables, ls.info_.offset_slack) +
-              1. / ls.Sl_i_ * ls.Zl_i_ + 1. / ls.Su_i_ * ls.Zu_i_);
-    ss_ = ls.rhs_f_s_ + 1. / ls.Sl_i_ * ls.rhs_cl_ - 1. / ls.Su_i_ * ls.rhs_cu_;
+              sl_inverse_ * ls.Zl_i_ + su_inverse_ * ls.Zu_i_);
+    ss_ = ls.rhs_f_s_ + sl_inverse_ * ls.rhs_cl_ - su_inverse_ * ls.rhs_cu_;
     D_ii_ = sigma_inverse_ + ls.D_e_.block(ls.info_.number_of_g_eq_slack, ls.info_.offset_g_eq_slack);
     g_ii_ = gi + sigma_inverse_ * ss_;
 
@@ -52,11 +56,11 @@ void PdSolverOrig<OcpType>::dereduce(LinearSystem<PdSystemType<OcpType>> &ls, Ve
         sigma_inverse_ * (mult_i - ss_);
     // set zl and zu
     x.block(ls.info_.number_of_slack_variables, ls.info_.pd_orig_offset_zl) =
-        1. / ls.Sl_i_ *
+        sl_inverse_ *
         (-ls.rhs_cl_ -
          ls.Zl_i_ * x.block(ls.info_.number_of_slack_variables, ls.info_.pd_orig_offset_slack));
     x.block(ls.info_.number_of_slack_variables, ls.info_.pd_orig_offset_zu) =
-        1. / ls.Su_i_ *
+        su_inverse_ *
         (-ls.rhs_cu_ +
          ls.Zu_i_ * x.block(ls.info_.number_of_slack_variables, ls.info_.pd_orig_offset_slack));
 }
