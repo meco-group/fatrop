@@ -79,6 +79,8 @@ namespace fatrop
             create_aug_system_solver();
         pd_solver_ =
             std::make_shared<PdSolverOrig<ProblemType>>(*problem_info_, aug_system_solver_);
+        if (options_registry_)
+            options_registry_->register_options(*pd_solver_);
         return *this;
     }
 
@@ -191,6 +193,8 @@ namespace fatrop
         // create the PdSolverResto
         std::shared_ptr<PdSolverResto<ProblemType>> pd_solver_resto =
             std::make_shared<PdSolverResto<ProblemType>>(*problem_info_, pd_solver_);
+        if (options_registry_)
+            options_registry_->register_options(*pd_solver_resto);
         // create the resto search dir
         typedef IpSearchDirImpl<PdSolverResto<ProblemType>, ProblemType> RestoSDType;
         std::shared_ptr<RestoSDType> search_dir_resto =
