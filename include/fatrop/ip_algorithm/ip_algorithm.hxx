@@ -12,6 +12,7 @@
 
 #ifndef __fatrop_ip_algorithm_ip_algorithm_hxx__
 #define __fatrop_ip_algorithm_ip_algorithm_hxx__
+#include "fatrop/common/printing.hpp"
 #include "fatrop/ip_algorithm/ip_algorithm.hpp"
 #include "fatrop/ip_algorithm/ip_convergence_check.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
@@ -58,6 +59,7 @@ namespace fatrop
     template <typename ProblemType>
     IpSolverReturnFlag IpAlgorithm<ProblemType>::optimize(bool is_resto)
     {
+        Banner::print_once();
         reset(is_resto);
         ip_data_->timing_statistics().full_algorithm.start();
         {

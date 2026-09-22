@@ -421,8 +421,6 @@ namespace fatrop
         {
             // Re-point the global stream at ours so a destroyed solver's stream never dangles
             if (use_own_stream_) OutputStreamManager::set_stream(&stream);
-            // Options are live only now, so the banner honours print_level here
-            if (PrintLevelManager::is_enabled(PrintLevel::Iterations)) Banner::print_once();
             flag = algo->optimize();
             if (flag == IpSolverReturnFlag::Success)
             {
