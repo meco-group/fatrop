@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(fatrop VERSION 1.1.9 LANGUAGES CXX C)
+project(fatrop VERSION 1.2.99 LANGUAGES CXX C)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
