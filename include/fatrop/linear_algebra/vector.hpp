@@ -667,7 +667,12 @@ namespace fatrop
         template <typename Derived> inline VecRealView &operator=(const VecReal<Derived> &vec_in);
         VecRealView &operator=(const VecRealView &vec_in)
         {
-            *this = *static_cast<const VecReal<VecRealView> *>(&vec_in);
+            fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for assignment");
+            if (m() > 0)
+            {
+                // memmove: views may alias overlapping blocks of the same underlying vector.
+                std::memmove(data(), vec_in.data(), m() * sizeof(Scalar));
+            }
             return *this;
         };
         /**
@@ -789,9 +794,10 @@ namespace fatrop
     inline VecRealView &VecRealView::operator=(const VecReal<Derived> &vec_in)
     {
         fatrop_dbg_assert(m() == vec_in.m() && "Vectors must be same size for asignment");
-        for (Index i = 0; i < m(); i++)
+        Scalar *dst = data();
+        for (Index i = 0; i < m(); ++i)
         {
-            this->operator()(i) = vec_in(i);
+            dst[i] = vec_in(i);
         }
         return *this;
     }
