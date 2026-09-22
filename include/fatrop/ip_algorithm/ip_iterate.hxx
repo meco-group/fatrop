@@ -322,9 +322,21 @@ namespace fatrop
         Scalar dual_infeasibility_s_linf = dual_infeasibility_s_inf();
         Scalar dual_infeasibility_linf =
             std::max(dual_infeasibility_x_linf, dual_infeasibility_s_linf);
-        Scalar complementarity_l_linf = norm_inf(relaxed_complementarity_l(mu));
-        Scalar complementarity_u_linf = norm_inf(relaxed_complementarity_u(mu));
-        Scalar complementarity_linf = std::max(complementarity_l_linf, complementarity_u_linf);
+        // Compute the norm from cached complementarity vectors to avoid materializing relaxed
+        // temporaries.
+        const VecRealView &compl_l = complementarity_l();
+        const VecRealView &compl_u = complementarity_u();
+        Scalar complementarity_linf = 0.;
+        for (Index i = 0; i < compl_l.m(); i++)
+        {
+            if ((*lower_bounded_)[i])
+                complementarity_linf = std::max(complementarity_linf, std::abs(compl_l(i) - mu));
+        }
+        for (Index i = 0; i < compl_u.m(); i++)
+        {
+            if ((*upper_bounded_)[i])
+                complementarity_linf = std::max(complementarity_linf, std::abs(compl_u(i) - mu));
+        }
         Scalar res = 0.;
         Scalar sd = 0.;
         Scalar sc = 0.;
