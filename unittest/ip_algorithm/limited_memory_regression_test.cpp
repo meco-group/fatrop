@@ -6,6 +6,7 @@
 #include "fatrop/ip_algorithm/ip_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_nlp_resto.hpp"
 #include "fatrop/ip_algorithm/limited_memory_hessian_evaluator.hpp"
+#include "fatrop/ip_algorithm/hessian_approximation_evaluator.hpp"
 #include "fatrop/ip_algorithm/limited_memory_nlp_resto.hpp"
 
 namespace
@@ -16,7 +17,10 @@ using namespace limited_memory_example;
 // or algorithm data.
 const LimitedMemoryBfgs<DenseType> &approximation(IpData<DenseType> &data)
 {
-    return dynamic_cast<LimitedMemoryHessianEvaluator<DenseType> &>(data.hessian_evaluator()).approximation();
+    auto &evaluator = data.hessian_evaluator();
+    if (auto *selector = dynamic_cast<HessianApproximationEvaluator<DenseType> *>(&evaluator))
+        return selector->limited_memory();
+    return dynamic_cast<LimitedMemoryHessianEvaluator<DenseType> &>(evaluator).approximation();
 }
 const std::shared_ptr<const LowRankHessian> &model(const Hessian<DenseType> &hessian)
 {
@@ -54,6 +58,20 @@ TEST(LimitedMemoryRegression, NonlinearGraphMatchesDense)
     EXPECT_EQ(graph->hessian_calls, 0);
     EXPECT_EQ(d.iterations, g.iterations);
     for (Index i = 0; i < Model::n; ++i) EXPECT_NEAR(d.x[i], g.x[i], 1e-9);
+}
+
+TEST(LimitedMemoryRegression, FullBfgsDenseOcpAndSparseGraph)
+{
+    auto dense = std::make_shared<DenseProblem>();
+    auto ocp = std::make_shared<OcpProblem>();
+    auto graph = std::make_shared<limited_memory_example::GraphProblem>();
+    const auto d = solve_fatrop<DenseType>(std::make_shared<NlpDense>(dense), dense->model, 6, "bfgs");
+    const auto o = solve_fatrop<OcpType>(std::make_shared<NlpOcp>(ocp), ocp->dense.model, 6, "bfgs");
+    const auto g = solve_fatrop<fatrop::GraphProblem>(std::make_shared<NlpGraph>(graph), graph->model, 6, "bfgs");
+    check(d); check(o); check(g);
+    EXPECT_EQ(dense->hessian_calls, 0);
+    EXPECT_EQ(ocp->dense.hessian_calls, 0);
+    EXPECT_EQ(graph->hessian_calls, 0);
 }
 
 TEST(LimitedMemoryRegression, OnePairHistoryConverges)
@@ -111,6 +129,27 @@ TEST(LimitedMemoryRegression, NonlinearMultistageDynamicsAndRepeatedOptimization
         if (run == 0) first_iterations = data->iteration_number();
         else EXPECT_EQ(data->iteration_number(), first_iterations);
     }
+}
+
+TEST(LimitedMemoryRegression, FullBfgsMultistageOcp)
+{
+    auto problem = std::make_shared<DynamicsProblem>();
+    OptionRegistry options;
+    IpAlgBuilder<OcpType> builder(std::make_shared<NlpOcp>(problem));
+    auto algorithm = builder.with_options_registry(&options).build();
+    options.set_option("hessian_approximation", std::string("bfgs"));
+    options.set_option("tolerance", Scalar(1e-8));
+    options.set_option("max_iter", Index(150));
+    options.set_option("print_level", Index(0));
+    ASSERT_EQ(algorithm->optimize(), IpSolverReturnFlag::Success);
+    const auto &x = builder.get_ipdata()->current_iterate().primal_x();
+    Index offset = 0;
+    for (Index k = 0; k < DynamicsProblem::horizon; ++k)
+    {
+        if (problem->get_nu(k)) EXPECT_NEAR(x(offset++), 0., 1e-5);
+        EXPECT_NEAR(x(offset++), 1., 1e-5);
+    }
+    EXPECT_EQ(problem->hessian_calls, 0);
 }
 
 TEST(LimitedMemoryRegression, InitialDualsSolveLeastSquaresWithoutHessianOrHistory)
@@ -291,6 +330,10 @@ TEST(LimitedMemoryRegression, SameSolverCanSwitchBackToExactHessian)
     ASSERT_EQ(algorithm->optimize(), IpSolverReturnFlag::Success);
     EXPECT_EQ(problem->hessian_calls, 0);
     EXPECT_GT(approximation(*builder.get_ipdata()).history_size(), 0);
+    options.set_option("hessian_approximation", std::string("bfgs"));
+    ASSERT_EQ(algorithm->optimize(), IpSolverReturnFlag::Success);
+    EXPECT_EQ(problem->hessian_calls, 0);
+    EXPECT_EQ(approximation(*builder.get_ipdata()).history_size(), 0);
     options.set_option("hessian_approximation", std::string("exact"));
     ASSERT_EQ(algorithm->optimize(), IpSolverReturnFlag::Success);
     EXPECT_GT(problem->hessian_calls, 0);

@@ -5,6 +5,12 @@
 #include "fatrop/dense/aug_system_solver.hpp"
 #include "fatrop/dense/pd_solver_orig.hpp"
 #include "fatrop/ip_algorithm/limited_memory_bfgs.hpp"
+#include "fatrop/ip_algorithm/full_bfgs.hpp"
+#include "fatrop/dense/bfgs_matrix_ops.hpp"
+#include "fatrop/graph/bfgs_matrix_ops.hpp"
+#include "fatrop/graph/dims.hpp"
+#include "fatrop/graph/problem_info.hpp"
+#include "fatrop/graph/jacobian.hpp"
 #include "fatrop/nlp/low_rank_aug_system_solver.hpp"
 #include <gtest/gtest.h>
 #include <deque>
@@ -96,6 +102,55 @@ TEST(LimitedMemoryBfgs, CurrentMultipliersFrozenPairsAndMemoryEviction)
         if (step == 2) { saved = model; saved_dense = B; }
         if (step > 2) compare(*saved, saved_dense);
     }
+}
+
+TEST(FullBfgs, DenseMatrixSatisfiesSecantEquation)
+{
+    ProblemDims<DenseType> dims(3, 0, 0);
+    ProblemInfo<DenseType> info(dims);
+    Jacobian<DenseType> jac(dims);
+    FullBfgs<DenseType> bfgs(info);
+    Hessian<DenseType> hess(dims);
+    VecRealAllocated x(3), g(3), lambda(0);
+    x = 0.; g = 0.;
+    bfgs.update(info, x, g, jac, lambda);
+    x(0) = 1.; x(1) = 2.; x(2) = -1.;
+    g(0) = 4.; g(1) = 7.; g(2) = -2.;
+    bfgs.update(info, x, g, jac, lambda);
+    bfgs.copy_to(hess);
+    for (Index i = 0; i < 3; ++i)
+    {
+        Scalar product = 0.;
+        for (Index j = 0; j < 3; ++j)
+        {
+            EXPECT_NEAR(hess.Hht(i, j), hess.Hht(j, i), 1e-12);
+            product += hess.Hht(i, j) * x(j);
+        }
+        EXPECT_NEAR(product, g(i), 1e-12);
+    }
+}
+
+TEST(FullBfgs, GraphUpdatesStoredEdgesOnly)
+{
+    ProblemDims<fatrop::GraphProblem> dims({2, 1, 2}, {{0, 1}, {1, 2}}, {0, 0, 0});
+    ProblemInfo<fatrop::GraphProblem> info(dims);
+    Jacobian<fatrop::GraphProblem> jac(dims);
+    FullBfgs<fatrop::GraphProblem> bfgs(info);
+    Hessian<fatrop::GraphProblem> hess(dims);
+    VecRealAllocated x(5), g(5), lambda(0);
+    x = 0.; g = 0.;
+    bfgs.update(info, x, g, jac, lambda);
+    x = 1.;
+    for (Index i = 0; i < 5; ++i) g(i) = i + 2.;
+    bfgs.update(info, x, g, jac, lambda);
+    bfgs.copy_to(hess);
+    EXPECT_TRUE(hess.H.has_block(1, 0));
+    EXPECT_TRUE(hess.H.has_block(2, 1));
+    EXPECT_FALSE(hess.H.has_block(2, 0));
+    EXPECT_NEAR(hess.H.block(1, 0)(0, 0), .2, 1e-12);
+    EXPECT_NEAR(hess.H.block(1, 0)(0, 1), .4, 1e-12);
+    EXPECT_NEAR(hess.H.block(2, 1)(0, 0), .8, 1e-12);
+    EXPECT_NEAR(hess.H.block(2, 1)(1, 0), 1., 1e-12);
 }
 
 TEST(LimitedMemoryBfgs, SkipsResetOnFollowingUpdateAndScaling)

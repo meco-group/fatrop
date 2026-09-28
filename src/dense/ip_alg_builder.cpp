@@ -1,4 +1,5 @@
 #include "fatrop/dense/aug_system_solver.hpp"
+#include "fatrop/dense/bfgs_matrix_ops.hpp"
 #include "fatrop/dense/hessian.hpp"
 #include "fatrop/dense/jacobian.hpp"
 #include "fatrop/dense/nlp_dense.hpp"

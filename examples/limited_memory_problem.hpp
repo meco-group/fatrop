@@ -311,12 +311,13 @@ inline void evaluate_result(Result &r, const Model &model)
 }
 
 template <typename ProblemType>
-Result solve_fatrop(std::shared_ptr<Nlp<ProblemType>> nlp, const Model &model, Index history = 6)
+Result solve_fatrop(std::shared_ptr<Nlp<ProblemType>> nlp, const Model &model,
+                    Index history = 6, const std::string &approximation = "limited-memory")
 {
     OptionRegistry options;
     IpAlgBuilder<ProblemType> builder(nlp);
     auto algorithm = builder.with_options_registry(&options).build();
-    options.set_option("hessian_approximation", std::string("limited-memory"));
+    options.set_option("hessian_approximation", approximation);
     options.set_option("limited_memory_max_history", history);
     options.set_option("tolerance", Scalar(1e-8));
     options.set_option("constr_viol_tol", Scalar(1e-8));

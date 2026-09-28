@@ -38,6 +38,10 @@ namespace fatrop
         bool uses_history() const override { return bfgs_.enabled(); }
         void reset() override { bfgs_.reset(); }
         void register_options(OptionRegistry &registry) override { bfgs_.register_options(registry); }
+        // The selector owns hessian_approximation, while this evaluator owns
+        // the limited-memory-specific settings.
+        void register_memory_options(OptionRegistry &registry) { bfgs_.register_options(registry, false); }
+        void set_approximation(const std::string &value) { bfgs_.set_approximation(value); }
         const LimitedMemoryBfgs<P> &approximation() const { return bfgs_; }
 
     private:

@@ -179,9 +179,10 @@ namespace fatrop
             if (value < init_min_) throw std::invalid_argument("limited_memory_init_val_max is below minimum");
             init_max_ = value;
         }
-        void register_options(OptionRegistry &registry)
+        void register_options(OptionRegistry &registry, bool register_approximation = true)
         {
-            registry.register_option("hessian_approximation", &LimitedMemoryBfgs::set_approximation, this);
+            if (register_approximation)
+                registry.register_option("hessian_approximation", &LimitedMemoryBfgs::set_approximation, this);
             registry.register_option("limited_memory_max_history", &LimitedMemoryBfgs::set_history, this);
             registry.register_option("limited_memory_max_skipping", &LimitedMemoryBfgs::set_max_skipping, this);
             registry.register_option("limited_memory_initialization", &LimitedMemoryBfgs::set_initialization, this);

@@ -1,3 +1,4 @@
+#include "fatrop/ocp/bfgs_matrix_ops.hpp"
 #include "fatrop/ip_algorithm/ip_alg_builder.hxx"
 #include "fatrop/ocp/aug_system_solver.hpp"
 #include "fatrop/ocp/hessian.hpp"

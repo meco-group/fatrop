@@ -3,6 +3,7 @@
 //
 
 #include "fatrop/graph/aug_system_solver.hpp"
+#include "fatrop/graph/bfgs_matrix_ops.hpp"
 #include "fatrop/graph/hessian.hpp"
 #include "fatrop/graph/jacobian.hpp"
 #include "fatrop/graph/nlp_graph.hpp"

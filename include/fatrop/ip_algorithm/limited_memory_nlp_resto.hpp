@@ -3,18 +3,19 @@
 #define FATROP_LIMITED_MEMORY_NLP_RESTO_HPP
 
 #include "fatrop/ip_algorithm/ip_nlp_resto.hpp"
+#include "fatrop/ip_algorithm/ip_hessian_evaluator.hpp"
 #include "fatrop/ip_algorithm/limited_memory_hessian_evaluator.hpp"
 
 namespace fatrop
 {
-    /// L-BFGS includes the restoration objective's curvature in x. Its slack
+    /// Approximate Hessians include the restoration objective's curvature in x. Its slack
     /// curvature remains explicit because the approximation only acts on x.
     template <typename P> class LimitedMemoryNlpResto : public IpNlpResto<P>
     {
     public:
         LimitedMemoryNlpResto(
             const std::shared_ptr<Nlp<P>> &nlp,
-            std::shared_ptr<LimitedMemoryHessianEvaluator<P>> evaluator)
+            std::shared_ptr<IpHessianEvaluator<P>> evaluator)
             : IpNlpResto<P>(nlp), evaluator_(std::move(evaluator)) {}
 
         void get_primal_damping(const ProblemInfo<P> &info, VecRealView &damping) override
@@ -35,7 +36,7 @@ namespace fatrop
         }
 
     private:
-        std::shared_ptr<LimitedMemoryHessianEvaluator<P>> evaluator_;
+        std::shared_ptr<IpHessianEvaluator<P>> evaluator_;
     };
 }
 #endif

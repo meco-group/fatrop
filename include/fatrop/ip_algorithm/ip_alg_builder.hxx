@@ -8,7 +8,7 @@
 #include "fatrop/ip_algorithm/ip_convergence_check.hpp"
 #include "fatrop/ip_algorithm/ip_convergence_check_resto.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
-#include "fatrop/ip_algorithm/limited_memory_hessian_evaluator.hpp"
+#include "fatrop/ip_algorithm/hessian_approximation_evaluator.hpp"
 #include "fatrop/ip_algorithm/limited_memory_nlp_resto.hpp"
 #include "fatrop/nlp/low_rank_aug_system_solver.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
@@ -49,7 +49,7 @@ namespace fatrop
     {
         if (!problem_info_) create_problem_info();
         ipdata_ = std::make_shared<IpData<ProblemType>>(
-            nlp_orig_, std::make_shared<LimitedMemoryHessianEvaluator<ProblemType>>(*problem_info_, workspace_.hessian_history_capacity));
+            nlp_orig_, std::make_shared<HessianApproximationEvaluator<ProblemType>>(*problem_info_, workspace_.hessian_history_capacity));
         if (options_registry_)
             ipdata_->register_options(*options_registry_);
         return *this;
@@ -191,7 +191,7 @@ namespace fatrop
             create_iteration_output();
         // create the resto nlp and its independent Hessian evaluator
         auto hessian_evaluator_resto =
-            std::make_shared<LimitedMemoryHessianEvaluator<ProblemType>>(*problem_info_, workspace_.hessian_history_capacity);
+            std::make_shared<HessianApproximationEvaluator<ProblemType>>(*problem_info_, workspace_.hessian_history_capacity);
         std::shared_ptr<IpNlpResto<ProblemType>> ip_nlp_resto =
             std::make_shared<LimitedMemoryNlpResto<ProblemType>>(nlp_orig_, hessian_evaluator_resto);
         if (options_registry_)
