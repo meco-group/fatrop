@@ -20,6 +20,7 @@
 #include "fatrop/nlp/fwd.hpp"
 #include <limits>
 #include <memory>
+#include <stdexcept>
 
 namespace fatrop
 {
@@ -82,7 +83,8 @@ namespace fatrop
          * @param restoration_phase Shared pointer to the restoration phase.
          */
         IpLinesearch(const IpDataSp &ipdata, const LinearSolverSp &linear_solver,
-                     const RestorationPhaseSp &restoration_phase);
+                     const RestorationPhaseSp &restoration_phase,
+                     Index max_iterations_capacity = 1000);
 
         bool find_acceptable_trial_point() override;
         void reset() override;
@@ -114,7 +116,8 @@ namespace fatrop
         void set_alpha_red_factor(const Scalar &value) { alpha_red_factor_ = value; }
         void set_max_iter(const Index &max_iter)
         {
-            filter().reserve(max_iter_ + 1);
+            if (max_iter < 0 || max_iter > max_iterations_capacity_)
+                throw std::invalid_argument("max_iter exceeds the constructed iteration capacity");
             max_iter_ = max_iter;
         }
         void set_soft_rest_pd_error_reduction_factor(const Scalar &value)
@@ -183,11 +186,13 @@ namespace fatrop
         Index watchdog_trial_iter_max_ = 3;
         Scalar alpha_red_factor_ = 0.5;
         Index max_iter_ = 1000;
+        Index max_iterations_capacity_;
         Scalar soft_rest_pd_error_reduction_factor_ = 1. - 1e-4;
         Index max_soft_resto_iters_ = 10;
 
         // internal staticstics
         bool in_watchdog_;
+        bool refactor_after_watchdog_ = false;
         Scalar reference_theta_;
         Scalar reference_barr_;
         Scalar reference_grad_bar_delta_;

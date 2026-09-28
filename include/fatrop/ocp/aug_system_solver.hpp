@@ -6,6 +6,8 @@
 #define __fatrop_ocp_aug_system_solver_hpp__
 #include "fatrop/context/context.hpp"
 #include "fatrop/nlp/aug_system_solver.hpp"
+#include "fatrop/nlp/aug_system_solver_base.hpp"
+#include "fatrop/linear_algebra/batched_factor_solve.hpp"
 #include "fatrop/linear_algebra/lu_factorization.hpp"
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/ocp/fwd.hpp"
@@ -17,7 +19,7 @@ namespace fatrop
 {
 
     /**
-     * @class AugSystemSolver<OcpType>
+     * @class AugSystemSolver<OcpType> : public AugSystemSolverBase<OcpType>
      * @brief Solves a system of equations for optimal control problems with augmented system
      * structure.
      *
@@ -60,14 +62,15 @@ namespace fatrop
      * to efficiently solve this system while handling potential numerical issues.
      */
     template<>
-    class AugSystemSolver<OcpType>
+    class AugSystemSolver<OcpType> : public AugSystemSolverBase<OcpType>
     {
     public:
+        ~AugSystemSolver() override = default;
         /**
          * @brief Constructs an AugSystemSolver<OcpType> object.
          * @param info Problem information for the optimal control problem.
          */
-        AugSystemSolver<OcpType>(const ProblemInfo<OcpType> &info);
+        AugSystemSolver<OcpType>(const ProblemInfo<OcpType> &info, Index rhs_capacity = 12);
 
         /**
          * @brief Solves the augmented system without path equality constraint regularization.
@@ -85,7 +88,7 @@ namespace fatrop
         LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
                                Hessian<OcpType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_s, const VecRealView &f, const VecRealView &g,
-                               VecRealView &x, VecRealView &eq_mult);
+                               VecRealView &x, VecRealView &eq_mult) override;
 
         /**
          * @brief Solves the augmented system with path equality constraint regularization.
@@ -105,7 +108,7 @@ namespace fatrop
                                Hessian<OcpType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_eq, const VecRealView &D_s,
                                const VecRealView &f, const VecRealView &g, VecRealView &x,
-                               VecRealView &eq_mult);
+                               VecRealView &eq_mult) override;
 
         /**
          * @brief Solves the system for a new right-hand side without path equality constraint regularization.
@@ -123,7 +126,7 @@ namespace fatrop
                                    const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
-                                   VecRealView &eq_mult);
+                                   VecRealView &eq_mult) override;
 
         /**
          * @brief Solves the system for a new right-hand side with path equality constraint regularization.
@@ -142,12 +145,36 @@ namespace fatrop
                                    const Jacobian<OcpType> &jacobian,
                                    const Hessian<OcpType> &hessian, const VecRealView &D_eq,
                                    const VecRealView &D_s, const VecRealView &f,
-                                   const VecRealView &g, VecRealView &x, VecRealView &eq_mult);
+                                   const VecRealView &g, VecRealView &x, VecRealView &eq_mult) override;
 
         /**
          * @brief Registers the solver options with the provided options registry.
          * @param registry The options registry to register with.
          */
+        /// Reuse the last factorization for columns of RHS matrices. K[X;Lambda] = -[F;G].
+        /// Inputs and outputs must be distinct; all matrices have the same column count.
+        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
+                                        const Jacobian<OcpType> &jacobian,
+                                        const Hessian<OcpType> &hessian, const VecRealView &D_s,
+                                        const MatRealView &F, const MatRealView &G,
+                                        MatRealView &X, MatRealView &Lambda);
+        LinsolReturnFlag solve_rhs(const ProblemInfo<OcpType> &info,
+                                        const Jacobian<OcpType> &jacobian,
+                                        const Hessian<OcpType> &hessian, const VecRealView &D_eq,
+                                        const VecRealView &D_s, const MatRealView &F,
+                                        const MatRealView &G, MatRealView &X, MatRealView &Lambda);
+
+        /// Factor once and solve all RHS columns, including dual inertia correction.
+        LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
+                               Hessian<OcpType> &hessian, const VecRealView &D_x,
+                               const VecRealView &D_s, const MatRealView &F, const MatRealView &G,
+                               MatRealView &X, MatRealView &Lambda);
+        LinsolReturnFlag solve(const ProblemInfo<OcpType> &info, Jacobian<OcpType> &jacobian,
+                               Hessian<OcpType> &hessian, const VecRealView &D_x,
+                               const VecRealView &D_eq, const VecRealView &D_s,
+                               const MatRealView &F, const MatRealView &G,
+                               MatRealView &X, MatRealView &Lambda);
+
         void register_options(OptionRegistry &registry);
 
         // Option setters
@@ -160,6 +187,12 @@ namespace fatrop
         void set_increased_accuracy(const bool &value) { increased_accuracy = value; }
 
     private:
+        const Index rhs_capacity_;
+        batched::FactorSolveWorkspace factor_many_work_;
+        void allocate_rhs_workspace();
+
+        std::vector<std::vector<MatRealAllocated>> rhs_many_work_{17};
+
         // temporaries, pre-allocated during construction to avoid allocation during
         // optimization
         std::vector<MatRealAllocated> Ppt;

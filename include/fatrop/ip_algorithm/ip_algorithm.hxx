@@ -39,7 +39,7 @@ namespace fatrop
         : search_dir_(search_dir), linesearch_(linesearch), initializer_(initializer),
           mu_update_(mu_update), eq_mult_initializer_(eq_mult_initializer),
           convergence_check_(convergence_check), iteration_output_(iteration_output),
-          ip_data_(ip_data)
+          ip_data_(ip_data), multiplier_recalculator_(ip_data, eq_mult_initializer)
     {
     }
 
@@ -92,6 +92,7 @@ namespace fatrop
             bool success = linesearch_->find_acceptable_trial_point();
             if(!success) return IpSolverReturnFlag::LineSearchFailed;
             ip_data_->accept_trial_iterate();
+            multiplier_recalculator_.after_accepted_step();
             conv_status = convergence_check_->check_converged();
             ip_data_->set_iteration_number(ip_data_->iteration_number() + 1);
         }

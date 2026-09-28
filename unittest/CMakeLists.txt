@@ -109,3 +109,34 @@ gtest_discover_tests(graph_linear_solver_test)
 if(BUILD_WITH_C_INTERFACE)
   gtest_discover_tests(c_interface_test)
 endif()
+
+add_executable(limited_memory_bfgs_test ip_algorithm/limited_memory_bfgs_test.cpp)
+target_link_libraries(limited_memory_bfgs_test PRIVATE GTest::gtest GTest::gtest_main fatrop)
+gtest_discover_tests(limited_memory_bfgs_test)
+
+add_executable(limited_memory_regression_test ip_algorithm/limited_memory_regression_test.cpp)
+target_link_libraries(limited_memory_regression_test PRIVATE GTest::gtest GTest::gtest_main fatrop)
+gtest_discover_tests(limited_memory_regression_test)
+
+add_executable(limited_memory_recalc_test ip_algorithm/limited_memory_recalc_test.cpp)
+target_link_libraries(limited_memory_recalc_test PRIVATE GTest::gtest GTest::gtest_main fatrop)
+gtest_discover_tests(limited_memory_recalc_test)
+
+# Heap interception must see allocations in the shared solver and BLASFEO too.
+# Keep this glibc-only instrumentation out of production targets and ASan builds,
+# where replacing libc allocation entry points conflicts with the sanitizer.
+include(CheckSymbolExists)
+check_symbol_exists(__GLIBC__ "features.h" FATROP_TEST_HAS_GLIBC)
+function(add_fatrop_allocation_test target source)
+  if(FATROP_TEST_HAS_GLIBC AND NOT FATROP_ENABLE_ASAN)
+    add_executable(${target} ${source} allocation_tracker.cpp)
+    target_link_libraries(${target} PRIVATE GTest::gtest GTest::gtest_main fatrop)
+    target_link_options(${target} PRIVATE -Wl,--export-dynamic)
+    target_compile_options(${target} PRIVATE -fno-builtin-malloc -fno-builtin-calloc
+      -fno-builtin-realloc -fno-builtin-free)
+    gtest_discover_tests(${target})
+  endif()
+endfunction()
+add_fatrop_allocation_test(limited_memory_allocation_test ip_algorithm/limited_memory_allocation_test.cpp)
+
+add_fatrop_allocation_test(native_rhs_allocation_test linear_algebra/native_rhs_allocation_test.cpp)

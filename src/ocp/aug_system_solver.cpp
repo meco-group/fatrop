@@ -3,6 +3,7 @@
 //
 
 #include "fatrop/ocp/aug_system_solver.hpp"
+#include "fatrop/linear_algebra/batched_rhs.hpp"
 #include "fatrop/linear_algebra/linear_algebra.hpp"
 #include "fatrop/ocp/hessian.hpp"
 #include "fatrop/ocp/jacobian.hpp"
@@ -10,7 +11,9 @@
 #include <algorithm>
 using namespace fatrop;
 
-AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
+AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info, Index rhs_capacity)
+    : rhs_capacity_(batched::checked_capacity(rhs_capacity)),
+      factor_many_work_(info.number_of_tangent_variables, info.number_of_eq_constraints)
 {
     Index max_number_of_controls =
         *std::max_element(info.dims.number_of_tangent_controls.begin(), info.dims.number_of_tangent_controls.end());
@@ -100,6 +103,7 @@ AugSystemSolver<OcpType>::AugSystemSolver(const ProblemInfo<OcpType> &info)
 
     gamma.resize(info.dims.K);
     rho.resize(info.dims.K);
+    allocate_rhs_workspace();
 };
 
 void AugSystemSolver<OcpType>::register_options(OptionRegistry &registry)

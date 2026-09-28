@@ -18,6 +18,7 @@
 #include "fatrop/linear_algebra/vector.hpp"
 
 #include <vector>
+#include <memory>
 
 namespace fatrop
 {
@@ -38,10 +39,13 @@ namespace fatrop
     class BlockCholeskySolver : public LinearSolver<BlockCholeskySolver, GraphType>
     {
     public:
-        explicit BlockCholeskySolver(const BlockSparsityPattern &sp);
+        explicit BlockCholeskySolver(const BlockSparsityPattern &sp, Index rhs_capacity = 12);
+        using LinearSolver<BlockCholeskySolver, GraphType>::solve_rhs;
 
         LinsolReturnFlag solve_once_impl(LinearSystem<GraphType> &ls, VecRealView &x);
         void solve_rhs_impl(LinearSystem<GraphType> &ls, VecRealView &x);
+        /// Solve M X = -F for all RHS columns using the cached supernode factors.
+        void solve_rhs(const MatRealView &F, MatRealView &X);
 
         /// See check_reg(); below it the matrix counts as indefinite.
         void set_pivot_tol(Scalar value) { pivot_tol_ = value; }
@@ -50,6 +54,17 @@ namespace fatrop
         const BlockSymbolicFactorization &symbolic() const { return symbolic_; }
 
     private:
+        const Index rhs_capacity_;
+        // BLASFEO panel size (D_PS). With supernode-major storage, the source block
+        // row offsets in gemm_nt are NOT always multiples of 4 (a block can start
+        // anywhere in the panel). Internally, BLASFEO's dispatch reads from
+        // `pC - (bi % PS) * PS` which goes BEFORE the destination's pA when the
+        // destination column offset is 0 — those reads land in unmapped memory and
+        // segfault. Avoidance: add PS leading slack columns to every supernode panel
+        // and store all real data at column offsets >= PS. Then `cj - (bi % PS) >= 1`,
+        // keeping every BLASFEO read inside the allocated panel.
+        static constexpr Index kColPad = 4;
+
         struct LBlockLoc
         {
             Index sn;      ///< owning supernode (index into @c L_supernode_)
@@ -180,6 +195,7 @@ namespace fatrop
         std::vector<Index> sn_off_S_;
 
         // Workspace for solve.
+        std::unique_ptr<MatRealAllocated> x_perm_many_;
         VecRealAllocated x_perm_;
         VecRealAllocated rhs_;
         VecRealAllocated pivot_ref_;

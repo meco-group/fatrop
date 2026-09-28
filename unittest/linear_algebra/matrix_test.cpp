@@ -314,3 +314,25 @@ namespace fatrop
     }
 
 } // namespace fatrop
+
+TEST(MatrixOperationsTest, RectangularRowAndColumnSwaps)
+{
+    fatrop::MatRealAllocated wide(3, 11), tall(11, 3);
+    for (fatrop::Index i = 0; i < 3; ++i)
+        for (fatrop::Index j = 0; j < 11; ++j)
+        {
+            wide(i, j) = 10.0 * i + j;
+            tall(j, i) = wide(i, j);
+        }
+    fatrop::blasfeo_rowsw_wrap(9, &wide.mat(), 0, 1, &wide.mat(), 2, 1);
+    fatrop::blasfeo_colsw_wrap(9, &tall.mat(), 1, 0, &tall.mat(), 1, 2);
+    for (fatrop::Index j = 1; j < 10; ++j)
+    {
+        EXPECT_EQ(wide(0, j), 20.0 + j);
+        EXPECT_EQ(wide(2, j), j);
+        EXPECT_EQ(tall(j, 0), 20.0 + j);
+        EXPECT_EQ(tall(j, 2), j);
+    }
+    EXPECT_EQ(wide(0, 0), 0.0);
+    EXPECT_EQ(tall(10, 2), 30.0);
+}

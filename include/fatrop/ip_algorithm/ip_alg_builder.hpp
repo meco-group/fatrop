@@ -7,6 +7,7 @@
 
 #include "fatrop/common/fwd.hpp"
 #include "fatrop/ip_algorithm/fwd.hpp"
+#include "fatrop/ip_algorithm/ip_workspace.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
 #include "fatrop/nlp/fwd.hpp"
 #include <memory>
@@ -27,7 +28,8 @@ namespace fatrop
          *
          * @param nlp Shared pointer to the Nonlinear Programming problem.
          */
-        IpAlgBuilder(const std::shared_ptr<Nlp<ProblemType>> &nlp);
+        IpAlgBuilder(const std::shared_ptr<Nlp<ProblemType>> &nlp,
+                     const IpWorkspace &workspace = {});
 
         IpAlgBuilder &with_options_registry(OptionRegistry *options_registry)
         {
@@ -127,6 +129,7 @@ namespace fatrop
         std::shared_ptr<IpAlgorithm<ProblemType>> build();
 
     private:
+        IpWorkspace workspace_;
         std::shared_ptr<IpNlpOrig<ProblemType>> nlp_orig_;
         std::shared_ptr<IpData<ProblemType>> ipdata_;
         std::shared_ptr<ProblemInfo<ProblemType>> problem_info_;

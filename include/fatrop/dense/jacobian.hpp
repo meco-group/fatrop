@@ -41,6 +41,12 @@ namespace fatrop
          */
         MatRealAllocated Gg_ineqt;
 
+        void copy_from(const Jacobian &other)
+        {
+            Gg_eqt = other.Gg_eqt;
+            Gg_ineqt = other.Gg_ineqt;
+        }
+
         void apply_on_right(const DenseInfo &info, const VecRealView &x, Scalar alpha,
                             const VecRealView &y, VecRealView &out) const;
         void transpose_apply_on_right(const DenseInfo &info, const VecRealView &mult_eq,

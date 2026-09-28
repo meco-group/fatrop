@@ -35,6 +35,8 @@ namespace fatrop
 
     template <typename ProblemType> bool IpRestoPhaseMinCl1<ProblemType>::perform_restoration()
     {
+        // Restoration has a different objective and multiplier trajectory.
+        ip_data_orig_->hessian_evaluator().reset();
         count_resto_++;
         // initialize the ip_data_resto_ to have the data of the original problem
         ip_data_resto_->set_iteration_number(ip_data_orig_->iteration_number() + 1);

@@ -34,7 +34,16 @@ void Hessian<DenseType>::set_rhs(const DenseInfo &info, const VecRealView &in)
     rowin(nxt, 1.0, in, 0, Hht, nxt, 0);
 }
 
-void Hessian<DenseType>::set_zero() { gese(Hht.m(), Hht.n(), 0.0, Hht, 0, 0); }
+void Hessian<DenseType>::set_zero()
+{
+    gese(Hht.m(), Hht.n(), 0.0, Hht, 0, 0);
+}
+
+void Hessian<DenseType>::set_diagonal(Scalar value)
+{
+    set_zero();
+    for (Index i = 0; i < Hht.n(); ++i) Hht(i, i) = value;
+}
 
 namespace fatrop
 {

@@ -44,6 +44,7 @@ namespace fatrop
          * @param dims The dimensions of the OCP, used to allocate appropriate memory.
          */
         Hessian(const ProblemDims<OcpType> &dims);
+        virtual ~Hessian() = default;
 
         /**
          * @brief Constraint Hessian of the dynamics.
@@ -63,10 +64,11 @@ namespace fatrop
          *   RSQrqt[-1, :] is reserved for the right-hand side.
          */
         std::vector<MatRealAllocated> RSQrqt;
-        void apply_on_right(const OcpInfo& info, const VecRealView& x, Scalar alpha, const VecRealView& y, VecRealView& out) const;
+        virtual void apply_on_right(const OcpInfo& info, const VecRealView& x, Scalar alpha, const VecRealView& y, VecRealView& out) const;
         void get_rhs(const OcpInfo& info, VecRealView& out) const;
         void set_rhs(const OcpInfo& info, const VecRealView& in);
-        void set_zero();
+        virtual void set_zero();
+        void set_diagonal(Scalar value);
         // make printable
         friend std::ostream& operator<<(std::ostream& os, const Hessian<OcpType>& hess);
     };

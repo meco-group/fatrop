@@ -1,3 +1,4 @@
+#include "../batched_aug_solver_check.hpp"
 //
 // Copyright (c) 2024 Lander Vanroye, KU Leuven
 //
@@ -124,4 +125,49 @@ TEST_F(DenseAugSystemSolverTest, TestSolveDegenRhs)
     ret = solver.solve_rhs(info, jacobian, hessian, D_eq, D_s, rhs_x, rhs_g, x, mult);
     EXPECT_EQ(ret, LinsolReturnFlag::SUCCESS);
     check_kkt(/*include_D_eq=*/true);
+}
+
+TEST_F(DenseAugSystemSolverTest, BatchedRhs)
+{
+    check_batched_augmented_solve(info, jacobian, hessian, solver, D_x, D_eq, D_s,
+                                  false, 0);
+}
+
+TEST_F(DenseAugSystemSolverTest, BatchedRegularizedRhs)
+{
+    check_batched_augmented_solve(info, jacobian, hessian, solver, D_x, D_eq, D_s,
+                                  true, 0);
+}
+
+TEST(DenseBatchedAugSystemSolverTest, NoConstraints)
+{
+    ProblemDims<DenseType> dims{9, 0, 0};
+    ProblemInfo<DenseType> info{dims};
+    Jacobian<DenseType> jacobian{dims};
+    Hessian<DenseType> hessian{dims};
+    hessian.Hht.block(9, 9, 0, 0) = ::test::random_spd_matrix(9);
+    AugSystemSolver<DenseType> solver{info};
+    VecRealAllocated dx(9), de(0), ds(0);
+    dx = 0.2;
+    check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds, false, 0);
+    check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds, true, 0);
+}
+
+TEST(DenseBatchedAugSystemSolverTest, FullyEqualityConstrained)
+{
+    ProblemDims<DenseType> dims{3, 3, 0};
+    ProblemInfo<DenseType> info{dims};
+    Jacobian<DenseType> jacobian{dims};
+    Hessian<DenseType> hessian{dims};
+    hessian.Hht = 0.0;
+    hessian.Hht.block(3, 3, 0, 0).diagonal() = 2.0;
+    jacobian.Gg_eqt = 0.0;
+    jacobian.Gg_eqt(0, 2) = 2.0;
+    jacobian.Gg_eqt(1, 0) = -1.0;
+    jacobian.Gg_eqt(2, 1) = 0.5;
+    AugSystemSolver<DenseType> solver{info};
+    VecRealAllocated dx(3), de(3), ds(0);
+    dx = 0.2;
+    de = 0.1;
+    check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds, false, 0);
 }

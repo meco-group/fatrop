@@ -15,7 +15,7 @@ template class fatrop::LinearSolver<PdSolverOrig<DenseType>, PdSystemType<DenseT
 
 PdSolverOrig<DenseType>::PdSolverOrig(
     const ProblemInfo<DenseType> &info,
-    const std::shared_ptr<AugSystemSolver<DenseType>> &aug_system_solver)
+    const std::shared_ptr<AugSystemSolverBase<DenseType>> &aug_system_solver)
     : LinearSolver<PdSolverOrig<DenseType>, PdSystemType<DenseType>>(
           LinearSystem<PdSystemType<DenseType>>::m(info)),
       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),

@@ -8,6 +8,9 @@
 #include "fatrop/ip_algorithm/ip_convergence_check.hpp"
 #include "fatrop/ip_algorithm/ip_convergence_check_resto.hpp"
 #include "fatrop/ip_algorithm/ip_data.hpp"
+#include "fatrop/ip_algorithm/limited_memory_hessian_evaluator.hpp"
+#include "fatrop/ip_algorithm/limited_memory_nlp_resto.hpp"
+#include "fatrop/nlp/low_rank_aug_system_solver.hpp"
 #include "fatrop/ip_algorithm/ip_eq_mult_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_initializer.hpp"
 #include "fatrop/ip_algorithm/ip_initializer_resto.hpp"
@@ -25,7 +28,9 @@
 namespace fatrop
 {
     template <typename ProblemType>
-    IpAlgBuilder<ProblemType>::IpAlgBuilder(const std::shared_ptr<Nlp<ProblemType>> &nlp)
+    IpAlgBuilder<ProblemType>::IpAlgBuilder(
+        const std::shared_ptr<Nlp<ProblemType>> &nlp, const IpWorkspace &workspace)
+        : workspace_(workspace)
     {
         nlp_orig_ = std::make_shared<IpNlpOrig<ProblemType>>(nlp);
     }
@@ -42,7 +47,9 @@ namespace fatrop
     template <typename ProblemType>
     IpAlgBuilder<ProblemType> &IpAlgBuilder<ProblemType>::create_ipdata()
     {
-        ipdata_ = std::make_shared<IpData<ProblemType>>(nlp_orig_);
+        if (!problem_info_) create_problem_info();
+        ipdata_ = std::make_shared<IpData<ProblemType>>(
+            nlp_orig_, std::make_shared<LimitedMemoryHessianEvaluator<ProblemType>>(*problem_info_, workspace_.hessian_history_capacity));
         if (options_registry_)
             ipdata_->register_options(*options_registry_);
         return *this;
@@ -64,7 +71,7 @@ namespace fatrop
     {
         if (!problem_info_)
             create_problem_info();
-        aug_system_solver_ = std::make_shared<AugSystemSolver<ProblemType>>(*problem_info_);
+        aug_system_solver_ = std::make_shared<AugSystemSolver<ProblemType>>(*problem_info_, workspace_.rhs_capacity);
         if (options_registry_)
             aug_system_solver_->register_options(*options_registry_);
         return *this;
@@ -78,7 +85,9 @@ namespace fatrop
         if (!aug_system_solver_)
             create_aug_system_solver();
         pd_solver_ =
-            std::make_shared<PdSolverOrig<ProblemType>>(*problem_info_, aug_system_solver_);
+            std::make_shared<PdSolverOrig<ProblemType>>(
+                *problem_info_, std::make_shared<LowRankAugSystemSolver<ProblemType>>(
+                    *problem_info_, aug_system_solver_, workspace_.hessian_history_capacity));
         return *this;
     }
 
@@ -106,7 +115,7 @@ namespace fatrop
         if (!resto_phase_)
             create_restoration_phase();
         linesearch_ = std::make_shared<IpLinesearch<PdSolverOrig<ProblemType>, ProblemType>>(
-            ipdata_, pd_solver_, resto_phase_);
+            ipdata_, pd_solver_, resto_phase_, workspace_.max_iterations_capacity);
         if (options_registry_)
             options_registry_->register_options(*linesearch_);
         return *this;
@@ -157,7 +166,9 @@ namespace fatrop
     {
         if (!ipdata_)
             create_ipdata();
-        convergence_check_ = std::make_shared<IpConvergenceCheck<ProblemType>>(ipdata_);
+        auto convergence_check = std::make_shared<IpConvergenceCheck<ProblemType>>(ipdata_);
+        convergence_check->set_max_iter(std::min(Index(1000), workspace_.max_iterations_capacity));
+        convergence_check_ = std::move(convergence_check);
         if (options_registry_)
             options_registry_->register_options(*convergence_check_);
         return *this;
@@ -178,14 +189,16 @@ namespace fatrop
             create_ipdata();
         if (!iteration_output_)
             create_iteration_output();
-        // create the resto nlp
+        // create the resto nlp and its independent Hessian evaluator
+        auto hessian_evaluator_resto =
+            std::make_shared<LimitedMemoryHessianEvaluator<ProblemType>>(*problem_info_, workspace_.hessian_history_capacity);
         std::shared_ptr<IpNlpResto<ProblemType>> ip_nlp_resto =
-            std::make_shared<IpNlpResto<ProblemType>>(nlp_orig_);
+            std::make_shared<LimitedMemoryNlpResto<ProblemType>>(nlp_orig_, hessian_evaluator_resto);
         if (options_registry_)
             options_registry_->register_options(*ip_nlp_resto);
         // create the resto ipdata
         std::shared_ptr<IpData<ProblemType>> ip_data_resto =
-            std::make_shared<IpData<ProblemType>>(ip_nlp_resto);
+            std::make_shared<IpData<ProblemType>>(ip_nlp_resto, hessian_evaluator_resto);
         if (options_registry_)
             options_registry_->register_options(*ip_data_resto);
         // create the PdSolverResto
@@ -200,12 +213,14 @@ namespace fatrop
         // create the resto linesearch
         typedef IpLinesearch<PdSolverResto<ProblemType>, ProblemType> RestoLSType;
         std::shared_ptr<RestoLSType> linesearch_resto =
-            std::make_shared<RestoLSType>(ip_data_resto, pd_solver_resto, nullptr);
+            std::make_shared<RestoLSType>(ip_data_resto, pd_solver_resto, nullptr,
+                                          workspace_.max_iterations_capacity);
         if (options_registry_)
             options_registry_->register_options(*linesearch_resto);
         // create the convergence check for the resto phase
         convergence_check_resto_ =
             std::make_shared<IpConvergenceCheckResto<ProblemType>>(ipdata_, ip_data_resto);
+        convergence_check_resto_->set_max_iter(std::min(Index(1000), workspace_.max_iterations_capacity));
         if (options_registry_)
             options_registry_->register_options(*convergence_check_resto_);
         // create the mu update for the resto phase
@@ -234,6 +249,8 @@ namespace fatrop
                 search_dir_resto, linesearch_resto, initializer_resto, mu_update_resto,
                 eq_mult_initializer_resto, convergence_check_resto_, iteration_output_resto,
                 ip_data_resto);
+        if (options_registry_)
+            options_registry_->register_options(*resto_alg);
         resto_phase_ = std::make_shared<IpRestoPhaseMinCl1<ProblemType>>(
             resto_alg, eq_mult_initializer_resto, ipdata_, ip_data_resto, ip_nlp_resto);
         if (options_registry_)
@@ -281,9 +298,12 @@ namespace fatrop
 
         // No banner here: options are not applied yet, optimize() prints it
 
-        return std::make_shared<IpAlgorithm<ProblemType>>(
+        auto algorithm = std::make_shared<IpAlgorithm<ProblemType>>(
             search_dir_, linesearch_, initializer_, mu_update_, eq_mult_initializer_,
             convergence_check_, iteration_output_, ipdata_);
+        if (options_registry_)
+            options_registry_->register_options(*algorithm);
+        return algorithm;
     }
 } // namespace fatrop
 

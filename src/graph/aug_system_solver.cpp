@@ -3,17 +3,29 @@
 //
 
 #include "fatrop/graph/aug_system_solver.hpp"
+#include "fatrop/linear_algebra/batched_rhs.hpp"
 
 #include "fatrop/graph/hessian.hpp"
 #include "fatrop/graph/jacobian.hpp"
 #include "fatrop/graph/problem_info.hpp"
 #include "fatrop/linear_algebra/blasfeo_operations.hpp"
+#include <algorithm>
 
 using namespace fatrop;
 
-AugSystemSolver<GraphProblem>::AugSystemSolver(const ProblemInfo<GraphProblem> &info)
-    : info_(info), M_(*info.sparsity), rhs_(info.dims.nx_tan),
-      chol_(std::make_unique<BlockCholeskySolver>(*info.sparsity))
+AugSystemSolver<GraphProblem>::AugSystemSolver(const ProblemInfo<GraphProblem> &info, Index rhs_capacity)
+    : rhs_capacity_(batched::checked_capacity(rhs_capacity)),
+      factor_many_work_(info.number_of_tangent_variables, info.number_of_eq_constraints),
+      rhs_many_(std::make_unique<MatRealAllocated>(info.dims.nx_tan, rhs_capacity_)),
+      scaled_many_(std::make_unique<MatRealAllocated>(info.number_of_slack_variables, rhs_capacity_)),
+      info_(info), M_(*info.sparsity), rhs_(info.dims.nx_tan),
+      scaled_jacobian_(info.dims.block_sizes_tan.empty() ? 0 :
+                           *std::max_element(info.dims.block_sizes_tan.begin(), info.dims.block_sizes_tan.end()),
+                       info.dims.ng_ineq.empty() ? 0 :
+                           *std::max_element(info.dims.ng_ineq.begin(), info.dims.ng_ineq.end())),
+      scaled_rhs_(info.dims.ng_ineq.empty() ? 0 :
+                      *std::max_element(info.dims.ng_ineq.begin(), info.dims.ng_ineq.end())),
+      chol_(std::make_unique<BlockCholeskySolver>(*info.sparsity, rhs_capacity_))
 {
 }
 
@@ -34,7 +46,7 @@ namespace
 // contributions onto a freshly-copied lower-triangle of H.
 void assemble_M(const ProblemInfo<GraphProblem> &info, Hessian<GraphProblem> &hessian,
                 Jacobian<GraphProblem> &jacobian, const VecRealView &D_x, const VecRealView &D_s,
-                BlockPdMatrix &M)
+                BlockPdMatrix &M, MatRealView &scaled_work)
 {
     const auto &sp = M.sparsity();
     // 1. Copy the lower-triangle blocks of H into M.
@@ -63,7 +75,7 @@ void assemble_M(const ProblemInfo<GraphProblem> &info, Hessian<GraphProblem> &he
         // safe to mutate.
         MatRealAllocated &Ak = jacobian.Gg_ineqt[k];
         // Build temporary scaled copy.
-        MatRealAllocated scaled(nk, ngk);
+        auto scaled = scaled_work.block(nk, ngk, 0, 0);
         gese(nk, ngk, 0.0, scaled, 0, 0);
         // scaled = Ak^T (top nk rows of the transposed-Jacobian matrix).
         gecp(nk, ngk, Ak, 0, 0, scaled, 0, 0);
@@ -92,7 +104,7 @@ void assemble_M(const ProblemInfo<GraphProblem> &info, Hessian<GraphProblem> &he
 // rhs_x = f + sum_k A_k^T D_s_k^{-1} g_k.
 void assemble_rhs(const ProblemInfo<GraphProblem> &info, const Jacobian<GraphProblem> &jacobian,
                   const VecRealView &D_s, const VecRealView &f, const VecRealView &g,
-                  VecRealView &rhs)
+                  VecRealView &rhs, VecRealView &scaled_work)
 {
     veccp(info.dims.nx_tan, f, 0, rhs, 0);
     for (Index k = 0; k < info.dims.num_blocks; ++k)
@@ -105,7 +117,7 @@ void assemble_rhs(const ProblemInfo<GraphProblem> &info, const Jacobian<GraphPro
         const Index s_off = info.offset_g_eq_slack + info.dims.ng_ineq_offsets[k];
         // Build the per-block scaled RHS vector g_k / D_s_k, then accumulate
         // A_k^T (g_k / D_s_k) into rhs[block k].
-        VecRealAllocated scaled(ngk);
+        auto scaled = scaled_work.block(ngk, 0);
         for (Index i = 0; i < ngk; ++i)
             scaled(i) = g(s_off + i) / D_s(s_off + i);
         gemv_n(nk, ngk, 1.0, jacobian.Gg_ineqt[k], 0, 0, scaled, 0, 1.0, rhs, x_off, rhs, x_off);
@@ -122,8 +134,8 @@ LinsolReturnFlag AugSystemSolver<GraphProblem>::solve(const ProblemInfo<GraphPro
                                                        VecRealView &x, VecRealView &eq_mult)
 {
     M_.set_zero();
-    assemble_M(info, hessian, jacobian, D_x, D_s, M_);
-    assemble_rhs(info, jacobian, D_s, f, g, rhs_);
+    assemble_M(info, hessian, jacobian, D_x, D_s, M_, scaled_jacobian_);
+    assemble_rhs(info, jacobian, D_s, f, g, rhs_, scaled_rhs_);
 
     // The block-Cholesky solver expects to solve M x = -rhs. Wrap rhs_ in a
     // linear system view and call solve_in_place: it will overwrite the rhs_
@@ -177,7 +189,7 @@ LinsolReturnFlag AugSystemSolver<GraphProblem>::solve_rhs(const ProblemInfo<Grap
 {
     // Rebuild only the right-hand side; the Cholesky factor produced by the
     // most recent `solve` call is reused.
-    assemble_rhs(info, jacobian, D_s, f, g, rhs_);
+    assemble_rhs(info, jacobian, D_s, f, g, rhs_, scaled_rhs_);
     LinearSystem<GraphType> ls(M_, rhs_);
     chol_->solve_rhs_impl(ls, rhs_);
     veccp(info.dims.nx_tan, rhs_, 0, x, 0);

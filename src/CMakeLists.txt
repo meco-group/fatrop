@@ -3,6 +3,8 @@ set(FATROP_SOURCES
     linear_algebra/lu_factorization.cpp
     linear_algebra/vector.cpp
     ocp/aug_system_solver.cpp
+    ocp/aug_system_solver_rhs.cpp
+    ocp/aug_system_solver_factor_rhs.cpp
     ocp/dims.cpp
     ocp/jacobian.cpp
     ocp/hessian.cpp
@@ -37,6 +39,8 @@ set(FATROP_SOURCES
     dense/jacobian.cpp
     dense/hessian.cpp
     dense/aug_system_solver.cpp
+    dense/aug_system_solver_rhs.cpp
+    dense/aug_system_solver_factor_rhs.cpp
     dense/pd_system_orig.cpp
     dense/pd_solver_orig.cpp
     dense/pd_system_resto.cpp
@@ -66,12 +70,15 @@ set(FATROP_SOURCES
     graph/elimination_order.cpp
     graph/symbolic_factorization.cpp
     graph/linear_solver.cpp
+    graph/linear_solver_rhs.cpp
     graph/dims.cpp
     graph/problem_info.cpp
     graph/hessian.cpp
     graph/jacobian.cpp
     graph/nlp_graph.cpp
     graph/aug_system_solver.cpp
+    graph/aug_system_solver_rhs.cpp
+    graph/aug_system_solver_factor_rhs.cpp
     graph/pd_system_orig.cpp
     graph/pd_solver_orig.cpp
     graph/pd_system_resto.cpp

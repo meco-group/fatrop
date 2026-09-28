@@ -13,6 +13,8 @@
 #include "fatrop/ocp/type.hpp"
 #include <memory>
 
+#include "fatrop/nlp/aug_system_solver_base.hpp"
+
 namespace fatrop
 {
 
@@ -20,7 +22,7 @@ namespace fatrop
     class PdSolverOrig<OcpType> : public LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>
     {
     public:
-        PdSolverOrig(const ProblemInfo<OcpType>& info, const std::shared_ptr<AugSystemSolver<OcpType>>& aug_system_solver);
+        PdSolverOrig(const ProblemInfo<OcpType>& info, const std::shared_ptr<AugSystemSolverBase<OcpType>>& aug_system_solver);
         LinsolReturnFlag solve_once_impl(LinearSystem<PdSystemType<OcpType>> &ls, VecRealView &x);
         void reduce(LinearSystem<PdSystemType<OcpType>> &ls);
         void dereduce(LinearSystem<PdSystemType<OcpType>> &ls, VecRealView &x);
@@ -34,7 +36,7 @@ namespace fatrop
         VecRealAllocated gg_;
         VecRealAllocated x_aug_;
         VecRealAllocated mult_aug_;
-        std::shared_ptr<AugSystemSolver<OcpType>> aug_system_solver_;
+        std::shared_ptr<AugSystemSolverBase<OcpType>> aug_system_solver_;
     };
 
 } // namespace fatrop

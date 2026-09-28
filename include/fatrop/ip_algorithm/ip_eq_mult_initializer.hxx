@@ -27,12 +27,29 @@ namespace fatrop
           Ds_(ipdata->current_iterate().info().number_of_slack_variables),
           Deq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           dummy_s_(ipdata->current_iterate().info().number_of_slack_variables),
-          dummy_z_(ipdata->current_iterate().info().number_of_slack_variables)
+          dummy_z_(ipdata->current_iterate().info().number_of_slack_variables),
+          saved_dual_eq_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints)
     {
     }
 
     template <typename ProblemType>
     void IpEqMultInitializer<ProblemType>::initialize_eq_mult(bool trial_it /* = false */)
+    {
+        calculate_eq_mult(trial_it);
+    }
+
+    template <typename ProblemType>
+    bool IpEqMultInitializer<ProblemType>::recalculate_eq_mult()
+    {
+        auto &iterate = ipdata_->current_iterate();
+        saved_dual_eq_ = iterate.dual_eq();
+        if (calculate_eq_mult(false)) return true;
+        iterate.set_dual_eq(saved_dual_eq_);
+        return false;
+    }
+
+    template <typename ProblemType>
+    bool IpEqMultInitializer<ProblemType>::calculate_eq_mult(bool trial_it)
     {
         IpIterateType &iterate = trial_it ? ipdata_->trial_iterate() : ipdata_->current_iterate();
         iterate.set_dual_eq(VecRealScalar(iterate.dual_eq().m(), 0.));
@@ -82,13 +99,14 @@ namespace fatrop
             break;
         }
         if (solved && norm_inf(rhs_g_) < lam_max_)
-            if (trial_it)
-                iterate.set_dual_eq(rhs_g_);
-            else
-                iterate.set_dual_eq(rhs_g_);
+        {
+            iterate.set_dual_eq(rhs_g_);
+            return true;
+        }
         else
         {
             iterate.set_dual_eq(VecRealScalar(iterate.dual_eq().m(), 0.));
+            return false;
         }
     }
 

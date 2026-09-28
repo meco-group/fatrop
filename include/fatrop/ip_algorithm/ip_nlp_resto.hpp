@@ -110,7 +110,7 @@ namespace fatrop
         void set_rho(const Scalar rho) { rho_ = rho; };
         NlpSp get_orig_nlp() { return nlp_orig_; };
 
-    private:
+    protected:
         NlpSp nlp_orig_; ///< Shared pointer to the original NLP problem
         NlpDims dims_;
         VecRealAllocated x_reference_;

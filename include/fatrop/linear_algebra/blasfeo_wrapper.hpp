@@ -163,8 +163,8 @@ namespace fatrop
         fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && ci >= 0 && cj >= 0 &&
                           "Indices must be non-negative");
-        fatrop_dbg_assert(aj + kmax <= sA->m && cj + kmax <= sC->m &&
-                          "Row indices plus kmax must not exceed matrix dimensions");
+        fatrop_dbg_assert(ai < sA->m && ci < sC->m && aj + kmax <= sA->n && cj + kmax <= sC->n &&
+                          "Row swaps must fit within matrix dimensions");
         ROWSW(kmax, sA, ai, aj, sC, ci, cj);
     }
 
@@ -174,8 +174,8 @@ namespace fatrop
         fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
         fatrop_dbg_assert(ai >= 0 && aj >= 0 && ci >= 0 && cj >= 0 &&
                           "Indices must be non-negative");
-        fatrop_dbg_assert(ai + kmax <= sA->n && ci + kmax <= sC->n &&
-                          "Column indices plus kmax must not exceed matrix dimensions");
+        fatrop_dbg_assert(aj < sA->n && cj < sC->n && ai + kmax <= sA->m && ci + kmax <= sC->m &&
+                          "Column swaps must fit within matrix dimensions");
         COLSW(kmax, sA, ai, aj, sC, ci, cj);
     }
 

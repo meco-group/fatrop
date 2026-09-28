@@ -8,15 +8,18 @@
 #include "fatrop/common/options.hpp"
 #include "fatrop/context/context.hpp"
 #include "fatrop/dense/fwd.hpp"
+#include "fatrop/linear_algebra/batched_factor_solve.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 #include "fatrop/linear_algebra/lu_factorization.hpp"
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/nlp/aug_system_solver.hpp"
+#include "fatrop/nlp/aug_system_solver_base.hpp"
+#include <vector>
 
 namespace fatrop
 {
     /**
-     * @class AugSystemSolver<DenseType>
+     * @class AugSystemSolver<DenseType> : public AugSystemSolverBase<DenseType>
      * @brief Augmented-system solver for dense NLP problems.
      *
      * Solves
@@ -36,37 +39,62 @@ namespace fatrop
      * mirrors the OCP implementation so the rest of the IP algorithm sees the
      * same interface.
      */
-    template <> class AugSystemSolver<DenseType>
+    template <> class AugSystemSolver<DenseType> : public AugSystemSolverBase<DenseType>
     {
     public:
-        AugSystemSolver(const ProblemInfo<DenseType> &info);
+        ~AugSystemSolver() override = default;
+        AugSystemSolver(const ProblemInfo<DenseType> &info, Index rhs_capacity = 12);
 
         /** Solve the augmented system without equality-constraint regularization. */
         LinsolReturnFlag solve(const ProblemInfo<DenseType> &info, Jacobian<DenseType> &jacobian,
                                Hessian<DenseType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_s, const VecRealView &f, const VecRealView &g,
-                               VecRealView &x, VecRealView &eq_mult);
+                               VecRealView &x, VecRealView &eq_mult) override;
 
         /** Solve the augmented system with equality-constraint regularization @c D_eq. */
         LinsolReturnFlag solve(const ProblemInfo<DenseType> &info, Jacobian<DenseType> &jacobian,
                                Hessian<DenseType> &hessian, const VecRealView &D_x,
                                const VecRealView &D_eq, const VecRealView &D_s,
                                const VecRealView &f, const VecRealView &g, VecRealView &x,
-                               VecRealView &eq_mult);
+                               VecRealView &eq_mult) override;
 
         /** Solve the system again for a new right-hand side (no regularization). */
         LinsolReturnFlag solve_rhs(const ProblemInfo<DenseType> &info,
                                    const Jacobian<DenseType> &jacobian,
                                    const Hessian<DenseType> &hessian, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
-                                   VecRealView &eq_mult);
+                                   VecRealView &eq_mult) override;
 
         /** Solve the system again for a new right-hand side (with @c D_eq regularization). */
         LinsolReturnFlag solve_rhs(const ProblemInfo<DenseType> &info,
                                    const Jacobian<DenseType> &jacobian,
                                    const Hessian<DenseType> &hessian, const VecRealView &D_eq,
                                    const VecRealView &D_s, const VecRealView &f,
-                                   const VecRealView &g, VecRealView &x, VecRealView &eq_mult);
+                                   const VecRealView &g, VecRealView &x, VecRealView &eq_mult) override;
+
+        /// Reuse the last factorization for columns of RHS matrices. K[X;Lambda] = -[F;G].
+        /// Inputs and outputs must be distinct; all matrices have the same column count.
+        LinsolReturnFlag solve_rhs(const ProblemInfo<DenseType> &info,
+                                        const Jacobian<DenseType> &jacobian,
+                                        const Hessian<DenseType> &hessian, const VecRealView &D_s,
+                                        const MatRealView &F, const MatRealView &G,
+                                        MatRealView &X, MatRealView &Lambda);
+        LinsolReturnFlag solve_rhs(const ProblemInfo<DenseType> &info,
+                                        const Jacobian<DenseType> &jacobian,
+                                        const Hessian<DenseType> &hessian, const VecRealView &D_eq,
+                                        const VecRealView &D_s, const MatRealView &F,
+                                        const MatRealView &G, MatRealView &X, MatRealView &Lambda);
+
+        /// Factor once and solve every RHS column using the same factors.
+        LinsolReturnFlag solve(const ProblemInfo<DenseType> &info, Jacobian<DenseType> &jacobian,
+                               Hessian<DenseType> &hessian, const VecRealView &D_x,
+                               const VecRealView &D_s, const MatRealView &F, const MatRealView &G,
+                               MatRealView &X, MatRealView &Lambda);
+        LinsolReturnFlag solve(const ProblemInfo<DenseType> &info, Jacobian<DenseType> &jacobian,
+                               Hessian<DenseType> &hessian, const VecRealView &D_x,
+                               const VecRealView &D_eq, const VecRealView &D_s,
+                               const MatRealView &F, const MatRealView &G,
+                               MatRealView &X, MatRealView &Lambda);
 
         void register_options(OptionRegistry &registry);
 
@@ -74,6 +102,12 @@ namespace fatrop
         void set_pivot_tol(const Scalar &value) { pivot_tol_ = value; }
 
     private:
+        const Index rhs_capacity_;
+        batched::FactorSolveWorkspace factor_many_work_;
+        void allocate_rhs_workspace();
+
+        std::vector<MatRealAllocated> rhs_many_work_;
+
         // Persistent buffers (allocated once, reused across solves).
         MatRealAllocated Ppt_;          // (nx + 1) x nx           — reduced Hessian + gradient block
         MatRealAllocated RSQrqt_tilde_; // (nx + 1) x nx           — augmented Hessian (incl. penalties)

@@ -15,6 +15,7 @@
 #include "fatrop/ip_algorithm/fwd.hpp"
 #include "fatrop/nlp/fwd.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
+#include "fatrop/ip_algorithm/ip_multiplier_recalculator.hpp"
 #include <memory>
 
 namespace fatrop
@@ -83,6 +84,8 @@ namespace fatrop
          */
         IpSolverReturnFlag optimize(bool is_resto = false);
 
+        void register_options(OptionRegistry &registry) { multiplier_recalculator_.register_options(registry); }
+
         const ProblemInfo<ProblemType> &info() const;
 
         const VecRealView &solution_primal() const;
@@ -97,6 +100,7 @@ namespace fatrop
         IpConvergenceCheckSp convergence_check_;    ///< Convergence checker
         IpIterationOutputSp iteration_output_;      ///< Iteration output handler
         IpDataSp ip_data_;                          ///< Interior point algorithm data
+        IpMultiplierRecalculator<ProblemType> multiplier_recalculator_;
     };
 } // namespace fatrop
 

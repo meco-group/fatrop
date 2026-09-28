@@ -1,3 +1,4 @@
+#include "../batched_aug_solver_check.hpp"
 //
 // Copyright (c) Lander Vanroye, KU Leuven
 //
@@ -276,5 +277,120 @@ TEST_F(AugSystemSolverTest, TestSolveDegenRhs)
     for (Index i = 0; i < info.number_of_primal_variables; ++i)
     {
         EXPECT_NEAR(grad(i), 0, 1e-5);
+    }
+}
+TEST_F(AugSystemSolverTest, BatchedRhs)
+{
+    check_batched_augmented_solve(info, jacobian, hessian, solver, D_x, D_eq, D_s,
+                                  false, info.offset_g_eq_path);
+}
+
+TEST_F(AugSystemSolverTest, BatchedRegularizedRhs)
+{
+    check_batched_augmented_solve(info, jacobian, hessian, solver, D_x, D_eq, D_s,
+                                  true, info.offset_g_eq_path);
+}
+
+TEST_F(AugSystemSolverTest, BatchedRhsWithoutIncreasedAccuracy)
+{
+    solver.set_increased_accuracy(false);
+    check_batched_augmented_solve(info, jacobian, hessian, solver, D_x, D_eq, D_s,
+                                  false, info.offset_g_eq_path);
+}
+
+TEST(OcpBatchedAugSystemSolverTest, LongHorizon)
+{
+    const Index K = 80;
+    std::vector<Index> nx(K, 3), nu(K, 2), ng(K, 0), ni(K, 1);
+    nu.back() = 0;
+    ng.front() = 3; // Fix x_0; the rank must propagate to the initial-state solve.
+    ProblemDims<OcpType> dims{K, nu, nx, ng, ni};
+    ProblemInfo<OcpType> info{dims};
+    Jacobian<OcpType> jacobian{dims};
+    Hessian<OcpType> hessian{dims};
+    for (Index k = 0; k < K; ++k)
+    {
+        const Index nv = nx[k] + nu[k];
+        hessian.RSQrqt[k] = 0.0;
+        hessian.RSQrqt[k].block(nv, nv, 0, 0).diagonal() = 2.0;
+        jacobian.Gg_ineqt[k] = 0.0;
+        jacobian.Gg_ineqt[k](nv - 1, 0) = 1.0;
+        if (k + 1 < K)
+        {
+            jacobian.BAbt[k] = 0.0;
+            for (Index i = 0; i < 3; ++i) jacobian.BAbt[k](nu[k] + i, i) = 0.9;
+            for (Index i = 0; i < 2; ++i) jacobian.BAbt[k](i, i) = 0.2;
+        }
+    }
+    jacobian.Gg_eqt[0] = 0.0;
+    jacobian.Gg_eqt[0].block(3, 3, nu[0], 0).diagonal() = 1.0;
+    VecRealAllocated dx(info.number_of_tangent_variables), de(info.number_of_g_eq_path);
+    VecRealAllocated ds(info.number_of_slack_variables);
+    dx = 0.1;
+    de = 0.2;
+    ds = 0.7;
+    AugSystemSolver<OcpType> solver{info};
+    check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds,
+                                  false, info.offset_g_eq_path);
+    check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds,
+                                  true, info.offset_g_eq_path);
+}
+
+TEST_F(AugSystemSolverTest, BatchedRegularizedRhsWithoutIncreasedAccuracy)
+{
+    solver.set_increased_accuracy(false);
+    check_batched_augmented_solve(info, jacobian, hessian, solver, D_x, D_eq, D_s,
+                                  true, info.offset_g_eq_path);
+}
+
+TEST(OcpBatchedAugSystemSolverTest, DualRegularizationWithDependentPathEqualities)
+{
+    // The two initial path equalities have the same Jacobian. Positive D_eq
+    // must make the augmented system solvable while leaving dynamics exact.
+    ProblemDims<OcpType> dims{3, {1, 1, 0}, {2, 2, 2}, {2, 0, 0}, {1, 0, 1}};
+    ProblemInfo<OcpType> info{dims};
+    Jacobian<OcpType> jacobian{dims};
+    Hessian<OcpType> hessian{dims};
+    for (Index k = 0; k < dims.K; ++k)
+    {
+        const Index nu = dims.number_of_tangent_controls[k];
+        const Index nx = dims.number_of_tangent_states[k];
+        const Index nv = nu + nx;
+        hessian.RSQrqt[k] = 0.0;
+        hessian.RSQrqt[k].block(nv, nv, 0, 0).diagonal() = 2.0;
+        jacobian.Gg_eqt[k] = 0.0;
+        jacobian.Gg_ineqt[k] = 0.0;
+        if (dims.number_of_ineq_constraints[k] > 0)
+            jacobian.Gg_ineqt[k](nv - 1, 0) = 1.0;
+        if (k + 1 < dims.K)
+        {
+            jacobian.BAbt[k] = 0.0;
+            for (Index i = 0; i < nx; ++i) jacobian.BAbt[k](nu + i, i) = 0.8;
+            jacobian.BAbt[k](0, 0) = 0.2;
+        }
+    }
+    jacobian.Gg_eqt[0](1, 0) = 1.0;
+    jacobian.Gg_eqt[0](1, 1) = 1.0;
+    VecRealAllocated dx(info.number_of_tangent_variables), dual_diagonal(info.number_of_eq_constraints);
+    dual_diagonal = 0.0;
+    auto de = dual_diagonal.block(info.number_of_g_eq_path, info.offset_g_eq_path);
+    VecRealAllocated ds(info.number_of_slack_variables);
+    dx = 0.1;
+    de(0) = 0.2;
+    de(1) = 0.7;
+    ds = 0.3;
+    for (bool increased_accuracy : {false, true})
+    {
+        SCOPED_TRACE(increased_accuracy);
+        AugSystemSolver<OcpType> solver{info};
+        solver.set_increased_accuracy(increased_accuracy);
+        VecRealAllocated f(info.number_of_tangent_variables), g(info.number_of_eq_constraints);
+        VecRealAllocated x(info.number_of_tangent_variables), lambda(info.number_of_eq_constraints);
+        f = 0.0;
+        g = 0.0;
+        ASSERT_EQ(solver.solve(info, jacobian, hessian, dx, ds, f, g, x, lambda),
+                  LinsolReturnFlag::NOFULL_RANK);
+        check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds,
+                                      true, info.offset_g_eq_path);
     }
 }

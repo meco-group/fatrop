@@ -19,6 +19,7 @@
 #include "fatrop/ip_algorithm/ip_utils.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -27,17 +28,20 @@ namespace fatrop
     template <typename LinearSolverType, typename ProblemType>
     IpLinesearch<LinearSolverType, ProblemType>::IpLinesearch(
         const IpDataSp &ipdata, const LinearSolverSp &linear_solver,
-        const RestorationPhaseSp &restoration_phase)
-        : ipdata_(ipdata), linear_solver_(linear_solver), restoration_phase_(restoration_phase),
+        const RestorationPhaseSp &restoration_phase, Index max_iterations_capacity)
+        : filter_(max_iterations_capacity), ipdata_(ipdata), linear_solver_(linear_solver),
+          restoration_phase_(restoration_phase),
           soc_rhs_x_(ipdata->current_iterate().nlp()->nlp_dims().number_of_tangent_variables),
           soc_rhs_s_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
           soc_rhs_g_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           soc_g_accumulate_(ipdata->current_iterate().nlp()->nlp_dims().number_of_eq_constraints),
           soc_rhs_cl_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
-          soc_rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints)
+          soc_rhs_cu_(ipdata->current_iterate().nlp()->nlp_dims().number_of_ineq_constraints),
+          max_iterations_capacity_(max_iterations_capacity)
     {
-        // avoid dynamic memory allocation during solving
-        filter().reserve(max_iter_ + 1);
+        if (max_iterations_capacity < 1)
+            throw std::invalid_argument("max_iterations_capacity must be positive");
+        max_iter_ = std::min(max_iter_, max_iterations_capacity_);
     }
 
     template <typename LinearSolverType, typename ProblemType>
@@ -144,6 +148,7 @@ namespace fatrop
         filter_reset_count_ = 0;
         in_watchdog_ = false;
         tiny_step_last_iteration_ = false;
+        refactor_after_watchdog_ = false;
         sucessive_tiny_step_count_ = 0;
         acceptable_iteration_count_ = -1;
         last_mu_ = -1.;
@@ -178,6 +183,8 @@ namespace fatrop
     template <typename LinearSolverType, typename ProblemType>
     bool IpLinesearch<LinearSolverType, ProblemType>::find_acceptable_trial_point()
     {
+        // The search-direction computation has just supplied current factors.
+        refactor_after_watchdog_ = false;
         IpIterateType *curr_it = &ipdata_->current_iterate();
         IpIterateType *trial_it = &ipdata_->trial_iterate();
         Scalar curr_mu = (*curr_it).mu();
@@ -451,6 +458,9 @@ namespace fatrop
         reference_barr_ = watchdog_barr_;
         reference_grad_bar_delta_ = watchdog_grad_bar_delta_;
         ipdata_->restore_current_iterate();
+        // A rollback restores an older Hessian and Jacobian. Any subsequent
+        // SOC must refresh both the base KKT and its Woodbury correction.
+        refactor_after_watchdog_ = true;
     }
 
     template <typename LinearSolverType, typename ProblemType>
@@ -505,11 +515,14 @@ namespace fatrop
                 curr_it.dual_bounds_l(), curr_it.dual_bounds_u(), soc_rhs_x_, soc_rhs_s_,
                 soc_rhs_g_, soc_rhs_cl_, soc_rhs_cu_);
 
-            LinsolReturnFlag ret = linear_solver_->solve_in_place_rhs(ls);
+            LinsolReturnFlag ret = refactor_after_watchdog_
+                                      ? linear_solver_->solve_in_place(ls)
+                                      : linear_solver_->solve_in_place_rhs(ls);
             // check if the linear system was solved successfully
             if (!(ret == LinsolReturnFlag::SUCCESS || ret == LinsolReturnFlag::ITREF_MAX_ITER ||
                   ret == LinsolReturnFlag::ITREF_INCREASE))
                 break;
+            refactor_after_watchdog_ = false;
             // compute the maximum step size for the second order correction
             alpha_primal_soc = curr_it.maximum_step_size_primal(curr_it.tau(), soc_rhs_s_);
             // set the new trial iterate

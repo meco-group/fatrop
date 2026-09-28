@@ -43,6 +43,11 @@ namespace fatrop
         /// @c ng_ineq[k] == 0 the entry is a zero-column matrix.
         std::vector<MatRealAllocated> Gg_ineqt;
 
+        void copy_from(const Jacobian &other)
+        {
+            for (Index k = 0; k < static_cast<Index>(Gg_ineqt.size()); ++k) Gg_ineqt[k] = other.Gg_ineqt[k];
+        }
+
         void apply_on_right(const GraphInfo &info, const VecRealView &x, Scalar alpha,
                             const VecRealView &y, VecRealView &out) const;
         void transpose_apply_on_right(const GraphInfo &info, const VecRealView &mult_eq,

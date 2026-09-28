@@ -40,6 +40,7 @@ namespace fatrop
     template <> struct Hessian<GraphProblem>
     {
         Hessian(const ProblemDims<GraphProblem> &dims);
+        virtual ~Hessian() = default;
 
         /// Block-sparse symmetric Lagrangian Hessian, in the user-supplied
         /// block sparsity pattern (lower triangle).
@@ -48,11 +49,12 @@ namespace fatrop
         /// Objective gradient (length @c dims.nx).
         VecRealAllocated grad;
 
-        void apply_on_right(const GraphInfo &info, const VecRealView &x, Scalar alpha,
+        virtual void apply_on_right(const GraphInfo &info, const VecRealView &x, Scalar alpha,
                             const VecRealView &y, VecRealView &out) const;
         void get_rhs(const GraphInfo &info, VecRealView &out) const;
         void set_rhs(const GraphInfo &info, const VecRealView &in);
-        void set_zero();
+        virtual void set_zero();
+        void set_diagonal(Scalar value);
 
         friend std::ostream &operator<<(std::ostream &os, const Hessian<GraphProblem> &hess);
     };

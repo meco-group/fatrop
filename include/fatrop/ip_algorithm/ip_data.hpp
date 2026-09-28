@@ -9,6 +9,7 @@
 #include "fatrop/context/context.hpp"
 #include "fatrop/ip_algorithm/ip_iterate.hpp"
 #include "fatrop/ip_algorithm/ip_timings.hpp"
+#include "fatrop/ip_algorithm/ip_hessian_evaluator.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include <vector>
 
@@ -32,7 +33,9 @@ namespace fatrop
          * @brief Construct a new IpData object.
          * @param nlp Shared pointer to the NLP problem.
          */
-        IpData(const NlpSp &nlp);
+        IpData(const NlpSp &nlp,
+               std::shared_ptr<IpHessianEvaluator<ProblemType>> evaluator =
+                   std::make_shared<IpHessianEvaluator<ProblemType>>());
 
         const InfoType &info() { return info_; }
 
@@ -141,6 +144,7 @@ namespace fatrop
         void register_options(OptionRegistry &registry);
 
         IpTimingStatistics &timing_statistics() { return timings_; }
+        IpHessianEvaluator<ProblemType> &hessian_evaluator() { return *hessian_evaluator_; }
 
     private:
         NlpSp nlp_; ///< Shared pointer to the NLP problem.
@@ -153,8 +157,9 @@ namespace fatrop
         bool tiny_step_flag_ = false;
         Scalar tol_ = 1e-8;
         IpTimingStatistics timings_;
+        std::shared_ptr<IpHessianEvaluator<ProblemType>> hessian_evaluator_;
         /** todo make this unique pointer to allow incomplete types? */
-        Hessian<ProblemType> hessian_data_[3];
+        std::unique_ptr<Hessian<ProblemType>> hessian_data_[3];
         Jacobian<ProblemType> jacobian_data_[3];
         Hessian<ProblemType> *hessian_curr_ = nullptr;
         Jacobian<ProblemType> *jacobian_curr_ = nullptr;

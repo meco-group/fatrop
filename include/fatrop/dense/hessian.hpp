@@ -26,15 +26,17 @@ namespace fatrop
     template <> struct Hessian<DenseType>
     {
         Hessian(const ProblemDims<DenseType> &dims);
+        virtual ~Hessian() = default;
 
         /// Hessian + gradient block, shape (nx + 1) x nx; last row is the gradient.
         MatRealAllocated Hht;
 
-        void apply_on_right(const DenseInfo &info, const VecRealView &x, Scalar alpha,
+        virtual void apply_on_right(const DenseInfo &info, const VecRealView &x, Scalar alpha,
                             const VecRealView &y, VecRealView &out) const;
         void get_rhs(const DenseInfo &info, VecRealView &out) const;
         void set_rhs(const DenseInfo &info, const VecRealView &in);
-        void set_zero();
+        virtual void set_zero();
+        void set_diagonal(Scalar value);
 
         friend std::ostream &operator<<(std::ostream &os, const Hessian<DenseType> &hess);
     };

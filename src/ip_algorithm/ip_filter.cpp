@@ -1,8 +1,16 @@
 #include "fatrop/ip_algorithm/ip_filter.hpp"
+#include <limits>
+#include <stdexcept>
 
 namespace fatrop
 {
-    IpFilter::IpFilter() {}
+    IpFilter::IpFilter(Index capacity)
+    {
+        if (capacity < 0 || capacity >= std::numeric_limits<Index>::max())
+            throw std::invalid_argument("invalid filter capacity");
+        // One extra entry accommodates the initial filter point.
+        reserve(capacity);
+    }
 
     void IpFilter::reset() { data_.resize(0); }
 
@@ -17,7 +25,12 @@ namespace fatrop
         }
         return true;
     }
-    void IpFilter::augment(const IpFilterData &data) { data_.push_back(data); }
+    void IpFilter::augment(const IpFilterData &data)
+    {
+        if (data_.size() == data_.capacity())
+            throw std::length_error("filter capacity exhausted");
+        data_.push_back(data);
+    }
 
     Index IpFilter::size() const { return data_.size(); }
 

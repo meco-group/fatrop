@@ -16,7 +16,7 @@ template class fatrop::LinearSolver<PdSolverOrig<GraphProblem>, PdSystemType<Gra
 
 PdSolverOrig<GraphProblem>::PdSolverOrig(
     const ProblemInfo<GraphProblem> &info,
-    const std::shared_ptr<AugSystemSolver<GraphProblem>> &aug_system_solver)
+    const std::shared_ptr<AugSystemSolverBase<GraphProblem>> &aug_system_solver)
     : LinearSolver<PdSolverOrig<GraphProblem>, PdSystemType<GraphProblem>>(
           LinearSystem<PdSystemType<GraphProblem>>::m(info)),
       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),

@@ -444,6 +444,7 @@ namespace fatrop
           De_(nlp_->nlp_dims().number_of_eq_constraints), number_of_bounds_(&data.number_of_bounds_)
     {
         timings_ = &data.timing_statistics();
+        data_ = &data;
         reset();
     }
     template <typename ProblemType> Hessian<ProblemType> &IpIterate<ProblemType>::hessian()
@@ -452,9 +453,7 @@ namespace fatrop
         if (!hessian_evaluated_)
         {
             ScopedTimer _t(timings_->compute_hessian, *timings_);
-            Index status = nlp_->eval_lag_hess(info(), objective_scale, primal_x_, primal_s_,
-                                               dual_eq_, *hessian_);
-            fatrop_assert_msg(status == 0, "Error in evaluating the Hessian of the Lagrangian.");
+            data_->hessian_evaluator().evaluate(*this, data_->current_iterate(), *hessian_);
             hessian_evaluated_ = true;
         }
         return *hessian_;

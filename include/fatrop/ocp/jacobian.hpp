@@ -90,6 +90,13 @@ namespace fatrop
          */
         std::vector<MatRealAllocated> Gg_ineqt;
 
+        void copy_from(const Jacobian &other)
+        {
+            for (Index k = 0; k < static_cast<Index>(BAbt.size()); ++k) BAbt[k] = other.BAbt[k];
+            for (Index k = 0; k < static_cast<Index>(Gg_eqt.size()); ++k) Gg_eqt[k] = other.Gg_eqt[k];
+            for (Index k = 0; k < static_cast<Index>(Gg_ineqt.size()); ++k) Gg_ineqt[k] = other.Gg_ineqt[k];
+        }
+
         void apply_on_right(const OcpInfo& info, const VecRealView &x, Scalar alpha, const VecRealView& y, VecRealView &out) const;
         void transpose_apply_on_right(const OcpInfo& info, const VecRealView &mult_eq, Scalar alpha, const VecRealView& y, VecRealView &out) const;
         void get_rhs(const OcpInfo& info, VecRealView &rhs) const;

@@ -14,6 +14,8 @@
 
 #include <memory>
 
+#include "fatrop/nlp/aug_system_solver_base.hpp"
+
 namespace fatrop
 {
     /**
@@ -30,7 +32,7 @@ namespace fatrop
     {
     public:
         PdSolverOrig(const ProblemInfo<GraphProblem> &info,
-                     const std::shared_ptr<AugSystemSolver<GraphProblem>> &aug_system_solver);
+                     const std::shared_ptr<AugSystemSolverBase<GraphProblem>> &aug_system_solver);
 
         LinsolReturnFlag solve_once_impl(LinearSystem<PdSystemType<GraphProblem>> &ls,
                                          VecRealView &x);
@@ -46,7 +48,7 @@ namespace fatrop
         VecRealAllocated gg_;
         VecRealAllocated x_aug_;
         VecRealAllocated mult_aug_;
-        std::shared_ptr<AugSystemSolver<GraphProblem>> aug_system_solver_;
+        std::shared_ptr<AugSystemSolverBase<GraphProblem>> aug_system_solver_;
     };
 } // namespace fatrop
 

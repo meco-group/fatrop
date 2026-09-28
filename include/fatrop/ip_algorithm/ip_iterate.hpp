@@ -486,6 +486,7 @@ namespace fatrop
         void set_jacobian(Jacobian<ProblemType> *jacobian_ptr) { jacobian_ = jacobian_ptr; }
 
         void set_hessian(Hessian<ProblemType> *hessian_ptr) { hessian_ = hessian_ptr; }
+        void invalidate_hessian() { hessian_evaluated_ = false; }
 
     private:
         NlpSp nlp_;
@@ -526,6 +527,7 @@ namespace fatrop
         VecRealAllocated primal_damping_;
         Jacobian<ProblemType> *jacobian_; ///< Jacobian of the NLP.
         Hessian<ProblemType> *hessian_;   ///< Hessian of the NLP.
+        IpDataType *data_ = nullptr;
         IpTimingStatistics *timings_;     ///< Pointer to the timing statistics owned by IpData.
         // Problem information
         const VecRealAllocated *lower_bounds_; ///< Lower bounds of the variables.

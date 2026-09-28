@@ -41,6 +41,16 @@ void Hessian<GraphProblem>::set_zero()
     grad = 0.0;
 }
 
+void Hessian<GraphProblem>::set_diagonal(Scalar value)
+{
+    set_zero();
+    for (Index k = 0; k < H.sparsity().num_blocks(); ++k)
+    {
+        auto diagonal = H.block(k, k);
+        for (Index i = 0; i < diagonal.m(); ++i) diagonal(i, i) = value;
+    }
+}
+
 namespace fatrop
 {
     std::ostream &operator<<(std::ostream &os, const Hessian<GraphProblem> &hess)

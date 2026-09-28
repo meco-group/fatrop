@@ -23,6 +23,7 @@ namespace fatrop
          * @brief Initialize the equality multipliers.
          */
         virtual void initialize_eq_mult(bool trial_it = false) = 0;
+        virtual bool recalculate_eq_mult() = 0;
         virtual void register_options(OptionRegistry& registry) = 0;
 
         /**
@@ -55,6 +56,7 @@ namespace fatrop
         IpEqMultInitializer(const IpDataSp &ipdata, const PdSolverSp &linear_solver);
 
         void initialize_eq_mult(bool trial_it = false) override;
+        bool recalculate_eq_mult() override;
         void reset() override;
 
     private:
@@ -70,7 +72,10 @@ namespace fatrop
         VecRealAllocated Deq_;     ///< Step in equality multipliers
         VecRealAllocated dummy_s_; ///< Dummy slack variables
         VecRealAllocated dummy_z_; ///< Dummy bound multipliers
+        VecRealAllocated saved_dual_eq_; ///< Preserves multipliers if recalculation fails
         Scalar lam_max_ = 1e3;     ///< Maximum allowed value for multipliers
+
+        bool calculate_eq_mult(bool trial_it);
 
     public:
         // Setter method for lam_max

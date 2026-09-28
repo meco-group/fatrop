@@ -14,16 +14,18 @@
 #include "fatrop/graph/linear_system.hpp"
 #include "fatrop/graph/problem_type.hpp"
 #include "fatrop/linear_algebra/fwd.hpp"
+#include "fatrop/linear_algebra/batched_factor_solve.hpp"
 #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 #include "fatrop/nlp/aug_system_solver.hpp"
+#include "fatrop/nlp/aug_system_solver_base.hpp"
 
 #include <memory>
 
 namespace fatrop
 {
     /**
-     * @class AugSystemSolver<GraphProblem>
+     * @class AugSystemSolver<GraphProblem> : public AugSystemSolverBase<GraphProblem>
      * @brief Augmented-system solver for graph-structured NLPs.
      *
      * Solves
@@ -44,10 +46,11 @@ namespace fatrop
      * @ref BlockCholeskySolver. The inequality multipliers are recovered by
      * back-substitution.
      */
-    template <> class AugSystemSolver<GraphProblem>
+    template <> class AugSystemSolver<GraphProblem> : public AugSystemSolverBase<GraphProblem>
     {
     public:
-        AugSystemSolver(const ProblemInfo<GraphProblem> &info);
+        ~AugSystemSolver() override = default;
+        AugSystemSolver(const ProblemInfo<GraphProblem> &info, Index rhs_capacity = 12);
 
         /// Solve the augmented system. The @c eq_mult slot is unused (graph
         /// problems have no equality multipliers); only the inequality
@@ -56,7 +59,7 @@ namespace fatrop
                                Jacobian<GraphProblem> &jacobian, Hessian<GraphProblem> &hessian,
                                const VecRealView &D_x, const VecRealView &D_s,
                                const VecRealView &f, const VecRealView &g, VecRealView &x,
-                               VecRealView &eq_mult);
+                               VecRealView &eq_mult) override;
 
         /// Solve the augmented system with an additional regularisation
         /// @c D_eq on the equality block. For graph problems @c D_eq has size
@@ -66,27 +69,58 @@ namespace fatrop
                                Jacobian<GraphProblem> &jacobian, Hessian<GraphProblem> &hessian,
                                const VecRealView &D_x, const VecRealView &D_eq,
                                const VecRealView &D_s, const VecRealView &f,
-                               const VecRealView &g, VecRealView &x, VecRealView &eq_mult);
+                               const VecRealView &g, VecRealView &x, VecRealView &eq_mult) override;
 
         /// Reuse the previous factorisation on a new right-hand side.
         LinsolReturnFlag solve_rhs(const ProblemInfo<GraphProblem> &info,
                                    const Jacobian<GraphProblem> &jacobian,
                                    const Hessian<GraphProblem> &hessian, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
-                                   VecRealView &eq_mult);
+                                   VecRealView &eq_mult) override;
 
         LinsolReturnFlag solve_rhs(const ProblemInfo<GraphProblem> &info,
                                    const Jacobian<GraphProblem> &jacobian,
                                    const Hessian<GraphProblem> &hessian,
                                    const VecRealView &D_eq, const VecRealView &D_s,
                                    const VecRealView &f, const VecRealView &g, VecRealView &x,
-                                   VecRealView &eq_mult);
+                                   VecRealView &eq_mult) override;
+
+        /// Reuse the last factorization for columns of RHS matrices. K[X;Lambda] = -[F;G].
+        /// Inputs and outputs must be distinct; all matrices have the same column count.
+        LinsolReturnFlag solve_rhs(const ProblemInfo<GraphProblem> &info,
+                                        const Jacobian<GraphProblem> &jacobian,
+                                        const Hessian<GraphProblem> &hessian, const VecRealView &D_s,
+                                        const MatRealView &F, const MatRealView &G,
+                                        MatRealView &X, MatRealView &Lambda);
+        LinsolReturnFlag solve_rhs(const ProblemInfo<GraphProblem> &info,
+                                        const Jacobian<GraphProblem> &jacobian,
+                                        const Hessian<GraphProblem> &hessian, const VecRealView &D_eq,
+                                        const VecRealView &D_s, const MatRealView &F,
+                                        const MatRealView &G, MatRealView &X, MatRealView &Lambda);
+
+        /// Factor once and solve all RHS columns.
+        LinsolReturnFlag solve(const ProblemInfo<GraphProblem> &info,
+                               Jacobian<GraphProblem> &jacobian, Hessian<GraphProblem> &hessian,
+                               const VecRealView &D_x, const VecRealView &D_s,
+                               const MatRealView &F, const MatRealView &G,
+                               MatRealView &X, MatRealView &Lambda);
+        LinsolReturnFlag solve(const ProblemInfo<GraphProblem> &info,
+                               Jacobian<GraphProblem> &jacobian, Hessian<GraphProblem> &hessian,
+                               const VecRealView &D_x, const VecRealView &D_eq,
+                               const VecRealView &D_s, const MatRealView &F, const MatRealView &G,
+                               MatRealView &X, MatRealView &Lambda);
 
         void register_options(OptionRegistry &registry);
 
         void set_pivot_tol(const Scalar &value);
 
     private:
+        const Index rhs_capacity_;
+        batched::FactorSolveWorkspace factor_many_work_;
+
+        std::unique_ptr<MatRealAllocated> rhs_many_;
+        std::unique_ptr<MatRealAllocated> scaled_many_;
+
         const ProblemInfo<GraphProblem> &info_;
 
         // Assembled SPD block matrix M = H + sum_k A_k^T D_s_k^{-1} A_k + D_x.
@@ -95,6 +129,8 @@ namespace fatrop
 
         // Right-hand side of the reduced SPD system, length nx.
         VecRealAllocated rhs_;
+        MatRealAllocated scaled_jacobian_;
+        VecRealAllocated scaled_rhs_;
 
         // Block-Cholesky solver for M.
         std::unique_ptr<BlockCholeskySolver> chol_;

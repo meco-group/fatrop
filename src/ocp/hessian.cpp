@@ -60,6 +60,13 @@ void Hessian<OcpType>::set_zero()
     for (auto &RSQ : RSQrqt)
         gese(RSQ.m(), RSQ.n(), 0.0, RSQ, 0, 0);
 }
+
+void Hessian<OcpType>::set_diagonal(Scalar value)
+{
+    set_zero();
+    for (auto &RSQ : RSQrqt)
+        for (Index i = 0; i < RSQ.n(); ++i) RSQ(i, i) = value;
+}
 // make printable
 namespace fatrop
 {

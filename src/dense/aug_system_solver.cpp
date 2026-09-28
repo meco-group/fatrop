@@ -2,6 +2,7 @@
 // Copyright (C) 2024 Lander Vanroye, KU Leuven
 //
 #include "fatrop/dense/aug_system_solver.hpp"
+#include "fatrop/linear_algebra/batched_rhs.hpp"
 #include "fatrop/dense/dims.hpp"
 #include "fatrop/dense/hessian.hpp"
 #include "fatrop/dense/jacobian.hpp"
@@ -12,8 +13,10 @@
 
 using namespace fatrop;
 
-AugSystemSolver<DenseType>::AugSystemSolver(const ProblemInfo<DenseType> &info)
-    : Ppt_(info.dims.nx_tangent + 1, info.dims.nx_tangent),
+AugSystemSolver<DenseType>::AugSystemSolver(const ProblemInfo<DenseType> &info, Index rhs_capacity)
+    : rhs_capacity_(batched::checked_capacity(rhs_capacity)),
+      factor_many_work_(info.number_of_tangent_variables, info.number_of_eq_constraints),
+      Ppt_(info.dims.nx_tangent + 1, info.dims.nx_tangent),
       RSQrqt_tilde_(info.dims.nx_tangent + 1, info.dims.nx_tangent),
       Ggt_stripe_(info.dims.nx_tangent + 1, info.dims.ng),
       Ggt_tilde_(info.dims.nx_tangent + 1, info.dims.nx_tangent),
@@ -30,6 +33,7 @@ AugSystemSolver<DenseType>::AugSystemSolver(const ProblemInfo<DenseType> &info)
       v_Ggt_ineq_(info.dims.ng_ineq),
       Pl_(info.dims.ng), Pr_(info.dims.nx_tangent)
 {
+    allocate_rhs_workspace();
 }
 
 void AugSystemSolver<DenseType>::register_options(OptionRegistry &registry)

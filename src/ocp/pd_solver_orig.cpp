@@ -13,7 +13,7 @@ using namespace fatrop;
 template class fatrop::LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>;
 
 PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
-                                    const std::shared_ptr<AugSystemSolver<OcpType>> &aug_system_solver)
+                                    const std::shared_ptr<AugSystemSolverBase<OcpType>> &aug_system_solver)
     : LinearSolver<PdSolverOrig<OcpType>, PdSystemType<OcpType>>(
           LinearSystem<PdSystemType<OcpType>>::m(info)),
       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),

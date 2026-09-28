@@ -3,6 +3,7 @@
 //
 
 #include "fatrop/graph/linear_solver.hpp"
+#include "fatrop/linear_algebra/batched_rhs.hpp"
 
 #include "fatrop/common/exception.hpp"
 #include "fatrop/graph/block_pd_matrix.hpp"
@@ -19,16 +20,6 @@ template class fatrop::LinearSolver<BlockCholeskySolver, GraphType>;
 
 namespace
 {
-// BLASFEO panel size (D_PS). With supernode-major storage, the source block
-// row offsets in gemm_nt are NOT always multiples of 4 (a block can start
-// anywhere in the panel). Internally, BLASFEO's dispatch reads from
-// `pC - (bi % PS) * PS` which goes BEFORE the destination's pA when the
-// destination column offset is 0 — those reads land in unmapped memory and
-// segfault. Avoidance: add PS leading slack columns to every supernode panel
-// and store all real data at column offsets >= PS. Then `cj - (bi % PS) >= 1`,
-// keeping every BLASFEO read inside the allocated panel.
-constexpr int kColPad = 4;
-
 std::vector<Index> make_offsets(const std::vector<Index> &sizes)
 {
     std::vector<Index> off(sizes.size() + 1, 0);
@@ -38,10 +29,12 @@ std::vector<Index> make_offsets(const std::vector<Index> &sizes)
 }
 } // namespace
 
-BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
-    : LinearSolver<BlockCholeskySolver, GraphType>(sp.total_size()), sp_(sp), order_(sp),
+BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index rhs_capacity)
+    : LinearSolver<BlockCholeskySolver, GraphType>(sp.total_size()),
+      rhs_capacity_(batched::checked_capacity(rhs_capacity)), sp_(sp), order_(sp),
       symbolic_(sp, order_), perm_block_sizes_(sp.num_blocks()),
       col_to_sn_(sp.num_blocks(), -1), col_to_off_in_sn_(sp.num_blocks(), -1),
+      x_perm_many_(std::make_unique<MatRealAllocated>(sp.total_size(), rhs_capacity_)),
       x_perm_(sp.total_size()), rhs_(sp.total_size()), pivot_ref_(sp.total_size())
 {
     const Index N = sp.num_blocks();

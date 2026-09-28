@@ -1,3 +1,9 @@
+#include "../batched_aug_solver_check.hpp"
+#include "fatrop/graph/aug_system_solver.hpp"
+#include "fatrop/graph/dims.hpp"
+#include "fatrop/graph/hessian.hpp"
+#include "fatrop/graph/jacobian.hpp"
+#include "fatrop/graph/problem_info.hpp"
 //
 // Copyright (c) 2026 Lander Vanroye, KU Leuven
 //
@@ -270,4 +276,33 @@ TEST(GraphCholeskySolverTest, SolveRhsReusesFactor)
     ASSERT_EQ(solver.solve_in_place_rhs(ls), LinsolReturnFlag::SUCCESS);
     for (Index i = 0; i < m; ++i)
         EXPECT_NEAR(rhs_view(i), x_true2(i), 1e-7) << "row " << i;
+}
+
+
+TEST(GraphAugSystemSolverTest, BatchedRhs)
+{
+    const std::vector<Index> sizes = {2, 3, 2, 4, 3, 2, 2};
+    for (Index pattern = 0; pattern < 3; ++pattern)
+    {
+        SCOPED_TRACE(pattern);
+        std::vector<std::pair<Index, Index>> edges;
+        for (Index i = 0; i < 7; ++i)
+            for (Index j = i + 1; j < 7; ++j)
+                if (pattern == 2 || (pattern == 1 && (j == i + 1 || (i < 4 && j < 4))))
+                    edges.emplace_back(i, j);
+        ProblemDims<GraphProblem> dims{sizes, edges, {1, 0, 3, 2, 0, 1, 4}};
+        ProblemInfo<GraphProblem> info{dims};
+        Jacobian<GraphProblem> jacobian{dims};
+        Hessian<GraphProblem> hessian{dims};
+        AugSystemSolver<GraphProblem> solver{info};
+        build_random_spd(hessian.H, sizes, edges);
+        for (Index k = 0; k < dims.num_blocks; ++k)
+            jacobian.Gg_ineqt[k].block(sizes[k], dims.ng_ineq[k], 0, 0) =
+                ::test::random_matrix(sizes[k], dims.ng_ineq[k]);
+        VecRealAllocated dx(dims.nx_tan), de(0), ds(dims.ng_ineq_total);
+        dx = 0.1;
+        ds = 0.7;
+        check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds, false, 0);
+        check_batched_augmented_solve(info, jacobian, hessian, solver, dx, de, ds, true, 0);
+    }
 }

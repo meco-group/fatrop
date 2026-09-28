@@ -11,11 +11,15 @@ namespace fatrop
 {
 
     template <typename ProblemType>
-    IpData<ProblemType>::IpData(const NlpSp &nlp)
+    IpData<ProblemType>::IpData(
+        const NlpSp &nlp, std::shared_ptr<IpHessianEvaluator<ProblemType>> evaluator)
         : nlp_(nlp), info_(nlp->problem_dims()), iterate_data_{*this, *this, *this},
           current_iterate_(&iterate_data_[0]), trial_iterate_(&iterate_data_[1]),
           stored_iterate_(&iterate_data_[2]),
-          hessian_data_{nlp->problem_dims(), nlp->problem_dims(), nlp->problem_dims()},
+          hessian_evaluator_(std::move(evaluator)),
+          hessian_data_{hessian_evaluator_->create(nlp->problem_dims()),
+                        hessian_evaluator_->create(nlp->problem_dims()),
+                        hessian_evaluator_->create(nlp->problem_dims())},
           jacobian_data_{nlp->problem_dims(), nlp->problem_dims(), nlp->problem_dims()},
           lower_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
           upper_bounds_(nlp->nlp_dims().number_of_ineq_constraints),
@@ -29,6 +33,7 @@ namespace fatrop
 
     template <typename ProblemType> void IpData<ProblemType>::reset(bool is_resto /* = false*/)
     {
+        hessian_evaluator().reset();
         // set the bounds
         get_nlp()->get_bounds(info_, lower_bounds_, upper_bounds_);
         // set the bound flags
@@ -53,11 +58,11 @@ namespace fatrop
             iterate.reset();
         }
         jacobian_curr_ = &jacobian_data_[0];
-        hessian_curr_ = &hessian_data_[0];
-        hessian_trial_ = &hessian_data_[1];
+        hessian_curr_ = hessian_data_[0].get();
+        hessian_trial_ = hessian_data_[1].get();
         jacobian_trial_ = &jacobian_data_[1];
         jacobian_stored_ = &jacobian_data_[2];
-        hessian_stored_ = &hessian_data_[2];
+        hessian_stored_ = hessian_data_[2].get();
         timing_statistics().reset();
         current_iterate().set_hessian(hessian_curr_);
         current_iterate().set_jacobian(jacobian_curr_);
@@ -74,6 +79,9 @@ namespace fatrop
         std::swap(hessian_curr_, hessian_trial_);
         std::swap(jacobian_curr_, jacobian_trial_);
         trial_iterate_->reset_evaluated_quantities();
+        // A trial Hessian, if requested, reused the preceding model. Update it
+        // only now that the iterate was accepted by the line search.
+        if (hessian_evaluator().uses_history()) current_iterate().invalidate_hessian();
         // set the hessian and jacobian pointers
         current_iterate().set_hessian(hessian_curr_);
         current_iterate().set_jacobian(jacobian_curr_);
@@ -99,6 +107,8 @@ namespace fatrop
 
     template <typename ProblemType> void IpData<ProblemType>::restore_current_iterate()
     {
+        // Discard evaluator history collected along the abandoned watchdog path.
+        hessian_evaluator().reset();
         fatrop_assert_msg(stored_iterate_is_valid_,
                           "Trying to restore iterate but stored iterate is not valid.");
         // swap current and stored iterate
@@ -113,6 +123,7 @@ namespace fatrop
     void IpData<ProblemType>::register_options(OptionRegistry &registry)
     {
         registry.register_option("tolerance", &IpData::set_tolerance, this);
+        hessian_evaluator().register_options(registry);
     }
 
 } // namespace fatrop

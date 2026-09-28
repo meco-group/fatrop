@@ -40,14 +40,14 @@ namespace fatrop
         /**
          * @brief Constructor.
          */
-        IpFilter();
+        explicit IpFilter(Index capacity = 1000);
         /**
          * @brief Reset the filter.
          */
         void reset();
         /**
          * @brief Reserve space for the filter.
-         * @param[in] max_size Maximum size of the filter.
+         * @param[in] max_size Maximum size of the filter (reserve before solving).
          */
         void reserve(const Index max_size);
         /**
