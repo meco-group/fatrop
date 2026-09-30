@@ -1,0 +1,63 @@
+#pragma once
+#include "pendulum.hpp"
+#include "coupled_chain.hpp"
+#include "saturating_actuator.hpp"
+#include "minimum_time_transfer.hpp"
+#include "minimum_time_unicycle.hpp"
+#include "van_der_pol.hpp"
+#include "nonlinear_path_limit.hpp"
+#include "predator_prey_harvest.hpp"
+#include "minimum_time_powered_ascent.hpp"
+#include "duffing_well_transfer.hpp"
+#include "lorenz_stabilization.hpp"
+#include "exothermic_reactor.hpp"
+#include "moon_lander.hpp"
+#include "minimum_time_moon_lander.hpp"
+#include "moon_lander_obstacle.hpp"
+#include "cart_pole_swing_up.hpp"
+#include "minimum_time_moon_lander_obstacle.hpp"
+#include "quadrotor_transfer.hpp"
+#include "quadrotor_obstacle.hpp"
+#include "minimum_time_quadrotor.hpp"
+#include "minimum_time_quadrotor_obstacle.hpp"
+#include "quadrotor_hourglass.hpp"
+#include "tethered_payload.hpp"
+#include "minimum_time_tethered_payload.hpp"
+#include "goddard_rocket.hpp"
+#include "goddard_max_q.hpp"
+#include "minimum_time_bicycle_obstacle.hpp"
+#include "minimum_time_quadrotor_hourglass.hpp"
+#include "race_car_speed_limit.hpp"
+#include "minimum_time_race_car.hpp"
+
+#define FATROP_BENCHMARK_PROBLEMS(X) \
+    X(Pendulum) \
+    X(CoupledChain) \
+    X(SaturatingActuator) \
+    X(MinimumTimeTransfer) \
+    X(MinimumTimeUnicycle) \
+    X(VanDerPol) \
+    X(NonlinearPathLimit) \
+    X(PredatorPreyHarvest) \
+    X(MinimumTimePoweredAscent) \
+    X(DuffingWellTransfer) \
+    X(LorenzStabilization) \
+    X(ExothermicReactor) \
+    X(MoonLander) \
+    X(MinimumTimeMoonLander) \
+    X(MoonLanderObstacle) \
+    X(CartPoleSwingUp) \
+    X(MinimumTimeMoonLanderObstacle) \
+    X(QuadrotorTransfer) \
+    X(QuadrotorObstacle) \
+    X(MinimumTimeQuadrotor) \
+    X(MinimumTimeQuadrotorObstacle) \
+    X(QuadrotorHourglass) \
+    X(TetheredPayload) \
+    X(MinimumTimeTetheredPayload) \
+    X(GoddardRocket) \
+    X(GoddardMaxQ) \
+    X(MinimumTimeBicycleObstacle) \
+    X(MinimumTimeQuadrotorHourglass) \
+    X(RaceCarSpeedLimit) \
+    X(MinimumTimeRaceCar)
