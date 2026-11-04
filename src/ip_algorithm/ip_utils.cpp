@@ -1,4 +1,5 @@
 #include "fatrop/ip_algorithm/ip_utils.hpp"
+#include <cmath> // for std::abs
 #include <limits> // for std::numeric_limits<Scalar>::epsilon()
 
 namespace fatrop
