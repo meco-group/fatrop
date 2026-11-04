@@ -20,12 +20,12 @@ namespace fatrop
     void PermutationMatrix::apply_on_rows(const Index kmax, MAT *mat)
     {
         fatrop_dbg_assert(kmax <= size_);
-        ROWPE(kmax, permutation_vector_.data(), mat);
+        ROWPE(kmax, permutation_vector_.data(), mat->n, mat, 0, 0);
     };
     void PermutationMatrix::apply_on_cols(const Index kmax, MAT *mat)
     {
         fatrop_dbg_assert(kmax <= size_);
-        COLPE(kmax, permutation_vector_.data(), mat);
+        COLPE(kmax, permutation_vector_.data(), mat->m, mat, 0, 0);
     };
     void PermutationMatrix::apply(const Index kmax, VEC *vec, const Index ai)
     {
