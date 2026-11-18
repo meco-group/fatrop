@@ -102,7 +102,7 @@ target_compile_definitions(fatrop PRIVATE FATROP_VERSION="${PROJECT_VERSION}")
 # Set properties for the fatrop target
 set_target_properties(fatrop PROPERTIES
     VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
+    SOVERSION ${PROJECT_VERSION} # ABI not stable across releases
 )
 
 # Link fatrop with blasfeo
