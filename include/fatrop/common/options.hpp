@@ -256,6 +256,14 @@ namespace fatrop
         }
 
         /**
+         * @brief Set the option value from a C-string.
+         */
+        void set_option(const std::string &option_name, const char *value)
+        {
+            set_option(option_name, std::string(value));
+        }
+
+        /**
          * @brief Set the value of a registered option.
          *
          * This method calls all registered setters for the given option name.
