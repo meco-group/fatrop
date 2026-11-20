@@ -5,9 +5,6 @@
 /**
  * @file lu_factorization.hpp
  * @brief Defines the PermutationMatrix class for LU factorization operations.
- *
- * This file also implements various linear algebra operations required by the FATROP algorithm
- * that are not currently available in the BLASFEO library.
  */
 
 #ifndef __fatrop_linear_algebra_lu_factorization_hpp__
@@ -73,65 +70,24 @@ namespace fatrop
             return permutation_vector_[i];
         }
 
+        int *data() { return permutation_vector_.data(); }
+
     private:
         const Index size_;                    ///< The size of the permutation matrix.
         std::vector<int> permutation_vector_; ///< The internal representation of the permutation.
     };
 
     /**
-     * @brief Computes LU factorization of a matrix stored in transposed form.
+     * @brief LU factorization with complete pivoting of At (n x m, the transpose of A), in place.
      *
-     * Performs LU factorization on a matrix \( A \), where the input \( At \) is \( A^T \)
-     * (transposed). Results (\( L \) and \( U \)) are also stored in transposed form. Indices and
-     * dimensions refer to the original matrix \( A \).
-     *
-     * @param m        [in]  Rows of the original matrix \( A \).
-     * @param n        [in]  Columns of the original matrix \( A \).
-     * @param n_max    [in]  Maximum column storage capacity.
-     * @param rank     [out] Effective rank of \( A \).
-     * @param At       [in]  Transposed input matrix \( A^T \).
-     * @param Pl_p     [out] Left permutation matrix \( P_L \).
-     * @param Pr_p     [out] Right permutation matrix \( P_R \).
-     * @param tol      [in]  Tolerance for rank determination (default \( 1 \times 10^{-5} \)).
-     *
-     * @note Ensure \( At \), \( Pl_p \), and \( Pr_p \) are allocated before use.
+     * Only the first n_max rows of At can be pivots. On exit, with r = rank:
+     * At[:r, :r] holds L (unit lower) and U, At[:r, r:m] holds U12,
+     * At[n_max:n, :r] holds L21 = At21 * inv(U11) and At[n_max:n, r:m] the Schur complement.
+     * Pr holds the row swaps (variables), Pl the column swaps (constraints).
      */
-    void fatrop_lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank, MAT *At,
-                            PermutationMatrix &Pl, PermutationMatrix &Pr, double tol = 1e-5);
-
-    /**
-     * @brief Performs an addition operation with a transposed matrix.
-     *
-     * @param m Number of rows in the result matrix.
-     * @param n Number of columns in the result matrix.
-     * @param alpha Scalar multiplier for the addition.
-     * @param sA Source matrix A.
-     * @param offs_ai Row offset for matrix A.
-     * @param offs_aj Column offset for matrix A.
-     * @param sB Destination matrix B.
-     * @param offs_bi Row offset for matrix B.
-     * @param offs_bj Column offset for matrix B.
-     */
-    void fatrop_gead_transposed(Index m, Index n, Scalar alpha, MAT *sA,
-                                Index offs_ai, Index offs_aj, MAT *sB,
-                                Index offs_bi, Index offs_bj);
-
-    /**
-     * @brief Solves a triangular system of linear equations (upper triangular, not transposed, unit
-     * diagonal).
-     *
-     */
-    void fatrop_trsv_unu(const Index m, const Index n, MAT *sA, const Index ai,
-                          const Index aj, VEC *sx, const Index xi, VEC *sz,
-                          const Index zi);
-
-    /**
-     * @brief Solves a triangular system of linear equations (upper triangular, transposed, unit
-     * diagonal).
-     *
-     */
-    void fatrop_trsv_utu(const Index m, MAT *sA, const Index ai, const Index aj,
-                          VEC *sx, const Index xi, VEC *sz, const Index zi);
+    void lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank,
+                            MatRealView &At, PermutationMatrix &Pl, PermutationMatrix &Pr,
+                            Scalar tol);
 
 } // namespace fatrop
 
