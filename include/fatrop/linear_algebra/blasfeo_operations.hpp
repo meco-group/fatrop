@@ -61,7 +61,7 @@ namespace fatrop
 
     static inline void rowpe(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_rowpe_wrap(kmax, ipiv, &A.mat());
+        blasfeo_rowpe_wrap(kmax, ipiv, A.n, &A.mat(), A.ai, A.aj);
     }
 
     static inline void vecpe(int kmax, int *ipiv, VecRealView &x, int xi)
@@ -76,17 +76,17 @@ namespace fatrop
 
     static inline void rowpei(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_rowpei_wrap(kmax, ipiv, &A.mat());
+        blasfeo_rowpei_wrap(kmax, ipiv, A.n, &A.mat(), A.ai, A.aj);
     }
 
     static inline void colpe(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_colpe_wrap(kmax, ipiv, &A.mat());
+        blasfeo_colpe_wrap(kmax, ipiv, A.m, &A.mat(), A.ai, A.aj);
     }
 
     static inline void colpei(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_colpei_wrap(kmax, ipiv, &A.mat());
+        blasfeo_colpei_wrap(kmax, ipiv, A.m, &A.mat(), A.ai, A.aj);
     }
 
     static inline void rowsw(int kmax, MatRealView &A, int ai, int aj, MatRealView &C, int ci,

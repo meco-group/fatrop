@@ -117,10 +117,10 @@ namespace fatrop
         VECMUL(m, const_cast<VEC *>(x), xi, const_cast<VEC *>(y), yi, z, zi);
     }
 
-    static inline void blasfeo_rowpe_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_rowpe_wrap(int kmax, int *ipiv, int n, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        ROWPE(kmax, ipiv, sA);
+        ROWPE(kmax, ipiv, n, sA, ai, aj);
     }
 
     static inline void blasfeo_vecpe_wrap(int kmax, int *ipiv, VEC *sx, int xi)
@@ -139,22 +139,22 @@ namespace fatrop
         VECPEI(kmax, ipiv, sx, xi);
     }
 
-    static inline void blasfeo_rowpei_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_rowpei_wrap(int kmax, int *ipiv, int n, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        ROWPEI(kmax, ipiv, sA);
+        ROWPEI(kmax, ipiv, n, sA, ai, aj);
     }
 
-    static inline void blasfeo_colpe_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_colpe_wrap(int kmax, int *ipiv, int m, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        COLPE(kmax, ipiv, sA);
+        COLPE(kmax, ipiv, m, sA, ai, aj);
     }
 
-    static inline void blasfeo_colpei_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_colpei_wrap(int kmax, int *ipiv, int m, MAT *sA, int ai, int aj)
     {
         fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        COLPEI(kmax, ipiv, sA);
+        COLPEI(kmax, ipiv, m, sA, ai, aj);
     }
 
     static inline void blasfeo_rowsw_wrap(int kmax, MAT *sA, int ai, int aj, MAT *sC, int ci,
