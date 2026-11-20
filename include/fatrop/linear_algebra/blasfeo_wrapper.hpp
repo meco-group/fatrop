@@ -29,10 +29,34 @@ extern "C"
 
 namespace fatrop
 {
-    static inline Scalar &blasfeo_matel_wrap(MAT *A, const int ai, const int aj)
+    // Reference to a matrix element. Goes through blasfeo's API instead of BLASFEO_DMATEL, so the
+    // panel size of the linked libblasfeo is used, not the one of the headers.
+    class MatElRef
+    {
+    public:
+        MatElRef(MAT *A, const int ai, const int aj) : A_(A), ai_(ai), aj_(aj) {}
+        operator Scalar() const { return blasfeo_dgeex1(A_, ai_, aj_); }
+        MatElRef &operator=(const Scalar a)
+        {
+            blasfeo_dgein1(a, A_, ai_, aj_);
+            return *this;
+        }
+        MatElRef &operator=(const MatElRef &other) { return *this = Scalar(other); }
+        MatElRef &operator+=(const Scalar a) { return *this = Scalar(*this) + a; }
+        MatElRef &operator-=(const Scalar a) { return *this = Scalar(*this) - a; }
+        MatElRef &operator*=(const Scalar a) { return *this = Scalar(*this) * a; }
+        MatElRef &operator/=(const Scalar a) { return *this = Scalar(*this) / a; }
+
+    private:
+        MAT *A_;
+        const int ai_;
+        const int aj_;
+    };
+
+    static inline MatElRef blasfeo_matel_wrap(MAT *A, const int ai, const int aj)
     {
         fatrop_dbg_assert(ai < A->m && aj < A->n);
-        return MATEL(A, ai, aj);
+        return MatElRef(A, ai, aj);
     }
     static inline Scalar &blasfeo_vecel_wrap(VEC *A, const int ai)
     {
@@ -43,7 +67,7 @@ namespace fatrop
     static inline Scalar blasfeo_matel_wrap(const MAT *A, const int ai, const int aj)
     {
         fatrop_dbg_assert(ai < A->m && aj < A->n);
-        return MATEL(A, ai, aj);
+        return blasfeo_dgeex1(const_cast<MAT *>(A), ai, aj);
     }
     static inline Scalar blasfeo_vecel_wrap(const VEC *A, const int ai)
     {

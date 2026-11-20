@@ -15,7 +15,6 @@ namespace fatrop
 #define VEC blasfeo_dvec
 #define VECEL BLASFEO_DVECEL
 #define MAT blasfeo_dmat
-#define MATEL BLASFEO_DMATEL
 
 
 // Vector-related BLASFEO definitions

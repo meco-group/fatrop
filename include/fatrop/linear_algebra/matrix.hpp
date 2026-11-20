@@ -164,9 +164,9 @@ namespace fatrop
          *
          * @param i Row index of the element.
          * @param j Column index of the element.
-         * @return Scalar& Reference to the value at position (i, j).
+         * @return MatElRef Reference to the value at position (i, j).
          */
-        inline Scalar &operator()(const Index i, const Index j) const;
+        inline MatElRef operator()(const Index i, const Index j) const;
 
         Index m() const { return m_; }
         Index n() const { return n_; }
@@ -199,7 +199,7 @@ namespace fatrop
         MatRealRowView(const MatRealViewBase &mat, const Index row) : mat_(mat), row_(row) {}
 
         inline Scalar operator()(const Index i) const;
-        inline Scalar &operator()(const Index i);
+        inline MatElRef operator()(const Index i);
         inline Index m() const;
 
         using MatRealView1D<MatRealRowView>::operator=;
@@ -225,7 +225,7 @@ namespace fatrop
         MatRealColView(const MatRealViewBase &mat, const Index col) : mat_(mat), col_(col) {}
 
         inline Scalar operator()(const Index i) const;
-        inline Scalar &operator()(const Index i);
+        inline MatElRef operator()(const Index i);
         inline Index m() const;
 
         using MatRealView1D<MatRealColView>::operator=;
@@ -251,7 +251,7 @@ namespace fatrop
         MatRealDiagonalView(MatRealViewBase &mat) : mat_(mat) {}
 
         inline Scalar operator()(const Index i) const;
-        inline Scalar &operator()(const Index i);
+        inline MatElRef operator()(const Index i);
         inline Index m() const;
 
         using MatRealView1D<MatRealDiagonalView>::operator=;
@@ -404,9 +404,9 @@ namespace fatrop
          *
          * @param i Row index of the element.
          * @param j Column index of the element.
-         * @return Scalar& Reference to the value at position (i, j).
+         * @return MatElRef Reference to the value at position (i, j).
          */
-        inline Scalar &operator()(const Index i, const Index j);
+        inline MatElRef operator()(const Index i, const Index j);
 
         /**
          * @brief Accesses the element at the given row and column (const version).
@@ -433,23 +433,23 @@ namespace fatrop
     };
     // Implementation of MatRealRowView
     Scalar MatRealRowView::operator()(const Index i) const { return mat_(row_, i); }
-    Scalar &MatRealRowView::operator()(const Index i) { return mat_(row_, i); }
+    MatElRef MatRealRowView::operator()(const Index i) { return mat_(row_, i); }
     Index MatRealRowView::m() const { return mat_.n(); }
 
     // Implementation of MatrixColumnView
     Scalar MatRealColView::operator()(const Index i) const { return mat_(i, col_); }
-    Scalar &MatRealColView::operator()(const Index i) { return mat_(i, col_); }
+    MatElRef MatRealColView::operator()(const Index i) { return mat_(i, col_); }
     Index MatRealColView::m() const { return mat_.m(); }
 
     // Implementation of MatrixDiagonaView
     Scalar MatRealDiagonalView::operator()(const Index i) const { return mat_(i, i); }
-    Scalar &MatRealDiagonalView::operator()(const Index i) { return mat_(i, i); }
+    MatElRef MatRealDiagonalView::operator()(const Index i) { return mat_(i, i); }
     Index MatRealDiagonalView::m() const { return std::min(mat_.m(), mat_.n()); }
 
     // Implementation of MatRealView
     MAT &MatRealViewBase::mat() { return mat_.mat(); }
     const MAT &MatRealViewBase::mat() const { return mat_.mat(); }
-    Scalar &MatRealViewBase::operator()(const Index i, const Index j) const
+    MatElRef MatRealViewBase::operator()(const Index i, const Index j) const
     {
         return mat_(i + ai_, j + aj_);
     }
@@ -497,7 +497,7 @@ namespace fatrop
         other.mat_.mem = nullptr;
     }
 
-    Scalar &MatRealAllocated::operator()(const Index i, const Index j)
+    MatElRef MatRealAllocated::operator()(const Index i, const Index j)
     {
         fatrop_dbg_assert(i >= 0 && i < m() && j >= 0 && j < n());
         return blasfeo_matel_wrap(&mat_, i, j);
