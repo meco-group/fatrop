@@ -89,7 +89,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve(const ProblemInfo<DenseType> 
             return LinsolReturnFlag::NOFULL_RANK;
 
         // Compute the projection factor Ggt_tilde = -Ggt_stripe[rank:nx+1, :rank] L⁻ᵀ.
-        trsm_rlnn(nx - rank_eq_ + 1, rank_eq_, -1.0, Ggt_stripe_, 0, 0, Ggt_stripe_, rank_eq_, 0,
+        trsm_rlnu(nx - rank_eq_ + 1, rank_eq_, -1.0, Ggt_stripe_, 0, 0, Ggt_stripe_, rank_eq_, 0,
                   Ggt_tilde_, 0, 0);
 
         // Apply the column permutation to Ppt_ (both rows and columns — symmetric).
@@ -133,10 +133,8 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve(const ProblemInfo<DenseType> 
         rowex(rank_eq_, -1.0, Ppt_, nx, 0, eq_mult, 0);
         gemv_t(nx, rank_eq_, -1.0, Ppt_, 0, 0, x, 0, 1.0, eq_mult,
                0, eq_mult, 0);
-        trsv_lnn(rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult,
-                 0);
-        trsv_unu(rank_eq_, rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult,
-                 0);
+        trsv_lnu(rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult, 0);
+        trsv_unn(rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult, 0);
         Pl_.apply_inverse(rank_eq_, &eq_mult.vec(), 0);
         Pr_.apply_inverse(rank_eq_, &x.vec(), 0);
     }
@@ -260,11 +258,11 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve_rhs(const ProblemInfo<DenseTy
         // v_Ggt_stripe = Pl @ g_eq, then apply U⁻¹ from the LU factors stored in Ggt_stripe_.
         veccp(ng, g, 0, v_Ggt_stripe_, 0);
         Pl_.apply(rank_eq_, &v_Ggt_stripe_.vec(), 0);
-        trsv_utu(rank_eq_, Ggt_stripe_, 0, 0, v_Ggt_stripe_, 0, v_Ggt_stripe_, 0);
+        trsv_utn(rank_eq_, Ggt_stripe_, 0, 0, v_Ggt_stripe_, 0, v_Ggt_stripe_, 0);
 
         // v_Ggt_tilde = -L⁻ᵀ v_Ggt_stripe.
         veccpsc(rank_eq_, -1.0, v_Ggt_stripe_, 0, v_Ggt_tilde_, 0);
-        trsv_ltn(rank_eq_, Ggt_stripe_, 0, 0, v_Ggt_tilde_, 0, v_Ggt_tilde_, 0);
+        trsv_ltu(rank_eq_, Ggt_stripe_, 0, 0, v_Ggt_tilde_, 0, v_Ggt_tilde_, 0);
 
         // Permute v_RSQrqt_tilde to the (Pr-permuted) Hessian's coordinates. After this
         // line v_RSQrqt_tilde_ plays the role of the "v_Ppt" vector — we keep it
@@ -290,10 +288,8 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve_rhs(const ProblemInfo<DenseTy
         veccpsc(rank_eq_, -1.0, v_RSQrqt_tilde_, 0, eq_mult, 0);
         gemv_t(nx, rank_eq_, -1.0, Ppt_, 0, 0, x, 0, 1.0, eq_mult,
                0, eq_mult, 0);
-        trsv_lnn(rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult,
-                 0);
-        trsv_unu(rank_eq_, rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult,
-                 0);
+        trsv_lnu(rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult, 0);
+        trsv_unn(rank_eq_, Ggt_stripe_, 0, 0, eq_mult, 0, eq_mult, 0);
         Pl_.apply_inverse(rank_eq_, &eq_mult.vec(), 0);
         Pr_.apply_inverse(rank_eq_, &x.vec(), 0);
     }

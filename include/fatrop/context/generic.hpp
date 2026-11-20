@@ -46,6 +46,10 @@ namespace fatrop
 #define GESC blasfeo_dgesc
 #define TRSM_RLTN blasfeo_dtrsm_rltn
 #define TRSM_RLNN blasfeo_dtrsm_rlnn
+#define TRSM_RLNU blasfeo_dtrsm_rlnu
+#define TRSM_RUNN blasfeo_dtrsm_runn
+#define GEMM_NN blasfeo_dgemm_nn
+#define GETRF_FP blasfeo_dgetrf_fp
 #define GEMM_NT blasfeo_dgemm_nt
 #define GEAD blasfeo_dgead
 #define SYRK_LN_MN blasfeo_dsyrk_ln_mn
@@ -56,9 +60,14 @@ namespace fatrop
 #define ROWEX blasfeo_drowex
 #define ROWIN blasfeo_drowin
 #define COLIN blasfeo_dcolin
+#define COLEX blasfeo_dcolex
+#define ROWAD blasfeo_drowad
 #define TRSV_LTN blasfeo_dtrsv_ltn
 #define TRSV_LNN blasfeo_dtrsv_lnn
 #define TRSV_UTN blasfeo_dtrsv_utn
+#define TRSV_LNU blasfeo_dtrsv_lnu
+#define TRSV_LTU blasfeo_dtrsv_ltu
+#define TRSV_UNN blasfeo_dtrsv_unn
 #define GEMV_T blasfeo_dgemv_t
 #define GEMV_N blasfeo_dgemv_n
 #define GESE blasfeo_dgese

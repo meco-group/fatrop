@@ -1,4 +1,7 @@
 #include "fatrop/linear_algebra/linear_algebra.hpp"
+#include "../random_matrix.hpp"
+#include <algorithm>
+#include <cmath>
 #include <gtest/gtest.h>
 
 namespace fatrop
@@ -174,193 +177,96 @@ namespace fatrop
             }
         }
 
-        TEST(LUFactorizationTest, transposedLUFactorization)
+        // At is n x m, only its first n_max rows may be pivots. Checks Pr * At * Pl = L * U + S,
+        // with L (n x r) and U (r x m) read from the factored At and S its trailing block.
+        void check_lu_fact_transposed(const Index m, const Index n, const Index n_max,
+                                      const MatRealAllocated &At0, const Index rank_expected)
         {
-            const Index m = 5;
-            const Index n = 5;
-            const Index n_max = 5;
-            Index rank;
-            MatRealAllocated A(m, n);
+            const Scalar tol = 1e-8;
             MatRealAllocated At(n, m);
-            PermutationMatrix Pl(m);
-            PermutationMatrix Pr(n);
-
-            // Generate a random matrix A
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = 0; j < n; ++j)
-                {
-                    A(i, j) = static_cast<Scalar>(rand()) / RAND_MAX;
-                    At(j, i) = A(i, j); // Transpose
-                }
-            }
-
-            // Compute LU factorization
-            fatrop_lu_fact_transposed(m, n, n_max, rank, &At.mat(), Pl, Pr);
-
-            // Extract L and U from At
-            MatRealAllocated L(m, m);
-            MatRealAllocated U(m, n);
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = 0; j < n; ++j)
-                {
-                    if (i > j)
-                        L(i, j) = At(j, i);
-                    else if (i == j)
-                        L(i, j) = 1.0;
-                    else
-                        L(i, j) = 0.0;
-
-                    if (i <= j)
-                        U(i, j) = At(j, i);
-                    else
-                        U(i, j) = 0.0;
-                }
-            }
-
-            // Check if A = Pl * L * U * Pr^T
-            MatRealAllocated temp1(m, n);
-            MatRealAllocated temp2(m, n);
-            MatRealAllocated result(m, n);
-
-            // Compute L * U
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = 0; j < n; ++j)
-                {
-                    Scalar sum = 0;
-                    for (Index k = 0; k < m; ++k)
-                    {
-                        sum += L(i, k) * U(k, j);
-                    }
-                    temp1(i, j) = sum;
-                }
-            }
-
-            // Apply left permutation Pr to L * U
-            Pr.apply_on_rows(n, &temp1.mat());
-
-            // Apply right permutation Pl to (Pr * L * U)
-            Pl.apply_on_cols(m, &temp1.mat());
-
-            // Compare A with Pl * L * U * Pl^T
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = 0; j < n; ++j)
-                {
-                    EXPECT_NEAR(A(i, j), temp1(i, j), 1e-10);
-                }
-            }
-
-            // Check the rank
-            EXPECT_EQ(rank, std::min(m, n));
-        }
-
-        TEST(LinearAlgebraTest, fatrop_gead_transposed)
-        {
-            const Index m = 3;
-            const Index n = 4;
-            MatRealAllocated A(n, m); // Note: A is transposed
-            MatRealAllocated B(m, n);
-            Scalar alpha = 2.0;
-
-            // Initialize A and B
+            MatRealAllocated Ap(n, m);
             for (Index i = 0; i < n; ++i)
                 for (Index j = 0; j < m; ++j)
-                    A(i, j) = i * m + j + 1;
+                    At(i, j) = Ap(i, j) = At0(i, j);
+            PermutationMatrix Pl(m);
+            PermutationMatrix Pr(n_max);
+            Index rank;
+            lu_fact_transposed(m, n, n_max, rank, At, Pl, Pr, tol);
+            EXPECT_EQ(rank, rank_expected);
 
-            for (Index i = 0; i < m; ++i)
-                for (Index j = 0; j < n; ++j)
-                    B(i, j) = i * n + j + 1;
-
-            // Call fatrop_gead_transposed
-            fatrop_gead_transposed(m, n, alpha, &A.mat(), 0, 0, &B.mat(), 0, 0);
-
-            // Check results
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = 0; j < n; ++j)
-                {
-                    Scalar expected = (i * n + j + 1) + alpha * (j * m + i + 1);
-                    EXPECT_NEAR(expected, B(i, j), 1e-10);
-                }
-            }
-        }
-
-        TEST(LinearAlgebraTest, fatrop_trsv_unu)
-        {
-            const Index m = 3;
-            MatRealAllocated A(m, m);
-            VecRealAllocated b(m);
-            VecRealAllocated x(m);
-
-            // Initialize A as upper triangular
-            for (Index i = 0; i < m; ++i)
-                for (Index j = i; j < m; ++j)
-                {
-                    A(i, j) = i * m + j + 1;
-                    if (i == j)
-                        A(i, i) = 1.;
-                }
-
-            // Initialize b
-            for (Index i = 0; i < m; ++i)
-                b(i) = i + 1;
-
-            // Call dtrsv_unu
-            fatrop_trsv_unu(m, m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
-
-            // Check if Ax = b
-            VecRealAllocated Ax(m);
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = i; j < m; ++j)
-                    Ax(i) += A(i, j) * x(j);
-            }
-
-            for (Index i = 0; i < m; ++i)
-                EXPECT_NEAR(b(i), Ax(i), 1e-10);
-        }
-
-        TEST(LinearAlgebraTest, fatrop_trsv_utu)
-        {
-            const Index m = 3;
-            MatRealAllocated A(m, m);
-            VecRealAllocated b(m);
-            VecRealAllocated x(m);
-
-            // Initialize A as upper triangular with unit diagonal
-            for (Index i = 0; i < m; ++i)
+            Pr.apply_on_rows(rank, &Ap.mat());
+            Pl.apply_on_cols(rank, &Ap.mat());
+            for (Index i = 0; i < n; ++i)
             {
                 for (Index j = 0; j < m; ++j)
                 {
-                    if (i < j)
-                        A(i, j) = i * m + j + 1;
-                    else if (i == j)
-                        A(i, j) = 1.0;
-                    else
-                        A(i, j) = 0.0;
+                    Scalar lu = (i >= rank && j >= rank) ? At(i, j) : 0.0;
+                    for (Index k = 0; k < std::min({i + 1, j + 1, rank}); ++k)
+                    {
+                        const Scalar l = (k == i) ? 1.0 : At(i, k);
+                        lu += l * At(k, j);
+                    }
+                    EXPECT_NEAR(Ap(i, j), lu, 1e-10) << "i=" << i << " j=" << j;
                 }
             }
+            // eligible rows: what is left is below tol
+            for (Index i = rank; i < n_max; ++i)
+                for (Index j = rank; j < m; ++j)
+                    EXPECT_LE(std::abs(At(i, j)), tol);
+        }
 
-            // Initialize b
-            for (Index i = 0; i < m; ++i)
-                b(i) = i + 1;
+        MatRealAllocated random_low_rank(Index n, Index m, Index r)
+        {
+            MatRealAllocated X = random_matrix(n, r, -1.0, 1.0);
+            MatRealAllocated Y = random_matrix(r, m, -1.0, 1.0);
+            MatRealAllocated A(n, m);
+            for (Index i = 0; i < n; ++i)
+                for (Index j = 0; j < m; ++j)
+                {
+                    Scalar sum = 0.0;
+                    for (Index k = 0; k < r; ++k)
+                        sum += X(i, k) * Y(k, j);
+                    A(i, j) = sum;
+                }
+            return A;
+        }
 
-            // Call dtrsv_utu
-            fatrop_trsv_utu(m, &A.mat(), 0, 0, &b.vec(), 0, &x.vec(), 0);
+        TEST(LUFactorizationTest, transposedSquare)
+        {
+            check_lu_fact_transposed(5, 5, 5, random_matrix(5, 5, -1.0, 1.0), 5);
+        }
 
-            // Check if A^T x = b
-            VecRealAllocated Ax(m);
-            for (Index i = 0; i < m; ++i)
-            {
-                for (Index j = i; j < m; ++j)
-                    Ax(j) += A(i, j) * x(i);
-            }
+        TEST(LUFactorizationTest, transposedExtraRows)
+        {
+            // n_max < n: the bottom rows are eliminated but never pivot
+            check_lu_fact_transposed(3, 9, 6, random_matrix(9, 3, -1.0, 1.0), 3);
+            check_lu_fact_transposed(5, 9, 6, random_matrix(9, 5, -1.0, 1.0), 5);
+        }
 
-            for (Index i = 0; i < m; ++i)
-                EXPECT_NEAR(b(i), Ax(i), 1e-10);
+        TEST(LUFactorizationTest, transposedPivotOnlyEligibleRows)
+        {
+            // eligible rows tiny, extra rows large: pivots must still come from the top
+            MatRealAllocated At = random_matrix(7, 3, -1.0, 1.0);
+            for (Index i = 0; i < 4; ++i)
+                for (Index j = 0; j < 3; ++j)
+                    At(i, j) *= 1e-3;
+            check_lu_fact_transposed(3, 7, 4, At, 3);
+        }
+
+        TEST(LUFactorizationTest, transposedRankDeficient)
+        {
+            // rank 2 in the eligible rows, full rank in the extra rows
+            MatRealAllocated At = random_low_rank(9, 5, 2);
+            for (Index i = 6; i < 9; ++i)
+                for (Index j = 0; j < 5; ++j)
+                    At(i, j) = random(-1.0, 1.0);
+            check_lu_fact_transposed(5, 9, 6, At, 2);
+        }
+
+        TEST(LUFactorizationTest, transposedZero)
+        {
+            MatRealAllocated At(6, 3);
+            check_lu_fact_transposed(3, 6, 4, At, 0);
         }
 
     } // namespace fatrop::test
