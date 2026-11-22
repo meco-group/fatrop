@@ -55,15 +55,12 @@ namespace fatrop
 
     private:
         const Index rhs_capacity_;
-        // BLASFEO panel size (D_PS). With supernode-major storage, the source block
-        // row offsets in gemm_nt are NOT always multiples of 4 (a block can start
-        // anywhere in the panel). Internally, BLASFEO's dispatch reads from
-        // `pC - (bi % PS) * PS` which goes BEFORE the destination's pA when the
-        // destination column offset is 0 — those reads land in unmapped memory and
-        // segfault. Avoidance: add PS leading slack columns to every supernode panel
-        // and store all real data at column offsets >= PS. Then `cj - (bi % PS) >= 1`,
-        // keeping every BLASFEO read inside the allocated panel.
-        static constexpr Index kColPad = 4;
+        // BLASFEO panel size. gemm/syrk read outside the destination matrix when
+        // a row offset is not a multiple of it, so those calls only ever get
+        // operands whose row offsets are: misaligned external blocks are copied
+        // to L_ext_aligned_, misaligned destinations go through a workspace.
+        static constexpr Index kPanel = 4;
+        static bool aligned_(Index row) { return row % kPanel == 0; }
 
         struct LBlockLoc
         {
@@ -105,6 +102,10 @@ namespace fatrop
         // The Cholesky factor, supernode-major. One MAT per supernode, sized
         // (sn_t_total_[s] + sn_ext_total_[s] + 1) x sn_t_total_[s].
         std::vector<MatRealAllocated> L_supernode_;
+        // Per supernode, a copy of the external blocks whose panel row offset is
+        // not a multiple of kPanel, each stored at one that is. Refreshed by every
+        // factorization.
+        std::vector<MatRealAllocated> L_ext_aligned_;
 
         // Per-supernode dimensions:
         //   sn_t_total_[s]   = sum of internal block sizes for supernode s
@@ -148,7 +149,7 @@ namespace fatrop
         {
             Index nk;          ///< column block size (rows of rhs strip)
             Index x_off;       ///< offset into x_perm_
-            Index panel_col;   ///< column offset inside supernode panel (includes kColPad)
+            Index panel_col;   ///< column offset inside supernode panel
         };
         // For each supernode s, the per-column rhs in/out + propagation list.
         std::vector<std::vector<RhsLoadOp>> sn_rhs_cols_;
@@ -158,6 +159,8 @@ namespace fatrop
             Index ni;          ///< external block row count
             Index x_off_i;     ///< offset into x_perm_ for block i
             Index panel_row;   ///< absolute row offset in supernode panel (t_total + sn_ext_row_off[a])
+            Index ws_row;      ///< row offset of the aligned copy in L_ext_aligned_, -1 if panel_row is aligned
+            Index work_off_i;  ///< row offset of block i in x_perm_many_
         };
         // For each supernode s, list of external blocks (one per ext_set entry).
         std::vector<std::vector<ExtOp>> sn_ext_ops_;
@@ -168,7 +171,8 @@ namespace fatrop
             Index dst_row;     ///< row offset in target panel
             Index dst_col;     ///< column offset in target panel
             Index ni;          ///< block size
-            Index src_row;     ///< absolute row offset in source panel
+            Index src_row;     ///< row offset of L_ext[i, :] in the source panel or its aligned copy
+            bool src_ws;       ///< true: src_row indexes L_ext_aligned_
         };
         struct GemmOp
         {
@@ -177,8 +181,10 @@ namespace fatrop
             Index dst_col;     ///< column offset in target panel
             Index ni;
             Index nj;
-            Index src_row_a;   ///< absolute row offset in source panel for L_ext[i, :]
-            Index src_row_b;   ///< absolute row offset in source panel for L_ext[j, :]
+            Index src_row_a;   ///< row offset of L_ext[i, :] in the source panel or its aligned copy
+            Index src_row_b;   ///< same for L_ext[j, :]
+            bool src_ws_a;     ///< true: src_row_a indexes L_ext_aligned_
+            bool src_ws_b;
         };
         // Schur trailing update operations, one list per source supernode.
         // sn_syrk_[s][a] -> the diagonal contribution for ext_set[a].
@@ -193,9 +199,15 @@ namespace fatrop
         // out of a flat array.
         std::vector<Index> sn_aug_row_;
         std::vector<Index> sn_off_S_;
+        // Row layout of x_perm_many_: every supernode starts at a multiple of kPanel.
+        std::vector<Index> sn_work_off_;
+        std::vector<Index> work_block_off_; ///< per permuted block
 
         // Workspace for solve.
         std::unique_ptr<MatRealAllocated> x_perm_many_;
+        // One block of a schur update / of a matrix rhs, at row offset 0.
+        std::unique_ptr<MatRealAllocated> schur_ws_;
+        std::unique_ptr<MatRealAllocated> rhs_block_ws_;
         VecRealAllocated x_perm_;
         VecRealAllocated rhs_;
         VecRealAllocated pivot_ref_;

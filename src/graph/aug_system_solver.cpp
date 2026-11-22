@@ -18,6 +18,10 @@ AugSystemSolver<GraphProblem>::AugSystemSolver(const ProblemInfo<GraphProblem> &
       factor_many_work_(info.number_of_tangent_variables, info.number_of_eq_constraints),
       rhs_many_(std::make_unique<MatRealAllocated>(info.dims.nx_tan, rhs_capacity_)),
       scaled_many_(std::make_unique<MatRealAllocated>(info.number_of_slack_variables, rhs_capacity_)),
+      block_many_(std::make_unique<MatRealAllocated>(
+          info.dims.block_sizes_tan.empty() ? 0 :
+              *std::max_element(info.dims.block_sizes_tan.begin(), info.dims.block_sizes_tan.end()),
+          rhs_capacity_)),
       info_(info), M_(*info.sparsity), rhs_(info.dims.nx_tan),
       scaled_jacobian_(info.dims.block_sizes_tan.empty() ? 0 :
                            *std::max_element(info.dims.block_sizes_tan.begin(), info.dims.block_sizes_tan.end()),

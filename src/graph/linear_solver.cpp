@@ -34,7 +34,6 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
       rhs_capacity_(batched::checked_capacity(rhs_capacity)), sp_(sp), order_(sp),
       symbolic_(sp, order_), perm_block_sizes_(sp.num_blocks()),
       col_to_sn_(sp.num_blocks(), -1), col_to_off_in_sn_(sp.num_blocks(), -1),
-      x_perm_many_(std::make_unique<MatRealAllocated>(sp.total_size(), rhs_capacity_)),
       x_perm_(sp.total_size()), rhs_(sp.total_size()), pivot_ref_(sp.total_size())
 {
     const Index N = sp.num_blocks();
@@ -49,6 +48,9 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
     sn_t_total_.assign(num_sn, 0);
     sn_ext_total_.assign(num_sn, 0);
     sn_ext_row_off_.assign(num_sn, {});
+    sn_work_off_.assign(num_sn, 0);
+    work_block_off_.assign(N, 0);
+    Index work_rows = 0;
     for (Index s = 0; s < num_sn; ++s)
     {
         const Index s_start = symbolic_.supernode_start(s);
@@ -58,9 +60,12 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
         {
             col_to_sn_[k] = s;
             col_to_off_in_sn_[k] = col_acc;
+            work_block_off_[k] = work_rows + col_acc;
             col_acc += perm_block_sizes_[k];
         }
         sn_t_total_[s] = col_acc;
+        sn_work_off_[s] = work_rows;
+        work_rows += (col_acc + kPanel - 1) / kPanel * kPanel;
 
         const auto &ext_set = symbolic_.lower_pattern(s_end - 1);
         sn_ext_row_off_[s].resize(ext_set.size(), 0);
@@ -75,16 +80,20 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
 
     // Allocate supernode panels. The +1 row is the aug-row scratch used by
     // the factor's forward-substitution fusion; it is read/written only
-    // during factorize_with_rhs_ and ignored by the standalone solves. The
-    // leading kColPad slack columns guard against BLASFEO gemm_nt OOB reads
-    // for misaligned source row offsets (see kColPad comment above).
+    // during factorize_with_rhs_ and ignored by the standalone solves.
     L_supernode_.reserve(num_sn);
     for (Index s = 0; s < num_sn; ++s)
     {
         const Index rows = sn_t_total_[s] + sn_ext_total_[s] + 1;
-        const Index cols = kColPad + std::max<Index>(1, sn_t_total_[s]);
+        const Index cols = std::max<Index>(1, sn_t_total_[s]);
         L_supernode_.emplace_back(rows, cols);
     }
+    const Index max_block =
+        std::max<Index>(1, *std::max_element(perm_block_sizes_.begin(), perm_block_sizes_.end()));
+    x_perm_many_ = std::make_unique<MatRealAllocated>(std::max<Index>(1, work_rows), rhs_capacity_);
+    schur_ws_ = std::make_unique<MatRealAllocated>(max_block, max_block);
+    rhs_block_ws_ = std::make_unique<MatRealAllocated>(max_block, rhs_capacity_);
+    L_ext_aligned_.reserve(num_sn);
 
     // ----- precomputed op lists for the numeric phase -----------------------
     const auto &inv = order_.inv_perm();
@@ -112,7 +121,7 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
             RhsLoadOp r;
             r.nk = perm_block_sizes_[k];
             r.x_off = perm_block_offsets_[k];
-            r.panel_col = kColPad + col_to_off_in_sn_[k];
+            r.panel_col = col_to_off_in_sn_[k];
             sn_rhs_cols_[s].push_back(r);
         }
 
@@ -121,14 +130,23 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
 
         // External strips (used by (3b), forward, backward).
         sn_ext_ops_[s].reserve(static_cast<size_t>(n_ext));
+        Index ws_rows = 0;
         for (Index a = 0; a < n_ext; ++a)
         {
             ExtOp e;
             e.ni = perm_block_sizes_[ext_set[a]];
             e.x_off_i = perm_block_offsets_[ext_set[a]];
+            e.work_off_i = work_block_off_[ext_set[a]];
             e.panel_row = t_total + sn_ext_row_off_[s][a];
+            e.ws_row = -1;
+            if (!aligned_(e.panel_row))
+            {
+                e.ws_row = ws_rows;
+                ws_rows += (e.ni + kPanel - 1) / kPanel * kPanel;
+            }
             sn_ext_ops_[s].push_back(e);
         }
+        L_ext_aligned_.emplace_back(std::max<Index>(1, ws_rows), std::max<Index>(1, t_total));
 
         // Schur trailing update — one syrk per a, then a flat gemm list for
         // pairs (a, b) with b < a. All target supernode indices, row/col
@@ -139,7 +157,7 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
         {
             const Index i = ext_set[a];
             const Index ni = perm_block_sizes_[i];
-            const Index row_a = t_total + sn_ext_row_off_[s][a];
+            const ExtOp &ea = sn_ext_ops_[s][a];
 
             const LBlockLoc loc_ii = l_loc_(i, i);
             SyrkOp sk;
@@ -147,14 +165,15 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
             sk.dst_row = loc_ii.row_off;
             sk.dst_col = loc_ii.col_off;
             sk.ni = ni;
-            sk.src_row = row_a;
+            sk.src_ws = ea.ws_row >= 0;
+            sk.src_row = sk.src_ws ? ea.ws_row : ea.panel_row;
             sn_syrk_[s].push_back(sk);
 
             for (Index b = 0; b < a; ++b)
             {
                 const Index j = ext_set[b];
                 const Index nj = perm_block_sizes_[j];
-                const Index row_b = t_total + sn_ext_row_off_[s][b];
+                const ExtOp &eb = sn_ext_ops_[s][b];
                 const LBlockLoc loc_ij = l_loc_(i, j);
                 GemmOp g;
                 g.target_sn = loc_ij.sn;
@@ -162,8 +181,10 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
                 g.dst_col = loc_ij.col_off;
                 g.ni = ni;
                 g.nj = nj;
-                g.src_row_a = row_a;
-                g.src_row_b = row_b;
+                g.src_ws_a = sk.src_ws;
+                g.src_row_a = sk.src_row;
+                g.src_ws_b = eb.ws_row >= 0;
+                g.src_row_b = g.src_ws_b ? eb.ws_row : eb.panel_row;
                 sn_gemm_[s].push_back(g);
             }
         }
@@ -216,9 +237,7 @@ BlockCholeskySolver::l_loc_(Index i, Index j) const
     fatrop_dbg_assert(i >= j && "L stores lower triangle only");
     LBlockLoc loc;
     loc.sn = col_to_sn_[j];
-    // col_off applies to PANEL columns, hence the kColPad shift; row offsets
-    // are NOT padded (they index into rows of the panel directly).
-    loc.col_off = kColPad + col_to_off_in_sn_[j];
+    loc.col_off = col_to_off_in_sn_[j];
     const Index s_end = symbolic_.supernode_start(loc.sn + 1);
     if (i < s_end)
     {
@@ -333,13 +352,12 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         for (const RhsLoadOp &r : rhs_cols)
             rowin(r.nk, 1.0, x_perm_, r.x_off, P, aug_row, r.panel_col);
 
-        // (2) Partial Cholesky on the (t_total + ext_total + 1) x t_total panel,
-        //     rooted at column kColPad.
+        // (2) Partial Cholesky on the (t_total + ext_total + 1) x t_total panel.
         // In place, so save the diagonal check_reg needs.
         for (Index i = 0; i < t_total; ++i)
-            pivot_ref_(i) = P(i, kColPad + i);
-        potrf_l_mn(t_total + ext_total + 1, t_total, P, 0, kColPad, P, 0, kColPad);
-        if (!check_reg(t_total, P, 0, kColPad, pivot_ref_, 0, pivot_tol_))
+            pivot_ref_(i) = P(i, i);
+        potrf_l_mn(t_total + ext_total + 1, t_total, P, 0, 0, P, 0, 0);
+        if (!check_reg(t_total, P, 0, 0, pivot_ref_, 0, pivot_tol_))
             return LinsolReturnFlag::INDEFINITE;
 
         // (3a) Extract y_S from the aug row into x_perm_.
@@ -347,29 +365,60 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
             rowex(r.nk, 1.0, P, aug_row, r.panel_col, x_perm_, r.x_off);
         // (3b) Propagate y_S into external rhs strips: x[i] -= L[i, S] * y_S.
         const auto &exts = sn_ext_ops_[s];
+        MatRealAllocated &E = L_ext_aligned_[s];
         for (const ExtOp &e : exts)
-            gemv_n(e.ni, t_total, -1.0, P, e.panel_row, kColPad,
+        {
+            gemv_n(e.ni, t_total, -1.0, P, e.panel_row, 0,
                    x_perm_, off_S, 1.0, x_perm_, e.x_off_i, x_perm_, e.x_off_i);
+            if (e.ws_row >= 0)
+                gecp(e.ni, t_total, P, e.panel_row, 0, E, e.ws_row, 0);
+        }
 
         // (4) Trailing schur — write directly into owner supernodes' panels.
         // NOTE: blasfeo_dsyrk_ln (square) silently zeros beta*C when m < k
         // and the in-place case is used. The _mn flavor is correct for all
         // m, n, k.
+        // Every row offset passed to syrk/gemm is a multiple of kPanel: a
+        // destination that is not is updated through W.
+        MatRealAllocated &W = *schur_ws_;
         for (const SyrkOp &sk : sn_syrk_[s])
         {
             MatRealAllocated &P_ii = L_supernode_[sk.target_sn];
-            syrk_ln_mn(sk.ni, sk.ni, t_total, -1.0,
-                       P, sk.src_row, kColPad, P, sk.src_row, kColPad, 1.0,
-                       P_ii, sk.dst_row, sk.dst_col,
-                       P_ii, sk.dst_row, sk.dst_col);
+            const MatRealAllocated &A = sk.src_ws ? E : P;
+            if (aligned_(sk.dst_row))
+            {
+                syrk_ln_mn(sk.ni, sk.ni, t_total, -1.0,
+                           A, sk.src_row, 0, A, sk.src_row, 0, 1.0,
+                           P_ii, sk.dst_row, sk.dst_col,
+                           P_ii, sk.dst_row, sk.dst_col);
+            }
+            else
+            {
+                // syrk reads its destination even for beta == 0, so copy in and out.
+                gecp(sk.ni, sk.ni, P_ii, sk.dst_row, sk.dst_col, W, 0, 0);
+                syrk_ln_mn(sk.ni, sk.ni, t_total, -1.0,
+                           A, sk.src_row, 0, A, sk.src_row, 0, 1.0, W, 0, 0, W, 0, 0);
+                gecp(sk.ni, sk.ni, W, 0, 0, P_ii, sk.dst_row, sk.dst_col);
+            }
         }
         for (const GemmOp &g : sn_gemm_[s])
         {
             MatRealAllocated &P_ij = L_supernode_[g.target_sn];
-            gemm_nt(g.ni, g.nj, t_total, -1.0,
-                    P, g.src_row_a, kColPad, P, g.src_row_b, kColPad, 1.0,
-                    P_ij, g.dst_row, g.dst_col,
-                    P_ij, g.dst_row, g.dst_col);
+            const MatRealAllocated &A = g.src_ws_a ? E : P;
+            const MatRealAllocated &B = g.src_ws_b ? E : P;
+            if (aligned_(g.dst_row))
+            {
+                gemm_nt(g.ni, g.nj, t_total, -1.0,
+                        A, g.src_row_a, 0, B, g.src_row_b, 0, 1.0,
+                        P_ij, g.dst_row, g.dst_col,
+                        P_ij, g.dst_row, g.dst_col);
+            }
+            else
+            {
+                gemm_nt(g.ni, g.nj, t_total, -1.0,
+                        A, g.src_row_a, 0, B, g.src_row_b, 0, 0.0, W, 0, 0, W, 0, 0);
+                gead(g.ni, g.nj, 1.0, W, 0, 0, P_ij, g.dst_row, g.dst_col);
+            }
         }
     }
 
@@ -380,7 +429,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
 void BlockCholeskySolver::forward_solve_(VecRealView &x_perm)
 {
     // No heap allocation. Walks supernode panels: one trsv per supernode
-    // on the t_total x t_total internal block (rooted at column kColPad),
+    // on the t_total x t_total internal block,
     // one gemv per external block — all driven by the cached sn_ext_ops_.
     const Index num_sn = symbolic_.num_supernodes();
     for (Index s = 0; s < num_sn; ++s)
@@ -390,9 +439,9 @@ void BlockCholeskySolver::forward_solve_(VecRealView &x_perm)
             continue;
         const Index off_S = sn_off_S_[s];
         MatRealAllocated &P = L_supernode_[s];
-        trsv_lnn(t_total, P, 0, kColPad, x_perm, off_S, x_perm, off_S);
+        trsv_lnn(t_total, P, 0, 0, x_perm, off_S, x_perm, off_S);
         for (const ExtOp &e : sn_ext_ops_[s])
-            gemv_n(e.ni, t_total, -1.0, P, e.panel_row, kColPad,
+            gemv_n(e.ni, t_total, -1.0, P, e.panel_row, 0,
                    x_perm, off_S, 1.0, x_perm, e.x_off_i, x_perm, e.x_off_i);
     }
 }
@@ -409,9 +458,9 @@ void BlockCholeskySolver::backward_solve_(VecRealView &x_perm)
         const Index off_S = sn_off_S_[s];
         MatRealAllocated &P = L_supernode_[s];
         for (const ExtOp &e : sn_ext_ops_[s])
-            gemv_t(e.ni, t_total, -1.0, P, e.panel_row, kColPad,
+            gemv_t(e.ni, t_total, -1.0, P, e.panel_row, 0,
                    x_perm, e.x_off_i, 1.0, x_perm, off_S, x_perm, off_S);
-        trsv_ltn(t_total, P, 0, kColPad, x_perm, off_S, x_perm, off_S);
+        trsv_ltn(t_total, P, 0, 0, x_perm, off_S, x_perm, off_S);
     }
 }
 

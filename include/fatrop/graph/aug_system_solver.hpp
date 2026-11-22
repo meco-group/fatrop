@@ -120,6 +120,8 @@ namespace fatrop
 
         std::unique_ptr<MatRealAllocated> rhs_many_;
         std::unique_ptr<MatRealAllocated> scaled_many_;
+        // One block of a matrix rhs at row offset 0, see solve_rhs.
+        std::unique_ptr<MatRealAllocated> block_many_;
 
         const ProblemInfo<GraphProblem> &info_;
 

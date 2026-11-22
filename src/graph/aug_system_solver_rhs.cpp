@@ -21,6 +21,10 @@ LinsolReturnFlag AugSystemSolver<GraphProblem>::solve_rhs(
             { return solve_rhs(info, jacobian, hessian, D_s, fp, gp, xp, lp); });
     auto rhs = rhs_many_->block(rhs_many_->m(), F.n(), 0, 0);
     auto scaled = scaled_many_->block(scaled_many_->m(), F.n(), 0, 0);
+    // BLASFEO gemm reads outside its destination when a row offset is not a
+    // multiple of the panel size, so it only gets operands at row offset 0:
+    // block is the x-block operand, scaled the slack-block one.
+    auto block = block_many_->block(block_many_->m(), F.n(), 0, 0);
     batched::gecp(F.m(), F, 0, rhs, 0);
     for (Index k = 0; k < info.dims.num_blocks; ++k)
     {
@@ -31,7 +35,8 @@ LinsolReturnFlag AugSystemSolver<GraphProblem>::solve_rhs(
         const Index goff = info.offset_g_eq_slack + info.dims.ng_ineq_offsets[k];
         batched::divide_rows(ng, G, goff, D_s, goff, scaled, 0);
         batched::gemm_nn(nk, ng, 1.0, jacobian.Gg_ineqt[k], 0, 0,
-                           scaled, 0, 1.0, rhs, off, rhs, off);
+                         scaled, 0, 0.0, block, 0, block, 0);
+        gead(nk, F.n(), 1.0, block, 0, 0, rhs, off, 0);
     }
     chol_->solve_rhs(rhs, X);
     for (Index k = 0; k < info.dims.num_blocks; ++k)
@@ -41,8 +46,15 @@ LinsolReturnFlag AugSystemSolver<GraphProblem>::solve_rhs(
         if (ng == 0) continue;
         const Index off = info.dims.block_offsets_tan[k];
         const Index goff = info.offset_g_eq_slack + info.dims.ng_ineq_offsets[k];
-        batched::gemm_tn(nk, ng, 1.0, jacobian.Gg_ineqt[k], 0, 0,
-                                     X, off, 1.0, G, goff, Lambda, goff);
+        if (nk == 0)
+            batched::gecp(ng, G, goff, Lambda, goff);
+        else
+        {
+            gecp(nk, F.n(), X, off, 0, block, 0, 0);
+            batched::gemm_tn(nk, ng, 1.0, jacobian.Gg_ineqt[k], 0, 0,
+                             block, 0, 0.0, scaled, 0, scaled, 0);
+            batched::gead(ng, 1.0, scaled, 0, G, goff, Lambda, goff);
+        }
         batched::divide_rows(ng, Lambda, goff, D_s, goff, Lambda, goff);
     }
     return LinsolReturnFlag::SUCCESS;
