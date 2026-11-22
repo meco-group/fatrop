@@ -208,6 +208,8 @@ namespace fatrop
         // One block of a schur update / of a matrix rhs, at row offset 0.
         std::unique_ptr<MatRealAllocated> schur_ws_;
         std::unique_ptr<MatRealAllocated> rhs_block_ws_;
+        // kPanel - 1 entries longer than the system: BLASFEO trsv_ltn loads a full
+        // panel at the tail of its vector.
         VecRealAllocated x_perm_;
         VecRealAllocated rhs_;
         VecRealAllocated pivot_ref_;

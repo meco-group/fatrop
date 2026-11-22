@@ -34,7 +34,7 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp, Index r
       rhs_capacity_(batched::checked_capacity(rhs_capacity)), sp_(sp), order_(sp),
       symbolic_(sp, order_), perm_block_sizes_(sp.num_blocks()),
       col_to_sn_(sp.num_blocks(), -1), col_to_off_in_sn_(sp.num_blocks(), -1),
-      x_perm_(sp.total_size()), rhs_(sp.total_size()), pivot_ref_(sp.total_size())
+      x_perm_(sp.total_size() + kPanel - 1), rhs_(sp.total_size()), pivot_ref_(sp.total_size())
 {
     const Index N = sp.num_blocks();
 
