@@ -560,8 +560,11 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
             // RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
             gecp(nx + 1, nu, Llt[k], nu, 0, Llt_shift[0], 0,
                  0); // needless operation because feature not implemented yet
+            // syrk reads past the end of its C operand at a row offset that is not a
+            // multiple of the panel size, so copy first and update in place.
+            gecp(nx + 1, nx, *RSQrq_hat_curr_p, nu, nu, Ppt[k], 0, 0);
             syrk_ln_mn(nx + 1, nx, nu, -1.0, Llt_shift[0], 0, 0, Llt_shift[0], 0, 0, 1.0,
-                       *RSQrq_hat_curr_p, nu, nu, Ppt[k], 0, 0);
+                       Ppt[k], 0, 0, Ppt[k], 0, 0);
         }
         trtr_l(nx, Ppt[k], 0, 0, Ppt[k], 0, 0);
     }
