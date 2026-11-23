@@ -365,7 +365,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         // calculate xIb
         rowex(nx - rankI, -1.0, LlIt[0], nx - rankI, 0, x, offs_x + rankI);
         // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
-        trsv_ltn(nx - rankI, LlIt[0], 0, 0, x, offs_x + rankI, x, offs_x + rankI);
+        trsv_ltn(nx - rankI, LlIt[0], 0, 0, x, offs_x + rankI, v_tmp[0]);
         // calculate xIa
         rowex(rankI, 1.0, GgIt_tilde[0], nx - rankI, 0, x, offs_x);
         // assume aliasing is possible for last two elements
@@ -411,7 +411,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
             // assume aliasing of last two eliments is allowed
             gemv_t(nx, numrho_k, -1.0, Llt[k], numrho_k, 0, x, offs_x, 1.0, x, offs + rho_k, x,
                    offs + rho_k);
-            trsv_ltn(numrho_k, Llt[k], 0, 0, x, offs + rho_k, x, offs + rho_k);
+            trsv_ltn(numrho_k, Llt[k], 0, 0, x, offs + rho_k, v_tmp[0]);
         }
         /// calcualate uka_tilde
         if (rho_k > 0)
@@ -556,8 +556,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
             // RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
             gecp(nx + 1, nu, Llt[k], nu, 0, Llt_shift[0], 0,
                  0); // needless operation because feature not implemented yet
-            syrk_ln_mn(nx + 1, nx, nu, -1.0, Llt_shift[0], 0, 0, Llt_shift[0], 0, 0, 1.0,
-                       *RSQrq_hat_curr_p, nu, nu, Ppt[k], 0, 0);
+            // copy first: syrk reads outside C when its row offset is not 0
+            gecp(nx + 1, nx, *RSQrq_hat_curr_p, nu, nu, Ppt[k], 0, 0);
+            syrk_ln_mn(nx + 1, nx, nu, -1.0, Llt_shift[0], 0, 0, Llt_shift[0], 0, 0, 1.0, Ppt[k],
+                       0, 0, Ppt[k], 0, 0);
         }
         trtr_l(nx, Ppt[k], 0, 0, Ppt[k], 0, 0);
     }
@@ -579,7 +581,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         // calculate xIb
         rowex(nx, -1.0, LlIt[0], nx, 0, x, offs_x);
         // assume TRSV_LTN allows aliasing, this is the case in normal BLAS
-        trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, x, offs_x);
+        trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, v_tmp[0]);
     }
     for (Index k = 0; k < info.dims.K; k++)
     {
@@ -589,7 +591,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         const Index offs_x = info.offsets_tangent_x[k];
         rowex(nu, -1.0, Llt[k], nu + nx, 0, x, offs);
         gemv_t(nx, nu, -1.0, Llt[k], nu, 0, x, offs_x, 1.0, x, offs, x, offs);
-        trsv_ltn(nu, Llt[k], 0, 0, x, offs, x, offs);
+        trsv_ltn(nu, Llt[k], 0, 0, x, offs, v_tmp[0]);
         if (k != info.dims.K - 1)
         {
             const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
@@ -782,7 +784,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         const Index offs_x = info.offsets_tangent_x[0];
         const Index offs_g = info.offsets_g_eq_path[0];
         veccpsc(nx - rankI, -1.0, v_LlIt[0], 0, x, offs_x + rankI);
-        trsv_ltn(nx - rankI, LlIt[0], 0, 0, x, offs_x + rankI, x, offs_x + rankI);
+        trsv_ltn(nx - rankI, LlIt[0], 0, 0, x, offs_x + rankI, v_tmp[0]);
         veccp(rankI, v_GgIt_tilde[0], 0, x, offs_x);
         gemv_t(nx - rankI, rankI, 1.0, GgIt_tilde[0], 0, 0, x, offs_x + rankI, 1.0, x, offs_x, x,
                offs_x);
@@ -818,7 +820,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
             }
             gemv_t(nx, numrho_k, -1.0, Llt[k], numrho_k, 0, x, offs_x, 1.0, x, offs + rho_k, x,
                    offs + rho_k);
-            trsv_ltn(numrho_k, Llt[k], 0, 0, x, offs + rho_k, x, offs + rho_k);
+            trsv_ltn(numrho_k, Llt[k], 0, 0, x, offs + rho_k, v_tmp[0]);
         }
         //         /// calcualate uka_tilde
         if (rho_k > 0)
@@ -940,7 +942,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         const Index nu = info.dims.number_of_tangent_controls[0];
         const Index offs_x = info.offsets_tangent_x[0];
         veccpsc(nx, -1.0, v_LlIt[0], 0, x, offs_x);
-        trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, x, offs_x);
+        trsv_ltn(nx, LlIt[0], 0, 0, x, offs_x, v_tmp[0]);
     }
     for (Index k = 0; k < info.dims.K; k++)
     {
@@ -951,7 +953,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         const Index offs_dyn_eq_k = info.offsets_g_eq_dyn[k];
         veccpsc(nu, -1.0, v_Llt[k], 0, x, offs);
         gemv_t(nx, nu, -1.0, Llt[k], nu, 0, x, offs_x, 1.0, x, offs, x, offs);
-        trsv_ltn(nu, Llt[k], 0, 0, x, offs, x, offs);
+        trsv_ltn(nu, Llt[k], 0, 0, x, offs, v_tmp[0]);
         if (k != info.dims.K - 1)
         {
             const Index nxp1 = info.dims.number_of_tangent_states[k + 1];
