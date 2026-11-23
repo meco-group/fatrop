@@ -129,22 +129,14 @@ namespace fatrop
         };
         std::vector<LoadOp> load_ops_;
 
-        struct RhsLoadOp
-        {
-            Index nk;          ///< column block size (rows of rhs strip)
-            Index x_off;       ///< offset into x_perm_
-            Index panel_col;   ///< column offset inside supernode panel
-        };
-        // For each supernode s, the per-column rhs in/out + propagation list.
-        std::vector<std::vector<RhsLoadOp>> sn_rhs_cols_;
-
         struct ExtOp
         {
             Index ni;          ///< external block row count
             Index x_off_i;     ///< offset into x_perm_ for block i
             Index panel_row;   ///< absolute row offset in supernode panel (t_total + sn_ext_row_off[a])
         };
-        // For each supernode s, list of external blocks (one per ext_set entry).
+        // For each supernode s, its external rows, one entry per run of
+        // consecutive blocks.
         std::vector<std::vector<ExtOp>> sn_ext_ops_;
 
         // Schur trailing update, one list per source supernode: the block at

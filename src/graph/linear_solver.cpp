@@ -95,7 +95,6 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
 
     sn_aug_row_.assign(num_sn, 0);
     sn_off_S_.assign(num_sn, 0);
-    sn_rhs_cols_.assign(num_sn, {});
     sn_ext_ops_.assign(num_sn, {});
     sn_schur_.assign(num_sn, {});
 
@@ -108,24 +107,18 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
         sn_aug_row_[s] = t_total + ext_total;
         sn_off_S_[s] = perm_block_offsets_[s_start];
 
-        // Per-column rhs in/out for steps (1) and (3a).
-        sn_rhs_cols_[s].reserve(static_cast<size_t>(s_end - s_start));
-        for (Index k = s_start; k < s_end; ++k)
-        {
-            RhsLoadOp r;
-            r.nk = perm_block_sizes_[k];
-            r.x_off = perm_block_offsets_[k];
-            r.panel_col = col_to_off_in_sn_[k];
-            sn_rhs_cols_[s].push_back(r);
-        }
-
         const auto &ext_set = symbolic_.lower_pattern(s_end - 1);
         const Index n_ext = static_cast<Index>(ext_set.size());
 
-        // External strips (used by (3b), forward, backward).
-        sn_ext_ops_[s].reserve(static_cast<size_t>(n_ext));
+        // External strips (used by (3b), forward, backward), one per run of
+        // consecutive blocks.
         for (Index a = 0; a < n_ext; ++a)
         {
+            if (a > 0 && ext_set[a] == ext_set[a - 1] + 1)
+            {
+                sn_ext_ops_[s].back().ni += perm_block_sizes_[ext_set[a]];
+                continue;
+            }
             ExtOp e;
             e.ni = perm_block_sizes_[ext_set[a]];
             e.x_off_i = perm_block_offsets_[ext_set[a]];
@@ -293,8 +286,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     // No heap allocation in this function. All buffers (L_supernode_,
     // x_perm_, rhs_) are sized at construction time and reused. All
     // destination supernode indices, panel offsets, and block sizes are
-    // resolved during the symbolic phase (load_ops_, sn_rhs_cols_,
-    // sn_ext_ops_, sn_schur_); this function is a flat traversal
+    // resolved during the symbolic phase (load_ops_, sn_ext_ops_, sn_schur_); this function is a flat traversal
     // of those op lists.
 
     // Permute -rhs into x_perm_. The forward substitution is folded into
@@ -332,7 +324,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     //      block AND trsm-solves the (ext_total + 1) x t_total bottom strip
     //      (external L rows + aug row computing y_S = L_internal^{-1}(-rhs_S)),
     //   3. extract y_S from the aug row into x_perm_, propagate it to
-    //      external rhs strips with one gemv per ext block,
+    //      external rhs strips with one gemv per run of ext blocks,
     //   4. schur-update — for each pair (i, j) in ext_set with i >= j, do
     //      a syrk (i == j) or gemm (i > j) writing DIRECTLY into the owning
     //      supernode's panel using the precomputed op list.
@@ -347,10 +339,8 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         const Index aug_row = sn_aug_row_[s];
         const Index off_S = sn_off_S_[s];
 
-        // (1) Load the rhs strip into the aug row, one column block at a time.
-        const auto &rhs_cols = sn_rhs_cols_[s];
-        for (const RhsLoadOp &r : rhs_cols)
-            rowin(r.nk, 1.0, x_perm_, r.x_off, P, aug_row, r.panel_col);
+        // (1) Load the rhs strip into the aug row.
+        rowin(t_total, 1.0, x_perm_, off_S, P, aug_row, 0);
 
         // (2) Partial Cholesky on the (t_total + ext_total + 1) x t_total panel.
         // In place, so save the diagonal check_reg needs.
@@ -361,8 +351,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
             return LinsolReturnFlag::INDEFINITE;
 
         // (3a) Extract y_S from the aug row into x_perm_.
-        for (const RhsLoadOp &r : rhs_cols)
-            rowex(r.nk, 1.0, P, aug_row, r.panel_col, x_perm_, r.x_off);
+        rowex(t_total, 1.0, P, aug_row, 0, x_perm_, off_S);
         // (3b) Propagate y_S into external rhs strips: x[i] -= L[i, S] * y_S.
         const auto &exts = sn_ext_ops_[s];
         for (const ExtOp &e : exts)
@@ -391,7 +380,7 @@ void BlockCholeskySolver::forward_solve_(VecRealView &x_perm)
 {
     // No heap allocation. Walks supernode panels: one trsv per supernode
     // on the t_total x t_total internal block,
-    // one gemv per external block — all driven by the cached sn_ext_ops_.
+    // one gemv per run of external blocks — all driven by the cached sn_ext_ops_.
     const Index num_sn = symbolic_.num_supernodes();
     for (Index s = 0; s < num_sn; ++s)
     {
