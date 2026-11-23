@@ -27,8 +27,7 @@ using namespace fatrop;
 // the remaining weight. Elements covered by L_p are absorbed, variables only
 // adjacent to p are eliminated together with p (mass elimination) and
 // variables with identical adjacency are merged into supervariables. Degree
-// buckets give O(1) pivot selection; the bucket heads are LIFO, which makes
-// the result deterministic.
+// buckets (LIFO) give O(1) pivot selection.
 //
 // The members of a supervariable are emitted consecutively, so they form a
 // chain in the elimination tree with identical column patterns (a supernode).
@@ -40,14 +39,22 @@ enum NodeState : unsigned char
     ELEMENT,  // eliminated, not yet absorbed
     DEAD      // absorbed element or non-principal variable
 };
-} // namespace
 
-BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
-    : perm_(sp.num_blocks()), inv_perm_(sp.num_blocks())
+// sum_{c = a + 1}^{b} c^2: flops of scalar columns with counts a + 1, ..., b.
+double sum_squares(double a, double b)
+{
+    auto s = [](double x) { return x * (x + 1.) * (2. * x + 1.) / 6.; };
+    return s(b) - s(a);
+}
+
+// One AMD run. Ties between equal degrees are decided by the bucket order,
+// which the two flags flip: the initial insertion order and the order in which
+// L_p is reinserted. Returns the flops (sum of squared scalar column counts of
+// L), which are exact since L_p is the exact pattern of the pivot's columns.
+double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_reinsert,
+           std::vector<Index> &perm, std::vector<Index> &inv_perm)
 {
     const Index n = sp.num_blocks();
-    if (n == 0)
-        return;
     // var[i] / elem[i]: A_i / E_i of a variable; var[e] holds L_e of an element.
     std::vector<std::vector<Index>> var(n), elem(n);
     std::vector<NodeState> state(n, VARIABLE);
@@ -93,8 +100,8 @@ BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
     {
         for (Index k = i; k != -1; k = member_next[k])
         {
-            perm_[n_out] = k;
-            inv_perm_[k] = n_out++;
+            perm[n_out] = k;
+            inv_perm[k] = n_out++;
         }
     };
     auto release = [](std::vector<Index> &v) { std::vector<Index>().swap(v); };
@@ -106,12 +113,12 @@ BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
         for (Index j : var[i])
             deg[i] += w[j];
     }
-    // Insert in reverse so that, among equal degrees, low indices come first.
-    for (Index i = n - 1; i >= 0; --i)
-        bucket_insert(i);
+    for (Index k = 0; k < n; ++k)
+        bucket_insert(ascending_init ? k : n - 1 - k);
 
     Index rem = sp.total_size();
     Index stamp = 0;
+    double flops = 0.;
     while (n_out < n)
     {
         while (head[mindeg] == -1)
@@ -145,6 +152,7 @@ BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
         release(var[p]);
         release(elem[p]);
         state[p] = ELEMENT;
+        const Index rem_before = rem;
         rem -= w[p];
         emit(p);
         for (Index i : lp)
@@ -279,13 +287,35 @@ BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
         n_lp = 0;
         for (Index i : lp)
             if (state[i] == VARIABLE)
-            {
                 lp[n_lp++] = i;
-                bucket_insert(i);
-            }
         lp.resize(n_lp);
+        for (size_t q = 0; q < n_lp; ++q)
+            bucket_insert(lp[reverse_reinsert ? n_lp - 1 - q : q]);
         var[p].assign(lp.begin(), lp.end());
         el_w[p] = lp_w;
         el_nv[p] = lp_nv;
+        // p and the mass-eliminated variables form one chain above L_p.
+        flops += sum_squares(lp_w, lp_w + rem_before - rem);
+    }
+    return flops;
+}
+} // namespace
+
+BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
+    : perm_(sp.num_blocks()), inv_perm_(sp.num_blocks())
+{
+    // AMD is sensitive to tie-breaking on regular meshes; keep the cheapest of
+    // four tie-breaking variants.
+    std::vector<Index> perm(sp.num_blocks()), inv_perm(sp.num_blocks());
+    double best = -1.;
+    for (int variant = 0; variant < 4; ++variant)
+    {
+        const double flops = amd(sp, variant & 1, variant & 2, perm, inv_perm);
+        if (best < 0. || flops < best)
+        {
+            best = flops;
+            perm_.swap(perm);
+            inv_perm_.swap(inv_perm);
+        }
     }
 }
