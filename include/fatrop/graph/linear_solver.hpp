@@ -119,8 +119,7 @@ namespace fatrop
         // searches an ext_set, and never recomputes panel offsets.
         struct LoadOp
         {
-            Index src_i;      ///< original block row (source matrix coords)
-            Index src_j;      ///< original block col (source matrix coords)
+            Index src_id;     ///< stored block id in the source matrix
             Index dst_sn;     ///< owning supernode of destination
             Index dst_row;    ///< row offset within destination panel
             Index dst_col;    ///< column offset within destination panel

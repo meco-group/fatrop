@@ -168,8 +168,7 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
             const Index ip = inv[i_orig];
             const Index jp = inv[j_orig];
             LoadOp op;
-            op.src_i = i_orig;
-            op.src_j = j_orig;
+            op.src_id = static_cast<Index>(load_ops_.size());
             if (ip >= jp)
             {
                 const LBlockLoc loc = l_loc_(ip, jp);
@@ -281,7 +280,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     // panels using the cached load_ops_ table.
     for (const LoadOp &op : load_ops_)
     {
-        const MatRealView src = matrix.block(op.src_i, op.src_j);
+        const MatRealView src = matrix.block_by_id(op.src_id);
         MatRealAllocated &dst = L_supernode_[op.dst_sn];
         if (!op.transpose)
             gecp(op.ni, op.nj, src, 0, 0, dst, op.dst_row, op.dst_col);

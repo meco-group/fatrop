@@ -44,6 +44,7 @@ namespace fatrop
         /// View of the stored block with position @c id (see
         /// @ref BlockSparsityPattern::block_id).
         MatRealView block_by_id(Index id) { return blocks_[id]; }
+        const MatRealView block_by_id(Index id) const { return blocks_[id]; }
 
         /// Zero all stored block data.
         void set_zero();
@@ -60,12 +61,9 @@ namespace fatrop
 
     private:
         const BlockSparsityPattern &sp_;
-        // One block per lower-triangle structural entry (i, j) with i >= j.
+        // One block per lower-triangle structural entry (i, j) with i >= j,
+        // in the storage order of BlockSparsityPattern::block_id.
         std::vector<MatRealAllocated> blocks_;
-        // block_index_[i * N + j] = index in blocks_, or -1 if not stored.
-        std::vector<Index> block_index_;
-
-        Index lookup_(Index i, Index j) const;
     };
 } // namespace fatrop
 
