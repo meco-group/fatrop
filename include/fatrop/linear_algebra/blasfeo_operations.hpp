@@ -240,6 +240,19 @@ namespace fatrop
                               &z.vec(), z.ai() + zi);
     }
 
+    // In place. blasfeo loads whole panels of x, which can reach past the end of
+    // the vector unless the slice starts at its beginning; other slices go
+    // through ws (size >= m).
+    static inline void trsv_ltn(int m, const MatRealView &A, int ai, int aj, VecRealView &x, int xi,
+                                VecRealView &ws)
+    {
+        if (x.ai() + xi == 0)
+            return trsv_ltn(m, A, ai, aj, x, xi, x, xi);
+        veccp(m, x, xi, ws, 0);
+        trsv_ltn(m, A, ai, aj, ws, 0, ws, 0);
+        veccp(m, ws, 0, x, xi);
+    }
+
     static inline void trsv_lnn(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
                                 int xi, VecRealView &z, int zi)
     {

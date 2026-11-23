@@ -122,8 +122,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve(const ProblemInfo<DenseType> 
     {
         // Free part of x (last nx - rank components).
         rowex(nx - rank_eq_, -1.0, Llt_, nx - rank_eq_, 0, x, rank_eq_);
-        trsv_ltn(nx - rank_eq_, Llt_, 0, 0, x, rank_eq_, x,
-                 rank_eq_);
+        trsv_ltn(nx - rank_eq_, Llt_, 0, 0, x, rank_eq_, v_Llt_);
         // Constrained part of x (first rank components).
         rowex(rank_eq_, 1.0, Ggt_tilde_, nx - rank_eq_, 0, x, 0);
         gemv_t(nx - rank_eq_, rank_eq_, 1.0, Ggt_tilde_, 0, 0, x,
@@ -143,7 +142,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve(const ProblemInfo<DenseType> 
     else
     {
         rowex(nx, -1.0, Llt_, nx, 0, x, 0);
-        trsv_ltn(nx, Llt_, 0, 0, x, 0, x, 0);
+        trsv_ltn(nx, Llt_, 0, 0, x, 0, v_Llt_);
     }
 
     // ----- 4. Inequality multipliers: λ_i = D_s⁻¹ (A_i x + g_i).
@@ -210,7 +209,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve(const ProblemInfo<DenseType> 
 
     // ----- 2. Forward substitute the primal direction.
     rowex(nx, -1.0, Llt_, nx, 0, x, 0);
-    trsv_ltn(nx, Llt_, 0, 0, x, 0, x, 0);
+    trsv_ltn(nx, Llt_, 0, 0, x, 0, v_Llt_);
 
     // ----- 3. Recover the multipliers from the (now eliminated) penalty rows.
     if (ng > 0)
@@ -281,8 +280,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve_rhs(const ProblemInfo<DenseTy
 
         // Recover x and eq_mult by forward substitution (mirror of solve()).
         veccpsc(nx - rank_eq_, -1.0, v_Llt_, 0, x, rank_eq_);
-        trsv_ltn(nx - rank_eq_, Llt_, 0, 0, x, rank_eq_, x,
-                 rank_eq_);
+        trsv_ltn(nx - rank_eq_, Llt_, 0, 0, x, rank_eq_, v_Llt_);
         veccp(rank_eq_, v_Ggt_tilde_, 0, x, 0);
         gemv_t(nx - rank_eq_, rank_eq_, 1.0, Ggt_tilde_, 0, 0, x,
                rank_eq_, 1.0, x, 0, x,
@@ -301,7 +299,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve_rhs(const ProblemInfo<DenseTy
     {
         trsv_lnn(nx, Llt_, 0, 0, v_RSQrqt_tilde_, 0, v_Llt_, 0);
         veccpsc(nx, -1.0, v_Llt_, 0, x, 0);
-        trsv_ltn(nx, Llt_, 0, 0, x, 0, x, 0);
+        trsv_ltn(nx, Llt_, 0, 0, x, 0, v_Llt_);
     }
 
     if (ng_ineq > 0)
@@ -344,7 +342,7 @@ LinsolReturnFlag AugSystemSolver<DenseType>::solve_rhs(const ProblemInfo<DenseTy
     }
     trsv_lnn(nx, Llt_, 0, 0, v_RSQrqt_tilde_, 0, v_Llt_, 0);
     veccpsc(nx, -1.0, v_Llt_, 0, x, 0);
-    trsv_ltn(nx, Llt_, 0, 0, x, 0, x, 0);
+    trsv_ltn(nx, Llt_, 0, 0, x, 0, v_Llt_);
 
     if (ng > 0)
     {

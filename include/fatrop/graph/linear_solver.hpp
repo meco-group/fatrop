@@ -17,6 +17,7 @@
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 
+#include <memory>
 #include <vector>
 
 namespace fatrop
@@ -58,8 +59,8 @@ namespace fatrop
         };
         // Locate the L-block at permuted block coordinates (i, j) with i >= j
         // in the supernode-major storage. Called only during the symbolic
-        // phase (the numeric hot path uses the cached @c sn_syrk_ /
-        // @c sn_gemm_ / @c load_ops_ tables instead, so the binary search
+        // phase (the numeric hot path uses the cached @c sn_schur_ /
+        // @c load_ops_ tables instead, so the binary search
         // here does not appear in solve-time cost).
         LBlockLoc l_loc_(Index i, Index j) const;
 
@@ -133,7 +134,7 @@ namespace fatrop
         {
             Index nk;          ///< column block size (rows of rhs strip)
             Index x_off;       ///< offset into x_perm_
-            Index panel_col;   ///< column offset inside supernode panel (includes kColPad)
+            Index panel_col;   ///< column offset inside supernode panel
         };
         // For each supernode s, the per-column rhs in/out + propagation list.
         std::vector<std::vector<RhsLoadOp>> sn_rhs_cols_;
@@ -147,29 +148,20 @@ namespace fatrop
         // For each supernode s, list of external blocks (one per ext_set entry).
         std::vector<std::vector<ExtOp>> sn_ext_ops_;
 
-        struct SyrkOp
+        // Schur trailing update, one list per source supernode: the block at
+        // (src_row, src_col) of the dense update L_ext L_ext^T is subtracted from
+        // the target panel at (dst_row, dst_col).
+        struct SchurOp
         {
-            Index target_sn;   ///< owner supernode of L[i, i] block
-            Index dst_row;     ///< row offset in target panel
-            Index dst_col;     ///< column offset in target panel
-            Index ni;          ///< block size
-            Index src_row;     ///< absolute row offset in source panel
-        };
-        struct GemmOp
-        {
-            Index target_sn;   ///< owner supernode of L[i, j] block
-            Index dst_row;     ///< row offset in target panel
-            Index dst_col;     ///< column offset in target panel
+            Index target_sn;
+            Index dst_row;
+            Index dst_col;
             Index ni;
             Index nj;
-            Index src_row_a;   ///< absolute row offset in source panel for L_ext[i, :]
-            Index src_row_b;   ///< absolute row offset in source panel for L_ext[j, :]
+            Index src_row;
+            Index src_col;
         };
-        // Schur trailing update operations, one list per source supernode.
-        // sn_syrk_[s][a] -> the diagonal contribution for ext_set[a].
-        // sn_gemm_[s] is the flat (a, b) list with b < a.
-        std::vector<std::vector<SyrkOp>> sn_syrk_;
-        std::vector<std::vector<GemmOp>> sn_gemm_;
+        std::vector<std::vector<SchurOp>> sn_schur_;
 
         // Per-supernode constants used by every per-iteration kernel: the
         // internal block dimension, the external strip dimension, the aug-row
@@ -180,6 +172,12 @@ namespace fatrop
         std::vector<Index> sn_off_S_;
 
         // Workspace for solve.
+        // gemm/syrk read outside their destination when a row offset is not a
+        // multiple of the BLASFEO panel size, so they only get operands at row
+        // offset 0: a copy of the external strip, and its product.
+        std::unique_ptr<MatRealAllocated> ext_ws_;
+        std::unique_ptr<MatRealAllocated> schur_ws_;
+        VecRealAllocated trsv_ws_;
         VecRealAllocated x_perm_;
         VecRealAllocated rhs_;
         VecRealAllocated pivot_ref_;
