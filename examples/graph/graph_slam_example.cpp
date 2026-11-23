@@ -48,8 +48,8 @@
 //      nothing about fatrop, GraphAbstract or NLP variables.
 //   2. SlamProblem: takes a SlamProblemInput (prior + measurements + initial
 //      guess; no ground truth) and implements GraphAbstract — it exposes the
-//      block sizes, the Hessian / gradient / Jacobian callbacks and the SE(3)
-//      retraction.
+//      problem structure, the Hessian / gradient callbacks (each factor is
+//      evaluated once per call) and the SE(3) retraction.
 //
 
 #include <fatrop/fatrop.hpp>
@@ -62,6 +62,7 @@
 #include <fatrop/ip_algorithm/ip_alg_builder.hpp>
 #include <fatrop/ip_algorithm/ip_algorithm.hpp>
 #include <fatrop/ip_algorithm/ip_data.hpp>
+#include <fatrop/linear_algebra/blasfeo_operations.hpp>
 
 #include "slam_helpers.hpp"
 #include "slam_synthetic_data.hpp"
@@ -117,7 +118,8 @@ public:
           n_pose_(static_cast<Index>(in_.pose_init.size())),
           n_landmark_(static_cast<Index>(in_.lmk_init.size()))
     {
-        build_edge_indices();
+        diag_ws_.assign(n_pose_ * POSE_TAN_DIM * POSE_TAN_DIM + n_landmark_ * LMK_DIM * LMK_DIM,
+                        0.0);
         // Scale the objective by the total number of scalar residuals so
         // its magnitude stays O(1) regardless of the dataset size. Without
         // this the initial cost is on the order of 1e6+, which makes the
@@ -135,25 +137,22 @@ public:
     Index pose_primal_offset(Index k) const { return k * POSE_PRIM_DIM; }
     Index lmk_primal_offset(Index j) const { return n_pose_ * POSE_PRIM_DIM + j * LMK_DIM; }
 
-    // ---- Block dimensions --------------------------------------------------
-    Index get_num_blocks() const override { return n_pose_ + n_landmark_; }
-    Index get_block_size(Index k) const override
+    // ---- Structure ---------------------------------------------------------
+    // Off-diagonal edges: one per odometry measurement, then one per pixel
+    // observation, so off(e) is the block of factor e.
+    GraphStructure get_structure() const override
     {
-        return (k < n_pose_) ? POSE_PRIM_DIM : LMK_DIM;
-    }
-    Index get_block_size_tan(Index k) const override
-    {
-        return (k < n_pose_) ? POSE_TAN_DIM : LMK_DIM;
-    }
-
-    std::vector<std::pair<Index, Index>> get_off_diag_edges() const override
-    {
-        std::vector<std::pair<Index, Index>> edges;
-        for (Index k = 0; k + 1 < n_pose_; ++k)
-            edges.emplace_back(pose_block(k), pose_block(k + 1));
+        GraphStructure st;
+        st.block_sizes.assign(n_pose_, POSE_PRIM_DIM);
+        st.block_sizes.resize(n_pose_ + n_landmark_, LMK_DIM);
+        st.block_sizes_tan.assign(n_pose_, POSE_TAN_DIM);
+        st.block_sizes_tan.resize(n_pose_ + n_landmark_, LMK_DIM);
+        for (const auto &meas : in_.odom)
+            st.off_diag_edges.emplace_back(std::max(pose_block(meas.a), pose_block(meas.b)),
+                                           std::min(pose_block(meas.a), pose_block(meas.b)));
         for (const auto &obs : in_.observations)
-            edges.emplace_back(pose_block(obs.pose_k), lmk_block(obs.lmk_j));
-        return edges;
+            st.off_diag_edges.emplace_back(lmk_block(obs.lmk_j), pose_block(obs.pose_k));
+        return st;
     }
 
     // ---- Initial guess -----------------------------------------------------
@@ -228,178 +227,24 @@ public:
         return 0;
     }
 
-    // ---- Gradient ----------------------------------------------------------
-    Index eval_grad_k(Index k, const Scalar *objective_scale, const Scalar *x,
-                      Scalar *res) override
+    // ---- Gradient / Gauss-Newton Hessian -----------------------------------
+    Index eval_hessian(const Scalar *objective_scale, const Scalar *x, const Scalar * /*mult*/,
+                       GraphHessianView &H) override
     {
-        const Scalar s = objective_scale[0];
-        const Index n_tan = get_block_size_tan(k);
-        for (Index a = 0; a < n_tan; ++a)
-            res[a] = 0.0;
-        if (k == 0)
+        std::fill(diag_ws_.begin(), diag_ws_.end(), 0.0);
+        eval_factors(objective_scale[0], x, H.grad(), &H);
+        for (Index k = 0; k < n_pose_ + n_landmark_; ++k)
         {
-            Scalar gp[6];
-            prior_gradient(x, gp);
-            for (Index a = 0; a < 6; ++a)
-                res[a] += s * prior_w() * gp[a];
-        }
-        if (k < n_pose_)
-        {
-            for (Index e_idx : pose_odom_edges_[k])
-            {
-                const OdomMeas &meas = in_.odom[e_idx];
-                Scalar r[6];
-                odom_residual(x, meas, r);
-                Scalar Ja[6][6], Jb[6][6];
-                odom_jacobian(x, meas, Ja, Jb);
-                if (meas.a == k)
-                    add_JT_r_pose(res, Ja, r, s * odom_w());
-                if (meas.b == k)
-                    add_JT_r_pose(res, Jb, r, s * odom_w());
-            }
-            for (Index e_idx : pose_obs_edges_[k])
-            {
-                const PixelMeas &obs = in_.observations[e_idx];
-                Pose pose;
-                Landmark lmk;
-                load_pose(x, obs.pose_k, pose);
-                load_lmk(x, obs.lmk_j, lmk);
-                Scalar pix[2];
-                if (!project(pose, lmk, pix))
-                    continue;
-                const Scalar r[2] = {pix[0] - obs.uv[0], pix[1] - obs.uv[1]};
-                Scalar Jp[2][6], Jl[2][3];
-                project_jacobian(pose, lmk, Jp, Jl);
-                (void)Jl;
-                for (Index a = 0; a < 6; ++a)
-                    res[a] += s * pix_w() * (Jp[0][a] * r[0] + Jp[1][a] * r[1]);
-            }
-        }
-        else
-        {
-            const Index j = k - n_pose_;
-            for (Index e_idx : lmk_obs_edges_[j])
-            {
-                const PixelMeas &obs = in_.observations[e_idx];
-                Pose pose;
-                Landmark lmk;
-                load_pose(x, obs.pose_k, pose);
-                load_lmk(x, obs.lmk_j, lmk);
-                Scalar pix[2];
-                if (!project(pose, lmk, pix))
-                    continue;
-                const Scalar r[2] = {pix[0] - obs.uv[0], pix[1] - obs.uv[1]};
-                Scalar Jp[2][6], Jl[2][3];
-                project_jacobian(pose, lmk, Jp, Jl);
-                (void)Jp;
-                for (Index a = 0; a < 3; ++a)
-                    res[a] += s * pix_w() * (Jl[0][a] * r[0] + Jl[1][a] * r[1]);
-            }
+            const Index n = k < n_pose_ ? POSE_TAN_DIM : LMK_DIM;
+            MatRealView Hkk = H.diag(k);
+            pack_mat(n, n, diag_block(k), n, Hkk, 0, 0);
         }
         return 0;
     }
 
-    // ---- Hessian (Gauss-Newton) -------------------------------------------
-    Index eval_Hk(Index i, Index j, const Scalar *objective_scale, const Scalar *x,
-                  const Scalar * /*mult*/, MAT *res) override
+    Index eval_gradient(const Scalar *objective_scale, const Scalar *x, Scalar *grad) override
     {
-        const Scalar s = objective_scale[0];
-        blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
-        if (i == 0 && j == 0)
-            for (Index a = 0; a < 6; ++a)
-                blasfeo_matel_wrap(res, a, a) += s * prior_w();
-
-        const bool is_pp = (i < n_pose_ && j < n_pose_);
-        const bool is_pl = (i >= n_pose_ && j < n_pose_);
-        const bool is_lp = (i < n_pose_ && j >= n_pose_);
-        const bool is_ll = (i >= n_pose_ && j >= n_pose_);
-
-        if (is_pp)
-        {
-            if (i == j)
-            {
-                for (Index e_idx : pose_odom_edges_[i])
-                {
-                    const OdomMeas &meas = in_.odom[e_idx];
-                    Scalar Ja[6][6], Jb[6][6];
-                    odom_jacobian(x, meas, Ja, Jb);
-                    if (meas.a == i)
-                        add_JTJ_pose(res, Ja, Ja, s * odom_w());
-                    if (meas.b == i)
-                        add_JTJ_pose(res, Jb, Jb, s * odom_w());
-                }
-                for (Index e_idx : pose_obs_edges_[i])
-                {
-                    const PixelMeas &obs = in_.observations[e_idx];
-                    Pose pose;
-                    Landmark lmk;
-                    load_pose(x, obs.pose_k, pose);
-                    load_lmk(x, obs.lmk_j, lmk);
-                    Scalar Jp[2][6], Jl[2][3];
-                    if (!project_jacobian(pose, lmk, Jp, Jl))
-                        continue;
-                    (void)Jl;
-                    add_JTJ_2xN(res, Jp, Jp, 6, 6, s * pix_w());
-                }
-            }
-            else
-            {
-                for (Index e_idx : pose_odom_edges_[i])
-                {
-                    const OdomMeas &meas = in_.odom[e_idx];
-                    if ((meas.a != i && meas.b != i) || (meas.a != j && meas.b != j))
-                        continue;
-                    Scalar Ja[6][6], Jb[6][6];
-                    odom_jacobian(x, meas, Ja, Jb);
-                    if (i == meas.b && j == meas.a)
-                        add_JTJ_pose(res, Jb, Ja, s * odom_w());
-                    if (i == meas.a && j == meas.b)
-                        add_JTJ_pose(res, Ja, Jb, s * odom_w());
-                }
-            }
-        }
-        else if (is_ll)
-        {
-            if (i == j)
-            {
-                const Index jj = i - n_pose_;
-                for (Index e_idx : lmk_obs_edges_[jj])
-                {
-                    const PixelMeas &obs = in_.observations[e_idx];
-                    Pose pose;
-                    Landmark lmk;
-                    load_pose(x, obs.pose_k, pose);
-                    load_lmk(x, obs.lmk_j, lmk);
-                    Scalar Jp[2][6], Jl[2][3];
-                    if (!project_jacobian(pose, lmk, Jp, Jl))
-                        continue;
-                    (void)Jp;
-                    add_JTJ_2xN(res, Jl, Jl, 3, 3, s * pix_w());
-                }
-            }
-        }
-        else if (is_pl || is_lp)
-        {
-            const Index pose_idx = is_pl ? j : i;
-            const Index lmk_idx = is_pl ? (i - n_pose_) : (j - n_pose_);
-            for (Index e_idx : lmk_obs_edges_[lmk_idx])
-            {
-                const PixelMeas &obs = in_.observations[e_idx];
-                if (obs.pose_k != pose_idx)
-                    continue;
-                Pose pose;
-                Landmark lmk;
-                load_pose(x, obs.pose_k, pose);
-                load_lmk(x, obs.lmk_j, lmk);
-                Scalar Jp[2][6], Jl[2][3];
-                if (!project_jacobian(pose, lmk, Jp, Jl))
-                    continue;
-                if (is_pl)
-                    add_JTJ_2xN(res, Jl, Jp, 3, 6, s * pix_w());
-                else
-                    add_JTJ_2xN(res, Jp, Jl, 6, 3, s * pix_w());
-            }
-        }
+        eval_factors(objective_scale[0], x, grad, nullptr);
         return 0;
     }
 
@@ -472,53 +317,102 @@ private:
         rel_pose_jacobian(x + pose_primal_offset(m.a), x + pose_primal_offset(m.b), Ja, Jb);
     }
 
-    static void add_JTJ_pose(MAT *res, const Scalar A[6][6], const Scalar B[6][6], Scalar s)
+    // Accumulates every factor once: gradient into grad, and, when H is
+    // given, J^T J into the column-major diagonal workspace and the
+    // off-diagonal blocks.
+    void eval_factors(Scalar s, const Scalar *x, Scalar *grad, GraphHessianView *H)
     {
-        for (Index i = 0; i < 6; ++i)
-            for (Index j = 0; j < 6; ++j)
-            {
-                Scalar v = 0.0;
-                for (Index k = 0; k < 6; ++k)
-                    v += A[k][i] * B[k][j];
-                blasfeo_matel_wrap(res, i, j) += s * v;
-            }
+        Scalar gp[6];
+        prior_gradient(x, gp);
+        for (Index a = 0; a < 6; ++a)
+            grad[a] += s * prior_w() * gp[a];
+        if (H)
+            for (Index a = 0; a < 6; ++a)
+                diag_block(0)[a + a * POSE_TAN_DIM] += s * prior_w();
+
+        const Index n_odom = static_cast<Index>(in_.odom.size());
+        for (Index e = 0; e < n_odom; ++e)
+        {
+            const OdomMeas &meas = in_.odom[e];
+            Scalar r[6];
+            odom_residual(x, meas, r);
+            Scalar Ja[6][6], Jb[6][6];
+            odom_jacobian(x, meas, Ja, Jb);
+            add_JT_r(grad + pose_tan_offset(meas.a), Ja, r, 6, 6, s * odom_w());
+            add_JT_r(grad + pose_tan_offset(meas.b), Jb, r, 6, 6, s * odom_w());
+            if (!H)
+                continue;
+            add_JTJ(diag_block(pose_block(meas.a)), 6, Ja, Ja, 6, 6, 6, s * odom_w());
+            add_JTJ(diag_block(pose_block(meas.b)), 6, Jb, Jb, 6, 6, 6, s * odom_w());
+            Scalar Hab[6 * 6] = {};
+            if (meas.b > meas.a)
+                add_JTJ(Hab, 6, Jb, Ja, 6, 6, 6, s * odom_w());
+            else
+                add_JTJ(Hab, 6, Ja, Jb, 6, 6, 6, s * odom_w());
+            MatRealView He = H->off(e);
+            pack_mat(6, 6, Hab, 6, He, 0, 0);
+        }
+
+        for (Index o = 0; o < static_cast<Index>(in_.observations.size()); ++o)
+        {
+            const PixelMeas &obs = in_.observations[o];
+            Pose pose;
+            Landmark lmk;
+            load_pose(x, obs.pose_k, pose);
+            load_lmk(x, obs.lmk_j, lmk);
+            Scalar pix[2];
+            if (!project(pose, lmk, pix))
+                continue;
+            const Scalar r[2] = {pix[0] - obs.uv[0], pix[1] - obs.uv[1]};
+            Scalar Jp[2][6], Jl[2][3];
+            project_jacobian(pose, lmk, Jp, Jl);
+            add_JT_r(grad + pose_tan_offset(obs.pose_k), Jp, r, 2, 6, s * pix_w());
+            add_JT_r(grad + lmk_tan_offset(obs.lmk_j), Jl, r, 2, 3, s * pix_w());
+            if (!H)
+                continue;
+            add_JTJ(diag_block(pose_block(obs.pose_k)), 6, Jp, Jp, 2, 6, 6, s * pix_w());
+            add_JTJ(diag_block(lmk_block(obs.lmk_j)), 3, Jl, Jl, 2, 3, 3, s * pix_w());
+            Scalar Hlp[3 * 6] = {};
+            add_JTJ(Hlp, 3, Jl, Jp, 2, 3, 6, s * pix_w());
+            MatRealView He = H->off(n_odom + o);
+            pack_mat(3, 6, Hlp, 3, He, 0, 0);
+        }
     }
-    static void add_JT_r_pose(Scalar *res, const Scalar A[6][6], const Scalar r[6], Scalar s)
+
+    Index pose_tan_offset(Index k) const { return k * POSE_TAN_DIM; }
+    Index lmk_tan_offset(Index j) const { return n_pose_ * POSE_TAN_DIM + j * LMK_DIM; }
+    Scalar *diag_block(Index k)
     {
-        for (Index i = 0; i < 6; ++i)
+        return k < n_pose_ ? diag_ws_.data() + k * POSE_TAN_DIM * POSE_TAN_DIM
+                           : diag_ws_.data() + n_pose_ * POSE_TAN_DIM * POSE_TAN_DIM +
+                                 (k - n_pose_) * LMK_DIM * LMK_DIM;
+    }
+
+    // res += s * A^T r with A a p x m row-major Jacobian.
+    template <typename Arows>
+    static void add_JT_r(Scalar *res, const Arows &A, const Scalar *r, Index p, Index m, Scalar s)
+    {
+        for (Index i = 0; i < m; ++i)
         {
             Scalar v = 0.0;
-            for (Index k = 0; k < 6; ++k)
+            for (Index k = 0; k < p; ++k)
                 v += A[k][i] * r[k];
             res[i] += s * v;
         }
     }
-    template <typename Acols, typename Bcols>
-    static void add_JTJ_2xN(MAT *res, const Acols &A, const Bcols &B, Index m, Index n, Scalar s)
+    // res (column-major, leading dimension ld) += s * A^T B with A p x m, B p x n.
+    template <typename Arows, typename Brows>
+    static void add_JTJ(Scalar *res, Index ld, const Arows &A, const Brows &B, Index p, Index m,
+                        Index n, Scalar s)
     {
         for (Index i = 0; i < m; ++i)
             for (Index j = 0; j < n; ++j)
             {
-                const Scalar v = A[0][i] * B[0][j] + A[1][i] * B[1][j];
-                blasfeo_matel_wrap(res, i, j) += s * v;
+                Scalar v = 0.0;
+                for (Index k = 0; k < p; ++k)
+                    v += A[k][i] * B[k][j];
+                res[i + j * ld] += s * v;
             }
-    }
-
-    void build_edge_indices()
-    {
-        pose_odom_edges_.assign(n_pose_, {});
-        pose_obs_edges_.assign(n_pose_, {});
-        lmk_obs_edges_.assign(n_landmark_, {});
-        for (Index e = 0; e < static_cast<Index>(in_.odom.size()); ++e)
-        {
-            pose_odom_edges_[in_.odom[e].a].push_back(e);
-            pose_odom_edges_[in_.odom[e].b].push_back(e);
-        }
-        for (Index e = 0; e < static_cast<Index>(in_.observations.size()); ++e)
-        {
-            pose_obs_edges_[in_.observations[e].pose_k].push_back(e);
-            lmk_obs_edges_[in_.observations[e].lmk_j].push_back(e);
-        }
     }
 
     SlamProblemInput in_;
@@ -526,9 +420,7 @@ private:
     Index n_pose_;
     Index n_landmark_;
     Scalar cost_scale_ = 1.0; // 1 / (total residual count) — see ctor
-    std::vector<std::vector<Index>> pose_odom_edges_;
-    std::vector<std::vector<Index>> pose_obs_edges_;
-    std::vector<std::vector<Index>> lmk_obs_edges_;
+    std::vector<Scalar> diag_ws_; // column-major diagonal Hessian blocks
 };
 
 // ============================================================================

@@ -28,6 +28,7 @@
 #include <fatrop/ip_algorithm/ip_alg_builder.hpp>
 #include <fatrop/ip_algorithm/ip_algorithm.hpp>
 #include <fatrop/ip_algorithm/ip_data.hpp>
+#include <fatrop/linear_algebra/blasfeo_operations.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -57,72 +58,72 @@ public:
         }
     }
 
-    Index get_num_blocks() const override { return N; }
-    Index get_block_size(Index) const override { return BLK; }
-    Index get_ng_ineq(Index) const override { return BLK; }
-
-    std::vector<std::pair<Index, Index>> get_off_diag_edges() const override
+    GraphStructure get_structure() const override
     {
-        std::vector<std::pair<Index, Index>> edges;
+        GraphStructure st;
+        st.block_sizes.assign(N, BLK);
+        st.ng_ineq.assign(N, BLK);
         for (Index k = 0; k + 1 < N; ++k)
-            edges.emplace_back(k, k + 1);
-        return edges;
+            st.off_diag_edges.emplace_back(k + 1, k);
+        return st;
     }
 
-    Index eval_Hk(Index i, Index j, const Scalar *objective_scale, const Scalar * /*x*/,
-                  const Scalar * /*mult*/, MAT *res) override
+    Index eval_hessian(const Scalar *objective_scale, const Scalar *x, const Scalar * /*mult*/,
+                       GraphHessianView &H) override
     {
         const Scalar s = objective_scale[0];
-        blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
-        if (i == j)
+        for (Index k = 0; k < N; ++k)
         {
             // Hessian diagonal block: identity (from 0.5 * ||x_k - r_k||^2).
-            for (Index a = 0; a < BLK; ++a)
-                blasfeo_matel_wrap(res, a, a) = s * 1.0;
+            MatRealView Hkk = H.diag(k);
+            diare(BLK, s, Hkk, 0, 0);
         }
-        else
+        for (Index e = 0; e + 1 < N; ++e)
         {
-            // Off-diagonal block (i > j): alpha * I  (from alpha * x_i^T x_j).
-            for (Index a = 0; a < BLK; ++a)
-                blasfeo_matel_wrap(res, a, a) = s * ALPHA;
+            // Off-diagonal block (e+1, e): alpha * I  (from alpha * x_i^T x_j).
+            MatRealView He = H.off(e);
+            diare(BLK, s * ALPHA, He, 0, 0);
         }
-        return 0;
+        return eval_gradient(objective_scale, x, H.grad());
     }
 
-    Index eval_grad_k(Index k, const Scalar *objective_scale, const Scalar *x, Scalar *res) override
+    Index eval_gradient(const Scalar *objective_scale, const Scalar *x, Scalar *res) override
     {
         const Scalar s = objective_scale[0];
         // grad_k = (x_k - r_k) + alpha * (sum of neighbour x's).
-        for (Index a = 0; a < BLK; ++a)
-            res[a] = s * (x[k * BLK + a] - r_[k * BLK + a]);
-        // Neighbours: (k-1) and (k+1) in the chain.
-        if (k > 0)
+        for (Index k = 0; k < N; ++k)
+        {
+            Scalar *gk = res + k * BLK;
             for (Index a = 0; a < BLK; ++a)
-                res[a] += s * ALPHA * x[(k - 1) * BLK + a];
-        if (k + 1 < N)
-            for (Index a = 0; a < BLK; ++a)
-                res[a] += s * ALPHA * x[(k + 1) * BLK + a];
+                gk[a] = s * (x[k * BLK + a] - r_[k * BLK + a]);
+            if (k > 0)
+                for (Index a = 0; a < BLK; ++a)
+                    gk[a] += s * ALPHA * x[(k - 1) * BLK + a];
+            if (k + 1 < N)
+                for (Index a = 0; a < BLK; ++a)
+                    gk[a] += s * ALPHA * x[(k + 1) * BLK + a];
+        }
         return 0;
     }
 
-    Index eval_Ggt_ineq_k(Index k, const Scalar *x, MAT *res) override
+    Index eval_jacobian_ineq(const Scalar *x, GraphJacobianView &J) override
     {
         // Inequality g_ineq_k(x_k) = x_k, so the (BLK+1) x BLK transposed
         // Jacobian's top part is the identity. The trailing row stores the
         // current value of g_ineq_k.
-        blasfeo_gese_wrap(res->m, res->n, 0.0, res, 0, 0);
-        for (Index a = 0; a < BLK; ++a)
+        for (Index k = 0; k < N; ++k)
         {
-            blasfeo_matel_wrap(res, a, a) = 1.0;
-            blasfeo_matel_wrap(res, BLK, a) = x[k * BLK + a];
+            MatRealView Jk = J.block(k);
+            diare(BLK, 1.0, Jk, 0, 0);
+            pack_mat(1, BLK, const_cast<Scalar *>(x + k * BLK), 1, Jk, BLK, 0);
         }
         return 0;
     }
 
-    Index eval_gineq_k(Index k, const Scalar *x, Scalar *res) override
+    Index eval_gineq(const Scalar *x, Scalar *res) override
     {
-        for (Index a = 0; a < BLK; ++a)
-            res[a] = x[k * BLK + a];
+        for (Index i = 0; i < N * BLK; ++i)
+            res[i] = x[i];
         return 0;
     }
 
@@ -161,6 +162,13 @@ public:
         for (Index i = 0; i < N * BLK; ++i)
             x[i] = 0.0;
         return 0;
+    }
+
+    void apply_retraction(const Scalar *x, const Scalar *delta_x, const Scalar alpha,
+                          Scalar *x_next) override
+    {
+        for (Index i = 0; i < N * BLK; ++i)
+            x_next[i] = x[i] + alpha * delta_x[i];
     }
 
 private:
