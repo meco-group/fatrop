@@ -24,7 +24,8 @@ namespace fatrop
      * the degree of a block is (an upper bound on) the summed size of its
      * current neighbours, which approximates the cost of eliminating it.
      * Blocks with identical adjacency are merged into supervariables and
-     * eliminated consecutively.
+     * eliminated consecutively. The result is postordered on the elimination
+     * tree, so every subtree occupies consecutive positions.
      *
      * After construction, @c perm()[k] gives the original block index that is
      * eliminated at step @c k, and @c inv_perm()[orig] gives the elimination

@@ -50,9 +50,10 @@ double sum_squares(double a, double b)
 // One AMD run. Ties between equal degrees are decided by the bucket order,
 // which the two flags flip: the initial insertion order and the order in which
 // L_p is reinserted. Returns the flops (sum of squared scalar column counts of
-// L), which are exact since L_p is the exact pattern of the pivot's columns.
+// L), which are exact since L_p is the exact pattern of the pivot's columns,
+// and the scalar off-diagonal count of every block column of L in count.
 double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_reinsert,
-           std::vector<Index> &perm, std::vector<Index> &inv_perm)
+           std::vector<Index> &perm, std::vector<Index> &inv_perm, std::vector<Index> &count)
 {
     const Index n = sp.num_blocks();
     // var[i] / elem[i]: A_i / E_i of a variable; var[e] holds L_e of an element.
@@ -154,6 +155,7 @@ double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_rei
         state[p] = ELEMENT;
         const Index rem_before = rem;
         rem -= w[p];
+        const Index n_first = n_out;
         emit(p);
         for (Index i : lp)
             bucket_remove(i);
@@ -296,6 +298,11 @@ double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_rei
         el_nv[p] = lp_nv;
         // p and the mass-eliminated variables form one chain above L_p.
         flops += sum_squares(lp_w, lp_w + rem_before - rem);
+        for (Index q = n_out - 1, below = lp_w; q >= n_first; --q)
+        {
+            count[perm[q]] = below;
+            below += sp.block_size(perm[q]);
+        }
     }
     return flops;
 }
@@ -304,18 +311,89 @@ double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_rei
 BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
     : perm_(sp.num_blocks()), inv_perm_(sp.num_blocks())
 {
+    const Index n = sp.num_blocks();
     // AMD is sensitive to tie-breaking on regular meshes; keep the cheapest of
     // four tie-breaking variants.
-    std::vector<Index> perm(sp.num_blocks()), inv_perm(sp.num_blocks());
+    std::vector<Index> perm(n), inv_perm(n), count(n), best_count(n);
     double best = -1.;
     for (int variant = 0; variant < 4; ++variant)
     {
-        const double flops = amd(sp, variant & 1, variant & 2, perm, inv_perm);
+        const double flops = amd(sp, variant & 1, variant & 2, perm, inv_perm, count);
         if (best < 0. || flops < best)
         {
             best = flops;
             perm_.swap(perm);
             inv_perm_.swap(inv_perm);
+            best_count.swap(count);
         }
     }
+
+    // Postorder the elimination tree (same fill): subtrees become contiguous,
+    // so a column directly follows its last child and chains can be merged
+    // into supernodes. The child with the largest column count goes last; its
+    // pattern overlaps most with the parent's.
+    // Elimination tree (Liu) in AMD positions.
+    std::vector<Index> parent(n, -1), ancestor(n, -1);
+    for (Index k = 0; k < n; ++k)
+        for (Index u : sp.neighbors(perm_[k]))
+        {
+            Index r = inv_perm_[u];
+            if (r > k)
+                continue;
+            while (ancestor[r] != -1 && ancestor[r] != k)
+            {
+                const Index t = ancestor[r];
+                ancestor[r] = k;
+                r = t;
+            }
+            if (ancestor[r] == -1)
+            {
+                ancestor[r] = k;
+                parent[r] = k;
+            }
+        }
+    // Children sorted by increasing column count, as CSR.
+    std::vector<Index> child_start(n + 1, 0), child(n), by_count(n);
+    for (Index k = 0; k < n; ++k)
+        if (parent[k] != -1)
+            ++child_start[parent[k] + 1];
+    for (Index k = 0; k < n; ++k)
+        child_start[k + 1] += child_start[k];
+    for (Index k = 0; k < n; ++k)
+        by_count[k] = k;
+    std::stable_sort(by_count.begin(), by_count.end(), [&](Index a, Index b)
+                     { return best_count[perm_[a]] < best_count[perm_[b]]; });
+    std::vector<Index> fill(child_start.begin(), child_start.end() - 1);
+    for (Index k : by_count)
+        if (parent[k] != -1)
+            child[fill[parent[k]]++] = k;
+    // Iterative depth-first search from the roots.
+    std::vector<Index> post, stack, next(n);
+    post.reserve(n);
+    stack.reserve(n);
+    for (Index root = 0; root < n; ++root)
+    {
+        if (parent[root] != -1)
+            continue;
+        stack.push_back(root);
+        next[root] = child_start[root];
+        while (!stack.empty())
+        {
+            const Index k = stack.back();
+            if (next[k] < child_start[k + 1])
+            {
+                const Index c = child[next[k]++];
+                next[c] = child_start[c];
+                stack.push_back(c);
+                continue;
+            }
+            stack.pop_back();
+            post.push_back(k);
+        }
+    }
+    for (Index k = 0; k < n; ++k)
+        perm[k] = perm_[post[k]];
+    perm_.swap(perm);
+    for (Index k = 0; k < n; ++k)
+        inv_perm_[perm_[k]] = k;
 }
