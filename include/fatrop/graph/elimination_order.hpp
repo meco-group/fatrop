@@ -13,18 +13,18 @@
 namespace fatrop
 {
     /**
-     * @brief Block-weighted minimum-degree elimination order.
+     * @brief Block-weighted approximate minimum degree elimination order.
      *
      * Computes a permutation of the blocks of @ref BlockSparsityPattern that
      * approximates a minimum-fill ordering for a symmetric block Cholesky
      * factorisation.
      *
-     * The algorithm runs the classical minimum-degree heuristic on the
-     * (quotient) elimination graph, but weights vertices by their block size:
-     * the "degree" of a vertex is the sum of the sizes of its current
-     * neighbours, which approximates the dense floating-point cost of
-     * eliminating that vertex. Eliminating a vertex turns its neighbour set
-     * into a clique (modelling block fill-in), then the vertex is removed.
+     * Runs approximate minimum degree (Amestoy, Davis, Duff 1996) on the
+     * quotient graph of the block graph, with degrees weighted by block size:
+     * the degree of a block is (an upper bound on) the summed size of its
+     * current neighbours, which approximates the cost of eliminating it.
+     * Blocks with identical adjacency are merged into supervariables and
+     * eliminated consecutively.
      *
      * After construction, @c perm()[k] gives the original block index that is
      * eliminated at step @c k, and @c inv_perm()[orig] gives the elimination
