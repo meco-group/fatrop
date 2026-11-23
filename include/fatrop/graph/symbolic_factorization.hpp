@@ -42,20 +42,19 @@ namespace fatrop
         /// in column @c j of @c L, in permuted coordinates.
         const std::vector<Index> &lower_pattern(Index j) const { return lower_pattern_[j]; }
 
-        /// Fundamental supernode partition of the columns.
+        /// Relaxed supernode partition of the columns.
         ///
         /// A range @c [supernode_start(s), supernode_start(s+1)) of consecutive
-        /// columns (in elimination order) forms a supernode iff:
-        ///   * each column's elimination-tree parent is the next column, AND
-        ///   * the lower pattern of column @c k+1 equals the lower pattern of
-        ///     column @c k with the leading row @c k+1 removed
-        ///     (equivalently, |lp(k+1)| = |lp(k)| - 1 — the count condition
-        ///     suffices once the parent condition holds, because inheritance
-        ///     forces @c lp(k+1) ⊇ lp(k) \ {k+1}).
+        /// columns (in elimination order) is a chain in the elimination tree.
+        /// Fundamental supernodes (each column's parent is the next column and
+        /// @c lp(k+1) = @c lp(k) \ {k+1}) are merged further with their
+        /// parent supernode while the result stays small; the merged columns
+        /// are stored with explicit zeros. Every column of the supernode is
+        /// stored with the internal rows below it and the external rows
+        /// @c lower_pattern(supernode_start(s+1) - 1), which contain its own.
         ///
-        /// Columns inside the same supernode share an identical block of
-        /// external off-diagonal rows: eliminating them can be done as one
-        /// dense (block_size_total + ext) x block_size_total panel factorisation
+        /// Eliminating the columns of a supernode is one dense
+        /// (block_size_total + ext) x block_size_total panel factorisation
         /// instead of one panel per column, amortising BLASFEO call overhead.
         /// The sentinel @c supernode_start(num_supernodes()) equals @c num_blocks().
         Index num_supernodes() const { return static_cast<Index>(supernode_start_.size()) - 1; }
