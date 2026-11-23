@@ -8,7 +8,6 @@
 #include "fatrop/graph/elimination_order.hpp"
 
 #include <algorithm>
-#include <set>
 
 using namespace fatrop;
 
@@ -76,22 +75,27 @@ BlockSymbolicFactorization::BlockSymbolicFactorization(const BlockSparsityPatter
     // Compute column patterns:
     //   pattern(L, :, j) = original A_lower(:, j) ∪ ⋃_{c child of j} (pattern(L, :, c) ∩ rows > j)
     // Process columns in order (children are < parent).
-    std::vector<std::set<Index>> work(N);
+    std::vector<Index> mark(N, -1);
     for (Index j = 0; j < N; ++j)
     {
-        auto &col = work[j];
-        for (Index i : A_lower[j])
-            col.insert(i);
-        for (Index c : children[j])
+        auto &col = lower_pattern_[j];
+        mark[j] = j;
+        auto add = [&](Index i)
         {
-            // We only inherit rows strictly greater than j; the entry "j"
-            // itself is the parent slot and not stored in the pattern.
-            for (Index i : work[c])
-                if (i > j)
-                    col.insert(i);
-        }
-        lower_pattern_[j].assign(col.begin(), col.end());
-        std::sort(lower_pattern_[j].begin(), lower_pattern_[j].end());
+            if (mark[i] != j)
+            {
+                mark[i] = j;
+                col.push_back(i);
+            }
+        };
+        for (Index i : A_lower[j])
+            add(i);
+        // Inherited rows are > j except the parent slot j itself, which the
+        // mark already excludes.
+        for (Index c : children[j])
+            for (Index i : lower_pattern_[c])
+                add(i);
+        std::sort(col.begin(), col.end());
     }
 
     // Fundamental-supernode partition. Walk columns left-to-right; column k
