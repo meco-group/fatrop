@@ -133,24 +133,61 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
             sn_ext_ops_[s].push_back(e);
         }
 
-        // Schur trailing update: where each block (a, b), b <= a, of the dense
-        // update goes.
-        sn_schur_[s].reserve(static_cast<size_t>(n_ext) * (static_cast<size_t>(n_ext) + 1) / 2);
-        for (Index a = 0; a < n_ext; ++a)
+        // Schur trailing update: where the blocks (a, b), b <= a, of the dense
+        // update go. Blocks are grouped into rectangles that land contiguously
+        // in one panel, one gead each: rows a with consecutive destination
+        // rows form a run, and runs of consecutive columns with the same rows
+        // form a rectangle. A diagonal run may join a rectangle that starts
+        // higher; the extra rows are upper triangle in both W and the target
+        // and never read.
+        auto &ops = sn_schur_[s];
+        std::vector<size_t> open, next_open;
+        for (Index b = 0; b < n_ext; ++b)
         {
-            for (Index b = 0; b <= a; ++b)
+            next_open.clear();
+            for (Index a = b; a < n_ext;)
             {
                 const LBlockLoc loc = l_loc_(ext_set[a], ext_set[b]);
-                SchurOp op;
-                op.target_sn = loc.sn;
-                op.dst_row = loc.row_off;
-                op.dst_col = loc.col_off;
-                op.ni = perm_block_sizes_[ext_set[a]];
-                op.nj = perm_block_sizes_[ext_set[b]];
-                op.src_row = sn_ext_row_off_[s][a];
-                op.src_col = sn_ext_row_off_[s][b];
-                sn_schur_[s].push_back(op);
+                SchurOp run;
+                run.target_sn = loc.sn;
+                run.dst_row = loc.row_off;
+                run.dst_col = loc.col_off;
+                run.ni = 0;
+                run.nj = perm_block_sizes_[ext_set[b]];
+                run.src_row = sn_ext_row_off_[s][a];
+                run.src_col = sn_ext_row_off_[s][b];
+                for (; a < n_ext; ++a)
+                {
+                    const LBlockLoc l = l_loc_(ext_set[a], ext_set[b]);
+                    if (l.sn != run.target_sn || l.col_off != run.dst_col ||
+                        l.row_off != run.dst_row + run.ni)
+                        break;
+                    run.ni += perm_block_sizes_[ext_set[a]];
+                }
+                const bool diagonal = run.src_row == run.src_col;
+                bool merged = false;
+                for (size_t r : open)
+                {
+                    SchurOp &op = ops[r];
+                    if (op.target_sn == run.target_sn && op.src_col + op.nj == run.src_col &&
+                        op.dst_col + op.nj == run.dst_col &&
+                        op.src_row + op.ni == run.src_row + run.ni &&
+                        op.dst_row - op.src_row == run.dst_row - run.src_row &&
+                        (op.src_row == run.src_row || (diagonal && op.src_row < run.src_row)))
+                    {
+                        op.nj += run.nj;
+                        next_open.push_back(r);
+                        merged = true;
+                        break;
+                    }
+                }
+                if (!merged)
+                {
+                    next_open.push_back(ops.size());
+                    ops.push_back(run);
+                }
             }
+            open.swap(next_open);
         }
     }
 
@@ -340,7 +377,6 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
             MatRealAllocated &W = *schur_ws_;
             gecp(ext_total, t_total, P, t_total, 0, E, 0, 0);
             syrk_ln_mn(ext_total, ext_total, t_total, 1.0, E, 0, 0, E, 0, 0, 0.0, W, 0, 0, W, 0, 0);
-            trtr_l(ext_total, W, 0, 0, W, 0, 0);
             for (const SchurOp &op : sn_schur_[s])
                 gead(op.ni, op.nj, -1.0, W, op.src_row, op.src_col,
                      L_supernode_[op.target_sn], op.dst_row, op.dst_col);
