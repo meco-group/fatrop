@@ -71,6 +71,7 @@ set(FATROP_SOURCES
     graph/hessian.cpp
     graph/jacobian.cpp
     graph/nlp_graph.cpp
+    graph/graph_blockwise_adapter.cpp
     graph/aug_system_solver.cpp
     graph/pd_system_orig.cpp
     graph/pd_solver_orig.cpp

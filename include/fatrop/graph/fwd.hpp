@@ -35,6 +35,8 @@ namespace fatrop
     template <typename T> class AugSystemSolver;
     template <> class AugSystemSolver<GraphProblem>;
     class GraphAbstract;
+    class GraphBlockwiseAbstract;
+    class GraphBlockwiseAdapter;
     class NlpGraph;
 } // namespace fatrop
 
