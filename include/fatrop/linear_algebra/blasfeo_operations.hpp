@@ -61,7 +61,7 @@ namespace fatrop
 
     static inline void rowpe(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_rowpe_wrap(kmax, ipiv, &A.mat());
+        blasfeo_rowpe_wrap(kmax, ipiv, A.n(), &A.mat(), A.ai(), A.aj());
     }
 
     static inline void vecpe(int kmax, int *ipiv, VecRealView &x, int xi)
@@ -76,17 +76,17 @@ namespace fatrop
 
     static inline void rowpei(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_rowpei_wrap(kmax, ipiv, &A.mat());
+        blasfeo_rowpei_wrap(kmax, ipiv, A.n(), &A.mat(), A.ai(), A.aj());
     }
 
     static inline void colpe(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_colpe_wrap(kmax, ipiv, &A.mat());
+        blasfeo_colpe_wrap(kmax, ipiv, A.m(), &A.mat(), A.ai(), A.aj());
     }
 
     static inline void colpei(int kmax, int *ipiv, MatRealView &A)
     {
-        blasfeo_colpei_wrap(kmax, ipiv, &A.mat());
+        blasfeo_colpei_wrap(kmax, ipiv, A.m(), &A.mat(), A.ai(), A.aj());
     }
 
     static inline void rowsw(int kmax, MatRealView &A, int ai, int aj, MatRealView &C, int ci,
@@ -339,35 +339,62 @@ namespace fatrop
                          sC.ai() + ci, sC.aj() + cj, &sD.mat(), sD.ai() + di, sD.aj() + dj);
     }
 
-    static inline void gead_transposed(int m, int n, Scalar alpha, const MatRealView &A, int ai,
-                                       int aj, MatRealView &B, int bi, int bj)
+    static inline void trsm_rlnu(int m, int n, Scalar alpha, const MatRealView &A, int ai, int aj,
+                                 const MatRealView &B, int bi, int bj, MatRealView &D, int di,
+                                 int dj)
     {
-        fatrop_gead_transposed(m, n, alpha, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
-                               &B.mat(), B.ai() + bi, B.aj() + bj);
+        blasfeo_trsm_rlnu_wrap(m, n, alpha, &A.mat(), A.ai() + ai, A.aj() + aj, &B.mat(),
+                               B.ai() + bi, B.aj() + bj, &D.mat(), D.ai() + di, D.aj() + dj);
     }
 
-    static inline void trsv_unu(int m, int n, const MatRealView &A, int ai, int aj,
-                                const VecRealView &x, int xi, VecRealView &z, int zi)
+    static inline void trsm_runn(int m, int n, Scalar alpha, const MatRealView &A, int ai, int aj,
+                                 const MatRealView &B, int bi, int bj, MatRealView &D, int di,
+                                 int dj)
     {
-        fatrop_trsv_unu(m, n, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
-                        const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
+        blasfeo_trsm_runn_wrap(m, n, alpha, &A.mat(), A.ai() + ai, A.aj() + aj, &B.mat(),
+                               B.ai() + bi, B.aj() + bj, &D.mat(), D.ai() + di, D.aj() + dj);
     }
 
-    static inline void trsv_utu(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
+    static inline void gemm_nn(int m, int n, int k, Scalar alpha, const MatRealView &A, int ai,
+                               int aj, const MatRealView &B, int bi, int bj, Scalar beta,
+                               const MatRealView &C, int ci, int cj, MatRealView &D, int di, int dj)
+    {
+        blasfeo_gemm_nn_wrap(m, n, k, alpha, &A.mat(), A.ai() + ai, A.aj() + aj, &B.mat(),
+                             B.ai() + bi, B.aj() + bj, beta, &C.mat(), C.ai() + ci, C.aj() + cj,
+                             &D.mat(), D.ai() + di, D.aj() + dj);
+    }
+
+    static inline void trsv_lnu(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
                                 int xi, VecRealView &z, int zi)
     {
-        fatrop_trsv_utu(m, const_cast<MAT *>(&A.mat()), A.ai() + ai, A.aj() + aj,
-                        const_cast<VEC *>(&x.vec()), x.ai() + xi, &z.vec(), z.ai() + zi);
+        blasfeo_trsv_lnu_wrap(m, &A.mat(), A.ai() + ai, A.aj() + aj, &x.vec(), x.ai() + xi,
+                              &z.vec(), z.ai() + zi);
     }
 
-    // void fatrop_lu_fact_transposed(const Index m, const Index n, const Index n_max, Index &rank,
-    // MAT *At, PermutationMatrix &Pl, PermutationMatrix &Pr, double tol = 1e-5);
-
-    static inline void lu_fact_transposed(const Index m, const Index n, const Index n_max,
-                                          Index &rank, const MatRealView &At, PermutationMatrix &Pl,
-                                          PermutationMatrix &Pr, double tol = 1e-5)
+    static inline void trsv_ltu(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
+                                int xi, VecRealView &z, int zi)
     {
-        fatrop_lu_fact_transposed(m, n, n_max, rank, const_cast<MAT *>(&At.mat()), Pl, Pr, tol);
+        blasfeo_trsv_ltu_wrap(m, &A.mat(), A.ai() + ai, A.aj() + aj, &x.vec(), x.ai() + xi,
+                              &z.vec(), z.ai() + zi);
+    }
+
+    static inline void trsv_unn(int m, const MatRealView &A, int ai, int aj, const VecRealView &x,
+                                int xi, VecRealView &z, int zi)
+    {
+        blasfeo_trsv_unn_wrap(m, &A.mat(), A.ai() + ai, A.aj() + aj, &x.vec(), x.ai() + xi,
+                              &z.vec(), z.ai() + zi);
+    }
+
+    static inline void colex(int kmax, const MatRealView &A, int ai, int aj, VecRealView &x, int xi)
+    {
+        blasfeo_colex_wrap(kmax, &A.mat(), A.ai() + ai, A.aj() + aj, &x.vec(), x.ai() + xi);
+    }
+
+    static inline void rowad(int kmax, Scalar alpha, const VecRealView &x, int xi, MatRealView &A,
+                             int ai, int aj)
+    {
+        blasfeo_rowad_wrap(kmax, alpha, &x.vec(), x.ai() + xi, &A.mat(), A.ai() + ai,
+                           A.aj() + aj);
     }
 }
 

@@ -180,8 +180,8 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
                     gemm_nt(nu + nx + 1, Hp1_size, nxp1, 1.0, jacobian.BAbt[k], 0, 0, Hh[k + 1], 0,
                             0, 0.0, Ggt_stripe[0], 0, ng, Ggt_stripe[0], 0, ng);
                     // Ggt_stripe[-1,ng:] <- Ggt_stripe[-1,ng:] + h_kp1^T
-                    gead_transposed(1, Hp1_size, 1.0, Hh[k + 1], 0, nxp1, Ggt_stripe[0], nu + nx,
-                                    ng);
+                    colex(Hp1_size, Hh[k + 1], 0, nxp1, v_tmp[0], 0);
+                    rowad(Hp1_size, 1.0, v_tmp[0], 0, Ggt_stripe[0], nu + nx, ng);
                 }
             }
             else
@@ -230,7 +230,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
             {
                 // Ggt_tilde_k <- Ggt_stripe[rho_k:nu+nx+1, :rho] L-T (note that this is slightly
                 // different from the implementation)
-                trsm_rlnn(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe[0], 0, 0, Ggt_stripe[0],
+                trsm_rlnu(nu - rank_k + nx + 1, rank_k, -1.0, Ggt_stripe[0], 0, 0, Ggt_stripe[0],
                           rank_k, 0, Ggt_tilde[k], 0, 0);
                 // the following command copies the top block matrix (LU) to the bottom because it
                 // it needed later
@@ -325,7 +325,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
                 return LinsolReturnFlag::NOFULL_RANK;
             // PpIt_tilde <- Ggt[rankI:nx+1, :rankI] L-T (note that this is slightly different from
             // the implementation)
-            trsm_rlnn(nx - rankI + 1, rankI, -1.0, HhIt[0], 0, 0, HhIt[0], rankI, 0, GgIt_tilde[0],
+            trsm_rlnu(nx - rankI + 1, rankI, -1.0, HhIt[0], 0, 0, HhIt[0], rankI, 0, GgIt_tilde[0],
                       0, 0);
             // permutations
             PrI[0].apply_on_rows(rankI, &Ppt[0].mat()); // TODO make use of symmetry
@@ -377,9 +377,9 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
         gemv_t(nx, rankI, -1.0, Ppt[0], 0, 0, x, offs_x, 1.0, eq_mult, offs_g, eq_mult, offs_g);
 
         // U^-T
-        trsv_lnn(rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
+        trsv_lnu(rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
         // L^-T
-        trsv_unu(rankI, rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
+        trsv_unn(rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
         PlI[0].apply_inverse(rankI, &eq_mult.vec(), offs_g);
         PrI[0].apply_inverse(rankI, &x.vec(), offs_x);
     }
@@ -428,12 +428,14 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
             gemv_t(nu + nx, rho_k, -1.0, RSQrqt_tilde[k], 0, 0, x, offs, 1.0, eq_mult, offs_g_k,
                    eq_mult, offs_g_k);
             // nu-rank_k+nx,0
-            // needless copy because feature not implemented yet in trsv_lnn
+            // copy: HP trsv needs ai == 0
             gecp(rho_k, gamma_k, Ggt_tilde[k], nu - rho_k + nx + 1, 0, AL[0], 0, 0);
             // U^-T
-            trsv_lnn(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
+            trsv_lnu(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
             // L^-T
-            trsv_unu(rho_k, gamma_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
+            gemv_n(rho_k, gamma_k - rho_k, -1.0, AL[0], 0, rho_k, eq_mult, offs_g_k + rho_k, 1.0,
+                   eq_mult, offs_g_k, eq_mult, offs_g_k);
+            trsv_unn(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
             Pl[k].apply_inverse(rho_k, &eq_mult.vec(), offs_g_k);
             Pr[k].apply_inverse(rho_k, &x.vec(), offs);
         }
@@ -705,7 +707,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
             rank_k = rho[k];
             gecp(rank_k, gamma_k, Ggt_tilde[k], nu - rank_k + nx + 1, 0, Ggt_stripe[0], 0, 0);
             Pl[k].apply(rank_k, &v_Ggt_stripe[0].vec(), 0);
-            trsv_utu(rank_k, Ggt_stripe[0], 0, 0, v_Ggt_stripe[0], 0, v_Ggt_stripe[0], 0);
+            trsv_utn(rank_k, Ggt_stripe[0], 0, 0, v_Ggt_stripe[0], 0, v_Ggt_stripe[0], 0);
             gemv_t(rank_k, gamma_k - rank_k, -1.0, Ggt_stripe[0], 0, rank_k, v_Ggt_stripe[0], 0,
                    1.0, v_Ggt_stripe[0], rank_k, v_Ggt_stripe[0], rank_k);
 
@@ -716,7 +718,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
             if (rank_k > 0)
             {
                 veccpsc(rank_k, -1.0, v_Ggt_stripe[0], 0, v_Ggt_tilde[k], 0);
-                trsv_ltn(rank_k, Ggt_stripe[0], 0, 0, v_Ggt_tilde[k], 0, v_Ggt_tilde[k], 0);
+                trsv_ltu(rank_k, Ggt_stripe[0], 0, 0, v_Ggt_tilde[k], 0, v_Ggt_tilde[k], 0);
                 Pr[k].apply(rank_k, &v_RSQrqt_tilde[k].vec(), 0);
                 veccp(nu + nx, v_RSQrqt_tilde[k], 0, v_GgLt[0], 0);
                 gemv_n(nu + nx, rank_k, 1.0, RSQrqt_tilde[k], 0, 0, v_Ggt_tilde[k], 0, 1.0,
@@ -759,11 +761,11 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
         {
             veccp(gamma_I, v_Hh[0], 0, v_HhIt[0], 0);
             PlI[0].apply(rankI, &v_HhIt[0].vec(), 0);
-            trsv_utu(rankI, HhIt[0], 0, 0, v_HhIt[0], 0, v_HhIt[0], 0);
+            trsv_utn(rankI, HhIt[0], 0, 0, v_HhIt[0], 0, v_HhIt[0], 0);
             gemv_t(rankI, gamma_I - rankI, -1.0, HhIt[0], 0, rankI, v_HhIt[0], 0, 1.0, v_HhIt[0],
                    rankI, v_HhIt[0], rankI);
             veccpsc(rankI, -1.0, v_HhIt[0], 0, v_GgIt_tilde[0], 0);
-            trsv_ltn(rankI, HhIt[0], 0, 0, v_GgIt_tilde[0], 0, v_GgIt_tilde[0], 0);
+            trsv_ltu(rankI, HhIt[0], 0, 0, v_GgIt_tilde[0], 0, v_GgIt_tilde[0], 0);
             PrI[0].apply(rankI, &v_Ppt[0].vec(), 0);
             veccp(nx, v_Ppt[0], 0, v_GgLIt[0], 0);
             gemv_n(nx, rankI, 1.0, Ppt[0], 0, 0, v_GgIt_tilde[0], 0, 1.0, v_GgLIt[0], 0, v_GgLIt[0],
@@ -790,8 +792,8 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
                offs_x);
         veccpsc(rankI, -1.0, v_Ppt[0], 0, eq_mult, offs_g);
         gemv_t(nx, rankI, -1.0, Ppt[0], 0, 0, x, nu, 1.0, eq_mult, offs_g, eq_mult, offs_g);
-        trsv_lnn(rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
-        trsv_unu(rankI, rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
+        trsv_lnu(rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
+        trsv_unn(rankI, HhIt[0], 0, 0, eq_mult, offs_g, eq_mult, offs_g);
         PlI[0].apply_inverse(rankI, &eq_mult.vec(), offs_g);
         PrI[0].apply_inverse(rankI, &x.vec(), offs_x);
     }
@@ -835,8 +837,10 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> 
             gemv_t(nu + nx, rho_k, -1.0, RSQrqt_tilde[k], 0, 0, x, offs, 1.0, eq_mult, offs_g_k,
                    eq_mult, offs_g_k);
             gecp(rho_k, gamma_k, Ggt_tilde[k], nu - rho_k + nx + 1, 0, AL[0], 0, 0);
-            trsv_lnn(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
-            trsv_unu(rho_k, gamma_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
+            trsv_lnu(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
+            gemv_n(rho_k, gamma_k - rho_k, -1.0, AL[0], 0, rho_k, eq_mult, offs_g_k + rho_k, 1.0,
+                   eq_mult, offs_g_k, eq_mult, offs_g_k);
+            trsv_unn(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
             Pl[k].apply_inverse(rho_k, &eq_mult.vec(), offs_g_k);
             Pr[k].apply_inverse(rho_k, &x.vec(), offs);
         }

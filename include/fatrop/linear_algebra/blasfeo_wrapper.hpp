@@ -29,10 +29,34 @@ extern "C"
 
 namespace fatrop
 {
-    static inline Scalar &blasfeo_matel_wrap(MAT *A, const int ai, const int aj)
+    // Reference to a matrix element. Goes through blasfeo's API instead of BLASFEO_DMATEL, so the
+    // panel size of the linked libblasfeo is used, not the one of the headers.
+    class MatElRef
+    {
+    public:
+        MatElRef(MAT *A, const int ai, const int aj) : A_(A), ai_(ai), aj_(aj) {}
+        operator Scalar() const { return blasfeo_dgeex1(A_, ai_, aj_); }
+        MatElRef &operator=(const Scalar a)
+        {
+            blasfeo_dgein1(a, A_, ai_, aj_);
+            return *this;
+        }
+        MatElRef &operator=(const MatElRef &other) { return *this = Scalar(other); }
+        MatElRef &operator+=(const Scalar a) { return *this = Scalar(*this) + a; }
+        MatElRef &operator-=(const Scalar a) { return *this = Scalar(*this) - a; }
+        MatElRef &operator*=(const Scalar a) { return *this = Scalar(*this) * a; }
+        MatElRef &operator/=(const Scalar a) { return *this = Scalar(*this) / a; }
+
+    private:
+        MAT *A_;
+        const int ai_;
+        const int aj_;
+    };
+
+    static inline MatElRef blasfeo_matel_wrap(MAT *A, const int ai, const int aj)
     {
         fatrop_dbg_assert(ai < A->m && aj < A->n);
-        return MATEL(A, ai, aj);
+        return MatElRef(A, ai, aj);
     }
     static inline Scalar &blasfeo_vecel_wrap(VEC *A, const int ai)
     {
@@ -43,7 +67,7 @@ namespace fatrop
     static inline Scalar blasfeo_matel_wrap(const MAT *A, const int ai, const int aj)
     {
         fatrop_dbg_assert(ai < A->m && aj < A->n);
-        return MATEL(A, ai, aj);
+        return blasfeo_dgeex1(const_cast<MAT *>(A), ai, aj);
     }
     static inline Scalar blasfeo_vecel_wrap(const VEC *A, const int ai)
     {
@@ -117,10 +141,11 @@ namespace fatrop
         VECMUL(m, const_cast<VEC *>(x), xi, const_cast<VEC *>(y), yi, z, zi);
     }
 
-    static inline void blasfeo_rowpe_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_rowpe_wrap(int kmax, int *ipiv, int n, MAT *sA, int ai, int aj)
     {
-        fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        ROWPE(kmax, ipiv, sA);
+        fatrop_dbg_assert(kmax >= 0 && n >= 0 && ai >= 0 && aj >= 0);
+        fatrop_dbg_assert(ai + kmax <= sA->m && aj + n <= sA->n);
+        ROWPE(kmax, ipiv, n, sA, ai, aj);
     }
 
     static inline void blasfeo_vecpe_wrap(int kmax, int *ipiv, VEC *sx, int xi)
@@ -139,22 +164,25 @@ namespace fatrop
         VECPEI(kmax, ipiv, sx, xi);
     }
 
-    static inline void blasfeo_rowpei_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_rowpei_wrap(int kmax, int *ipiv, int n, MAT *sA, int ai, int aj)
     {
-        fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        ROWPEI(kmax, ipiv, sA);
+        fatrop_dbg_assert(kmax >= 0 && n >= 0 && ai >= 0 && aj >= 0);
+        fatrop_dbg_assert(ai + kmax <= sA->m && aj + n <= sA->n);
+        ROWPEI(kmax, ipiv, n, sA, ai, aj);
     }
 
-    static inline void blasfeo_colpe_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_colpe_wrap(int kmax, int *ipiv, int m, MAT *sA, int ai, int aj)
     {
-        fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        COLPE(kmax, ipiv, sA);
+        fatrop_dbg_assert(kmax >= 0 && m >= 0 && ai >= 0 && aj >= 0);
+        fatrop_dbg_assert(ai + m <= sA->m && aj + kmax <= sA->n);
+        COLPE(kmax, ipiv, m, sA, ai, aj);
     }
 
-    static inline void blasfeo_colpei_wrap(int kmax, int *ipiv, MAT *sA)
+    static inline void blasfeo_colpei_wrap(int kmax, int *ipiv, int m, MAT *sA, int ai, int aj)
     {
-        fatrop_dbg_assert(kmax >= 0 && "kmax must be positive");
-        COLPEI(kmax, ipiv, sA);
+        fatrop_dbg_assert(kmax >= 0 && m >= 0 && ai >= 0 && aj >= 0);
+        fatrop_dbg_assert(ai + m <= sA->m && aj + kmax <= sA->n);
+        COLPEI(kmax, ipiv, m, sA, ai, aj);
     }
 
     static inline void blasfeo_rowsw_wrap(int kmax, MAT *sA, int ai, int aj, MAT *sC, int ci,
@@ -383,6 +411,96 @@ namespace fatrop
                           zi + m <= sz->m &&
                           "Indices and m must fit within matrix and vector dimensions");
         TRSV_UTN(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
+    }
+
+    static inline void blasfeo_trsv_lnu_wrap(int m, const MAT *sA, int ai, int aj, const VEC *sx,
+                                             int xi, VEC *sz, int zi)
+    {
+        fatrop_dbg_assert(m >= 0 && ai >= 0 && aj >= 0 && xi >= 0 && zi >= 0);
+        fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && xi + m <= sx->m && zi + m <= sz->m);
+        TRSV_LNU(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
+    }
+
+    static inline void blasfeo_trsv_ltu_wrap(int m, const MAT *sA, int ai, int aj, const VEC *sx,
+                                             int xi, VEC *sz, int zi)
+    {
+        fatrop_dbg_assert(m >= 0 && ai >= 0 && aj >= 0 && xi >= 0 && zi >= 0);
+        fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && xi + m <= sx->m && zi + m <= sz->m);
+        TRSV_LTU(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
+    }
+
+    static inline void blasfeo_trsv_unn_wrap(int m, const MAT *sA, int ai, int aj, const VEC *sx,
+                                             int xi, VEC *sz, int zi)
+    {
+        fatrop_dbg_assert(m >= 0 && ai >= 0 && aj >= 0 && xi >= 0 && zi >= 0);
+        fatrop_dbg_assert(ai + m <= sA->m && aj + m <= sA->n && xi + m <= sx->m && zi + m <= sz->m);
+        TRSV_UNN(m, const_cast<MAT *>(sA), ai, aj, const_cast<VEC *>(sx), xi, sz, zi);
+    }
+
+    static inline void blasfeo_trsm_rlnu_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai,
+                                              int aj, const MAT *sB, int bi, int bj, MAT *sD,
+                                              int di, int dj)
+    {
+        fatrop_dbg_assert(m >= 0 && n >= 0);
+        fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && di >= 0 && dj >= 0);
+        fatrop_dbg_assert(ai + n <= sA->m && aj + n <= sA->n && bi + m <= sB->m &&
+                          bj + n <= sB->n && di + m <= sD->m && dj + n <= sD->n);
+        TRSM_RLNU(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, sD, di,
+                  dj);
+    }
+
+    static inline void blasfeo_trsm_runn_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai,
+                                              int aj, const MAT *sB, int bi, int bj, MAT *sD,
+                                              int di, int dj)
+    {
+        fatrop_dbg_assert(m >= 0 && n >= 0);
+        fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && di >= 0 && dj >= 0);
+        fatrop_dbg_assert(ai + n <= sA->m && aj + n <= sA->n && bi + m <= sB->m &&
+                          bj + n <= sB->n && di + m <= sD->m && dj + n <= sD->n);
+        TRSM_RUNN(m, n, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, sD, di,
+                  dj);
+    }
+
+    static inline void blasfeo_gemm_nn_wrap(int m, int n, int k, Scalar alpha, const MAT *sA,
+                                            int ai, int aj, const MAT *sB, int bi, int bj,
+                                            Scalar beta, const MAT *sC, int ci, int cj, MAT *sD,
+                                            int di, int dj)
+    {
+        fatrop_dbg_assert(m >= 0 && n >= 0 && k >= 0);
+        fatrop_dbg_assert(ai >= 0 && aj >= 0 && bi >= 0 && bj >= 0 && ci >= 0 && cj >= 0 &&
+                          di >= 0 && dj >= 0);
+        fatrop_dbg_assert(ai + m <= sA->m && aj + k <= sA->n && bi + k <= sB->m &&
+                          bj + n <= sB->n && ci + m <= sC->m && cj + n <= sC->n &&
+                          di + m <= sD->m && dj + n <= sD->n);
+        GEMM_NN(m, n, k, alpha, const_cast<MAT *>(sA), ai, aj, const_cast<MAT *>(sB), bi, bj, beta,
+                const_cast<MAT *>(sC), ci, cj, sD, di, dj);
+    }
+
+    // P * C * Q = L * U, complete pivoting, stops at the first |pivot| <= tol
+    static inline void blasfeo_getrf_fp_wrap(int m, int n, Scalar tol, const MAT *sC, int ci,
+                                             int cj, MAT *sD, int di, int dj, int *ipiv,
+                                             int *jpiv, int *rank)
+    {
+        fatrop_dbg_assert(m >= 0 && n >= 0 && tol >= 0);
+        fatrop_dbg_assert(ci >= 0 && cj >= 0 && di >= 0 && dj >= 0);
+        fatrop_dbg_assert(ci + m <= sC->m && cj + n <= sC->n && di + m <= sD->m &&
+                          dj + n <= sD->n);
+        GETRF_FP(m, n, tol, const_cast<MAT *>(sC), ci, cj, sD, di, dj, ipiv, jpiv, rank);
+    }
+
+    static inline void blasfeo_colex_wrap(int kmax, const MAT *sA, int ai, int aj, VEC *sx, int xi)
+    {
+        fatrop_dbg_assert(kmax >= 0 && ai >= 0 && aj >= 0 && xi >= 0);
+        fatrop_dbg_assert(ai + kmax <= sA->m && aj < sA->n && xi + kmax <= sx->m);
+        COLEX(kmax, const_cast<MAT *>(sA), ai, aj, sx, xi);
+    }
+
+    static inline void blasfeo_rowad_wrap(int kmax, Scalar alpha, const VEC *sx, int xi, MAT *sA,
+                                          int ai, int aj)
+    {
+        fatrop_dbg_assert(kmax >= 0 && xi >= 0 && ai >= 0 && aj >= 0);
+        fatrop_dbg_assert(xi + kmax <= sx->m && ai < sA->m && aj + kmax <= sA->n);
+        ROWAD(kmax, alpha, const_cast<VEC *>(sx), xi, sA, ai, aj);
     }
 
     static inline void blasfeo_gemv_t_wrap(int m, int n, Scalar alpha, const MAT *sA, int ai,
