@@ -57,6 +57,14 @@ namespace fatrop
         /// always the first entry).
         const std::vector<Index> &column_pattern(Index j) const { return column_pattern_[j]; }
 
+        /// Number of stored lower-triangle blocks (diagonal included).
+        Index num_stored_blocks() const { return column_offsets_[num_blocks_]; }
+
+        /// Position of the lower-triangle block @c (i, j), @c i >= j, in the
+        /// column-major storage order (column @c j, then rows in
+        /// @c column_pattern(j)); -1 if not stored.
+        Index block_id(Index i, Index j) const;
+
     private:
         Index num_blocks_;
         Index total_size_;
@@ -64,6 +72,7 @@ namespace fatrop
         std::vector<Index> block_offsets_;
         std::vector<std::vector<Index>> neighbors_;
         std::vector<std::vector<Index>> column_pattern_;
+        std::vector<Index> column_offsets_;
     };
 } // namespace fatrop
 

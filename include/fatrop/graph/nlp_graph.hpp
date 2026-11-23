@@ -17,6 +17,7 @@
 #include "fatrop/nlp/nlp.hpp"
 
 #include <memory>
+#include <vector>
 
 namespace fatrop
 {
@@ -24,9 +25,9 @@ namespace fatrop
      * @brief Adapter from a @c GraphAbstract user problem to fatrop's
      *        @c Nlp<GraphProblem>.
      *
-     * Analogue of @c NlpOcp / @c NlpDense; it walks the per-block evaluation
-     * hooks of @c GraphAbstract and writes the results into the block-sparse
-     * Hessian / gradient and per-block transposed inequality Jacobian.
+     * Analogue of @c NlpOcp / @c NlpDense; it hands views on the block-sparse
+     * Hessian / gradient and per-block transposed inequality Jacobian to the
+     * whole-problem evaluations of @c GraphAbstract.
      */
     class NlpGraph : public Nlp<GraphProblem>
     {
@@ -83,6 +84,9 @@ namespace fatrop
         GraphAbstractSp graph_;
         ProblemDims<GraphProblem> dims_;
         NlpDims nlp_dims_;
+        // Storage ids of the diagonal blocks and of the user's off-diagonal edges.
+        std::vector<Index> diag_ids_;
+        std::vector<Index> off_ids_;
         Scalar lm_lambda_ = 0.0;
     };
 } // namespace fatrop

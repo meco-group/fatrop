@@ -15,7 +15,8 @@ BlockSparsityPattern::BlockSparsityPattern(
     const std::vector<std::pair<Index, Index>> &off_diag_edges)
     : num_blocks_(static_cast<Index>(block_sizes.size())), total_size_(0),
       block_sizes_(block_sizes), block_offsets_(block_sizes.size() + 1, 0),
-      neighbors_(block_sizes.size()), column_pattern_(block_sizes.size())
+      neighbors_(block_sizes.size()), column_pattern_(block_sizes.size()),
+      column_offsets_(block_sizes.size() + 1, 0)
 {
     for (Index k = 0; k < num_blocks_; ++k)
     {
@@ -51,5 +52,17 @@ BlockSparsityPattern::BlockSparsityPattern(
             if (i > j)
                 column_pattern_[j].push_back(i);
         std::sort(column_pattern_[j].begin(), column_pattern_[j].end());
+        column_offsets_[j + 1] =
+            column_offsets_[j] + static_cast<Index>(column_pattern_[j].size());
     }
+}
+
+Index BlockSparsityPattern::block_id(Index i, Index j) const
+{
+    fatrop_assert(i >= j && j >= 0 && i < num_blocks_ && "block_id expects i >= j");
+    const auto &col = column_pattern_[j];
+    const auto it = std::lower_bound(col.begin(), col.end(), i);
+    if (it == col.end() || *it != i)
+        return -1;
+    return column_offsets_[j] + static_cast<Index>(it - col.begin());
 }
