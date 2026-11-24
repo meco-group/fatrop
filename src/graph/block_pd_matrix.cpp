@@ -10,50 +10,33 @@
 using namespace fatrop;
 
 BlockPdMatrix::BlockPdMatrix(const BlockSparsityPattern &sp)
-    : sp_(sp), block_index_(sp.num_blocks() * sp.num_blocks(), -1)
+    : sp_(sp)
 {
     const Index N = sp.num_blocks();
     // Reserve exactly so push_back never reallocates.
-    Index total_entries = 0;
+    blocks_.reserve(sp.num_stored_blocks());
     for (Index j = 0; j < N; ++j)
-        total_entries += static_cast<Index>(sp.column_pattern(j).size());
-    blocks_.reserve(total_entries);
-
-    Index next = 0;
-    for (Index j = 0; j < N; ++j)
-    {
         for (Index i : sp.column_pattern(j))
-        {
             blocks_.emplace_back(sp.block_size(i), sp.block_size(j));
-            block_index_[i * N + j] = next++;
-        }
-    }
-}
-
-Index BlockPdMatrix::lookup_(Index i, Index j) const
-{
-    fatrop_dbg_assert(i >= 0 && j >= 0 && i < sp_.num_blocks() && j < sp_.num_blocks());
-    fatrop_dbg_assert(i >= j && "BlockPdMatrix stores lower triangle only");
-    return block_index_[i * sp_.num_blocks() + j];
 }
 
 bool BlockPdMatrix::has_block(Index i, Index j) const
 {
     if (i < j)
         std::swap(i, j);
-    return block_index_[i * sp_.num_blocks() + j] >= 0;
+    return sp_.block_id(i, j) >= 0;
 }
 
 MatRealView BlockPdMatrix::block(Index i, Index j)
 {
-    const Index e = lookup_(i, j);
+    const Index e = sp_.block_id(i, j);
     fatrop_dbg_assert(e >= 0 && "block not in sparsity pattern");
     return blocks_[e];
 }
 
 const MatRealView BlockPdMatrix::block(Index i, Index j) const
 {
-    const Index e = lookup_(i, j);
+    const Index e = sp_.block_id(i, j);
     fatrop_dbg_assert(e >= 0 && "block not in sparsity pattern");
     return blocks_[e];
 }
@@ -90,7 +73,7 @@ void BlockPdMatrix::apply_on_right(const VecRealView &x, Scalar alpha, const Vec
         const Index off = sp_.block_offset(k);
         if (nk == 0)
             continue;
-        const MatRealView Mkk = block(k, k);
+        const MatRealView Mkk = blocks_[sp_.column_offset(k)];
         for (Index ii = 0; ii < nk; ++ii)
         {
             out(off + ii) += Mkk(ii, ii) * x(off + ii);
@@ -108,13 +91,14 @@ void BlockPdMatrix::apply_on_right(const VecRealView &x, Scalar alpha, const Vec
     {
         const Index nj = sp_.block_size(j);
         const Index off_j = sp_.block_offset(j);
-        for (Index i : sp_.column_pattern(j))
+        const auto &col = sp_.column_pattern(j);
+        // col[0] is the diagonal block, handled above.
+        for (size_t a = 1; a < col.size(); ++a)
         {
-            if (i == j)
-                continue;
+            const Index i = col[a];
             const Index ni = sp_.block_size(i);
             const Index off_i = sp_.block_offset(i);
-            const MatRealView Mij = block(i, j);
+            const MatRealView Mij = blocks_[sp_.column_offset(j) + a];
             gemv_n(ni, nj, 1.0, Mij, 0, 0, x, off_j, 1.0, out, off_i, out, off_i);
             gemv_t(ni, nj, 1.0, Mij, 0, 0, x, off_i, 1.0, out, off_j, out, off_j);
         }

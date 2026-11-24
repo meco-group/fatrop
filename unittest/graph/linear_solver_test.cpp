@@ -12,7 +12,9 @@
 #include "fatrop/linear_algebra/linear_solver.hxx"
 
 #include <algorithm>
+#include <cmath>
 #include <gtest/gtest.h>
+#include <random>
 #include <vector>
 
 using namespace fatrop;
@@ -270,4 +272,73 @@ TEST(GraphCholeskySolverTest, SolveRhsReusesFactor)
     ASSERT_EQ(solver.solve_in_place_rhs(ls), LinsolReturnFlag::SUCCESS);
     for (Index i = 0; i < m; ++i)
         EXPECT_NEAR(rhs_view(i), x_true2(i), 1e-7) << "row " << i;
+}
+
+// --------------------------------------------------------------------------
+// Relaxed supernodes: pose-graph-like systems (odometry chain plus loop
+// closures) with mixed block sizes merge supernodes with explicit zeros; the
+// factor must still solve exactly, through both the fused and the separate
+// forward substitution.
+// --------------------------------------------------------------------------
+TEST(GraphCholeskySolverTest, SolveRelaxedSupernodes)
+{
+    for (unsigned seed = 0; seed < 6; ++seed)
+    {
+        std::mt19937 rng(seed);
+        const Index N = 60 + 40 * static_cast<Index>(seed);
+        std::uniform_int_distribution<Index> size_dist(seed % 2 ? 1 : 3, seed % 2 ? 6 : 3);
+        std::uniform_int_distribution<Index> node_dist(0, N - 1);
+        std::vector<Index> sizes(N);
+        for (auto &s : sizes)
+            s = size_dist(rng);
+        std::vector<std::pair<Index, Index>> edges;
+        for (Index k = 1; k < N; ++k)
+            edges.emplace_back(k - 1, k);
+        for (Index k = 0; k < N / 8; ++k)
+        {
+            const Index a = node_dist(rng), b = node_dist(rng);
+            if (a != b)
+                edges.emplace_back(a, b);
+        }
+        BlockSparsityPattern sp(sizes, edges);
+        BlockPdMatrix M(sp);
+        build_random_spd(M, sizes, edges);
+        BlockCholeskySolver solver(sp);
+
+        // Supernodes are merged beyond the fundamental ones, and every column
+        // is covered by the rows stored for its supernode.
+        const BlockSymbolicFactorization &sym = solver.symbolic();
+        Index fundamental = 1;
+        for (Index k = 1; k < N; ++k)
+            if (sym.parent()[k - 1] != k ||
+                sym.lower_pattern(k).size() + 1 != sym.lower_pattern(k - 1).size())
+                ++fundamental;
+        EXPECT_LT(sym.num_supernodes(), fundamental) << "seed " << seed;
+        for (Index s = 0; s < sym.num_supernodes(); ++s)
+        {
+            const Index end = sym.supernode_start(s + 1);
+            const auto &ext = sym.lower_pattern(end - 1);
+            for (Index k = sym.supernode_start(s); k < end; ++k)
+                for (Index i : sym.lower_pattern(k))
+                    EXPECT_TRUE(i < end || std::binary_search(ext.begin(), ext.end(), i));
+        }
+
+        const Index m = sp.total_size();
+        VecRealAllocated x_true(m), zero(m), b(m), rhs_storage(m);
+        zero = 0.0;
+        VecRealView rhs_view(rhs_storage);
+        LinearSystem<GraphType> ls(M, rhs_view);
+        for (int pass = 0; pass < 2; ++pass)
+        {
+            for (Index i = 0; i < m; ++i)
+                x_true(i) = std::sin(0.3 * static_cast<Scalar>(i) + pass);
+            M.apply_on_right(x_true, 0.0, zero, b);
+            vecsc(m, -1.0, b, 0);
+            veccp(m, b, 0, rhs_view, 0);
+            ASSERT_EQ(pass == 0 ? solver.solve_in_place(ls) : solver.solve_in_place_rhs(ls),
+                      LinsolReturnFlag::SUCCESS);
+            for (Index i = 0; i < m; ++i)
+                EXPECT_NEAR(rhs_view(i), x_true(i), 1e-8) << "seed " << seed << " row " << i;
+        }
+    }
 }

@@ -37,15 +37,13 @@ void assemble_M(const ProblemInfo<GraphProblem> &info, Hessian<GraphProblem> &he
                 BlockPdMatrix &M)
 {
     const auto &sp = M.sparsity();
-    // 1. Copy the lower-triangle blocks of H into M.
-    for (Index j = 0; j < sp.num_blocks(); ++j)
+    // 1. Copy the lower-triangle blocks of H into M (same sparsity, same
+    //    storage order).
+    for (Index id = 0; id < sp.num_stored_blocks(); ++id)
     {
-        for (Index i : sp.column_pattern(j))
-        {
-            MatRealView dst = M.block(i, j);
-            MatRealView src = hessian.H.block(i, j);
-            gecp(dst.m(), dst.n(), src, 0, 0, dst, 0, 0);
-        }
+        MatRealView dst = M.block_by_id(id);
+        MatRealView src = hessian.H.block_by_id(id);
+        gecp(dst.m(), dst.n(), src, 0, 0, dst, 0, 0);
     }
 
     // 2. Add block-local penalty A_k^T D_s_k^{-1} A_k to the (k,k) diagonal
@@ -73,7 +71,7 @@ void assemble_M(const ProblemInfo<GraphProblem> &info, Hessian<GraphProblem> &he
             colsc(nk, 1.0 / di, scaled, 0, i);
         }
         // Diagonal block update: M_kk += scaled * Ak^T (lower triangle).
-        MatRealView Mkk = M.block(k, k);
+        MatRealView Mkk = M.block_by_id(sp.column_offset(k));
         syrk_ln_mn(nk, nk, ngk, 1.0, scaled, 0, 0, Ak, 0, 0, 1.0, Mkk, 0, 0, Mkk, 0, 0);
     }
 
@@ -84,7 +82,7 @@ void assemble_M(const ProblemInfo<GraphProblem> &info, Hessian<GraphProblem> &he
         if (nk == 0)
             continue;
         const Index off = info.dims.block_offsets_tan[k];
-        MatRealView Mkk = M.block(k, k);
+        MatRealView Mkk = M.block_by_id(sp.column_offset(k));
         diaad(nk, 1.0, D_x, off, Mkk, 0, 0);
     }
 }

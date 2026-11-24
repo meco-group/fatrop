@@ -95,7 +95,6 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
 
     sn_aug_row_.assign(num_sn, 0);
     sn_off_S_.assign(num_sn, 0);
-    sn_rhs_cols_.assign(num_sn, {});
     sn_ext_ops_.assign(num_sn, {});
     sn_schur_.assign(num_sn, {});
 
@@ -108,24 +107,18 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
         sn_aug_row_[s] = t_total + ext_total;
         sn_off_S_[s] = perm_block_offsets_[s_start];
 
-        // Per-column rhs in/out for steps (1) and (3a).
-        sn_rhs_cols_[s].reserve(static_cast<size_t>(s_end - s_start));
-        for (Index k = s_start; k < s_end; ++k)
-        {
-            RhsLoadOp r;
-            r.nk = perm_block_sizes_[k];
-            r.x_off = perm_block_offsets_[k];
-            r.panel_col = col_to_off_in_sn_[k];
-            sn_rhs_cols_[s].push_back(r);
-        }
-
         const auto &ext_set = symbolic_.lower_pattern(s_end - 1);
         const Index n_ext = static_cast<Index>(ext_set.size());
 
-        // External strips (used by (3b), forward, backward).
-        sn_ext_ops_[s].reserve(static_cast<size_t>(n_ext));
+        // External strips (used by (3b), forward, backward), one per run of
+        // consecutive blocks.
         for (Index a = 0; a < n_ext; ++a)
         {
+            if (a > 0 && ext_set[a] == ext_set[a - 1] + 1)
+            {
+                sn_ext_ops_[s].back().ni += perm_block_sizes_[ext_set[a]];
+                continue;
+            }
             ExtOp e;
             e.ni = perm_block_sizes_[ext_set[a]];
             e.x_off_i = perm_block_offsets_[ext_set[a]];
@@ -133,24 +126,61 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
             sn_ext_ops_[s].push_back(e);
         }
 
-        // Schur trailing update: where each block (a, b), b <= a, of the dense
-        // update goes.
-        sn_schur_[s].reserve(static_cast<size_t>(n_ext) * (static_cast<size_t>(n_ext) + 1) / 2);
-        for (Index a = 0; a < n_ext; ++a)
+        // Schur trailing update: where the blocks (a, b), b <= a, of the dense
+        // update go. Blocks are grouped into rectangles that land contiguously
+        // in one panel, one gead each: rows a with consecutive destination
+        // rows form a run, and runs of consecutive columns with the same rows
+        // form a rectangle. A diagonal run may join a rectangle that starts
+        // higher; the extra rows are upper triangle in both W and the target
+        // and never read.
+        auto &ops = sn_schur_[s];
+        std::vector<size_t> open, next_open;
+        for (Index b = 0; b < n_ext; ++b)
         {
-            for (Index b = 0; b <= a; ++b)
+            next_open.clear();
+            for (Index a = b; a < n_ext;)
             {
                 const LBlockLoc loc = l_loc_(ext_set[a], ext_set[b]);
-                SchurOp op;
-                op.target_sn = loc.sn;
-                op.dst_row = loc.row_off;
-                op.dst_col = loc.col_off;
-                op.ni = perm_block_sizes_[ext_set[a]];
-                op.nj = perm_block_sizes_[ext_set[b]];
-                op.src_row = sn_ext_row_off_[s][a];
-                op.src_col = sn_ext_row_off_[s][b];
-                sn_schur_[s].push_back(op);
+                SchurOp run;
+                run.target_sn = loc.sn;
+                run.dst_row = loc.row_off;
+                run.dst_col = loc.col_off;
+                run.ni = 0;
+                run.nj = perm_block_sizes_[ext_set[b]];
+                run.src_row = sn_ext_row_off_[s][a];
+                run.src_col = sn_ext_row_off_[s][b];
+                for (; a < n_ext; ++a)
+                {
+                    const LBlockLoc l = l_loc_(ext_set[a], ext_set[b]);
+                    if (l.sn != run.target_sn || l.col_off != run.dst_col ||
+                        l.row_off != run.dst_row + run.ni)
+                        break;
+                    run.ni += perm_block_sizes_[ext_set[a]];
+                }
+                const bool diagonal = run.src_row == run.src_col;
+                bool merged = false;
+                for (size_t r : open)
+                {
+                    SchurOp &op = ops[r];
+                    if (op.target_sn == run.target_sn && op.src_col + op.nj == run.src_col &&
+                        op.dst_col + op.nj == run.dst_col &&
+                        op.src_row + op.ni == run.src_row + run.ni &&
+                        op.dst_row - op.src_row == run.dst_row - run.src_row &&
+                        (op.src_row == run.src_row || (diagonal && op.src_row < run.src_row)))
+                    {
+                        op.nj += run.nj;
+                        next_open.push_back(r);
+                        merged = true;
+                        break;
+                    }
+                }
+                if (!merged)
+                {
+                    next_open.push_back(ops.size());
+                    ops.push_back(run);
+                }
             }
+            open.swap(next_open);
         }
     }
 
@@ -168,8 +198,7 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
             const Index ip = inv[i_orig];
             const Index jp = inv[j_orig];
             LoadOp op;
-            op.src_i = i_orig;
-            op.src_j = j_orig;
+            op.src_id = static_cast<Index>(load_ops_.size());
             if (ip >= jp)
             {
                 const LBlockLoc loc = l_loc_(ip, jp);
@@ -257,8 +286,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     // No heap allocation in this function. All buffers (L_supernode_,
     // x_perm_, rhs_) are sized at construction time and reused. All
     // destination supernode indices, panel offsets, and block sizes are
-    // resolved during the symbolic phase (load_ops_, sn_rhs_cols_,
-    // sn_ext_ops_, sn_schur_); this function is a flat traversal
+    // resolved during the symbolic phase (load_ops_, sn_ext_ops_, sn_schur_); this function is a flat traversal
     // of those op lists.
 
     // Permute -rhs into x_perm_. The forward substitution is folded into
@@ -281,7 +309,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     // panels using the cached load_ops_ table.
     for (const LoadOp &op : load_ops_)
     {
-        const MatRealView src = matrix.block(op.src_i, op.src_j);
+        const MatRealView src = matrix.block_by_id(op.src_id);
         MatRealAllocated &dst = L_supernode_[op.dst_sn];
         if (!op.transpose)
             gecp(op.ni, op.nj, src, 0, 0, dst, op.dst_row, op.dst_col);
@@ -296,7 +324,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     //      block AND trsm-solves the (ext_total + 1) x t_total bottom strip
     //      (external L rows + aug row computing y_S = L_internal^{-1}(-rhs_S)),
     //   3. extract y_S from the aug row into x_perm_, propagate it to
-    //      external rhs strips with one gemv per ext block,
+    //      external rhs strips with one gemv per run of ext blocks,
     //   4. schur-update — for each pair (i, j) in ext_set with i >= j, do
     //      a syrk (i == j) or gemm (i > j) writing DIRECTLY into the owning
     //      supernode's panel using the precomputed op list.
@@ -311,10 +339,8 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         const Index aug_row = sn_aug_row_[s];
         const Index off_S = sn_off_S_[s];
 
-        // (1) Load the rhs strip into the aug row, one column block at a time.
-        const auto &rhs_cols = sn_rhs_cols_[s];
-        for (const RhsLoadOp &r : rhs_cols)
-            rowin(r.nk, 1.0, x_perm_, r.x_off, P, aug_row, r.panel_col);
+        // (1) Load the rhs strip into the aug row.
+        rowin(t_total, 1.0, x_perm_, off_S, P, aug_row, 0);
 
         // (2) Partial Cholesky on the (t_total + ext_total + 1) x t_total panel.
         // In place, so save the diagonal check_reg needs.
@@ -325,8 +351,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
             return LinsolReturnFlag::INDEFINITE;
 
         // (3a) Extract y_S from the aug row into x_perm_.
-        for (const RhsLoadOp &r : rhs_cols)
-            rowex(r.nk, 1.0, P, aug_row, r.panel_col, x_perm_, r.x_off);
+        rowex(t_total, 1.0, P, aug_row, 0, x_perm_, off_S);
         // (3b) Propagate y_S into external rhs strips: x[i] -= L[i, S] * y_S.
         const auto &exts = sn_ext_ops_[s];
         for (const ExtOp &e : exts)
@@ -341,7 +366,6 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
             MatRealAllocated &W = *schur_ws_;
             gecp(ext_total, t_total, P, t_total, 0, E, 0, 0);
             syrk_ln_mn(ext_total, ext_total, t_total, 1.0, E, 0, 0, E, 0, 0, 0.0, W, 0, 0, W, 0, 0);
-            trtr_l(ext_total, W, 0, 0, W, 0, 0);
             for (const SchurOp &op : sn_schur_[s])
                 gead(op.ni, op.nj, -1.0, W, op.src_row, op.src_col,
                      L_supernode_[op.target_sn], op.dst_row, op.dst_col);
@@ -356,7 +380,7 @@ void BlockCholeskySolver::forward_solve_(VecRealView &x_perm)
 {
     // No heap allocation. Walks supernode panels: one trsv per supernode
     // on the t_total x t_total internal block,
-    // one gemv per external block — all driven by the cached sn_ext_ops_.
+    // one gemv per run of external blocks — all driven by the cached sn_ext_ops_.
     const Index num_sn = symbolic_.num_supernodes();
     for (Index s = 0; s < num_sn; ++s)
     {

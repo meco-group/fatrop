@@ -60,6 +60,10 @@ namespace fatrop
         /// Number of stored lower-triangle blocks (diagonal included).
         Index num_stored_blocks() const { return column_offsets_[num_blocks_]; }
 
+        /// Position of the first stored block of column @c j, the diagonal
+        /// block @c (j, j); the blocks of @c column_pattern(j) follow it.
+        Index column_offset(Index j) const { return column_offsets_[j]; }
+
         /// Position of the lower-triangle block @c (i, j), @c i >= j, in the
         /// column-major storage order (column @c j, then rows in
         /// @c column_pattern(j)); -1 if not stored.
