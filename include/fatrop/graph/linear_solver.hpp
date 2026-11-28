@@ -17,6 +17,7 @@
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 
+#include <cstdlib>
 #include <memory>
 #include <vector>
 
@@ -89,7 +90,13 @@ namespace fatrop
         std::vector<Index> perm_block_offsets_;
 
         // The Cholesky factor, supernode-major. One MAT per supernode, sized
-        // (sn_t_total_[s] + sn_ext_total_[s] + 1) x sn_t_total_[s].
+        // (sn_t_total_[s] + sn_ext_total_[s] + 1) x sn_t_total_[s], all in
+        // L_arena_.
+        struct FreeDeleter
+        {
+            void operator()(char *p) const { std::free(p); }
+        };
+        std::unique_ptr<char, FreeDeleter> L_arena_;
         std::vector<MatRealAllocated> L_supernode_;
 
         // Per-supernode dimensions:

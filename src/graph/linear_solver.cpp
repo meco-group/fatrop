@@ -10,7 +10,10 @@
 #include "fatrop/linear_algebra/linear_solver.hxx"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <new>
 
 using namespace fatrop;
 
@@ -74,21 +77,38 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
     // Allocate supernode panels. The +1 row is the aug-row scratch used by
     // the factor's forward-substitution fusion; it is read/written only
     // during factorize_with_rhs_ and ignored by the standalone solves.
-    L_supernode_.reserve(num_sn);
-    for (Index s = 0; s < num_sn; ++s)
-    {
-        const Index rows = sn_t_total_[s] + sn_ext_total_[s] + 1;
-        const Index cols = std::max<Index>(1, sn_t_total_[s]);
-        L_supernode_.emplace_back(rows, cols);
-    }
+    // The panels and the schur workspaces share one zero-initialised arena:
+    // one allocation instead of one per matrix, and calloc leaves fresh pages
+    // untouched until the first factorisation. Kernels may read past the last
+    // row panel of a matrix, so the arena ends with slack.
     Index max_t = 1, max_ext = 1;
     for (Index s = 0; s < num_sn; ++s)
     {
         max_t = std::max(max_t, sn_t_total_[s]);
         max_ext = std::max(max_ext, sn_ext_total_[s]);
     }
-    ext_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_t);
-    schur_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_ext);
+    auto panel_rows = [&](Index s) { return sn_t_total_[s] + sn_ext_total_[s] + 1; };
+    auto panel_cols = [&](Index s) { return std::max<Index>(1, sn_t_total_[s]); };
+    constexpr size_t align = 64;
+    size_t arena_size = MatRealAllocated::memsize(max_ext, max_t) +
+                        MatRealAllocated::memsize(max_ext, max_ext) +
+                        MatRealAllocated::memsize(8, std::max(max_t, max_ext)) + align;
+    for (Index s = 0; s < num_sn; ++s)
+        arena_size += MatRealAllocated::memsize(panel_rows(s), panel_cols(s));
+    L_arena_.reset(static_cast<char *>(std::calloc(arena_size, 1)));
+    if (!L_arena_)
+        throw std::bad_alloc();
+    const std::uintptr_t base = reinterpret_cast<std::uintptr_t>(L_arena_.get());
+    char *mem = L_arena_.get() + ((base + align - 1) / align * align - base);
+    L_supernode_.reserve(num_sn);
+    for (Index s = 0; s < num_sn; ++s)
+    {
+        L_supernode_.emplace_back(panel_rows(s), panel_cols(s), mem);
+        mem += MatRealAllocated::memsize(panel_rows(s), panel_cols(s));
+    }
+    ext_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_t, mem);
+    mem += MatRealAllocated::memsize(max_ext, max_t);
+    schur_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_ext, mem);
 
     // ----- precomputed op lists for the numeric phase -----------------------
     const auto &inv = order_.inv_perm();

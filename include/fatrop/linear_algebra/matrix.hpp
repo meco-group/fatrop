@@ -350,6 +350,17 @@ namespace fatrop
         inline MatRealAllocated(const Index m, const Index n);
 
         /**
+         * @brief Constructs a matrix on caller-owned memory, which is neither
+         *        zeroed nor freed.
+         *
+         * @param mem At least @c memsize(m, n) bytes, aligned to 64 bytes.
+         */
+        inline MatRealAllocated(const Index m, const Index n, void *mem);
+
+        /// Bytes of memory a matrix of @p m x @p n needs (a multiple of 64).
+        static size_t memsize(const Index m, const Index n) { return MEMSIZE_MAT(m, n); }
+
+        /**
          * @brief Deleted copy constructor to prevent unintended copies.
          */
         MatRealAllocated(MatRealAllocated &other) = delete;
@@ -430,6 +441,7 @@ namespace fatrop
 
     private:
         MAT mat_;
+        bool owns_mem_ = true;
     };
     // Implementation of MatRealRowView
     Scalar MatRealRowView::operator()(const Index i) const { return mat_(row_, i); }
@@ -490,8 +502,15 @@ namespace fatrop
         std::memset(mat_.mem, 0, mat_.memsize * sizeof(char));
     }
 
+    MatRealAllocated::MatRealAllocated(const Index m, const Index n, void *mem)
+        : MatRealView(*this, m, n, 0, 0), mat_(), owns_mem_(false)
+    {
+        CREATE_MAT(m, n, &mat_, mem);
+    }
+
     MatRealAllocated::MatRealAllocated(MatRealAllocated &&other) noexcept
-        : MatRealView(*this, other.m(), other.n(), 0, 0), mat_(other.mat_)
+        : MatRealView(*this, other.m(), other.n(), 0, 0), mat_(other.mat_),
+          owns_mem_(other.owns_mem_)
     {
         // Nullify the moved-from object's mat_ to prevent double deletion
         other.mat_.mem = nullptr;
@@ -511,7 +530,7 @@ namespace fatrop
 
     MatRealAllocated::~MatRealAllocated()
     {
-        if (mat_.mem != nullptr)
+        if (owns_mem_ && mat_.mem != nullptr)
             FREE_MAT(&mat());
     }
 
