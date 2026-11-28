@@ -149,14 +149,13 @@ namespace fatrop
         /**
          * @brief Constructs a MatRealView object.
          *
-         * @param mat Reference to the allocated matrix.
+         * @param mat Reference to the underlying BLASFEO matrix.
          * @param m Number of rows.
          * @param n Number of columns.
          * @param ai Row offset.
          * @param aj Column offset.
          */
-        MatRealViewBase(MatRealAllocated &mat, const Index m, const Index n, const Index ai,
-                        const Index aj)
+        MatRealViewBase(MAT &mat, const Index m, const Index n, const Index ai, const Index aj)
             : mat_(mat), m_(m), n_(n), ai_(ai), aj_(aj) {};
 
         /**
@@ -176,7 +175,7 @@ namespace fatrop
         inline const MAT &mat() const;
 
     protected:
-        MatRealAllocated &mat_;
+        MAT &mat_;
         const Index m_;
         const Index n_;
         const Index ai_;
@@ -350,17 +349,6 @@ namespace fatrop
         inline MatRealAllocated(const Index m, const Index n);
 
         /**
-         * @brief Constructs a matrix on caller-owned memory, which is neither
-         *        zeroed nor freed.
-         *
-         * @param mem At least @c memsize(m, n) bytes, aligned to 64 bytes.
-         */
-        inline MatRealAllocated(const Index m, const Index n, void *mem);
-
-        /// Bytes of memory a matrix of @p m x @p n needs (a multiple of 64).
-        static size_t memsize(const Index m, const Index n) { return MEMSIZE_MAT(m, n); }
-
-        /**
          * @brief Deleted copy constructor to prevent unintended copies.
          */
         MatRealAllocated(MatRealAllocated &other) = delete;
@@ -441,7 +429,39 @@ namespace fatrop
 
     private:
         MAT mat_;
-        bool owns_mem_ = true;
+    };
+
+    /**
+     * @class MatRealMap
+     * @brief A matrix on memory owned by the caller, which is neither zeroed
+     *        nor freed.
+     */
+    class MatRealMap : public MatRealView
+    {
+    public:
+        /**
+         * @param mem At least @c memsize(m, n) bytes, aligned to 64 bytes.
+         */
+        MatRealMap(const Index m, const Index n, void *mem) : MatRealView(mat_, m, n, 0, 0), mat_()
+        {
+            CREATE_MAT(m, n, &mat_, mem);
+        }
+        MatRealMap(const MatRealMap &) = delete;
+        MatRealMap(MatRealMap &&other) noexcept
+            : MatRealView(mat_, other.m(), other.n(), 0, 0), mat_(other.mat_)
+        {
+        }
+
+        /// Bytes of memory a matrix of @p m x @p n needs (a multiple of 64).
+        static size_t memsize(const Index m, const Index n) { return MEMSIZE_MAT(m, n); }
+
+        MAT &mat() { return mat_; }
+        const MAT &mat() const { return mat_; }
+
+        using MatRealView::operator=;
+
+    private:
+        MAT mat_;
     };
     // Implementation of MatRealRowView
     Scalar MatRealRowView::operator()(const Index i) const { return mat_(row_, i); }
@@ -459,16 +479,17 @@ namespace fatrop
     Index MatRealDiagonalView::m() const { return std::min(mat_.m(), mat_.n()); }
 
     // Implementation of MatRealView
-    MAT &MatRealViewBase::mat() { return mat_.mat(); }
-    const MAT &MatRealViewBase::mat() const { return mat_.mat(); }
+    MAT &MatRealViewBase::mat() { return mat_; }
+    const MAT &MatRealViewBase::mat() const { return mat_; }
     MatElRef MatRealViewBase::operator()(const Index i, const Index j) const
     {
-        return mat_(i + ai_, j + aj_);
+        fatrop_dbg_assert(i + ai_ >= 0 && i + ai_ < mat_.m && j + aj_ >= 0 && j + aj_ < mat_.n);
+        return blasfeo_matel_wrap(&mat_, i + ai_, j + aj_);
     }
 
     MatRealView &MatRealView::operator=(const Scalar alpha)
     {
-        GESE(m(), n(), alpha, &this->mat_.mat(), ai_, aj_);
+        GESE(m(), n(), alpha, &mat_, ai_, aj_);
         return *this;
     }
 
@@ -489,28 +510,21 @@ namespace fatrop
     {
         fatrop_dbg_assert((*this).m() == mat_in.m() && (*this).n() == mat_in.n());
         GECP((*this).m(), (*this).n(), const_cast<MAT *>(&mat_in.mat()), mat_in.ai_, mat_in.aj_,
-             &mat_.mat(), ai_, aj_);
+             &mat_, ai_, aj_);
         return *this;
     };
 
     // Implementation of MatRealAllocated methods
     MatRealAllocated::MatRealAllocated(const Index m, const Index n)
-        : MatRealView(*this, m, n, 0, 0), mat_()
+        : MatRealView(mat_, m, n, 0, 0), mat_()
     {
         ALLOCATE_MAT(m, n, &mat_);
         // zero out
         std::memset(mat_.mem, 0, mat_.memsize * sizeof(char));
     }
 
-    MatRealAllocated::MatRealAllocated(const Index m, const Index n, void *mem)
-        : MatRealView(*this, m, n, 0, 0), mat_(), owns_mem_(false)
-    {
-        CREATE_MAT(m, n, &mat_, mem);
-    }
-
     MatRealAllocated::MatRealAllocated(MatRealAllocated &&other) noexcept
-        : MatRealView(*this, other.m(), other.n(), 0, 0), mat_(other.mat_),
-          owns_mem_(other.owns_mem_)
+        : MatRealView(mat_, other.m(), other.n(), 0, 0), mat_(other.mat_)
     {
         // Nullify the moved-from object's mat_ to prevent double deletion
         other.mat_.mem = nullptr;
@@ -530,7 +544,7 @@ namespace fatrop
 
     MatRealAllocated::~MatRealAllocated()
     {
-        if (owns_mem_ && mat_.mem != nullptr)
+        if (mat_.mem != nullptr)
             FREE_MAT(&mat());
     }
 

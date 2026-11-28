@@ -90,11 +90,11 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
     auto panel_rows = [&](Index s) { return sn_t_total_[s] + sn_ext_total_[s] + 1; };
     auto panel_cols = [&](Index s) { return std::max<Index>(1, sn_t_total_[s]); };
     constexpr size_t align = 64;
-    size_t arena_size = MatRealAllocated::memsize(max_ext, max_t) +
-                        MatRealAllocated::memsize(max_ext, max_ext) +
-                        MatRealAllocated::memsize(8, std::max(max_t, max_ext)) + align;
+    size_t arena_size = MatRealMap::memsize(max_ext, max_t) +
+                        MatRealMap::memsize(max_ext, max_ext) +
+                        MatRealMap::memsize(8, std::max(max_t, max_ext)) + align;
     for (Index s = 0; s < num_sn; ++s)
-        arena_size += MatRealAllocated::memsize(panel_rows(s), panel_cols(s));
+        arena_size += MatRealMap::memsize(panel_rows(s), panel_cols(s));
     L_arena_.reset(static_cast<char *>(std::calloc(arena_size, 1)));
     if (!L_arena_)
         throw std::bad_alloc();
@@ -104,11 +104,11 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
     for (Index s = 0; s < num_sn; ++s)
     {
         L_supernode_.emplace_back(panel_rows(s), panel_cols(s), mem);
-        mem += MatRealAllocated::memsize(panel_rows(s), panel_cols(s));
+        mem += MatRealMap::memsize(panel_rows(s), panel_cols(s));
     }
-    ext_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_t, mem);
-    mem += MatRealAllocated::memsize(max_ext, max_t);
-    schur_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_ext, mem);
+    ext_ws_ = std::make_unique<MatRealMap>(max_ext, max_t, mem);
+    mem += MatRealMap::memsize(max_ext, max_t);
+    schur_ws_ = std::make_unique<MatRealMap>(max_ext, max_ext, mem);
 
     // ----- precomputed op lists for the numeric phase -----------------------
     const auto &inv = order_.inv_perm();
@@ -339,7 +339,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     for (const LoadOp &op : load_ops_)
     {
         const MatRealView src = matrix.block_by_id(op.src_id);
-        MatRealAllocated &dst = L_supernode_[op.dst_sn];
+        MatRealMap &dst = L_supernode_[op.dst_sn];
         if (!op.transpose)
             gecp(op.ni, op.nj, src, 0, 0, dst, op.dst_row, op.dst_col);
         else
@@ -364,7 +364,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         if (t_total == 0)
             continue;
         const Index ext_total = sn_ext_total_[s];
-        MatRealAllocated &P = L_supernode_[s];
+        MatRealMap &P = L_supernode_[s];
         const Index aug_row = sn_aug_row_[s];
         const Index off_S = sn_off_S_[s];
 
@@ -391,8 +391,8 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         // external strip, then scattered into the owner supernodes' panels.
         if (ext_total > 0)
         {
-            MatRealAllocated &E = *ext_ws_;
-            MatRealAllocated &W = *schur_ws_;
+            MatRealMap &E = *ext_ws_;
+            MatRealMap &W = *schur_ws_;
             gecp(ext_total, t_total, P, t_total, 0, E, 0, 0);
             syrk_ln_mn(ext_total, ext_total, t_total, 1.0, E, 0, 0, E, 0, 0, 0.0, W, 0, 0, W, 0, 0);
             for (const SchurOp &op : sn_schur_[s])
@@ -417,7 +417,7 @@ void BlockCholeskySolver::forward_solve_(VecRealView &x_perm)
         if (t_total == 0)
             continue;
         const Index off_S = sn_off_S_[s];
-        MatRealAllocated &P = L_supernode_[s];
+        MatRealMap &P = L_supernode_[s];
         trsv_lnn(t_total, P, 0, 0, x_perm, off_S, x_perm, off_S);
         for (const ExtOp &e : sn_ext_ops_[s])
             gemv_n(e.ni, t_total, -1.0, P, e.panel_row, 0,
@@ -435,7 +435,7 @@ void BlockCholeskySolver::backward_solve_(VecRealView &x_perm)
         if (t_total == 0)
             continue;
         const Index off_S = sn_off_S_[s];
-        MatRealAllocated &P = L_supernode_[s];
+        MatRealMap &P = L_supernode_[s];
         for (const ExtOp &e : sn_ext_ops_[s])
             gemv_t(e.ni, t_total, -1.0, P, e.panel_row, 0,
                    x_perm, e.x_off_i, 1.0, x_perm, off_S, x_perm, off_S);
