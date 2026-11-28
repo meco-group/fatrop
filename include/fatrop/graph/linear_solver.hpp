@@ -17,6 +17,7 @@
 #include "fatrop/linear_algebra/matrix.hpp"
 #include "fatrop/linear_algebra/vector.hpp"
 
+#include <cstdlib>
 #include <memory>
 #include <vector>
 
@@ -89,8 +90,14 @@ namespace fatrop
         std::vector<Index> perm_block_offsets_;
 
         // The Cholesky factor, supernode-major. One MAT per supernode, sized
-        // (sn_t_total_[s] + sn_ext_total_[s] + 1) x sn_t_total_[s].
-        std::vector<MatRealAllocated> L_supernode_;
+        // (sn_t_total_[s] + sn_ext_total_[s] + 1) x sn_t_total_[s], all in
+        // L_arena_.
+        struct FreeDeleter
+        {
+            void operator()(char *p) const { std::free(p); }
+        };
+        std::unique_ptr<char, FreeDeleter> L_arena_;
+        std::vector<MatRealMap> L_supernode_;
 
         // Per-supernode dimensions:
         //   sn_t_total_[s]   = sum of internal block sizes for supernode s
@@ -166,8 +173,8 @@ namespace fatrop
         // gemm/syrk read outside their destination when a row offset is not a
         // multiple of the BLASFEO panel size, so they only get operands at row
         // offset 0: a copy of the external strip, and its product.
-        std::unique_ptr<MatRealAllocated> ext_ws_;
-        std::unique_ptr<MatRealAllocated> schur_ws_;
+        std::unique_ptr<MatRealMap> ext_ws_;
+        std::unique_ptr<MatRealMap> schur_ws_;
         VecRealAllocated trsv_ws_;
         VecRealAllocated x_perm_;
         VecRealAllocated rhs_;

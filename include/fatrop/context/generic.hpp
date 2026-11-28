@@ -84,5 +84,6 @@ namespace fatrop
 #define ALLOCATE_MAT blasfeo_allocate_dmat
 #define FREE_MAT blasfeo_free_dmat
 #define MEMSIZE_MAT blasfeo_memsize_dmat
+#define CREATE_MAT blasfeo_create_dmat
 
 #endif // __fatrop_context_generic_hpp__

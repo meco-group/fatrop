@@ -10,7 +10,10 @@
 #include "fatrop/linear_algebra/linear_solver.hxx"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <new>
 
 using namespace fatrop;
 
@@ -74,21 +77,38 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
     // Allocate supernode panels. The +1 row is the aug-row scratch used by
     // the factor's forward-substitution fusion; it is read/written only
     // during factorize_with_rhs_ and ignored by the standalone solves.
-    L_supernode_.reserve(num_sn);
-    for (Index s = 0; s < num_sn; ++s)
-    {
-        const Index rows = sn_t_total_[s] + sn_ext_total_[s] + 1;
-        const Index cols = std::max<Index>(1, sn_t_total_[s]);
-        L_supernode_.emplace_back(rows, cols);
-    }
+    // The panels and the schur workspaces share one zero-initialised arena:
+    // one allocation instead of one per matrix, and calloc leaves fresh pages
+    // untouched until the first factorisation. Kernels may read past the last
+    // row panel of a matrix, so the arena ends with slack.
     Index max_t = 1, max_ext = 1;
     for (Index s = 0; s < num_sn; ++s)
     {
         max_t = std::max(max_t, sn_t_total_[s]);
         max_ext = std::max(max_ext, sn_ext_total_[s]);
     }
-    ext_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_t);
-    schur_ws_ = std::make_unique<MatRealAllocated>(max_ext, max_ext);
+    auto panel_rows = [&](Index s) { return sn_t_total_[s] + sn_ext_total_[s] + 1; };
+    auto panel_cols = [&](Index s) { return std::max<Index>(1, sn_t_total_[s]); };
+    constexpr size_t align = 64;
+    size_t arena_size = MatRealMap::memsize(max_ext, max_t) +
+                        MatRealMap::memsize(max_ext, max_ext) +
+                        MatRealMap::memsize(8, std::max(max_t, max_ext)) + align;
+    for (Index s = 0; s < num_sn; ++s)
+        arena_size += MatRealMap::memsize(panel_rows(s), panel_cols(s));
+    L_arena_.reset(static_cast<char *>(std::calloc(arena_size, 1)));
+    if (!L_arena_)
+        throw std::bad_alloc();
+    const std::uintptr_t base = reinterpret_cast<std::uintptr_t>(L_arena_.get());
+    char *mem = L_arena_.get() + ((base + align - 1) / align * align - base);
+    L_supernode_.reserve(num_sn);
+    for (Index s = 0; s < num_sn; ++s)
+    {
+        L_supernode_.emplace_back(panel_rows(s), panel_cols(s), mem);
+        mem += MatRealMap::memsize(panel_rows(s), panel_cols(s));
+    }
+    ext_ws_ = std::make_unique<MatRealMap>(max_ext, max_t, mem);
+    mem += MatRealMap::memsize(max_ext, max_t);
+    schur_ws_ = std::make_unique<MatRealMap>(max_ext, max_ext, mem);
 
     // ----- precomputed op lists for the numeric phase -----------------------
     const auto &inv = order_.inv_perm();
@@ -98,6 +118,9 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
     sn_ext_ops_.assign(num_sn, {});
     sn_schur_.assign(num_sn, {});
 
+    std::vector<Index> target_row(N, -1);
+    Index scattered_sn = -1;
+    std::vector<size_t> open, next_open;
     for (Index s = 0; s < num_sn; ++s)
     {
         const Index s_start = symbolic_.supernode_start(s);
@@ -134,29 +157,35 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
         // higher; the extra rows are upper triangle in both W and the target
         // and never read.
         auto &ops = sn_schur_[s];
-        std::vector<size_t> open, next_open;
+        open.clear();
         for (Index b = 0; b < n_ext; ++b)
         {
+            // Rows a >= b land in the target supernode owning column b, at
+            // the panel rows scattered in target_row.
+            const Index t = col_to_sn_[ext_set[b]];
+            if (t != scattered_sn)
+            {
+                scattered_sn = t;
+                const Index t_end = symbolic_.supernode_start(t + 1);
+                for (Index k = symbolic_.supernode_start(t); k < t_end; ++k)
+                    target_row[k] = col_to_off_in_sn_[k];
+                const auto &t_ext = symbolic_.lower_pattern(t_end - 1);
+                for (size_t a = 0; a < t_ext.size(); ++a)
+                    target_row[t_ext[a]] = sn_t_total_[t] + sn_ext_row_off_[t][a];
+            }
             next_open.clear();
             for (Index a = b; a < n_ext;)
             {
-                const LBlockLoc loc = l_loc_(ext_set[a], ext_set[b]);
                 SchurOp run;
-                run.target_sn = loc.sn;
-                run.dst_row = loc.row_off;
-                run.dst_col = loc.col_off;
+                run.target_sn = t;
+                run.dst_row = target_row[ext_set[a]];
+                run.dst_col = col_to_off_in_sn_[ext_set[b]];
                 run.ni = 0;
                 run.nj = perm_block_sizes_[ext_set[b]];
                 run.src_row = sn_ext_row_off_[s][a];
                 run.src_col = sn_ext_row_off_[s][b];
-                for (; a < n_ext; ++a)
-                {
-                    const LBlockLoc l = l_loc_(ext_set[a], ext_set[b]);
-                    if (l.sn != run.target_sn || l.col_off != run.dst_col ||
-                        l.row_off != run.dst_row + run.ni)
-                        break;
+                for (; a < n_ext && target_row[ext_set[a]] == run.dst_row + run.ni; ++a)
                     run.ni += perm_block_sizes_[ext_set[a]];
-                }
                 const bool diagonal = run.src_row == run.src_col;
                 bool merged = false;
                 for (size_t r : open)
@@ -310,7 +339,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
     for (const LoadOp &op : load_ops_)
     {
         const MatRealView src = matrix.block_by_id(op.src_id);
-        MatRealAllocated &dst = L_supernode_[op.dst_sn];
+        MatRealMap &dst = L_supernode_[op.dst_sn];
         if (!op.transpose)
             gecp(op.ni, op.nj, src, 0, 0, dst, op.dst_row, op.dst_col);
         else
@@ -335,7 +364,7 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         if (t_total == 0)
             continue;
         const Index ext_total = sn_ext_total_[s];
-        MatRealAllocated &P = L_supernode_[s];
+        MatRealMap &P = L_supernode_[s];
         const Index aug_row = sn_aug_row_[s];
         const Index off_S = sn_off_S_[s];
 
@@ -362,8 +391,8 @@ BlockCholeskySolver::factorize_with_rhs_(const BlockPdMatrix &matrix,
         // external strip, then scattered into the owner supernodes' panels.
         if (ext_total > 0)
         {
-            MatRealAllocated &E = *ext_ws_;
-            MatRealAllocated &W = *schur_ws_;
+            MatRealMap &E = *ext_ws_;
+            MatRealMap &W = *schur_ws_;
             gecp(ext_total, t_total, P, t_total, 0, E, 0, 0);
             syrk_ln_mn(ext_total, ext_total, t_total, 1.0, E, 0, 0, E, 0, 0, 0.0, W, 0, 0, W, 0, 0);
             for (const SchurOp &op : sn_schur_[s])
@@ -388,7 +417,7 @@ void BlockCholeskySolver::forward_solve_(VecRealView &x_perm)
         if (t_total == 0)
             continue;
         const Index off_S = sn_off_S_[s];
-        MatRealAllocated &P = L_supernode_[s];
+        MatRealMap &P = L_supernode_[s];
         trsv_lnn(t_total, P, 0, 0, x_perm, off_S, x_perm, off_S);
         for (const ExtOp &e : sn_ext_ops_[s])
             gemv_n(e.ni, t_total, -1.0, P, e.panel_row, 0,
@@ -406,7 +435,7 @@ void BlockCholeskySolver::backward_solve_(VecRealView &x_perm)
         if (t_total == 0)
             continue;
         const Index off_S = sn_off_S_[s];
-        MatRealAllocated &P = L_supernode_[s];
+        MatRealMap &P = L_supernode_[s];
         for (const ExtOp &e : sn_ext_ops_[s])
             gemv_t(e.ni, t_total, -1.0, P, e.panel_row, 0,
                    x_perm, e.x_off_i, 1.0, x_perm, off_S, x_perm, off_S);

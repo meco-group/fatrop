@@ -52,12 +52,16 @@ double sum_squares(double a, double b)
 // L_p is reinserted. Returns the flops (sum of squared scalar column counts of
 // L), which are exact since L_p is the exact pattern of the pivot's columns,
 // and the scalar off-diagonal count of every block column of L in count.
+//
+// var[i] / elem[i] hold A_i / E_i of a variable and L_e of an element. They are
+// passed in so that their capacity carries over between runs.
 double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_reinsert,
+           std::vector<std::vector<Index>> &var, std::vector<std::vector<Index>> &elem,
            std::vector<Index> &perm, std::vector<Index> &inv_perm, std::vector<Index> &count)
 {
     const Index n = sp.num_blocks();
-    // var[i] / elem[i]: A_i / E_i of a variable; var[e] holds L_e of an element.
-    std::vector<std::vector<Index>> var(n), elem(n);
+    var.resize(n);
+    elem.resize(n);
     std::vector<NodeState> state(n, VARIABLE);
     // w: scalar size, nv: number of blocks of a supervariable (for elements:
     // summed over L_e; both are invariant until the element is absorbed).
@@ -105,11 +109,12 @@ double amd(const BlockSparsityPattern &sp, bool ascending_init, bool reverse_rei
             inv_perm[k] = n_out++;
         }
     };
-    auto release = [](std::vector<Index> &v) { std::vector<Index>().swap(v); };
+    auto release = [](std::vector<Index> &v) { v.clear(); };
 
     for (Index i = 0; i < n; ++i)
     {
         var[i] = sp.neighbors(i);
+        elem[i].clear();
         member_last[i] = i;
         for (Index j : var[i])
             deg[i] += w[j];
@@ -315,10 +320,11 @@ BlockEliminationOrder::BlockEliminationOrder(const BlockSparsityPattern &sp)
     // AMD is sensitive to tie-breaking on regular meshes; keep the cheapest of
     // four tie-breaking variants.
     std::vector<Index> perm(n), inv_perm(n), count(n), best_count(n);
+    std::vector<std::vector<Index>> var, elem;
     double best = -1.;
     for (int variant = 0; variant < 4; ++variant)
     {
-        const double flops = amd(sp, variant & 1, variant & 2, perm, inv_perm, count);
+        const double flops = amd(sp, variant & 1, variant & 2, var, elem, perm, inv_perm, count);
         if (best < 0. || flops < best)
         {
             best = flops;
