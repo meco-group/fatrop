@@ -450,6 +450,12 @@ namespace fatrop
          */
         Jacobian<ProblemType> &jacobian();
 
+        /**
+         * @brief Evaluates the objective gradient, Jacobian and Hessian in one NLP call if none of
+         * them is evaluated yet; otherwise they are left to the lazy accessors.
+         */
+        void eval_derivatives();
+
         // for printing purposes and debugging
         // note that this saves info about the step from previous to current iterate
         struct StepInfo
@@ -632,6 +638,7 @@ void fatrop::IpIterate<ProblemType>::set_dual_eq(const VecReal<Derived> &dual_eq
     dual_infeasibility_s_evaluated_ = false;
     dual_infeasibility_x_evaluated_ = false;
     dual_l1_norms_evaluated_ = false;
+    hessian_evaluated_ = false;
     dual_eq_ = dual_eq;
 }
 template <typename ProblemType>
