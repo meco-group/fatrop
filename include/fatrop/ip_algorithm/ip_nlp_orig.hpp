@@ -64,6 +64,16 @@ namespace fatrop
                                       Jacobian<ProblemType> &jac) override;
 
         /**
+         * @brief Evaluate the objective gradient, constraint Jacobian and Lagrangian Hessian.
+         */
+        virtual Index eval_derivatives(const ProblemInfo<ProblemType> &info,
+                                       const Scalar objective_scale, const VecRealView &primal_x,
+                                       const VecRealView &primal_s, const VecRealView &lam,
+                                       VecRealView &grad_x, VecRealView &grad_s,
+                                       Jacobian<ProblemType> &jac,
+                                       Hessian<ProblemType> &hess) override;
+
+        /**
          * @brief Evaluate the constraint violation.
          */
         virtual Index eval_constraint_violation(const ProblemInfo<ProblemType> &info,

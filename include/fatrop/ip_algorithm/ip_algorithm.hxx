@@ -92,6 +92,8 @@ namespace fatrop
             bool success = linesearch_->find_acceptable_trial_point();
             if(!success) return IpSolverReturnFlag::LineSearchFailed;
             ip_data_->accept_trial_iterate();
+            // gradient, Jacobian and Hessian in one NLP call (the Hessian is unused if converged)
+            ip_data_->current_iterate().eval_derivatives();
             conv_status = convergence_check_->check_converged();
             ip_data_->set_iteration_number(ip_data_->iteration_number() + 1);
         }

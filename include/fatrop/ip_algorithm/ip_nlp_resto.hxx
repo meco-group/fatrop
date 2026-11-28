@@ -63,6 +63,25 @@ namespace fatrop
     }
 
     template <typename ProblemType>
+    Index IpNlpResto<ProblemType>::eval_derivatives(const ProblemInfo<ProblemType> &info,
+                                                    const Scalar objective_scale,
+                                                    const VecRealView &primal_x,
+                                                    const VecRealView &primal_s,
+                                                    const VecRealView &lam, VecRealView &grad_x,
+                                                    VecRealView &grad_s, Jacobian<ProblemType> &jac,
+                                                    Hessian<ProblemType> &hess)
+    {
+        // the original gradient lands in grad_x and the slack part of grad_s, both are
+        // overwritten by the restoration gradient below
+        VecRealView grad_ss = grad_s.block(info.number_of_slack_variables, 0);
+        Index ret = nlp_orig_->eval_derivatives(info, 0.0, primal_x, primal_s, lam, grad_x, grad_ss,
+                                                jac, hess);
+        if (ret != 0)
+            return ret;
+        return eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x, grad_s);
+    }
+
+    template <typename ProblemType>
     Index IpNlpResto<ProblemType>::eval_constraint_violation(const ProblemInfo<ProblemType> &info,
                                                              const VecRealView &primal_x,
                                                              const VecRealView &primal_s,

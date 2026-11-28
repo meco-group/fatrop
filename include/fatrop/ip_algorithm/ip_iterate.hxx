@@ -478,6 +478,20 @@ namespace fatrop
         }
         return *jacobian_;
     }
+    template <typename ProblemType> void IpIterate<ProblemType>::eval_derivatives()
+    {
+        fatrop_assert_msg(jacobian_ != nullptr && hessian_ != nullptr,
+                          "Jacobian or Hessian not set.");
+        if (obj_gradient_evaluated_ || jacobian_evaluated_ || hessian_evaluated_)
+            return;
+        Index status =
+            nlp_->eval_derivatives(info(), objective_scale, primal_x_, primal_s_, dual_eq_,
+                                   obj_gradient_x_, obj_gradient_s_, *jacobian_, *hessian_);
+        fatrop_assert_msg(status == 0, "Error in evaluating the derivatives.");
+        obj_gradient_evaluated_ = true;
+        jacobian_evaluated_ = true;
+        hessian_evaluated_ = true;
+    }
     template <typename ProblemType>
     void IpIterate<ProblemType>::register_options(OptionRegistry &registry)
     {

@@ -39,6 +39,29 @@ namespace fatrop
                                      const VecRealView &primal_s, Scalar &res) = 0;
         virtual Index get_bounds(const ProblemInfo<ProblemType> &info, VecRealView &lower_bounds,
                                  VecRealView &upper_bounds) = 0;
+        /**
+         * @brief Evaluate the objective gradient, the constraint Jacobian and the Hessian of the
+         *        Lagrangian at one point.
+         *
+         * Called where all three are needed at the same iterate. Override it when evaluating
+         * them together is cheaper than separately. The default implementation calls
+         * eval_objective_gradient, eval_constr_jac and eval_lag_hess.
+         */
+        virtual Index eval_derivatives(const ProblemInfo<ProblemType> &info,
+                                       const Scalar objective_scale, const VecRealView &primal_x,
+                                       const VecRealView &primal_s, const VecRealView &lam,
+                                       VecRealView &grad_x, VecRealView &grad_s,
+                                       Jacobian<ProblemType> &jac, Hessian<ProblemType> &hess)
+        {
+            Index status =
+                eval_objective_gradient(info, objective_scale, primal_x, primal_s, grad_x, grad_s);
+            if (status != 0)
+                return status;
+            status = eval_constr_jac(info, primal_x, primal_s, jac);
+            if (status != 0)
+                return status;
+            return eval_lag_hess(info, objective_scale, primal_x, primal_s, lam, hess);
+        }
         virtual Index get_initial_primal(const ProblemInfo<ProblemType> &info,
                                          VecRealView &primal_x) = 0;
         virtual void get_primal_damping(const ProblemInfo<ProblemType> &info,
