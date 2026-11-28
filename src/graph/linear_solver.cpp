@@ -118,6 +118,9 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
     sn_ext_ops_.assign(num_sn, {});
     sn_schur_.assign(num_sn, {});
 
+    std::vector<Index> target_row(N, -1);
+    Index scattered_sn = -1;
+    std::vector<size_t> open, next_open;
     for (Index s = 0; s < num_sn; ++s)
     {
         const Index s_start = symbolic_.supernode_start(s);
@@ -154,29 +157,35 @@ BlockCholeskySolver::BlockCholeskySolver(const BlockSparsityPattern &sp)
         // higher; the extra rows are upper triangle in both W and the target
         // and never read.
         auto &ops = sn_schur_[s];
-        std::vector<size_t> open, next_open;
+        open.clear();
         for (Index b = 0; b < n_ext; ++b)
         {
+            // Rows a >= b land in the target supernode owning column b, at
+            // the panel rows scattered in target_row.
+            const Index t = col_to_sn_[ext_set[b]];
+            if (t != scattered_sn)
+            {
+                scattered_sn = t;
+                const Index t_end = symbolic_.supernode_start(t + 1);
+                for (Index k = symbolic_.supernode_start(t); k < t_end; ++k)
+                    target_row[k] = col_to_off_in_sn_[k];
+                const auto &t_ext = symbolic_.lower_pattern(t_end - 1);
+                for (size_t a = 0; a < t_ext.size(); ++a)
+                    target_row[t_ext[a]] = sn_t_total_[t] + sn_ext_row_off_[t][a];
+            }
             next_open.clear();
             for (Index a = b; a < n_ext;)
             {
-                const LBlockLoc loc = l_loc_(ext_set[a], ext_set[b]);
                 SchurOp run;
-                run.target_sn = loc.sn;
-                run.dst_row = loc.row_off;
-                run.dst_col = loc.col_off;
+                run.target_sn = t;
+                run.dst_row = target_row[ext_set[a]];
+                run.dst_col = col_to_off_in_sn_[ext_set[b]];
                 run.ni = 0;
                 run.nj = perm_block_sizes_[ext_set[b]];
                 run.src_row = sn_ext_row_off_[s][a];
                 run.src_col = sn_ext_row_off_[s][b];
-                for (; a < n_ext; ++a)
-                {
-                    const LBlockLoc l = l_loc_(ext_set[a], ext_set[b]);
-                    if (l.sn != run.target_sn || l.col_off != run.dst_col ||
-                        l.row_off != run.dst_row + run.ni)
-                        break;
+                for (; a < n_ext && target_row[ext_set[a]] == run.dst_row + run.ni; ++a)
                     run.ni += perm_block_sizes_[ext_set[a]];
-                }
                 const bool diagonal = run.src_row == run.src_col;
                 bool merged = false;
                 for (size_t r : open)
