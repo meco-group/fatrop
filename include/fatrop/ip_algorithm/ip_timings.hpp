@@ -26,6 +26,7 @@ namespace fatrop
         Timer eval_constraint_violation;
         Timer eval_hessian;
         Timer eval_jacobian;
+        Timer eval_derivatives;
         // Iterate-level computation timers (driven from ip_iterate.hxx).
         // Each timer measures the exclusive cost of its method: time spent
         // inside any nested timed scope (another iterate timer or an
@@ -113,6 +114,7 @@ namespace fatrop
         eval_constraint_violation.reset();
         eval_hessian.reset();
         eval_jacobian.reset();
+        eval_derivatives.reset();
         compute_obj_value.reset();
         compute_obj_gradient.reset();
         compute_constr_viol.reset();
@@ -148,6 +150,7 @@ namespace fatrop
         eval_constraint_violation.pause();
         eval_hessian.pause();
         eval_jacobian.pause();
+        eval_derivatives.pause();
         compute_obj_value.pause();
         compute_obj_gradient.pause();
         compute_constr_viol.pause();
@@ -182,6 +185,7 @@ namespace fatrop
         ret -= eval_constraint_violation.elapsed();
         ret -= eval_hessian.elapsed();
         ret -= eval_jacobian.elapsed();
+        ret -= eval_derivatives.elapsed();
         ret -= compute_iterate_quantities();
         return ret;
     }
@@ -194,6 +198,7 @@ namespace fatrop
         ret += eval_constraint_violation.elapsed();
         ret += eval_hessian.elapsed();
         ret += eval_jacobian.elapsed();
+        ret += eval_derivatives.elapsed();
         return ret;
     }
 
@@ -298,6 +303,7 @@ namespace fatrop
         row_indent("eval constraint violation", timings.eval_constraint_violation.elapsed());
         row_indent("eval hessian", timings.eval_hessian.elapsed());
         row_indent("eval jacobian", timings.eval_jacobian.elapsed());
+        row_indent("eval derivatives", timings.eval_derivatives.elapsed());
         os << std::string(line_w, '-') << std::endl;
         row("total", total);
         return os;

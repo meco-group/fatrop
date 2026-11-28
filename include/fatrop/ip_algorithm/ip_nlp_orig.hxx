@@ -61,6 +61,25 @@ namespace fatrop
     }
 
     template <typename ProblemType>
+    Index IpNlpOrig<ProblemType>::eval_derivatives(const ProblemInfo<ProblemType> &info,
+                                                   const Scalar objective_scale,
+                                                   const VecRealView &primal_x,
+                                                   const VecRealView &primal_s,
+                                                   const VecRealView &lam, VecRealView &grad_x,
+                                                   VecRealView &grad_s, Jacobian<ProblemType> &jac,
+                                                   Hessian<ProblemType> &hess)
+    {
+        if (timings_)
+        {
+            ScopedTimer _t(timings_->eval_derivatives, *timings_);
+            return nlp_->eval_derivatives(info, objective_scale, primal_x, primal_s, lam, grad_x,
+                                          grad_s, jac, hess);
+        }
+        return nlp_->eval_derivatives(info, objective_scale, primal_x, primal_s, lam, grad_x,
+                                      grad_s, jac, hess);
+    }
+
+    template <typename ProblemType>
     Index IpNlpOrig<ProblemType>::eval_constraint_violation(const ProblemInfo<ProblemType> &info,
                                                             const VecRealView &primal_x,
                                                             const VecRealView &primal_s,
